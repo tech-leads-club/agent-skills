@@ -1,0 +1,45 @@
+{
+  "name": "@tlc/agent-skills",
+  "version": "0.0.1",
+  "description": "CLI to install skills for AI coding agents",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "tlc-skills": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "cli"
+  ],
+  "dependencies": {
+    "@clack/core": "^0.5.0",
+    "@clack/prompts": "^0.11.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
