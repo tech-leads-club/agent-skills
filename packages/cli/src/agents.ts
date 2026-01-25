@@ -2,9 +2,11 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import { findProjectRoot } from './project-root'
 import type { AgentConfig, AgentType } from './types'
 
 const home = homedir()
+const projectRoot = findProjectRoot()
 
 export const agents: Record<AgentType, AgentConfig> = {
   // Tier 1: Most popular AI coding agents
@@ -14,7 +16,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI-first code editor built on VS Code',
     skillsDir: '.cursor/skills',
     globalSkillsDir: join(home, '.cursor/skills'),
-    detectInstalled: () => existsSync(join(home, '.cursor')),
+    detectInstalled: () => existsSync(join(home, '.cursor')) || existsSync(join(projectRoot, '.cursor')),
   },
   'claude-code': {
     name: 'claude-code',
@@ -22,7 +24,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: "Anthropic's agentic coding tool",
     skillsDir: '.claude/skills',
     globalSkillsDir: join(home, '.claude/skills'),
-    detectInstalled: () => existsSync(join(home, '.claude')),
+    detectInstalled: () => existsSync(join(home, '.claude')) || existsSync(join(projectRoot, '.claude')),
   },
   'github-copilot': {
     name: 'github-copilot',
@@ -30,7 +32,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI pair programmer by GitHub/Microsoft',
     skillsDir: '.github/skills',
     globalSkillsDir: join(home, '.copilot/skills'),
-    detectInstalled: () => existsSync(join(home, '.copilot')) || existsSync(join(process.cwd(), '.github')),
+    detectInstalled: () => existsSync(join(home, '.copilot')) || existsSync(join(projectRoot, '.github')),
   },
   windsurf: {
     name: 'windsurf',
@@ -38,7 +40,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI IDE with Cascade flow (Codeium)',
     skillsDir: '.windsurf/skills',
     globalSkillsDir: join(home, '.codeium/windsurf/skills'),
-    detectInstalled: () => existsSync(join(home, '.codeium/windsurf')),
+    detectInstalled: () => existsSync(join(home, '.codeium/windsurf')) || existsSync(join(projectRoot, '.windsurf')),
   },
   cline: {
     name: 'cline',
@@ -46,7 +48,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'Autonomous AI coding agent for VS Code',
     skillsDir: '.cline/skills',
     globalSkillsDir: join(home, '.cline/skills'),
-    detectInstalled: () => existsSync(join(home, '.cline')),
+    detectInstalled: () => existsSync(join(home, '.cline')) || existsSync(join(projectRoot, '.cline')),
   },
 
   // Tier 2: Rising stars
@@ -56,7 +58,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI pair programming in terminal',
     skillsDir: '.aider/skills',
     globalSkillsDir: join(home, '.aider/skills'),
-    detectInstalled: () => existsSync(join(home, '.aider')),
+    detectInstalled: () => existsSync(join(home, '.aider')) || existsSync(join(projectRoot, '.aider')),
   },
   codex: {
     name: 'codex',
@@ -64,7 +66,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: "OpenAI's coding agent",
     skillsDir: '.codex/skills',
     globalSkillsDir: join(home, '.codex/skills'),
-    detectInstalled: () => existsSync(join(home, '.codex')),
+    detectInstalled: () => existsSync(join(home, '.codex')) || existsSync(join(projectRoot, '.codex')),
   },
   gemini: {
     name: 'gemini',
@@ -72,7 +74,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: "Google's AI coding assistant",
     skillsDir: '.gemini/skills',
     globalSkillsDir: join(home, '.gemini/skills'),
-    detectInstalled: () => existsSync(join(home, '.gemini')),
+    detectInstalled: () => existsSync(join(home, '.gemini')) || existsSync(join(projectRoot, '.gemini')),
   },
   antigravity: {
     name: 'antigravity',
@@ -80,7 +82,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: "Google's agentic coding (VS Code)",
     skillsDir: '.agent/skills',
     globalSkillsDir: join(home, '.agent/skills'),
-    detectInstalled: () => existsSync(join(home, '.gemini/antigravity')) || existsSync(join(process.cwd(), '.agent')),
+    detectInstalled: () => existsSync(join(home, '.gemini/antigravity')) || existsSync(join(projectRoot, '.agent')),
   },
   roo: {
     name: 'roo',
@@ -88,7 +90,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI coding assistant for VS Code',
     skillsDir: '.roo/skills',
     globalSkillsDir: join(home, '.roo/skills'),
-    detectInstalled: () => existsSync(join(home, '.roo')),
+    detectInstalled: () => existsSync(join(home, '.roo')) || existsSync(join(projectRoot, '.roo')),
   },
   kilocode: {
     name: 'kilocode',
@@ -96,7 +98,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI coding agent with auto-launch',
     skillsDir: '.kilocode/skills',
     globalSkillsDir: join(home, '.kilocode/skills'),
-    detectInstalled: () => existsSync(join(home, '.kilocode')) || existsSync(join(process.cwd(), '.kilocode')),
+    detectInstalled: () => existsSync(join(home, '.kilocode')) || existsSync(join(projectRoot, '.kilocode')),
   },
 
   // Tier 3: Enterprise & specialized
@@ -106,7 +108,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AWS AI coding assistant',
     skillsDir: '.amazonq/skills',
     globalSkillsDir: join(home, '.amazonq/skills'),
-    detectInstalled: () => existsSync(join(home, '.amazonq')),
+    detectInstalled: () => existsSync(join(home, '.amazonq')) || existsSync(join(projectRoot, '.amazonq')),
   },
   augment: {
     name: 'augment',
@@ -114,7 +116,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI code assistant with context engine',
     skillsDir: '.augment/skills',
     globalSkillsDir: join(home, '.augment/skills'),
-    detectInstalled: () => existsSync(join(home, '.augment')),
+    detectInstalled: () => existsSync(join(home, '.augment')) || existsSync(join(projectRoot, '.augment')),
   },
   tabnine: {
     name: 'tabnine',
@@ -122,7 +124,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI code completions with privacy focus',
     skillsDir: '.tabnine/skills',
     globalSkillsDir: join(home, '.tabnine/skills'),
-    detectInstalled: () => existsSync(join(home, '.tabnine')),
+    detectInstalled: () => existsSync(join(home, '.tabnine')) || existsSync(join(projectRoot, '.tabnine')),
   },
   opencode: {
     name: 'opencode',
@@ -130,7 +132,10 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'Open-source AI coding terminal',
     skillsDir: '.opencode/skills',
     globalSkillsDir: join(home, '.config/opencode/skills'),
-    detectInstalled: () => existsSync(join(home, '.config/opencode')),
+    detectInstalled: () =>
+      existsSync(join(home, '.config/opencode')) ||
+      existsSync(join(projectRoot, '.opencode')) ||
+      existsSync(join(projectRoot, '.config/opencode')),
   },
   sourcegraph: {
     name: 'sourcegraph',
@@ -138,7 +143,7 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI assistant with codebase context',
     skillsDir: '.sourcegraph/skills',
     globalSkillsDir: join(home, '.sourcegraph/skills'),
-    detectInstalled: () => existsSync(join(home, '.sourcegraph')),
+    detectInstalled: () => existsSync(join(home, '.sourcegraph')) || existsSync(join(projectRoot, '.sourcegraph')),
   },
 }
 
