@@ -1,0 +1,24 @@
+{
+  "$schema": "./categories.schema.json",
+  "categories": [
+    {
+      "id": "development",
+      "name": "Development",
+      "description": "Skills for software development workflows",
+      "priority": 1
+    },
+    {
+      "id": "creation",
+      "name": "Skill & Agent Creation",
+      "description": "Skills for creating new skills and subagents",
+      "priority": 2
+    }
+  ],
+  "skills": {
+    "spec-driven-dev": "development",
+    "skill-creator": "creation",
+    "subagent-creator": "creation",
+    "cursor-skill-creator": "creation",
+    "cursor-subagent-creator": "creation"
+  }
+}
