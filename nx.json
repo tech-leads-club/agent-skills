@@ -16,7 +16,7 @@
   "plugins": [],
   "release": {
     "projects": [
-      "@tlc/agent-skills"
+      "@tech-leads-club/agent-skills"
     ],
     "version": {
       "conventionalCommits": true,
