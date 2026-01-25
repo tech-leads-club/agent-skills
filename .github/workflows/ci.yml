@@ -19,6 +19,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v4
+
       - name: Start Nx Cloud CI Run
         run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
         env:
