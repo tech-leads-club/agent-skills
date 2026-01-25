@@ -2,23 +2,22 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import {
+  DEFAULT_CATEGORY,
+  DEFAULT_CATEGORY_ID,
+  SKILLS_CATEGORIES_FILE,
+  formatCategoryName,
+} from '@tech-leads-club/core'
+
 import type { CategoriesConfig, CategoryInfo } from './types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const DEFAULT_CATEGORY_ID = 'uncategorized'
-const DEFAULT_CATEGORY: CategoryInfo = {
-  id: DEFAULT_CATEGORY_ID,
-  name: 'Uncategorized',
-  description: 'Skills without a specific category',
-  priority: 999,
-}
-
 export function getCategoriesFilePath(): string {
-  const devPath = join(__dirname, '..', '..', '..', 'skills', 'categories.json')
+  const devPath = join(__dirname, '..', '..', '..', SKILLS_CATEGORIES_FILE)
   if (existsSync(devPath)) return devPath
-  const pkgPath = join(__dirname, '..', 'skills', 'categories.json')
+  const pkgPath = join(__dirname, '..', SKILLS_CATEGORIES_FILE)
   if (existsSync(pkgPath)) return pkgPath
   return devPath
 }
@@ -91,13 +90,6 @@ export function assignSkillToCategory(skillName: string, categoryId: string, cat
 
   config.skills[skillName] = categoryId
   saveCategoriesConfig(config)
-}
-
-function formatCategoryName(categoryId: string): string {
-  return categoryId
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
 }
 
 export function groupSkillsByCategory<T extends { name: string; category?: string }>(
