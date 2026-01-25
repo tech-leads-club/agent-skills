@@ -37,3 +37,14 @@ export interface InstallOptions {
   agents: AgentType[]
   skills: string[]
 }
+
+export interface InstallResult {
+  agent: string
+  skill: string
+  path: string
+  method: 'symlink' | 'copy'
+  success: boolean
+  error?: string
+  usedGlobalSymlink?: boolean
+  symlinkFailed?: boolean
+}
