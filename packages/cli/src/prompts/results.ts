@@ -1,6 +1,22 @@
 import pc from 'picocolors'
 
-import { logBarEnd, SYMBOL } from '../ui/styles'
+import { logBar, logBarEnd, S_BAR, SYMBOL } from '../ui/styles'
+
+interface InstallationSummaryOptions {
+  skills: string[]
+  agents: string[]
+  method: string
+}
+
+export function showInstallationSummary(options: InstallationSummaryOptions): void {
+  logBar()
+  logBar(pc.blue(pc.bold('📋 Installation Summary')))
+  logBar()
+  logBar(`${pc.blue(S_BAR)}  ${pc.white(pc.bold('Skills:'))} ${pc.gray(options.skills.join(', '))}`)
+  logBar(`${pc.blue(S_BAR)}  ${pc.white(pc.bold('Agents:'))} ${pc.gray(options.agents.join(', '))}`)
+  logBar(`${pc.blue(S_BAR)}  ${pc.white(pc.bold('Method:'))} ${pc.cyan(options.method)}`)
+  logBar()
+}
 
 export function showInstallResults(
   results: Array<{
