@@ -1,6 +1,6 @@
 {
   "name": "@tech-leads-club/agent-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLI to install and manage skills for AI coding agents",
   "author": "Tech Leads Club",
   "license": "MIT",

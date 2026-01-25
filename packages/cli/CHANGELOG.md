@@ -1,3 +1,47 @@
+## 0.2.0 (2026-01-25)
+
+### 🚀 Features
+
+- use package version from package.json for CLI versioning ([cc23397](https://github.com/tech-leads-club/agent-skills/commit/cc23397))
+- add installation summary display for skills and agents ([13dc11f](https://github.com/tech-leads-club/agent-skills/commit/13dc11f))
+- implement interactive installation wizard for skills and agents ([3bdd983](https://github.com/tech-leads-club/agent-skills/commit/3bdd983))
+- add function to display available skills with installation status ([c8896e1](https://github.com/tech-leads-club/agent-skills/commit/c8896e1))
+- implement interactive skill removal process ([5ea69a4](https://github.com/tech-leads-club/agent-skills/commit/5ea69a4))
+- add functions to display installation and removal results ([4606e3c](https://github.com/tech-leads-club/agent-skills/commit/4606e3c))
+- add utility functions for agent options and installed skills ([f54e25c](https://github.com/tech-leads-club/agent-skills/commit/f54e25c))
+- add truncate function for text length management ([70870b0](https://github.com/tech-leads-club/agent-skills/commit/70870b0))
+- implement blue select and confirm prompts with back navigation ([21b05e1](https://github.com/tech-leads-club/agent-skills/commit/21b05e1))
+- add logo generation and screen initialization functions ([359e6a2](https://github.com/tech-leads-club/agent-skills/commit/359e6a2))
+- add gradient styles and logging functions for UI components ([75fb2e5](https://github.com/tech-leads-club/agent-skills/commit/75fb2e5))
+- update skills directory logic and enhance skill discovery ([da1aff9](https://github.com/tech-leads-club/agent-skills/commit/da1aff9))
+- add unit tests for categories configuration and logic ([ca4e001](https://github.com/tech-leads-club/agent-skills/commit/ca4e001))
+- implement category management and skill assignment functionality ([7eb3bb2](https://github.com/tech-leads-club/agent-skills/commit/7eb3bb2))
+- add detailed install result interface for better tracking ([0d48a0b](https://github.com/tech-leads-club/agent-skills/commit/0d48a0b))
+- implement skill lock file management functions ([c8b6e1d](https://github.com/tech-leads-club/agent-skills/commit/c8b6e1d))
+- enhance skill installation process with symlink and copy methods ([195ffa0](https://github.com/tech-leads-club/agent-skills/commit/195ffa0))
+- add remove command for uninstalling skills ([a8be796](https://github.com/tech-leads-club/agent-skills/commit/a8be796))
+- add function to find project root directory ([1cfe620](https://github.com/tech-leads-club/agent-skills/commit/1cfe620))
+- use project root for skill installation paths ([f27e81c](https://github.com/tech-leads-club/agent-skills/commit/f27e81c))
+- enhance agent installation detection for project root ([b7fca84](https://github.com/tech-leads-club/agent-skills/commit/b7fca84))
+- add global path utilities for skill management ([36f45e5](https://github.com/tech-leads-club/agent-skills/commit/36f45e5))
+- implement global symlink handling for skill installation ([b45b92e](https://github.com/tech-leads-club/agent-skills/commit/b45b92e))
+- add update check functionality for package versioning ([e034070](https://github.com/tech-leads-club/agent-skills/commit/e034070))
+- enhance installer tests with global symlink handling ([b44be21](https://github.com/tech-leads-club/agent-skills/commit/b44be21))
+- add project configuration for CLI application ([1ee7ad5](https://github.com/tech-leads-club/agent-skills/commit/1ee7ad5))
+- implement skill installation and listing functionality ([ba9cb2c](https://github.com/tech-leads-club/agent-skills/commit/ba9cb2c))
+- implement interactive skill installation and listing commands ([945f255](https://github.com/tech-leads-club/agent-skills/commit/945f255))
+- add agent configuration and detection functionality ([b35851a](https://github.com/tech-leads-club/agent-skills/commit/b35851a))
+- implement skill discovery and management functions ([4fd5139](https://github.com/tech-leads-club/agent-skills/commit/4fd5139))
+- add interfaces for agent configuration and skill management ([74ea8f8](https://github.com/tech-leads-club/agent-skills/commit/74ea8f8))
+- add TypeScript configuration for testing with Jest ([32aa9a1](https://github.com/tech-leads-club/agent-skills/commit/32aa9a1))
+- add TypeScript configuration for CLI package ([f23d900](https://github.com/tech-leads-club/agent-skills/commit/f23d900))
+- add initial CLI package configuration for agent skills ([072af1d](https://github.com/tech-leads-club/agent-skills/commit/072af1d))
+- add Jest configuration for CLI testing ([b7d098e](https://github.com/tech-leads-club/agent-skills/commit/b7d098e))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.1.0-beta.3 (2026-01-25)
 
 ### 🚀 Features
