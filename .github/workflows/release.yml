@@ -37,7 +37,7 @@ jobs:
 
       - name: Release (Beta)
         if: github.ref == 'refs/heads/beta'
-        run: npx nx release --yes --preid beta --tag beta
+        run: npx nx release --yes --preid beta
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
