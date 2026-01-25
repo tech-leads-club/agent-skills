@@ -54,6 +54,7 @@
     "@nx/devkit": "^22.4.1",
     "@nx/esbuild": "^22.4.1",
     "@nx/eslint": "^22.4.1",
+    "@nx/eslint-plugin": "^22.4.1",
     "@nx/jest": "22.4.1",
     "@nx/js": "^22.4.1",
     "@nx/plugin": "^22.4.1",
@@ -78,7 +79,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1"
   },
-  "dependencies": {},
   "nx": {
     "includedScripts": []
   }
