@@ -2,8 +2,10 @@ import { ConfirmPrompt, MultiSelectPrompt, SelectPrompt } from '@clack/core'
 import pc from 'picocolors'
 
 import { detectInstalledAgents, getAgentConfig, getAllAgentTypes } from './agents'
+import { isGloballyInstalled } from './installer'
 import { discoverSkills } from './skills'
 import type { AgentType, InstallOptions } from './types'
+import { checkForUpdates, getCurrentVersion } from './update-check'
 
 const S_BAR = '│'
 const S_BAR_END = '└'
@@ -131,6 +133,24 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   console.clear()
   console.log(LOGO)
   console.log(`${pc.blue(S_BAR)}`)
+
+  // Check for updates (non-blocking)
+  const currentVersion = getCurrentVersion()
+  const latestVersion = await checkForUpdates(currentVersion)
+
+  if (latestVersion) {
+    console.log(
+      `${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Update available:')} ${pc.dim(currentVersion)} → ${pc.green(latestVersion)}`,
+    )
+    console.log(`${pc.blue(S_BAR)}     ${pc.dim('Run: npm update -g @tech-leads-club/agent-skills')}`)
+    console.log(`${pc.blue(S_BAR)}`)
+  } else if (!isGloballyInstalled()) {
+    console.log(`${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Not installed globally')}`)
+    console.log(`${pc.blue(S_BAR)}     ${pc.dim("Skills won't auto-update. Install globally:")}`)
+    console.log(`${pc.blue(S_BAR)}     ${pc.dim('npm i -g @tech-leads-club/agent-skills')}`)
+    console.log(`${pc.blue(S_BAR)}`)
+  }
+
   console.log(`${pc.blue(S_BAR)}  ${pc.dim('Install curated skills to your AI coding agents')}`)
   console.log(`${pc.blue(S_BAR)}`)
 
