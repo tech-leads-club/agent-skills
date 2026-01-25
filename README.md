@@ -37,10 +37,15 @@ skills/
 npx @tech-leads-club/agent-skills
 ```
 
-This launches an interactive menu to:
-1. **Select skills** from the curated collection
-2. **Choose agents** (Antigravity, Claude Code, Cursor, etc.)
-3. **Install** via symlinks to the appropriate directories
+This launches an interactive wizard with 5 steps:
+
+1. **Browse categories** — Filter skills by category or select "All"
+2. **Select skills** — Choose which skills to install
+3. **Choose agents** — Pick target agents (Cursor, Claude Code, etc.)
+4. **Installation method** — Symlink (recommended) or Copy
+5. **Scope** — Global (user home) or Local (project only)
+
+Each step shows a **← Back** option to return to the previous step and revise your choices. A confirmation summary is shown before installation.
 
 ### CLI Options
 
@@ -82,9 +87,18 @@ npx @tech-leads-club/agent-skills remove --help
 
 ## 📦 Available Skills
 
+Skills are organized by category for easier navigation.
+
+### 🔧 Development
+
 | Skill | Description |
 |-------|-------------|
-| **spec-driven-dev** | Specification-driven development workflow with 5 phases: specify → plan → tasks → implement → validate |
+| **spec-driven-dev** | Specification-driven development workflow with 4 phases: specify → design → tasks → implement+validate |
+
+### 🛠 Skill & Agent Creation
+
+| Skill | Description |
+|-------|-------------|
 | **skill-creator** | Meta-skill for creating new skills following best practices |
 | **subagent-creator** | Create specialized subagents for complex tasks |
 | **cursor-skill-creator** | Cursor-specific skill creation |
@@ -131,10 +145,22 @@ npm run build
 Use the NX generator:
 
 ```bash
+# Basic usage (will prompt for category)
 nx g @tech-leads-club/skill-plugin:skill my-awesome-skill
+
+# With category specified
+nx g @tech-leads-club/skill-plugin:skill my-awesome-skill --category=development
+
+# With all options
+nx g @tech-leads-club/skill-plugin:skill my-skill \
+  --description="What my skill does" \
+  --category=development
 ```
 
-This creates `skills/my-awesome-skill/SKILL.md` with the correct template structure.
+The generator will:
+- Create `skills/my-skill/SKILL.md` with the correct template structure
+- Assign the skill to the specified category (creating it if needed)
+- If no category is specified, the skill will appear as "Uncategorized"
 
 ### Skill Structure
 
@@ -146,6 +172,44 @@ skills/my-skill/
 ├── templates/            # Optional: file templates
 └── assets/               # Optional: images, files
 ```
+
+### Skill Categories
+
+Skills are organized into categories for better navigation in the CLI. Categories are defined in `skills/categories.json`.
+
+#### Adding a Skill to a Category
+
+Edit `skills/categories.json` and add your skill to the `skills` map:
+
+```json
+{
+  "categories": [
+    { "id": "development", "name": "Development", "priority": 1 },
+    { "id": "creation", "name": "Skill & Agent Creation", "priority": 2 }
+  ],
+  "skills": {
+    "my-new-skill": "development"
+  }
+}
+```
+
+#### Creating a New Category
+
+Add a new entry to the `categories` array:
+
+```json
+{
+  "id": "my-category",
+  "name": "My Category",
+  "description": "Optional description",
+  "priority": 3
+}
+```
+
+- `id`: Unique identifier (kebab-case)
+- `name`: Display name in the CLI
+- `description`: Optional description
+- `priority`: Display order (lower = first)
 
 ### SKILL.md Format
 
@@ -184,6 +248,8 @@ agent-skills/
 ├── tools/
 │   └── skill-plugin/           # NX generator plugin
 ├── skills/                     # Skill definitions
+│   ├── categories.json         # Skill category mappings
+│   └── [skill-name]/           # Individual skill folders
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml              # CI: lint, test, build
