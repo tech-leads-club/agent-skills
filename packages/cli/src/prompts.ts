@@ -1,4 +1,6 @@
 import { ConfirmPrompt, MultiSelectPrompt, SelectPrompt } from '@clack/core'
+import figlet from 'figlet'
+import gradient from 'gradient-string'
 import pc from 'picocolors'
 
 import { detectInstalledAgents, getAgentConfig, getAllAgentTypes } from './agents'
@@ -16,10 +18,26 @@ const S_CHECKBOX_INACTIVE = '◻'
 
 const symbol = pc.blue('◆')
 
-const LOGO = `
-  ${pc.bold(pc.blue('◆ TECH LEADS CLUB'))}
-    ${pc.bold(pc.white('Agent Skills'))}
+const cristalGradient = gradient([
+  { color: '#1e3a8a', pos: 0 },
+  { color: '#3b82f6', pos: 0.3 },
+  { color: '#0ea5e9', pos: 0.5 },
+  { color: '#06b6d4', pos: 0.7 },
+  { color: '#22d3ee', pos: 1 },
+])
+
+function generateLogo(): string {
+  const asciiArt = figlet.textSync('Tech Leads Club', {
+    font: 'Larry 3D',
+    horizontalLayout: 'default',
+  })
+
+  return `
+${cristalGradient.multiline(asciiArt)}
+  ${pc.white(pc.bold('Tech Leads Club'))} ${pc.blue('›')} ${pc.bold(pc.blue('Agent Skills'))}
+  ${pc.white('Curated skills to power up your AI coding agents')}
 `
+}
 
 function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
@@ -51,9 +69,9 @@ async function blueMultiSelect<T>(
   const opt = (option: Option<T>, state: 'active' | 'selected' | 'cancelled' | 'inactive' | 'selected-active') => {
     const isSelected = state === 'selected' || state === 'selected-active'
     const isActive = state === 'active' || state === 'selected-active'
-    const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.dim(S_CHECKBOX_INACTIVE)
-    const label = isActive ? pc.blue(option.label) : option.label
-    const hint = isActive && option.hint ? pc.dim(` (${option.hint})`) : ''
+    const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.gray(S_CHECKBOX_INACTIVE)
+    const label = isActive ? pc.blue(option.label) : pc.white(option.label)
+    const hint = isActive && option.hint ? pc.dim(pc.gray(` (${option.hint})`)) : ''
     return `${checkbox} ${label}${hint}`
   }
 
@@ -61,16 +79,16 @@ async function blueMultiSelect<T>(
     options,
     initialValues,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.bold(message)}\n`
+      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
           return `${title}${pc.blue(S_BAR)}  ${this.options
             .filter((o) => this.value.includes(o.value))
-            .map((o) => o.label)
-            .join(pc.dim(', '))}\n${pc.blue(S_BAR)}`
+            .map((o) => pc.blue(String(o.value)))
+            .join(pc.gray(', '))}\n${pc.blue(S_BAR)}`
         case 'cancel':
-          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.dim('cancelled'))}\n${pc.blue(S_BAR)}`
+          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('cancelled'))}\n${pc.blue(S_BAR)}`
         default:
           return `${title}${this.options
             .map((option, i) => {
@@ -80,7 +98,9 @@ async function blueMultiSelect<T>(
                 isSelected && isActive ? 'selected-active' : isSelected ? 'selected' : isActive ? 'active' : 'inactive'
               return `${pc.blue(S_BAR)}  ${opt(option as Option<T>, state)}`
             })
-            .join('\n')}\n${pc.blue(S_BAR_END)}  ${pc.dim('(↑↓ navigate, space select, enter confirm)')}`
+            .join(
+              '\n',
+            )}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${pc.dim(pc.gray('(↑↓ navigate, space select, enter confirm)'))}`
       }
     },
   })
@@ -90,9 +110,9 @@ async function blueMultiSelect<T>(
 
 async function blueSelect<T>(message: string, options: Option<T>[], initialValue?: T): Promise<T | symbol> {
   const opt = (option: Option<T>, isActive: boolean) => {
-    const radio = isActive ? pc.blue(S_RADIO_ACTIVE) : pc.dim(S_RADIO_INACTIVE)
-    const label = isActive ? pc.blue(option.label) : option.label
-    const hint = isActive && option.hint ? pc.dim(` - ${option.hint}`) : ''
+    const radio = isActive ? pc.blue(S_RADIO_ACTIVE) : pc.gray(S_RADIO_INACTIVE)
+    const label = isActive ? pc.blue(option.label) : pc.white(option.label)
+    const hint = isActive && option.hint ? pc.dim(pc.gray(` - ${option.hint}`)) : ''
     return `${radio} ${label}${hint}`
   }
 
@@ -100,17 +120,19 @@ async function blueSelect<T>(message: string, options: Option<T>[], initialValue
     options,
     initialValue,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.bold(message)}\n`
+      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
-          return `${title}${pc.blue(S_BAR)}  ${this.options.find((o) => o.value === this.value)?.label}\n${pc.blue(S_BAR)}`
+          return `${title}${pc.blue(S_BAR)}  ${pc.blue(this.options.find((o) => o.value === this.value)?.label)}\n${pc.blue(S_BAR)}`
         case 'cancel':
-          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.dim('cancelled'))}\n${pc.blue(S_BAR)}`
+          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('cancelled'))}\n${pc.blue(S_BAR)}`
         default:
           return `${title}${this.options
             .map((option, i) => `${pc.blue(S_BAR)}  ${opt(option as Option<T>, i === this.cursor)}`)
-            .join('\n')}\n${pc.blue(S_BAR_END)}`
+            .join(
+              '\n',
+            )}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${pc.dim(pc.gray('(↑↓ navigate, enter to confirm)'))}`
       }
     },
   })
@@ -124,15 +146,19 @@ async function blueConfirm(message: string, initialValue = false): Promise<boole
     inactive: 'No',
     initialValue,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.bold(message)}\n`
+      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
-          return `${title}${pc.blue(S_BAR)}  ${this.value ? 'Yes' : 'No'}\n${pc.blue(S_BAR)}`
+          return `${title}${pc.blue(S_BAR)}  ${pc.blue(this.value ? 'Yes' : 'No')}\n${pc.blue(S_BAR)}`
         case 'cancel':
-          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.dim('cancelled'))}\n${pc.blue(S_BAR)}`
+          return `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('cancelled'))}\n${pc.blue(S_BAR)}`
         default:
-          return `${title}${pc.blue(S_BAR)}  ${this.value ? `${pc.blue('● Yes')} / ○ No` : `○ Yes / ${pc.blue('● No')}`}\n${pc.blue(S_BAR_END)}  ${pc.dim('(←→ to change, enter to confirm)')}`
+          return `${title}${pc.blue(S_BAR)}  ${
+            this.value
+              ? `${pc.blue('● Yes')} ${pc.dim(pc.gray('/'))} ${pc.gray('○')} ${pc.white('No')}`
+              : `${pc.gray('○')} ${pc.white('Yes')} ${pc.dim(pc.gray('/'))} ${pc.blue('● No')}`
+          }\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${pc.dim(pc.gray('(←→ to change, enter to confirm)'))}`
       }
     },
   })
@@ -142,7 +168,7 @@ async function blueConfirm(message: string, initialValue = false): Promise<boole
 
 export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   console.clear()
-  console.log(LOGO)
+  console.log(generateLogo())
   console.log(`${pc.blue(S_BAR)}`)
 
   const currentVersion = getCurrentVersion()
@@ -150,19 +176,16 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
 
   if (latestVersion) {
     console.log(
-      `${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Update available:')} ${pc.dim(currentVersion)} → ${pc.green(latestVersion)}`,
+      `${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Update available:')} ${pc.gray(currentVersion)} → ${pc.green(latestVersion)}`,
     )
-    console.log(`${pc.blue(S_BAR)}     ${pc.dim('Run: npm update -g @tech-leads-club/agent-skills')}`)
+    console.log(`${pc.blue(S_BAR)}     ${pc.gray('Run: npm update -g @tech-leads-club/agent-skills')}`)
     console.log(`${pc.blue(S_BAR)}`)
   } else if (!isGloballyInstalled()) {
     console.log(`${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Not installed globally')}`)
-    console.log(`${pc.blue(S_BAR)}     ${pc.dim("Skills won't auto-update. Install globally:")}`)
-    console.log(`${pc.blue(S_BAR)}     ${pc.dim('npm i -g @tech-leads-club/agent-skills')}`)
+    console.log(`${pc.blue(S_BAR)}     ${pc.yellow("Skills won't auto-update. Install globally:")}`)
+    console.log(`${pc.blue(S_BAR)}     ${pc.yellow('npm i -g @tech-leads-club/agent-skills')}`)
     console.log(`${pc.blue(S_BAR)}`)
   }
-
-  console.log(`${pc.blue(S_BAR)}  ${pc.dim('Install curated skills to your AI coding agents')}`)
-  console.log(`${pc.blue(S_BAR)}`)
 
   const skills = discoverSkills()
   if (skills.length === 0) {
@@ -179,7 +202,9 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
       .map((a) => getAgentConfig(a).displayName)
       .join(', ')
     const more = installedAgents.length > 5 ? ` +${installedAgents.length - 5} more` : ''
-    console.log(`${pc.blue(S_BAR)}  ${pc.blue('●')} Detected: ${pc.bold(agentNames)}${more}`)
+    console.log(
+      `${pc.blue(S_BAR)}  ${pc.blue('●')} ${pc.white('Detected:')} ${pc.white(pc.bold(agentNames))}${pc.white(more)}`,
+    )
     console.log(`${pc.blue(S_BAR)}`)
   }
 
@@ -189,7 +214,7 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
 
   // Step 1
   const selectedSkills = await blueMultiSelect(
-    `Which skills do you want to install? ${pc.dim(`(${skills.length} available)`)}`,
+    `Which skills do you want to install? ${pc.gray(`(${skills.length} available)`)}`,
     skills.map((skill) => {
       const isInstalled = installedSkills.has(skill.name)
       return {
@@ -201,19 +226,19 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   )
 
   if (typeof selectedSkills === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.dim('Cancelled')}`)
+    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
     return null
   }
 
   // Step 2
   const selectedAgents = await blueMultiSelect(
-    `Where to install? ${pc.dim(`(${selectedSkills.length} skill(s) selected)`)}`,
+    `Where to install? ${pc.gray(`(${selectedSkills.length} skill(s) selected)`)}`,
     allAgents.map((type) => {
       const config = getAgentConfig(type)
       const isInstalled = installedAgents.includes(type)
       return {
         value: type,
-        label: isInstalled ? `${config.displayName} ${pc.blue('●')}` : config.displayName,
+        label: isInstalled ? `${config.displayName} ${pc.green('● detected')}` : config.displayName,
         hint: truncate(config.description, 50),
       }
     }),
@@ -221,7 +246,7 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   )
 
   if (typeof selectedAgents === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.dim('Cancelled')}`)
+    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
     return null
   }
 
@@ -236,7 +261,7 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   )
 
   if (typeof method === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.dim('Cancelled')}`)
+    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
     return null
   }
 
@@ -244,7 +269,7 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   const global = await blueConfirm('Install globally? (user home vs this project)', false)
 
   if (typeof global === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.dim('Cancelled')}`)
+    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
     return null
   }
 
@@ -276,13 +301,13 @@ export function showInstallResults(
 
   if (successful.length > 0) {
     for (const r of successful) {
-      console.log(`${pc.blue(symbol)} ${pc.bold(r.skill)} → ${r.agent}`)
+      console.log(`${pc.blue(symbol)} ${pc.white(pc.bold(r.skill))} ${pc.gray('→')} ${pc.white(r.agent)}`)
     }
   }
 
   if (alreadyExists.length > 0) {
     for (const r of alreadyExists) {
-      console.log(`${pc.dim(symbol)} ${r.skill} → ${r.agent} ${pc.dim('(exists)')}`)
+      console.log(`${pc.gray(symbol)} ${r.skill} → ${r.agent} ${pc.gray('(exists)')}`)
     }
   }
 
@@ -296,7 +321,7 @@ export function showInstallResults(
 
   console.log()
   console.log(
-    `${pc.blue(S_BAR_END)}  ${pc.blue('✓')} ${pc.bold(`${successful.length} skill(s)`)} installed to ${pc.bold(`${totalAgents} agent(s)`)}`,
+    `${pc.blue(S_BAR_END)}  ${pc.blue('✓')} ${pc.white(pc.bold(`${successful.length} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
   )
 }
 
@@ -304,7 +329,7 @@ export function showAvailableSkills() {
   const skills = discoverSkills()
 
   console.clear()
-  console.log(LOGO)
+  console.log(generateLogo())
 
   if (skills.length === 0) {
     console.log(`${pc.blue(S_BAR)}  ${pc.yellow('No skills found')}`)
@@ -324,9 +349,9 @@ export function showAvailableSkills() {
     const isInstalled = installedSkills.has(skill.name)
     const installedBadge = isInstalled ? ` ${pc.green('● installed')}` : ''
     console.log(`${pc.blue(S_BAR)}  ${pc.blue('◆')} ${pc.bold(skill.name)}${installedBadge}`)
-    console.log(`${pc.blue(S_BAR)}    ${pc.dim(skill.description)}`)
+    console.log(`${pc.blue(S_BAR)}    ${pc.dim(pc.gray(skill.description))}`)
   }
 
   console.log(`${pc.blue(S_BAR)}`)
-  console.log(`${pc.blue(S_BAR_END)}  ${pc.dim('Run "npx @tech-leads-club/agent-skills" to install')}`)
+  console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Run "npx @tech-leads-club/agent-skills" to install')}`)
 }
