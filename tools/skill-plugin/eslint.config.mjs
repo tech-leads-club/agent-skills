@@ -1,7 +1,14 @@
+import nx from '@nx/eslint-plugin'
+
 import baseConfig from '../../eslint.config.js'
 
 export default [
   ...baseConfig,
+  {
+    plugins: {
+      '@nx': nx,
+    },
+  },
   {
     files: ['**/*.json'],
     rules: {
@@ -17,7 +24,7 @@ export default [
     },
   },
   {
-    files: ['**/package.json', '**/package.json', '**/generators.json'],
+    files: ['**/package.json', '**/generators.json'],
     rules: {
       '@nx/nx-plugin-checks': 'error',
     },
