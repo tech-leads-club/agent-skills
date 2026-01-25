@@ -35,12 +35,13 @@
       "automaticFromRef": true,
       "projectChangelogs": true,
       "workspaceChangelog": {
-        "createRelease": "github"
+        "createRelease": false
       }
     },
     "git": {
       "commit": true,
-      "tag": true
+      "tag": true,
+      "push": false
     }
   },
   "targetDefaults": {
@@ -88,6 +89,5 @@
       ]
     }
   },
-  "defaultBase": "main",
-  "nxCloudId": "69766724b12521140b82d456"
+  "defaultBase": "main"
 }
