@@ -20,7 +20,6 @@
         "main": "packages/cli/src/index.ts",
         "tsConfig": "packages/cli/tsconfig.json",
         "assets": [
-          "packages/cli/*.md",
           {
             "glob": "README.md",
             "input": ".",
