@@ -3,6 +3,7 @@ import { join, relative } from 'node:path'
 
 import { getAgentConfig } from './agents'
 import { getGlobalSkillPath, isGloballyInstalled } from './global-path'
+import { findProjectRoot } from './project-root'
 import type { AgentType, InstallOptions, SkillInfo } from './types'
 
 const TLC_SKILLS_DIR = '.tlc-skills'
@@ -19,13 +20,14 @@ export interface InstallResult {
 
 export function installSkills(skills: SkillInfo[], options: InstallOptions): InstallResult[] {
   const results: InstallResult[] = []
+  const projectRoot = findProjectRoot()
 
   for (const agent of options.agents) {
     const config = getAgentConfig(agent)
-    const targetDir = options.global ? config.globalSkillsDir : join(process.cwd(), config.skillsDir)
+    const targetDir = options.global ? config.globalSkillsDir : join(projectRoot, config.skillsDir)
     if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true })
     for (const skill of skills) {
-      const result = installSkillForAgent(skill, agent, targetDir, options.method)
+      const result = installSkillForAgent(skill, agent, targetDir, options.method, projectRoot)
       results.push(result)
     }
   }
@@ -38,6 +40,7 @@ function installSkillForAgent(
   agent: AgentType,
   targetDir: string,
   method: 'symlink' | 'copy',
+  projectRoot: string,
 ): InstallResult {
   const config = getAgentConfig(agent)
   const skillTargetPath = join(targetDir, skill.name)
@@ -68,9 +71,9 @@ function installSkillForAgent(
           usedGlobalSymlink: true,
         }
       }
-      
+
       // Fallback
-      const canonicalDir = join(process.cwd(), TLC_SKILLS_DIR)
+      const canonicalDir = join(projectRoot, TLC_SKILLS_DIR)
       const canonicalSkillPath = join(canonicalDir, skill.name)
       if (!existsSync(canonicalDir)) mkdirSync(canonicalDir, { recursive: true })
       if (!existsSync(canonicalSkillPath)) cpSync(skill.path, canonicalSkillPath, { recursive: true })
@@ -102,7 +105,7 @@ function installSkillForAgent(
 
 export function listInstalledSkills(agent: AgentType, global: boolean): string[] {
   const config = getAgentConfig(agent)
-  const targetDir = global ? config.globalSkillsDir : join(process.cwd(), config.skillsDir)
+  const targetDir = global ? config.globalSkillsDir : join(findProjectRoot(), config.skillsDir)
   if (!existsSync(targetDir)) return []
   return readdirSync(targetDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
