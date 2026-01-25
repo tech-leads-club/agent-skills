@@ -38,6 +38,7 @@ jobs:
       - name: Run Affected
         run: npx nx affected -t lint test build --parallel=3
         env:
+          NODE_OPTIONS: '--experimental-vm-modules'
           NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
   validate-skills:
