@@ -2,7 +2,7 @@ import { ConfirmPrompt, MultiSelectPrompt, SelectPrompt } from '@clack/core'
 import pc from 'picocolors'
 
 import { detectInstalledAgents, getAgentConfig, getAllAgentTypes } from './agents'
-import { isGloballyInstalled } from './installer'
+import { isGloballyInstalled, listInstalledSkills } from './installer'
 import { discoverSkills } from './skills'
 import type { AgentType, InstallOptions } from './types'
 import { checkForUpdates, getCurrentVersion } from './update-check'
@@ -24,6 +24,17 @@ const LOGO = `
 function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
   return text.slice(0, maxLength - 3) + '...'
+}
+
+function getInstalledSkillNames(agents: AgentType[], global: boolean): Set<string> {
+  const installed = new Set<string>()
+  for (const agent of agents) {
+    const skills = listInstalledSkills(agent, global)
+    for (const skill of skills) {
+      installed.add(skill)
+    }
+  }
+  return installed
 }
 
 interface Option<T> {
@@ -134,7 +145,6 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
   console.log(LOGO)
   console.log(`${pc.blue(S_BAR)}`)
 
-  // Check for updates (non-blocking)
   const currentVersion = getCurrentVersion()
   const latestVersion = await checkForUpdates(currentVersion)
 
@@ -173,10 +183,21 @@ export async function runInteractiveInstall(): Promise<InstallOptions | null> {
     console.log(`${pc.blue(S_BAR)}`)
   }
 
+  const installedGlobal = getInstalledSkillNames(installedAgents.length > 0 ? installedAgents : allAgents, true)
+  const installedLocal = getInstalledSkillNames(installedAgents.length > 0 ? installedAgents : allAgents, false)
+  const installedSkills = new Set([...installedGlobal, ...installedLocal])
+
   // Step 1
   const selectedSkills = await blueMultiSelect(
     `Which skills do you want to install? ${pc.dim(`(${skills.length} available)`)}`,
-    skills.map((skill) => ({ value: skill.name, label: skill.name, hint: truncate(skill.description, 200) })),
+    skills.map((skill) => {
+      const isInstalled = installedSkills.has(skill.name)
+      return {
+        value: skill.name,
+        label: isInstalled ? `${skill.name} ${pc.green('● installed')}` : skill.name,
+        hint: truncate(skill.description, 200),
+      }
+    }),
   )
 
   if (typeof selectedSkills === 'symbol') {
@@ -294,8 +315,15 @@ export function showAvailableSkills() {
   console.log(`${pc.blue(S_BAR)}  ${pc.bold(`${skills.length} skills available:`)}`)
   console.log(`${pc.blue(S_BAR)}`)
 
+  const allAgents = getAllAgentTypes()
+  const installedGlobal = getInstalledSkillNames(allAgents, true)
+  const installedLocal = getInstalledSkillNames(allAgents, false)
+  const installedSkills = new Set([...installedGlobal, ...installedLocal])
+
   for (const skill of skills) {
-    console.log(`${pc.blue(S_BAR)}  ${pc.blue('◆')} ${pc.bold(skill.name)}`)
+    const isInstalled = installedSkills.has(skill.name)
+    const installedBadge = isInstalled ? ` ${pc.green('● installed')}` : ''
+    console.log(`${pc.blue(S_BAR)}  ${pc.blue('◆')} ${pc.bold(skill.name)}${installedBadge}`)
     console.log(`${pc.blue(S_BAR)}    ${pc.dim(skill.description)}`)
   }
 
