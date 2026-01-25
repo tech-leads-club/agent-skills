@@ -9,16 +9,222 @@ import { discoverSkills } from './skills'
 import type { AgentType, InstallOptions } from './types'
 import { checkForUpdates, getCurrentVersion } from './update-check'
 
+export async function runInteractiveInstall(): Promise<InstallOptions | null> {
+  initScreen()
+
+  // Check for updates
+  const currentVersion = getCurrentVersion()
+  const latestVersion = await checkForUpdates(currentVersion)
+
+  if (latestVersion) {
+    logBar(
+      `${pc.yellow('⚠')}  ${pc.yellow('Update available:')} ${pc.gray(currentVersion)} → ${pc.green(latestVersion)}`,
+    )
+    logBar(`   ${pc.gray('Run: npm update -g @tech-leads-club/agent-skills')}`)
+    logBar()
+  } else if (!isGloballyInstalled()) {
+    logBar(`${pc.yellow('⚠')}  ${pc.yellow('Not installed globally')}`)
+    logBar(`   ${pc.yellow("Skills won't auto-update. Install globally:")}`)
+    logBar(`   ${pc.yellow('npm i -g @tech-leads-club/agent-skills')}`)
+    logBar()
+  }
+
+  const skills = discoverSkills()
+  if (skills.length === 0) {
+    logBarEnd(pc.red('No skills available'))
+    return null
+  }
+
+  const installedAgents = detectInstalledAgents()
+  const allAgents = getAllAgentTypes()
+  const targetAgents = installedAgents.length > 0 ? installedAgents : allAgents
+  const installedSkills = await getAllInstalledSkillNames(targetAgents)
+
+  // Step 1: Select skills
+  const selectedSkills = await blueMultiSelect(
+    `Which skills do you want to install? ${pc.gray(`(${skills.length} available)`)}`,
+    buildSkillOptions(skills, installedSkills),
+  )
+
+  if (isCancelled(selectedSkills)) {
+    logCancelled()
+    return null
+  }
+
+  // Step 2: Select agents
+  const selectedAgents = await blueMultiSelect(
+    `Where to install? ${pc.gray(`(${selectedSkills.length} skill(s) selected)`)}`,
+    buildAgentOptions(allAgents, installedAgents),
+    installedAgents.length > 0 ? installedAgents : ['cursor', 'claude-code'],
+  )
+
+  if (isCancelled(selectedAgents)) {
+    logCancelled()
+    return null
+  }
+
+  // Step 3: Select method
+  const method = await blueSelect(
+    'Installation method',
+    [
+      { value: 'symlink', label: 'Symlink', hint: 'recommended - shared source' },
+      { value: 'copy', label: 'Copy', hint: 'independent copies' },
+    ],
+    'symlink',
+  )
+
+  if (isCancelled(method)) {
+    logCancelled()
+    return null
+  }
+
+  // Step 4: Global or local
+  const global = await blueConfirm('Install globally? (user home vs this project)', false)
+
+  if (isCancelled(global)) {
+    logCancelled()
+    return null
+  }
+
+  logBar()
+
+  return {
+    agents: selectedAgents as AgentType[],
+    skills: selectedSkills as string[],
+    method: method as 'symlink' | 'copy',
+    global: global as boolean,
+  }
+}
+
+export function showInstallResults(
+  results: Array<{
+    agent: string
+    skill: string
+    path: string
+    method: string
+    success: boolean
+    error?: string
+  }>,
+): void {
+  const successful = results.filter((r) => r.success && !r.error)
+  const alreadyExists = results.filter((r) => r.success && r.error === 'Already exists')
+  const failed = results.filter((r) => !r.success)
+
+  console.log()
+
+  for (const r of successful) {
+    console.log(`${SYMBOL} ${pc.white(pc.bold(r.skill))} ${pc.gray('→')} ${pc.white(r.agent)}`)
+  }
+
+  for (const r of alreadyExists) {
+    console.log(`${pc.gray(SYMBOL)} ${r.skill} → ${r.agent} ${pc.gray('(exists)')}`)
+  }
+
+  for (const r of failed) {
+    console.log(`${pc.red('✗')} ${r.skill} → ${r.agent}: ${r.error}`)
+  }
+
+  const totalAgents = new Set(results.map((r) => r.agent)).size
+
+  console.log()
+  logBarEnd(
+    `${pc.blue('✓')} ${pc.white(pc.bold(`${successful.length} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
+  )
+}
+
+export async function showAvailableSkills(): Promise<void> {
+  initScreen()
+
+  const skills = discoverSkills()
+
+  if (skills.length === 0) {
+    logBar(pc.yellow('No skills found'))
+    return
+  }
+
+  logBar(pc.bold(`${skills.length} skills available:`))
+  logBar()
+
+  const allAgents = getAllAgentTypes()
+  const installedSkills = await getAllInstalledSkillNames(allAgents)
+
+  for (const skill of skills) {
+    const installedBadge = installedSkills.has(skill.name) ? ` ${pc.green('● installed')}` : ''
+    logBar(`${pc.blue('◆')} ${pc.bold(skill.name)}${installedBadge}`)
+    console.log(`${pc.blue(S_BAR)}    ${pc.dim(pc.gray(skill.description))}`)
+  }
+
+  logBar()
+  logBarEnd(pc.gray('Run "npx @tech-leads-club/agent-skills" to install'))
+}
+
+export async function runInteractiveRemove(global: boolean): Promise<void> {
+  initScreen()
+
+  const allAgents = getAllAgentTypes()
+  const installedSkills = await getInstalledSkillNames(allAgents, global)
+
+  if (installedSkills.size === 0) {
+    logBar(pc.yellow('No skills installed'))
+    logBarEnd()
+    return
+  }
+
+  const skillsArray = Array.from(installedSkills)
+
+  // Step 1: Select skills to remove
+  const selectedSkills = await blueMultiSelect(
+    `Which skills do you want to remove? ${pc.gray(`(${skillsArray.length} installed)`)}`,
+    skillsArray.map((name) => ({ value: name, label: name })),
+  )
+
+  if (isCancelled(selectedSkills) || selectedSkills.length === 0) {
+    logCancelled()
+    return
+  }
+
+  // Step 2: Select agents
+  const selectedAgents = await blueMultiSelect(
+    'Remove from which agents?',
+    buildAgentOptions(allAgents).map((opt) => ({ ...opt, hint: undefined })),
+    allAgents,
+  )
+
+  if (isCancelled(selectedAgents)) {
+    logCancelled()
+    return
+  }
+
+  // Step 3: Confirm
+  const confirm = await blueConfirm(
+    `Remove ${selectedSkills.length} skill(s) from ${selectedAgents.length} agent(s)?`,
+    false,
+  )
+
+  if (isCancelled(confirm) || !confirm) {
+    logCancelled()
+    return
+  }
+
+  logBar()
+
+  const { removeSkill } = await import('./installer')
+
+  for (const skillName of selectedSkills) {
+    const results = await removeSkill(skillName, selectedAgents as AgentType[], { global })
+    showRemoveResults(skillName, results)
+  }
+}
+
 const S_BAR = '│'
 const S_BAR_END = '└'
 const S_RADIO_ACTIVE = '●'
 const S_RADIO_INACTIVE = '○'
 const S_CHECKBOX_ACTIVE = '◼'
 const S_CHECKBOX_INACTIVE = '◻'
+const SYMBOL = pc.blue('◆')
 
-const symbol = pc.blue('◆')
-
-const cristalGradient = gradient([
+const crystalGradient = gradient([
   { color: '#1e3a8a', pos: 0 },
   { color: '#3b82f6', pos: 0.3 },
   { color: '#0ea5e9', pos: 0.5 },
@@ -26,39 +232,26 @@ const cristalGradient = gradient([
   { color: '#22d3ee', pos: 1 },
 ])
 
-function generateLogo(): string {
-  const asciiArt = figlet.textSync('Tech Leads Club', {
-    font: 'Larry 3D',
-    horizontalLayout: 'default',
-  })
+export function showRemoveResults(
+  skillName: string,
+  results: Array<{ agent: string; success: boolean; error?: string }>,
+): void {
+  const successful = results.filter((r) => r.success)
+  const failed = results.filter((r) => !r.success)
 
-  return `
-${cristalGradient.multiline(asciiArt)}
-  ${pc.white(pc.bold('Tech Leads Club'))} ${pc.blue('›')} ${pc.bold(pc.blue('Agent Skills'))}
-  ${pc.white('Curated skills to power up your AI coding agents')}
-`
-}
-
-function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength - 3) + '...'
-}
-
-function getInstalledSkillNames(agents: AgentType[], global: boolean): Set<string> {
-  const installed = new Set<string>()
-  for (const agent of agents) {
-    const skills = listInstalledSkills(agent, global)
-    for (const skill of skills) {
-      installed.add(skill)
-    }
+  if (successful.length > 0) {
+    console.log(
+      `${SYMBOL} ${pc.white(pc.bold(skillName))} ${pc.gray('removed from')} ${successful.map((r) => r.agent).join(', ')}`,
+    )
   }
-  return installed
-}
 
-interface Option<T> {
-  value: T
-  label: string
-  hint?: string
+  for (const r of failed) {
+    console.log(`${pc.red('✗')} ${skillName} → ${r.agent}: ${r.error}`)
+  }
+
+  if (successful.length > 0 && failed.length === 0) {
+    logBarEnd(`${pc.blue('✓')} ${pc.white('Skill removed successfully')}`)
+  }
 }
 
 async function blueMultiSelect<T>(
@@ -79,7 +272,7 @@ async function blueMultiSelect<T>(
     options,
     initialValues,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
+      const title = `${pc.blue(S_BAR)}\n${SYMBOL} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
@@ -120,7 +313,7 @@ async function blueSelect<T>(message: string, options: Option<T>[], initialValue
     options,
     initialValue,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
+      const title = `${pc.blue(S_BAR)}\n${SYMBOL} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
@@ -146,7 +339,7 @@ async function blueConfirm(message: string, initialValue = false): Promise<boole
     inactive: 'No',
     initialValue,
     render() {
-      const title = `${pc.blue(S_BAR)}\n${pc.blue(symbol)} ${pc.white(pc.bold(message))}\n`
+      const title = `${pc.blue(S_BAR)}\n${SYMBOL} ${pc.white(pc.bold(message))}\n`
 
       switch (this.state) {
         case 'submit':
@@ -166,192 +359,92 @@ async function blueConfirm(message: string, initialValue = false): Promise<boole
   return prompt.prompt() as Promise<boolean | symbol>
 }
 
-export async function runInteractiveInstall(): Promise<InstallOptions | null> {
-  console.clear()
-  console.log(generateLogo())
-  console.log(`${pc.blue(S_BAR)}`)
+// Helpers
+function generateLogo(): string {
+  const asciiArt = figlet.textSync('Tech Leads Club', {
+    font: 'Larry 3D',
+    horizontalLayout: 'default',
+  })
 
-  const currentVersion = getCurrentVersion()
-  const latestVersion = await checkForUpdates(currentVersion)
-
-  if (latestVersion) {
-    console.log(
-      `${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Update available:')} ${pc.gray(currentVersion)} → ${pc.green(latestVersion)}`,
-    )
-    console.log(`${pc.blue(S_BAR)}     ${pc.gray('Run: npm update -g @tech-leads-club/agent-skills')}`)
-    console.log(`${pc.blue(S_BAR)}`)
-  } else if (!isGloballyInstalled()) {
-    console.log(`${pc.blue(S_BAR)}  ${pc.yellow('⚠')}  ${pc.yellow('Not installed globally')}`)
-    console.log(`${pc.blue(S_BAR)}     ${pc.yellow("Skills won't auto-update. Install globally:")}`)
-    console.log(`${pc.blue(S_BAR)}     ${pc.yellow('npm i -g @tech-leads-club/agent-skills')}`)
-    console.log(`${pc.blue(S_BAR)}`)
-  }
-
-  const skills = discoverSkills()
-  if (skills.length === 0) {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.red('No skills available')}`)
-    return null
-  }
-
-  const installedAgents = detectInstalledAgents()
-  const allAgents = getAllAgentTypes()
-
-  if (installedAgents.length > 0) {
-    const agentNames = installedAgents
-      .slice(0, 5)
-      .map((a) => getAgentConfig(a).displayName)
-      .join(', ')
-    const more = installedAgents.length > 5 ? ` +${installedAgents.length - 5} more` : ''
-    console.log(
-      `${pc.blue(S_BAR)}  ${pc.blue('●')} ${pc.white('Detected:')} ${pc.white(pc.bold(agentNames))}${pc.white(more)}`,
-    )
-    console.log(`${pc.blue(S_BAR)}`)
-  }
-
-  const installedGlobal = getInstalledSkillNames(installedAgents.length > 0 ? installedAgents : allAgents, true)
-  const installedLocal = getInstalledSkillNames(installedAgents.length > 0 ? installedAgents : allAgents, false)
-  const installedSkills = new Set([...installedGlobal, ...installedLocal])
-
-  // Step 1
-  const selectedSkills = await blueMultiSelect(
-    `Which skills do you want to install? ${pc.gray(`(${skills.length} available)`)}`,
-    skills.map((skill) => {
-      const isInstalled = installedSkills.has(skill.name)
-      return {
-        value: skill.name,
-        label: isInstalled ? `${skill.name} ${pc.green('● installed')}` : skill.name,
-        hint: truncate(skill.description, 200),
-      }
-    }),
-  )
-
-  if (typeof selectedSkills === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
-    return null
-  }
-
-  // Step 2
-  const selectedAgents = await blueMultiSelect(
-    `Where to install? ${pc.gray(`(${selectedSkills.length} skill(s) selected)`)}`,
-    allAgents.map((type) => {
-      const config = getAgentConfig(type)
-      const isInstalled = installedAgents.includes(type)
-      return {
-        value: type,
-        label: isInstalled ? `${config.displayName} ${pc.green('● detected')}` : config.displayName,
-        hint: truncate(config.description, 50),
-      }
-    }),
-    installedAgents.length > 0 ? installedAgents : ['cursor', 'claude-code'],
-  )
-
-  if (typeof selectedAgents === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
-    return null
-  }
-
-  // Step 3
-  const method = await blueSelect(
-    'Installation method',
-    [
-      { value: 'symlink', label: 'Symlink', hint: 'recommended - shared source' },
-      { value: 'copy', label: 'Copy', hint: 'independent copies' },
-    ],
-    'symlink',
-  )
-
-  if (typeof method === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
-    return null
-  }
-
-  // Step 4
-  const global = await blueConfirm('Install globally? (user home vs this project)', false)
-
-  if (typeof global === 'symbol') {
-    console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Cancelled')}`)
-    return null
-  }
-
-  console.log(`${pc.blue(S_BAR)}`)
-
-  return {
-    agents: selectedAgents as AgentType[],
-    skills: selectedSkills as string[],
-    method: method as 'symlink' | 'copy',
-    global: global as boolean,
-  }
+  return `
+${crystalGradient.multiline(asciiArt)}
+  ${pc.white(pc.bold('Tech Leads Club'))} ${pc.blue('›')} ${pc.bold(pc.blue('Agent Skills'))}
+  ${pc.white('Curated skills to power up your AI coding agents')}
+`
 }
 
-export function showInstallResults(
-  results: Array<{
-    agent: string
-    skill: string
-    path: string
-    method: string
-    success: boolean
-    error?: string
-  }>,
-) {
-  const successful = results.filter((r) => r.success && !r.error)
-  const alreadyExists = results.filter((r) => r.success && r.error === 'Already exists')
-  const failed = results.filter((r) => !r.success)
-
-  console.log()
-
-  if (successful.length > 0) {
-    for (const r of successful) {
-      console.log(`${pc.blue(symbol)} ${pc.white(pc.bold(r.skill))} ${pc.gray('→')} ${pc.white(r.agent)}`)
-    }
-  }
-
-  if (alreadyExists.length > 0) {
-    for (const r of alreadyExists) {
-      console.log(`${pc.gray(symbol)} ${r.skill} → ${r.agent} ${pc.gray('(exists)')}`)
-    }
-  }
-
-  if (failed.length > 0) {
-    for (const r of failed) {
-      console.log(`${pc.red('✗')} ${r.skill} → ${r.agent}: ${r.error}`)
-    }
-  }
-
-  const totalAgents = new Set(results.map((r) => r.agent)).size
-
-  console.log()
-  console.log(
-    `${pc.blue(S_BAR_END)}  ${pc.blue('✓')} ${pc.white(pc.bold(`${successful.length} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
-  )
+function truncate(text: string, maxLength: number): string {
+  return text.length <= maxLength ? text : text.slice(0, maxLength - 3) + '...'
 }
 
-export function showAvailableSkills() {
-  const skills = discoverSkills()
+function logBar(message = ''): void {
+  console.log(message ? `${pc.blue(S_BAR)}  ${message}` : pc.blue(S_BAR))
+}
 
+function logBarEnd(message = ''): void {
+  console.log(`${pc.blue(S_BAR_END)}  ${message}`)
+}
+
+function logCancelled(): void {
+  logBarEnd(pc.gray('Cancelled'))
+}
+
+function isCancelled<T>(value: T | symbol): value is symbol {
+  return typeof value === 'symbol'
+}
+
+function initScreen(): void {
   console.clear()
   console.log(generateLogo())
+  logBar()
+}
 
-  if (skills.length === 0) {
-    console.log(`${pc.blue(S_BAR)}  ${pc.yellow('No skills found')}`)
-    return
+async function getInstalledSkillNames(agents: AgentType[], global: boolean): Promise<Set<string>> {
+  const installed = new Set<string>()
+  for (const agent of agents) {
+    const skills = await listInstalledSkills(agent, global)
+    skills.forEach((skill) => installed.add(skill))
   }
+  return installed
+}
 
-  console.log(`${pc.blue(S_BAR)}`)
-  console.log(`${pc.blue(S_BAR)}  ${pc.bold(`${skills.length} skills available:`)}`)
-  console.log(`${pc.blue(S_BAR)}`)
+async function getAllInstalledSkillNames(agents: AgentType[]): Promise<Set<string>> {
+  const [globalSkills, localSkills] = await Promise.all([
+    getInstalledSkillNames(agents, true),
+    getInstalledSkillNames(agents, false),
+  ])
+  return new Set([...globalSkills, ...localSkills])
+}
 
-  const allAgents = getAllAgentTypes()
-  const installedGlobal = getInstalledSkillNames(allAgents, true)
-  const installedLocal = getInstalledSkillNames(allAgents, false)
-  const installedSkills = new Set([...installedGlobal, ...installedLocal])
+// Builders
+interface Option<T> {
+  value: T
+  label: string
+  hint?: string
+}
 
-  for (const skill of skills) {
+function buildAgentOptions(agents: AgentType[], detectedAgents: AgentType[] = []): Option<AgentType>[] {
+  return agents.map((type) => {
+    const config = getAgentConfig(type)
+    const isDetected = detectedAgents.includes(type)
+    return {
+      value: type,
+      label: isDetected ? `${config.displayName} ${pc.green('● detected')}` : config.displayName,
+      hint: truncate(config.description, 50),
+    }
+  })
+}
+
+function buildSkillOptions(
+  skills: Array<{ name: string; description: string }>,
+  installedSkills: Set<string>,
+): Option<string>[] {
+  return skills.map((skill) => {
     const isInstalled = installedSkills.has(skill.name)
-    const installedBadge = isInstalled ? ` ${pc.green('● installed')}` : ''
-    console.log(`${pc.blue(S_BAR)}  ${pc.blue('◆')} ${pc.bold(skill.name)}${installedBadge}`)
-    console.log(`${pc.blue(S_BAR)}    ${pc.dim(pc.gray(skill.description))}`)
-  }
-
-  console.log(`${pc.blue(S_BAR)}`)
-  console.log(`${pc.blue(S_BAR_END)}  ${pc.gray('Run "npx @tech-leads-club/agent-skills" to install')}`)
+    return {
+      value: skill.name,
+      label: isInstalled ? `${skill.name} ${pc.green('● installed')}` : skill.name,
+      hint: truncate(skill.description, 200),
+    }
+  })
 }
