@@ -22,7 +22,19 @@ runs:
             body: `🚀 **Snapshot Published!**\n\n\`\`\`bash\nnpm install @tech-leads-club/agent-skills@${version}\n\`\`\``
           });
 
-    - name: Remove Label
+    - name: Add Published Label
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          await github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['snapshot: published']
+          });
+
+    - name: Remove Action Label
       if: always()
       uses: actions/github-script@v7
       with:
