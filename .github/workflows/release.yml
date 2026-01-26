@@ -25,20 +25,24 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.action != 'labeled'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: nrwl/nx-set-shas@v4
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
 
-      - uses: ./.github/actions/setup
+      - name: Setup Environment
+        uses: ./.github/actions/setup
 
       - name: Run Affected
         run: npx nx affected -t lint test build --parallel=3
         env:
           NODE_OPTIONS: "--experimental-vm-modules"
 
-      - uses: ./.github/actions/validate-skills
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
 
       - name: Self-Healing CI
         if: always()
@@ -53,15 +57,18 @@ jobs:
       github.event.action == 'labeled' &&
       github.event.label.name == 'action: snapshot'
     steps:
-      - uses: ./.github/actions/check-ci-status
-
-      - uses: actions/checkout@v4
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
-      - uses: ./.github/actions/setup
+      - name: Verify CI Passed
+        uses: ./.github/actions/check-ci-status
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
           token: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           app-id: ${{ secrets.RELEASE_APP_ID }}
@@ -76,7 +83,8 @@ jobs:
           NODE_AUTH_TOKEN: ""
           NPM_CONFIG_PROVENANCE: "true"
 
-      - uses: ./.github/actions/snapshot-notification
+      - name: Notify PR
+        uses: ./.github/actions/snapshot-notification
         with:
           github-token: ${{ env.GITHUB_APP_TOKEN }}
 
@@ -86,19 +94,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           filter: tree:0
 
-      - name: Setup
+      - name: Setup Environment
         uses: ./.github/actions/setup
         with:
           token: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           app-id: ${{ secrets.RELEASE_APP_ID }}
           git-config: true
 
-      - name: Release
+      - name: Release Version
         run: npx nx release --yes
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_APP_TOKEN }}
