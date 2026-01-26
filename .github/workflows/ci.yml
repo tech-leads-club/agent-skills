@@ -45,6 +45,8 @@ jobs:
       # Becomes no-op when all tasks succeed. Requires if: always() to run on failures.
       - name: Self-Healing CI
         run: npx nx fix-ci
+        env:
+          NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
         if: always()
 
   validate-skills:
