@@ -39,32 +39,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          registry-url: "https://registry.npmjs.org"
-          scope: "@tech-leads-club"
           cache: "npm"
 
       - run: npm ci
       - run: npm install -g npm@latest
 
-      - name: Git Config
+      - name: Setup NPM Registry
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm config set @tech-leads-club:registry=https://registry.npmjs.org/
+          npm config set //registry.npmjs.org/:_authToken=""
 
       - name: Release Snapshot
         id: release
         run: |
+          npm config list
+
           npx nx release version 0.0.0-snapshot-${{ github.event.number }} \
             --git-tag=false \
             --git-commit=false \
             --stage-changes=false
 
-          npx nx release publish --tag snapshot
+          npx nx release publish --tag snapshot --provenance
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NODE_AUTH_TOKEN: ''
-          NPM_CONFIG_PROVENANCE: true
           NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
 
       - name: Comment on PR
         uses: actions/github-script@v7
@@ -73,7 +72,7 @@ jobs:
           script: |
             const fs = require('fs');
             try {
-              const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+              const packageJson = JSON.parse(fs.readFileSync('packages/cli/package.json', 'utf8'));
               const version = packageJson.version;
 
               await github.rest.issues.createComment({
