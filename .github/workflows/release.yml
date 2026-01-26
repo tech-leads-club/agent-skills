@@ -1,66 +1,116 @@
-name: Release
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-      - beta
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, labeled]
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
+  actions: read
   contents: write
   id-token: write
+  pull-requests: write
+
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
+  ci:
+    name: CI Checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Run Affected
+        run: npx nx affected -t lint test build --parallel=3
+        env:
+          NODE_OPTIONS: "--experimental-vm-modules"
+
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
+      - name: Self-Healing CI
+        if: always()
+        run: npx nx fix-ci
+        continue-on-error: true
+
+  snapshot:
+    name: Snapshot Release
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'action: snapshot' &&
+      !contains(github.event.pull_request.labels.*.name, 'snapshot: published')
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Verify CI Passed
+        uses: ./.github/actions/check-ci-status
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          token: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+
+      - name: Publish Snapshot
+        run: |
+          npx nx release version 0.0.0-snapshot-${{ github.event.number }} \
+            --git-tag=false --git-commit=false --stage-changes=false
+          npx nx release publish --tag snapshot --provenance
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_APP_TOKEN }}
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_PROVENANCE: "true"
+
+      - name: Notify PR
+        uses: ./.github/actions/snapshot-notification
+        with:
+          github-token: ${{ env.GITHUB_APP_TOKEN }}
+
   release:
-    name: Release
+    name: Production Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           filter: tree:0
 
-      - name: Start Nx Cloud CI Run
-        run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
-        env:
-          NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-        continue-on-error: true
-
-      - uses: actions/setup-node@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@tech-leads-club'
-          cache: 'npm'
+          token: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          git-config: true
 
-      - run: npm ci
-
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
-
-      - name: Git Config
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Release (Beta)
-        if: github.ref == 'refs/heads/beta'
-        run: npx nx release --yes --preid beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true # TODO: Enable when repository is public
-          NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-          NODE_AUTH_TOKEN: ''
-
-      - name: Release (Production)
-        if: github.ref == 'refs/heads/main'
+      - name: Release Version
         run: npx nx release --yes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true # TODO: Enable when repository is public
-          NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-          NODE_AUTH_TOKEN: ''
+          GITHUB_TOKEN: ${{ env.GITHUB_APP_TOKEN }}
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_PROVENANCE: "true"
