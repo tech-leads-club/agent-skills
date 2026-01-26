@@ -30,7 +30,15 @@
     ],
     "version": {
       "conventionalCommits": true,
-      "fallbackCurrentVersionResolver": "disk"
+      "fallbackCurrentVersionResolver": "disk",
+      "preVersionCommand": "npx nx run-many -t build --skip-nx-cache",
+      "manifestRootsToUpdate": [
+        "{projectRoot}",
+        {
+          "path": "{projectRoot}/dist",
+          "preserveLocalDependencyProtocols": false
+        }
+      ]
     },
     "changelog": {
       "automaticFromRef": true,
