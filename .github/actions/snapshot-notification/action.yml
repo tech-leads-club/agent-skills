@@ -10,6 +10,7 @@ runs:
   using: composite
   steps:
     - name: Check for Existing Snapshot Comment
+      id: check
       uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.github-token }}
@@ -26,10 +27,13 @@ runs:
           );
 
           if (alreadyCommented) {
-            core.setFailed(`⚠️ Snapshot ${version} already published and commented.`);
+            core.setFailed(`⚠️ Snapshot ${version} already published. Adding label to prevent future attempts.`);
           }
 
+          core.setOutput('should_add_label', 'true');
+
     - name: Comment Snapshot Version
+      if: success()
       uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.github-token }}
@@ -43,6 +47,7 @@ runs:
           });
 
     - name: Add Published Label
+      if: steps.check.outputs.should_add_label == 'true'
       uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.github-token }}
