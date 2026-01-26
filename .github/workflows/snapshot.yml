@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
   id-token: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   snapshot:
@@ -39,31 +39,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          scope: "@tech-leads-club"
           cache: "npm"
 
       - run: npm ci
       - run: npm install -g npm@latest
 
-      - name: Setup NPM Registry
-        run: |
-          npm config set @tech-leads-club:registry=https://registry.npmjs.org/
-          npm config set //registry.npmjs.org/:_authToken=""
-
       - name: Release Snapshot
         id: release
         run: |
-          npm config list
-
           npx nx release version 0.0.0-snapshot-${{ github.event.number }} \
             --git-tag=false \
             --git-commit=false \
             --stage-changes=false
 
-          npx nx release publish --tag snapshot --provenance
+          npx nx release publish --tag snapshot
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ""
 
       - name: Comment on PR
         uses: actions/github-script@v7
