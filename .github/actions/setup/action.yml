@@ -1,0 +1,62 @@
+name: "Setup Environment"
+description: "Reusable setup for Node.js, NPM, Nx Cloud, and Git config"
+
+inputs:
+  token:
+    description: "GitHub App private key for token generation"
+    required: false
+  app-id:
+    description: "GitHub App ID"
+    required: false
+  git-config:
+    description: "Configure git user for commits"
+    required: false
+    default: "false"
+
+outputs:
+  token:
+    description: "Generated GitHub App token"
+    value: ${{ steps.app-token.outputs.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Generate App Token
+      if: inputs.token != ''
+      uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.token }}
+
+    - name: Export Token
+      if: inputs.token != ''
+      shell: bash
+      run: echo "GITHUB_APP_TOKEN=${{ steps.app-token.outputs.token }}" >> $GITHUB_ENV
+
+    - name: Start Nx Cloud
+      shell: bash
+      run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
+      env:
+        NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
+      continue-on-error: true
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: ".nvmrc"
+        registry-url: "https://registry.npmjs.org"
+        scope: "@tech-leads-club"
+        cache: "npm"
+
+    - name: Install Dependencies
+      shell: bash
+      run: |
+        npm ci
+        npm install -g npm@latest
+
+    - name: Git Config
+      if: inputs.git-config == 'true'
+      shell: bash
+      run: |
+        git config user.name "tech-leads-club-release-bot[bot]"
+        git config user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
