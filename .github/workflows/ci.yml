@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  affected-checks:
     name: Nx Affected CI
     runs-on: ubuntu-latest
     steps:
@@ -41,6 +41,12 @@ jobs:
           NODE_OPTIONS: '--experimental-vm-modules'
           NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
+      # Self-Healing CI: Automatically proposes fixes for failed tasks
+      # Becomes no-op when all tasks succeed. Requires if: always() to run on failures.
+      - name: Self-Healing CI
+        run: npx nx fix-ci
+        if: always()
+
   validate-skills:
     name: Validate Skills Structure
     runs-on: ubuntu-latest
@@ -55,12 +61,12 @@ jobs:
               echo "❌ Missing SKILL.md in $skill"
               exit 1
             fi
-            
+
             if ! head -1 "$skill/SKILL.md" | grep -q "^---"; then
               echo "❌ Missing frontmatter in $skill/SKILL.md"
               exit 1
             fi
-            
+
             echo "✅ Valid: $skill"
           done
           echo "✅ All skills valid"
