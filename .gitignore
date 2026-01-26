@@ -8,8 +8,9 @@ dist/
 # Generated graph
 graph.json
 
-# NX cache
-.nx/
+# NX
+.nx/cache/*
+.nx/workspace-data/*
 
 # Temporary files
 tmp/
