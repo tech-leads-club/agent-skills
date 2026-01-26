@@ -1,0 +1,31 @@
+name: "Validate Skills"
+description: "Validates skill structure and frontmatter"
+
+runs:
+  using: composite
+  steps:
+    - name: Validate Skills Structure
+      shell: bash
+      run: |
+        echo "🔍 Validating skills..."
+        failed=0
+        for skill in skills/*/; do
+          skill_name=$(basename "$skill")
+
+          if [ ! -f "$skill/SKILL.md" ]; then
+            echo "❌ $skill_name: Missing SKILL.md"
+            failed=1
+            continue
+          fi
+
+          if ! head -1 "$skill/SKILL.md" | grep -q "^---"; then
+            echo "❌ $skill_name: Missing frontmatter (---) in SKILL.md"
+            failed=1
+            continue
+          fi
+
+          echo "✅ $skill_name"
+        done
+
+        [ $failed -eq 0 ] || exit 1
+        echo "✅ All skills valid"
