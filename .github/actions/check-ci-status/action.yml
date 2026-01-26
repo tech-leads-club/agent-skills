@@ -14,16 +14,20 @@ runs:
             ref: context.payload.pull_request.head.sha
           });
 
-          const ciCheck = checks.check_runs.find(check => check.name === 'CI Checks');
+          const ciChecks = checks.check_runs.filter(check => check.name === 'CI Checks');
 
-          if (!ciCheck) {
+          if (ciChecks.length === 0) {
             core.setFailed('❌ CI Checks not found. Please wait for CI to run first.');
             return;
           }
 
-          if (ciCheck.conclusion !== 'success') {
-            core.setFailed(`❌ CI Checks must pass before proceeding. Current status: ${ciCheck.conclusion || ciCheck.status}`);
+          const successfulRun = ciChecks.find(check => check.conclusion === 'success');
+
+          if (!successfulRun) {
+            const latestRun = ciChecks[0];
+            const status = latestRun.conclusion || latestRun.status;
+            core.setFailed(`❌ CI Checks must pass before proceeding. Latest status: ${status}`);
             return;
           }
 
-          core.info('✅ CI Checks passed');
+          core.info(`✅ CI Checks passed (run ${successfulRun.id})`);
