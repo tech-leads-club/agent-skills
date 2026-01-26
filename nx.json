@@ -1,5 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/nrwl/nx/master/packages/nx/schemas/nx-schema.json",
+  "nxCloudId": "69766724b12521140b82d456",
   "namedInputs": {
     "default": [
       "{projectRoot}/**/*",
