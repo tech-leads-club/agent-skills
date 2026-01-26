@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - beta
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -24,6 +23,13 @@ jobs:
           fetch-depth: 0
           filter: tree:0
 
+      - name: Generate App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Start Nx Cloud CI Run
         run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
         env:
@@ -32,35 +38,24 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@tech-leads-club'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          scope: "@tech-leads-club"
+          cache: "npm"
 
       - run: npm ci
-
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
+      - run: npm install -g npm@latest
 
       - name: Git Config
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "tech-leads-club-release-bot[bot]"
+          git config user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
 
-      - name: Release (Beta)
-        if: github.ref == 'refs/heads/beta'
-        run: npx nx release --yes --preid beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true # TODO: Enable when repository is public
-          NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-          NODE_AUTH_TOKEN: ''
-
-      - name: Release (Production)
+      - name: Release
         if: github.ref == 'refs/heads/main'
         run: npx nx release --yes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true # TODO: Enable when repository is public
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_PROVENANCE: true
           NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-          NODE_AUTH_TOKEN: ''
