@@ -55,7 +55,8 @@ jobs:
     if: |
       github.event_name == 'pull_request' &&
       github.event.action == 'labeled' &&
-      github.event.label.name == 'action: snapshot'
+      github.event.label.name == 'action: snapshot' &&
+      !contains(github.event.pull_request.labels.*.name, 'snapshot: published')
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
