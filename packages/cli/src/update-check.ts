@@ -17,8 +17,13 @@ export async function checkForUpdates(currentVersion: string): Promise<string | 
 export function getCurrentVersion(): string {
   try {
     const require = createRequire(import.meta.url)
-    const pkg = require('../package.json')
-    return pkg.version || '0.0.0'
+    try {
+      const pkg = require('./package.json')
+      return pkg.version || '0.0.0'
+    } catch {
+      const pkg = require('../package.json')
+      return pkg.version || '0.0.0'
+    }
   } catch {
     return '0.0.0'
   }
