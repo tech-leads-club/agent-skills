@@ -19,6 +19,8 @@ export function getCategoriesFilePath(): string {
   if (existsSync(devPath)) return devPath
   const pkgPath = join(__dirname, '..', SKILLS_CATEGORIES_FILE)
   if (existsSync(pkgPath)) return pkgPath
+  const bundlePath = join(__dirname, SKILLS_CATEGORIES_FILE)
+  if (existsSync(bundlePath)) return bundlePath
   return devPath
 }
 
