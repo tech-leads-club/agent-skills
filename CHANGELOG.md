@@ -1,3 +1,14 @@
+## 0.5.2 (2026-01-27)
+
+### 🩹 Fixes
+
+- improve skills directory lookup logic ([a9eecea](https://github.com/tech-leads-club/agent-skills/commit/a9eecea))
+- ensure correct categories file path resolution ([02c5968](https://github.com/tech-leads-club/agent-skills/commit/02c5968))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.5.1 (2026-01-27)
 
 ### 🩹 Fixes
