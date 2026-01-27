@@ -1,3 +1,14 @@
+## 0.5.1 (2026-01-27)
+
+### 🩹 Fixes
+
+- **cli:** force bump to 0.5.1 ([1f9f780](https://github.com/tech-leads-club/agent-skills/commit/1f9f780))
+- **cli:** force bump to 0.5.1 ([c3624d2](https://github.com/tech-leads-club/agent-skills/commit/c3624d2))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.5.0 (2026-01-27)
 
 ### 🚀 Features
