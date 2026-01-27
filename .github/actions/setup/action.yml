@@ -1,42 +1,21 @@
-name: "Setup Environment"
-description: "Reusable setup for Node.js, NPM, Nx Cloud, and Git config"
+name: 'Setup Environment'
+description: 'Reusable setup for Node.js, NPM, Nx Cloud, and Git config'
 
 inputs:
-  token:
-    description: "GitHub App private key for token generation"
-    required: false
-  app-id:
-    description: "GitHub App ID"
-    required: false
   github-app-token:
-    description: "Pre-generated GitHub App token (skips token generation if provided)"
+    description: 'GitHub App token for git operations'
+    required: false
+  app-slug:
+    description: 'GitHub App slug for git user config (e.g. my-app-bot)'
     required: false
   git-config:
-    description: "Configure git user for commits"
+    description: 'Configure git user for commits'
     required: false
-    default: "false"
-
-outputs:
-  token:
-    description: "Generated or provided GitHub App token"
-    value: ${{ inputs.github-app-token || steps.app-token.outputs.token }}
+    default: 'false'
 
 runs:
   using: composite
   steps:
-    - name: Generate App Token
-      if: inputs.token != '' && inputs.github-app-token == ''
-      uses: actions/create-github-app-token@v1
-      id: app-token
-      with:
-        app-id: ${{ inputs.app-id }}
-        private-key: ${{ inputs.token }}
-
-    - name: Export Token
-      if: inputs.token != '' || inputs.github-app-token != ''
-      shell: bash
-      run: echo "GITHUB_APP_TOKEN=${{ inputs.github-app-token || steps.app-token.outputs.token }}" >> $GITHUB_ENV
-
     - name: Start Nx Cloud
       shell: bash
       run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
@@ -46,10 +25,10 @@ runs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version-file: ".nvmrc"
-        registry-url: "https://registry.npmjs.org"
-        scope: "@tech-leads-club"
-        cache: "npm"
+        node-version-file: '.nvmrc'
+        registry-url: 'https://registry.npmjs.org'
+        scope: '@tech-leads-club'
+        cache: 'npm'
 
     - name: Install Dependencies
       shell: bash
@@ -58,8 +37,9 @@ runs:
         npm install -g npm@latest
 
     - name: Git Config
-      if: inputs.git-config == 'true'
+      if: inputs.git-config == 'true' && inputs.app-slug != '' && inputs.github-app-token != ''
       shell: bash
       run: |
-        git config user.name "tech-leads-club-release-bot[bot]"
-        git config user.email "tech-leads-club-release-bot[bot]@users.noreply.github.com"
+        git config user.name "${{ inputs.app-slug }}[bot]"
+        git config user.email "${{ inputs.app-slug }}[bot]@users.noreply.github.com"
+        git remote set-url origin "https://x-access-token:${{ inputs.github-app-token }}@github.com/${{ github.repository }}.git"
