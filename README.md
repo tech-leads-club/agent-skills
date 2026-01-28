@@ -68,7 +68,7 @@ Each step shows a **← Back** option to return to the previous step and revise 
 # Interactive mode (default)
 npx @tech-leads-club/agent-skills
 
-# Install globally (to ~/.agent/skills, ~/.claude/skills, etc.)
+# Install globally (to ~/.gemini/antigravity/global_skills, ~/.claude/skills, etc.)
 npx @tech-leads-club/agent-skills install -g
 
 # List available skills
@@ -106,18 +106,18 @@ Skills are organized by category for easier navigation.
 
 ### 🔧 Development
 
-| Skill | Description |
-|-------|-------------|
+| Skill               | Description                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
 | **spec-driven-dev** | Specification-driven development workflow with 4 phases: specify → design → tasks → implement+validate |
 
 ### 🛠 Skill & Agent Creation
 
-| Skill | Description |
-|-------|-------------|
-| **skill-creator** | Meta-skill for creating new skills following best practices |
-| **subagent-creator** | Create specialized subagents for complex tasks |
-| **cursor-skill-creator** | Cursor-specific skill creation |
-| **cursor-subagent-creator** | Cursor-specific subagent creation |
+| Skill                       | Description                                                 |
+| --------------------------- | ----------------------------------------------------------- |
+| **skill-creator**           | Meta-skill for creating new skills following best practices |
+| **subagent-creator**        | Create specialized subagents for complex tasks              |
+| **cursor-skill-creator**    | Cursor-specific skill creation                              |
+| **cursor-subagent-creator** | Cursor-specific subagent creation                           |
 
 ---
 
@@ -144,16 +144,16 @@ npm run build
 
 ### Development Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run start:dev` | Run CLI locally (interactive mode) |
-| `npm run g <name>` | Generate a new skill |
-| `npm run build` | Build all packages |
-| `npm run test` | Run all tests |
-| `npm run lint` | Lint codebase |
-| `npm run lint:fix` | Fix lint issues |
-| `npm run format` | Format code with Prettier |
-| `npm run release:dry` | Preview release (dry-run) |
+| Command               | Description                        |
+| --------------------- | ---------------------------------- |
+| `npm run start:dev`   | Run CLI locally (interactive mode) |
+| `npm run g <name>`    | Generate a new skill               |
+| `npm run build`       | Build all packages                 |
+| `npm run test`        | Run all tests                      |
+| `npm run lint`        | Lint codebase                      |
+| `npm run lint:fix`    | Fix lint issues                    |
+| `npm run format`      | Format code with Prettier          |
+| `npm run release:dry` | Preview release (dry-run)          |
 
 ### Creating a New Skill
 
@@ -280,13 +280,13 @@ agent-skills/
 
 This project uses **NX Release** with **Conventional Commits** for automated versioning:
 
-| Commit Prefix | Version Bump | Example |
-|---------------|--------------|---------|
-| `feat:` | Minor (0.X.0) | `feat: add new skill` |
-| `fix:` | Patch (0.0.X) | `fix: correct symlink path` |
-| `feat!:` | Major (X.0.0) | `feat!: breaking API change` |
-| `docs:` | No bump | `docs: update README` |
-| `chore:` | No bump | `chore: update deps` |
+| Commit Prefix | Version Bump  | Example                      |
+| ------------- | ------------- | ---------------------------- |
+| `feat:`       | Minor (0.X.0) | `feat: add new skill`        |
+| `fix:`        | Patch (0.0.X) | `fix: correct symlink path`  |
+| `feat!:`      | Major (X.0.0) | `feat!: breaking API change` |
+| `docs:`       | No bump       | `docs: update README`        |
+| `chore:`      | No bump       | `chore: update deps`         |
 
 Releases are automated via GitHub Actions when merging to `main`.
 

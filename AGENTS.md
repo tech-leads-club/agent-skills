@@ -142,13 +142,13 @@ npm run release
 
 The CLI installs skills to these locations:
 
-| Agent          | Local Path          | Global Path           |
-| -------------- | ------------------- | --------------------- |
-| Antigravity    | `.agent/skills/`    | `~/.agent/skills/`    |
-| Claude Code    | `.claude/skills/`   | `~/.claude/skills/`   |
-| Cursor         | `.cursor/skills/`   | `~/.cursor/skills/`   |
-| GitHub Copilot | `.github/skills/`   | `~/.copilot/skills/`  |
-| OpenCode       | `.opencode/skills/` | `~/.opencode/skills/` |
+| Agent          | Local Path          | Global Path                            |
+| -------------- | ------------------- | -------------------------------------- |
+| Antigravity    | `.agent/skills/`    | `~/.gemini/antigravity/global_skills/` |
+| Claude Code    | `.claude/skills/`   | `~/.claude/skills/`                    |
+| Cursor         | `.cursor/skills/`   | `~/.cursor/skills/`                    |
+| GitHub Copilot | `.github/skills/`   | `~/.copilot/skills/`                   |
+| OpenCode       | `.opencode/skills/` | `~/.opencode/skills/`                  |
 
 ## Testing Skills
 
