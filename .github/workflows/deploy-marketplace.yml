@@ -1,14 +1,7 @@
 name: Deploy Marketplace
 on:
   push:
-    branches: [main, feature/marketplace-skills]
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy from'
-        required: false
-        default: 'main'
-        type: string
+    branches: [feature/marketplace-skills]
 
 permissions:
   actions: read
