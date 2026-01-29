@@ -1,7 +1,7 @@
 name: Deploy Marketplace
 on:
   push:
-    branches: [main]
+    branches: [main, feature/marketplace-skills]
   workflow_dispatch:
       inputs:
         branch:
