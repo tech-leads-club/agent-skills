@@ -28,13 +28,15 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "github-markdown-css": "^5.8.1",
     "gray-matter": "^4.0.3",
     "next": "~16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@types/node": "^25",
