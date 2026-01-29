@@ -1,3 +1,13 @@
+## 0.5.3 (2026-01-29)
+
+### 🩹 Fixes
+
+- antigravity global location path for skills ([bb85ec1](https://github.com/tech-leads-club/agent-skills/commit/bb85ec1))
+
+### ❤️ Thank You
+
+- Edmar Paulino
+
 ## 0.5.2 (2026-01-27)
 
 ### 🩹 Fixes
