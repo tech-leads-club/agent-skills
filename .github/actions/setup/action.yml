@@ -33,7 +33,7 @@ runs:
     - name: Install Dependencies
       shell: bash
       run: |
-        npm ci
+        npm install
         npm install -g npm@latest
 
     - name: Git Config
