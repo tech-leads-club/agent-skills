@@ -40,6 +40,7 @@ Mark task complete in tasks.md.
 **Reading**: task definition from tasks.md
 **Dependencies**: [All done? ✅ | Blocked by: TY]
 **Using**:
+
 - MCP: [from task]
 - Skill: [from task]
 - Reusing: [from task]

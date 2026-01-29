@@ -128,6 +128,7 @@ description: What the skill does and when to use it. Include specific triggers a
 ```
 
 **Description guidelines:**
+
 - Include both what the skill does AND when to use it
 - Include trigger phrases
 - Max 1024 characters, no XML tags
@@ -136,6 +137,7 @@ description: What the skill does and when to use it. Include specific triggers a
 #### Body
 
 Write instructions for using the skill. Include:
+
 - Quick start guide
 - Step-by-step workflow
 - Links to reference files when needed

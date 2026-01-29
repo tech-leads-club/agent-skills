@@ -4,26 +4,28 @@
 
 ## Why Granular Tasks?
 
-| Vague Task (BAD) | Granular Tasks (GOOD) |
-|------------------|----------------------|
-| "Create form" | T1: Create email input component |
-|               | T2: Add email validation function |
-|               | T3: Create submit button |
-|               | T4: Add form state management |
-|               | T5: Connect form to API |
-| "Implement auth" | T1: Create login form |
-|                  | T2: Create register form |
-|                  | T3: Add token storage utility |
-|                  | T4: Create auth API service |
-|                  | T5: Add route protection |
+| Vague Task (BAD) | Granular Tasks (GOOD)             |
+| ---------------- | --------------------------------- |
+| "Create form"    | T1: Create email input component  |
+|                  | T2: Add email validation function |
+|                  | T3: Create submit button          |
+|                  | T4: Add form state management     |
+|                  | T5: Connect form to API           |
+| "Implement auth" | T1: Create login form             |
+|                  | T2: Create register form          |
+|                  | T3: Add token storage utility     |
+|                  | T4: Create auth API service       |
+|                  | T5: Add route protection          |
 
 **Benefits of granular:**
+
 - **Agents don't err** - Single focus, no ambiguity
 - **Easy to test** - Each task = one verifiable outcome
 - **Parallelizable** - Independent tasks run simultaneously
 - **Errors isolated** - One failure doesn't block everything
 
 **Rule**: One task = ONE of these:
+
 - One component
 - One function
 - One API endpoint
@@ -34,11 +36,13 @@
 ## Process
 
 ### 1. Review Design
+
 Read `.specs/[feature]/design.md` before creating tasks.
 
 ### 2. Break Into Atomic Tasks
 
 **Task = ONE deliverable**. Examples:
+
 - ✅ "Create UserService interface" (one file, one concept)
 - ❌ "Implement user management" (too vague, multiple files)
 
@@ -55,7 +59,7 @@ Group tasks into phases. Identify what can run in parallel.
 **CRITICAL**: Before execution, ask the user:
 
 > "For each task, which tools should I use?"
-> 
+>
 > **Available MCPs**: [list from project or user]
 > **Available Skills**: [list from project or user]
 
@@ -74,27 +78,34 @@ Group tasks into phases. Identify what can run in parallel.
 ## Execution Plan
 
 ### Phase 1: Foundation (Sequential)
-Tasks that must be done first, in order.
 
+Tasks that must be done first, in order.
 ```
+
 T1 → T2 → T3
+
 ```
 
 ### Phase 2: Core Implementation (Parallel OK)
 After foundation, these can run in parallel.
 
 ```
+
      ┌→ T4 ─┐
+
 T3 ──┼→ T5 ─┼──→ T8
-     └→ T6 ─┘
-       T7 ──────→
+└→ T6 ─┘
+T7 ──────→
+
 ```
 
-### Phase 3: Integration (Sequential) 
+### Phase 3: Integration (Sequential)
 Bringing it all together.
 
 ```
+
 T8 → T9
+
 ```
 
 ---
@@ -177,18 +188,20 @@ T8 → T9
 Visual representation of what can run simultaneously:
 
 ```
+
 Phase 1 (Sequential):
-  T1 ──→ T2 ──→ T3
+T1 ──→ T2 ──→ T3
 
 Phase 2 (Parallel):
-  T3 complete, then:
-    ├── T4 [P]
-    ├── T5 [P]  } Can run simultaneously
-    └── T6 [P]
+T3 complete, then:
+├── T4 [P]
+├── T5 [P] } Can run simultaneously
+└── T6 [P]
 
 Phase 3 (Sequential):
-  T4, T5, T6 complete, then:
-    T7 ──→ T8
+T4, T5, T6 complete, then:
+T7 ──→ T8
+
 ```
 
 ---

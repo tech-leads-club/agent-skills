@@ -1,6 +1,6 @@
-import { SkillsClient } from './SkillsClient';
-import marketplaceData from '../../data/skills.json';
+import marketplaceData from '../../data/skills.json'
+import { SkillsClient } from './SkillsClient'
 
 export default function SkillsPage() {
-  return <SkillsClient data={marketplaceData} />;
+  return <SkillsClient data={marketplaceData} />
 }

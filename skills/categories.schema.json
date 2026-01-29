@@ -3,20 +3,14 @@
   "title": "Skill Categories",
   "description": "Schema for skill categories configuration",
   "type": "object",
-  "required": [
-    "categories",
-    "skills"
-  ],
+  "required": ["categories", "skills"],
   "properties": {
     "categories": {
       "type": "array",
       "description": "List of available categories",
       "items": {
         "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "properties": {
           "id": {
             "type": "string",

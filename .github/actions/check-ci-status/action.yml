@@ -1,5 +1,5 @@
-name: "Check CI Status"
-description: "Verifies that CI checks have passed before proceeding"
+name: 'Check CI Status'
+description: 'Verifies that CI checks have passed before proceeding'
 
 runs:
   using: composite

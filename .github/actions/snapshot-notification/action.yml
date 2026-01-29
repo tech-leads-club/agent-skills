@@ -1,9 +1,9 @@
-name: "Snapshot Notification"
-description: "Comments on PR with snapshot version and removes label"
+name: 'Snapshot Notification'
+description: 'Comments on PR with snapshot version and removes label'
 
 inputs:
   github-token:
-    description: "GitHub token for API access"
+    description: 'GitHub token for API access'
     required: true
 
 runs:

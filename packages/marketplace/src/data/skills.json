@@ -52,13 +52,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "design.md",
-          "implement.md",
-          "specify.md",
-          "tasks.md",
-          "validate.md"
-        ],
+        "referenceFiles": ["design.md", "implement.md", "specify.md", "tasks.md", "validate.md"],
         "lastModified": "2026-01-29"
       }
     },

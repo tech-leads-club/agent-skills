@@ -15,23 +15,23 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 
 ## Phase Selection
 
-| User wants to... | Load reference |
-|------------------|----------------|
-| Define what to build | [specify.md](references/specify.md) |
-| Design architecture | [design.md](references/design.md) |
-| Break into tasks | [tasks.md](references/tasks.md) |
-| Implement a task | [implement.md](references/implement.md) |
-| Verify it works | [validate.md](references/validate.md) |
+| User wants to...     | Load reference                          |
+| -------------------- | --------------------------------------- |
+| Define what to build | [specify.md](references/specify.md)     |
+| Design architecture  | [design.md](references/design.md)       |
+| Break into tasks     | [tasks.md](references/tasks.md)         |
+| Implement a task     | [implement.md](references/implement.md) |
+| Verify it works      | [validate.md](references/validate.md)   |
 
 ## Commands
 
-| Command | Action |
-|---------|--------|
-| `specify [feature]` | Define requirements |
-| `design [feature]` | Design architecture |
-| `tasks [feature]` | Create task breakdown |
-| `implement T1` | Implement task |
-| `validate` | Verify implementation |
+| Command             | Action                |
+| ------------------- | --------------------- |
+| `specify [feature]` | Define requirements   |
+| `design [feature]`  | Design architecture   |
+| `tasks [feature]`   | Create task breakdown |
+| `implement T1`      | Implement task        |
+| `validate`          | Verify implementation |
 
 ## Output
 

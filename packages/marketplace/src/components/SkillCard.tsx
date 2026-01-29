@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import type { Skill } from '../types';
-import { CopyButton } from './CopyButton';
+import Link from 'next/link'
+import type { Skill } from '../types'
+import { CopyButton } from './CopyButton'
 
 interface SkillCardProps {
-  skill: Skill;
-  categoryName: string;
+  skill: Skill
+  categoryName: string
 }
 
 export function SkillCard({ skill, categoryName }: SkillCardProps) {
-  const installCommand = `npx @tech-leads-club/agent-skills --skill ${skill.id}`;
+  const installCommand = `npx @tech-leads-club/agent-skills --skill ${skill.id}`
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 p-6">
@@ -19,9 +19,7 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
         >
           {skill.name}
         </Link>
-        <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-          {categoryName}
-        </span>
+        <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">{categoryName}</span>
       </div>
 
       <p className="text-gray-600 text-sm mb-4 line-clamp-3">{skill.description}</p>
@@ -52,11 +50,9 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
       </div>
 
       <div className="bg-gray-50 rounded-md p-3 flex items-center justify-between">
-        <code className="text-xs text-gray-700 flex-1 overflow-x-auto">
-          {installCommand}
-        </code>
+        <code className="text-xs text-gray-700 flex-1 overflow-x-auto">{installCommand}</code>
         <CopyButton text={installCommand} />
       </div>
     </div>
-  );
+  )
 }

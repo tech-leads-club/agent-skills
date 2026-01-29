@@ -13,6 +13,7 @@
 ### 1. Check Completed Tasks
 
 Go through tasks.md:
+
 - [ ] All tasks marked done?
 - [ ] Any blocked or partial?
 
@@ -24,6 +25,7 @@ For each user story in spec.md:
 ### P1: [Story Title]
 
 **Acceptance Criteria**:
+
 1. WHEN [X] THEN [Y] → [PASS/FAIL]
 2. WHEN [X] THEN [Y] → [PASS/FAIL]
 ```
@@ -31,6 +33,7 @@ For each user story in spec.md:
 ### 3. Check Edge Cases
 
 From spec.md edge cases:
+
 - [ ] [Edge case 1] handled correctly
 - [ ] [Edge case 2] handled correctly
 
@@ -56,11 +59,11 @@ npm test  # or project test command
 
 ## Task Completion
 
-| Task | Status | Notes |
-|------|--------|-------|
-| T1 | ✅ Done | - |
-| T2 | ✅ Done | - |
-| T3 | ⚠️ Partial | [Issue] |
+| Task | Status     | Notes   |
+| ---- | ---------- | ------- |
+| T1   | ✅ Done    | -       |
+| T2   | ✅ Done    | -       |
+| T3   | ⚠️ Partial | [Issue] |
 
 ---
 
@@ -68,8 +71,8 @@ npm test  # or project test command
 
 ### P1: [Story Title] ⭐ MVP
 
-| Criterion | Result |
-|-----------|--------|
+| Criterion     | Result  |
+| ------------- | ------- |
 | WHEN X THEN Y | ✅ PASS |
 | WHEN A THEN B | ✅ PASS |
 
@@ -77,8 +80,8 @@ npm test  # or project test command
 
 ### P2: [Story Title]
 
-| Criterion | Result |
-|-----------|--------|
+| Criterion     | Result             |
+| ------------- | ------------------ |
 | WHEN X THEN Y | ❌ FAIL - [reason] |
 
 **Status**: ⚠️ P2 Issues
@@ -105,13 +108,16 @@ npm test  # or project test command
 **Overall**: ✅ Ready | ⚠️ Issues | ❌ Not Ready
 
 **What works**:
+
 - [List]
 
 **Issues found**:
+
 - [Issue 1]: [How to fix]
 - [Issue 2]: [How to fix]
 
 **Recommended next steps**:
+
 1. [Action]
 2. [Action]
 ```

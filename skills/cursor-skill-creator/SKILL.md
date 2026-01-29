@@ -267,15 +267,15 @@ description: Organizes and formats JavaScript/TypeScript imports in alphabetical
 
 ```typescript
 // External
-import { useState } from "react";
-import axios from "axios";
+import { useState } from 'react'
+import axios from 'axios'
 
 // Internal
-import { Button } from "@/components/Button";
-import { utils } from "../utils";
+import { Button } from '@/components/Button'
+import { utils } from '../utils'
 
 // Types
-import type { User } from "@/types";
+import type { User } from '@/types'
 ```
 ````
 

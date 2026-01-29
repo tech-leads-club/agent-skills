@@ -1,5 +1,5 @@
-name: "Validate Skills"
-description: "Validates skill structure and frontmatter"
+name: 'Validate Skills'
+description: 'Validates skill structure and frontmatter'
 
 runs:
   using: composite

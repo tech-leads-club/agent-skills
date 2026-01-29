@@ -6,16 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "platform": "node",
         "outputPath": "packages/cli/dist",
-        "format": [
-          "esm"
-        ],
+        "format": ["esm"],
         "bundle": true,
         "main": "packages/cli/src/index.ts",
         "tsConfig": "packages/cli/tsconfig.json",

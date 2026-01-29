@@ -1,25 +1,22 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react'
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
-  placeholder?: string;
+  onSearch: (query: string) => void
+  placeholder?: string
 }
 
-export function SearchBar({
-  onSearch,
-  placeholder = 'Search skills...',
-}: SearchBarProps) {
-  const [query, setQuery] = useState('');
+export function SearchBar({ onSearch, placeholder = 'Search skills...' }: SearchBarProps) {
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearch(query);
-    }, 300);
+      onSearch(query)
+    }, 300)
 
-    return () => clearTimeout(timer);
-  }, [query, onSearch]);
+    return () => clearTimeout(timer)
+  }, [query, onSearch])
 
   return (
     <div className="relative">
@@ -44,5 +41,5 @@ export function SearchBar({
         />
       </svg>
     </div>
-  );
+  )
 }

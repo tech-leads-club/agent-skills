@@ -25,7 +25,5 @@
       "x-prompt": "Which category should this skill belong to? (e.g., 'development', 'creation')"
     }
   },
-  "required": [
-    "name"
-  ]
+  "required": ["name"]
 }

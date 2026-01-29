@@ -3,24 +3,26 @@ on:
   push:
     branches: [main, feature/marketplace-skills]
   workflow_dispatch:
-      inputs:
-        branch:
-          description: 'Branch to deploy from'
-          required: false
-          default: 'main'
-          type: string
+    inputs:
+      branch:
+        description: 'Branch to deploy from'
+        required: false
+        default: 'main'
+        type: string
 
 permissions:
-  contents: read
-  pages: write
+  actions: read
+  contents: write
   id-token: write
+  pull-requests: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-deploy:
+    name: CI Checks
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -28,6 +30,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
 
       - name: Setup Environment
         uses: ./.github/actions/setup

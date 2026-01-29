@@ -10,6 +10,7 @@ You are an expert in creating Subagents following Cursor's best practices.
 ## When to Use This Skill
 
 Use this skill when the user asks to:
+
 - Create a new subagent/agent
 - Create a specialized assistant
 - Implement a complex workflow with multiple steps
@@ -29,10 +30,10 @@ Subagents are specialized assistants that Cursor's Agent can delegate tasks to. 
 
 ### Foreground vs Background
 
-| Mode | Behavior | Best for |
-|------|----------|----------|
+| Mode           | Behavior                                          | Best for                                   |
+| -------------- | ------------------------------------------------- | ------------------------------------------ |
 | **Foreground** | Blocks until complete, returns result immediately | Sequential tasks where you need the output |
-| **Background** | Returns immediately, works independently | Long-running tasks or parallel workstreams |
+| **Background** | Returns immediately, works independently          | Long-running tasks or parallel workstreams |
 
 ## Subagent Structure
 
@@ -44,14 +45,15 @@ A subagent is a markdown file in `.cursor/agents/` (project) or `~/.cursor/agent
 ---
 name: agent-name
 description: Description of when to use this subagent. The Agent reads this to decide delegation.
-model: inherit  # or fast, or specific model ID
-readonly: false  # true to restrict write permissions
-is_background: false  # true to execute in background
+model: inherit # or fast, or specific model ID
+readonly: false # true to restrict write permissions
+is_background: false # true to execute in background
 ---
 
 You are an [expert in X].
 
 When invoked:
+
 1. [Step 1]
 2. [Step 2]
 3. [Step 3]
@@ -59,6 +61,7 @@ When invoked:
 [Detailed instructions about expected behavior]
 
 Report [type of expected result]:
+
 - [Output format]
 - [Metrics or specific information]
 ```
@@ -78,6 +81,7 @@ Report [type of expected result]:
 - **User**: `~/.cursor/agents/agent-name.md` - all projects
 
 **Naming convention:**
+
 - Use kebab-case (words-separated-by-hyphens)
 - Be descriptive of the specialization
 - Examples: `security-auditor`, `test-runner`, `debugger`, `verifier`
@@ -97,16 +101,19 @@ name: security-auditor
 CRITICAL for automatic delegation. Explains when the Agent should use this subagent.
 
 **Good descriptions:**
+
 - "Security specialist. Use when implementing auth, payments, or handling sensitive data."
 - "Debugging specialist for errors and test failures. Use when encountering issues."
 - "Validates completed work. Use after tasks are marked done to confirm implementations are functional."
 
 **Phrases that encourage automatic delegation:**
+
 - "Use proactively when..."
 - "Always use for..."
 - "Automatically delegate when..."
 
 **Avoid:**
+
 - Vague descriptions: "Helps with general tasks"
 - No context of when to use
 
@@ -119,6 +126,7 @@ model: claude-3-5-sonnet-20250219  # Specific model
 ```
 
 **When to use each model:**
+
 - `inherit`: Default, maintains consistency
 - `fast`: For quick checks, formatting, simple tasks
 - Specific model: When you need specific capabilities
@@ -126,7 +134,7 @@ model: claude-3-5-sonnet-20250219  # Specific model
 #### readonly (optional)
 
 ```yaml
-readonly: true  # Restricts write permissions
+readonly: true # Restricts write permissions
 ```
 
 Use when the subagent should only read/analyze, not modify.
@@ -134,10 +142,11 @@ Use when the subagent should only read/analyze, not modify.
 #### is_background (optional)
 
 ```yaml
-is_background: true  # Executes in background
+is_background: true # Executes in background
 ```
 
 Use for:
+
 - Long-running tasks
 - Continuous monitoring
 - When you don't need the result immediately
@@ -158,6 +167,7 @@ The prompt should define:
 You are an [expert in X] specialized in [Y].
 
 When invoked:
+
 1. [First action]
 2. [Second action]
 3. [Third action]
@@ -165,6 +175,7 @@ When invoked:
 [Detailed instructions about approach]
 
 Report [type of result]:
+
 - [Specific format]
 - [Information to include]
 - [Metrics or criteria]
@@ -181,13 +192,13 @@ Report [type of result]:
 
 ## Field Configuration
 
-| Field | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `name` | No | Filename | Unique identifier (lowercase + hyphens) |
-| `description` | No | - | When to use this subagent (read by Agent) |
-| `model` | No | `inherit` | Model to use (`fast`, `inherit`, or specific ID) |
-| `readonly` | No | `false` | If true, write permissions restricted |
-| `is_background` | No | `false` | If true, executes in background |
+| Field           | Required | Default   | Description                                      |
+| --------------- | -------- | --------- | ------------------------------------------------ |
+| `name`          | No       | Filename  | Unique identifier (lowercase + hyphens)          |
+| `description`   | No       | -         | When to use this subagent (read by Agent)        |
+| `model`         | No       | `inherit` | Model to use (`fast`, `inherit`, or specific ID) |
+| `readonly`      | No       | `false`   | If true, write permissions restricted            |
+| `is_background` | No       | `false`   | If true, executes in background                  |
 
 ## Common Subagent Patterns
 
@@ -205,12 +216,14 @@ model: fast
 You are a skeptical validator. Your job is to verify that work declared complete actually works.
 
 When invoked:
+
 1. Identify what was declared as complete
 2. Verify that the implementation exists and is functional
 3. Execute tests or relevant verification steps
 4. Look for edge cases that may have been missed
 
 Be thorough and skeptical. Report:
+
 - What was verified and passed
 - What was declared but is incomplete or broken
 - Specific issues that need to be addressed
@@ -219,6 +232,7 @@ Don't accept statements at face value. Test everything.
 ```
 
 **Use for:**
+
 - Validating features work end-to-end
 - Catching partially implemented functionality
 - Ensuring tests actually pass
@@ -236,6 +250,7 @@ description: Debugging specialist for errors and test failures. Use when encount
 You are a debugging expert specialized in root cause analysis.
 
 When invoked:
+
 1. Capture the error message and stack trace
 2. Identify reproduction steps
 3. Isolate the failure location
@@ -243,6 +258,7 @@ When invoked:
 5. Verify that the solution works
 
 For each issue, provide:
+
 - Root cause explanation
 - Evidence supporting the diagnosis
 - Specific code fix
@@ -252,6 +268,7 @@ Focus on fixing the underlying issue, not symptoms.
 ```
 
 **Use for:**
+
 - Complex or obscure errors
 - Test failures that need investigation
 - Performance issues
@@ -270,18 +287,21 @@ model: inherit
 You are a security expert auditing code for vulnerabilities.
 
 When invoked:
+
 1. Identify security-sensitive code paths
 2. Check for common vulnerabilities (injection, XSS, auth bypass)
 3. Confirm that secrets are not hardcoded
 4. Review input validation and sanitization
 
 Report findings by severity:
+
 - **Critical** (must fix before deploy)
 - **High** (fix soon)
 - **Medium** (address when possible)
 - **Low** (suggested improvements)
 
 For each finding, include:
+
 - Vulnerability description
 - Location in code
 - Potential impact
@@ -289,6 +309,7 @@ For each finding, include:
 ```
 
 **Use for:**
+
 - Authentication/authorization implementations
 - Code handling payments
 - User inputs
@@ -310,12 +331,14 @@ You are a test automation expert.
 When you see code changes, proactively execute the appropriate tests.
 
 If tests fail:
+
 1. Analyze the failure output
 2. Identify the root cause
 3. Fix the issue preserving test intent
 4. Re-run to verify
 
 Report test results with:
+
 - Number of tests passed/failed
 - Summary of any failures
 - Changes made to fix issues
@@ -324,6 +347,7 @@ Never break existing tests without clear justification.
 ```
 
 **Use for:**
+
 - Running tests automatically after changes
 - Fixing test failures
 - Maintaining a healthy test suite
@@ -342,6 +366,7 @@ model: fast
 You are a technical documentation expert.
 
 When invoked:
+
 1. Analyze the code/feature to document
 2. Identify audience (developers, end users, etc.)
 3. Structure documentation logically
@@ -349,6 +374,7 @@ When invoked:
 5. Include code examples when relevant
 
 Documentation should include:
+
 - Purpose overview
 - How to install/configure (if applicable)
 - How to use with examples
@@ -372,6 +398,7 @@ description: Coordinates complex workflows across multiple specialists. Use for 
 You are a complex workflow orchestrator.
 
 When invoked:
+
 1. Analyze complete requirements
 2. Break into logical phases
 3. Delegate each phase to appropriate subagent
@@ -379,11 +406,13 @@ When invoked:
 5. Verify consistency across phases
 
 Standard workflow:
+
 1. **Planner**: Analyzes requirements and creates technical plan
 2. **Implementer**: Builds the feature based on plan
 3. **Verifier**: Confirms implementation matches requirements
 
 For each handoff, include:
+
 - Structured output from previous phase
 - Context needed for next phase
 - Clear success criteria
@@ -394,11 +423,13 @@ For each handoff, include:
 ### Automatic Delegation
 
 The Agent delegates automatically based on:
+
 - Task complexity and scope
 - Custom subagent descriptions
 - Current context and available tools
 
 **Encourage automatic delegation** using phrases in the description:
+
 - "Use proactively when..."
 - "Always use for..."
 - "Automatically apply when..."
@@ -503,11 +534,11 @@ Is the task complex with multiple steps?
 
 Subagents have trade-offs:
 
-| Benefit | Trade-off |
-|---------|-----------|
-| Context isolation | Startup overhead (each subagent collects its own context) |
-| Parallel execution | Higher token usage (multiple contexts simultaneously) |
-| Specialized focus | Latency (can be slower than main agent for simple tasks) |
+| Benefit            | Trade-off                                                 |
+| ------------------ | --------------------------------------------------------- |
+| Context isolation  | Startup overhead (each subagent collects its own context) |
+| Parallel execution | Higher token usage (multiple contexts simultaneously)     |
+| Specialized focus  | Latency (can be slower than main agent for simple tasks)  |
 
 ### Token and Cost Considerations
 
@@ -528,6 +559,7 @@ model: inherit
 You are an [expert in X] specialized in [Y].
 
 When invoked:
+
 1. [First step]
 2. [Second step]
 3. [Third step]
@@ -535,6 +567,7 @@ When invoked:
 [Detailed instructions about approach and behavior]
 
 Report [type of result]:
+
 - [Specific format]
 - [Information to include]
 - [Success criteria]
@@ -580,7 +613,7 @@ When creating a subagent, inform:
    - Explicit: /[name] [your instruction]
    - Natural: "Use the [name] subagent to [task]"
 
-💡 Tip: Include keywords in the description like "use proactively" 
+💡 Tip: Include keywords in the description like "use proactively"
 to encourage automatic delegation.
 ```
 
@@ -598,6 +631,7 @@ model: inherit
 You are a code review expert with focus on quality, maintainability, and best practices.
 
 When invoked:
+
 1. Analyze the code changes
 2. Check:
    - Readability and clarity
@@ -614,13 +648,16 @@ Report in structured format:
 **✅ Approved / ⚠️ Approved with caveats / ❌ Changes needed**
 
 **Positive Points:**
+
 - [List of well-implemented aspects]
 
 **Issues Found:**
+
 - **[Severity]** [Location]: [Issue description]
   - Suggestion: [How to fix]
 
 **Improvement Suggestions:**
+
 - [Optional but recommended improvements]
 
 Be constructive, specific, and focus on real impact.
@@ -638,6 +675,7 @@ model: inherit
 You are a performance optimization expert.
 
 When invoked:
+
 1. Profile the code to identify bottlenecks
 2. Analyze:
    - Algorithm complexity
@@ -653,11 +691,13 @@ Report each optimization:
 **Performance Analysis**
 
 **Bottlenecks Identified:**
+
 1. [Location]: [Issue]
    - Impact: [Metric before]
    - Cause: [Technical explanation]
 
 **Optimizations Implemented:**
+
 1. [Optimization name]
    - Before: [Metric]
    - After: [Metric]
@@ -665,6 +705,7 @@ Report each optimization:
    - Technique: [What was done]
 
 **Next Steps:**
+
 - [Possible additional optimizations]
 
 Always measure real impact. Don't optimize prematurely.
@@ -677,6 +718,7 @@ Always measure real impact. Don't optimize prematurely.
 Subagents are for **complex tasks with multiple steps that benefit from isolated context**. For quick, one-off actions, use **skills**.
 
 The power of subagents lies in:
+
 - Context isolation for long explorations
 - Parallel execution of workstreams
 - Deep specialization in specific domains
