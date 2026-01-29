@@ -1,9 +1,14 @@
 name: Deploy Marketplace
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
+      inputs:
+        branch:
+          description: 'Branch to deploy from'
+          required: false
+          default: 'main'
+          type: string
 
 permissions:
   contents: read
