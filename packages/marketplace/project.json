@@ -1,0 +1,43 @@
+{
+  "name": "marketplace",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/marketplace",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "generate-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx scripts/generate-data.ts",
+        "cwd": "packages/marketplace"
+      }
+    },
+    "build": {
+      "dependsOn": ["generate-data"],
+      "executor": "@nx/next:build",
+      "outputs": ["{projectRoot}/out", "{projectRoot}/.next"],
+      "options": {
+        "outputPath": "packages/marketplace/out"
+      }
+    },
+    "dev": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "marketplace:build",
+        "dev": true,
+        "port": 3000
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "marketplace:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "marketplace:build:production",
+          "dev": false
+        }
+      }
+    }
+  }
+}

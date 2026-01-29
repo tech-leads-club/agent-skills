@@ -57,12 +57,19 @@
     "@nx/eslint-plugin": "^22.4.1",
     "@nx/jest": "22.4.1",
     "@nx/js": "^22.4.1",
+    "@nx/next": "^22.4.1",
     "@nx/plugin": "^22.4.1",
     "@swc-node/register": "^1.11.1",
+    "@swc/cli": "~0.6.0",
     "@swc/core": "^1.15.10",
     "@swc/helpers": "~0.5.18",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/jest": "^30.0.0",
     "@types/node": "^22",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.23",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -71,8 +78,10 @@
     "jest-util": "^30.2.0",
     "jsonc-eslint-parser": "^2.4.2",
     "nx": "^22.4.1",
+    "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
+    "tailwindcss": "^4.1.18",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
@@ -81,5 +90,17 @@
   },
   "nx": {
     "includedScripts": []
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "github-markdown-css": "^5.8.1",
+    "gray-matter": "^4.0.3",
+    "next": "~16.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
+    "tsx": "^4.21.0"
   }
 }
