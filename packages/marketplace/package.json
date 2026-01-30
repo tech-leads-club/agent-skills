@@ -1,0 +1,49 @@
+{
+  "name": "@tech-leads-club/marketplace",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Next.js marketplace application for browsing and discovering AI agent skills",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tech-leads-club/agent-skills.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "cli"
+  ],
+  "scripts": {
+    "build": "nx build",
+    "dev": "nx dev",
+    "generate-data": "nx generate-data"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.0.15",
+    "clsx": "^2.1.1",
+    "github-markdown-css": "^5.8.1",
+    "gray-matter": "^4.0.3",
+    "next": "~16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
