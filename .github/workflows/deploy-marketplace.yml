@@ -40,7 +40,7 @@ jobs:
           NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
         continue-on-error: true
 
-      - name: Install dependencies
+      - name: Install dependencies test
         run: npm install --include=optional
 
       - name: Generate skills data
