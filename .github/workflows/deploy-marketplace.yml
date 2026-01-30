@@ -2,7 +2,7 @@ name: Deploy Marketplace (GitHub Pages)
 
 on:
   push:
-    branches: [feature/marketplace-skills]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
