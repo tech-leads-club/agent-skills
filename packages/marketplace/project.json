@@ -15,9 +15,16 @@
     "build": {
       "dependsOn": ["generate-data"],
       "executor": "@nx/next:build",
-      "outputs": ["{projectRoot}/out", "{projectRoot}/.next"],
+      "outputs": ["{projectRoot}/.next"],
       "options": {
-        "outputPath": "packages/marketplace/out"
+        "outputPath": "packages/marketplace/.next"
+      }
+    },
+    "export": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/marketplace",
+        "commands": ["next build"]
       }
     },
     "dev": {

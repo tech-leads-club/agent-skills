@@ -1,50 +1,59 @@
-name: Deploy Marketplace
+name: Deploy Marketplace (GitHub Pages)
+
 on:
   push:
     branches: [feature/marketplace-skills]
+  workflow_dispatch: {}
 
 permissions:
-  actions: read
-  contents: write
+  contents: read
+  pages: write
   id-token: write
-  pull-requests: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-deploy:
-    name: CI Checks
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate skills data
+        run: npx nx run marketplace:generate-data
+
+      - name: Build (static export)
+        run: npx nx run marketplace:export
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/marketplace/out
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set Nx SHAs
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-
-      - name: Generate Skills Data
-        run: npx nx run marketplace:generate-data
-
-      - name: Build Next.js Site
-        run: npx nx run marketplace:build
-        env:
-          NODE_ENV: production
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: packages/marketplace/out/.next
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
