@@ -1,0 +1,17 @@
+{
+  "(development)": {
+    "name": "Development",
+    "description": "Skills for software development workflows",
+    "priority": 1
+  },
+  "(creation)": {
+    "name": "Skill & Agent Creation",
+    "description": "Skills for creating new skills and subagents",
+    "priority": 2
+  },
+  "(web-automation)": {
+    "name": "Web Automation",
+    "description": "Skills for browser automation and web testing",
+    "priority": 3
+  }
+}
