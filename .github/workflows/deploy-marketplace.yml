@@ -10,6 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
@@ -18,6 +22,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@tech-leads-club'
+          cache: 'npm'
+
       - name: Start Nx Cloud
         shell: bash
         run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
@@ -25,23 +40,7 @@ jobs:
           NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
         continue-on-error: true
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@tech-leads-club'
-          cache: 'npm'
-          
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies / Test
+      - name: Install dependencies
         run: npm install
 
       - name: Generate skills data
