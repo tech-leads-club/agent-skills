@@ -1,0 +1,65 @@
+name: Deploy Marketplace (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@tech-leads-club'
+          cache: 'npm'
+
+      - name: Start Nx Cloud
+        shell: bash
+        run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
+        env:
+          NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
+        continue-on-error: true
+
+      - name: Install dependencies test
+        run: npm install --include=optional
+
+      - name: Generate skills data
+        run: npx nx run marketplace:generate-data
+
+      - name: Build (static export)
+        run: npx nx run marketplace:export
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/marketplace/out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
