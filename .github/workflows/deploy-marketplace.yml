@@ -18,6 +18,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Start Nx Cloud
+        shell: bash
+        run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
+        env:
+          NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@tech-leads-club'
+          cache: 'npm'
+          
       - name: Checkout
         uses: actions/checkout@v4
 
