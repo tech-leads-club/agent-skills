@@ -65,6 +65,7 @@
     "@swc/helpers": "~0.5.18",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
+    "lightningcss": "^1.30.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^25",
     "@types/react": "^19.2.10",

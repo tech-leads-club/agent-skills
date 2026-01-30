@@ -41,7 +41,7 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --include=optional
 
       - name: Generate skills data
         run: npx nx run marketplace:generate-data
