@@ -7,6 +7,8 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+  
   return (
     <html lang="en">
       <body className="bg-gray-50 min-h-screen">
@@ -14,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-8 w-auto" />
+                <img src={`${basePath}/tlc-logo-dark.svg`} alt="Tech Leads Club" className="h-8 w-auto" />
                 <div className="flex flex-col">
                   <span className="text-xl font-bold text-gray-900 leading-tight">Agent Skills</span>
                   <span className="text-xs text-gray-500 leading-tight">by Tech Leads Club</span>
