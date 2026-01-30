@@ -1,4 +1,4 @@
-import type { AgentConfig, AgentType, CategoriesConfig, CategoryInfo, SkillInfo } from '@tech-leads-club/core'
+import type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, SkillInfo } from '@tech-leads-club/core'
 
 export interface InstallOptions {
   global: boolean
@@ -18,4 +18,4 @@ export interface InstallResult {
   symlinkFailed?: boolean
 }
 
-export type { AgentConfig, AgentType, CategoriesConfig, CategoryInfo, SkillInfo }
+export type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, SkillInfo }
