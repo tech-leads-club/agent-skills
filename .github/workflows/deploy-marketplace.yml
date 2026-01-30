@@ -27,7 +27,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install dependencies / Test
         run: npm install
 
       - name: Generate skills data
