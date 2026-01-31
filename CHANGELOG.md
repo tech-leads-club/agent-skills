@@ -1,3 +1,23 @@
+## 0.6.0 (2026-01-31)
+
+### 🚀 Features
+
+- add initial skill categories for development and automation ([f68ce6b](https://github.com/tech-leads-club/agent-skills/commit/f68ce6b))
+- add Playwright skill for browser automation with helper functions ([a51259e](https://github.com/tech-leads-club/agent-skills/commit/a51259e))
+- add AWS advisor skill ([e65b456](https://github.com/tech-leads-club/agent-skills/commit/e65b456))
+- add coding guidelines skill ([fe3e51c](https://github.com/tech-leads-club/agent-skills/commit/fe3e51c))
+- add a new category ([31db4d2](https://github.com/tech-leads-club/agent-skills/commit/31db4d2))
+- add docs-writer skill and documentation style guide ([bd7a92f](https://github.com/tech-leads-club/agent-skills/commit/bd7a92f))
+- add nx-ci-monitor skill for automated CI pipeline monitoring ([00d8330](https://github.com/tech-leads-club/agent-skills/commit/00d8330))
+- add nx-generate skill for code generation using nx generators ([6334b5c](https://github.com/tech-leads-club/agent-skills/commit/6334b5c))
+- add nx-run-tasks skill for executing tasks in Nx workspace ([c630cfd](https://github.com/tech-leads-club/agent-skills/commit/c630cfd))
+- add nx-workspace skill ([8f0e621](https://github.com/tech-leads-club/agent-skills/commit/8f0e621))
+- add run-nx-generator skill ([5ccb0a2](https://github.com/tech-leads-club/agent-skills/commit/5ccb0a2))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.5.3 (2026-01-29)
 
 ### 🩹 Fixes
