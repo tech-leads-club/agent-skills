@@ -101,30 +101,19 @@ npx @tech-leads-club/agent-skills remove --help
 
 ---
 
-## 📦 Available Skills
+## 📦 Discovering Skills
 
-Skills are organized by category for easier navigation.
+Use the CLI to browse and install available skills:
 
-### 🔧 Development
+```bash
+# Interactive mode — browse categories and select skills
+npx @tech-leads-club/agent-skills
 
-| Skill               | Description                                                                                            |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| **spec-driven-dev** | Specification-driven development workflow with 4 phases: specify → design → tasks → implement+validate |
+# List all available skills
+npx @tech-leads-club/agent-skills list
+```
 
-### 🛠 Skill & Agent Creation
-
-| Skill                       | Description                                                 |
-| --------------------------- | ----------------------------------------------------------- |
-| **skill-creator**           | Meta-skill for creating new skills following best practices |
-| **subagent-creator**        | Create specialized subagents for complex tasks              |
-| **cursor-skill-creator**    | Cursor-specific skill creation                              |
-| **cursor-subagent-creator** | Cursor-specific subagent creation                           |
-
-### 🌐 Web Automation
-
-| Skill                | Description                                                                       |
-| -------------------- | --------------------------------------------------------------------------------- |
-| **playwright-skill** | Complete browser automation and testing workflow. Detects dev servers and tests UI |
+Skills are organized by category (development, creation, automation, etc.) and the collection is constantly growing.
 
 ---
 
