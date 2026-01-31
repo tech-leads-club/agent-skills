@@ -17,21 +17,19 @@ function makeModuleNameMapper(srcPaths: Record<string, string[]>, rootDir: strin
 
 export default {
   displayName: 'skill-plugin',
-  preset: '../../jest.preset.js',
-  globals: {},
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/../../libs/core/src'],
+  roots: ['<rootDir>/src'],
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',
       {
         useESM: false,
         tsconfig: { module: 'commonjs', esModuleInterop: true, allowSyntheticDefaultImports: true },
-        isolatedModules: true,
       },
     ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/tools/skill-plugin',
   moduleNameMapper: makeModuleNameMapper(paths, '<rootDir>/../../'),
+  extensionsToTreatAsEsm: [],
 }
