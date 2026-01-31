@@ -20,28 +20,20 @@ concurrency:
 
 jobs:
   build:
+    name: Build Marketplace
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled'
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@tech-leads-club'
-          cache: 'npm'
+          fetch-depth: 0
 
-      - name: Start Nx Cloud
-        shell: bash
-        run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
-        env:
-          NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
-        continue-on-error: true
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
 
-      - name: Install dependencies test
-        run: npm install --include=optional
+      - name: Setup Environment
+        uses: ./.github/actions/setup
 
       - name: Generate skills data
         run: npx nx run marketplace:generate-data
