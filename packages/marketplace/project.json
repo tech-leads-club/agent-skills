@@ -33,7 +33,8 @@
       "options": {
         "buildTarget": "marketplace:build",
         "dev": true,
-        "port": 3000
+        "port": 3000,
+        "turbopack": false
       },
       "configurations": {
         "development": {
