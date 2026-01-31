@@ -15,25 +15,38 @@ A curated collection of skills for AI coding agents. Skills are packaged instruc
 ```
 agent-skills/
 ├── packages/
-│   └── cli/                    # @tech-leads-club/agent-skills CLI
+│   ├── cli/                    # @tech-leads-club/agent-skills CLI
+│   │   └── src/
+│   │       ├── index.ts        # Entry point
+│   │       ├── agents.ts       # Agent detection and mapping
+│   │       ├── installer.ts    # Symlink/copy logic
+│   │       ├── prompts.ts      # Interactive menu (@clack/prompts)
+│   │       ├── skills.ts       # Skill discovery
+│   │       └── types.ts        # TypeScript types
+│   └── marketplace/            # Next.js marketplace website
+│       ├── scripts/
+│       │   └── generate-data.ts  # Generates skills.json from skills/
 │       └── src/
-│           ├── index.ts        # Entry point
-│           ├── agents.ts       # Agent detection and mapping
-│           ├── installer.ts    # Symlink/copy logic
-│           ├── prompts.ts      # Interactive menu (@clack/prompts)
-│           ├── skills.ts       # Skill discovery
-│           └── types.ts        # TypeScript types
+│           ├── app/            # Next.js app router
+│           ├── components/     # React components
+│           └── data/
+│               └── skills.json # Generated marketplace data
 ├── tools/
 │   └── skill-plugin/           # NX generator plugin
 │       └── src/generators/skill/
-├── skills/                     # Skill definitions
-│   ├── skill-creator/          # Meta-skill for creating skills
-│   ├── spec-driven-dev/        # Specification-driven development workflow
+├── skills/                     # Skill definitions (organized by category)
+│   ├── _category.json          # Category definitions
+│   ├── (cloud)/                # Cloud & Infrastructure skills
+│   ├── (creation)/             # Skill & Agent Creation
+│   ├── (development)/          # Development workflows
+│   ├── (tooling)/              # Tooling utilities
+│   ├── (web-automation)/       # Web automation
 │   └── ...
 ├── .github/workflows/
 │   ├── ci.yml                  # Lint, test, build
-│   └── release.yml             # Version and publish
-│└── nx.json                     # NX configuration
+│   ├── release.yml             # Version and publish
+│   └── deploy-marketplace.yml  # Deploy marketplace to GitHub Pages
+└── nx.json                     # NX configuration
 ```
 
 ## Creating a New Skill
@@ -137,6 +150,37 @@ npm run release:dry
 # Release (CI only)
 npm run release
 ```
+
+## Marketplace Commands
+
+The marketplace is a Next.js application that displays all available skills.
+
+```bash
+# Generate marketplace data from skills/ directory
+npx nx run marketplace:generate-data
+
+# Run marketplace dev server
+npx nx run marketplace:dev
+
+# Build marketplace for production
+npx nx run marketplace:build
+
+# Export static site (for GitHub Pages)
+npx nx run marketplace:export
+```
+
+### Skills Organization
+
+Skills are organized in Next.js-style route groups by category:
+
+- `skills/_category.json` - Category definitions (name, description, priority)
+- `skills/(cloud)/` - Cloud & Infrastructure skills
+- `skills/(creation)/` - Skill & Agent Creation
+- `skills/(development)/` - Development workflows
+- `skills/(tooling)/` - Tooling utilities
+- `skills/(web-automation)/` - Web automation
+
+When adding new skills, place them in the appropriate category folder. The `generate-data` script automatically discovers skills and maps them to categories.
 
 ## Agent-Specific Paths
 

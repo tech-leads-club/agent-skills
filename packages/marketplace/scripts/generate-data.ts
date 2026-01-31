@@ -9,20 +9,72 @@ const __dirname = path.dirname(__filename)
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '../../..')
 const SKILLS_DIR = path.join(WORKSPACE_ROOT, 'skills')
-const CATEGORIES_FILE = path.join(SKILLS_DIR, 'categories.json')
+const CATEGORIES_FILE = path.join(SKILLS_DIR, '_category.json')
 const OUTPUT_FILE = path.join(__dirname, '../src/data/skills.json')
 
-function getAllSkillDirectories(): string[] {
-  const entries = fs.readdirSync(SKILLS_DIR, { withFileTypes: true })
-  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+interface CategoryDefinition {
+  name: string
+  description: string
+  priority: number
 }
 
-function parseSkill(skillId: string): Skill | null {
-  const skillDir = path.join(SKILLS_DIR, skillId)
+interface SkillWithCategory {
+  skill: Skill
+  categoryId: string
+}
+
+function loadCategories(): Record<string, CategoryDefinition> {
+  if (!fs.existsSync(CATEGORIES_FILE)) {
+    console.warn(`Categories file not found: ${CATEGORIES_FILE}`)
+    return {}
+  }
+  return JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf-8'))
+}
+
+function getAllSkillsWithCategories(): SkillWithCategory[] {
+  const entries = fs.readdirSync(SKILLS_DIR, { withFileTypes: true })
+  const results: SkillWithCategory[] = []
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+
+    // Check if this is a category folder (starts with parentheses)
+    if (entry.name.startsWith('(') && entry.name.endsWith(')')) {
+      const categoryId = entry.name
+      const categoryPath = path.join(SKILLS_DIR, categoryId)
+
+      // Scan for skill directories within the category
+      const skillEntries = fs.readdirSync(categoryPath, { withFileTypes: true })
+
+      for (const skillEntry of skillEntries) {
+        if (skillEntry.isDirectory()) {
+          const skill = parseSkill(categoryId, skillEntry.name)
+          if (skill) {
+            results.push({ skill, categoryId })
+          }
+        }
+      }
+    } else if (entry.name !== '_category.json') {
+      // Legacy: skill at root level (uncategorized)
+      const skill = parseSkill('', entry.name)
+      if (skill) {
+        results.push({ skill, categoryId: 'uncategorized' })
+      }
+    }
+  }
+
+  return results
+}
+
+function parseSkill(categoryFolder: string, skillName: string): Skill | null {
+  const skillDir = categoryFolder 
+    ? path.join(SKILLS_DIR, categoryFolder, skillName)
+    : path.join(SKILLS_DIR, skillName)
+  
   const skillFile = path.join(skillDir, 'SKILL.md')
 
   if (!fs.existsSync(skillFile)) {
-    console.warn(`SKILL.md not found for ${skillId}`)
+    console.warn(`SKILL.md not found for ${skillName} in ${categoryFolder || 'root'}`)
     return null
   }
 
@@ -42,16 +94,16 @@ function parseSkill(skillId: string): Skill | null {
   const stats = fs.statSync(skillFile)
   const lastModified = stats.mtime.toISOString().split('T')[0]
 
-  // Get category from categories.json
-  const categoriesData = JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf-8'))
-  const category = categoriesData.skills[skillId] || 'uncategorized'
+  const skillPath = categoryFolder 
+    ? `skills/${categoryFolder}/${skillName}/SKILL.md`
+    : `skills/${skillName}/SKILL.md`
 
   return {
-    id: skillId,
-    name: data.name || skillId,
+    id: skillName,
+    name: data.name || skillName,
     description: data.description || '',
-    category,
-    path: `skills/${skillId}/SKILL.md`,
+    category: '', // Will be set later
+    path: skillPath,
     content: content.trim(),
     metadata: {
       hasScripts,
@@ -63,19 +115,35 @@ function parseSkill(skillId: string): Skill | null {
 }
 
 function generateMarketplaceData(): MarketplaceData {
-  const skillDirs = getAllSkillDirectories()
+  const categoriesData = loadCategories()
+  const skillsWithCategories = getAllSkillsWithCategories()
+  
   const skills: Skill[] = []
+  const categories: Category[] = []
 
-  for (const skillId of skillDirs) {
-    const skill = parseSkill(skillId)
-    if (skill) {
-      skills.push(skill)
-    }
+  // Build categories array
+  for (const [categoryId, categoryDef] of Object.entries(categoriesData)) {
+    const id = categoryId.replace(/[()]/g, '') // Remove parentheses for ID
+    categories.push({
+      id,
+      name: categoryDef.name,
+      description: categoryDef.description,
+      priority: categoryDef.priority,
+    })
   }
 
-  // Load categories
-  const categoriesData = JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf-8'))
-  const categories: Category[] = categoriesData.categories
+  // Build skills array with category mappings
+  for (const { skill, categoryId } of skillsWithCategories) {
+    // Map category folder name to category ID
+    const mappedCategoryId = categoryId === 'uncategorized' 
+      ? 'uncategorized'
+      : categoryId.replace(/[()]/g, '')
+    
+    skills.push({
+      ...skill,
+      category: mappedCategoryId,
+    })
+  }
 
   // Sort skills by name
   skills.sort((a, b) => a.name.localeCompare(b.name))
