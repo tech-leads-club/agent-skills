@@ -2,7 +2,7 @@
   "name": "@tech-leads-club/agent-skills",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/cli/src",
-  "projectType": "application",
+  "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
@@ -10,6 +10,11 @@
         "{options.outputPath}"
       ],
       "defaultConfiguration": "production",
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/skills/**/*"
+      ],
       "options": {
         "platform": "node",
         "outputPath": "packages/cli/dist",
