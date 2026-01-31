@@ -47,10 +47,11 @@ export function showInstallResults(
   }
 
   const totalAgents = new Set(results.map((r) => r.agent)).size
+  const uniqueSkillsCount = new Set(successful.map((r) => r.skill)).size
 
   console.log()
   logBarEnd(
-    `${pc.blue('✓')} ${pc.white(pc.bold(`${successful.length} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
+    `${pc.blue('✓')} ${pc.white(pc.bold(`${uniqueSkillsCount} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
   )
 }
 
