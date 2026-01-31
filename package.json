@@ -58,6 +58,7 @@
     "@nx/eslint-plugin": "^22.4.1",
     "@nx/jest": "22.4.1",
     "@nx/js": "^22.4.1",
+    "@nx/next": "^22.4.1",
     "@nx/plugin": "^22.4.1",
     "@swc-node/register": "^1.11.1",
     "@swc/core": "^1.15.10",
@@ -82,5 +83,10 @@
   },
   "nx": {
     "includedScripts": []
+  },
+  "dependencies": {
+    "next": "~16.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
