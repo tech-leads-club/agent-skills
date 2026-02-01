@@ -12,9 +12,6 @@ permissions:
   id-token: write
   pull-requests: write
 
-env:
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-
 jobs:
   ci:
     name: CI Checks
@@ -38,7 +35,8 @@ jobs:
       - name: Run Affected
         run: npx nx affected -t lint test build --parallel=3
         env:
-          NODE_OPTIONS: '--experimental-vm-modules'
+          NODE_OPTIONS: "--experimental-vm-modules"
+          NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
 
       - name: Validate Skills Structure
         uses: ./.github/actions/validate-skills
@@ -88,7 +86,7 @@ jobs:
           npx nx release publish --tag snapshot --provenance
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_CONFIG_PROVENANCE: 'true'
+          NPM_CONFIG_PROVENANCE: "true"
 
       - name: Notify PR
         uses: ./.github/actions/snapshot-notification
@@ -133,4 +131,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
-          NODE_AUTH_TOKEN: ''
+          NODE_AUTH_TOKEN: ""
