@@ -6,10 +6,6 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 permissions:
   actions: read
   contents: write
@@ -24,6 +20,9 @@ jobs:
     name: CI Checks
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.action != 'labeled'
+    concurrency:
+      group: ci-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -52,6 +51,9 @@ jobs:
   snapshot:
     name: Snapshot Release
     runs-on: ubuntu-latest
+    concurrency:
+      group: snapshot-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
     if: |
       github.event_name == 'pull_request' &&
       github.event.action == 'labeled' &&
@@ -95,12 +97,15 @@ jobs:
 
   release:
     name: Production Release
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/main' &&
       github.actor != 'tech-leads-club-release-bot[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore(release):')
-    runs-on: ubuntu-latest
     steps:
       - name: Generate App Token
         uses: actions/create-github-app-token@v1
