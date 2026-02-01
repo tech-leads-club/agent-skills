@@ -57,8 +57,7 @@ jobs:
     if: |
       github.event_name == 'pull_request' &&
       github.event.action == 'labeled' &&
-      github.event.label.name == 'action: snapshot' &&
-      !contains(github.event.pull_request.labels.*.name, 'snapshot: published')
+      github.event.label.name == 'action: snapshot'
     steps:
       - name: Generate App Token
         uses: actions/create-github-app-token@v1
@@ -83,7 +82,8 @@ jobs:
 
       - name: Publish Snapshot
         run: |
-          npx nx release version 0.0.0-snapshot-${{ github.event.number }} \
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
             --git-tag=false --git-commit=false --stage-changes=false
           npx nx release publish --tag snapshot --provenance
         env:
