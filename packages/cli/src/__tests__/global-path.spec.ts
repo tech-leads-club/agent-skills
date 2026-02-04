@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import path from 'node:path'
 
 jest.unstable_mockModule('node:child_process', () => ({
   execSync: jest.fn(),
@@ -40,7 +41,8 @@ describe('global-path', () => {
       ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
       ;(existsSync as jest.Mock).mockReturnValue(true)
       const result = getGlobalSkillsPath()
-      expect(result).toBe('/home/user/.npm-global/lib/node_modules/@tech-leads-club/agent-skills/skills')
+      const expected = path.join('/home/user/.npm-global/lib/node_modules', '@tech-leads-club/agent-skills/skills')
+      expect(result).toBe(expected)
     })
 
     it('should return null when skills directory does not exist', () => {
@@ -78,9 +80,11 @@ describe('global-path', () => {
       ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
       ;(existsSync as jest.Mock).mockReturnValue(true)
       const result = getGlobalSkillPath('spec-driven-dev')
-      expect(result).toBe(
-        '/home/user/.npm-global/lib/node_modules/@tech-leads-club/agent-skills/skills/spec-driven-dev',
+      const expected = path.join(
+        '/home/user/.npm-global/lib/node_modules',
+        '@tech-leads-club/agent-skills/skills/spec-driven-dev',
       )
+      expect(result).toBe(expected)
     })
 
     it('should return null when skill does not exist', () => {

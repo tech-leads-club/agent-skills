@@ -15,6 +15,10 @@ const {
   readFileSync: mockReadFileSync,
 } = await import('node:fs')
 
+const normalizePath = (path: unknown): string => {
+  return String(path).replace(/\\/g, '/')
+}
+
 describe('skills', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -65,7 +69,7 @@ describe('skills', () => {
   describe('discoverSkills', () => {
     it('should return empty array when directory is empty', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        if (String(path).endsWith('skills')) return true
+        if (normalizePath(path).endsWith('skills')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockReturnValue([])
@@ -75,14 +79,14 @@ describe('skills', () => {
 
     it('should discover skills in category folders', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) return true
         if (p.includes('(development)')) return true
         if (p.includes('my-skill/SKILL.md')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) {
           return [{ name: '(development)', isDirectory: () => true }]
         }
@@ -105,13 +109,13 @@ description: A test skill
 
     it('should discover uncategorized skills at root', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) return true
         if (p.includes('root-skill/SKILL.md')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockImplementation((path) => {
-        if (String(path).endsWith('skills')) {
+        if (normalizePath(path).endsWith('skills')) {
           return [{ name: 'root-skill', isDirectory: () => true }]
         }
         return []
@@ -130,14 +134,14 @@ description: An uncategorized skill
 
     it('should discover skills from multiple categories', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) return true
         if (p.includes('(development)') || p.includes('(creation)')) return true
         if (p.includes('SKILL.md')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) {
           return [
             { name: '(development)', isDirectory: () => true },
@@ -169,7 +173,7 @@ description: An uncategorized skill
   describe('discoverCategories', () => {
     it('should return empty array when no category folders exist', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        if (String(path).endsWith('skills')) return true
+        if (normalizePath(path).endsWith('skills')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockReturnValue([{ name: 'some-skill', isDirectory: () => true }])
@@ -179,8 +183,9 @@ description: An uncategorized skill
 
     it('should discover category folders', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        if (String(path).endsWith('skills')) return true
-        if (String(path).includes('_category.json')) return false
+        const p = normalizePath(path)
+        if (p.endsWith('skills')) return true
+        if (p.includes('_category.json')) return false
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockReturnValue([
@@ -200,7 +205,7 @@ description: An uncategorized skill
   describe('getSkillByName', () => {
     it('should return undefined for non-existent skill', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        if (String(path).endsWith('skills')) return true
+        if (normalizePath(path).endsWith('skills')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockReturnValue([])
@@ -210,14 +215,14 @@ description: An uncategorized skill
 
     it('should find skill by name', () => {
       ;(mockExistsSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) return true
         if (p.includes('(development)')) return true
         if (p.includes('target-skill/SKILL.md')) return true
         return false
       })
       ;(mockReaddirSync as jest.Mock).mockImplementation((path) => {
-        const p = String(path)
+        const p = normalizePath(path)
         if (p.endsWith('skills')) {
           return [{ name: '(development)', isDirectory: () => true }]
         }
