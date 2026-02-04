@@ -1,27 +1,32 @@
 {
+  "(performance)": {
+    "name": "Performance",
+    "description": "Skills for web performance optimization, audits, and monitoring",
+    "priority": 1
+  },
   "(cloud)": {
     "name": "Cloud & Infrastructure",
     "description": "Skills for cloud management, AWS, and DevOps",
-    "priority": 1
+    "priority": 2
   },
   "(creation)": {
     "name": "Skill & Agent Creation",
     "description": "Skills for creating new skills and subagents",
-    "priority": 2
+    "priority": 3
   },
   "(development)": {
     "name": "Development",
     "description": "Skills for software development workflows",
-    "priority": 3
+    "priority": 4
   },
   "(tooling)": {
     "name": "Tooling",
     "description": "Skills for tooling and utilities",
-    "priority": 4
+    "priority": 5
   },
   "(web-automation)": {
     "name": "Web Automation",
     "description": "Skills for browser automation and web testing",
-    "priority": 5
+    "priority": 6
   }
 }
