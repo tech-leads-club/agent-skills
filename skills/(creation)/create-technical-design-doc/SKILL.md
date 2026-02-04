@@ -21,37 +21,24 @@ Use this skill when:
 
 ## Language Adaptation
 
-**CRITICAL**: Always generate the TDD in the **same language as the user's request**.
+**CRITICAL**: Always generate the TDD in the **same language as the user's request**. Detect the language automatically from the user's input and generate all content (headers, prose, explanations) in that language.
 
-### Language Detection
+**Translation Guidelines**:
 
-- **If user writes in Portuguese** → Generate TDD in Portuguese
-- **If user writes in English** → Generate TDD in English
-- **If user writes in Spanish** → Generate TDD in Spanish
-- **Mixed languages** → Use the predominant language from user's request
+- Translate all section headers, prose, and explanations to match user's language
+- Keep technical terms in English when appropriate (e.g., "API", "webhook", "JSON", "rollback", "feature flag")
+- Keep code examples and schemas language-agnostic (JSON, diagrams, code)
+- Company/product names remain in original language
+- Use natural, professional language for the target language
+- Maintain consistency in terminology throughout the document
 
-### Examples
-
-**User Request**: "Crie um TDD para integração com Stripe"
-→ **Generate in**: Portuguese
-
-**User Request**: "Create a TDD for Stripe integration"
-→ **Generate in**: English
-
-**User Request**: "Crea un TDD para integración con Stripe"
-→ **Generate in**: Spanish
-
-### Section Headers Translation
-
-Translate all section headers and content to match user's language:
+**Common Section Header Translations**:
 
 | English                    | Portuguese                      | Spanish                      |
 | -------------------------- | ------------------------------- | ---------------------------- |
 | Context                    | Contexto                        | Contexto                     |
 | Problem Statement          | Definição do Problema           | Definición del Problema      |
 | Scope                      | Escopo                          | Alcance                      |
-| In Scope                   | No Escopo                       | En Alcance                   |
-| Out of Scope               | Fora do Escopo                  | Fuera de Alcance             |
 | Technical Solution         | Solução Técnica                 | Solución Técnica             |
 | Risks                      | Riscos                          | Riesgos                      |
 | Implementation Plan        | Plano de Implementação          | Plan de Implementación       |
@@ -59,22 +46,6 @@ Translate all section headers and content to match user's language:
 | Testing Strategy           | Estratégia de Testes            | Estrategia de Pruebas        |
 | Monitoring & Observability | Monitoramento e Observabilidade | Monitoreo y Observabilidad   |
 | Rollback Plan              | Plano de Rollback               | Plan de Reversión            |
-
-### Important Notes on Translation
-
-- **Translate all prose and explanations** to user's language
-- **Keep technical terms in English** when appropriate (e.g., "API", "webhook", "JSON")
-- **Translate table headers and labels** to user's language
-- **Keep code examples and schemas** language-agnostic (JSON, diagrams)
-- **Company/product names** remain in original language
-- **Industry terms** can stay in English if commonly used (e.g., "rollback", "feature flag")
-
-### Quality Guidelines
-
-- Use **natural, professional language** for the target language
-- Avoid literal translations that sound awkward
-- Use industry-standard terminology for the target language
-- Maintain consistency in terminology throughout the document
 
 ## Industry Standards Reference
 
@@ -1460,7 +1431,7 @@ We'll deploy and hope it works.
 
 ## Important Notes
 
-- **Respect user's language** - ALWAYS generate TDD in the same language as user's request (Portuguese, English, Spanish, etc.)
+- **Respect user's language** - Automatically detect and generate TDD in the same language as user's request
 - **Focus on architecture, not implementation** - Document decisions and contracts, not code
 - **High-level examples only** - Show API contracts, data schemas, diagrams (not CLI commands or code snippets)
 - **Always validate mandatory sections** - Don't let user skip them
