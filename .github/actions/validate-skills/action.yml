@@ -1,5 +1,5 @@
-name: "Validate Skills"
-description: "Validates skill structure and frontmatter"
+name: 'Validate Skills'
+description: 'Validates skill structure and frontmatter'
 
 runs:
   using: composite
@@ -9,22 +9,26 @@ runs:
       run: |
         echo "🔍 Validating skills..."
         failed=0
-        for skill in skills/*/; do
+
+        for skill in skills/*/*/; do
+          [ -d "$skill" ] || continue
+          
           skill_name=$(basename "$skill")
+          category=$(basename "$(dirname "$skill")")
 
           if [ ! -f "$skill/SKILL.md" ]; then
-            echo "❌ $skill_name: Missing SKILL.md"
+            echo "❌ $category/$skill_name: Missing SKILL.md"
             failed=1
             continue
           fi
 
           if ! head -1 "$skill/SKILL.md" | grep -q "^---"; then
-            echo "❌ $skill_name: Missing frontmatter (---) in SKILL.md"
+            echo "❌ $category/$skill_name: Missing frontmatter (---) in SKILL.md"
             failed=1
             continue
           fi
 
-          echo "✅ $skill_name"
+          echo "✅ $category/$skill_name"
         done
 
         [ $failed -eq 0 ] || exit 1
