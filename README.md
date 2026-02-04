@@ -315,6 +315,16 @@ MIT © [Tech Leads Club](https://github.com/tech-leads-club)
 
 ---
 
+## ⭐ Star History
+
+<p align="center">
+  <a href="https://star-history.com/#tech-leads-club/agent-skills&Date">
+    <img src="https://api.star-history.com/svg?repos=tech-leads-club/agent-skills&type=Date" alt="Star History Chart" />
+  </a>
+</p>
+
+---
+
 <p align="center">
   <sub>Built with ❤️ by the Tech Leads Club community</sub>
 </p>
