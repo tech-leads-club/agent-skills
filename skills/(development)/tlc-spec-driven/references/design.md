@@ -5,18 +5,23 @@
 ## Process
 
 ### 1. Review Specification
+
 Read `.specs/[feature]/spec.md` before designing.
 
 ### 2. Define Architecture
+
 Overview of how components interact. Use mermaid diagrams when helpful.
 
 ### 3. Identify Code Reuse
+
 **CRITICAL**: What existing code can we leverage? This saves tokens and reduces errors.
 
 ### 4. Define Components and Interfaces
+
 Each component: Purpose, Location, Interfaces, Dependencies, What it reuses.
 
 ### 5. Define Data Models
+
 If the feature involves data, define models before implementation.
 
 ---
@@ -70,7 +75,7 @@ graph TD
 
 - **Purpose**: [What this component does - one sentence]
 - **Location**: `src/path/to/component/`
-- **Interfaces**: 
+- **Interfaces**:
   - `methodName(param: Type): ReturnType` - [description]
   - `methodName(param: Type): ReturnType` - [description]
 - **Dependencies**: [What it needs to function]
@@ -80,7 +85,7 @@ graph TD
 
 - **Purpose**: [What this component does]
 - **Location**: `src/path/to/component/`
-- **Interfaces**: 
+- **Interfaces**:
   - `methodName(param: Type): ReturnType`
 - **Dependencies**: [Dependencies]
 - **Reuses**: [Existing code]
@@ -127,7 +132,6 @@ interface AnotherModel {
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | [What we decided] | [What we chose] | [Why - brief] |
-```
 
 ---
 
