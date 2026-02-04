@@ -1,6 +1,6 @@
-# Phase 4b: Validate
+# Validate
 
-**Goal**: Verify implementation meets spec requirements.
+**Goal**: Verify implementation meets spec AND coding principles.
 
 ## When to Validate
 
@@ -8,11 +8,14 @@
 - After completing all tasks
 - When user requests validation
 
+---
+
 ## Process
 
 ### 1. Check Completed Tasks
 
 Go through tasks.md:
+
 - [ ] All tasks marked done?
 - [ ] Any blocked or partial?
 
@@ -31,16 +34,33 @@ For each user story in spec.md:
 ### 3. Check Edge Cases
 
 From spec.md edge cases:
+
 - [ ] [Edge case 1] handled correctly
 - [ ] [Edge case 2] handled correctly
 
 ### 4. Run Tests (if applicable)
 
 ```bash
-npm test  # or project test command
+# project test command
 ```
 
-### 5. Report
+### 5. Code Quality Check (MANDATORY)
+
+For each changed file, verify against [coding-principles.md](coding-principles.md):
+
+| Check | Pass? |
+|-------|-------|
+| No features beyond what was asked | |
+| No abstractions for single-use code | |
+| No unnecessary "flexibility" added | |
+| Only touched files required for task | |
+| Didn't "improve" unrelated code | |
+| Matches existing patterns/style | |
+| Would senior engineer approve? | |
+
+❌ Any "No"? → Fix before marking complete.
+
+### 6. Report
 
 ---
 
@@ -50,7 +70,7 @@ npm test  # or project test command
 # [Feature] Validation
 
 **Date**: [YYYY-MM-DD]
-**Spec**: `.specs/[feature]/spec.md`
+**Spec**: `.specs/features/[feature]/spec.md`
 
 ---
 
@@ -85,6 +105,17 @@ npm test  # or project test command
 
 ---
 
+## Code Quality
+
+| Principle | Status |
+|-----------|--------|
+| Minimum code | ✅ |
+| Surgical changes | ✅ |
+| No scope creep | ✅ |
+| Matches patterns | ✅ |
+
+---
+
 ## Edge Cases
 
 - [x] Edge case 1: Handled correctly
@@ -94,8 +125,8 @@ npm test  # or project test command
 
 ## Tests
 
-- **Ran**: `npm test`
-- **Result**: 15 passed, 2 failed
+- **Ran**: [test command]
+- **Result**: [X] passed, [Y] failed
 - **Failures**: [list]
 
 ---
@@ -109,11 +140,9 @@ npm test  # or project test command
 
 **Issues found**:
 - [Issue 1]: [How to fix]
-- [Issue 2]: [How to fix]
 
-**Recommended next steps**:
+**Next steps**:
 1. [Action]
-2. [Action]
 ```
 
 ---
@@ -124,3 +153,4 @@ npm test  # or project test command
 - **WHEN/THEN = Test** - Each criterion is a test case
 - **Be specific** - "Doesn't work" isn't helpful
 - **Recommend fixes** - Don't just report problems
+- **Quality check is mandatory** - Not optional

@@ -141,12 +141,14 @@ interface SelectSkillsUnifiedProps {
   allSkills: ReturnType<typeof discoverSkills>
   installedSkills: Set<string>
   stepIndicator: string
+  initialCursor?: number
 }
 
 async function selectSkillsUnifiedStep({
   allSkills,
   installedSkills,
   stepIndicator,
+  initialCursor = 0,
 }: SelectSkillsUnifiedProps): Promise<string[] | null> {
   const groupedSkills = groupSkillsByCategory(allSkills)
   const options: Record<string, { value: string; label: string; hint?: string }[]> = {}
@@ -162,7 +164,14 @@ async function selectSkillsUnifiedStep({
     })
   }
 
-  const selectedSkills = await blueGroupMultiSelect(`${stepIndicator} Select skills to install`, options, [], false)
+  const result = await blueGroupMultiSelect(
+    `${stepIndicator} Select skills to install`,
+    options,
+    [],
+    false,
+    initialCursor,
+  )
+  const { value: selectedSkills, cursor: finalCursor } = result
 
   if (selectedSkills === Symbol.for('back')) return null
 
@@ -170,7 +179,15 @@ async function selectSkillsUnifiedStep({
     logCancelled()
     return null
   }
-  return selectedSkills as string[]
+
+  const validSkills = selectedSkills as string[]
+
+  if (validSkills.length === 0) {
+    logBar(pc.yellow('⚠ Please select at least one skill'))
+    return selectSkillsUnifiedStep({ allSkills, installedSkills, stepIndicator, initialCursor: finalCursor })
+  }
+
+  return validSkills
 }
 
 interface SelectAgentsProps {
@@ -179,6 +196,7 @@ interface SelectAgentsProps {
   currentAgents: AgentType[]
   stepIndicator: string
   allowBack: boolean
+  initialCursor?: number
 }
 
 async function selectAgentsStep({
@@ -187,15 +205,19 @@ async function selectAgentsStep({
   currentAgents,
   stepIndicator,
   allowBack,
+  initialCursor = 0,
 }: SelectAgentsProps): Promise<AgentType[] | symbol | null> {
   const agentOptions = buildAgentOptions(allAgents, installedAgents)
 
-  const selectedAgents = await blueMultiSelectWithBack(
+  const result = await blueMultiSelectWithBack(
     `${stepIndicator} Where to install?`,
     agentOptions,
     currentAgents,
     allowBack,
+    initialCursor,
   )
+
+  const { value: selectedAgents, cursor: finalCursor } = result
 
   if (selectedAgents === Symbol.for('back')) return Symbol.for('back')
 
@@ -208,7 +230,14 @@ async function selectAgentsStep({
 
   if (validAgents.length === 0) {
     logBar(pc.yellow('⚠ Please select at least one agent'))
-    return selectAgentsStep({ allAgents, installedAgents, currentAgents, stepIndicator, allowBack })
+    return selectAgentsStep({
+      allAgents,
+      installedAgents,
+      currentAgents: [], // Clear selection
+      stepIndicator,
+      allowBack,
+      initialCursor: finalCursor, // Maintain cursor position
+    })
   }
 
   return validAgents
