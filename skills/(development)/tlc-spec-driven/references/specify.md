@@ -7,11 +7,13 @@
 ### 1. Clarify Requirements
 
 Ask the user (2-3 questions to start):
+
 - "What problem are you solving?"
 - "Who is the user and what's their pain?"
 - "What does success look like?"
 
 If needed:
+
 - "What are the constraints (time, tech, resources)?"
 - "What is explicitly out of scope?"
 
@@ -24,6 +26,7 @@ Each story MUST be **independently testable** - you can implement and demo just 
 ### 3. Write Acceptance Criteria
 
 Use **WHEN/THEN/SHALL** format - it's precise and testable:
+
 - WHEN [event/action] THEN [system] SHALL [response/behavior]
 
 ---

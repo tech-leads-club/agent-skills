@@ -18,12 +18,14 @@
 |                  | T5: Add route protection |
 
 **Benefits of granular:**
+
 - **Agents don't err** - Single focus, no ambiguity
 - **Easy to test** - Each task = one verifiable outcome
 - **Parallelizable** - Independent tasks run simultaneously
 - **Errors isolated** - One failure doesn't block everything
 
 **Rule**: One task = ONE of these:
+
 - One component
 - One function
 - One API endpoint
@@ -34,11 +36,13 @@
 ## Process
 
 ### 1. Review Design
+
 Read `.specs/[feature]/design.md` before creating tasks.
 
 ### 2. Break Into Atomic Tasks
 
 **Task = ONE deliverable**. Examples:
+
 - ✅ "Create UserService interface" (one file, one concept)
 - ❌ "Implement user management" (too vague, multiple files)
 
@@ -55,7 +59,7 @@ Group tasks into phases. Identify what can run in parallel.
 **CRITICAL**: Before execution, ask the user:
 
 > "For each task, which tools should I use?"
-> 
+>
 > **Available MCPs**: [list from project or user]
 > **Available Skills**: [list from project or user]
 
@@ -77,25 +81,29 @@ Group tasks into phases. Identify what can run in parallel.
 Tasks that must be done first, in order.
 
 ```
+
 T1 → T2 → T3
+
 ```
 
 ### Phase 2: Core Implementation (Parallel OK)
 After foundation, these can run in parallel.
 
 ```
+
      ┌→ T4 ─┐
 T3 ──┼→ T5 ─┼──→ T8
      └→ T6 ─┘
        T7 ──────→
+
 ```
 
-### Phase 3: Integration (Sequential) 
+### Phase 3: Integration (Sequential)
 Bringing it all together.
 
 ```
+
 T8 → T9
-```
 
 ---
 
@@ -109,10 +117,12 @@ T8 → T9
 **Reuses**: `src/existing/BaseInterface.ts`
 
 **Tools**:
+
 - MCP: `filesystem` (or NONE)
 - Skill: NONE
 
 **Done when**:
+
 - [ ] Interface defined with all methods from design
 - [ ] Types exported correctly
 - [ ] No TypeScript errors
@@ -127,10 +137,12 @@ T8 → T9
 **Reuses**: `src/services/BaseService.ts` patterns
 
 **Tools**:
+
 - MCP: `filesystem`, `context7`
 - Skill: NONE
 
 **Done when**:
+
 - [ ] Implements interface from T1
 - [ ] Handles error cases from design
 - [ ] Unit test passes
@@ -145,10 +157,12 @@ T8 → T9
 **Reuses**: `src/components/BaseComponent.tsx`
 
 **Tools**:
+
 - MCP: `filesystem`
 - Skill: NONE
 
 **Done when**:
+
 - [ ] Component renders correctly
 - [ ] Handles props from interface
 - [ ] Follows existing component patterns
@@ -163,10 +177,12 @@ T8 → T9
 **Reuses**: Existing service patterns
 
 **Tools**:
+
 - MCP: `filesystem`, `github`
 - Skill: `api-design`
 
 **Done when**:
+
 - [ ] Feature works per acceptance criteria
 - [ ] Integration test passes
 
@@ -177,6 +193,7 @@ T8 → T9
 Visual representation of what can run simultaneously:
 
 ```
+
 Phase 1 (Sequential):
   T1 ──→ T2 ──→ T3
 
@@ -189,6 +206,7 @@ Phase 2 (Parallel):
 Phase 3 (Sequential):
   T4, T5, T6 complete, then:
     T7 ──→ T8
+
 ```
 
 ---
@@ -205,10 +223,10 @@ Before approving tasks, verify they are granular enough:
 | T4: Connect to API | 1 function | ✅ Granular |
 
 **Granularity check**:
+
 - ✅ 1 component / 1 function / 1 endpoint = Good
 - ⚠️ 2-3 related things in same file = OK if cohesive
 - ❌ Multiple components or files = MUST split
-```
 
 ---
 
@@ -219,3 +237,45 @@ Before approving tasks, verify they are granular enough:
 - **Tools per task** - MCPs and Skills prevent wrong approaches
 - **Dependencies are gates** - Clear what blocks what
 - **Done when = Testable** - If you can't verify it, rewrite it
+
+---
+
+## Task Verification Standards
+
+Every task MUST include:
+
+**Done when checklist:**
+
+- Specific, testable outcomes
+- Pass/fail criteria
+- Test execution commands
+
+**Verify section:**
+
+- Commands to prove functionality
+- Expected outputs
+- Success indicators
+
+**Structure:**
+
+```markdown
+### T1: [Task name]
+
+**What:** [Deliverable]
+**Where:** [File path]
+
+**Done when:**
+- [ ] [Specific outcome]
+- [ ] [Specific outcome]
+- [ ] Tests pass: [command]
+
+**Verify:**
+[Command to prove it works]
+[Expected output/behavior]
+```
+
+**Quality check:**
+
+- Can task be verified without human judgment?
+- Is success criteria binary (pass/fail)?
+- Can verification be automated?
