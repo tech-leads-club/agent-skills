@@ -11,7 +11,7 @@ import type { AgentType } from './types'
 
 const program = new Command()
 
-program.name('tlc-agent-skills').description('Install TLC Agent Skills to your AI coding agents').version(pkg.version)
+program.name('tlc-skills').description('Install TLC Agent Skills to your AI coding agents').version(pkg.version)
 
 program
   .command('install', { isDefault: true })
