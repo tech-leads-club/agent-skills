@@ -35,8 +35,9 @@ jobs:
       - name: Run Affected
         run: npx nx affected -t lint test build --parallel=3
         env:
-          NODE_OPTIONS: "--experimental-vm-modules"
+          NODE_OPTIONS: '--experimental-vm-modules'
           NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+          NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
 
       - name: Validate Skills Structure
         uses: ./.github/actions/validate-skills
@@ -86,16 +87,17 @@ jobs:
           npx nx release publish --tag snapshot --provenance
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_CONFIG_PROVENANCE: "true"
+          NPM_CONFIG_PROVENANCE: 'true'
 
       - name: Notify PR
         uses: ./.github/actions/snapshot-notification
         with:
           github-token: ${{ steps.app-token.outputs.token }}
 
-  release:
-    name: Production Release
+  approve-release:
+    name: Approve Release
     runs-on: ubuntu-latest
+    environment: publish
     concurrency:
       group: release-${{ github.ref }}
       cancel-in-progress: false
@@ -104,6 +106,17 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.actor != 'tech-leads-club-release-bot[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore(release):')
+    steps:
+      - name: Approval Gate
+        run: echo "✅ Release approved for publish"
+
+  release:
+    name: Production Release
+    runs-on: ubuntu-latest
+    needs: [approve-release]
+    concurrency:
+      group: publish-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - name: Generate App Token
         uses: actions/create-github-app-token@v1
@@ -131,4 +144,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
-          NODE_AUTH_TOKEN: ""
+          NODE_AUTH_TOKEN: ''
