@@ -61,12 +61,17 @@ export async function blueSelectWithBack<T>(
   return result as T | symbol
 }
 
+interface PromptWithCursor {
+  cursor: number
+}
+
 export async function blueMultiSelectWithBack<T>(
   message: string,
   options: Option<T>[],
   initialValues: T[] = [],
   allowBack = true,
-): Promise<T[] | symbol> {
+  initialCursor = 0,
+): Promise<{ value: T[] | symbol; cursor: number }> {
   const opt = (option: Option<T>, state: 'active' | 'selected' | 'cancelled' | 'inactive' | 'selected-active') => {
     const isSelected = state === 'selected' || state === 'selected-active'
     const isActive = state === 'active' || state === 'selected-active'
@@ -107,9 +112,16 @@ export async function blueMultiSelectWithBack<T>(
     },
   })
 
+  // Hack to set initial cursor since it's not exposed in options
+  if (initialCursor > 0 && initialCursor < options.length) {
+    ;(prompt as unknown as PromptWithCursor).cursor = initialCursor
+  }
+
   const result = await prompt.prompt()
-  if (typeof result === 'symbol' && allowBack) return Symbol.for('back')
-  return result as T[] | symbol
+  const finalCursor = (prompt as unknown as PromptWithCursor).cursor ?? 0
+
+  if (typeof result === 'symbol' && allowBack) return { value: Symbol.for('back'), cursor: finalCursor }
+  return { value: result as T[] | symbol, cursor: finalCursor }
 }
 
 export async function blueConfirm(message: string, initialValue = false): Promise<boolean | symbol> {
@@ -149,7 +161,8 @@ export async function blueGroupMultiSelect<T>(
   groupedOptions: GroupMultiSelectOptions<T>,
   initialValues: T[] = [],
   allowBack = true,
-): Promise<T[] | symbol> {
+  initialCursor = 0,
+): Promise<{ value: T[] | symbol; cursor: number }> {
   const flatOptions: ExtendedOption<T>[] = []
 
   for (const [group, options] of Object.entries(groupedOptions)) {
@@ -236,13 +249,19 @@ export async function blueGroupMultiSelect<T>(
     },
   })
 
+  // Hack to set initial cursor since it's not exposed in options
+  if (initialCursor > 0 && initialCursor < flatOptions.length) {
+    ;(prompt as unknown as PromptWithCursor).cursor = initialCursor
+  }
+
   let result = (await prompt.prompt()) as T[] | symbol
+  const finalCursor = (prompt as unknown as PromptWithCursor).cursor ?? 0
 
   if (typeof result === 'symbol') {
-    if (allowBack) return Symbol.for('back')
-    return result
+    if (allowBack) return { value: Symbol.for('back'), cursor: finalCursor }
+    return { value: result, cursor: finalCursor }
   }
 
   result = (result as T[]).filter((val) => !String(val).startsWith('__header_'))
-  return result
+  return { value: result, cursor: finalCursor }
 }
