@@ -1,0 +1,31 @@
+{
+  "name": "skills-catalog",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/skills-catalog",
+  "projectType": "library",
+  "tags": [
+    "scope:skills"
+  ],
+  "targets": {
+    "generate-registry": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx packages/skills-catalog/src/generate-registry.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/skills/**/*"
+      ],
+      "outputs": [
+        "{workspaceRoot}/skills-registry.json"
+      ]
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -e \"const fs = require('fs'); const skills = fs.readdirSync('packages/skills-catalog/skills', {withFileTypes: true}).filter(d => d.isDirectory()); console.log('✅ Found', skills.length, 'skill directories');\"",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

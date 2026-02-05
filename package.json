@@ -22,6 +22,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "g": "nx g @tech-leads-club/skill-plugin:skill",
+    "generate:registry": "nx run skills-catalog:generate-registry",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "release": "nx release",

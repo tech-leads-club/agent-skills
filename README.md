@@ -30,14 +30,12 @@
   Extend the capabilities of <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, <b>GitHub Copilot</b>, and more with reusable, packaged instructions.
 </p>
 
----
-
 ## ✨ What are Skills?
 
 Skills are packaged instructions and resources that extend AI agent capabilities. Think of them as **plugins for your AI assistant** — they teach your agent new workflows, patterns, and specialized knowledge.
 
 ```
-skills/
+packages/skills-catalog/skills/
   (category-name)/
     spec-driven-dev/
       SKILL.md          ← Main instructions
@@ -53,7 +51,7 @@ skills/
 npx @tech-leads-club/agent-skills
 ```
 
-This launches an interactive wizard with 5 steps:
+This launches an interactive wizard:
 
 1. **Browse categories** — Filter skills by category or select "All"
 2. **Select skills** — Choose which skills to install
@@ -61,71 +59,67 @@ This launches an interactive wizard with 5 steps:
 4. **Installation method** — Symlink (recommended) or Copy
 5. **Scope** — Global (user home) or Local (project only)
 
-Each step shows a **← Back** option to return to the previous step and revise your choices. A confirmation summary is shown before installation.
-
-### Global Installation (Optional)
-
-For faster access, you can install the CLI globally:
-
-```bash
-npm install -g @tech-leads-club/agent-skills
-```
-
-This exposes the `tlc-skills` binary. You can use it instead of `npx @tech-leads-club/agent-skills`.
+Each step shows a **← Back** option to return and revise your choices.
 
 ### CLI Options
 
 ```bash
 # Interactive mode (default)
-tlc-skills
-
-# Install globally (to ~/.gemini/antigravity/global_skills, ~/.claude/skills, etc.)
-tlc-skills install -g
+npx @tech-leads-club/agent-skills
 
 # List available skills
-tlc-skills list
+npx @tech-leads-club/agent-skills list
 
 # Install a specific skill
-tlc-skills install -s spec-driven-dev
+npx @tech-leads-club/agent-skills install -s spec-driven-dev
 
 # Install to specific agents
-tlc-skills install -a antigravity cursor
+npx @tech-leads-club/agent-skills install -a cursor claude-code
 
-# Use copy instead of symlink
-tlc-skills install --copy
+# Install globally (to ~/.gemini, ~/.claude, etc.)
+npx @tech-leads-club/agent-skills install -g
 
-# Remove skills (interactive)
-tlc-skills remove
+# Force re-download (bypass cache)
+npx @tech-leads-club/agent-skills install -s my-skill --force
 
-# Remove a specific skill
-tlc-skills remove -s spec-driven-dev
+# Update a specific skill
+npx @tech-leads-club/agent-skills update -s my-skill
 
-# Remove from global installation
-tlc-skills remove -g -s spec-driven-dev
+# Remove skills
+npx @tech-leads-club/agent-skills remove
+
+# Manage cache
+npx @tech-leads-club/agent-skills cache --clear   # Clear all cache
+npx @tech-leads-club/agent-skills cache --path    # Show cache location
 
 # Show help
-tlc-skills --help
-tlc-skills install --help
-tlc-skills remove --help
+npx @tech-leads-club/agent-skills --help
 ```
 
----
-
-## 📦 Discovering Skills
-
-Use the CLI to browse and install available skills:
+### Global Installation (Optional)
 
 ```bash
-# Interactive mode — browse categories and select skills
-tlc-skills
-
-# List all available skills
-tlc-skills list
+npm install -g @tech-leads-club/agent-skills
+tlc-skills  # Use 'tlc-skills' instead of 'npx @tech-leads-club/agent-skills'
 ```
 
-Skills are organized by category (development, creation, automation, etc.) and the collection is constantly growing.
+## ⚡ How It Works
 
----
+The CLI fetches skills **on-demand** from our CDN:
+
+1. **Browse** — The CLI fetches the skills catalog (~45KB)
+2. **Select** — You choose the skills you need
+3. **Download** — Selected skills are downloaded and cached locally
+4. **Install** — Skills are installed to your agent's configuration
+
+### Caching
+
+Downloaded skills are cached in `~/.cache/tlc-skills/` for offline use.
+
+```bash
+# Clear the cache
+rm -rf ~/.cache/tlc-skills
+```
 
 ## 🛠 For Contributors
 
@@ -137,14 +131,9 @@ Skills are organized by category (development, creation, automation, etc.) and t
 ### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/tech-leads-club/agent-skills.git
 cd agent-skills
-
-# Install dependencies
 npm ci
-
-# Build all packages
 npm run build
 ```
 
@@ -157,73 +146,54 @@ npm run build
 | `npm run build`       | Build all packages                 |
 | `npm run test`        | Run all tests                      |
 | `npm run lint`        | Lint codebase                      |
-| `npm run lint:fix`    | Fix lint issues                    |
 | `npm run format`      | Format code with Prettier          |
-| `npm run release:dry` | Preview release (dry-run)          |
 
 ### Creating a New Skill
 
-Use the NX generator:
-
 ```bash
-# Basic usage (will prompt for category)
-nx g @tech-leads-club/skill-plugin:skill my-awesome-skill
+# With category (recommended)
+nx g @tech-leads-club/skill-plugin:skill my-skill --category=development
 
-# With category specified
-nx g @tech-leads-club/skill-plugin:skill my-awesome-skill --category=development
-
-# With all options
+# Full options
 nx g @tech-leads-club/skill-plugin:skill my-skill \
   --description="What my skill does" \
   --category=development
 ```
 
-The generator will:
+The generator creates:
 
-- Create the skill folder inside the specified category (e.g., `skills/(development)/my-skill/`)
-- Create `SKILL.md` with the correct template structure
-- If no category is specified, the skill will be created at the root of the `skills/` directory and appear as "Uncategorized" in the CLI.
+- `packages/skills-catalog/skills/(development)/my-skill/SKILL.md`
 
-### Skill Structure
+## 📁 Project Structure
 
 ```
-skills/
-├── (category-name)/      # Category folder (starts and ends with parenthesis)
-│   └── my-skill/         # Individual skill folder
-│       ├── SKILL.md      # Required: main instructions
-│       ├── scripts/      # Optional: executable scripts
-│       ├── references/   # Optional: on-demand documentation
-│       └── ...
-└── uncategorized-skill/  # Uncategorized skills stay at the root
+agent-skills/
+├── packages/
+│   ├── cli/                      # @tech-leads-club/agent-skills CLI
+│   └── skills-catalog/           # Skills collection
+│       └── skills/               # All skill definitions
+│           ├── (category-name)/  # Categorized skills
+│           └── _category.json    # Category metadata
+├── tools/
+│   └── skill-plugin/             # Nx skill generator
+├── skills-registry.json          # Auto-generated catalog
+├── .github/
+│   └── workflows/                # CI/CD pipelines
+└── nx.json                       # Nx configuration
 ```
 
-Skills are organized into categories using the file-system structure, inspired by the Next.js App Router conventions.
+## 📝 Skill Structure
 
-#### Folder Convention
-
-To put a skill in a category, place its folder inside a directory named with parentheses:
-
-- ✅ `skills/(development)/spec-driven-dev/` -> Category: **development**
-- ✅ `skills/(creation)/skill-creator/` -> Category: **creation**
-- ❌ `skills/my-skill/` -> **Uncategorized**
-
-#### Category Metadata
-
-Optional metadata (display name, description, priority) for categories can be defined in `skills/_category.json`:
-
-```json
-{
-  "(development)": {
-    "name": "Development",
-    "description": "Skills for software development workflows",
-    "priority": 1
-  }
-}
 ```
-
-- `name`: Display name in the CLI (defaults to the folder name without parentheses)
-- `description`: Optional description shown in the CLI
-- `priority`: Display order (lower = first)
+packages/skills-catalog/skills/
+├── (category-name)/              # Category folder
+│   └── my-skill/                 # Skill folder
+│       ├── SKILL.md              # Required: main instructions
+│       ├── scripts/              # Optional: executable scripts
+│       ├── templates/            # Optional: file templates
+│       └── references/           # Optional: on-demand docs
+└── _category.json                # Category metadata
+```
 
 ### SKILL.md Format
 
@@ -241,7 +211,20 @@ Brief description.
 
 1. Step one
 2. Step two
-3. ...
+```
+
+### Category Metadata
+
+`_category.json`:
+
+```json
+{
+  "(development)": {
+    "name": "Development",
+    "description": "Skills for software development",
+    "priority": 1
+  }
+}
 ```
 
 ### Best Practices
@@ -251,33 +234,9 @@ Brief description.
 - **Assume the agent is smart** — only add what it doesn't already know
 - **Prefer scripts over inline code** — reduces context window usage
 
----
-
-## 📁 Project Structure
-
-```
-agent-skills/
-├── packages/
-│   └── cli/                    # @tech-leads-club/agent-skills CLI package
-├── tools/
-│   └── skill-plugin/           # NX generator plugin
-├── skills/                     # Skill definitions
-│   ├── (category-name)/        # Categorized skills
-│   ├── _category.json          # Category metadata (optional)
-│   └── [skill-name]/           # Uncategorized skill folders
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # CI: lint, test, build
-│       └── release.yml         # Release: version, publish
-├── nx.json                     # NX configuration
-└── package.json                # Root package.json
-```
-
----
-
 ## 🔄 Release Process
 
-This project uses **NX Release** with **Conventional Commits** for automated versioning:
+This project uses **Conventional Commits** for automated versioning:
 
 | Commit Prefix | Version Bump  | Example                      |
 | ------------- | ------------- | ---------------------------- |
@@ -289,8 +248,6 @@ This project uses **NX Release** with **Conventional Commits** for automated ver
 
 Releases are automated via GitHub Actions when merging to `main`.
 
----
-
 ## 🤝 Contributing
 
 1. **Fork** the repository
@@ -299,21 +256,15 @@ Releases are automated via GitHub Actions when merging to `main`.
 4. **Push** to your fork (`git push origin feat/amazing-skill`)
 5. **Open** a Pull Request
 
----
-
 ## 🛡️ Content & Authorship
 
 This repository is a collection of curated skills intended to benefit the community. We deeply respect the intellectual property and wishes of all creators.
 
-If you are the author of any content included here and would like it **removed** or **updated**, please [open an issue](https://github.com/tech-leads-club/agent-skills/issues/new) or contact the maintainers. We will address your request immediately.
-
----
+If you are the author of any content included here and would like it **removed** or **updated**, please [open an issue](https://github.com/tech-leads-club/agent-skills/issues/new) or contact the maintainers.
 
 ## 📄 License
 
 MIT © [Tech Leads Club](https://github.com/tech-leads-club)
-
----
 
 ## ⭐ Star History
 

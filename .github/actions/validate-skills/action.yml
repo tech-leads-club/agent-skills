@@ -10,7 +10,7 @@ runs:
         echo "🔍 Validating skills..."
         failed=0
 
-        for skill in skills/*/*/; do
+        for skill in packages/skills-catalog/skills/*/*/; do
           [ -d "$skill" ] || continue
           
           skill_name=$(basename "$skill")

@@ -3,17 +3,25 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/cli/src",
   "projectType": "library",
+  "tags": [
+    "scope:cli"
+  ],
+  "implicitDependencies": [
+    "skills-catalog"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
+      "dependsOn": [
+        "skills-catalog:generate-registry"
+      ],
       "outputs": [
         "{options.outputPath}"
       ],
       "defaultConfiguration": "production",
       "inputs": [
         "production",
-        "^production",
-        "{workspaceRoot}/skills/**/*"
+        "^production"
       ],
       "options": {
         "platform": "node",
@@ -34,11 +42,6 @@
             "glob": "LICENSE",
             "input": ".",
             "output": "."
-          },
-          {
-            "glob": "**/*",
-            "input": "skills",
-            "output": "skills"
           },
           {
             "glob": "package.json",

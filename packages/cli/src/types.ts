@@ -5,6 +5,7 @@ export interface InstallOptions {
   method: 'symlink' | 'copy'
   agents: AgentType[]
   skills: string[]
+  forceUpdate?: boolean
 }
 
 export interface InstallResult {

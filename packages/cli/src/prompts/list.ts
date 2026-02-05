@@ -2,17 +2,19 @@ import pc from 'picocolors'
 
 import { getAllAgentTypes } from '../agents'
 import { groupSkillsByCategory } from '../categories'
-import { discoverSkills } from '../skills'
+import { discoverSkillsAsync } from '../skills-provider'
 import { initScreen } from '../ui/screen'
+import { withSpinner } from '../ui/spinner'
 import { logBar, logBarEnd, S_BAR } from '../ui/styles'
 import { getAllInstalledSkillNames } from './utils'
 
 export async function showAvailableSkills(): Promise<void> {
   initScreen()
-  const skills = discoverSkills()
+
+  const skills = await withSpinner('Loading skills catalog...', discoverSkillsAsync)
 
   if (skills.length === 0) {
-    logBar(pc.yellow('No skills found'))
+    logBar(pc.yellow('No skills found. Check your internet connection.'))
     return
   }
 

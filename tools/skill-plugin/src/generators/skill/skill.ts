@@ -1,7 +1,7 @@
 import { formatFiles, generateFiles, names, Tree } from '@nx/devkit'
 import * as path from 'path'
 
-import { formatCategoryName, SKILLS_ROOT_DIR } from '@tech-leads-club/core'
+import { formatCategoryName, SKILLS_CATALOG_DIR } from '@tech-leads-club/core'
 
 import { SkillGeneratorSchema } from './schema'
 
@@ -10,7 +10,7 @@ function categoryIdToFolderName(categoryId: string): string {
 }
 
 function categoryFolderExists(tree: Tree, categoryId: string): boolean {
-  const folderPath = `${SKILLS_ROOT_DIR}/${categoryIdToFolderName(categoryId)}`
+  const folderPath = `${SKILLS_CATALOG_DIR}/${categoryIdToFolderName(categoryId)}`
   return tree.exists(folderPath)
 }
 
@@ -22,10 +22,10 @@ export async function skillGenerator(tree: Tree, options: SkillGeneratorSchema) 
 
   if (options.category) {
     const categoryFolder = categoryIdToFolderName(options.category)
-    skillRoot = `${SKILLS_ROOT_DIR}/${categoryFolder}/${normalizedNames.fileName}`
+    skillRoot = `${SKILLS_CATALOG_DIR}/${categoryFolder}/${normalizedNames.fileName}`
     isNewCategory = !categoryFolderExists(tree, options.category)
   } else {
-    skillRoot = `${SKILLS_ROOT_DIR}/${normalizedNames.fileName}`
+    skillRoot = `${SKILLS_CATALOG_DIR}/${normalizedNames.fileName}`
   }
 
   if (tree.exists(`${skillRoot}/SKILL.md`)) {
@@ -49,7 +49,9 @@ export async function skillGenerator(tree: Tree, options: SkillGeneratorSchema) 
     }
   } else {
     console.log(`ℹ️  No category specified. Skill will appear as "Uncategorized".`)
-    console.log(`   To add a category: move to skills/(category-name)/${normalizedNames.fileName}`)
+    console.log(
+      `   To add a category: move to packages/skills-catalog/skills/(category-name)/${normalizedNames.fileName}`,
+    )
   }
 
   console.log(`
@@ -58,6 +60,7 @@ export async function skillGenerator(tree: Tree, options: SkillGeneratorSchema) 
 📁 ${skillRoot}/SKILL.md
 🔧 Test: npx @tech-leads-club/agent-skills --skill ${normalizedNames.fileName}
 💡 Edit SKILL.md and customize the instructions
+📦 Registry will auto-update on build, or run: npm run generate:registry
 `)
 }
 

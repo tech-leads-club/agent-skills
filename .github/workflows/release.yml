@@ -139,6 +139,16 @@ jobs:
           app-slug: ${{ steps.app-token.outputs.app-slug }}
           git-config: true
 
+      - name: Generate Skills Registry
+        run: npm run generate:registry
+
+      - name: Commit Registry if Changed
+        run: |
+          if ! git diff --quiet skills-registry.json 2>/dev/null; then
+            git add skills-registry.json
+            git commit -m "chore: update skills-registry.json" || true
+          fi
+
       - name: Release Version and Publish
         run: npx nx release --yes
         env:

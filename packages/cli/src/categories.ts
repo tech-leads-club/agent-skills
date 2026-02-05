@@ -8,7 +8,6 @@ import {
   DEFAULT_CATEGORY,
   DEFAULT_CATEGORY_ID,
   formatCategoryName,
-  SKILLS_ROOT_DIR,
 } from '@tech-leads-club/core'
 
 import type { CategoryInfo, CategoryMetadata } from './types'
@@ -17,12 +16,14 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 function getSkillsDir(): string {
-  const devPath = join(__dirname, '..', '..', '..', SKILLS_ROOT_DIR)
+  // Dev mode
+  const devPath = join(__dirname, '..', '..', 'skills-catalog', 'skills')
   if (existsSync(devPath)) return devPath
-  const pkgPath = join(__dirname, '..', SKILLS_ROOT_DIR)
-  if (existsSync(pkgPath)) return pkgPath
-  const bundlePath = join(__dirname, SKILLS_ROOT_DIR)
-  if (existsSync(bundlePath)) return bundlePath
+
+  // Built package mode
+  const altPath = join(__dirname, '..', '..', '..', 'packages', 'skills-catalog', 'skills')
+  if (existsSync(altPath)) return altPath
+
   return devPath
 }
 
@@ -121,10 +122,22 @@ export function categoryExists(categoryId: string): boolean {
   return getCategories().some((cat) => cat.id === categoryId)
 }
 
-export function groupSkillsByCategory<T extends { name: string; category?: string }>(
+export function groupSkillsByCategory<T extends { name: string; category?: string; description?: string }>(
   skills: T[],
 ): Map<CategoryInfo, T[]> {
-  const categories = getCategories()
+  // Try to get local categories, fall back to building from skills
+  let categories = getCategories()
+
+  // If no local categories, build from skills data
+  if (categories.length === 0) {
+    const categoryIds = new Set(skills.map((s) => s.category).filter(Boolean) as string[])
+    categories = Array.from(categoryIds).map((id, index) => ({
+      id,
+      name: formatCategoryName(id),
+      priority: index,
+    }))
+  }
+
   const grouped = new Map<CategoryInfo, T[]>()
 
   for (const category of categories) {
@@ -135,15 +148,36 @@ export function groupSkillsByCategory<T extends { name: string; category?: strin
 
   for (const skill of skills) {
     const categoryId = skill.category ?? DEFAULT_CATEGORY_ID
-    const category = categories.find((c) => c.id === categoryId) ?? DEFAULT_CATEGORY
-    const group = grouped.get(category) ?? []
+    let category = categories.find((c) => c.id === categoryId)
+
+    // If category not found, create it dynamically
+    if (!category && categoryId !== DEFAULT_CATEGORY_ID) {
+      category = {
+        id: categoryId,
+        name: formatCategoryName(categoryId),
+        priority: 999,
+      }
+      categories.push(category)
+      grouped.set(category, [])
+    }
+
+    const targetCategory = category ?? DEFAULT_CATEGORY
+    const group = grouped.get(targetCategory) ?? []
     group.push(skill)
-    grouped.set(category, group)
+    grouped.set(targetCategory, group)
   }
 
   for (const [category, skillList] of grouped) {
     if (skillList.length === 0) grouped.delete(category)
   }
 
-  return grouped
+  // Sort by priority
+  const sortedGrouped = new Map<CategoryInfo, T[]>()
+  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
+  for (const cat of sortedCategories) {
+    const skills = grouped.get(cat)
+    if (skills) sortedGrouped.set(cat, skills)
+  }
+
+  return sortedGrouped
 }

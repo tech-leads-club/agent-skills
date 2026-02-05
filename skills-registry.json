@@ -1,0 +1,835 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-05T18:42:17.000Z",
+  "baseUrl": "https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@main/packages/skills-catalog/skills",
+  "categories": {
+    "cloud": {
+      "name": "Cloud & Infrastructure",
+      "description": "Skills for cloud management, AWS, and DevOps",
+      "priority": 1
+    },
+    "creation": {
+      "name": "Skill & Agent Creation",
+      "description": "Skills for creating new skills and subagents",
+      "priority": 2
+    },
+    "design": {
+      "name": "Design",
+      "description": "Skills for UI/UX design and design systems",
+      "priority": 3
+    },
+    "development": {
+      "name": "Development",
+      "description": "Skills for software development workflows",
+      "priority": 4
+    },
+    "monitoring": {
+      "name": "Monitoring",
+      "description": "Skills for observability, logging, and system monitoring",
+      "priority": 5
+    },
+    "performance": {
+      "name": "Performance",
+      "description": "Skills for web performance optimization, audits, and monitoring",
+      "priority": 6
+    },
+    "quality": {
+      "name": "Quality",
+      "description": "Skills for code quality, testing, and best practices",
+      "priority": 7
+    },
+    "security": {
+      "name": "Security",
+      "description": "Skills for security analysis, vulnerability detection, and secure coding",
+      "priority": 8
+    },
+    "tooling": {
+      "name": "Tooling",
+      "description": "Skills for tooling and utilities",
+      "priority": 9
+    },
+    "web-automation": {
+      "name": "Web Automation",
+      "description": "Skills for browser automation and web testing",
+      "priority": 10
+    },
+    "webautomation": {
+      "name": "Webautomation"
+    },
+    "uncategorized": {
+      "name": "Uncategorized",
+      "description": "Skills without a specific category",
+      "priority": 999
+    }
+  },
+  "skills": [
+    {
+      "name": "accessibility",
+      "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\".",
+      "category": "quality",
+      "path": "(quality)/web-accessibility",
+      "files": [
+        "SKILL.md",
+        "references/WCAG.md"
+      ],
+      "author": "web-quality-skills",
+      "version": "1.0"
+    },
+    {
+      "name": "aws-advisor",
+      "description": "Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for accurate, documentation-backed answers. Use when user asks about AWS architecture, security, service selection, migrations, troubleshooting, or learning AWS. Triggers on AWS, Lambda, S3, EC2, ECS, EKS, DynamoDB, RDS, CloudFormation, CDK, Terraform, Serverless, SAM, IAM, VPC, API Gateway, or any AWS service.",
+      "category": "cloud",
+      "path": "(cloud)/aws-advisor",
+      "files": [
+        "SKILL.md",
+        "references/checklists.md",
+        "references/decision-trees.md",
+        "references/mcp-guide.md",
+        "scripts/architecture_validator.py",
+        "scripts/cost_considerations.py",
+        "scripts/generate_diagram.py",
+        "scripts/security_review.py",
+        "scripts/well_architected_review.py"
+      ]
+    },
+    {
+      "name": "best-practices",
+      "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when asked to \"apply best practices\", \"security audit\", \"modernize code\", \"code quality review\", or \"check for vulnerabilities\".",
+      "category": "quality",
+      "path": "(quality)/web-best-practices",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "web-quality-skills",
+      "version": "1.0"
+    },
+    {
+      "name": "cloudflare-deploy",
+      "description": "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.",
+      "category": "cloud",
+      "path": "(cloud)/cloudflare-deploy",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/agents-sdk/README.md",
+        "references/agents-sdk/api.md",
+        "references/agents-sdk/configuration.md",
+        "references/agents-sdk/gotchas.md",
+        "references/agents-sdk/patterns.md",
+        "references/ai-gateway/README.md",
+        "references/ai-gateway/configuration.md",
+        "references/ai-gateway/dynamic-routing.md",
+        "references/ai-gateway/features.md",
+        "references/ai-gateway/sdk-integration.md",
+        "references/ai-gateway/troubleshooting.md",
+        "references/ai-search/README.md",
+        "references/ai-search/api.md",
+        "references/ai-search/configuration.md",
+        "references/ai-search/gotchas.md",
+        "references/ai-search/patterns.md",
+        "references/analytics-engine/README.md",
+        "references/analytics-engine/api.md",
+        "references/analytics-engine/configuration.md",
+        "references/analytics-engine/gotchas.md",
+        "references/analytics-engine/patterns.md",
+        "references/api/README.md",
+        "references/api/api.md",
+        "references/api/configuration.md",
+        "references/api/gotchas.md",
+        "references/api/patterns.md",
+        "references/api-shield/README.md",
+        "references/api-shield/api.md",
+        "references/api-shield/configuration.md",
+        "references/api-shield/gotchas.md",
+        "references/api-shield/patterns.md",
+        "references/argo-smart-routing/README.md",
+        "references/argo-smart-routing/api.md",
+        "references/argo-smart-routing/configuration.md",
+        "references/argo-smart-routing/gotchas.md",
+        "references/argo-smart-routing/patterns.md",
+        "references/bindings/README.md",
+        "references/bindings/api.md",
+        "references/bindings/configuration.md",
+        "references/bindings/gotchas.md",
+        "references/bindings/patterns.md",
+        "references/bot-management/README.md",
+        "references/bot-management/api.md",
+        "references/bot-management/configuration.md",
+        "references/bot-management/gotchas.md",
+        "references/bot-management/patterns.md",
+        "references/browser-rendering/README.md",
+        "references/browser-rendering/api.md",
+        "references/browser-rendering/configuration.md",
+        "references/browser-rendering/gotchas.md",
+        "references/browser-rendering/patterns.md",
+        "references/c3/README.md",
+        "references/c3/api.md",
+        "references/c3/configuration.md",
+        "references/c3/gotchas.md",
+        "references/c3/patterns.md",
+        "references/cache-reserve/README.md",
+        "references/cache-reserve/api.md",
+        "references/cache-reserve/configuration.md",
+        "references/cache-reserve/gotchas.md",
+        "references/cache-reserve/patterns.md",
+        "references/containers/README.md",
+        "references/containers/api.md",
+        "references/containers/configuration.md",
+        "references/containers/gotchas.md",
+        "references/containers/patterns.md",
+        "references/cron-triggers/README.md",
+        "references/cron-triggers/api.md",
+        "references/cron-triggers/configuration.md",
+        "references/cron-triggers/gotchas.md",
+        "references/cron-triggers/patterns.md",
+        "references/d1/README.md",
+        "references/d1/api.md",
+        "references/d1/configuration.md",
+        "references/d1/gotchas.md",
+        "references/d1/patterns.md",
+        "references/ddos/README.md",
+        "references/ddos/api.md",
+        "references/ddos/configuration.md",
+        "references/ddos/gotchas.md",
+        "references/ddos/patterns.md",
+        "references/do-storage/README.md",
+        "references/do-storage/api.md",
+        "references/do-storage/configuration.md",
+        "references/do-storage/gotchas.md",
+        "references/do-storage/patterns.md",
+        "references/do-storage/testing.md",
+        "references/durable-objects/README.md",
+        "references/durable-objects/api.md",
+        "references/durable-objects/configuration.md",
+        "references/durable-objects/gotchas.md",
+        "references/durable-objects/patterns.md",
+        "references/email-routing/README.md",
+        "references/email-routing/api.md",
+        "references/email-routing/configuration.md",
+        "references/email-routing/gotchas.md",
+        "references/email-routing/patterns.md",
+        "references/email-workers/README.md",
+        "references/email-workers/api.md",
+        "references/email-workers/configuration.md",
+        "references/email-workers/gotchas.md",
+        "references/email-workers/patterns.md",
+        "references/hyperdrive/README.md",
+        "references/hyperdrive/api.md",
+        "references/hyperdrive/configuration.md",
+        "references/hyperdrive/gotchas.md",
+        "references/hyperdrive/patterns.md",
+        "references/images/README.md",
+        "references/images/api.md",
+        "references/images/configuration.md",
+        "references/images/gotchas.md",
+        "references/images/patterns.md",
+        "references/kv/README.md",
+        "references/kv/api.md",
+        "references/kv/configuration.md",
+        "references/kv/gotchas.md",
+        "references/kv/patterns.md",
+        "references/miniflare/README.md",
+        "references/miniflare/api.md",
+        "references/miniflare/configuration.md",
+        "references/miniflare/gotchas.md",
+        "references/miniflare/patterns.md",
+        "references/network-interconnect/README.md",
+        "references/network-interconnect/api.md",
+        "references/network-interconnect/configuration.md",
+        "references/network-interconnect/gotchas.md",
+        "references/network-interconnect/patterns.md",
+        "references/observability/README.md",
+        "references/observability/api.md",
+        "references/observability/configuration.md",
+        "references/observability/gotchas.md",
+        "references/observability/patterns.md",
+        "references/pages/README.md",
+        "references/pages/api.md",
+        "references/pages/configuration.md",
+        "references/pages/gotchas.md",
+        "references/pages/patterns.md",
+        "references/pages-functions/README.md",
+        "references/pages-functions/api.md",
+        "references/pages-functions/configuration.md",
+        "references/pages-functions/gotchas.md",
+        "references/pages-functions/patterns.md",
+        "references/pipelines/README.md",
+        "references/pipelines/api.md",
+        "references/pipelines/configuration.md",
+        "references/pipelines/gotchas.md",
+        "references/pipelines/patterns.md",
+        "references/pulumi/README.md",
+        "references/pulumi/api.md",
+        "references/pulumi/configuration.md",
+        "references/pulumi/gotchas.md",
+        "references/pulumi/patterns.md",
+        "references/queues/README.md",
+        "references/queues/api.md",
+        "references/queues/configuration.md",
+        "references/queues/gotchas.md",
+        "references/queues/patterns.md",
+        "references/r2/README.md",
+        "references/r2/api.md",
+        "references/r2/configuration.md",
+        "references/r2/gotchas.md",
+        "references/r2/patterns.md",
+        "references/r2-data-catalog/README.md",
+        "references/r2-data-catalog/api.md",
+        "references/r2-data-catalog/configuration.md",
+        "references/r2-data-catalog/gotchas.md",
+        "references/r2-data-catalog/patterns.md",
+        "references/r2-sql/README.md",
+        "references/r2-sql/api.md",
+        "references/r2-sql/configuration.md",
+        "references/r2-sql/gotchas.md",
+        "references/r2-sql/patterns.md",
+        "references/realtime-sfu/README.md",
+        "references/realtime-sfu/api.md",
+        "references/realtime-sfu/configuration.md",
+        "references/realtime-sfu/gotchas.md",
+        "references/realtime-sfu/patterns.md",
+        "references/realtimekit/README.md",
+        "references/realtimekit/api.md",
+        "references/realtimekit/configuration.md",
+        "references/realtimekit/gotchas.md",
+        "references/realtimekit/patterns.md",
+        "references/sandbox/README.md",
+        "references/sandbox/api.md",
+        "references/sandbox/configuration.md",
+        "references/sandbox/gotchas.md",
+        "references/sandbox/patterns.md",
+        "references/secrets-store/README.md",
+        "references/secrets-store/api.md",
+        "references/secrets-store/configuration.md",
+        "references/secrets-store/gotchas.md",
+        "references/secrets-store/patterns.md",
+        "references/smart-placement/README.md",
+        "references/smart-placement/api.md",
+        "references/smart-placement/configuration.md",
+        "references/smart-placement/gotchas.md",
+        "references/smart-placement/patterns.md",
+        "references/snippets/README.md",
+        "references/snippets/api.md",
+        "references/snippets/configuration.md",
+        "references/snippets/gotchas.md",
+        "references/snippets/patterns.md",
+        "references/spectrum/README.md",
+        "references/spectrum/api.md",
+        "references/spectrum/configuration.md",
+        "references/spectrum/gotchas.md",
+        "references/spectrum/patterns.md",
+        "references/static-assets/README.md",
+        "references/static-assets/api.md",
+        "references/static-assets/configuration.md",
+        "references/static-assets/gotchas.md",
+        "references/static-assets/patterns.md",
+        "references/stream/README.md",
+        "references/stream/api-live.md",
+        "references/stream/api.md",
+        "references/stream/configuration.md",
+        "references/stream/gotchas.md",
+        "references/stream/patterns.md",
+        "references/tail-workers/README.md",
+        "references/tail-workers/api.md",
+        "references/tail-workers/configuration.md",
+        "references/tail-workers/gotchas.md",
+        "references/tail-workers/patterns.md",
+        "references/terraform/README.md",
+        "references/terraform/api.md",
+        "references/terraform/configuration.md",
+        "references/terraform/gotchas.md",
+        "references/terraform/patterns.md",
+        "references/tunnel/README.md",
+        "references/tunnel/api.md",
+        "references/tunnel/configuration.md",
+        "references/tunnel/gotchas.md",
+        "references/tunnel/networking.md",
+        "references/tunnel/patterns.md",
+        "references/turn/README.md",
+        "references/turn/api.md",
+        "references/turn/configuration.md",
+        "references/turn/gotchas.md",
+        "references/turn/patterns.md",
+        "references/turnstile/README.md",
+        "references/turnstile/api.md",
+        "references/turnstile/configuration.md",
+        "references/turnstile/gotchas.md",
+        "references/turnstile/patterns.md",
+        "references/vectorize/README.md",
+        "references/vectorize/api.md",
+        "references/vectorize/configuration.md",
+        "references/vectorize/gotchas.md",
+        "references/vectorize/patterns.md",
+        "references/waf/README.md",
+        "references/waf/api.md",
+        "references/waf/configuration.md",
+        "references/waf/gotchas.md",
+        "references/waf/patterns.md",
+        "references/web-analytics/README.md",
+        "references/web-analytics/configuration.md",
+        "references/web-analytics/gotchas.md",
+        "references/web-analytics/integration.md",
+        "references/web-analytics/patterns.md",
+        "references/workerd/README.md",
+        "references/workerd/api.md",
+        "references/workerd/configuration.md",
+        "references/workerd/gotchas.md",
+        "references/workerd/patterns.md",
+        "references/workers/README.md",
+        "references/workers/api.md",
+        "references/workers/configuration.md",
+        "references/workers/frameworks.md",
+        "references/workers/gotchas.md",
+        "references/workers/patterns.md",
+        "references/workers-ai/README.md",
+        "references/workers-ai/api.md",
+        "references/workers-ai/configuration.md",
+        "references/workers-ai/gotchas.md",
+        "references/workers-ai/patterns.md",
+        "references/workers-for-platforms/README.md",
+        "references/workers-for-platforms/api.md",
+        "references/workers-for-platforms/configuration.md",
+        "references/workers-for-platforms/gotchas.md",
+        "references/workers-for-platforms/patterns.md",
+        "references/workers-playground/README.md",
+        "references/workers-playground/api.md",
+        "references/workers-playground/configuration.md",
+        "references/workers-playground/gotchas.md",
+        "references/workers-playground/patterns.md",
+        "references/workers-vpc/README.md",
+        "references/workers-vpc/api.md",
+        "references/workers-vpc/configuration.md",
+        "references/workers-vpc/gotchas.md",
+        "references/workers-vpc/patterns.md",
+        "references/workflows/README.md",
+        "references/workflows/api.md",
+        "references/workflows/configuration.md",
+        "references/workflows/gotchas.md",
+        "references/workflows/patterns.md",
+        "references/wrangler/README.md",
+        "references/wrangler/api.md",
+        "references/wrangler/auth.md",
+        "references/wrangler/configuration.md",
+        "references/wrangler/gotchas.md",
+        "references/wrangler/patterns.md",
+        "references/zaraz/IMPLEMENTATION_SUMMARY.md",
+        "references/zaraz/README.md",
+        "references/zaraz/api.md",
+        "references/zaraz/configuration.md",
+        "references/zaraz/gotchas.md",
+        "references/zaraz/patterns.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "coding-guidelines",
+      "description": "Apply when writing, modifying, or reviewing code. Behavioral guidelines to reduce common LLM coding mistakes. Triggers on implementation tasks, code changes, refactoring, bug fixes, or feature development.",
+      "category": "development",
+      "path": "(development)/coding-guidelines",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "ale",
+      "version": "1.0.0"
+    },
+    {
+      "name": "confluence-assistant",
+      "description": "Expert in Confluence operations using Atlassian MCP - automatically detects workspace Confluence configuration or prompts for site details. Use for searching, creating, updating pages, managing spaces, and adding comments with proper Markdown formatting.",
+      "category": "development",
+      "path": "(development)/confluence-assistant",
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "core-web-vitals",
+      "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\".",
+      "category": "performance",
+      "path": "(performance)/core-web-vitals",
+      "files": [
+        "SKILL.md",
+        "references/LCP.md"
+      ],
+      "author": "web-quality-skills",
+      "version": "1.0"
+    },
+    {
+      "name": "cursor-skill-creator",
+      "description": "Creates Cursor-specific AI agent skills with SKILL.md format. Use when creating skills for Cursor editor specifically, following Cursor's patterns and directories (.cursor/skills/). Triggers on \"cursor skill\", \"create cursor skill\".",
+      "category": "creation",
+      "path": "(creation)/cursor-skill-creator",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "cursor-subagent-creator",
+      "description": "Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows. Use when creating subagents for Cursor editor specifically, following Cursor's patterns and directories (.cursor/agents/). Triggers on \"cursor subagent\", \"cursor agent\".",
+      "category": "creation",
+      "path": "(creation)/cursor-subagent-creator",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "docs-writer",
+      "description": "Use this skill for writing, reviewing, and editing documentation (`/docs` directory or any .md file).",
+      "category": "development",
+      "path": "(development)/docs-writer",
+      "files": [
+        ".DS_Store",
+        "SKILL.md",
+        "references/style-guide.md"
+      ]
+    },
+    {
+      "name": "figma",
+      "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.",
+      "category": "design",
+      "path": "(design)/figma",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/figma-mcp-config.md",
+        "references/figma-tools-and-prompts.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "figma-implement-design",
+      "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Trigger when the user provides Figma URLs or node IDs, or asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection.",
+      "category": "design",
+      "path": "(design)/figma-implement-design",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "gh-address-comments",
+      "description": "Help address review/issue comments on the open GitHub PR for the current branch using gh CLI; verify gh auth first and prompt the user to authenticate if not logged in.",
+      "category": "development",
+      "path": "(development)/gh-address-comments",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/fetch_comments.py"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "gh-fix-ci",
+      "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.",
+      "category": "tooling",
+      "path": "(tooling)/gh-fix-ci",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/inspect_pr_checks.py"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "Jira Assistant",
+      "description": "Expert in Jira operations using Atlassian MCP - automatically detects workspace Jira configuration or prompts for project details. Use for searching, creating, updating issues, managing status transitions, and handling tasks.",
+      "category": "development",
+      "path": "(development)/jira-assistant",
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "netlify-deploy",
+      "description": "Deploy web projects to Netlify using the Netlify CLI (`npx netlify`). Use when the user asks to deploy, host, publish, or link a site/repo on Netlify, including preview and production deploys.",
+      "category": "cloud",
+      "path": "(cloud)/netlify-deploy",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/cli-commands.md",
+        "references/deployment-patterns.md",
+        "references/netlify-toml.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "nx-ci-monitor",
+      "description": "Monitor Nx Cloud CI pipeline and handle self-healing fixes automatically. Checks for Nx Cloud connection before starting.",
+      "category": "tooling",
+      "path": "(tooling)/nx-ci-monitor",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "nx-generate",
+      "description": "Generate code using nx generators. USE WHEN scaffolding code or transforming existing code - for example creating libraries or applications, or anything else that is boilerplate code or automates repetitive tasks. ALWAYS use this first when generating code with Nx instead of calling MCP tools or running nx generate immediately.",
+      "category": "tooling",
+      "path": "(tooling)/nx-generate",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "nx-run-tasks",
+      "description": "Helps with running tasks in an Nx workspace. USE WHEN the user wants to execute build, test, lint, serve, or run any other tasks defined in the workspace.",
+      "category": "tooling",
+      "path": "(tooling)/nx-run-tasks",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "nx-workspace",
+      "description": "Configure, explore, and optimize Nx monorepo workspaces. Use when setting up Nx, exploring workspace structure, configuring project boundaries, running tasks, analyzing affected projects, optimizing build caching, or implementing CI/CD with affected commands. Keywords - nx, monorepo, workspace, projects, targets, affected, build, lint, test.",
+      "category": "tooling",
+      "path": "(tooling)/nx-workspace",
+      "files": [
+        ".DS_Store",
+        "SKILL.md",
+        "reference/best-practices.md",
+        "reference/ci-cd.md",
+        "reference/commands.md",
+        "reference/configuration.md"
+      ]
+    },
+    {
+      "name": "perf-astro",
+      "description": "\"Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Triggers on: astro performance, astro lighthouse, astro optimization, astro-critters.\"",
+      "category": "performance",
+      "path": "(performance)/perf-astro",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "perf-lighthouse",
+      "description": "\"Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget.\"",
+      "category": "performance",
+      "path": "(performance)/perf-lighthouse",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "perf-web-optimization",
+      "description": "\"Optimize web performance: Core Web Vitals (LCP, CLS, INP), bundle size, images, caching. Use when site is slow, optimizing for Lighthouse scores, reducing bundle size, fixing layout shifts, or improving Time to Interactive. Triggers on: web performance, Core Web Vitals, LCP, CLS, INP, FID, bundle size, page speed, slow site.\"",
+      "category": "performance",
+      "path": "(performance)/perf-web-optimization",
+      "files": [
+        "SKILL.md",
+        "references/bundle-optimization.md",
+        "references/core-web-vitals.md",
+        "references/image-optimization.md"
+      ]
+    },
+    {
+      "name": "playwright-skill",
+      "description": "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login flows, check links, automate any browser task. Use when user wants to test websites, automate browser interactions, validate web functionality, or perform any browser-based testing.",
+      "category": "web-automation",
+      "path": "(web-automation)/playwright-skill",
+      "files": [
+        "API_REFERENCE.md",
+        "SKILL.md",
+        "lib/helpers.js",
+        "package.json",
+        "run.js"
+      ]
+    },
+    {
+      "name": "render-deploy",
+      "description": "Deploy applications to Render by analyzing codebases, generating render.yaml Blueprints, and providing Dashboard deeplinks. Use when the user wants to deploy, host, publish, or set up their application on Render's cloud platform.",
+      "category": "cloud",
+      "path": "(cloud)/render-deploy",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/blueprint-spec.md",
+        "references/codebase-analysis.md",
+        "references/configuration-guide.md",
+        "references/deployment-details.md",
+        "references/direct-creation.md",
+        "references/error-patterns.md",
+        "references/post-deploy-checks.md",
+        "references/runtimes.md",
+        "references/service-types.md",
+        "references/troubleshooting-basics.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "run-nx-generator",
+      "description": "Run Nx generators with prioritization for workspace-plugin generators. Use this when generating code, scaffolding new features, or automating repetitive tasks in the monorepo.",
+      "category": "tooling",
+      "path": "(tooling)/run-nx-generator",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "security-best-practices",
+      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.",
+      "category": "security",
+      "path": "(security)/security-best-practices",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/golang-general-backend-security.md",
+        "references/javascript-express-web-server-security.md",
+        "references/javascript-general-web-frontend-security.md",
+        "references/javascript-jquery-web-frontend-security.md",
+        "references/javascript-typescript-nextjs-web-server-security.md",
+        "references/javascript-typescript-react-web-frontend-security.md",
+        "references/javascript-typescript-vue-web-frontend-security.md",
+        "references/python-django-web-server-security.md",
+        "references/python-fastapi-web-server-security.md",
+        "references/python-flask-web-server-security.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "security-ownership-map",
+      "description": "'Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Trigger only when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do not trigger for general maintainer lists or non-security ownership questions.'",
+      "category": "security",
+      "path": "(security)/security-ownership-map",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/neo4j-import.md",
+        "scripts/build_ownership_map.py",
+        "scripts/community_maintainers.py",
+        "scripts/query_ownership.py",
+        "scripts/run_ownership_map.py"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "security-threat-model",
+      "description": "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work.",
+      "category": "security",
+      "path": "(security)/security-threat-model",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/prompt-template.md",
+        "references/security-controls-and-assets.md"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "sentry",
+      "description": "Use when the user asks to inspect Sentry issues or events, summarize recent production errors, or pull basic Sentry health data via the Sentry API; perform read-only queries with the bundled script and require `SENTRY_AUTH_TOKEN`.",
+      "category": "monitoring",
+      "path": "(monitoring)/sentry",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/sentry_api.py"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "seo",
+      "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\".",
+      "category": "quality",
+      "path": "(quality)/seo",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "web-quality-skills",
+      "version": "1.0"
+    },
+    {
+      "name": "skill-creator",
+      "description": "Guide for creating effective AI agent skills. Use when users want to create a new skill (or update an existing skill) that extends an AI agent's capabilities with specialized knowledge, workflows, or tool integrations. Works with any agent that supports the SKILL.md format (Claude Code, Cursor, Roo, Cline, Windsurf, etc.). Triggers on \"create skill\", \"new skill\", \"package knowledge\", \"skill for\".",
+      "category": "creation",
+      "path": "(creation)/skill-creator",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "subagent-creator",
+      "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\".",
+      "category": "creation",
+      "path": "(creation)/subagent-creator",
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "Technical Design Doc Creator",
+      "description": "Creates comprehensive Technical Design Documents (TDD) following industry standards with mandatory sections, optional sections, and interactive gathering of missing information.",
+      "category": "creation",
+      "path": "(creation)/create-technical-design-doc",
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "tlc-spec-driven",
+      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when: (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\".",
+      "category": "development",
+      "path": "(development)/tlc-spec-driven",
+      "files": [
+        "README.md",
+        "SKILL.md",
+        "references/brownfield-mapping.md",
+        "references/code-analysis.md",
+        "references/coding-principles.md",
+        "references/context-limits.md",
+        "references/design.md",
+        "references/implement.md",
+        "references/project-init.md",
+        "references/roadmap.md",
+        "references/session-handoff.md",
+        "references/specify.md",
+        "references/state-management.md",
+        "references/tasks.md",
+        "references/validate.md"
+      ],
+      "author": "github.com/felipfr",
+      "version": "1.0.0"
+    },
+    {
+      "name": "vercel-deploy",
+      "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\".",
+      "category": "cloud",
+      "path": "(cloud)/vercel-deploy",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/deploy.sh"
+      ],
+      "author": "github.com/openai/skills",
+      "version": "1.0.0"
+    },
+    {
+      "name": "web-quality-audit",
+      "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices. Use when asked to \"audit my site\", \"review web quality\", \"run lighthouse audit\", \"check page quality\", or \"optimize my website\".",
+      "category": "quality",
+      "path": "(quality)/web-quality-audit",
+      "files": [
+        "SKILL.md",
+        "scripts/analyze.sh"
+      ],
+      "author": "web-quality-skills",
+      "version": "1.0"
+    }
+  ]
+}
