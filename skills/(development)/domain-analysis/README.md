@@ -1,6 +1,6 @@
 # Subdomain Identification Skill
 
-A Cursor Agent Skill for identifying subdomains and suggesting bounded contexts in any codebase following Domain-Driven Design (DDD) Strategic Design principles.
+A Agent Skill for identifying subdomains and suggesting bounded contexts in any codebase following Domain-Driven Design (DDD) Strategic Design principles.
 
 ## What This Skill Does
 
@@ -210,11 +210,13 @@ The skill suggests appropriate integration patterns:
 
 ## Installation
 
-This skill is installed at the project level:
+This skill is installed at the project level in your agent's skills directory:
 
 ```
-.cursor/skills/subdomain-identification/
+.{agent}/skills/subdomain-identification/
 ```
+
+Where `{agent}` is your agent's directory (e.g., `.cursor/`, `.claude/`, `.agent/`, `.github/`, `.opencode/`).
 
 This means it's:
 
@@ -231,7 +233,7 @@ The agent will automatically discover and use it when appropriate based on the d
 If your project has specific domain patterns, create a project-level reference:
 
 ```
-.cursor/skills/subdomain-identification/
+.{agent}/skills/subdomain-identification/
 └── project-domains.md  # Document project-specific patterns
 ```
 
