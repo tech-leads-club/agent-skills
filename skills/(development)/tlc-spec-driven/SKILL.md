@@ -22,7 +22,7 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 .specs/
 ├── project/
 │   ├── PROJECT.md      # Vision & goals
-│   ├── ROADMAP.md      # Features & milestones  
+│   ├── ROADMAP.md      # Features & milestones
 │   └── STATE.md        # Memory between sessions
 ├── codebase/           # Brownfield analysis (existing projects)
 │   ├── STACK.md
@@ -41,11 +41,13 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 ## Workflow
 
 **New project:**
+
 1. Initialize project → PROJECT.md
 2. Create roadmap → ROADMAP.md
 3. Specify features → existing workflow
 
 **Existing codebase:**
+
 1. Map codebase → 6 brownfield docs
 2. Initialize project → PROJECT.md + ROADMAP.md
 3. Specify features → existing workflow
@@ -53,17 +55,20 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 ## Context Loading Strategy
 
 **Base load (~15k tokens):**
+
 - PROJECT.md (if exists)
 - ROADMAP.md (when planning/working on features)
 - STATE.md (persistent memory)
 
 **On-demand load:**
+
 - Codebase docs (when working in existing project)
 - spec.md (when working on specific feature)
 - design.md (when implementing from design)
 - tasks.md (when executing tasks)
 
 **Never load simultaneously:**
+
 - Multiple feature specs
 - Multiple architecture docs
 - Archived documents
@@ -97,6 +102,12 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 | Trigger Pattern | Reference |
 |----------------|-----------|
 | Code analysis, search patterns | [code-analysis.md](references/code-analysis.md) |
+
+## Output Behavior
+
+**Model guidance:** After completing lightweight tasks (validation, state updates, session handoff), naturally mention once that such tasks work well with faster/cheaper models. Track in STATE.md under `Preferences` to avoid repeating. For heavy tasks (brownfield mapping, complex design), briefly note the reasoning requirements before starting.
+
+Be conversational, not robotic. Don't interrupt workflow—add as a natural closing note. Skip if user seems experienced or has already acknowledged the tip.
 
 ## Code Analysis
 

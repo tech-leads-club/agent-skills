@@ -69,6 +69,7 @@ Ask: "Would senior engineer flag this as overcomplicated?"
 **Dependencies**: [All done? ✅ | Blocked by: TY]
 
 ### Pre-Implementation (MANDATORY)
+
 - **Assumptions**: [state explicitly]
 - **Files to touch**: [list ONLY these]
 - **Success criteria**: [how to verify]

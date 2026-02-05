@@ -1,3 +1,69 @@
+## 0.8.1 (2026-02-05)
+
+### 🩹 Fixes
+
+- improve pagination logic ([a63e1d4](https://github.com/tech-leads-club/agent-skills/commit/a63e1d4))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 0.8.0 (2026-02-05)
+
+### 🚀 Features
+
+- add validation process and report template for user stories ([628a967](https://github.com/tech-leads-club/agent-skills/commit/628a967))
+- add granular task breakdown and execution plan template ([953cc41](https://github.com/tech-leads-club/agent-skills/commit/953cc41))
+- add state management documentation for decisions and blockers ([3c0746d](https://github.com/tech-leads-club/agent-skills/commit/3c0746d))
+- add specification template for capturing requirements and user stories ([96de671](https://github.com/tech-leads-club/agent-skills/commit/96de671))
+- add session handoff template for managing work transitions ([d0f7100](https://github.com/tech-leads-club/agent-skills/commit/d0f7100))
+- add roadmap creation template for project planning and tracking ([672929c](https://github.com/tech-leads-club/agent-skills/commit/672929c))
+- add project initialization template for structured setup ([b8a31b4](https://github.com/tech-leads-club/agent-skills/commit/b8a31b4))
+- add implementation guidelines for task execution process ([95a98e7](https://github.com/tech-leads-club/agent-skills/commit/95a98e7))
+- add design phase documentation for feature development ([a7c4cf0](https://github.com/tech-leads-club/agent-skills/commit/a7c4cf0))
+- add context limits documentation for file size and monitoring ([32da084](https://github.com/tech-leads-club/agent-skills/commit/32da084))
+- add coding principles documentation for implementation guidelines ([005c9d3](https://github.com/tech-leads-club/agent-skills/commit/005c9d3))
+- add code analysis tools documentation for structural search ([a9b1db4](https://github.com/tech-leads-club/agent-skills/commit/a9b1db4))
+- add brownfield mapping documentation for project analysis ([bae4def](https://github.com/tech-leads-club/agent-skills/commit/bae4def))
+- add tlc-spec-driven documentation for project planning workflow ([ef1a08d](https://github.com/tech-leads-club/agent-skills/commit/ef1a08d))
+- enhance skill and agent selection with cursor support ([bcee6be](https://github.com/tech-leads-club/agent-skills/commit/bcee6be))
+- add jira and confluence Atlassian skills ([aa22057](https://github.com/tech-leads-club/agent-skills/commit/aa22057))
+- add technical design doc creation skill ([42abb4a](https://github.com/tech-leads-club/agent-skills/commit/42abb4a))
+- add global installation option for CLI with alias tlc-skills ([8ce2464](https://github.com/tech-leads-club/agent-skills/commit/8ce2464))
+- add star history section to README ([3ee26b6](https://github.com/tech-leads-club/agent-skills/commit/3ee26b6))
+- add spec-driven development skill documentation ([fb5a22b](https://github.com/tech-leads-club/agent-skills/commit/fb5a22b))
+- add output behavior guidance for task completion ([d4931f9](https://github.com/tech-leads-club/agent-skills/commit/d4931f9))
+- add user-facing behavioral state tracking to preferences section ([5eda7f3](https://github.com/tech-leads-club/agent-skills/commit/5eda7f3))
+- add Cloudflare deploy skill ([4953e51](https://github.com/tech-leads-club/agent-skills/commit/4953e51))
+- add netlify deployment skill ([abc0610](https://github.com/tech-leads-club/agent-skills/commit/abc0610))
+- add Render skills ([696bf12](https://github.com/tech-leads-club/agent-skills/commit/696bf12))
+- add Vercel deployment skill ([d38fd88](https://github.com/tech-leads-club/agent-skills/commit/d38fd88))
+- add Figma skill ([501627b](https://github.com/tech-leads-club/agent-skills/commit/501627b))
+- add Figma implementation skill ([9b2ad66](https://github.com/tech-leads-club/agent-skills/commit/9b2ad66))
+- add gh-address-comments skill ([1fc7e0b](https://github.com/tech-leads-club/agent-skills/commit/1fc7e0b))
+- add Sentry skill ([cca6faf](https://github.com/tech-leads-club/agent-skills/commit/cca6faf))
+- add core web vitals optimization skill and reference documentation ([bb583de](https://github.com/tech-leads-club/agent-skills/commit/bb583de))
+- add SEO optimization skill with comprehensive guidelines ([26baecd](https://github.com/tech-leads-club/agent-skills/commit/26baecd))
+- add comprehensive accessibility guidelines based on WCAG 2.1 ([61dbc0e](https://github.com/tech-leads-club/agent-skills/commit/61dbc0e))
+- add best practices for web development security and compatibility ([205e35d](https://github.com/tech-leads-club/agent-skills/commit/205e35d))
+- add web quality audit skill with comprehensive guidelines ([fc6c644](https://github.com/tech-leads-club/agent-skills/commit/fc6c644))
+- add Security Best Practices skill ([c6abf16](https://github.com/tech-leads-club/agent-skills/commit/c6abf16))
+- add Security Ownership Map skill ([c431666](https://github.com/tech-leads-club/agent-skills/commit/c431666))
+- add security threat model skill with detailed guidelines and templates ([b207107](https://github.com/tech-leads-club/agent-skills/commit/b207107))
+- add gh-fix-ci skill for debugging GitHub PR checks and logs ([e34f890](https://github.com/tech-leads-club/agent-skills/commit/e34f890))
+- **skills:** add performance optimization skills ([d2aae51](https://github.com/tech-leads-club/agent-skills/commit/d2aae51))
+
+### 🩹 Fixes
+
+- resolve dependency conflicts and ensure cross-platform test compatibility ([b642481](https://github.com/tech-leads-club/agent-skills/commit/b642481))
+
+### ❤️ Thank You
+
+- Edmar Paulino
+- Felipe Rodrigues @felipfr
+- Waldemar Neto @waldemarnt
+- William Calderipe @wcalderipe
+
 ## 0.7.0 (2026-01-31)
 
 ### 🚀 Features

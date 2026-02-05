@@ -30,11 +30,13 @@ Based on PROJECT.md, decompose vision into:
 ### Features
 
 **[Feature Name]** - STATUS
+
 - [Capability 1]
 - [Capability 2]
 - [Capability 3]
 
 **[Feature Name]** - STATUS
+
 - [Capability 1]
 - [Capability 2]
 

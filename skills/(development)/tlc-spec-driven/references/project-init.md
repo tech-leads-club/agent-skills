@@ -35,6 +35,7 @@ Extract project vision via iterative Q&A (max 3-5 questions per message):
 ## Tech Stack
 
 **Core:**
+
 - Framework: [name + version]
 - Language: [name + version]
 - Database: [name]
@@ -44,11 +45,13 @@ Extract project vision via iterative Q&A (max 3-5 questions per message):
 ## Scope
 
 **v1 includes:**
+
 - [Core capability 1]
 - [Core capability 2]
 - [Core capability 3]
 
 **Explicitly out of scope:**
+
 - [What is NOT being built]
 - [What is NOT being built]
 

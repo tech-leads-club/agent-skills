@@ -28,7 +28,7 @@ If the feature involves data, define models before implementation.
 
 ## Template: `.specs/[feature]/design.md`
 
-```markdown
+````markdown
 # [Feature] Design
 
 **Spec**: `.specs/[feature]/spec.md`
@@ -47,6 +47,7 @@ graph TD
     C --> D[Data Store]
     B --> E[Component B]
 ```
+````
 
 ---
 
@@ -54,18 +55,18 @@ graph TD
 
 ### Existing Components to Leverage
 
-| Component | Location | How to Use |
-|-----------|----------|------------|
-| [Existing Component] | `src/path/to/file` | [Extend/Import/Reference] |
-| [Existing Utility] | `src/utils/file` | [How it helps] |
-| [Existing Pattern] | `src/patterns/file` | [Apply same pattern] |
+| Component            | Location            | How to Use                |
+| -------------------- | ------------------- | ------------------------- |
+| [Existing Component] | `src/path/to/file`  | [Extend/Import/Reference] |
+| [Existing Utility]   | `src/utils/file`    | [How it helps]            |
+| [Existing Pattern]   | `src/patterns/file` | [Apply same pattern]      |
 
 ### Integration Points
 
-| System | Integration Method |
-|--------|-------------------|
-| [Existing API] | [How new feature connects] |
-| [Database] | [How data connects to existing schemas] |
+| System         | Integration Method                      |
+| -------------- | --------------------------------------- |
+| [Existing API] | [How new feature connects]              |
+| [Database]     | [How data connects to existing schemas] |
 
 ---
 
@@ -98,10 +99,10 @@ graph TD
 
 ```typescript
 interface ModelName {
-  id: string;
-  field1: string;
-  field2: number;
-  createdAt: Date;
+  id: string
+  field1: string
+  field2: number
+  createdAt: Date
 }
 ```
 
@@ -111,7 +112,7 @@ interface ModelName {
 
 ```typescript
 interface AnotherModel {
-  id: string;
+  id: string
   // ...
 }
 ```
@@ -120,17 +121,17 @@ interface AnotherModel {
 
 ## Error Handling Strategy
 
-| Error Scenario | Handling | User Impact |
-|---------------|----------|-------------|
-| [Scenario 1] | [How handled] | [What user sees] |
-| [Scenario 2] | [How handled] | [What user sees] |
+| Error Scenario | Handling      | User Impact      |
+| -------------- | ------------- | ---------------- |
+| [Scenario 1]   | [How handled] | [What user sees] |
+| [Scenario 2]   | [How handled] | [What user sees] |
 
 ---
 
 ## Tech Decisions (only non-obvious ones)
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
+| Decision          | Choice          | Rationale     |
+| ----------------- | --------------- | ------------- |
 | [What we decided] | [What we chose] | [Why - brief] |
 
 ---

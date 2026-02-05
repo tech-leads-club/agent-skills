@@ -63,40 +63,50 @@ This launches an interactive wizard with 5 steps:
 
 Each step shows a **← Back** option to return to the previous step and revise your choices. A confirmation summary is shown before installation.
 
+### Global Installation (Optional)
+
+For faster access, you can install the CLI globally:
+
+```bash
+npm install -g @tech-leads-club/agent-skills
+```
+
+This exposes the `tlc-skills` binary. You can use it instead of `npx @tech-leads-club/agent-skills`.
+
 ### CLI Options
 
 ```bash
 # Interactive mode (default)
-npx @tech-leads-club/agent-skills
+tlc-skills
 
 # Install globally (to ~/.gemini/antigravity/global_skills, ~/.claude/skills, etc.)
-npx @tech-leads-club/agent-skills install -g
+tlc-skills install -g
 
 # List available skills
-npx @tech-leads-club/agent-skills list
+tlc-skills list
 
 # Install a specific skill
-npx @tech-leads-club/agent-skills install -s spec-driven-dev
+tlc-skills install -s spec-driven-dev
 
 # Install to specific agents
-npx @tech-leads-club/agent-skills install -a antigravity cursor
+tlc-skills install -a antigravity cursor
 
 # Use copy instead of symlink
-npx @tech-leads-club/agent-skills install --copy
+tlc-skills install --copy
 
 # Remove skills (interactive)
-npx @tech-leads-club/agent-skills remove
+tlc-skills remove
 
 # Remove a specific skill
-npx @tech-leads-club/agent-skills remove -s spec-driven-dev
+tlc-skills remove -s spec-driven-dev
 
 # Remove from global installation
-npx @tech-leads-club/agent-skills remove -g -s spec-driven-dev
+tlc-skills remove -g -s spec-driven-dev
 
 # Show help
-npx @tech-leads-club/agent-skills --help
-npx @tech-leads-club/agent-skills install --help
-npx @tech-leads-club/agent-skills remove --help
+tlc-skills --help
+tlc-skills install --help
+tlc-skills remove --help
 ```
 
 ---
@@ -107,10 +117,10 @@ Use the CLI to browse and install available skills:
 
 ```bash
 # Interactive mode — browse categories and select skills
-npx @tech-leads-club/agent-skills
+tlc-skills
 
 # List all available skills
-npx @tech-leads-club/agent-skills list
+tlc-skills list
 ```
 
 Skills are organized by category (development, creation, automation, etc.) and the collection is constantly growing.
@@ -302,6 +312,16 @@ If you are the author of any content included here and would like it **removed**
 ## 📄 License
 
 MIT © [Tech Leads Club](https://github.com/tech-leads-club)
+
+---
+
+## ⭐ Star History
+
+<p align="center">
+  <a href="https://star-history.com/#tech-leads-club/agent-skills&Date">
+    <img src="https://api.star-history.com/svg?repos=tech-leads-club/agent-skills&type=Date" alt="Star History Chart" />
+  </a>
+</p>
 
 ---
 

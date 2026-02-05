@@ -29,7 +29,7 @@
     "release:beta:dry": "nx release --preid beta --dry-run",
     "release:dry": "nx release --dry-run",
     "start:dev": "npm run dev --workspace=@tech-leads-club/agent-skills",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
   },
   "repository": {
     "type": "git",
@@ -58,13 +58,13 @@
     "@nx/eslint-plugin": "^22.4.5",
     "@nx/jest": "22.4.5",
     "@nx/js": "^22.4.5",
-    "@nx/next": "^22.4.5",
     "@nx/plugin": "^22.4.5",
     "@swc-node/register": "^1.11.1",
     "@swc/core": "^1.15.11",
     "@swc/helpers": "~0.5.18",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25",
+    "@types/node": "^22",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

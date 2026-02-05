@@ -61,6 +61,7 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 **Why P1**: [Why this is critical for MVP]
 
 **Acceptance Criteria**:
+
 1. WHEN [user action/event] THEN system SHALL [expected behavior]
 2. WHEN [user action/event] THEN system SHALL [expected behavior]
 3. WHEN [edge case] THEN system SHALL [graceful handling]
@@ -76,6 +77,7 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 **Why P2**: [Why this isn't MVP but important]
 
 **Acceptance Criteria**:
+
 1. WHEN [event] THEN system SHALL [behavior]
 2. WHEN [event] THEN system SHALL [behavior]
 
@@ -90,6 +92,7 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 **Why P3**: [Why this is nice-to-have]
 
 **Acceptance Criteria**:
+
 1. WHEN [event] THEN system SHALL [behavior]
 
 ---
@@ -105,6 +108,7 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 ## Success Criteria
 
 How we know the feature is successful:
+
 - [ ] [Measurable outcome - e.g., "User can complete X in < 2 minutes"]
 - [ ] [Measurable outcome - e.g., "Zero errors in Y scenario"]
 ```

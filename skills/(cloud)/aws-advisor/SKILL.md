@@ -26,13 +26,13 @@ Expert AWS consulting with accuracy-first approach using MCP tools.
 
 **IaC Selection** - Don't default to one, guide by context:
 
-| Context | Recommended | Why |
-|---------|-------------|-----|
-| Quick MVP, serverless-heavy | Serverless Framework, SST, SAM | Fast iteration, conventions |
-| Multi-cloud or existing Terraform | Terraform | Portability, team familiarity |
-| Complex AWS, TypeScript team | CDK | Type safety, constructs |
-| Simple Lambda + API | SAM | AWS-native, minimal config |
-| Full control, learning | CloudFormation | Foundational understanding |
+| Context                           | Recommended                    | Why                           |
+| --------------------------------- | ------------------------------ | ----------------------------- |
+| Quick MVP, serverless-heavy       | Serverless Framework, SST, SAM | Fast iteration, conventions   |
+| Multi-cloud or existing Terraform | Terraform                      | Portability, team familiarity |
+| Complex AWS, TypeScript team      | CDK                            | Type safety, constructs       |
+| Simple Lambda + API               | SAM                            | AWS-native, minimal config    |
+| Full control, learning            | CloudFormation                 | Foundational understanding    |
 
 **Language/Runtime** - Match user's preference:
 
@@ -44,36 +44,36 @@ Expert AWS consulting with accuracy-first approach using MCP tools.
 
 ### AWS Knowledge MCP
 
-| Tool | Use For |
-|------|---------|
-| `aws___search_documentation` | Any AWS question - search first! |
-| `aws___read_documentation` | Read full page content |
-| `aws___recommend` | Find related documentation |
+| Tool                              | Use For                              |
+| --------------------------------- | ------------------------------------ |
+| `aws___search_documentation`      | Any AWS question - search first!     |
+| `aws___read_documentation`        | Read full page content               |
+| `aws___recommend`                 | Find related documentation           |
 | `aws___get_regional_availability` | Check service availability by region |
-| `aws___list_regions` | Get all AWS regions |
+| `aws___list_regions`              | Get all AWS regions                  |
 
 ### AWS Marketplace MCP
 
-| Tool | Use For |
-|------|---------|
-| `ask_aws_marketplace` | Evaluate third-party solutions |
-| `get_aws_marketplace_solution` | Detailed solution info |
+| Tool                           | Use For                        |
+| ------------------------------ | ------------------------------ |
+| `ask_aws_marketplace`          | Evaluate third-party solutions |
+| `get_aws_marketplace_solution` | Detailed solution info         |
 
 ## Search Topic Selection
 
 **Critical**: Choose the right topic for efficient searches.
 
-| Query Type | Topic | Keywords |
-|------------|-------|----------|
-| SDK/CLI code | `reference_documentation` | "SDK", "API", "CLI", "boto3" |
-| New features | `current_awareness` | "new", "latest", "announced" |
-| Errors | `troubleshooting` | "error", "failed", "not working" |
-| CDK | `cdk_docs` / `cdk_constructs` | "CDK", "construct" |
-| Terraform | `general` + web search | "Terraform", "provider" |
-| Serverless Framework | `general` + web search | "Serverless", "sls" |
-| SAM | `cloudformation` | "SAM", "template" |
-| CloudFormation | `cloudformation` | "CFN", "template" |
-| Architecture | `general` | "best practices", "pattern" |
+| Query Type           | Topic                         | Keywords                         |
+| -------------------- | ----------------------------- | -------------------------------- |
+| SDK/CLI code         | `reference_documentation`     | "SDK", "API", "CLI", "boto3"     |
+| New features         | `current_awareness`           | "new", "latest", "announced"     |
+| Errors               | `troubleshooting`             | "error", "failed", "not working" |
+| CDK                  | `cdk_docs` / `cdk_constructs` | "CDK", "construct"               |
+| Terraform            | `general` + web search        | "Terraform", "provider"          |
+| Serverless Framework | `general` + web search        | "Serverless", "sls"              |
+| SAM                  | `cloudformation`              | "SAM", "template"                |
+| CloudFormation       | `cloudformation`              | "CFN", "template"                |
+| Architecture         | `general`                     | "best practices", "pattern"      |
 
 ## Workflows
 
@@ -110,23 +110,23 @@ Expert AWS consulting with accuracy-first approach using MCP tools.
 
 Load only when needed:
 
-| File | Load When |
-|------|-----------|
-| [mcp-guide.md](references/mcp-guide.md) | Optimizing MCP usage, complex queries |
-| [decision-trees.md](references/decision-trees.md) | Service selection questions |
-| [checklists.md](references/checklists.md) | Reviews, validations, discovery |
+| File                                              | Load When                             |
+| ------------------------------------------------- | ------------------------------------- |
+| [mcp-guide.md](references/mcp-guide.md)           | Optimizing MCP usage, complex queries |
+| [decision-trees.md](references/decision-trees.md) | Service selection questions           |
+| [checklists.md](references/checklists.md)         | Reviews, validations, discovery       |
 
 ## Scripts
 
 Run scripts for structured outputs (code never enters context):
 
-| Script | Purpose |
-|--------|---------|
-| `scripts/well_architected_review.py` | Generate W-A review questions |
-| `scripts/security_review.py` | Generate security checklist |
-| `scripts/generate_diagram.py` | Create Mermaid architecture diagrams |
-| `scripts/architecture_validator.py` | Validate architecture description |
-| `scripts/cost_considerations.py` | List cost factors to evaluate |
+| Script                               | Purpose                              |
+| ------------------------------------ | ------------------------------------ |
+| `scripts/well_architected_review.py` | Generate W-A review questions        |
+| `scripts/security_review.py`         | Generate security checklist          |
+| `scripts/generate_diagram.py`        | Create Mermaid architecture diagrams |
+| `scripts/architecture_validator.py`  | Validate architecture description    |
+| `scripts/cost_considerations.py`     | List cost factors to evaluate        |
 
 ## Code Examples
 
@@ -137,6 +137,7 @@ Run scripts for structured outputs (code never enters context):
 3. **Framework**: If applicable (Express, FastAPI, NestJS, etc.)
 
 **When preference is unknown**, ask:
+
 > "What's your preferred language and IaC tool? (e.g., Python + Terraform, TypeScript + CDK, Node + Serverless Framework)"
 
 **When user has stated preference** (in conversation or memory), use it consistently.
@@ -194,7 +195,7 @@ new lambda.Function(this, 'Handler', {
   runtime: lambda.Runtime.NODEJS_20_X,
   handler: 'index.handler',
   code: lambda.Code.fromAsset('lambda'),
-});
+})
 ```
 
 ## Response Style

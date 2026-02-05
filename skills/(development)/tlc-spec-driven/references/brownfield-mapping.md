@@ -7,6 +7,7 @@
 ## Process
 
 **High-level approach:**
+
 1. Explore directory structure systematically
 2. Identify technology stack from dependency manifests
 3. Extract patterns from representative code samples
@@ -14,6 +15,7 @@
 5. Catalog external integrations
 
 **Analysis depth:**
+
 - Sample 5-10 representative files per category
 - Focus on consistency and patterns, not exhaustive coverage
 - Extract actual examples, not assumptions
@@ -29,47 +31,56 @@
 **Size limit:** 2,000 tokens (~1,200 words)
 
 **Extract from:**
+
 - Dependency manifest files
 - Build configuration
 - Runtime configuration
 
 **Document:**
+
 ```markdown
 # Tech Stack
 
 **Analyzed:** [date]
 
 ## Core
+
 - Framework: [detected name + version]
 - Language: [detected name + version]
 - Runtime: [detected name + version]
 - Package manager: [detected manager]
 
 ## Frontend (if applicable)
+
 - UI Framework: [name + version]
 - Styling: [approach + tools]
 - State Management: [library/pattern]
 - Form Handling: [library if present]
 
 ## Backend (if applicable)
+
 - API Style: [REST/GraphQL/gRPC + framework]
 - Database: [ORM/query builder + database system]
 - Authentication: [library/approach]
 
 ## Testing
+
 - Unit: [framework]
 - Integration: [framework]
 - E2E: [framework if present]
 
 ## External Services
+
 - [Category]: [Service name]
 - [Category]: [Service name]
 
 ## Development Tools
+
 - [Tool category]: [Tool name]
 ```
 
 **Instructions:**
+
 - Extract from actual dependency files
 - Include versions for major dependencies
 - Categorize by purpose
@@ -84,11 +95,13 @@
 **Size limit:** 4,000 tokens (~2,400 words)
 
 **Extract from:**
+
 - Directory organization
 - Code structure analysis
 - Repeated patterns across files
 
 **Document:**
+
 ```markdown
 # Architecture
 
@@ -101,20 +114,24 @@
 ## Identified Patterns
 
 ### [Pattern Name]
+
 **Location:** [where this pattern lives]
 **Purpose:** [what this achieves]
 **Implementation:** [how it's structured]
 **Example:** [reference to actual file/function]
 
 ### [Pattern Name]
+
 [Same structure]
 
 ## Data Flow
 
 ### [Key Flow - e.g., Authentication/Payment/etc]
+
 [Map actual flow from code analysis]
 
 ### [Key Flow]
+
 [Map actual flow]
 
 ## Code Organization
@@ -129,6 +146,7 @@
 ```
 
 **Instructions:**
+
 - Identify patterns from actual code, not assumptions
 - Document observed architectural decisions
 - Create flow diagrams for critical paths
@@ -143,11 +161,13 @@
 **Size limit:** 3,000 tokens (~1,800 words)
 
 **Extract from:**
+
 - Analyzing 5-10 representative files
 - Identifying consistent patterns
 - Observing actual conventions in use
 
 **Document:**
+
 ```markdown
 # Code Conventions
 
@@ -196,6 +216,7 @@ Examples: [actual constant names]
 ```
 
 **Instructions:**
+
 - Extract patterns from actual code samples
 - Document observed conventions, not ideal conventions
 - Include concrete examples from codebase
@@ -210,6 +231,7 @@ Examples: [actual constant names]
 **Size limit:** 2,000 tokens (~1,200 words)
 
 **Document:**
+
 ```markdown
 # Project Structure
 
@@ -222,16 +244,19 @@ Examples: [actual constant names]
 ## Module Organization
 
 ### [Module/Area Name]
+
 **Purpose:** [what this area handles]
 **Location:** [where files live]
 **Key files:** [important files in this area]
 
 ### [Module/Area Name]
+
 [Same structure]
 
 ## Where Things Live
 
 **[Capability/Feature]:**
+
 - UI/Interface: [location]
 - Business Logic: [location]
 - Data Access: [location]
@@ -248,6 +273,7 @@ Examples: [actual constant names]
 ```
 
 **Instructions:**
+
 - Create tree view of actual directory structure
 - Limit depth to maintain readability
 - Document purpose of key directories
@@ -262,6 +288,7 @@ Examples: [actual constant names]
 **Size limit:** 4,000 tokens (~2,400 words)
 
 **Document:**
+
 ```markdown
 # Testing Infrastructure
 
@@ -280,16 +307,19 @@ Examples: [actual constant names]
 ## Testing Patterns
 
 ### Unit Tests
+
 **Approach:** [observed pattern]
 **Location:** [where unit tests live]
 [Description of actual pattern used]
 
 ### Integration Tests
+
 **Approach:** [observed pattern]
 **Location:** [where integration tests live]
 [Description of actual pattern used]
 
 ### E2E Tests
+
 **Approach:** [observed pattern if present]
 **Location:** [where E2E tests live]
 [Description of actual pattern used]
@@ -307,6 +337,7 @@ Examples: [actual constant names]
 ```
 
 **Instructions:**
+
 - Identify test frameworks from dependencies and code
 - Document actual testing patterns observed
 - Note test organization approach
@@ -321,6 +352,7 @@ Examples: [actual constant names]
 **Size limit:** 5,000 tokens (~3,000 words)
 
 **Document:**
+
 ```markdown
 # External Integrations
 
@@ -339,6 +371,7 @@ Examples: [actual constant names]
 ## API Integrations
 
 ### [API Name]
+
 **Purpose:** [what this API provides]
 **Location:** [where API client/code lives]
 **Authentication:** [auth method]
@@ -347,6 +380,7 @@ Examples: [actual constant names]
 ## Webhooks
 
 ### [Webhook Source]
+
 **Purpose:** [what events are handled]
 **Location:** [webhook handler location]
 **Events:** [event types processed]
@@ -359,6 +393,7 @@ Examples: [actual constant names]
 ```
 
 **Instructions:**
+
 - Identify integrations from code and configuration
 - Document authentication approaches
 - Note webhook handlers if present

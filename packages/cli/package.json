@@ -1,6 +1,6 @@
 {
   "name": "@tech-leads-club/agent-skills",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "description": "CLI to install and manage skills for AI coding agents",
   "author": "Tech Leads Club",
   "license": "MIT",
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "nx build",
     "dev": "tsx src/index.ts",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

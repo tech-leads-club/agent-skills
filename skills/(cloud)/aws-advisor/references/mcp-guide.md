@@ -2,11 +2,12 @@
 
 Efficient patterns for AWS MCP tools to minimize tokens and maximize accuracy.
 
-## aws___search_documentation
+## aws\_\_\_search_documentation
 
 ### Query Optimization
 
 **Good queries** (specific, 2-5 words):
+
 ```
 "Lambda cold start optimization"
 "S3 bucket policy examples"
@@ -15,6 +16,7 @@ Efficient patterns for AWS MCP tools to minimize tokens and maximize accuracy.
 ```
 
 **Bad queries** (too vague or verbose):
+
 ```
 "How do I make my Lambda faster" → Too conversational
 "AWS" → Too broad
@@ -23,15 +25,15 @@ Efficient patterns for AWS MCP tools to minimize tokens and maximize accuracy.
 
 ### Topic Selection Matrix
 
-| User Says | Topic | Query Example |
-|-----------|-------|---------------|
-| "How do I use SDK..." | `reference_documentation` | "S3 PutObject SDK v3" |
-| "What's new in..." | `current_awareness` | "Lambda 2024 features" |
-| "Getting error..." | `troubleshooting` | "AccessDenied S3 GetObject" |
-| "CDK how to..." | `cdk_docs` | "CDK Lambda Python" |
-| "CDK example..." | `cdk_constructs` | "API Gateway Lambda CDK" |
-| "CloudFormation..." | `cloudformation` | "DynamoDB table template" |
-| "Best practice..." | `general` | "serverless security patterns" |
+| User Says             | Topic                     | Query Example                  |
+| --------------------- | ------------------------- | ------------------------------ |
+| "How do I use SDK..." | `reference_documentation` | "S3 PutObject SDK v3"          |
+| "What's new in..."    | `current_awareness`       | "Lambda 2024 features"         |
+| "Getting error..."    | `troubleshooting`         | "AccessDenied S3 GetObject"    |
+| "CDK how to..."       | `cdk_docs`                | "CDK Lambda Python"            |
+| "CDK example..."      | `cdk_constructs`          | "API Gateway Lambda CDK"       |
+| "CloudFormation..."   | `cloudformation`          | "DynamoDB table template"      |
+| "Best practice..."    | `general`                 | "serverless security patterns" |
 
 ### Multi-Topic Searches
 
@@ -47,7 +49,7 @@ topics=["cdk_constructs", "cdk_docs"]
 query="Lambda function CDK"
 ```
 
-## aws___read_documentation
+## aws\_\_\_read_documentation
 
 ### When to Use
 
@@ -67,11 +69,12 @@ aws___read_documentation(url="...", start_index=5000, max_length=5000)
 
 **Stop early** if you found the answer - don't read entire doc.
 
-## aws___get_regional_availability
+## aws\_\_\_get_regional_availability
 
 ### Query Patterns
 
 **Check service availability**:
+
 ```python
 resource_type="product"
 filters=["Amazon Aurora Serverless v2", "AWS AppSync"]
@@ -79,6 +82,7 @@ region="sa-east-1"
 ```
 
 **Check API availability**:
+
 ```python
 resource_type="api"
 filters=["Lambda+CreateFunction", "S3+PutObject"]
@@ -86,6 +90,7 @@ region="eu-west-1"
 ```
 
 **Check CloudFormation support**:
+
 ```python
 resource_type="cfn"
 filters=["AWS::Lambda::Function", "AWS::DynamoDB::GlobalTable"]
@@ -98,7 +103,7 @@ region="ap-southeast-1"
 2. **Multi-region architectures**: Check consistency across regions
 3. **New features**: Verify regional rollout status
 
-## aws___recommend
+## aws\_\_\_recommend
 
 ### When to Use
 

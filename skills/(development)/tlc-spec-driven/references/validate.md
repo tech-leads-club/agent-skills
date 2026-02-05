@@ -27,6 +27,7 @@ For each user story in spec.md:
 ### P1: [Story Title]
 
 **Acceptance Criteria**:
+
 1. WHEN [X] THEN [Y] → [PASS/FAIL]
 2. WHEN [X] THEN [Y] → [PASS/FAIL]
 ```
@@ -48,15 +49,15 @@ From spec.md edge cases:
 
 For each changed file, verify against [coding-principles.md](coding-principles.md):
 
-| Check | Pass? |
-|-------|-------|
-| No features beyond what was asked | |
-| No abstractions for single-use code | |
-| No unnecessary "flexibility" added | |
-| Only touched files required for task | |
-| Didn't "improve" unrelated code | |
-| Matches existing patterns/style | |
-| Would senior engineer approve? | |
+| Check                                | Pass? |
+| ------------------------------------ | ----- |
+| No features beyond what was asked    |       |
+| No abstractions for single-use code  |       |
+| No unnecessary "flexibility" added   |       |
+| Only touched files required for task |       |
+| Didn't "improve" unrelated code      |       |
+| Matches existing patterns/style      |       |
+| Would senior engineer approve?       |       |
 
 ❌ Any "No"? → Fix before marking complete.
 
@@ -76,11 +77,11 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 
 ## Task Completion
 
-| Task | Status | Notes |
-|------|--------|-------|
-| T1 | ✅ Done | - |
-| T2 | ✅ Done | - |
-| T3 | ⚠️ Partial | [Issue] |
+| Task | Status     | Notes   |
+| ---- | ---------- | ------- |
+| T1   | ✅ Done    | -       |
+| T2   | ✅ Done    | -       |
+| T3   | ⚠️ Partial | [Issue] |
 
 ---
 
@@ -88,8 +89,8 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 
 ### P1: [Story Title] ⭐ MVP
 
-| Criterion | Result |
-|-----------|--------|
+| Criterion     | Result  |
+| ------------- | ------- |
 | WHEN X THEN Y | ✅ PASS |
 | WHEN A THEN B | ✅ PASS |
 
@@ -97,8 +98,8 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 
 ### P2: [Story Title]
 
-| Criterion | Result |
-|-----------|--------|
+| Criterion     | Result             |
+| ------------- | ------------------ |
 | WHEN X THEN Y | ❌ FAIL - [reason] |
 
 **Status**: ⚠️ P2 Issues
@@ -107,12 +108,12 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 
 ## Code Quality
 
-| Principle | Status |
-|-----------|--------|
-| Minimum code | ✅ |
-| Surgical changes | ✅ |
-| No scope creep | ✅ |
-| Matches patterns | ✅ |
+| Principle        | Status |
+| ---------------- | ------ |
+| Minimum code     | ✅     |
+| Surgical changes | ✅     |
+| No scope creep   | ✅     |
+| Matches patterns | ✅     |
 
 ---
 
@@ -136,12 +137,15 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 **Overall**: ✅ Ready | ⚠️ Issues | ❌ Not Ready
 
 **What works**:
+
 - [List]
 
 **Issues found**:
+
 - [Issue 1]: [How to fix]
 
 **Next steps**:
+
 1. [Action]
 ```
 

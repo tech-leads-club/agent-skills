@@ -4,18 +4,18 @@
 
 ## Why Granular Tasks?
 
-| Vague Task (BAD) | Granular Tasks (GOOD) |
-|------------------|----------------------|
-| "Create form" | T1: Create email input component |
-|               | T2: Add email validation function |
-|               | T3: Create submit button |
-|               | T4: Add form state management |
-|               | T5: Connect form to API |
-| "Implement auth" | T1: Create login form |
-|                  | T2: Create register form |
-|                  | T3: Add token storage utility |
-|                  | T4: Create auth API service |
-|                  | T5: Add route protection |
+| Vague Task (BAD) | Granular Tasks (GOOD)             |
+| ---------------- | --------------------------------- |
+| "Create form"    | T1: Create email input component  |
+|                  | T2: Add email validation function |
+|                  | T3: Create submit button          |
+|                  | T4: Add form state management     |
+|                  | T5: Connect form to API           |
+| "Implement auth" | T1: Create login form             |
+|                  | T2: Create register form          |
+|                  | T3: Add token storage utility     |
+|                  | T4: Create auth API service       |
+|                  | T5: Add route protection          |
 
 **Benefits of granular:**
 
@@ -78,8 +78,8 @@ Group tasks into phases. Identify what can run in parallel.
 ## Execution Plan
 
 ### Phase 1: Foundation (Sequential)
-Tasks that must be done first, in order.
 
+Tasks that must be done first, in order.
 ```
 
 T1 → T2 → T3
@@ -92,9 +92,10 @@ After foundation, these can run in parallel.
 ```
 
      ┌→ T4 ─┐
+
 T3 ──┼→ T5 ─┼──→ T8
-     └→ T6 ─┘
-       T7 ──────→
+└→ T6 ─┘
+T7 ──────→
 
 ```
 
@@ -215,12 +216,12 @@ Phase 3 (Sequential):
 
 Before approving tasks, verify they are granular enough:
 
-| Task | Scope | Status |
-|------|-------|--------|
-| T1: Create email input | 1 component | ✅ Granular |
-| T2: Add validation function | 1 function | ✅ Granular |
+| Task                            | Scope         | Status       |
+| ------------------------------- | ------------- | ------------ |
+| T1: Create email input          | 1 component   | ✅ Granular  |
+| T2: Add validation function     | 1 function    | ✅ Granular  |
 | T3: Create form with all fields | 5+ components | ❌ Split it! |
-| T4: Connect to API | 1 function | ✅ Granular |
+| T4: Connect to API              | 1 function    | ✅ Granular  |
 
 **Granularity check**:
 
@@ -265,6 +266,7 @@ Every task MUST include:
 **Where:** [File path]
 
 **Done when:**
+
 - [ ] [Specific outcome]
 - [ ] [Specific outcome]
 - [ ] Tests pass: [command]

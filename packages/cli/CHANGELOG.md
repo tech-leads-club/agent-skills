@@ -1,3 +1,27 @@
+## 0.8.1 (2026-02-05)
+
+### 🩹 Fixes
+
+- improve pagination logic ([a63e1d4](https://github.com/tech-leads-club/agent-skills/commit/a63e1d4))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 0.8.0 (2026-02-05)
+
+### 🚀 Features
+
+- enhance skill and agent selection with cursor support ([bcee6be](https://github.com/tech-leads-club/agent-skills/commit/bcee6be))
+
+### 🩹 Fixes
+
+- resolve dependency conflicts and ensure cross-platform test compatibility ([b642481](https://github.com/tech-leads-club/agent-skills/commit/b642481))
+
+### ❤️ Thank You
+
+- Edmar Paulino
+
 ## 0.7.0 (2026-01-31)
 
 ### 🚀 Features

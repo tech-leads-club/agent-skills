@@ -143,5 +143,6 @@ jobs:
         run: npx nx release --yes
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_CONFIG_PROVENANCE: true
           NODE_AUTH_TOKEN: ''
+          NPM_CONFIG_PROVENANCE: true
+          NX_NO_CLOUD: true

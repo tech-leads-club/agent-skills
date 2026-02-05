@@ -20,21 +20,26 @@
 **Task:** [task identifier] - [brief status]
 
 ## Completed ✓
+
 - [Completed work item]
 - [Completed work item]
 
 ## In Progress
+
 - [Current work] ([percentage or status])
 - Specific location: [file:line if applicable]
 
 ## Pending
+
 - [Next immediate step]
 - [Following step]
 
 ## Blockers
+
 - [Blocker description] - [impact]
 
 ## Context
+
 - Branch: [git branch if applicable]
 - Uncommitted: [files with changes]
 - Related decisions: [STATE.md references if applicable]

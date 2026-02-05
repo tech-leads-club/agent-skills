@@ -24,15 +24,15 @@ What's the priority?
 
 ### IaC Comparison Matrix
 
-| Tool | Best For | Trade-offs |
-|------|----------|------------|
+| Tool                     | Best For                                | Trade-offs                       |
+| ------------------------ | --------------------------------------- | -------------------------------- |
 | **Serverless Framework** | Fast serverless apps, plugins ecosystem | Less control over non-serverless |
-| **SST** | Full-stack serverless, local dev | Newer, smaller community |
-| **SAM** | Lambda + API Gateway, AWS native | Limited to serverless resources |
-| **CDK** | Complex infra, type safety, constructs | Learning curve, AWS-only |
-| **Terraform** | Multi-cloud, mature ecosystem, state | HCL syntax, state management |
-| **Pulumi** | Multi-cloud with real languages | Smaller community than Terraform |
-| **CloudFormation** | AWS native, no dependencies | Verbose, slow feedback loop |
+| **SST**                  | Full-stack serverless, local dev        | Newer, smaller community         |
+| **SAM**                  | Lambda + API Gateway, AWS native        | Limited to serverless resources  |
+| **CDK**                  | Complex infra, type safety, constructs  | Learning curve, AWS-only         |
+| **Terraform**            | Multi-cloud, mature ecosystem, state    | HCL syntax, state management     |
+| **Pulumi**               | Multi-cloud with real languages         | Smaller community than Terraform |
+| **CloudFormation**       | AWS native, no dependencies             | Verbose, slow feedback loop      |
 
 ### When to Switch Tools
 
@@ -192,6 +192,7 @@ Who's authenticating?
 ## Questions to Ask User
 
 ### For Architecture Decisions
+
 1. What's the expected traffic pattern? (steady vs spiky)
 2. What's acceptable latency? (p99 target)
 3. What's the budget constraint?
@@ -200,6 +201,7 @@ Who's authenticating?
 6. What's the team's expertise? (K8s? Serverless?)
 
 ### For Database Decisions
+
 1. What's the data model? (relational, document, graph)
 2. Read/write ratio?
 3. Expected data size and growth?
@@ -207,6 +209,7 @@ Who's authenticating?
 5. Need for transactions?
 
 ### For Compute Decisions
+
 1. Is the workload event-driven or long-running?
 2. Any specific runtime requirements?
 3. Need for GPU or specialized hardware?
