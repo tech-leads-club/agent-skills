@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { NpmDownloadsCard } from '../components/NpmDownloadsCard'
 import { StatsCard } from '../components/StatsCard'
 import marketplaceData from '../data/skills.json'
 
@@ -34,9 +35,10 @@ export default function HomePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
         <StatsCard label="Total Skills" value={stats.totalSkills} icon="🎯" />
         <StatsCard label="Categories" value={stats.totalCategories} icon="📂" />
+        <NpmDownloadsCard />
       </div>
 
       {/* Quick Start */}
