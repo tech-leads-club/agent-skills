@@ -11,8 +11,7 @@ jest.unstable_mockModule('node:fs', () => ({
 
 const { execSync } = await import('node:child_process')
 const { existsSync } = await import('node:fs')
-const { getGlobalSkillPath, getGlobalSkillsPath, getNpmGlobalRoot, isGloballyInstalled } =
-  await import('../global-path')
+const { getNpmGlobalRoot, isGloballyInstalled } = await import('../global-path')
 
 describe('global-path', () => {
   beforeEach(() => {
@@ -36,36 +35,14 @@ describe('global-path', () => {
     })
   })
 
-  describe('getGlobalSkillsPath', () => {
-    it('should return skills path when package is installed globally', () => {
-      ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
-      ;(existsSync as jest.Mock).mockReturnValue(true)
-      const result = getGlobalSkillsPath()
-      const expected = path.join('/home/user/.npm-global/lib/node_modules', '@tech-leads-club/agent-skills/skills')
-      expect(result).toBe(expected)
-    })
-
-    it('should return null when skills directory does not exist', () => {
-      ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
-      ;(existsSync as jest.Mock).mockReturnValue(false)
-      const result = getGlobalSkillsPath()
-      expect(result).toBeNull()
-    })
-
-    it('should return null when npm root fails', () => {
-      ;(execSync as jest.Mock).mockImplementation(() => {
-        throw new Error('command failed')
-      })
-      const result = getGlobalSkillsPath()
-      expect(result).toBeNull()
-    })
-  })
-
   describe('isGloballyInstalled', () => {
     it('should return true when package is installed globally', () => {
       ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
       ;(existsSync as jest.Mock).mockReturnValue(true)
       expect(isGloballyInstalled()).toBe(true)
+      expect(existsSync).toHaveBeenCalledWith(
+        path.join('/home/user/.npm-global/lib/node_modules', '@tech-leads-club/agent-skills'),
+      )
     })
 
     it('should return false when package is not installed globally', () => {
@@ -73,25 +50,12 @@ describe('global-path', () => {
       ;(existsSync as jest.Mock).mockReturnValue(false)
       expect(isGloballyInstalled()).toBe(false)
     })
-  })
 
-  describe('getGlobalSkillPath', () => {
-    it('should return path to specific skill when it exists', () => {
-      ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
-      ;(existsSync as jest.Mock).mockReturnValue(true)
-      const result = getGlobalSkillPath('spec-driven-dev')
-      const expected = path.join(
-        '/home/user/.npm-global/lib/node_modules',
-        '@tech-leads-club/agent-skills/skills/spec-driven-dev',
-      )
-      expect(result).toBe(expected)
-    })
-
-    it('should return null when skill does not exist', () => {
-      ;(execSync as jest.Mock).mockReturnValue('/home/user/.npm-global/lib/node_modules\n')
-      ;(existsSync as jest.Mock).mockReturnValueOnce(true).mockReturnValueOnce(false)
-      const result = getGlobalSkillPath('nonexistent-skill')
-      expect(result).toBeNull()
+    it('should return false when npm root fails', () => {
+      ;(execSync as jest.Mock).mockImplementation(() => {
+        throw new Error('command failed')
+      })
+      expect(isGloballyInstalled()).toBe(false)
     })
   })
 })
