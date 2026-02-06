@@ -185,11 +185,9 @@ description: An uncategorized skill
         '(cloud)': {
           name: 'Cloud & Infrastructure',
           description: 'Cloud-related skills',
-          priority: 1,
         },
         '(development)': {
           name: 'Development Tools',
-          priority: 2,
         },
       }
 
@@ -199,7 +197,6 @@ description: An uncategorized skill
       const content = readFileSync(join(skillsDir, '_category.json'), 'utf-8')
       const parsed = JSON.parse(content) as typeof metadata
       expect(parsed['(cloud)'].name).toBe('Cloud & Infrastructure')
-      expect(parsed['(development)'].priority).toBe(2)
     })
 
     it('should discover category folders correctly', async () => {
