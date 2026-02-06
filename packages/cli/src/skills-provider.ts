@@ -81,9 +81,7 @@ function scanLocalSkills(dirPath: string, categoryId: string): SkillInfo[] {
     .filter((skill): skill is SkillInfo => skill !== null)
 }
 
-function loadLocalCategoryMetadata(
-  skillsDir: string,
-): Record<string, { name?: string; description?: string; priority?: number }> {
+function loadLocalCategoryMetadata(skillsDir: string): Record<string, { name?: string; description?: string }> {
   const metadataPath = join(skillsDir, CATEGORY_METADATA_FILE)
   if (!existsSync(metadataPath)) return {}
 
@@ -128,11 +126,10 @@ function discoverLocalCategories(skillsDir: string): CategoryInfo[] {
         id: categoryId,
         name: meta.name ?? formatCategoryName(categoryId),
         description: meta.description,
-        priority: meta.priority ?? index,
       })
       return acc
     }, [])
-    .sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export function detectMode(): SkillsMode {

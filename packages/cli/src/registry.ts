@@ -20,7 +20,6 @@ export interface SkillMetadata {
 export interface CategoryMetadata {
   name: string
   description?: string
-  priority?: number
 }
 
 export interface SkillsRegistry {
@@ -43,7 +42,6 @@ const CONFIG = {
   maxRetries: 3,
   retryBaseDelayMs: 500,
   maxConcurrentDownloads: 10,
-  defaultCategoryPriority: 999,
 } as const
 
 const PATHS = {
@@ -249,9 +247,8 @@ export async function getRemoteCategories(): Promise<CategoryInfo[]> {
       id,
       name: meta.name,
       description: meta.description,
-      priority: meta.priority ?? CONFIG.defaultCategoryPriority,
     }))
-    .sort((a, b) => a.priority - b.priority)
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export async function getSkillMetadata(skillName: string): Promise<SkillMetadata | null> {

@@ -30,7 +30,6 @@ describe('categories', () => {
         id: 'test-category',
         name: 'Test Category',
         description: 'A test category',
-        priority: 1,
       }
       expect(category.id).toBe('test-category')
       expect(category.name).toBe('Test Category')
@@ -39,18 +38,16 @@ describe('categories', () => {
     it('should allow optional fields', () => {
       const category: CategoryInfo = { id: 'minimal', name: 'Minimal Category' }
       expect(category.description).toBeUndefined()
-      expect(category.priority).toBeUndefined()
     })
   })
 
   describe('CategoryMetadata type', () => {
     it('should map folder names to metadata', () => {
       const metadata: CategoryMetadata = {
-        '(development)': { name: 'Development Tools', description: 'Skills for development', priority: 1 },
-        '(creation)': { name: 'Skill Creation', priority: 2 },
+        '(development)': { name: 'Development Tools', description: 'Skills for development' },
+        '(creation)': { name: 'Skill Creation' },
       }
       expect(metadata['(development)'].name).toBe('Development Tools')
-      expect(metadata['(creation)'].priority).toBe(2)
     })
 
     it('should allow partial metadata', () => {
@@ -214,7 +211,6 @@ describe('categories', () => {
         '(development)': {
           name: 'Development Tools',
           description: 'Skills for developers',
-          priority: 1,
         },
       }
       await writeFile(metadataPath, JSON.stringify(metadata, null, 2))
@@ -222,7 +218,6 @@ describe('categories', () => {
       const content = readFileSync(metadataPath, 'utf-8')
       const parsed = JSON.parse(content) as CategoryMetadata
       expect(parsed['(development)'].name).toBe('Development Tools')
-      expect(parsed['(development)'].priority).toBe(1)
     })
 
     it('should work without metadata file', () => {
