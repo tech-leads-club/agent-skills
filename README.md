@@ -1,4 +1,8 @@
 <p align="center">
+  <img src=".github/assets/logo.png" alt="Tech Leads Club" width="400" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/npm/v/@tech-leads-club/agent-skills?style=flat-square&color=blue" alt="npm version" />
   <img src="https://img.shields.io/npm/dt/@tech-leads-club/agent-skills?style=flat-square&color=blue" alt="total downloads" />
   <img src="https://img.shields.io/npm/dm/@tech-leads-club/agent-skills?style=flat-square&color=blue" alt="monthly downloads" />
@@ -30,6 +34,24 @@
   Extend the capabilities of <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, <b>GitHub Copilot</b>, and more with reusable, packaged instructions.
 </p>
 
+---
+
+## 📖 Table of Contents
+
+- [✨ What are Skills?](#-what-are-skills)
+- [🤖 Supported Agents](#-supported-agents)
+- [🌟 Featured Skills](#-featured-skills)
+- [🚀 Quick Start](#-quick-start)
+- [⚡ How It Works](#-how-it-works)
+- [🛠 For Contributors](#-for-contributors)
+- [📁 Project Structure](#-project-structure)
+- [📝 Skill Structure](#-skill-structure)
+- [🔄 Release Process](#-release-process)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+
+---
+
 ## ✨ What are Skills?
 
 Skills are packaged instructions and resources that extend AI agent capabilities. Think of them as **plugins for your AI assistant** — they teach your agent new workflows, patterns, and specialized knowledge.
@@ -42,6 +64,63 @@ packages/skills-catalog/skills/
       templates/        ← File templates
       references/       ← On-demand documentation
 ```
+
+## 🤖 Supported Agents
+
+Install skills to any of these AI coding agents:
+
+**Tier 1 — Most Popular**
+
+<p align="center">
+  <a href="https://cursor.com"><img src="https://img.shields.io/badge/Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white" alt="Cursor" /></a>
+  <a href="https://claude.ai/code"><img src="https://img.shields.io/badge/Claude_Code-191919?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Code" /></a>
+  <a href="https://github.com/features/copilot"><img src="https://img.shields.io/badge/GitHub_Copilot-000000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Copilot" /></a>
+  <a href="https://codeium.com/windsurf"><img src="https://img.shields.io/badge/Windsurf-0066FF?style=for-the-badge&logo=codeium&logoColor=white" alt="Windsurf" /></a>
+  <a href="https://github.com/cline/cline"><img src="https://img.shields.io/badge/Cline-4A154B?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Cline" /></a>
+</p>
+
+**Tier 2 — Rising Stars**
+
+<p align="center">
+  <a href="https://aider.chat"><img src="https://img.shields.io/badge/Aider-FF6B6B?style=for-the-badge&logo=terminal&logoColor=white" alt="Aider" /></a>
+  <a href="https://openai.com/index/introducing-codex/"><img src="https://img.shields.io/badge/OpenAI_Codex-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI Codex" /></a>
+  <a href="https://ai.google.dev/gemini-api/docs/code-execution"><img src="https://img.shields.io/badge/Gemini_CLI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini CLI" /></a>
+  <a href="https://idx.google.com"><img src="https://img.shields.io/badge/Antigravity-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Antigravity" /></a>
+  <a href="https://roo.dev"><img src="https://img.shields.io/badge/Roo_Code-FF4081?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Roo Code" /></a>
+  <a href="https://kilocode.ai"><img src="https://img.shields.io/badge/Kilo_Code-00D4AA?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Kilo Code" /></a>
+</p>
+
+**Tier 3 — Enterprise & Specialized**
+
+<p align="center">
+  <a href="https://aws.amazon.com/q/developer/"><img src="https://img.shields.io/badge/Amazon_Q-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Amazon Q" /></a>
+  <a href="https://www.augmentcode.com"><img src="https://img.shields.io/badge/Augment-6366F1?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Augment" /></a>
+  <a href="https://www.tabnine.com"><img src="https://img.shields.io/badge/Tabnine-5B5BD6?style=for-the-badge&logo=tabnine&logoColor=white" alt="Tabnine" /></a>
+  <a href="https://github.com/opencode-ai/opencode"><img src="https://img.shields.io/badge/OpenCode-1A1A1A?style=for-the-badge&logo=terminal&logoColor=white" alt="OpenCode" /></a>
+  <a href="https://sourcegraph.com/cody"><img src="https://img.shields.io/badge/Sourcegraph_Cody-FF5733?style=for-the-badge&logo=sourcegraph&logoColor=white" alt="Sourcegraph Cody" /></a>
+</p>
+
+<p align="center">
+  <sub>Missing your favorite agent? <a href="https://github.com/tech-leads-club/agent-skills/issues/new"><strong>Open an issue</strong></a> and we'll add support!</sub>
+</p>
+
+## 🌟 Featured Skills
+
+A glimpse of what's available in our growing catalog:
+
+| Skill | Category | Description |
+|-------|----------|-------------|
+| **[tlc-spec-driven](packages/skills-catalog/skills/(development)/tlc-spec-driven)** | Development | Project and feature planning with 4 phases: Specify → Design → Tasks → Implement. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. |
+| **[aws-advisor](packages/skills-catalog/skills/(cloud)/aws-advisor)** | Cloud | Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for documentation-backed answers. |
+| **[playwright-skill](packages/skills-catalog/skills/(web-automation)/playwright-skill)** | Automation | Complete browser automation with Playwright. Test pages, fill forms, take screenshots, validate UX, and automate any browser task. |
+| **[figma](packages/skills-catalog/skills/(design)/figma)** | Design | Fetch design context from Figma and translate nodes into production code. Design-to-code implementation with MCP integration. |
+| **[security-best-practices](packages/skills-catalog/skills/(security)/security-best-practices)** | Security | Language and framework-specific security reviews. Detect vulnerabilities, generate reports, and suggest secure-by-default fixes. |
+
+<p align="center">
+  <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
+</p>
+
+---
 
 ## 🚀 Quick Start
 
