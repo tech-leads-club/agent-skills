@@ -3,26 +3,28 @@ name: Deploy Marketplace (GitHub Pages)
 on:
   push:
     branches: [main]
-  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, labeled]
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
-
-env:
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-
-
-concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  pull-requests: write
 
 jobs:
   build:
     name: Build Marketplace
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.action != 'labeled'
+    concurrency:
+      group: ci-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+      NODE_OPTIONS: "--experimental-vm-modules"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
