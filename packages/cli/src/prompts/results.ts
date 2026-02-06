@@ -27,6 +27,7 @@ export function showInstallResults(
     success: boolean
     error?: string
   }>,
+  isUpdate = false,
 ): void {
   const successful = results.filter((r) => r.success && !r.error)
   const alreadyExists = results.filter((r) => r.success && r.error === 'Already exists')
@@ -48,10 +49,11 @@ export function showInstallResults(
 
   const totalAgents = new Set(results.map((r) => r.agent)).size
   const uniqueSkillsCount = new Set(successful.map((r) => r.skill)).size
+  const action = isUpdate ? 'updated' : 'installed'
 
   console.log()
   logBarEnd(
-    `${pc.blue('✓')} ${pc.white(pc.bold(`${uniqueSkillsCount} skill(s)`))} ${pc.white('installed to')} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
+    `${pc.blue('✓')} ${pc.white(pc.bold(`${uniqueSkillsCount} skill(s)`))} ${pc.white(`${action} to`)} ${pc.white(pc.bold(`${totalAgents} agent(s)`))}`,
   )
 }
 
