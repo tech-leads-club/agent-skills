@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import { groupSkillsByCategory } from '../categories'
 import type { CategoryInfo, CategoryMetadata } from '../types'
 
 describe('categories', () => {
@@ -78,27 +79,17 @@ describe('categories', () => {
     })
   })
 
-  describe('category priority sorting', () => {
-    it('should sort categories by priority', () => {
+  describe('category alphabetical sorting', () => {
+    it('should sort categories by name', () => {
       const categories: CategoryInfo[] = [
-        { id: 'last', name: 'Last', priority: 100 },
-        { id: 'first', name: 'First', priority: 1 },
-        { id: 'middle', name: 'Middle', priority: 50 },
+        { id: 'z', name: 'Zebra' },
+        { id: 'a', name: 'Alpha' },
+        { id: 'b', name: 'Beta' },
       ]
-      const sorted = [...categories].sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
-      expect(sorted[0].id).toBe('first')
-      expect(sorted[1].id).toBe('middle')
-      expect(sorted[2].id).toBe('last')
-    })
-
-    it('should handle missing priority', () => {
-      const categories: CategoryInfo[] = [
-        { id: 'with-priority', name: 'With Priority', priority: 1 },
-        { id: 'no-priority', name: 'No Priority' },
-      ]
-      const sorted = [...categories].sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
-      expect(sorted[0].id).toBe('with-priority')
-      expect(sorted[1].id).toBe('no-priority')
+      const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name))
+      expect(sorted[0].name).toBe('Alpha')
+      expect(sorted[1].name).toBe('Beta')
+      expect(sorted[2].name).toBe('Zebra')
     })
   })
 
@@ -130,6 +121,30 @@ describe('categories', () => {
   })
 
   describe('groupSkillsByCategory logic', () => {
+    it('should group and sort skills and categories alphabetically', () => {
+      interface TestSkill {
+        name: string
+        category?: string
+      }
+
+      const skills: TestSkill[] = [
+        { name: 'z-skill', category: 'b-cat' },
+        { name: 'a-skill', category: 'b-cat' },
+        { name: 'x-skill', category: 'a-cat' },
+      ]
+
+      const grouped = groupSkillsByCategory(skills)
+      const categories = Array.from(grouped.keys())
+
+      // Categories should be sorted (A Cat, B Cat)
+      expect(categories[0].name).toBe('A Cat')
+      expect(categories[1].name).toBe('B Cat')
+
+      // Skills in B Cat should be sorted (a-skill, z-skill)
+      const bCatSkills = grouped.get(categories[1])
+      expect(bCatSkills?.map((s) => s.name)).toEqual(['a-skill', 'z-skill'])
+    })
+
     it('should group skills correctly', () => {
       interface TestSkill {
         name: string
