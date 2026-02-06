@@ -531,7 +531,7 @@
       "version": "1.0.0"
     },
     {
-      "name": "Jira Assistant",
+      "name": "jira-assistant",
       "description": "Expert in Jira operations using Atlassian MCP - automatically detects workspace Jira configuration or prompts for project details. Use for searching, creating, updating issues, managing status transitions, and handling tasks.",
       "category": "development",
       "path": "(development)/jira-assistant",
@@ -765,7 +765,7 @@
       ]
     },
     {
-      "name": "Technical Design Doc Creator",
+      "name": "technical-design-doc-creator",
       "description": "Creates comprehensive Technical Design Documents (TDD) following industry standards with mandatory sections, optional sections, and interactive gathering of missing information.",
       "category": "creation",
       "path": "(creation)/create-technical-design-doc",

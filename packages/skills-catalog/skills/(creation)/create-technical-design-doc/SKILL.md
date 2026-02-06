@@ -1,6 +1,6 @@
 ---
 description: Creates comprehensive Technical Design Documents (TDD) following industry standards with mandatory sections, optional sections, and interactive gathering of missing information.
-name: Technical Design Doc Creator
+name: technical-design-doc-creator
 ---
 
 # Technical Design Doc Creator
