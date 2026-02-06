@@ -7,13 +7,38 @@ import { runInteractiveInstall } from './prompts/install'
 import { showAvailableSkills } from './prompts/list'
 import { runInteractiveRemove } from './prompts/remove'
 import { showInstallResults, showRemoveResults } from './prompts/results'
+import type { UpdateConfig } from './prompts/utils'
 import { clearCache, clearRegistryCache, forceDownloadSkill, getCacheDir } from './registry'
 import { discoverSkillsAsync, ensureSkillAvailable, getSkillByNameAsync } from './skills-provider'
-import type { AgentType, SkillInfo } from './types'
+import type { AgentType, InstallOptions, SkillInfo } from './types'
+import { withSpinner } from './ui/spinner'
+import { logBar } from './ui/styles'
 
 const program = new Command()
 
 program.name('tlc-skills').description('Install TLC Agent Skills to your AI coding agents').version(pkg.version)
+
+function isUpdateConfig(result: InstallOptions | UpdateConfig[]): result is UpdateConfig[] {
+  return Array.isArray(result)
+}
+
+async function downloadSkills(
+  skillNames: string[],
+  allSkills: SkillInfo[],
+  forceDownload: boolean,
+): Promise<SkillInfo[]> {
+  const selectedSkills: SkillInfo[] = []
+
+  for (const skillName of skillNames) {
+    const skill = allSkills.find((s) => s.name === skillName)
+    if (skill) {
+      const path = forceDownload ? await forceDownloadSkill(skillName) : await ensureSkillAvailable(skillName)
+      if (path) selectedSkills.push({ ...skill, path })
+    }
+  }
+
+  return selectedSkills
+}
 
 program
   .command('install', { isDefault: true })
@@ -27,25 +52,44 @@ program
     if (options.skill || options.agent) {
       await runNonInteractive(options)
     } else {
-      const installOptions = await runInteractiveInstall()
-      if (!installOptions) return
+      const result = await runInteractiveInstall()
+      if (!result) return
 
       const allSkills = await discoverSkillsAsync()
-      const selectedSkills: SkillInfo[] = []
 
-      for (const skillName of installOptions.skills) {
-        const skill = allSkills.find((s) => s.name === skillName)
-        if (skill) {
-          const shouldForce = options.force || installOptions.forceUpdate
-          const path = shouldForce ? await forceDownloadSkill(skillName) : await ensureSkillAvailable(skillName)
-          if (path) {
-            selectedSkills.push({ ...skill, path })
+      if (isUpdateConfig(result)) {
+        const allResults: Awaited<ReturnType<typeof installSkills>> = []
+
+        for (const config of result) {
+          const location = config.global ? 'global' : 'local'
+          logBar()
+          const skills = await withSpinner(`Downloading ${config.skills.length} skills (${location})...`, () =>
+            downloadSkills(config.skills, allSkills, true),
+          )
+
+          const installOptions: InstallOptions = {
+            skills: config.skills,
+            agents: config.agents,
+            method: 'symlink',
+            global: config.global,
+            forceUpdate: true,
+            isUpdate: true,
           }
-        }
-      }
 
-      const results = await installSkills(selectedSkills, installOptions)
-      showInstallResults(results)
+          const results = await installSkills(skills, installOptions)
+          allResults.push(...results)
+        }
+
+        showInstallResults(allResults, true)
+      } else {
+        logBar()
+        const skills = await withSpinner(`Downloading ${result.skills.length} skills...`, () =>
+          downloadSkills(result.skills, allSkills, options.force || result.forceUpdate),
+        )
+
+        const results = await installSkills(skills, result)
+        showInstallResults(results, result.isUpdate)
+      }
     }
   })
 
