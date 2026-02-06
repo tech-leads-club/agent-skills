@@ -16,7 +16,9 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
         onClick={() => onSelectCategory(null)}
         className={clsx(
           'px-4 py-2 rounded-full text-sm font-medium transition-colors',
-          selectedCategory === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
+          selectedCategory === null
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700',
         )}
       >
         All
@@ -27,7 +29,9 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
           onClick={() => onSelectCategory(category.id)}
           className={clsx(
             'px-4 py-2 rounded-full text-sm font-medium transition-colors',
-            selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
+            selectedCategory === category.id
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700',
           )}
         >
           {category.name}

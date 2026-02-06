@@ -11,20 +11,20 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
   const installCommand = `npx @tech-leads-club/agent-skills --skill ${skill.id}`
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-start justify-between mb-3">
         <Link
           href={`/skills/${skill.id}`}
-          className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+          className="text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           {skill.name}
         </Link>
-        <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">{categoryName}</span>
+        <span className="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full">{categoryName}</span>
       </div>
 
-      <p className="text-gray-600 text-sm mb-4 line-clamp-3">{skill.description}</p>
+      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">{skill.description}</p>
 
-      <div className="flex items-center gap-3 mb-4 text-xs text-gray-500">
+      <div className="flex items-center gap-3 mb-4 text-xs text-gray-500 dark:text-gray-500">
         {skill.metadata.hasScripts && (
           <span className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -49,8 +49,8 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
         <span>{skill.metadata.lastModified}</span>
       </div>
 
-      <div className="bg-gray-50 rounded-md p-3 flex items-center justify-between">
-        <code className="text-xs text-gray-700 flex-1 overflow-x-auto">{installCommand}</code>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 flex items-center justify-between">
+        <code className="text-xs text-gray-700 dark:text-gray-300 flex-1 overflow-x-auto">{installCommand}</code>
         <CopyButton text={installCommand} />
       </div>
     </div>

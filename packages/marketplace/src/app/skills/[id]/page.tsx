@@ -28,7 +28,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       {/* Back link */}
       <Link
         href="/skills/"
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -41,16 +41,16 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
         <div className="lg:col-span-2">
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-3">
-              <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+              <span className="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full">
                 {category?.name || skill.category}
               </span>
-              <span className="text-sm text-gray-500">{skill.metadata.lastModified}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{skill.metadata.lastModified}</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">{skill.name}</h1>
-            <p className="text-lg text-gray-600 leading-relaxed">{skill.description}</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">{skill.name}</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">{skill.description}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="markdown-body">
               <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                 {skill.content}
@@ -61,22 +61,22 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 sticky top-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6 sticky top-6">
             {/* Installation Section */}
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Installation</h2>
-            <div className="bg-gray-900 rounded-lg p-4 mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Installation</h2>
+            <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 mb-4">
               <code className="text-sm text-green-400 break-all font-mono">{installCommand}</code>
             </div>
             <CopyButton text={installCommand} className="w-full mb-6" />
 
             {/* Skill Info */}
-            <div className="border-t border-gray-200 pt-6 space-y-4">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
               {(skill.metadata.hasScripts || skill.metadata.hasReferences) && (
                 <div>
-                  <p className="text-sm text-gray-600 font-medium mb-2">Includes</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">Includes</p>
                   <div className="flex flex-wrap gap-2">
                     {skill.metadata.hasScripts && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 rounded">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path
                             fillRule="evenodd"
@@ -88,7 +88,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                       </span>
                     )}
                     {skill.metadata.hasReferences && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 rounded">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                         </svg>
@@ -101,11 +101,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
               {skill.metadata.hasReferences && skill.metadata.referenceFiles.length > 0 && (
                 <div>
-                  <p className="text-sm text-gray-600 font-medium mb-2">Reference Files</p>
-                  <ul className="text-sm text-gray-700 space-y-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">Reference Files</p>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                     {skill.metadata.referenceFiles.map((file) => (
                       <li key={file} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -113,7 +113,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                           />
                         </svg>
-                        <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{file}</code>
+                        <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{file}</code>
                       </li>
                     ))}
                   </ul>
@@ -122,12 +122,12 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
 
             {/* GitHub Link */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <a
                 href={`https://github.com/tech-leads-club/agent-skills/tree/main/${skill.path}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm font-medium"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path
