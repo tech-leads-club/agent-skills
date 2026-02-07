@@ -25,7 +25,6 @@ interface SkillMetadata {
 interface CategoryMetadata {
   name: string
   description?: string
-  priority?: number
 }
 
 interface SkillsRegistry {
@@ -193,7 +192,6 @@ function generateRegistry(): SkillsRegistry {
     categories['uncategorized'] = {
       name: 'Uncategorized',
       description: 'Skills without a specific category',
-      priority: 999,
     }
   }
 

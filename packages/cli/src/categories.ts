@@ -85,7 +85,7 @@ export function getCategories(): CategoryInfo[] {
     index++
   }
 
-  categories.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
+  categories.sort((a, b) => a.name.localeCompare(b.name))
   return categories
 }
 
@@ -171,12 +171,17 @@ export function groupSkillsByCategory<T extends { name: string; category?: strin
     if (skillList.length === 0) grouped.delete(category)
   }
 
-  // Sort by priority
+  // Sort skills within each category and sort categories by name
   const sortedGrouped = new Map<CategoryInfo, T[]>()
-  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100))
+  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => a.name.localeCompare(b.name))
+
   for (const cat of sortedCategories) {
     const skills = grouped.get(cat)
-    if (skills) sortedGrouped.set(cat, skills)
+    if (skills) {
+      // Sort skills alphabetically by name
+      skills.sort((a, b) => a.name.localeCompare(b.name))
+      sortedGrouped.set(cat, skills)
+    }
   }
 
   return sortedGrouped
