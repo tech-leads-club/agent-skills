@@ -17,7 +17,6 @@ jobs:
   build:
     name: Build Marketplace
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action != 'labeled'
     concurrency:
       group: ci-${{ github.event.pull_request.number }}
       cancel-in-progress: true
