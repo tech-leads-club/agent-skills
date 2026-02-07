@@ -5,7 +5,16 @@ on:
     workflows: ['CI/CD Pipeline']
     types: [completed]
     branches: [main]
+<<<<<<< HEAD
   workflow_dispatch: {}
+||||||| parent of 1b1622c (fix: fix link to github folder)
+  pull_request:
+    types: [opened, synchronize, labeled]
+=======
+  pull_request:
+    types: [opened, synchronize, labeled]
+  workflow_dispatch: {}
+>>>>>>> 1b1622c (fix: fix link to github folder)
 
 permissions:
   contents: read
