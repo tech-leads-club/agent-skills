@@ -51,6 +51,9 @@
       "description": "Skills for browser automation and web testing",
       "priority": 10
     },
+    "architecture": {
+      "name": "Architecture"
+    },
     "uncategorized": {
       "name": "Uncategorized",
       "description": "Skills without a specific category",
@@ -429,6 +432,39 @@
       "version": "1.0.0"
     },
     {
+      "name": "component-common-domain-detection",
+      "description": "Identifies duplicate domain functionality across components and suggests consolidation opportunities. Use when finding common domain logic, detecting duplicate functionality, analyzing shared classes, planning component consolidation, or when the user asks about common components, duplicate code, or domain consolidation.",
+      "category": "architecture",
+      "path": "(architecture)/component-common-domain-detection",
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "component-flattening-analysis",
+      "description": "Identifies and fixes component hierarchy issues by detecting orphaned classes in root namespaces and ensuring components exist only as leaf nodes. Use when analyzing component structure, finding orphaned classes, flattening component hierarchies, removing component nesting, or when the user asks about component flattening, orphaned classes, or component structure cleanup.",
+      "category": "architecture",
+      "path": "(architecture)/component-flattening-analysis",
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "component-identification-sizing",
+      "description": "Identifies architectural components in codebases and calculates size metrics for decomposition planning. Use when analyzing codebase structure, planning monolithic decomposition, identifying oversized components, calculating component statistics, or when the user asks about component analysis, codebase sizing, or architectural decomposition.",
+      "category": "architecture",
+      "path": "(architecture)/component-identification-sizing",
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
       "name": "confluence-assistant",
       "description": "Expert in Confluence operations using Atlassian MCP - automatically detects workspace Confluence configuration or prompts for site details. Use for searching, creating, updating pages, managing spaces, and adding comments with proper Markdown formatting.",
       "category": "development",
@@ -469,6 +505,17 @@
       ]
     },
     {
+      "name": "decomposition-planning-roadmap",
+      "description": "Creates structured decomposition plans and roadmaps for migrating monolithic applications. Use when planning decomposition, creating migration roadmaps, prioritizing decomposition work, tracking decomposition progress, or when the user asks about decomposition planning, migration strategy, or architectural roadmap.",
+      "category": "architecture",
+      "path": "(architecture)/decomposition-planning-roadmap",
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
       "name": "docs-writer",
       "description": "Use this skill for writing, reviewing, and editing documentation (`/docs` directory or any .md file).",
       "category": "development",
@@ -476,6 +523,29 @@
       "files": [
         "SKILL.md",
         "references/style-guide.md"
+      ]
+    },
+    {
+      "name": "domain-analysis",
+      "description": "Identifies subdomains and suggests bounded contexts in any codebase following DDD Strategic Design. Use when analyzing domain boundaries, identifying business subdomains, assessing domain cohesion, mapping bounded contexts, or when the user asks about DDD strategic design, domain analysis, or subdomain classification.",
+      "category": "architecture",
+      "path": "(architecture)/domain-analysis",
+      "files": [
+        "EXAMPLES.md",
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "domain-identification-grouping",
+      "description": "Groups components into logical domains for service-based architecture. Use when creating component domains, grouping components by business functionality, planning domain services, analyzing component relationships, or when the user asks about domain grouping, component domains, or domain identification.",
+      "category": "architecture",
+      "path": "(architecture)/domain-identification-grouping",
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
       ]
     },
     {
