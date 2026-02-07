@@ -1,6 +1,6 @@
 ---
 description: Expert in Jira operations using Atlassian MCP - automatically detects workspace Jira configuration or prompts for project details. Use for searching, creating, updating issues, managing status transitions, and handling tasks.
-name: Jira Assistant
+name: jira-assistant
 ---
 
 # Jira Assistant

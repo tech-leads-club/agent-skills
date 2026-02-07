@@ -1,52 +1,42 @@
 {
   "(cloud)": {
     "name": "Cloud & Infrastructure",
-    "description": "Skills for cloud management, AWS, and DevOps",
-    "priority": 1
+    "description": "Skills for cloud management, AWS, and DevOps"
   },
   "(creation)": {
     "name": "Skill & Agent Creation",
-    "description": "Skills for creating new skills and subagents",
-    "priority": 2
+    "description": "Skills for creating new skills and subagents"
   },
   "(design)": {
     "name": "Design",
-    "description": "Skills for UI/UX design and design systems",
-    "priority": 3
+    "description": "Skills for UI/UX design and design systems"
   },
   "(development)": {
     "name": "Development",
-    "description": "Skills for software development workflows",
-    "priority": 4
+    "description": "Skills for software development workflows"
   },
   "(monitoring)": {
     "name": "Monitoring",
-    "description": "Skills for observability, logging, and system monitoring",
-    "priority": 5
+    "description": "Skills for observability, logging, and system monitoring"
   },
   "(performance)": {
     "name": "Performance",
-    "description": "Skills for web performance optimization, audits, and monitoring",
-    "priority": 6
+    "description": "Skills for web performance optimization, audits, and monitoring"
   },
   "(quality)": {
     "name": "Quality",
-    "description": "Skills for code quality, testing, and best practices",
-    "priority": 7
+    "description": "Skills for code quality, testing, and best practices"
   },
   "(security)": {
     "name": "Security",
-    "description": "Skills for security analysis, vulnerability detection, and secure coding",
-    "priority": 8
+    "description": "Skills for security analysis, vulnerability detection, and secure coding"
   },
   "(tooling)": {
     "name": "Tooling",
-    "description": "Skills for tooling and utilities",
-    "priority": 9
+    "description": "Skills for tooling and utilities"
   },
   "(web-automation)": {
     "name": "Web Automation",
-    "description": "Skills for browser automation and web testing",
-    "priority": 10
+    "description": "Skills for browser automation and web testing"
   }
 }
