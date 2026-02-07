@@ -1,3 +1,20 @@
+## 0.11.0 (2026-02-06)
+
+### 🚀 Features
+
+- add marketplace ([29ebc5b](https://github.com/tech-leads-club/agent-skills/commit/29ebc5b))
+- theme toggle with System, Dark, Light ([1a5bc5d](https://github.com/tech-leads-club/agent-skills/commit/1a5bc5d))
+- add deploy workflow ([76d08ae](https://github.com/tech-leads-club/agent-skills/commit/76d08ae))
+- add deploy workflow ([ce74762](https://github.com/tech-leads-club/agent-skills/commit/ce74762))
+- update ddd analisys skill ([1de2125](https://github.com/tech-leads-club/agent-skills/commit/1de2125))
+- add monolithic decomposition skill ([33b5ddb](https://github.com/tech-leads-club/agent-skills/commit/33b5ddb))
+- add refactoring skills and move to the right place ([959e3d9](https://github.com/tech-leads-club/agent-skills/commit/959e3d9))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+- William Reis Fernandes
+
 ## 0.10.0 (2026-02-06)
 
 ### 🚀 Features
