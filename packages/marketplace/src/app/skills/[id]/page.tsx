@@ -124,7 +124,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             {/* GitHub Link */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <a
-                href={`https://github.com/tech-leads-club/agent-skills/tree/main/${skill.path}`}
+                href={`https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm font-medium"
