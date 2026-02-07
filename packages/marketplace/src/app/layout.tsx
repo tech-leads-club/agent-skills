@@ -5,7 +5,7 @@ import './global.css'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
 export const metadata = {
-  title: 'Agent Skills Marketplace',
+  title: 'Agent Skills | Tech Leads Club',
   description: 'A curated collection of skills for AI coding agents',
   icons: {
     icon: [
