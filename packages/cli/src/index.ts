@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import pc from 'picocolors'
 
 import pkg from '../package.json' with { type: 'json' }
+
 import { installSkills, removeSkill } from './installer'
 import { runInteractiveInstall } from './prompts/install'
 import { showAvailableSkills } from './prompts/list'
