@@ -44,6 +44,43 @@
       "fallbackCurrentVersionResolver": "disk",
       "preVersionCommand": "npx nx run-many -t build --skip-nx-cache"
     },
+    "conventionalCommits": {
+      "types": {
+        "feat": {
+          "semverBump": "minor"
+        },
+        "fix": {
+          "semverBump": "patch"
+        },
+        "perf": {
+          "semverBump": "patch"
+        },
+        "refactor": {
+          "semverBump": "patch"
+        },
+        "chore": {
+          "semverBump": "patch"
+        },
+        "test": {
+          "semverBump": "patch"
+        },
+        "docs": {
+          "semverBump": "patch"
+        },
+        "style": {
+          "semverBump": "patch"
+        },
+        "build": {
+          "semverBump": "patch"
+        },
+        "ci": {
+          "semverBump": "patch"
+        },
+        "revert": {
+          "semverBump": "patch"
+        }
+      }
+    },
     "changelog": {
       "automaticFromRef": true,
       "projectChangelogs": true,

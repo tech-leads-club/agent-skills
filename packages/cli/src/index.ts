@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import pc from 'picocolors'
 
 import pkg from '../package.json' with { type: 'json' }
+
 import { installSkills, removeSkill } from './installer'
 import { runInteractiveInstall } from './prompts/install'
 import { showAvailableSkills } from './prompts/list'
@@ -123,7 +124,7 @@ program
   .description('Update installed skills to the latest version')
   .option('-s, --skill <name>', 'Update a specific skill')
   .action(async (options) => {
-    console.log(pc.blue('⏳ Checking for updates...'))
+    console.log(pc.blue('⏳ Checking for skill updates...'))
 
     clearRegistryCache()
 

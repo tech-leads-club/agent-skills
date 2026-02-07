@@ -1,3 +1,13 @@
+## 0.11.1 (2026-02-07)
+
+### 🩹 Fixes
+
+- update log message to trigger release ([0e483f6](https://github.com/tech-leads-club/agent-skills/commit/0e483f6))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.11.0 (2026-02-06)
 
 This was a version bump only for @tech-leads-club/agent-skills to align it with other projects, there were no code changes.

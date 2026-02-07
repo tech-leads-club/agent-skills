@@ -1,3 +1,20 @@
+## 0.11.1 (2026-02-07)
+
+### 🚀 Features
+
+- add favicon to hp page ([7f94f1f](https://github.com/tech-leads-club/agent-skills/commit/7f94f1f))
+- add favicon to hp page ([96d19fb](https://github.com/tech-leads-club/agent-skills/commit/96d19fb))
+- add favicon to hp page ([049368d](https://github.com/tech-leads-club/agent-skills/commit/049368d))
+
+### 🩹 Fixes
+
+- update log message to trigger release ([0e483f6](https://github.com/tech-leads-club/agent-skills/commit/0e483f6))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+- William Reis Fernandes
+
 ## 0.11.0 (2026-02-06)
 
 ### 🚀 Features
