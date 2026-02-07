@@ -3,20 +3,20 @@ import { ThemeProvider } from '../components/ThemeProvider'
 import { ThemeToggle } from '../components/ThemeToggle'
 import './global.css'
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
 export const metadata = {
   title: 'Agent Skills Marketplace',
   description: 'A curated collection of skills for AI coding agents',
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: `${basePath}/favicon.ico`, sizes: 'any' },
+      { url: `${basePath}/favicon-32x32.png`, sizes: '32x32', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: `${basePath}/apple-touch-icon.png`,
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+export default function RootLayout({ children }: { children: React.ReactNode }) {  
   
   return (
     <html lang="en" suppressHydrationWarning>
