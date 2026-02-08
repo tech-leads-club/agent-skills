@@ -20,6 +20,7 @@ describe('agents', () => {
         'tabnine',
         'opencode',
         'sourcegraph',
+        'droid',
       ]
 
       for (const agentName of expectedAgents) {

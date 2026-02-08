@@ -145,6 +145,14 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalSkillsDir: join(home, '.sourcegraph/skills'),
     detectInstalled: () => existsSync(join(home, '.sourcegraph')) || existsSync(join(projectRoot, '.sourcegraph')),
   },
+  droid: {
+    name: 'droid',
+    displayName: 'Droid (Factory.ai)',
+    description: 'AI software engineer by Factory.ai',
+    skillsDir: '.factory/skills',
+    globalSkillsDir: join(home, '.factory/skills'),
+    detectInstalled: () => existsSync(join(home, '.factory')) || existsSync(join(projectRoot, '.factory')),
+  },
 }
 
 export function detectInstalledAgents(): AgentType[] {

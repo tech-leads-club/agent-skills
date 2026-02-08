@@ -30,6 +30,7 @@ export type AgentType =
   | 'tabnine'
   | 'opencode'
   | 'sourcegraph'
+  | 'droid'
 
 export interface AgentConfig {
   name: string
