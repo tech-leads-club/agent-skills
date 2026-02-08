@@ -88,6 +88,7 @@ Install skills to any of these AI coding agents:
   <a href="https://idx.google.com"><img src="https://img.shields.io/badge/Antigravity-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Antigravity" /></a>
   <a href="https://roo.dev"><img src="https://img.shields.io/badge/Roo_Code-FF4081?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Roo Code" /></a>
   <a href="https://kilocode.ai"><img src="https://img.shields.io/badge/Kilo_Code-00D4AA?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Kilo Code" /></a>
+  <a href="https://docs.trae.ai"><img src="https://img.shields.io/badge/TRAE-8B5CF6?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="TRAE" /></a>
 </p>
 
 **Tier 3 — Enterprise & Specialized**

@@ -31,6 +31,7 @@ export type AgentType =
   | 'opencode'
   | 'sourcegraph'
   | 'droid'
+  | 'trae'
 
 export interface AgentConfig {
   name: string
