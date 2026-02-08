@@ -22,17 +22,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors">
         <ThemeProvider>
           <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
               <div className="flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-8 w-auto" />
-                  <div className="flex flex-col">
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Agent Skills</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">by Tech Leads Club</span>
+                <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0">
+                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-6 sm:h-8 w-auto shrink-0" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">Agent Skills</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight hidden sm:block">by Tech Leads Club</span>
                   </div>
                 </Link>
-                <div className="flex items-center gap-6">
-                  <Link href="/skills" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
+                <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                  <Link href="/skills" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
                     Skills
                   </Link>
                   <a
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>GitHub</span>
+                    <span className="hidden sm:inline">GitHub</span>
                   </a>
                   <ThemeToggle />
                 </div>
