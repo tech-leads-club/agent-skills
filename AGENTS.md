@@ -36,7 +36,7 @@ Refer to `packages/cli/src/agents.ts` for the canonical config.
 | Tier | Agents | Notes |
 | :--- | :--- | :--- |
 | **1 (Core)** | Cursor, Claude Code, GitHub Copilot, Windsurf, Cline | Most active support & testing. |
-| **2 (Rising)** | Aider, OpenAI Codex, Gemini CLI, Antigravity, Roo Code, Kilo Code | Full installation support. |
+| **2 (Rising)** | Aider, OpenAI Codex, Gemini CLI, Antigravity, Roo Code, Kilo Code, TRAE | Full installation support. |
 | **3 (Ent)** | Amazon Q, Augment, Tabnine, OpenCode, Sourcegraph Cody | Specialized/Enterprise usage. |
 
 ## 4. Operational Procedures

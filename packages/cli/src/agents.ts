@@ -100,6 +100,14 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalSkillsDir: join(home, '.kilocode/skills'),
     detectInstalled: () => existsSync(join(home, '.kilocode')) || existsSync(join(projectRoot, '.kilocode')),
   },
+  trae: {
+    name: 'trae',
+    displayName: 'TRAE',
+    description: 'AI IDE with SOLO mode and custom agents',
+    skillsDir: '.trae/skills',
+    globalSkillsDir: join(home, '.trae/skills'),
+    detectInstalled: () => existsSync(join(home, '.trae')) || existsSync(join(projectRoot, '.trae')),
+  },
 
   // Tier 3: Enterprise & specialized
   'amazon-q': {
