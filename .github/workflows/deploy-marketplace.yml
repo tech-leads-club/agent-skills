@@ -56,7 +56,6 @@ jobs:
         run: npx nx run marketplace:export || NX_NO_CLOUD=true npx nx run marketplace:export
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

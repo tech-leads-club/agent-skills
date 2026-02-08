@@ -3,16 +3,15 @@ import { ThemeProvider } from '../components/ThemeProvider'
 import { ThemeToggle } from '../components/ThemeToggle'
 import './global.css'
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
 export const metadata = {
   title: 'Agent Skills | Tech Leads Club',
   description: 'A curated collection of skills for AI coding agents',
   icons: {
     icon: [
-      { url: `${basePath}/favicon.ico`, sizes: 'any' },
-      { url: `${basePath}/favicon-32x32.png`, sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: `${basePath}/apple-touch-icon.png`,
+    apple: '/apple-touch-icon.png',
   },
 }
 
@@ -26,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <img src={`${basePath}/tlc-logo-dark.svg`} alt="Tech Leads Club" className="h-8 w-auto" />
+                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-8 w-auto" />
                   <div className="flex flex-col">
                     <span className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Agent Skills</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">by Tech Leads Club</span>
