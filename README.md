@@ -34,6 +34,10 @@
   Extend the capabilities of <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, <b>GitHub Copilot</b>, and more with reusable, packaged instructions.
 </p>
 
+<p align="center">
+  <a href="https://tech-leads-club.github.io/agent-skills/" target="_blank">https://tech-leads-club.github.io/agent-skills/</a>
+</p>
+
 ## 📖 Table of Contents
 
 - [✨ What are Skills?](#-what-are-skills)
