@@ -98,6 +98,7 @@ Install skills to any of these AI coding agents:
   <a href="https://www.tabnine.com"><img src="https://img.shields.io/badge/Tabnine-5B5BD6?style=for-the-badge&logo=tabnine&logoColor=white" alt="Tabnine" /></a>
   <a href="https://github.com/opencode-ai/opencode"><img src="https://img.shields.io/badge/OpenCode-1A1A1A?style=for-the-badge&logo=terminal&logoColor=white" alt="OpenCode" /></a>
   <a href="https://sourcegraph.com/cody"><img src="https://img.shields.io/badge/Sourcegraph_Cody-FF5733?style=for-the-badge&logo=sourcegraph&logoColor=white" alt="Sourcegraph Cody" /></a>
+  <a href="https://www.factory.ai"><img src="https://img.shields.io/badge/Droid_(Factory.ai)-121212?style=for-the-badge&logo=robot&logoColor=white" alt="Droid (Factory.ai)" /></a>
 </p>
 
 <p align="center">
@@ -108,13 +109,13 @@ Install skills to any of these AI coding agents:
 
 A glimpse of what's available in our growing catalog:
 
-| Skill | Category | Description |
-|-------|----------|-------------|
-| **[tlc-spec-driven](packages/skills-catalog/skills/(development)/tlc-spec-driven)** | Development | Project and feature planning with 4 phases: Specify → Design → Tasks → Implement. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. |
-| **[aws-advisor](packages/skills-catalog/skills/(cloud)/aws-advisor)** | Cloud | Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for documentation-backed answers. |
-| **[playwright-skill](packages/skills-catalog/skills/(web-automation)/playwright-skill)** | Automation | Complete browser automation with Playwright. Test pages, fill forms, take screenshots, validate UX, and automate any browser task. |
-| **[figma](packages/skills-catalog/skills/(design)/figma)** | Design | Fetch design context from Figma and translate nodes into production code. Design-to-code implementation with MCP integration. |
-| **[security-best-practices](packages/skills-catalog/skills/(security)/security-best-practices)** | Security | Language and framework-specific security reviews. Detect vulnerabilities, generate reports, and suggest secure-by-default fixes. |
+| Skill                                                                                              | Category    | Description                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[tlc-spec-driven](<packages/skills-catalog/skills/(development)/tlc-spec-driven>)**              | Development | Project and feature planning with 4 phases: Specify → Design → Tasks → Implement. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. |
+| **[aws-advisor](<packages/skills-catalog/skills/(cloud)/aws-advisor>)**                            | Cloud       | Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for documentation-backed answers.                          |
+| **[playwright-skill](<packages/skills-catalog/skills/(web-automation)/playwright-skill>)**         | Automation  | Complete browser automation with Playwright. Test pages, fill forms, take screenshots, validate UX, and automate any browser task.                                                 |
+| **[figma](<packages/skills-catalog/skills/(design)/figma>)**                                       | Design      | Fetch design context from Figma and translate nodes into production code. Design-to-code implementation with MCP integration.                                                      |
+| **[security-best-practices](<packages/skills-catalog/skills/(security)/security-best-practices>)** | Security    | Language and framework-specific security reviews. Detect vulnerabilities, generate reports, and suggest secure-by-default fixes.                                                   |
 
 <p align="center">
   <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
@@ -218,14 +219,14 @@ npm run build
 
 ### Development Commands
 
-| Command               | Description                        |
-| --------------------- | ---------------------------------- |
-| `npm run start:dev`   | Run CLI locally (interactive mode) |
-| `npm run g <name>`    | Generate a new skill               |
-| `npm run build`       | Build all packages                 |
-| `npm run test`        | Run all tests                      |
-| `npm run lint`        | Lint codebase                      |
-| `npm run format`      | Format code with Prettier          |
+| Command             | Description                        |
+| ------------------- | ---------------------------------- |
+| `npm run start:dev` | Run CLI locally (interactive mode) |
+| `npm run g <name>`  | Generate a new skill               |
+| `npm run build`     | Build all packages                 |
+| `npm run test`      | Run all tests                      |
+| `npm run lint`      | Lint codebase                      |
+| `npm run format`    | Format code with Prettier          |
 
 ### Creating a New Skill
 
