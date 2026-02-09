@@ -11,6 +11,31 @@ import {
   SYMBOL,
 } from './styles'
 
+const UI_CONSTANTS = {
+  MARGIN_X: 2,
+  MARGIN_Y: 1,
+  PAGE_HISTORY: 5,
+  HEADER_HEIGHT: 2,
+  FOOTER_HEIGHT: 2,
+  MIN_PAGE_SIZE: 5,
+  MAX_PAGE_SIZE: 20,
+  DEFAULT_WIDTH: 80,
+  DEFAULT_HEIGHT: 20,
+}
+
+function getTerminalWidth(): number {
+  return process.stdout.columns || UI_CONSTANTS.DEFAULT_WIDTH
+}
+
+function getTerminalHeight(): number {
+  return process.stdout.rows || UI_CONSTANTS.DEFAULT_HEIGHT
+}
+
+function truncateText(text: string, maxWidth: number): string {
+  if (text.length <= maxWidth) return text
+  return text.slice(0, Math.max(0, maxWidth - 3)) + '...'
+}
+
 export interface Option<T> {
   value: T
   label: string
@@ -59,19 +84,35 @@ function getCursor(prompt: unknown): number {
   return (prompt as PromptWithCursor).cursor ?? 0
 }
 
+function renderPaginatedList<T>(
+  title: string,
+  items: T[],
+  cursor: number,
+  pageSize: number,
+  renderItem: (item: T, index: number, isActive: boolean) => string,
+  navigationHint: string,
+): string {
+  const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(cursor, items.length, pageSize)
+
+  const window = items.slice(startIndex, endIndex)
+  const optionLines = window.map((item, i) => {
+    const absoluteIndex = startIndex + i
+    const rendered = renderItem(item, absoluteIndex, absoluteIndex === cursor)
+    return `${pc.blue(S_BAR)}  ${rendered}`
+  })
+
+  if (hasScrollUp || startIndex > 0) optionLines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
+  if (hasScrollDown || endIndex < items.length) optionLines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
+
+  return `${title}${optionLines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${navigationHint}`
+}
+
 export async function blueSelectWithBack<T>(
   message: string,
   options: Option<T>[],
   initialValue?: T,
   allowBack = true,
 ): Promise<T | symbol> {
-  const renderOption = (option: Option<T>, isActive: boolean): string => {
-    const radio = isActive ? pc.blue(S_RADIO_ACTIVE) : pc.gray(S_RADIO_INACTIVE)
-    const label = isActive ? pc.blue(option.label) : pc.white(option.label)
-    const hint = isActive && option.hint ? pc.dim(pc.gray(` - ${option.hint}`)) : ''
-    return `${radio} ${label}${hint}`
-  }
-
   const prompt = new SelectPrompt({
     options,
     initialValue,
@@ -83,23 +124,22 @@ export async function blueSelectWithBack<T>(
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
           const PAGE_SIZE = getSafePageSize()
-          const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
+          const maxWidth = getTerminalWidth() - 10
+
+          return renderPaginatedList(
+            title,
+            this.options,
             this.cursor,
-            this.options.length,
             PAGE_SIZE,
+            (option, _, isActive) => {
+              const radio = isActive ? pc.blue(S_RADIO_ACTIVE) : pc.gray(S_RADIO_INACTIVE)
+              const truncatedLabel = truncateText(option.label, maxWidth)
+              const label = isActive ? pc.blue(truncatedLabel) : pc.white(truncatedLabel)
+              const hint = isActive && option.hint ? pc.dim(pc.gray(` - ${option.hint}`)) : ''
+              return `${radio} ${label}${hint}`
+            },
+            buildNavigationHint(['↑↓ navigate'], allowBack),
           )
-
-          const window = this.options.slice(startIndex, endIndex)
-          const optionLines = window.map((option, i) => {
-            const absoluteIndex = startIndex + i
-            return `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, absoluteIndex === this.cursor)}`
-          })
-
-          if (hasScrollUp || startIndex > 0) optionLines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
-          if (hasScrollDown || endIndex < this.options.length)
-            optionLines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
-
-          return `${title}${optionLines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate'], allowBack)}`
         },
       }
       return (stateRenderers[this.state] ?? stateRenderers.default)()
@@ -118,15 +158,6 @@ export async function blueMultiSelectWithBack<T>(
   allowBack = true,
   initialCursor = 0,
 ): Promise<{ value: T[] | symbol; cursor: number }> {
-  const renderOption = (option: Option<T>, state: OptionState): string => {
-    const isSelected = state === 'selected' || state === 'selected-active'
-    const isActive = state === 'active' || state === 'selected-active'
-    const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.gray(S_CHECKBOX_INACTIVE)
-    const label = isActive ? pc.blue(option.label) : pc.white(option.label)
-    const hint = isActive && option.hint ? pc.dim(pc.gray(` (${option.hint})`)) : ''
-    return `${checkbox} ${label}${hint}`
-  }
-
   const prompt = new MultiSelectPrompt({
     options,
     initialValues,
@@ -143,24 +174,25 @@ export async function blueMultiSelectWithBack<T>(
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
           const PAGE_SIZE = getSafePageSize()
-          const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
+          const maxWidth = getTerminalWidth() - 10
+
+          return renderPaginatedList(
+            title,
+            this.options,
             this.cursor,
-            this.options.length,
             PAGE_SIZE,
+            (option, _, isActive) => {
+              const state = getOptionState(this.value.includes(option.value), isActive)
+              const isSelected = state === 'selected' || state === 'selected-active'
+              const isStateActive = state === 'active' || state === 'selected-active'
+              const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.gray(S_CHECKBOX_INACTIVE)
+              const truncatedLabel = truncateText(option.label, maxWidth)
+              const label = isStateActive ? pc.blue(truncatedLabel) : pc.white(truncatedLabel)
+              const hint = isStateActive && option.hint ? pc.dim(pc.gray(` (${option.hint})`)) : ''
+              return `${checkbox} ${label}${hint}`
+            },
+            buildNavigationHint(['↑↓ navigate', 'space select'], allowBack),
           )
-
-          const window = this.options.slice(startIndex, endIndex)
-          const optionLines = window.map((option, i) => {
-            const absoluteIndex = startIndex + i
-            const state = getOptionState(this.value.includes(option.value), absoluteIndex === this.cursor)
-            return `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, state)}`
-          })
-
-          if (hasScrollUp || startIndex > 0) optionLines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
-          if (hasScrollDown || endIndex < this.options.length)
-            optionLines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
-
-          return `${title}${optionLines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate', 'space select'], allowBack)}`
         },
       }
       return (stateRenderers[this.state] ?? stateRenderers.default)()
@@ -221,10 +253,10 @@ function flattenGroupedOptions<T>(groupedOptions: GroupMultiSelectOptions<T>): E
 }
 
 function getSafePageSize(): number {
-  const terminalHeight = process.stdout.rows || 20
-  // Title (2) + Footer (2) + Margins (2) = 6 lines reserved
-  const availableHeight = Math.max(5, terminalHeight - 8)
-  return Math.min(20, availableHeight)
+  const terminalHeight = getTerminalHeight()
+  const reservedLines = 8 // Title + Footer + Margins
+  const availableHeight = Math.max(UI_CONSTANTS.MIN_PAGE_SIZE, terminalHeight - reservedLines)
+  return Math.min(UI_CONSTANTS.MAX_PAGE_SIZE, availableHeight)
 }
 
 function calculatePaginationWindow(cursor: number, total: number, pageSize: number) {
@@ -252,16 +284,6 @@ export async function blueGroupMultiSelect<T>(
 ): Promise<{ value: T[] | symbol; cursor: number }> {
   const flatOptions = flattenGroupedOptions(groupedOptions)
 
-  const renderOption = (option: ExtendedOption<T>, state: OptionState): string => {
-    if (option.isHeader) return pc.blue(pc.bold(option.label))
-    const isSelected = state === 'selected' || state === 'selected-active'
-    const isActive = state === 'active' || state === 'selected-active'
-    const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.gray(S_CHECKBOX_INACTIVE)
-    const label = isActive ? pc.blue(option.label) : pc.white(option.label)
-    const hint = isActive && option.hint ? pc.dim(pc.gray(` (${option.hint})`)) : ''
-    return `  ${checkbox} ${label}${hint}`
-  }
-
   const prompt = new MultiSelectPrompt({
     options: flatOptions,
     initialValues,
@@ -278,23 +300,27 @@ export async function blueGroupMultiSelect<T>(
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
           const PAGE_SIZE = getSafePageSize()
-          const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
+          const maxWidth = getTerminalWidth() - 10
+
+          return renderPaginatedList(
+            title,
+            this.options,
             this.cursor,
-            this.options.length,
             PAGE_SIZE,
+            (option, _, isActive) => {
+              const extOption = option as ExtendedOption<T>
+              if (extOption.isHeader) return pc.blue(pc.bold(truncateText(extOption.label, maxWidth)))
+              const state = getOptionState(this.value.includes(option.value), isActive)
+              const isSelected = state === 'selected' || state === 'selected-active'
+              const isStateActive = state === 'active' || state === 'selected-active'
+              const checkbox = isSelected ? pc.blue(S_CHECKBOX_ACTIVE) : pc.gray(S_CHECKBOX_INACTIVE)
+              const truncatedLabel = truncateText(option.label, maxWidth)
+              const label = isStateActive ? pc.blue(truncatedLabel) : pc.white(truncatedLabel)
+              const hint = isStateActive && option.hint ? pc.dim(pc.gray(` (${option.hint})`)) : ''
+              return `  ${checkbox} ${label}${hint}`
+            },
+            buildNavigationHint(['↑↓ navigate', 'space select'], allowBack),
           )
-
-          const window = this.options.slice(startIndex, endIndex)
-          const lines = window.map((option, i) => {
-            const absoluteIndex = startIndex + i
-            const state = getOptionState(this.value.includes(option.value), absoluteIndex === this.cursor)
-            return `${pc.blue(S_BAR)}  ${renderOption(option as ExtendedOption<T>, state)}`
-          })
-
-          if (hasScrollUp || startIndex > 0) lines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
-          if (hasScrollDown || endIndex < this.options.length) lines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
-
-          return `${title}${lines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate', 'space select'], allowBack)}`
         },
       }
       return (stateRenderers[this.state] ?? stateRenderers.default)()
