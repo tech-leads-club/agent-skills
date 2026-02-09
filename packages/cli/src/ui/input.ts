@@ -82,10 +82,24 @@ export async function blueSelectWithBack<T>(
           `${title}${pc.blue(S_BAR)}  ${pc.blue(this.options.find((o) => o.value === this.value)?.label)}\n${pc.blue(S_BAR)}`,
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
-          const optionLines = this.options
-            .map((option, i) => `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, i === this.cursor)}`)
-            .join('\n')
-          return `${title}${optionLines}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate'], allowBack)}`
+          const PAGE_SIZE = getSafePageSize()
+          const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
+            this.cursor,
+            this.options.length,
+            PAGE_SIZE,
+          )
+
+          const window = this.options.slice(startIndex, endIndex)
+          const optionLines = window.map((option, i) => {
+            const absoluteIndex = startIndex + i
+            return `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, absoluteIndex === this.cursor)}`
+          })
+
+          if (hasScrollUp || startIndex > 0) optionLines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
+          if (hasScrollDown || endIndex < this.options.length)
+            optionLines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
+
+          return `${title}${optionLines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate'], allowBack)}`
         },
       }
       return (stateRenderers[this.state] ?? stateRenderers.default)()
@@ -128,13 +142,25 @@ export async function blueMultiSelectWithBack<T>(
         },
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
-          const optionLines = this.options
-            .map((option, i) => {
-              const state = getOptionState(this.value.includes(option.value), i === this.cursor)
-              return `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, state)}`
-            })
-            .join('\n')
-          return `${title}${optionLines}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate', 'space select'], allowBack)}`
+          const PAGE_SIZE = getSafePageSize()
+          const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
+            this.cursor,
+            this.options.length,
+            PAGE_SIZE,
+          )
+
+          const window = this.options.slice(startIndex, endIndex)
+          const optionLines = window.map((option, i) => {
+            const absoluteIndex = startIndex + i
+            const state = getOptionState(this.value.includes(option.value), absoluteIndex === this.cursor)
+            return `${pc.blue(S_BAR)}  ${renderOption(option as Option<T>, state)}`
+          })
+
+          if (hasScrollUp || startIndex > 0) optionLines.unshift(`${pc.blue(S_BAR)}  ${pc.gray('↑ ...')}`)
+          if (hasScrollDown || endIndex < this.options.length)
+            optionLines.push(`${pc.blue(S_BAR)}  ${pc.gray('↓ ...')}`)
+
+          return `${title}${optionLines.join('\n')}\n${pc.blue(S_BAR)}\n${pc.blue(S_BAR_END)}  ${buildNavigationHint(['↑↓ navigate', 'space select'], allowBack)}`
         },
       }
       return (stateRenderers[this.state] ?? stateRenderers.default)()
@@ -194,6 +220,13 @@ function flattenGroupedOptions<T>(groupedOptions: GroupMultiSelectOptions<T>): E
   return flatOptions
 }
 
+function getSafePageSize(): number {
+  const terminalHeight = process.stdout.rows || 20
+  // Title (2) + Footer (2) + Margins (2) = 6 lines reserved
+  const availableHeight = Math.max(5, terminalHeight - 8)
+  return Math.min(20, availableHeight)
+}
+
 function calculatePaginationWindow(cursor: number, total: number, pageSize: number) {
   const hasScrollUp = cursor > Math.floor(pageSize / 2)
   const hasScrollDown = total > pageSize && cursor < total - Math.floor(pageSize / 2)
@@ -244,7 +277,7 @@ export async function blueGroupMultiSelect<T>(
         },
         cancel: () => `${title}${pc.blue(S_BAR)}  ${pc.strikethrough(pc.gray('back'))}\n${pc.blue(S_BAR)}`,
         default: () => {
-          const PAGE_SIZE = 20
+          const PAGE_SIZE = getSafePageSize()
           const { startIndex, endIndex, hasScrollUp, hasScrollDown } = calculatePaginationWindow(
             this.cursor,
             this.options.length,
