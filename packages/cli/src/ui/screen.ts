@@ -10,7 +10,9 @@ export function generateLogo(): string {
   const fullArt = figlet.textSync(fullTitle, { font: 'Larry 3D', horizontalLayout: 'default' })
   const artWidth = fullArt.split('\n').reduce((max, line) => Math.max(max, line.length), 0)
 
-  const title = width < artWidth + 2 ? 'TLC' : fullTitle
+  const LOGO_WIDTH_PADDING = 2
+
+  const title = width < artWidth + LOGO_WIDTH_PADDING ? 'TLC' : fullTitle
   const asciiArt =
     title === fullTitle ? fullArt : figlet.textSync(title, { font: 'Larry 3D', horizontalLayout: 'default' })
 
