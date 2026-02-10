@@ -15,6 +15,7 @@ describe('agents', () => {
         'gemini',
         'roo',
         'kilocode',
+        'trae',
         'amazon-q',
         'augment',
         'tabnine',
@@ -59,6 +60,13 @@ describe('agents', () => {
       expect(config.name).toBe('antigravity')
       expect(config.displayName).toBe('Antigravity')
       expect(config.skillsDir).toBe('.agent/skills')
+    })
+
+    it('should return correct config for trae', () => {
+      const config = getAgentConfig('trae')
+      expect(config.name).toBe('trae')
+      expect(config.displayName).toBe('TRAE')
+      expect(config.skillsDir).toBe('.trae/skills')
     })
   })
 
