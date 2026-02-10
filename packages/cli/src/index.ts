@@ -9,7 +9,7 @@ import { showAvailableSkills } from './prompts/list'
 import { runInteractiveRemove } from './prompts/remove'
 import { showInstallResults, showRemoveResults } from './prompts/results'
 import type { UpdateConfig } from './prompts/utils'
-import { clearCache, clearRegistryCache, forceDownloadSkill, getCacheDir } from './registry'
+import { clearCache, fetchRegistry, forceDownloadSkill, getCacheDir, getUpdatableSkills, needsUpdate } from './registry'
 import { discoverSkillsAsync, ensureSkillAvailable, getSkillByNameAsync } from './skills-provider'
 import type { AgentType, InstallOptions, SkillInfo } from './types'
 import { withSpinner } from './ui/spinner'
@@ -85,7 +85,7 @@ program
       } else {
         logBar()
         const skills = await withSpinner(`Downloading ${result.skills.length} skills...`, () =>
-          downloadSkills(result.skills, allSkills, options.force || result.forceUpdate),
+          downloadSkills(result.skills, allSkills, options.force),
         )
 
         const results = await installSkills(skills, result)
@@ -124,11 +124,17 @@ program
   .description('Update installed skills to the latest version')
   .option('-s, --skill <name>', 'Update a specific skill')
   .action(async (options) => {
-    console.log(pc.blue('⏳ Checking for skill updates...'))
-
-    clearRegistryCache()
+    console.log(pc.blue('⏳ Fetching latest registry...'))
+    await fetchRegistry(true)
 
     if (options.skill) {
+      const outdated = await needsUpdate(options.skill)
+
+      if (!outdated) {
+        console.log(pc.green(`✅ ${options.skill} is already up to date`))
+        return
+      }
+
       console.log(pc.blue(`⏳ Updating ${options.skill}...`))
       const path = await forceDownloadSkill(options.skill)
       if (path) {
@@ -138,9 +144,42 @@ program
         process.exit(1)
       }
     } else {
-      console.log(pc.blue('💡 To update a specific skill: tlc-skills update -s <skill-name>'))
-      console.log(pc.blue('💡 To reinstall all skills: tlc-skills install --force'))
-      console.log(pc.blue('💡 To clear cache completely: tlc-skills cache --clear'))
+      const { readSkillLock } = await import('./lockfile')
+      const lock = await readSkillLock()
+      const installedNames = Object.keys(lock.skills)
+
+      if (installedNames.length === 0) {
+        console.log(pc.yellow('No installed skills found. Run tlc-skills install first.'))
+        return
+      }
+
+      const { toUpdate, upToDate } = await getUpdatableSkills(installedNames)
+
+      if (toUpdate.length === 0) {
+        console.log(pc.green(`✅ All ${upToDate.length} installed skills are up to date`))
+        return
+      }
+
+      console.log(pc.blue(`⏳ Updating ${toUpdate.length} of ${installedNames.length} skills...`))
+
+      let updated = 0
+      let failed = 0
+
+      for (const name of toUpdate) {
+        const path = await forceDownloadSkill(name)
+        if (path) {
+          updated++
+        } else {
+          failed++
+          console.error(pc.red(`  ❌ Failed to update ${name}`))
+        }
+      }
+
+      console.log(
+        pc.green(
+          `✅ ${updated} updated, ${upToDate.length} already up to date${failed > 0 ? pc.red(`, ${failed} failed`) : ''}`,
+        ),
+      )
     }
   })
 
