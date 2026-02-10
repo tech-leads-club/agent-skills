@@ -1,7 +1,7 @@
-export const TERMINAL_DEFAULTS = {
+export const TERMINAL_DEFAULTS = Object.freeze({
   WIDTH: 80,
   HEIGHT: 20,
-}
+})
 
 export function getTerminalWidth(defaultWidth = TERMINAL_DEFAULTS.WIDTH): number {
   return process.stdout.columns ?? defaultWidth
