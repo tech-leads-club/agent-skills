@@ -4,8 +4,8 @@ import { getAgentConfig } from '../agents'
 import { listInstalledSkills } from '../installer'
 import { fetchRegistry, getUpdatableSkills } from '../registry'
 import type { AgentType } from '../types'
-import { truncate } from '../ui/formatting'
 import type { Option } from '../ui/input'
+import { truncateText } from '../ui/utils'
 
 export interface UpdateConfig {
   skills: string[]
@@ -26,7 +26,7 @@ export function buildAgentOptions(agents: AgentType[], detectedAgents: AgentType
     return {
       value: type,
       label: isDetected ? `${config.displayName} ${pc.green('● detected')}` : config.displayName,
-      hint: truncate(config.description, 50),
+      hint: truncateText(config.description, 50),
     }
   })
 }
