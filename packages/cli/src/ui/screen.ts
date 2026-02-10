@@ -2,9 +2,10 @@ import figlet from 'figlet'
 import pc from 'picocolors'
 
 import { crystalGradient } from './styles'
+import { getTerminalWidth } from './utils'
 
 export function generateLogo(): string {
-  const width = process.stdout?.columns ?? 120
+  const width = getTerminalWidth()
   const title = width < 112 ? 'TLC' : 'Tech Leads Club'
   const asciiArt = figlet.textSync(title, { font: 'Larry 3D', horizontalLayout: 'default' })
   return `${crystalGradient.multiline(asciiArt)}

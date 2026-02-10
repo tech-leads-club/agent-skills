@@ -10,6 +10,7 @@ import {
   S_RADIO_INACTIVE,
   SYMBOL,
 } from './styles'
+import { getTerminalHeight, getTerminalWidth, truncateText } from './utils'
 
 const UI_CONSTANTS = {
   MARGIN_X: 2,
@@ -19,21 +20,6 @@ const UI_CONSTANTS = {
   FOOTER_HEIGHT: 2,
   MIN_PAGE_SIZE: 5,
   MAX_PAGE_SIZE: 20,
-  DEFAULT_WIDTH: 80,
-  DEFAULT_HEIGHT: 20,
-}
-
-function getTerminalWidth(): number {
-  return process.stdout.columns || UI_CONSTANTS.DEFAULT_WIDTH
-}
-
-function getTerminalHeight(): number {
-  return process.stdout.rows || UI_CONSTANTS.DEFAULT_HEIGHT
-}
-
-function truncateText(text: string, maxWidth: number): string {
-  if (text.length <= maxWidth) return text
-  return text.slice(0, Math.max(0, maxWidth - 3)) + '...'
 }
 
 export interface Option<T> {
