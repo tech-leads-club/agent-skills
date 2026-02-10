@@ -9,6 +9,7 @@ const CURRENT_VERSION = 1
 export interface SkillLockEntry {
   name: string
   source: string
+  contentHash?: string
   installedAt: string
   updatedAt: string
 }
@@ -45,7 +46,7 @@ export async function writeSkillLock(lock: SkillLockFile): Promise<void> {
   await writeFile(lockPath, JSON.stringify(lock, null, 2), 'utf-8')
 }
 
-export async function addSkillToLock(skillName: string, source: string = 'local'): Promise<void> {
+export async function addSkillToLock(skillName: string, source: string = 'local', contentHash?: string): Promise<void> {
   const lock = await readSkillLock()
   const now = new Date().toISOString()
   const existingEntry = lock.skills[skillName]
@@ -53,6 +54,7 @@ export async function addSkillToLock(skillName: string, source: string = 'local'
   lock.skills[skillName] = {
     name: skillName,
     source,
+    contentHash: contentHash ?? existingEntry?.contentHash,
     installedAt: existingEntry?.installedAt ?? now,
     updatedAt: now,
   }
