@@ -5,7 +5,6 @@ import { groupSkillsByCategory } from '../categories'
 import { isGloballyInstalled } from '../installer'
 import { discoverSkillsAsync } from '../skills-provider'
 import type { AgentType, InstallOptions, SkillInfo } from '../types'
-import { truncate } from '../ui/formatting'
 import {
   blueConfirm,
   blueGroupMultiSelect,
@@ -16,6 +15,7 @@ import {
 import { initScreen } from '../ui/screen'
 import { withSpinner } from '../ui/spinner'
 import { logBar, logBarEnd, logCancelled } from '../ui/styles'
+import { truncateText } from '../ui/utils'
 import { checkForUpdates, getCurrentVersion } from '../update-check'
 import { showInstallationSummary } from './results'
 import {
@@ -350,7 +350,7 @@ function buildSkillOptions(
       return {
         value: skill.name,
         label: badge ? `${skill.name} ${badge}` : skill.name,
-        hint: truncate(skill.description, 150),
+        hint: truncateText(skill.description, 150),
       }
     })
   }
