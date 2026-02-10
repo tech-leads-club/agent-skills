@@ -12,6 +12,8 @@ export function getTerminalHeight(defaultHeight = TERMINAL_DEFAULTS.HEIGHT): num
 }
 
 export function truncateText(text: string, maxWidth: number): string {
+  if (maxWidth <= 0) return ''
   if (text.length <= maxWidth) return text
+  if (maxWidth < 3) return '.'.repeat(maxWidth)
   return text.slice(0, Math.max(0, maxWidth - 3)) + '...'
 }
