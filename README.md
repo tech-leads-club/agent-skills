@@ -133,8 +133,8 @@ npx @tech-leads-club/agent-skills
 
 This launches an interactive wizard:
 
-1. **Browse categories** — Filter skills by category or select "All"
-2. **Select skills** — Choose which skills to install
+1. **Choose Action** — "Install skills" or "Update installed skills"
+2. **Browse & Select** — Filter by category or search
 3. **Choose agents** — Pick target agents (Cursor, Claude Code, etc.)
 4. **Installation method** — Symlink (recommended) or Copy
 5. **Scope** — Global (user home) or Local (project only)
@@ -151,7 +151,7 @@ npx @tech-leads-club/agent-skills
 npx @tech-leads-club/agent-skills list
 
 # Install a specific skill
-npx @tech-leads-club/agent-skills install -s spec-driven-dev
+npx @tech-leads-club/agent-skills install -s tlc-spec-driven
 
 # Install to specific agents
 npx @tech-leads-club/agent-skills install -a cursor claude-code
@@ -237,7 +237,9 @@ nx g @tech-leads-club/skill-plugin:skill my-skill --category=development
 # Full options
 nx g @tech-leads-club/skill-plugin:skill my-skill \
   --description="What my skill does" \
-  --category=development
+  --category=development \
+  --author="github.com/username" \
+  --skillVersion="1.0.0"
 ```
 
 The generator creates:
@@ -281,6 +283,9 @@ packages/skills-catalog/skills/
 ---
 name: my-skill
 description: What this skill does. Use when user says "trigger phrase".
+metadata:
+  version: 1.0.0
+  author: github.com/username
 ---
 
 # My Skill
