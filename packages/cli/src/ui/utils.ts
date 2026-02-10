@@ -3,11 +3,11 @@ export const TERMINAL_DEFAULTS = Object.freeze({
   HEIGHT: 20,
 })
 
-export function getTerminalWidth(defaultWidth = TERMINAL_DEFAULTS.WIDTH): number {
+export function getTerminalWidth(defaultWidth: number = TERMINAL_DEFAULTS.WIDTH): number {
   return process.stdout.columns ?? defaultWidth
 }
 
-export function getTerminalHeight(defaultHeight = TERMINAL_DEFAULTS.HEIGHT): number {
+export function getTerminalHeight(defaultHeight: number = TERMINAL_DEFAULTS.HEIGHT): number {
   return process.stdout.rows ?? defaultHeight
 }
 
