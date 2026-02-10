@@ -152,7 +152,7 @@ async function runWizard(params: WizardParams): Promise<InstallOptions | null> {
   const state: WizardState = {
     skills: preselectedSkills,
     agents: installedAgents.length > 0 ? installedAgents : (['cursor', 'claude-code'] as AgentType[]),
-    method: 'symlink',
+    method: 'copy',
     global: false,
   }
 
@@ -173,7 +173,7 @@ async function runWizard(params: WizardParams): Promise<InstallOptions | null> {
 
     if (stepResult === 'back') {
       currentStep--
-      if (currentStep === WIZARD_STEPS.CONFIG - 1) state.method = 'symlink'
+      if (currentStep === WIZARD_STEPS.CONFIG - 1) state.method = 'copy'
       continue
     }
 
@@ -429,8 +429,8 @@ interface ConfigureProps {
 }
 
 const METHOD_OPTIONS = [
-  { value: 'symlink' as const, label: 'Symlink', hint: 'shared source (recommended)' },
-  { value: 'copy' as const, label: 'Copy', hint: 'independent copies' },
+  { value: 'copy' as const, label: 'Copy', hint: 'independent copies (recommended)' },
+  { value: 'symlink' as const, label: 'Symlink', hint: 'shared source (may not work with all agents)' },
 ]
 
 const SCOPE_OPTIONS = [
