@@ -1,3 +1,43 @@
+## 0.12.0 (2026-02-10)
+
+### 🚀 Features
+
+- add metadata section with version and author placeholders ([af1d533](https://github.com/tech-leads-club/agent-skills/commit/af1d533))
+- add author and version fields to skill generation ([cd7412b](https://github.com/tech-leads-club/agent-skills/commit/cd7412b))
+- add author and skillVersion fields to skill schema ([e941aa8](https://github.com/tech-leads-club/agent-skills/commit/e941aa8))
+- add author and skillVersion fields to skill generator schema ([26c4f2c](https://github.com/tech-leads-club/agent-skills/commit/26c4f2c))
+- add content hash computation for skills in registry generation ([32eb949](https://github.com/tech-leads-club/agent-skills/commit/32eb949))
+- add architecture category with description to skills catalog ([6dbed82](https://github.com/tech-leads-club/agent-skills/commit/6dbed82))
+- enhance architecture category with name and description fields ([6ce9f27](https://github.com/tech-leads-club/agent-skills/commit/6ce9f27))
+- implement smart update configuration for agents ([882bd53](https://github.com/tech-leads-club/agent-skills/commit/882bd53))
+- implement smart update functionality for skills installation ([d3e1da3](https://github.com/tech-leads-club/agent-skills/commit/d3e1da3))
+- add content hash computation and metadata handling tests ([a95f0f7](https://github.com/tech-leads-club/agent-skills/commit/a95f0f7))
+- add content hash management for skill metadata caching ([a928fee](https://github.com/tech-leads-club/agent-skills/commit/a928fee))
+- add content hash parameter to skill lock entry ([6955ad5](https://github.com/tech-leads-club/agent-skills/commit/6955ad5))
+- add content hash to skill lock entry during installation ([5117c51](https://github.com/tech-leads-club/agent-skills/commit/5117c51))
+- enhance skill update command to fetch and update installed skills ([5e40f99](https://github.com/tech-leads-club/agent-skills/commit/5e40f99))
+- update installation wizard steps and add skill metadata options ([502f11b](https://github.com/tech-leads-club/agent-skills/commit/502f11b))
+- **cli:** add support for Droid agent ([1e2a70a](https://github.com/tech-leads-club/agent-skills/commit/1e2a70a))
+
+### 🩹 Fixes
+
+- **cli:** add dynamic pagination to select prompts ([8a6c755](https://github.com/tech-leads-club/agent-skills/commit/8a6c755))
+
+### 💅 Refactors
+
+- update conventional commits configuration to simplify types ([5f23335](https://github.com/tech-leads-club/agent-skills/commit/5f23335))
+- **cli:** unify pagination logic and truncate long options ([c275894](https://github.com/tech-leads-club/agent-skills/commit/c275894))
+
+### 📖 Documentation
+
+- add Droid agent to documentation ([01b66d7](https://github.com/tech-leads-club/agent-skills/commit/01b66d7))
+- update README to reflect TLC Spec-Driven terminology and version ([16e8c16](https://github.com/tech-leads-club/agent-skills/commit/16e8c16))
+
+### ❤️ Thank You
+
+- Edmar Paulino
+- Felipe Rodrigues @felipfr
+
 ## 0.11.1 (2026-02-07)
 
 ### 🚀 Features
