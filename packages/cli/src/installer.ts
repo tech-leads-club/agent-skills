@@ -6,6 +6,7 @@ import { getAgentConfig } from './agents'
 import { isGloballyInstalled } from './global-path'
 import { addSkillToLock, removeSkillFromLock } from './lockfile'
 import { findProjectRoot } from './project-root'
+import { getCachedContentHash } from './registry'
 import type { AgentType, InstallOptions, InstallResult, SkillInfo } from './types'
 
 const CANONICAL_SKILLS_DIR = join('.agents', 'skills')
@@ -178,7 +179,7 @@ export const installSkills = async (skills: SkillInfo[], options: InstallOptions
     for (const skill of skills) {
       const result = await installSkillForAgent(skill, agent, targetDir, options.method, projectRoot, options.global)
       results.push(result)
-      if (result.success) await addSkillToLock(skill.name, 'local')
+      if (result.success) await addSkillToLock(skill.name, 'local', getCachedContentHash(skill.name))
     }
   }
 

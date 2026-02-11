@@ -5,7 +5,6 @@ import { groupSkillsByCategory } from '../categories'
 import { isGloballyInstalled } from '../installer'
 import { discoverSkillsAsync } from '../skills-provider'
 import type { AgentType, InstallOptions, SkillInfo } from '../types'
-import { truncate } from '../ui/formatting'
 import {
   blueConfirm,
   blueGroupMultiSelect,
@@ -16,13 +15,14 @@ import {
 import { initScreen } from '../ui/screen'
 import { withSpinner } from '../ui/spinner'
 import { logBar, logBarEnd, logCancelled } from '../ui/styles'
+import { truncateText } from '../ui/utils'
 import { checkForUpdates, getCurrentVersion } from '../update-check'
 import { showInstallationSummary } from './results'
 import {
   buildAgentOptions,
   getAllInstalledSkillNames,
   getInstalledSkillsForAgents,
-  getUpdateConfigs,
+  getSmartUpdateConfigs,
   type UpdateConfig,
 } from './utils'
 
@@ -73,8 +73,7 @@ export async function runInteractiveInstall(): Promise<InstallOptions | UpdateCo
     allAgents,
     installedAgents,
     installedSkills: validInstalledSkills,
-    shouldForceUpdate: validInstalledSkills.size > 0,
-    preselectedSkills: validInstalledSkills.size > 0 ? Array.from(validInstalledSkills) : [],
+    preselectedSkills: [],
   })
 }
 
@@ -83,7 +82,7 @@ interface WizardParams {
   allAgents: AgentType[]
   installedAgents: AgentType[]
   installedSkills: Set<string>
-  shouldForceUpdate: boolean
+  shouldForceUpdate?: boolean
   preselectedSkills: string[]
 }
 
@@ -91,20 +90,23 @@ async function handleExistingSkills(
   installedSkills: Set<string>,
   allAgents: AgentType[],
 ): Promise<InstallOptions | UpdateConfig[] | null | undefined> {
-  const action = await selectAction(installedSkills.size)
+  const action = await selectAction()
   if (action === null) return null
   if (action === 'install') return undefined
 
-  const updateConfigs = await getUpdateConfigs(allAgents)
+  logBar(pc.blue('⏳ Checking for updates...'))
+  const { configs, toUpdate, upToDate } = await getSmartUpdateConfigs(allAgents)
 
-  if (updateConfigs.length === 0) {
-    logBarEnd(pc.yellow('No agents found with installed skills.'))
+  if (configs.length === 0) {
+    if (upToDate.length > 0) {
+      logBarEnd(pc.green(`✅ All ${upToDate.length} installed skills are already up to date`))
+    } else {
+      logBarEnd(pc.yellow('No agents found with installed skills.'))
+    }
     return null
   }
 
-  const allSkills = updateConfigs.flatMap((c) => c.skills)
-  const uniqueSkills = [...new Set(allSkills)]
-  showUpdatePreview(uniqueSkills)
+  showUpdatePreview(toUpdate, upToDate)
 
   const confirm = await blueConfirm('Proceed with update?', true)
   if (isCancelled(confirm) || !confirm) {
@@ -112,16 +114,16 @@ async function handleExistingSkills(
     return null
   }
 
-  return updateConfigs
+  return configs
 }
 
-async function selectAction(installedCount: number): Promise<ActionType | null> {
+async function selectAction(): Promise<ActionType | null> {
   const options = [
-    { value: 'install' as const, label: 'Install / Update skills', hint: 'browse and select skills' },
+    { value: 'install' as const, label: 'Install skills', hint: 'browse and select skills to install' },
     {
       value: 'update' as const,
-      label: `Update all installed (${installedCount})`,
-      hint: 're-download latest versions',
+      label: 'Update installed skills',
+      hint: 'check for content changes',
     },
   ]
 
@@ -135,20 +137,22 @@ async function selectAction(installedCount: number): Promise<ActionType | null> 
   return result as ActionType
 }
 
-function showUpdatePreview(skills: string[]): void {
-  logBar(pc.cyan(`Will update ${skills.length} installed skills:`))
-  skills.slice(0, 5).forEach((skill) => logBar(pc.gray(`  • ${skill}`)))
-  if (skills.length > 5) logBar(pc.gray(`  ... and ${skills.length - 5} more`))
+function showUpdatePreview(toUpdate: string[], upToDate: string[]): void {
+  logBar(pc.cyan(`${toUpdate.length} skill${toUpdate.length === 1 ? '' : 's'} with updates available:`))
+  toUpdate.forEach((skill) => logBar(pc.white(`  ↑ ${skill}`)))
+  if (upToDate.length > 0) {
+    logBar(pc.gray(`  ${upToDate.length} skill${upToDate.length === 1 ? '' : 's'} already up to date`))
+  }
   logBar()
 }
 
 async function runWizard(params: WizardParams): Promise<InstallOptions | null> {
-  const { allSkills, allAgents, installedAgents, installedSkills, shouldForceUpdate, preselectedSkills } = params
+  const { allSkills, allAgents, installedAgents, installedSkills, preselectedSkills } = params
 
   const state: WizardState = {
     skills: preselectedSkills,
     agents: installedAgents.length > 0 ? installedAgents : (['cursor', 'claude-code'] as AgentType[]),
-    method: 'symlink',
+    method: 'copy',
     global: false,
   }
 
@@ -169,7 +173,7 @@ async function runWizard(params: WizardParams): Promise<InstallOptions | null> {
 
     if (stepResult === 'back') {
       currentStep--
-      if (currentStep === WIZARD_STEPS.CONFIG - 1) state.method = 'symlink'
+      if (currentStep === WIZARD_STEPS.CONFIG - 1) state.method = 'copy'
       continue
     }
 
@@ -179,7 +183,6 @@ async function runWizard(params: WizardParams): Promise<InstallOptions | null> {
     }
 
     if (typeof stepResult === 'object') {
-      if (shouldForceUpdate) stepResult.forceUpdate = true
       return stepResult
     }
 
@@ -229,14 +232,13 @@ async function handleAgentsStep(ctx: StepContext, stepIndicator: string): Promis
 
 async function handleSkillsStep(ctx: StepContext, stepIndicator: string, allowBack: boolean): Promise<StepResult> {
   const installedSkillsForAgents = await getInstalledSkillsForAgents(ctx.state.agents, ctx.allSkills)
-  const preselected = [...installedSkillsForAgents.keys()]
 
   const result = await selectSkillsUnifiedStep({
     allSkills: ctx.allSkills,
     selectedAgents: ctx.state.agents,
     installedSkillsMap: installedSkillsForAgents,
     stepIndicator,
-    initialValues: preselected,
+    initialValues: ctx.preselectedSkills,
     allowBack,
   })
 
@@ -298,7 +300,7 @@ async function selectSkillsUnifiedStep({
   allowBack = false,
 }: SelectSkillsUnifiedProps): Promise<string[] | symbol | null> {
   const groupedSkills = groupSkillsByCategory(allSkills)
-  const options = buildSkillOptions(groupedSkills, selectedAgents, installedSkillsMap, initialValues)
+  const options = buildSkillOptions(groupedSkills, selectedAgents, installedSkillsMap)
 
   const result = await blueGroupMultiSelect(
     `${stepIndicator} Select skills to install`,
@@ -337,20 +339,18 @@ function buildSkillOptions(
   groupedSkills: Map<{ name: string }, SkillInfo[]>,
   selectedAgents: AgentType[],
   installedSkillsMap: Map<string, AgentType[]>,
-  initialValues: string[],
 ): Record<string, { value: string; label: string; hint?: string }[]> {
   const options: Record<string, { value: string; label: string; hint?: string }[]> = {}
 
   for (const [category, skills] of groupedSkills.entries()) {
     options[category.name] = skills.map((skill) => {
       const installedInAgents = installedSkillsMap.get(skill.name) || []
-      const isPreselected = initialValues.includes(skill.name)
-      const badge = buildInstallBadge(installedInAgents, selectedAgents, isPreselected)
+      const badge = buildInstallBadge(installedInAgents, selectedAgents)
 
       return {
         value: skill.name,
         label: badge ? `${skill.name} ${badge}` : skill.name,
-        hint: truncate(skill.description, 150),
+        hint: truncateText(skill.description, 150),
       }
     })
   }
@@ -358,19 +358,15 @@ function buildSkillOptions(
   return options
 }
 
-function buildInstallBadge(
-  installedInAgents: AgentType[],
-  selectedAgents: AgentType[],
-  isPreselected: boolean,
-): string {
+function buildInstallBadge(installedInAgents: AgentType[], selectedAgents: AgentType[]): string {
   if (installedInAgents.length === 0) return ''
   const agentNames = installedInAgents.map((a) => getAgentConfig(a).displayName)
 
   if (installedInAgents.length === selectedAgents.length) {
-    return isPreselected ? pc.yellow('● all (update)') : pc.green('● all')
+    return pc.green('✓ installed')
   } else {
     const agentList = agentNames.join(', ')
-    return isPreselected ? pc.yellow(`● ${agentList} (update)`) : pc.green(`● ${agentList}`)
+    return pc.green(`✓ ${agentList}`)
   }
 }
 
@@ -433,8 +429,8 @@ interface ConfigureProps {
 }
 
 const METHOD_OPTIONS = [
-  { value: 'symlink' as const, label: 'Symlink', hint: 'shared source (recommended)' },
-  { value: 'copy' as const, label: 'Copy', hint: 'independent copies' },
+  { value: 'copy' as const, label: 'Copy', hint: 'independent copies (recommended)' },
+  { value: 'symlink' as const, label: 'Symlink', hint: 'shared source (may not work with all agents)' },
 ]
 
 const SCOPE_OPTIONS = [

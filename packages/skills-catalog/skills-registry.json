@@ -1,6 +1,10 @@
 {
   "version": "1.0.0",
   "categories": {
+    "architecture": {
+      "name": "Architecture",
+      "description": "Skills for software architecture, patterns, and system design"
+    },
     "cloud": {
       "name": "Cloud & Infrastructure",
       "description": "Skills for cloud management, AWS, and DevOps"
@@ -41,9 +45,6 @@
       "name": "Web Automation",
       "description": "Skills for browser automation and web testing"
     },
-    "architecture": {
-      "name": "Architecture"
-    },
     "uncategorized": {
       "name": "Uncategorized",
       "description": "Skills without a specific category"
@@ -60,7 +61,8 @@
         "references/WCAG.md"
       ],
       "author": "web-quality-skills",
-      "version": "1.0"
+      "version": "1.0",
+      "contentHash": "04f7951c52ad4925edb53a13b285398933c0249df1c77d5498592bf47b519ae7"
     },
     {
       "name": "aws-advisor",
@@ -77,7 +79,8 @@
         "scripts/generate_diagram.py",
         "scripts/security_review.py",
         "scripts/well_architected_review.py"
-      ]
+      ],
+      "contentHash": "ae13aed5247978ad0b05d4020aad4fa5b43f33fdee1463bcb417443142cb7b74"
     },
     {
       "name": "best-practices",
@@ -88,7 +91,8 @@
         "SKILL.md"
       ],
       "author": "web-quality-skills",
-      "version": "1.0"
+      "version": "1.0",
+      "contentHash": "397e1833b5a71830f875b57926aafe6b450e76a4407282506e5d74766411c991"
     },
     {
       "name": "cloudflare-deploy",
@@ -407,7 +411,8 @@
         "references/zaraz/patterns.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "2784a4cc3205752c76ba936211ffd33a4f2acac9943a90513dda6280feda82c9"
     },
     {
       "name": "coding-guidelines",
@@ -418,7 +423,8 @@
         "SKILL.md"
       ],
       "author": "ale",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "7d98273930ef3622d6d5339403860722a26e5de91fdcf9d96738618aedd82c10"
     },
     {
       "name": "component-common-domain-detection",
@@ -429,7 +435,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "0664f9d93e4d5069fbde8c90e2fc93950c56e1acecfd107a81d5bd3a65b7a223"
     },
     {
       "name": "component-flattening-analysis",
@@ -440,7 +447,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "52fb78457467190be4f64e9841094d03fb33cb308dd23eb0c5b1e7a3aa32fab4"
     },
     {
       "name": "component-identification-sizing",
@@ -451,7 +459,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "2e00e675e5b15812396b37fc3f68d254b5d9153f0c5353a29be22795bb0aa620"
     },
     {
       "name": "confluence-assistant",
@@ -461,7 +470,8 @@
       "files": [
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "3377c27e43b93432d51ba5d95eeffc07694da72c76cb6119357084446839c7d9"
     },
     {
       "name": "core-web-vitals",
@@ -473,7 +483,8 @@
         "references/LCP.md"
       ],
       "author": "web-quality-skills",
-      "version": "1.0"
+      "version": "1.0",
+      "contentHash": "2c95db336a888573d034d5db4e94a6d80267a0f1e466875d9e8076967498f4fa"
     },
     {
       "name": "cursor-skill-creator",
@@ -482,7 +493,8 @@
       "path": "(creation)/cursor-skill-creator",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "baab6a3de2bf32d09abf28423fce5135b0ae269dd7c609863c60626fe5c8f502"
     },
     {
       "name": "cursor-subagent-creator",
@@ -491,7 +503,8 @@
       "path": "(creation)/cursor-subagent-creator",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "d08832128b46649832ffd3848dd06179bfef1c617352c77a5b8572ee0f5a826c"
     },
     {
       "name": "decomposition-planning-roadmap",
@@ -502,7 +515,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "5a4d66a618e67099e0ffd18bc090e9892620876efdd644c90cc3d0c83d1662a5"
     },
     {
       "name": "docs-writer",
@@ -512,7 +526,8 @@
       "files": [
         "SKILL.md",
         "references/style-guide.md"
-      ]
+      ],
+      "contentHash": "f8327ca0ba45f57625f26ed23d8d013717640b68379f027a59f6337f489960f0"
     },
     {
       "name": "domain-analysis",
@@ -524,7 +539,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "f6599c3326d844615e13464a77c28e28f63787b1eeef1eb1cf8cd8615473c884"
     },
     {
       "name": "domain-identification-grouping",
@@ -535,7 +551,8 @@
         "QUICK-REFERENCE.md",
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "61d58b48277065dc4f2990ede13e37e9814234859506b14c2370c88ee04b4a35"
     },
     {
       "name": "figma",
@@ -549,7 +566,8 @@
         "references/figma-tools-and-prompts.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "8a62d54f9173fceb6a46801c719a0361991b7ebb05e9acff2500b567f6a7897f"
     },
     {
       "name": "figma-implement-design",
@@ -561,7 +579,8 @@
         "SKILL.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "0c2760ab7ff1668a020d7555e374bd1a388878ba56f585753f5f7dcf433e02b5"
     },
     {
       "name": "gh-address-comments",
@@ -574,7 +593,8 @@
         "scripts/fetch_comments.py"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "f24def7dfa73df37434d7a40f28ffbe3d823417599205d56f03388ebc68eaf64"
     },
     {
       "name": "gh-fix-ci",
@@ -587,7 +607,8 @@
         "scripts/inspect_pr_checks.py"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "14e76c819f7ea8dd94e14f537bbbcf6ea6716e706289b811b1862cf38fea8a2c"
     },
     {
       "name": "jira-assistant",
@@ -597,7 +618,8 @@
       "files": [
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "4f9482b652c88273ebd71dbfa8ae70274c260ce927b164aa06edb1de2952c727"
     },
     {
       "name": "netlify-deploy",
@@ -612,7 +634,8 @@
         "references/netlify-toml.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "af3257da70b1534922398cb78449ff785e1c13b57715de0f5e378b3a76685257"
     },
     {
       "name": "nx-ci-monitor",
@@ -621,7 +644,8 @@
       "path": "(tooling)/nx-ci-monitor",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "c2c12b329cb665a9934927453d991453652fb739119944659a267a793e8413ff"
     },
     {
       "name": "nx-generate",
@@ -630,7 +654,8 @@
       "path": "(tooling)/nx-generate",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "fb7c13f96e57d43d9a9b672a24e7486075a76d920301811d5f41f89d3fcce10b"
     },
     {
       "name": "nx-run-tasks",
@@ -639,7 +664,8 @@
       "path": "(tooling)/nx-run-tasks",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "e42dec15f588268887d88d606187b0fab9cbb3f90fd4ce41d66d2faffc9295c4"
     },
     {
       "name": "nx-workspace",
@@ -652,7 +678,8 @@
         "reference/ci-cd.md",
         "reference/commands.md",
         "reference/configuration.md"
-      ]
+      ],
+      "contentHash": "12f90fa9b5dc549d41a04f5063db1b03c032614d1b1751c9a1c88edc0567ff5a"
     },
     {
       "name": "perf-astro",
@@ -661,7 +688,8 @@
       "path": "(performance)/perf-astro",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "287f1c9f65e36ddc35cd19190a38d1353290d73d13e312bd27f6909c3f4f4e4c"
     },
     {
       "name": "perf-lighthouse",
@@ -670,7 +698,8 @@
       "path": "(performance)/perf-lighthouse",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "81a156dd3e7801e53f64eb0586ea9ba1fec9b403c82d570439665af7a71bab49"
     },
     {
       "name": "perf-web-optimization",
@@ -682,7 +711,8 @@
         "references/bundle-optimization.md",
         "references/core-web-vitals.md",
         "references/image-optimization.md"
-      ]
+      ],
+      "contentHash": "85a00348a0480144b110866c63b9689172ee07613e4190c34f8ed09de1681085"
     },
     {
       "name": "playwright-skill",
@@ -695,7 +725,8 @@
         "lib/helpers.js",
         "package.json",
         "run.js"
-      ]
+      ],
+      "contentHash": "704ae04b9fbb96ce4eeb2a340fb2137eb2995436a1aca165f403dc24d57a350f"
     },
     {
       "name": "render-deploy",
@@ -717,7 +748,8 @@
         "references/troubleshooting-basics.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "8d20fd36768334e023de5cdff07a05519668d253b9294a0bdf833a811e2918b9"
     },
     {
       "name": "run-nx-generator",
@@ -726,7 +758,8 @@
       "path": "(tooling)/run-nx-generator",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "f9d3cfc28d1e880f083b29bc37b79147dca838e91330c0286b6620798be2a1c4"
     },
     {
       "name": "security-best-practices",
@@ -748,7 +781,8 @@
         "references/python-flask-web-server-security.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "e75a7e845663b8d7b072860acc5d5ebb44dddb4ea7622a77c055c3fbae15aa06"
     },
     {
       "name": "security-ownership-map",
@@ -765,7 +799,8 @@
         "scripts/run_ownership_map.py"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "9c5677c78669351aa10cba9cf82841288f2ae8c211d8ab7dc07d8d4355827898"
     },
     {
       "name": "security-threat-model",
@@ -779,7 +814,8 @@
         "references/security-controls-and-assets.md"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "7a2a20834aa6fa16a7701ce13272e54142c82ca09441ffb39d6f16ce3a4aff6e"
     },
     {
       "name": "sentry",
@@ -792,7 +828,8 @@
         "scripts/sentry_api.py"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "2ab7cd79b46399e4f634f543efad911ce34d25a90c6c645df0148e2fad175886"
     },
     {
       "name": "seo",
@@ -803,7 +840,8 @@
         "SKILL.md"
       ],
       "author": "web-quality-skills",
-      "version": "1.0"
+      "version": "1.0",
+      "contentHash": "7b124e46a34303039b08aefe1c60aac89f05aee348c2c8522e69533fd7a6f62e"
     },
     {
       "name": "skill-creator",
@@ -812,7 +850,8 @@
       "path": "(creation)/skill-creator",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "5630765536263e907d31eec2d2c99d2ed87100add353e14b3bc269d0e1eb2d51"
     },
     {
       "name": "subagent-creator",
@@ -821,7 +860,8 @@
       "path": "(creation)/subagent-creator",
       "files": [
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "14a6caeabcd011164e802611692fa7098030de47ad23e9b7caef85209deda201"
     },
     {
       "name": "technical-design-doc-creator",
@@ -831,7 +871,8 @@
       "files": [
         "README.md",
         "SKILL.md"
-      ]
+      ],
+      "contentHash": "e76734fb9240df31760a2bbeb80afbd70e43a5d4fa3b9fb9c23c6c1a4a7862bf"
     },
     {
       "name": "tlc-spec-driven",
@@ -856,7 +897,8 @@
         "references/validate.md"
       ],
       "author": "github.com/felipfr",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "64ba71efa2195b58970f0400ee2d893ba577bebacddb0b371705ee4a74eef329"
     },
     {
       "name": "vercel-deploy",
@@ -869,7 +911,8 @@
         "scripts/deploy.sh"
       ],
       "author": "github.com/openai/skills",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "contentHash": "8628bf69eb47fd1f243c6dac0060390dead25d1fa7063fd8225bde4cbca5294c"
     },
     {
       "name": "web-quality-audit",
@@ -881,7 +924,8 @@
         "scripts/analyze.sh"
       ],
       "author": "web-quality-skills",
-      "version": "1.0"
+      "version": "1.0",
+      "contentHash": "522ef3fd0af98e5d538a32408e768c0bcbd540f29eccb36ee0ed38d9142b4f57"
     }
   ]
 }

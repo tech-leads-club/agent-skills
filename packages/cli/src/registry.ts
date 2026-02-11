@@ -15,7 +15,15 @@ export interface SkillMetadata {
   files: string[]
   author?: string
   version?: string
+  contentHash?: string
 }
+
+interface CachedSkillMeta {
+  contentHash: string
+  downloadedAt: number
+}
+
+const SKILL_META_FILE = '.skill-meta.json'
 
 export interface CategoryMetadata {
   name: string
@@ -181,6 +189,56 @@ export function isSkillCached(skillName: string): boolean {
   }
 }
 
+function saveCachedSkillMeta(skillName: string, meta: CachedSkillMeta): void {
+  try {
+    const metaPath = join(getSkillCachePath(skillName), SKILL_META_FILE)
+    writeFileSync(metaPath, JSON.stringify(meta, null, 2))
+  } catch {
+    // Non-critical: skill works without metadata
+  }
+}
+
+function readCachedSkillMeta(skillName: string): CachedSkillMeta | null {
+  try {
+    const metaPath = join(getSkillCachePath(skillName), SKILL_META_FILE)
+    if (!existsSync(metaPath)) return null
+    return JSON.parse(readFileSync(metaPath, 'utf-8')) as CachedSkillMeta
+  } catch {
+    return null
+  }
+}
+
+export async function needsUpdate(skillName: string): Promise<boolean> {
+  if (!isSkillCached(skillName)) return true
+
+  const metadata = await getSkillMetadata(skillName)
+  if (!metadata?.contentHash) return false
+
+  const cached = readCachedSkillMeta(skillName)
+  if (!cached?.contentHash) return true
+
+  return cached.contentHash !== metadata.contentHash
+}
+
+export function getCachedContentHash(skillName: string): string | undefined {
+  return readCachedSkillMeta(skillName)?.contentHash
+}
+
+export async function getUpdatableSkills(skillNames: string[]): Promise<{ toUpdate: string[]; upToDate: string[] }> {
+  const toUpdate: string[] = []
+  const upToDate: string[] = []
+
+  for (const name of skillNames) {
+    if (await needsUpdate(name)) {
+      toUpdate.push(name)
+    } else {
+      upToDate.push(name)
+    }
+  }
+
+  return { toUpdate, upToDate }
+}
+
 async function downloadSkillFile(skill: SkillMetadata, file: string, skillCachePath: string): Promise<boolean> {
   const filePath = join(skillCachePath, file)
 
@@ -217,6 +275,10 @@ export async function downloadSkill(skill: SkillMetadata): Promise<string | null
 
     if (downloadedCount < files.length) {
       throw new Error(`Only ${downloadedCount}/${files.length} files downloaded successfully`)
+    }
+
+    if (skill.contentHash) {
+      saveCachedSkillMeta(skill.name, { contentHash: skill.contentHash, downloadedAt: Date.now() })
     }
 
     return skillCachePath

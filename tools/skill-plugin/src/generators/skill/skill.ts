@@ -35,6 +35,8 @@ export async function skillGenerator(tree: Tree, options: SkillGeneratorSchema) 
   generateFiles(tree, path.join(__dirname, 'files'), skillRoot, {
     ...normalizedNames,
     description: options.description || 'TODO: Add description',
+    author: options.author || 'TODO',
+    version: options.skillVersion || '1.0.0',
     tmpl: '',
   })
 

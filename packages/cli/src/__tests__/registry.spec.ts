@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals'
-import { existsSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -8,6 +9,7 @@ import {
   clearRegistryCache,
   clearSkillCache,
   getCacheDir,
+  getCachedContentHash,
   getSkillCachePath,
   isSkillCached,
   type SkillMetadata,
@@ -730,5 +732,379 @@ describe('registry retry and fallback logic', () => {
       const errorMsg = `Only ${downloadedFiles}/${expectedFiles} files downloaded successfully`
       expect(errorMsg).toContain('295/310')
     })
+  })
+})
+
+describe('content hash computation', () => {
+  let tempDir: string
+
+  beforeEach(async () => {
+    tempDir = join(tmpdir(), `hash-test-${Date.now()}`)
+    await mkdir(tempDir, { recursive: true })
+  })
+
+  afterEach(async () => {
+    try {
+      await rm(tempDir, { recursive: true, force: true })
+    } catch {
+      // Ignore
+    }
+  })
+
+  it('should produce deterministic hash for same content regardless of input order', async () => {
+    await writeFile(join(tempDir, 'SKILL.md'), '# Test Skill')
+    await writeFile(join(tempDir, 'README.md'), '# Readme')
+
+    const computeHash = (dir: string, files: string[]): string => {
+      const hash = createHash('sha256')
+      const sortedFiles = [...files].sort()
+      for (const file of sortedFiles) {
+        const filePath = join(dir, file)
+        if (existsSync(filePath)) {
+          hash.update(file)
+          hash.update(readFileSync(filePath))
+        }
+      }
+      return hash.digest('hex')
+    }
+
+    const hash1 = computeHash(tempDir, ['SKILL.md', 'README.md'])
+    const hash2 = computeHash(tempDir, ['README.md', 'SKILL.md'])
+
+    expect(hash1).toBe(hash2)
+    expect(hash1).toHaveLength(64)
+  })
+
+  it('should produce different hash when content changes', async () => {
+    await writeFile(join(tempDir, 'SKILL.md'), '# Version 1')
+
+    const computeHash = (dir: string, files: string[]): string => {
+      const hash = createHash('sha256')
+      const sortedFiles = [...files].sort()
+      for (const file of sortedFiles) {
+        const filePath = join(dir, file)
+        if (existsSync(filePath)) {
+          hash.update(file)
+          hash.update(readFileSync(filePath))
+        }
+      }
+      return hash.digest('hex')
+    }
+
+    const hash1 = computeHash(tempDir, ['SKILL.md'])
+
+    await writeFile(join(tempDir, 'SKILL.md'), '# Version 2')
+    const hash2 = computeHash(tempDir, ['SKILL.md'])
+
+    expect(hash1).not.toBe(hash2)
+  })
+
+  it('should produce different hash when files are added', async () => {
+    await writeFile(join(tempDir, 'SKILL.md'), '# Skill')
+
+    const computeHash = (dir: string, files: string[]): string => {
+      const hash = createHash('sha256')
+      const sortedFiles = [...files].sort()
+      for (const file of sortedFiles) {
+        const filePath = join(dir, file)
+        if (existsSync(filePath)) {
+          hash.update(file)
+          hash.update(readFileSync(filePath))
+        }
+      }
+      return hash.digest('hex')
+    }
+
+    const hash1 = computeHash(tempDir, ['SKILL.md'])
+
+    await writeFile(join(tempDir, 'EXTRA.md'), '# Extra')
+    const hash2 = computeHash(tempDir, ['SKILL.md', 'EXTRA.md'])
+
+    expect(hash1).not.toBe(hash2)
+  })
+})
+
+describe('cache metadata (.skill-meta.json)', () => {
+  let tempDir: string
+
+  beforeEach(async () => {
+    tempDir = join(tmpdir(), `meta-test-${Date.now()}`)
+    await mkdir(tempDir, { recursive: true })
+  })
+
+  afterEach(async () => {
+    try {
+      await rm(tempDir, { recursive: true, force: true })
+    } catch {
+      // Ignore
+    }
+  })
+
+  it('should round-trip cache metadata via JSON', async () => {
+    const meta = { contentHash: 'abc123def456', downloadedAt: Date.now() }
+    const metaPath = join(tempDir, '.skill-meta.json')
+
+    writeFileSync(metaPath, JSON.stringify(meta, null, 2))
+    const parsed = JSON.parse(readFileSync(metaPath, 'utf-8'))
+
+    expect(parsed.contentHash).toBe(meta.contentHash)
+    expect(parsed.downloadedAt).toBe(meta.downloadedAt)
+  })
+
+  it('should handle missing meta file gracefully', () => {
+    const metaPath = join(tempDir, '.skill-meta.json')
+    expect(existsSync(metaPath)).toBe(false)
+
+    const tryRead = (): { contentHash: string; downloadedAt: number } | null => {
+      try {
+        if (!existsSync(metaPath)) return null
+        return JSON.parse(readFileSync(metaPath, 'utf-8'))
+      } catch {
+        return null
+      }
+    }
+
+    expect(tryRead()).toBeNull()
+  })
+
+  it('should handle corrupted meta file gracefully', async () => {
+    const metaPath = join(tempDir, '.skill-meta.json')
+    await writeFile(metaPath, 'not valid json{{{')
+
+    const tryRead = (): { contentHash: string } | null => {
+      try {
+        return JSON.parse(readFileSync(metaPath, 'utf-8'))
+      } catch {
+        return null
+      }
+    }
+
+    expect(tryRead()).toBeNull()
+  })
+})
+
+describe('getCachedContentHash', () => {
+  it('should return undefined for non-existent skill', () => {
+    const hash = getCachedContentHash('non-existent-skill-' + Date.now())
+    expect(hash).toBeUndefined()
+  })
+
+  it('should return undefined for invalid skill name', () => {
+    const hash = getCachedContentHash('')
+    expect(hash).toBeUndefined()
+  })
+})
+
+describe('needsUpdate detection logic', () => {
+  interface UpdateCheckParams {
+    isCached: boolean
+    registryHash: string | undefined
+    cachedHash: string | undefined
+  }
+
+  const checkNeedsUpdate = (params: UpdateCheckParams): boolean => {
+    if (!params.isCached) return true
+    if (!params.registryHash) return false
+    if (!params.cachedHash) return true
+    return params.cachedHash !== params.registryHash
+  }
+
+  it('should need update when skill is not cached', () => {
+    expect(checkNeedsUpdate({ isCached: false, registryHash: 'abc', cachedHash: undefined })).toBe(true)
+  })
+
+  it('should NOT need update when registry has no hash (cannot compare)', () => {
+    expect(checkNeedsUpdate({ isCached: true, registryHash: undefined, cachedHash: 'abc' })).toBe(false)
+  })
+
+  it('should need update when cache has no hash (legacy skill)', () => {
+    expect(checkNeedsUpdate({ isCached: true, registryHash: 'abc', cachedHash: undefined })).toBe(true)
+  })
+
+  it('should need update when hashes differ', () => {
+    expect(checkNeedsUpdate({ isCached: true, registryHash: 'new-hash', cachedHash: 'old-hash' })).toBe(true)
+  })
+
+  it('should NOT need update when hashes match', () => {
+    expect(checkNeedsUpdate({ isCached: true, registryHash: 'same-hash', cachedHash: 'same-hash' })).toBe(false)
+  })
+
+  it('should NOT need update when both hashes are undefined (no comparison possible)', () => {
+    expect(checkNeedsUpdate({ isCached: true, registryHash: undefined, cachedHash: undefined })).toBe(false)
+  })
+
+  it('should handle real SHA-256 hashes', () => {
+    const hash1 = createHash('sha256').update('content-v1').digest('hex')
+    const hash2 = createHash('sha256').update('content-v2').digest('hex')
+    const hash1Copy = createHash('sha256').update('content-v1').digest('hex')
+
+    expect(checkNeedsUpdate({ isCached: true, registryHash: hash1, cachedHash: hash1Copy })).toBe(false)
+    expect(checkNeedsUpdate({ isCached: true, registryHash: hash2, cachedHash: hash1 })).toBe(true)
+  })
+})
+
+describe('getUpdatableSkills batch logic', () => {
+  const simulateGetUpdatableSkills = (
+    skillNames: string[],
+    outdatedSet: Set<string>,
+  ): { toUpdate: string[]; upToDate: string[] } => {
+    const toUpdate: string[] = []
+    const upToDate: string[] = []
+
+    for (const name of skillNames) {
+      if (outdatedSet.has(name)) {
+        toUpdate.push(name)
+      } else {
+        upToDate.push(name)
+      }
+    }
+
+    return { toUpdate, upToDate }
+  }
+
+  it('should separate outdated from up-to-date skills', () => {
+    const outdated = new Set(['skill-a', 'skill-c'])
+    const result = simulateGetUpdatableSkills(['skill-a', 'skill-b', 'skill-c', 'skill-d'], outdated)
+
+    expect(result.toUpdate).toEqual(['skill-a', 'skill-c'])
+    expect(result.upToDate).toEqual(['skill-b', 'skill-d'])
+  })
+
+  it('should return all in upToDate when nothing is outdated', () => {
+    const result = simulateGetUpdatableSkills(['skill-a', 'skill-b'], new Set())
+
+    expect(result.toUpdate).toHaveLength(0)
+    expect(result.upToDate).toEqual(['skill-a', 'skill-b'])
+  })
+
+  it('should return all in toUpdate when everything is outdated', () => {
+    const result = simulateGetUpdatableSkills(['skill-a', 'skill-b'], new Set(['skill-a', 'skill-b']))
+
+    expect(result.toUpdate).toEqual(['skill-a', 'skill-b'])
+    expect(result.upToDate).toHaveLength(0)
+  })
+
+  it('should handle empty skill list', () => {
+    const result = simulateGetUpdatableSkills([], new Set(['skill-a']))
+
+    expect(result.toUpdate).toHaveLength(0)
+    expect(result.upToDate).toHaveLength(0)
+  })
+
+  it('should maintain order of skills', () => {
+    const outdated = new Set(['z-skill', 'a-skill'])
+    const result = simulateGetUpdatableSkills(['z-skill', 'm-skill', 'a-skill'], outdated)
+
+    expect(result.toUpdate).toEqual(['z-skill', 'a-skill'])
+    expect(result.upToDate).toEqual(['m-skill'])
+  })
+})
+
+describe('smart update config filtering', () => {
+  interface UpdateConfig {
+    skills: string[]
+    agents: string[]
+    global: boolean
+  }
+
+  const filterConfigs = (
+    configs: UpdateConfig[],
+    outdatedSkills: Set<string>,
+  ): { configs: UpdateConfig[]; toUpdate: string[]; upToDate: string[] } => {
+    const allSkills = [...new Set(configs.flatMap((c) => c.skills))]
+    const toUpdate = allSkills.filter((s) => outdatedSkills.has(s))
+    const upToDate = allSkills.filter((s) => !outdatedSkills.has(s))
+
+    if (toUpdate.length === 0) {
+      return { configs: [], upToDate, toUpdate: [] }
+    }
+
+    const filteredConfigs = configs
+      .map((config) => ({
+        ...config,
+        skills: config.skills.filter((s) => outdatedSkills.has(s)),
+      }))
+      .filter((config) => config.skills.length > 0)
+
+    return { configs: filteredConfigs, upToDate, toUpdate }
+  }
+
+  it('should filter configs to only include outdated skills', () => {
+    const configs: UpdateConfig[] = [{ skills: ['skill-a', 'skill-b', 'skill-c'], agents: ['cursor'], global: false }]
+    const outdated = new Set(['skill-a', 'skill-c'])
+
+    const result = filterConfigs(configs, outdated)
+
+    expect(result.configs).toHaveLength(1)
+    expect(result.configs[0].skills).toEqual(['skill-a', 'skill-c'])
+    expect(result.toUpdate).toEqual(['skill-a', 'skill-c'])
+    expect(result.upToDate).toEqual(['skill-b'])
+  })
+
+  it('should return empty configs when all skills are up to date', () => {
+    const configs: UpdateConfig[] = [{ skills: ['skill-a', 'skill-b'], agents: ['cursor'], global: false }]
+
+    const result = filterConfigs(configs, new Set())
+
+    expect(result.configs).toHaveLength(0)
+    expect(result.toUpdate).toHaveLength(0)
+    expect(result.upToDate).toEqual(['skill-a', 'skill-b'])
+  })
+
+  it('should remove configs where no skills need update', () => {
+    const configs: UpdateConfig[] = [
+      { skills: ['skill-a'], agents: ['cursor'], global: false },
+      { skills: ['skill-b'], agents: ['claude-code'], global: true },
+    ]
+    const outdated = new Set(['skill-a'])
+
+    const result = filterConfigs(configs, outdated)
+
+    expect(result.configs).toHaveLength(1)
+    expect(result.configs[0].agents).toEqual(['cursor'])
+  })
+
+  it('should handle configs with overlapping skills', () => {
+    const configs: UpdateConfig[] = [
+      { skills: ['skill-a', 'skill-b'], agents: ['cursor'], global: false },
+      { skills: ['skill-a', 'skill-c'], agents: ['claude-code'], global: true },
+    ]
+    const outdated = new Set(['skill-a'])
+
+    const result = filterConfigs(configs, outdated)
+
+    expect(result.configs).toHaveLength(2)
+    expect(result.toUpdate).toEqual(['skill-a'])
+    expect(result.upToDate).toEqual(['skill-b', 'skill-c'])
+  })
+})
+
+describe('update preview display logic', () => {
+  it('should format single skill update correctly', () => {
+    const toUpdate = ['skill-a']
+    const label = `${toUpdate.length} skill${toUpdate.length === 1 ? '' : 's'} with updates available:`
+
+    expect(label).toBe('1 skill with updates available:')
+  })
+
+  it('should format multiple skill updates correctly', () => {
+    const toUpdate = ['skill-a', 'skill-b', 'skill-c']
+    const label = `${toUpdate.length} skill${toUpdate.length === 1 ? '' : 's'} with updates available:`
+
+    expect(label).toBe('3 skills with updates available:')
+  })
+
+  it('should format up-to-date count correctly', () => {
+    const upToDate = ['skill-d', 'skill-e']
+    const label = `${upToDate.length} skill${upToDate.length === 1 ? '' : 's'} already up to date`
+
+    expect(label).toBe('2 skills already up to date')
+  })
+
+  it('should format singular up-to-date correctly', () => {
+    const upToDate = ['skill-d']
+    const label = `${upToDate.length} skill${upToDate.length === 1 ? '' : 's'} already up to date`
+
+    expect(label).toBe('1 skill already up to date')
   })
 })

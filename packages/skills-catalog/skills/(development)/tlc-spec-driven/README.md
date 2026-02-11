@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Skill-Spec--Driven%20Development-blue?style=for-the-badge" alt="skill badge" />
+  <img src="https://img.shields.io/badge/Skill-TLC%20Spec--Driven-blue?style=for-the-badge" alt="skill badge" />
   <img src="https://img.shields.io/badge/Stack-Agnostic-green?style=for-the-badge" alt="stack agnostic" />
   <img src="https://img.shields.io/badge/Version-1.0.0-purple?style=for-the-badge" alt="version" />
 </p>
 
-<h1 align="center">🎯 Spec-Driven Development</h1>
+<h1 align="center">🎯 TLC Spec-Driven</h1>
 
 <p align="center">
   <strong>Plan and implement projects with precision. Granular tasks. Clear dependencies. Right tools.</strong>
@@ -23,7 +23,7 @@
 
 ## ✨ What Is This Skill?
 
-**Spec-Driven Development** transforms how AI agents approach software projects. Instead of diving straight into code, this skill enforces a structured methodology:
+**TLC Spec-Driven** transforms how AI agents approach software projects. Built on the principles of **Spec-Driven Development**, this skill enforces a structured methodology where every line of code is backed by a clear specification:
 
 ```
 ┌──────────┐   ┌──────────┐   ┌─────────┐   ┌───────────────────┐
@@ -44,7 +44,7 @@ Each phase produces documented artifacts that persist across sessions, enabling:
 
 > **Best results with modern, reasoning-capable models:**
 >
-> - **Claude Opus 4.5 / Sonnet 4.5** — Excellent for all phases
+> - **Claude Opus 4.6 / Sonnet 4.5** — Excellent for all phases
 > - **Gemini 3 Pro / GPT 5.2** — Strong reasoning and large context window
 > - **Gemini 3 Flash / Claude Haiku 4.5** — Great general-purpose performance
 >

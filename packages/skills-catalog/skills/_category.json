@@ -1,4 +1,8 @@
 {
+  "(architecture)": {
+    "name": "Architecture",
+    "description": "Skills for software architecture, patterns, and system design"
+  },
   "(cloud)": {
     "name": "Cloud & Infrastructure",
     "description": "Skills for cloud management, AWS, and DevOps"

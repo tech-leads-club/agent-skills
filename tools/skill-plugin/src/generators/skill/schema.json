@@ -23,6 +23,16 @@
       "type": "string",
       "description": "Category ID for the skill (kebab-case). If the category doesn't exist, it will be created.",
       "x-prompt": "Which category should this skill belong to? (e.g., 'development', 'creation')"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author of the skill (e.g. github.com/username)",
+      "default": "TODO"
+    },
+    "skillVersion": {
+      "type": "string",
+      "description": "Initial version of the skill",
+      "default": "1.0.0"
     }
   },
   "required": [

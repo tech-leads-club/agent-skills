@@ -33,11 +33,11 @@ graph TD
 
 Refer to `packages/cli/src/agents.ts` for the canonical config.
 
-| Tier | Agents | Notes |
-| :--- | :--- | :--- |
-| **1 (Core)** | Cursor, Claude Code, GitHub Copilot, Windsurf, Cline | Most active support & testing. |
-| **2 (Rising)** | Aider, OpenAI Codex, Gemini CLI, Antigravity, Roo Code, Kilo Code | Full installation support. |
-| **3 (Ent)** | Amazon Q, Augment, Tabnine, OpenCode, Sourcegraph Cody | Specialized/Enterprise usage. |
+| Tier           | Agents                                                                  | Notes                          |
+| :------------- | :---------------------------------------------------------------------- | :----------------------------- |
+| **1 (Core)**   | Cursor, Claude Code, GitHub Copilot, Windsurf, Cline                    | Most active support & testing. |
+| **2 (Rising)** | Aider, OpenAI Codex, Gemini CLI, Antigravity, Roo Code, Kilo Code, TRAE | Full installation support.     |
+| **3 (Ent)**    | Amazon Q, Augment, Tabnine, OpenCode, Sourcegraph Cody, Droid           | Specialized/Enterprise usage.  |
 
 ## 4. Operational Procedures
 
@@ -85,15 +85,15 @@ SKILLS_CDN_REF=main npm run dev -- install
 Skills must be explicitly optimized for agent consumption.
 
 1. **High Density, Low Noise**:
-    - ❌ Bad: "First, you might want to try checking the file system..."
-    - ✅ Good: "1. List files in target directory."
+   - ❌ Bad: "First, you might want to try checking the file system..."
+   - ✅ Good: "1. List files in target directory."
 2. **Progressive Disclosure**:
-    - Keep `SKILL.md` < 500 lines.
-    - Offload reference tables/docs to `references/` or `templates/`.
-    - Agents read the prompt -> Decide to load extra files -> Execute.
+   - Keep `SKILL.md` < 500 lines.
+   - Offload reference tables/docs to `references/` or `templates/`.
+   - Agents read the prompt -> Decide to load extra files -> Execute.
 3. **Imperative Actions**:
-    - Use active verbs: "Analyze", "Generate", "Validate".
-    - Avoid philosophical or educational content unless it's a "Guide" skill.
+   - Use active verbs: "Analyze", "Generate", "Validate".
+   - Avoid philosophical or educational content unless it's a "Guide" skill.
 
 ## 6. Commit Strategy (Conventional Commits)
 

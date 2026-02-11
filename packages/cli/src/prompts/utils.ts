@@ -2,14 +2,21 @@ import pc from 'picocolors'
 
 import { getAgentConfig } from '../agents'
 import { listInstalledSkills } from '../installer'
+import { fetchRegistry, getUpdatableSkills } from '../registry'
 import type { AgentType } from '../types'
-import { truncate } from '../ui/formatting'
 import type { Option } from '../ui/input'
+import { truncateText } from '../ui/utils'
 
 export interface UpdateConfig {
   skills: string[]
   agents: AgentType[]
   global: boolean
+}
+
+export interface SmartUpdateResult {
+  configs: UpdateConfig[]
+  upToDate: string[]
+  toUpdate: string[]
 }
 
 export function buildAgentOptions(agents: AgentType[], detectedAgents: AgentType[] = []): Option<AgentType>[] {
@@ -19,7 +26,7 @@ export function buildAgentOptions(agents: AgentType[], detectedAgents: AgentType
     return {
       value: type,
       label: isDetected ? `${config.displayName} ${pc.green('● detected')}` : config.displayName,
-      hint: truncate(config.description, 50),
+      hint: truncateText(config.description, 50),
     }
   })
 }
@@ -87,6 +94,37 @@ export async function getUpdateConfigs(agents: AgentType[]): Promise<UpdateConfi
   }
 
   return configs
+}
+
+export async function getSmartUpdateConfigs(agents: AgentType[]): Promise<SmartUpdateResult> {
+  const registry = await fetchRegistry(true)
+  const configs = await getUpdateConfigs(agents)
+  if (configs.length === 0 || !registry) return { configs: [], upToDate: [], toUpdate: [] }
+
+  const catalogSkillNames = new Set(registry.skills.map((s) => s.name))
+  const catalogConfigs = configs
+    .map((config) => ({
+      ...config,
+      skills: config.skills.filter((s) => catalogSkillNames.has(s)),
+    }))
+    .filter((config) => config.skills.length > 0)
+
+  if (catalogConfigs.length === 0) return { configs: [], upToDate: [], toUpdate: [] }
+
+  const allSkillNames = [...new Set(catalogConfigs.flatMap((c) => c.skills))]
+  const { toUpdate, upToDate } = await getUpdatableSkills(allSkillNames)
+
+  if (toUpdate.length === 0) return { configs: [], upToDate, toUpdate: [] }
+
+  const updateSet = new Set(toUpdate)
+  const filteredConfigs = catalogConfigs
+    .map((config) => ({
+      ...config,
+      skills: config.skills.filter((s) => updateSet.has(s)),
+    }))
+    .filter((config) => config.skills.length > 0)
+
+  return { configs: filteredConfigs, upToDate, toUpdate }
 }
 
 export async function getInstalledSkillsForAgents(

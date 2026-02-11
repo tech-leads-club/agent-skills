@@ -1,6 +1,9 @@
 ---
 name: <%= fileName %>
 description: <%= description %>
+metadata:
+  version: <%= version %>
+  author: <%= author %>
 ---
 
 # <%= className %>

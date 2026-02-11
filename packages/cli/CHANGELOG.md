@@ -1,3 +1,45 @@
+## 0.13.0 (2026-02-10)
+
+### 🚀 Features
+
+- add TRAE agent configuration and update documentation ([93ef566](https://github.com/tech-leads-club/agent-skills/commit/93ef566))
+
+### 💅 Refactors
+
+- change installation method from 'symlink' to 'copy' ([82c451f](https://github.com/tech-leads-club/agent-skills/commit/82c451f))
+- change option from 'copy' to 'symlink' for skill installation ([b8519d8](https://github.com/tech-leads-club/agent-skills/commit/b8519d8))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+- may-santos
+
+## 0.12.0 (2026-02-10)
+
+### 🚀 Features
+
+- enhance skill update command to fetch and update installed skills ([5e40f99](https://github.com/tech-leads-club/agent-skills/commit/5e40f99))
+- add content hash to skill lock entry during installation ([5117c51](https://github.com/tech-leads-club/agent-skills/commit/5117c51))
+- add content hash parameter to skill lock entry ([6955ad5](https://github.com/tech-leads-club/agent-skills/commit/6955ad5))
+- add content hash management for skill metadata caching ([a928fee](https://github.com/tech-leads-club/agent-skills/commit/a928fee))
+- add content hash computation and metadata handling tests ([a95f0f7](https://github.com/tech-leads-club/agent-skills/commit/a95f0f7))
+- implement smart update functionality for skills installation ([d3e1da3](https://github.com/tech-leads-club/agent-skills/commit/d3e1da3))
+- implement smart update configuration for agents ([882bd53](https://github.com/tech-leads-club/agent-skills/commit/882bd53))
+- **cli:** add support for Droid agent ([1e2a70a](https://github.com/tech-leads-club/agent-skills/commit/1e2a70a))
+
+### 🩹 Fixes
+
+- **cli:** add dynamic pagination to select prompts ([8a6c755](https://github.com/tech-leads-club/agent-skills/commit/8a6c755))
+
+### 💅 Refactors
+
+- **cli:** unify pagination logic and truncate long options ([c275894](https://github.com/tech-leads-club/agent-skills/commit/c275894))
+
+### ❤️ Thank You
+
+- Edmar Paulino
+- Felipe Rodrigues @felipfr
+
 ## 0.11.1 (2026-02-07)
 
 ### 🩹 Fixes

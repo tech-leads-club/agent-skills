@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +21,7 @@ interface SkillMetadata {
   files: string[]
   author?: string
   version?: string
+  contentHash: string
 }
 
 interface CategoryMetadata {
@@ -45,8 +47,10 @@ function parseSkillFrontmatter(content: string): {
   const frontmatter = frontmatterMatch[1]
   const nameMatch = frontmatter.match(/^name:\s*(.+)$/m)
   const descMatch = frontmatter.match(/^description:\s*(.+)$/m)
-  const authorMatch = frontmatter.match(/author:\s*(.+)$/m)
-  const versionMatch = frontmatter.match(/version:\s*['"]?([^'"]+)['"]?$/m)
+  const metadataBlock = frontmatter.match(/^metadata:\s*\n((?:\s{2,}.+\n?)*)/m)
+  const metadata = metadataBlock?.[1] || ''
+  const authorMatch = metadata.match(/author:\s*(.+)$/m)
+  const versionMatch = metadata.match(/version:\s*['"]?([^'"]+)['"]?$/m)
 
   return {
     name: nameMatch?.[1]?.trim(),
@@ -77,6 +81,21 @@ function getFilesInDirectory(dir: string): string[] {
 
   walk(dir)
   return files
+}
+
+function computeSkillHash(skillDir: string, files: string[]): string {
+  const hash = createHash('sha256')
+  const sortedFiles = [...files].sort()
+
+  for (const file of sortedFiles) {
+    const filePath = join(skillDir, file)
+    if (existsSync(filePath)) {
+      hash.update(file)
+      hash.update(readFileSync(filePath))
+    }
+  }
+
+  return hash.digest('hex')
 }
 
 function isCategoryFolder(name: string): boolean {
@@ -127,6 +146,7 @@ function scanSkillsInCategory(categoryPath: string, categoryId: string): SkillMe
     const content = readFileSync(skillMdPath, 'utf-8')
     const { name, description, author, version } = parseSkillFrontmatter(content)
     const files = getFilesInDirectory(skillPath)
+    const contentHash = computeSkillHash(skillPath, files)
     const relativePath = categoryId === 'uncategorized' ? entry.name : `(${categoryId})/${entry.name}`
 
     skills.push({
@@ -137,6 +157,7 @@ function scanSkillsInCategory(categoryPath: string, categoryId: string): SkillMe
       files,
       author,
       version,
+      contentHash,
     })
   }
 
@@ -172,7 +193,9 @@ function generateRegistry(): SkillsRegistry {
       if (existsSync(skillMdPath)) {
         const content = readFileSync(skillMdPath, 'utf-8')
         const { name, description, author, version } = parseSkillFrontmatter(content)
-        const files = getFilesInDirectory(join(SKILLS_DIR, entry.name))
+        const skillDir = join(SKILLS_DIR, entry.name)
+        const files = getFilesInDirectory(skillDir)
+        const contentHash = computeSkillHash(skillDir, files)
 
         skills.push({
           name: name || entry.name,
@@ -182,6 +205,7 @@ function generateRegistry(): SkillsRegistry {
           files,
           author,
           version,
+          contentHash,
         })
       }
     }
