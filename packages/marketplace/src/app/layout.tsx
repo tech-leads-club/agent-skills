@@ -1,17 +1,74 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ThemeProvider } from '../components/ThemeProvider'
 import { ThemeToggle } from '../components/ThemeToggle'
 import './global.css'
 
-export const metadata = {
-  title: 'Agent Skills | Tech Leads Club',
-  description: 'A curated collection of skills for AI coding agents',
+const SITE_URL = 'https://agent-skills.techleads.club'
+const SITE_NAME = 'Agent Skills Marketplace'
+const SITE_DESCRIPTION =
+  'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Agent Skills Marketplace | Tech Leads Club',
+    template: '%s | Agent Skills',
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'AI coding agents',
+    'agent skills',
+    'cursor skills',
+    'claude code',
+    'github copilot',
+    'windsurf',
+    'cline',
+    'AI assistant plugins',
+    'coding automation',
+    'tech leads club',
+    'developer tools',
+  ],
+  authors: [{ name: 'Tech Leads Club', url: 'https://github.com/tech-leads-club' }],
+  creator: 'Tech Leads Club',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: SITE_NAME,
+    title: 'Agent Skills Marketplace | Tech Leads Club',
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Agent Skills Marketplace | Tech Leads Club',
+    description: SITE_DESCRIPTION,
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: '/apple-touch-icon.png',
+  },
+  alternates: {
+    canonical: SITE_URL,
   },
 }
 
