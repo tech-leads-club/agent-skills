@@ -1,14 +1,39 @@
 import Link from 'next/link'
+import { JsonLd } from '../components/JsonLd'
 import { NpmDownloadsCard } from '../components/NpmDownloadsCard'
 import { StatsCard } from '../components/StatsCard'
 import marketplaceData from '../data/skills.json'
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Agent Skills Marketplace',
+  url: 'https://agent-skills.techleads.club',
+  description:
+    'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Tech Leads Club',
+    url: 'https://github.com/tech-leads-club',
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://agent-skills.techleads.club/skills?search={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
 
 export default function HomePage() {
   const { stats, skills } = marketplaceData
   const featuredSkills = skills.slice(0, 3)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      <JsonLd data={websiteSchema} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
       <div className="text-center mb-16">
         <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Agent Skills Marketplace</h1>
@@ -82,5 +107,6 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
