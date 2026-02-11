@@ -30,23 +30,27 @@ describe('UI Utils', () => {
   })
 
   describe('Terminal Dimensions', () => {
-    const originalStdout = process.stdout
+    const originalColumns = process.stdout.columns
+    const originalRows = process.stdout.rows
 
     const mockStdout = (columns?: number, rows?: number) => {
-      Object.defineProperty(process, 'stdout', {
-        value: {
-          columns,
-          rows,
-        },
-        writable: true,
+      Object.defineProperty(process.stdout, 'columns', {
+        value: columns,
+        configurable: true,
+      })
+      Object.defineProperty(process.stdout, 'rows', {
+        value: rows,
         configurable: true,
       })
     }
 
     afterEach(() => {
-      Object.defineProperty(process, 'stdout', {
-        value: originalStdout,
-        writable: true,
+      Object.defineProperty(process.stdout, 'columns', {
+        value: originalColumns,
+        configurable: true,
+      })
+      Object.defineProperty(process.stdout, 'rows', {
+        value: originalRows,
         configurable: true,
       })
     })
