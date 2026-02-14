@@ -23,7 +23,7 @@ jobs:
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
       NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
-      NODE_OPTIONS: "--experimental-vm-modules"
+      NODE_OPTIONS: '--experimental-vm-modules'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
           npx nx release publish --tag snapshot --provenance
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_CONFIG_PROVENANCE: "true"
+          NPM_CONFIG_PROVENANCE: 'true'
 
       - name: Notify PR
         uses: ./.github/actions/snapshot-notification
@@ -144,21 +144,22 @@ jobs:
           app-slug: ${{ steps.app-token.outputs.app-slug }}
           git-config: true
 
-      - name: Generate Skills Registry
-        run: npm run generate:registry
+      - name: Generate Skills Data
+        run: npm run generate:data
 
-      - name: Commit Registry if Changed
+      - name: Commit Data if Changed
         run: |
           REGISTRY_PATH="packages/skills-catalog/skills-registry.json"
-          if ! git diff --quiet "$REGISTRY_PATH" 2>/dev/null; then
-            git add "$REGISTRY_PATH"
-            git commit -m "chore: update skills-registry.json" || true
+          MARKETPLACE_DATA_PATH="packages/marketplace/src/data/skills.json"
+          if ! git diff --quiet "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH" 2>/dev/null; then
+            git add "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH"
+            git commit -m "chore: update generated skills data" || true
           fi
 
       - name: Release Version and Publish
         run: npx nx release --yes
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NODE_AUTH_TOKEN: ""
+          NODE_AUTH_TOKEN: ''
           NPM_CONFIG_PROVENANCE: true
           NX_NO_CLOUD: true
