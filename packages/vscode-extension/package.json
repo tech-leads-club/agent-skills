@@ -1,0 +1,67 @@
+{
+  "name": "@tech-leads-club/vscode-extension",
+  "displayName": "Agent Skills Manager",
+  "description": "Discover, install, and manage AI agent skills directly within VS Code",
+  "version": "0.0.1",
+  "publisher": "tech-leads-club",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tech-leads-club/agent-skills.git"
+  },
+  "type": "module",
+  "main": "./dist/extension.js",
+  "engines": {
+    "node": ">=22",
+    "vscode": "^1.96.0"
+  },
+  "activationEvents": [],
+  "categories": [
+    "Other"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agent-skills-sidebar",
+          "title": "Agent Skills",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "agent-skills-sidebar": [
+        {
+          "type": "webview",
+          "id": "agentSkillsSidebar",
+          "name": "Skills Marketplace"
+        }
+      ]
+    }
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In restricted mode, only marketplace browsing is available. Local skill installation is disabled."
+    }
+  },
+  "scripts": {
+    "build": "nx build",
+    "build:webview": "nx build:webview",
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest",
+    "typecheck": "tsc --noEmit",
+    "package": "nx package"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tech-leads-club/core": "0.0.1",
+    "@types/node": "^22",
+    "@types/vscode": "^1.96.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0"
+  }
+}

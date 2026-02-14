@@ -53,4 +53,23 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['packages/vscode-extension/package.json'],
+    rules: {
+      '@nx/dependency-checks': [
+        'error',
+        {
+          ignoredDependencies: [
+            '@tech-leads-club/core',
+            '@types/vscode',
+            'react',
+            'react-dom',
+            'vite',
+            '@vitejs/plugin-react',
+            '@jest/globals',
+          ],
+        },
+      ],
+    },
+  },
 ])
