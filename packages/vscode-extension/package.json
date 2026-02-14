@@ -38,6 +38,26 @@
           "name": "Skills Marketplace"
         }
       ]
+    },
+    "commands": [
+      {
+        "command": "agentSkills.refresh",
+        "title": "Agent Skills: Refresh Skills",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "agentSkills.openSettings",
+        "title": "Agent Skills: Open Settings"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "agentSkills.refresh",
+          "when": "view == agentSkillsSidebar",
+          "group": "navigation"
+        }
+      ]
     }
   },
   "capabilities": {
