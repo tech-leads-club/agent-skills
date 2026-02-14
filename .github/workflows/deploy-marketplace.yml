@@ -13,7 +13,6 @@ permissions:
 env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
-
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
@@ -22,7 +21,7 @@ jobs:
   build:
     name: Build Marketplace
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action != 'labeled'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'labeled')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -36,7 +35,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Generate skills data
-        run: npx nx run marketplace:generate-data
+        run: npm run generate:data
 
       - name: Build (static export)
         run: npx nx run marketplace:export
