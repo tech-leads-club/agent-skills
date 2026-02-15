@@ -78,4 +78,96 @@ describe('Shared Messages', () => {
       expect(msg.payload.status).toBe(status)
     })
   })
+
+  // TESTS FOR INSTALL/REMOVE PAYLOADS WITH MULTI-AGENT SUPPORT
+
+  it('should construct installSkill with multiple agents', () => {
+    const msg: WebviewMessage = {
+      type: 'installSkill',
+      payload: { skillName: 'test', agents: ['cursor', 'claude-code'], scope: 'local' },
+    }
+    expect(msg.type).toBe('installSkill')
+    if (msg.type === 'installSkill') {
+      expect(msg.payload.agents).toEqual(['cursor', 'claude-code'])
+      expect(msg.payload.scope).toBe('local')
+    }
+  })
+
+  it('should construct removeSkill with multiple agents', () => {
+    const msg: WebviewMessage = {
+      type: 'removeSkill',
+      payload: { skillName: 'test', agents: ['cursor'], scope: 'global' },
+    }
+    expect(msg.type).toBe('removeSkill')
+    if (msg.type === 'removeSkill') {
+      expect(msg.payload.agents).toEqual(['cursor'])
+    }
+  })
+
+  // TESTS FOR QUICK PICK MESSAGE TYPES
+
+  it('should construct requestAgentPick message', () => {
+    const msg: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+    expect(msg.type).toBe('requestAgentPick')
+    if (msg.type === 'requestAgentPick') {
+      expect(msg.payload.skillName).toBe('test-skill')
+      expect(msg.payload.action).toBe('add')
+    }
+  })
+
+  it('should construct requestScopePick message', () => {
+    const msg: WebviewMessage = {
+      type: 'requestScopePick',
+      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor'] },
+    }
+    expect(msg.type).toBe('requestScopePick')
+    if (msg.type === 'requestScopePick') {
+      expect(msg.payload.agents).toEqual(['cursor'])
+    }
+  })
+
+  it('should construct agentPickResult message', () => {
+    const msg: ExtensionMessage = {
+      type: 'agentPickResult',
+      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor', 'claude-code'] },
+    }
+    expect(msg.type).toBe('agentPickResult')
+    if (msg.type === 'agentPickResult') {
+      expect(msg.payload.agents).toEqual(['cursor', 'claude-code'])
+    }
+  })
+
+  it('should construct agentPickResult with null agents (cancelled)', () => {
+    const msg: ExtensionMessage = {
+      type: 'agentPickResult',
+      payload: { skillName: 'test-skill', action: 'remove', agents: null },
+    }
+    if (msg.type === 'agentPickResult') {
+      expect(msg.payload.agents).toBeNull()
+    }
+  })
+
+  it('should construct scopePickResult message', () => {
+    const msg: ExtensionMessage = {
+      type: 'scopePickResult',
+      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor'], scope: 'local' },
+    }
+    expect(msg.type).toBe('scopePickResult')
+    if (msg.type === 'scopePickResult') {
+      expect(msg.payload.scope).toBe('local')
+    }
+  })
+
+  it('should construct scopePickResult with null scope (cancelled)', () => {
+    const msg: ExtensionMessage = {
+      type: 'scopePickResult',
+      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor'], scope: null },
+    }
+    if (msg.type === 'scopePickResult') {
+      expect(msg.payload.scope).toBeNull()
+    }
+  })
 })

@@ -9,6 +9,7 @@ export const window = {
   showInformationMessage: jest.fn(),
   showErrorMessage: jest.fn(),
   showWarningMessage: jest.fn(),
+  showQuickPick: jest.fn(),
 }
 
 export const commands = {
@@ -21,6 +22,7 @@ export const workspace = {
     get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
   })),
   isTrusted: true,
+  workspaceFolders: [{ uri: { fsPath: '/test/workspace' }, name: 'test', index: 0 }],
 }
 
 export const Uri = {

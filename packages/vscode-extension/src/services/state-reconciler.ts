@@ -79,6 +79,13 @@ export class StateReconciler implements vscode.Disposable {
   }
 
   /**
+   * Returns the current installed skills map from the last reconciliation.
+   */
+  async getInstalledSkills(): Promise<InstalledSkillsMap> {
+    return this.previousState
+  }
+
+  /**
    * Subscribes to state change events.
    */
   onStateChanged(handler: (state: InstalledSkillsMap) => void): void {

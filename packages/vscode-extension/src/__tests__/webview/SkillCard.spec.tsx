@@ -28,10 +28,8 @@ describe('SkillCard Accessibility', () => {
     isOperating: false,
     hasUpdate: false,
     agents: mockAgents,
-    hasWorkspace: true,
-    onInstall: jest.fn(),
-    onRemove: jest.fn(),
     onUpdate: jest.fn(),
+    onRequestAgentPick: jest.fn(),
   }
 
   it('should have article role for the card element', () => {
@@ -152,6 +150,29 @@ describe('SkillCard Accessibility', () => {
 
     await user.click(screen.getByRole('button', { name: /update/i }))
     expect(onUpdate).toHaveBeenCalled()
+  })
+
+  it('should call onRequestAgentPick with "add" when Add button is clicked', async () => {
+    const onRequestAgentPick = jest.fn()
+    const user = userEvent.setup()
+    render(<SkillCard {...defaultProps} onRequestAgentPick={onRequestAgentPick} />)
+
+    await user.click(screen.getByRole('button', { name: /add/i }))
+    expect(onRequestAgentPick).toHaveBeenCalledWith('add')
+  })
+
+  it('should call onRequestAgentPick with "remove" when Remove button is clicked', async () => {
+    const onRequestAgentPick = jest.fn()
+    const user = userEvent.setup()
+    const installedInfo = {
+      local: true,
+      global: false,
+      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false }],
+    }
+    render(<SkillCard {...defaultProps} installedInfo={installedInfo} onRequestAgentPick={onRequestAgentPick} />)
+
+    await user.click(screen.getByRole('button', { name: /remove/i }))
+    expect(onRequestAgentPick).toHaveBeenCalledWith('remove')
   })
 
   describe('Automated WCAG Checks', () => {

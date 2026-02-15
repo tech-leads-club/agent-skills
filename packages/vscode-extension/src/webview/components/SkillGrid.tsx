@@ -23,7 +23,6 @@ export function SkillGrid({
   isOperating,
   getOperationMessage,
   availableAgents,
-  hasWorkspace,
 }: SkillGridProps) {
   if (skills.length === 0) {
     return (
@@ -64,23 +63,16 @@ export function SkillGrid({
               operationMessage={getOperationMessage(skill.name)}
               hasUpdate={hasUpdate}
               agents={cardAgents}
-              hasWorkspace={hasWorkspace}
-              onInstall={(agent, scope) => {
-                postMessage({
-                  type: 'installSkill',
-                  payload: { skillName: skill.name, agent, scope },
-                })
-              }}
-              onRemove={(agent, scope) => {
-                postMessage({
-                  type: 'removeSkill',
-                  payload: { skillName: skill.name, agent, scope },
-                })
-              }}
               onUpdate={() => {
                 postMessage({
                   type: 'updateSkill',
                   payload: { skillName: skill.name },
+                })
+              }}
+              onRequestAgentPick={(action) => {
+                postMessage({
+                  type: 'requestAgentPick',
+                  payload: { skillName: skill.name, action },
                 })
               }}
             />

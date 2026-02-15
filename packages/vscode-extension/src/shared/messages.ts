@@ -11,6 +11,8 @@ export type WebviewMessage =
   | { type: 'removeSkill'; payload: RemoveSkillPayload }
   | { type: 'updateSkill'; payload: UpdateSkillPayload }
   | { type: 'cancelOperation'; payload: CancelOperationPayload }
+  | { type: 'requestAgentPick'; payload: RequestAgentPickPayload }
+  | { type: 'requestScopePick'; payload: RequestScopePickPayload }
 
 /**
  * Messages sent FROM the Extension Host TO the Webview.
@@ -23,6 +25,8 @@ export type ExtensionMessage =
   | { type: 'operationProgress'; payload: OperationProgressPayload }
   | { type: 'operationCompleted'; payload: OperationCompletedPayload }
   | { type: 'reconcileState'; payload: ReconcileStatePayload }
+  | { type: 'agentPickResult'; payload: AgentPickResultPayload }
+  | { type: 'scopePickResult'; payload: ScopePickResultPayload }
 
 /**
  * Payload for initialize message.
@@ -48,7 +52,7 @@ export interface RegistryUpdatePayload {
  */
 export interface InstallSkillPayload {
   skillName: string
-  agent: string // Selected agent identifier
+  agents: string[] // Selected agent identifiers (supports multi-select)
   scope: 'local' | 'global' | 'all'
 }
 
@@ -57,7 +61,7 @@ export interface InstallSkillPayload {
  */
 export interface RemoveSkillPayload {
   skillName: string
-  agent: string // Selected agent identifier
+  agents: string[] // Selected agent identifiers (supports multi-select)
   scope: 'local' | 'global' | 'all'
 }
 
@@ -110,4 +114,42 @@ export interface OperationCompletedPayload {
  */
 export interface ReconcileStatePayload {
   installedSkills: InstalledSkillsMap
+}
+
+/**
+ * Payload for requestAgentPick message (Webview → Extension).
+ * Asks the extension host to show vscode.window.showQuickPick for agent selection.
+ */
+export interface RequestAgentPickPayload {
+  skillName: string
+  action: 'add' | 'remove'
+}
+
+/**
+ * Payload for requestScopePick message (Webview → Extension).
+ * Asks the extension host to show vscode.window.showQuickPick for scope selection.
+ */
+export interface RequestScopePickPayload {
+  skillName: string
+  action: 'add' | 'remove'
+  agents: string[] // Previously selected agents
+}
+
+/**
+ * Result from agent quick pick (Extension → Webview).
+ */
+export interface AgentPickResultPayload {
+  skillName: string
+  action: 'add' | 'remove'
+  agents: string[] | null // null if user cancelled
+}
+
+/**
+ * Result from scope quick pick (Extension → Webview).
+ */
+export interface ScopePickResultPayload {
+  skillName: string
+  action: 'add' | 'remove'
+  agents: string[]
+  scope: 'local' | 'global' | 'all' | null // null if user cancelled
 }

@@ -30,6 +30,9 @@ describe('SidebarProvider', () => {
   }
 
   beforeEach(() => {
+    // Reset all mocks (including module-level vscode mocks and their implementations)
+    jest.resetAllMocks()
+
     // Mock ExtensionContext
     context = {
       extensionUri: { fsPath: '/test/extension/uri' },
@@ -71,6 +74,7 @@ describe('SidebarProvider', () => {
     reconciler = {
       reconcile: jest.fn<MockableFn>().mockResolvedValue(undefined),
       getAvailableAgents: jest.fn<MockableFn>().mockResolvedValue([]),
+      getInstalledSkills: jest.fn<MockableFn>().mockResolvedValue({}),
       onStateChanged: jest.fn<MockableFn>().mockReturnValue({ dispose: jest.fn<MockableFn>() }),
       start: jest.fn<MockableFn>(),
       dispose: jest.fn<MockableFn>(),
@@ -237,5 +241,296 @@ describe('SidebarProvider', () => {
         errorMessage: expect.stringContaining('Network error'),
       },
     })
+  })
+
+  // TESTS FOR QUICK PICK FLOW
+
+  it('should show quick pick with available agents (no "All" option)', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+      { agent: 'claude-code', displayName: 'Claude Code' },
+    ])
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
+
+    // Should NOT contain "All" option
+    expect(items.find((i) => i.agentId === '__all__')).toBeUndefined()
+    // Should contain both agents
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Cursor', agentId: 'cursor' }),
+        expect.objectContaining({ label: 'Claude Code', agentId: 'claude-code' }),
+      ]),
+    )
+    expect(quickPickCall[1]).toEqual(
+      expect.objectContaining({
+        canPickMany: true,
+        title: expect.stringContaining('test-skill'),
+      }),
+    )
+  })
+
+  it('should send null agents when agent pick is cancelled', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+    ])
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null)
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'agentPickResult',
+      payload: { skillName: 'test-skill', action: 'add', agents: null },
+    })
+  })
+
+  it('should exclude fully saturated agents from ADD pick', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+      { agent: 'claude-code', displayName: 'Claude Code' },
+    ])
+    // cursor is fully installed (local + global), claude-code is not
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+      'test-skill': {
+        local: true,
+        global: true,
+        agents: [
+          { agent: 'cursor', displayName: 'Cursor', local: true, global: true },
+          { agent: 'claude-code', displayName: 'Claude Code', local: false, global: false },
+        ],
+      },
+    })
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
+
+    // cursor should be excluded (fully saturated)
+    expect(items.find((i) => i.agentId === 'cursor')).toBeUndefined()
+    // claude-code should be included
+    expect(items).toEqual(
+      expect.arrayContaining([expect.objectContaining({ label: 'Claude Code', agentId: 'claude-code' })]),
+    )
+  })
+
+  it('should only show installed agents in REMOVE pick', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+      { agent: 'claude-code', displayName: 'Claude Code' },
+      { agent: 'opencode', displayName: 'OpenCode' },
+    ])
+    // Only opencode has the skill installed
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+      'test-skill': {
+        local: true,
+        global: false,
+        agents: [{ agent: 'opencode', displayName: 'OpenCode', local: true, global: false }],
+      },
+    })
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'remove' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
+
+    // Only opencode should be in the list
+    expect(items).toHaveLength(1)
+    expect(items[0]).toEqual(expect.objectContaining({ label: 'OpenCode', agentId: 'opencode' }))
+  })
+
+  it('should only show "Locally" scope when skill is only installed locally for REMOVE', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'opencode', displayName: 'OpenCode' },
+    ])
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+      'test-skill': {
+        local: true,
+        global: false,
+        agents: [{ agent: 'opencode', displayName: 'OpenCode', local: true, global: false }],
+      },
+    })
+    // User selects opencode for removal
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValueOnce([
+      { label: 'OpenCode', agentId: 'opencode' },
+    ]) // agent pick
+    ;(vscode.window.showWarningMessage as jest.Mock<MockableFn>).mockResolvedValue('Remove')
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'remove' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    // Scope pick should NOT have been shown (auto-selected since only 1 option)
+    // showQuickPick called once for agent pick only
+    expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(1)
+
+    // Should still call remove with local scope
+    expect(orchestrator.remove).toHaveBeenCalledWith('test-skill', 'local', ['opencode'])
+  })
+
+  it('should chain to scope pick after agent selection', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+    ])
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({}) // not installed
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
+      .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    // Should have called showQuickPick twice (agent + scope)
+    expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(2)
+
+    // Should install the skill
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+  })
+
+  it('should handle "all" scope by installing both local and global', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+    ])
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({}) // not installed
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
+      .mockResolvedValueOnce({ label: 'All', scopeId: 'all' }) // scope pick
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'global', ['cursor'])
+  })
+
+  it('should confirm removal before executing remove action', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+    ])
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+      'test-skill': {
+        local: true,
+        global: true,
+        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true }],
+      },
+    })
+    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
+      .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
+    ;(vscode.window.showWarningMessage as jest.Mock<MockableFn>).mockResolvedValue('Remove')
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'remove' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(vscode.window.showWarningMessage).toHaveBeenCalled()
+    expect(orchestrator.remove).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+  })
+
+  it('should handle installSkill message with multiple agents', async () => {
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'installSkill',
+      payload: { skillName: 'test-skill', agents: ['cursor', 'claude-code'], scope: 'local' },
+    }
+
+    await messageHandler(message)
+
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor', 'claude-code'])
+  })
+
+  it('should handle installSkill with scope "all" by installing local and global', async () => {
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'installSkill',
+      payload: { skillName: 'test-skill', agents: ['cursor'], scope: 'all' },
+    }
+
+    await messageHandler(message)
+
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'global', ['cursor'])
+  })
+
+  it('should show info message when all agents are saturated for ADD', async () => {
+    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+      { agent: 'cursor', displayName: 'Cursor' },
+    ])
+    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+      'test-skill': {
+        local: true,
+        global: true,
+        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true }],
+      },
+    })
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = {
+      type: 'requestAgentPick',
+      payload: { skillName: 'test-skill', action: 'add' },
+    }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('already installed'))
+    // Should NOT show the quick pick
+    expect(vscode.window.showQuickPick).not.toHaveBeenCalled()
   })
 })

@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import type { AgentInstallInfo, InstalledSkillInfo, Skill } from '../../shared/types'
-import { SelectionFlow } from './SelectionFlow'
 
 export interface SkillCardProps {
   skill: Skill
@@ -10,17 +8,13 @@ export interface SkillCardProps {
   operationMessage?: string
   hasUpdate: boolean
   agents: AgentInstallInfo[]
-  hasWorkspace: boolean
-  onInstall: (agent: string, scope: 'local' | 'global' | 'all') => void
-  onRemove: (agent: string, scope: 'local' | 'global' | 'all') => void
   onUpdate: () => void
+  onRequestAgentPick: (action: 'add' | 'remove') => void
 }
-
-type ActionType = 'add' | 'remove' | null
 
 /**
  * Card component for displaying a single skill with lifecycle management actions.
- * Supports guided selection flow for agent/scope selection.
+ * Agent and scope selection is handled via vscode.window.showQuickPick in the extension host.
  */
 export function SkillCard({
   skill,
@@ -30,13 +24,9 @@ export function SkillCard({
   operationMessage,
   hasUpdate,
   agents,
-  hasWorkspace,
-  onInstall,
-  onRemove,
   onUpdate,
+  onRequestAgentPick,
 }: SkillCardProps) {
-  const [activeAction, setActiveAction] = useState<ActionType>(null)
-
   const ariaLabel =
     `${skill.name}. ${skill.description}. Category: ${categoryName}.` +
     (skill.author ? ` By ${skill.author}.` : '') +
@@ -44,8 +34,6 @@ export function SkillCard({
 
   // Render Action Buttons
   const renderActions = () => {
-    if (activeAction) return null
-
     const buttons = []
 
     if (hasUpdate) {
@@ -78,7 +66,7 @@ export function SkillCard({
             className="btn-add"
             onClick={(e) => {
               e.stopPropagation()
-              setActiveAction('add')
+              onRequestAgentPick('add')
             }}
             disabled={isOperating}
           >
@@ -96,7 +84,7 @@ export function SkillCard({
           className="btn-remove"
           onClick={(e) => {
             e.stopPropagation()
-            setActiveAction('remove')
+            onRequestAgentPick('remove')
           }}
           disabled={isOperating}
         >
@@ -108,55 +96,22 @@ export function SkillCard({
     return <div className="skill-card-actions">{buttons}</div>
   }
 
-  // Render Selection Flow
-  const renderSelectionFlow = () => {
-    if (!activeAction) return null
-
-    return (
-      <SelectionFlow
-        action={activeAction}
-        installedInfo={installedInfo}
-        agents={agents}
-        hasWorkspace={hasWorkspace}
-        onConfirm={(agent, scope) => {
-          if (activeAction === 'add') {
-            onInstall(agent, scope)
-          } else {
-            onRemove(agent, scope)
-          }
-          setActiveAction(null)
-        }}
-        onCancel={() => setActiveAction(null)}
-      />
-    )
-  }
-
   const cardClasses = `skill-card ${isOperating ? 'skill-card--operating' : ''}`
 
   return (
-    <div
-      className={cardClasses}
-      role="article" // Changed from button to article since it contains interactive elements
-      aria-label={ariaLabel}
-      aria-busy={isOperating}
-    >
+    <div className={cardClasses} role="article" aria-label={ariaLabel} aria-busy={isOperating}>
       <div className="skill-card-header">
         <h3 className="skill-card-title">{skill.name}</h3>
         <span className="skill-card-category-badge">{categoryName}</span>
       </div>
 
-      {!activeAction && (
-        <>
-          <p className="skill-card-description">{skill.description}</p>
-          <div className="skill-card-meta">
-            {skill.author && <span className="skill-card-author">by {skill.author}</span>}
-            {skill.version && <span className="skill-card-version">v{skill.version}</span>}
-          </div>
-        </>
-      )}
+      <p className="skill-card-description">{skill.description}</p>
+      <div className="skill-card-meta">
+        {skill.author && <span className="skill-card-author">by {skill.author}</span>}
+        {skill.version && <span className="skill-card-version">v{skill.version}</span>}
+      </div>
 
       {renderActions()}
-      {renderSelectionFlow()}
 
       {isOperating && operationMessage && (
         <div className="skill-card-progress" aria-live="polite">
