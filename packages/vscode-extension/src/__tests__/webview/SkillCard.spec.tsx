@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { axe, toHaveNoViolations } from 'jest-axe'
-import type { Skill } from '../../shared/types'
+import jestAxe from 'jest-axe'
+import type { AgentInstallInfo, Skill } from '../../shared/types'
 import { SkillCard } from '../../webview/components/SkillCard'
 
+const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
 describe('SkillCard Accessibility', () => {
@@ -18,26 +19,30 @@ describe('SkillCard Accessibility', () => {
     version: '1.0.0',
   }
 
+  const mockAgents: AgentInstallInfo[] = [{ agent: 'cursor', displayName: 'Cursor', local: false, global: false }]
+
   const defaultProps = {
     skill: mockSkill,
     categoryName: 'Testing',
+    installedInfo: null,
+    isOperating: false,
+    hasUpdate: false,
+    agents: mockAgents,
+    hasWorkspace: true,
+    onInstall: jest.fn(),
+    onRemove: jest.fn(),
+    onUpdate: jest.fn(),
   }
 
-  it('should have button role for interactive element', () => {
+  it('should have article role for the card element', () => {
     render(<SkillCard {...defaultProps} />)
-    const card = screen.getByRole('button')
+    const card = screen.getByRole('article')
     expect(card).toBeInTheDocument()
-  })
-
-  it('should be keyboard focusable with tabIndex', () => {
-    render(<SkillCard {...defaultProps} />)
-    const card = screen.getByRole('button')
-    expect(card).toHaveAttribute('tabIndex', '0')
   })
 
   it('should have comprehensive aria-label with all skill info', () => {
     render(<SkillCard {...defaultProps} />)
-    const card = screen.getByRole('button')
+    const card = screen.getByRole('article')
 
     const ariaLabel = card.getAttribute('aria-label')
     expect(ariaLabel).toContain('test-skill')
@@ -49,80 +54,20 @@ describe('SkillCard Accessibility', () => {
 
   it('should omit author from aria-label if not provided', () => {
     const skillWithoutAuthor = { ...mockSkill, author: undefined }
-    render(<SkillCard skill={skillWithoutAuthor} categoryName="Testing" />)
+    render(<SkillCard {...defaultProps} skill={skillWithoutAuthor} />)
 
-    const card = screen.getByRole('button')
+    const card = screen.getByRole('article')
     const ariaLabel = card.getAttribute('aria-label')
     expect(ariaLabel).not.toContain('By')
   })
 
   it('should omit version from aria-label if not provided', () => {
     const skillWithoutVersion = { ...mockSkill, version: undefined }
-    render(<SkillCard skill={skillWithoutVersion} categoryName="Testing" />)
+    render(<SkillCard {...defaultProps} skill={skillWithoutVersion} />)
 
-    const card = screen.getByRole('button')
+    const card = screen.getByRole('article')
     const ariaLabel = card.getAttribute('aria-label')
     expect(ariaLabel).not.toContain('Version')
-  })
-
-  it('should be keyboard navigable with Tab', async () => {
-    const user = userEvent.setup()
-    render(<SkillCard {...defaultProps} />)
-
-    const card = screen.getByRole('button')
-    await user.tab()
-    expect(card).toHaveFocus()
-  })
-
-  it('should be activatable with Enter key', async () => {
-    const user = userEvent.setup()
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    render(<SkillCard {...defaultProps} />)
-
-    const card = screen.getByRole('button')
-    card.focus()
-    await user.keyboard('{Enter}')
-
-    expect(consoleSpy).toHaveBeenCalledWith('Skill clicked:', 'test-skill')
-    consoleSpy.mockRestore()
-  })
-
-  it('should be activatable with Space key', async () => {
-    const user = userEvent.setup()
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    render(<SkillCard {...defaultProps} />)
-
-    const card = screen.getByRole('button')
-    card.focus()
-    await user.keyboard(' ')
-
-    expect(consoleSpy).toHaveBeenCalledWith('Skill clicked:', 'test-skill')
-    consoleSpy.mockRestore()
-  })
-
-  it('should prevent default on Space key to avoid page scroll', async () => {
-    render(<SkillCard {...defaultProps} />)
-
-    const card = screen.getByRole('button')
-    card.focus()
-
-    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true })
-    const preventDefaultSpy = jest.spyOn(event, 'preventDefault')
-    card.dispatchEvent(event)
-
-    expect(preventDefaultSpy).toHaveBeenCalled()
-  })
-
-  it('should be clickable with mouse', async () => {
-    const user = userEvent.setup()
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-    render(<SkillCard {...defaultProps} />)
-
-    const card = screen.getByRole('button')
-    await user.click(card)
-
-    expect(consoleSpy).toHaveBeenCalledWith('Skill clicked:', 'test-skill')
-    consoleSpy.mockRestore()
   })
 
   it('should display skill name as heading', () => {
@@ -151,23 +96,62 @@ describe('SkillCard Accessibility', () => {
     expect(screen.getByText(/v1.0.0/i)).toBeInTheDocument()
   })
 
-  it('should have cursor pointer style', () => {
+  it('should have skill-card class', () => {
     render(<SkillCard {...defaultProps} />)
-    const card = screen.getByRole('button')
+    const card = screen.getByRole('article')
     expect(card).toHaveClass('skill-card')
   })
 
-  it('should have visual focus indicator', async () => {
-    const user = userEvent.setup()
+  it('should show Add button when skill is not fully installed', () => {
     render(<SkillCard {...defaultProps} />)
+    expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument()
+  })
 
-    const card = screen.getByRole('button')
-    await user.tab()
+  it('should show Update button when hasUpdate is true', () => {
+    render(<SkillCard {...defaultProps} hasUpdate={true} />)
+    expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument()
+  })
 
-    // The card should be focused
-    expect(card).toHaveFocus()
-    // CSS should apply focus-visible styles (tested via class)
-    expect(card).toHaveClass('skill-card')
+  it('should show Remove button when skill is installed', () => {
+    const installedInfo = {
+      local: true,
+      global: false,
+      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false }],
+    }
+    render(<SkillCard {...defaultProps} installedInfo={installedInfo} />)
+    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument()
+  })
+
+  it('should disable buttons when isOperating is true', () => {
+    render(<SkillCard {...defaultProps} isOperating={true} />)
+    const addButton = screen.getByRole('button', { name: /add/i })
+    expect(addButton).toBeDisabled()
+  })
+
+  it('should show operating class when isOperating is true', () => {
+    render(<SkillCard {...defaultProps} isOperating={true} />)
+    const card = screen.getByRole('article')
+    expect(card).toHaveClass('skill-card--operating')
+  })
+
+  it('should show operation message when operating', () => {
+    render(<SkillCard {...defaultProps} isOperating={true} operationMessage="Installing..." />)
+    expect(screen.getByText('Installing...')).toBeInTheDocument()
+  })
+
+  it('should set aria-busy when operating', () => {
+    render(<SkillCard {...defaultProps} isOperating={true} />)
+    const card = screen.getByRole('article')
+    expect(card).toHaveAttribute('aria-busy', 'true')
+  })
+
+  it('should call onUpdate when Update button is clicked', async () => {
+    const onUpdate = jest.fn()
+    const user = userEvent.setup()
+    render(<SkillCard {...defaultProps} hasUpdate={true} onUpdate={onUpdate} />)
+
+    await user.click(screen.getByRole('button', { name: /update/i }))
+    expect(onUpdate).toHaveBeenCalled()
   })
 
   describe('Automated WCAG Checks', () => {
@@ -186,7 +170,7 @@ describe('SkillCard Accessibility', () => {
         files: ['SKILL.md'],
         contentHash: 'hash',
       }
-      const { container } = render(<SkillCard skill={minimalSkill} categoryName="Test" />)
+      const { container } = render(<SkillCard {...defaultProps} skill={minimalSkill} />)
       const results = await axe(container)
       expect(results).toHaveNoViolations()
     })

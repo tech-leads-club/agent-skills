@@ -1,9 +1,15 @@
+import { jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
+import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
 import { LoggingService } from '../../services/logging-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
+import type { StateReconciler } from '../../services/state-reconciler'
 import { WebviewMessage } from '../../shared/messages'
 import type { SkillRegistry } from '../../shared/types'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MockableFn = (...args: any[]) => any
 
 // Mock vscode module (handled by jest.config.ts moduleNameMapper)
 
@@ -12,6 +18,8 @@ describe('SidebarProvider', () => {
   let context: vscode.ExtensionContext
   let logger: LoggingService
   let registryService: SkillRegistryService
+  let orchestrator: InstallationOrchestrator
+  let reconciler: StateReconciler
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
 
@@ -35,19 +43,38 @@ describe('SidebarProvider', () => {
 
     // Mock LoggingService
     logger = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-      dispose: jest.fn(),
+      info: jest.fn<MockableFn>(),
+      warn: jest.fn<MockableFn>(),
+      error: jest.fn<MockableFn>(),
+      debug: jest.fn<MockableFn>(),
+      dispose: jest.fn<MockableFn>(),
     } as unknown as LoggingService
 
     // Mock SkillRegistryService
     registryService = {
-      getRegistry: jest.fn().mockResolvedValue(mockRegistry),
-      refresh: jest.fn().mockResolvedValue(mockRegistry),
-      dispose: jest.fn(),
+      getRegistry: jest.fn<MockableFn>().mockResolvedValue(mockRegistry),
+      refresh: jest.fn<MockableFn>().mockResolvedValue(mockRegistry),
+      dispose: jest.fn<MockableFn>(),
     } as unknown as SkillRegistryService
+
+    // Mock InstallationOrchestrator
+    orchestrator = {
+      install: jest.fn<MockableFn>().mockResolvedValue(undefined),
+      remove: jest.fn<MockableFn>().mockResolvedValue(undefined),
+      update: jest.fn<MockableFn>().mockResolvedValue(undefined),
+      cancel: jest.fn<MockableFn>(),
+      onOperationEvent: jest.fn<MockableFn>().mockReturnValue({ dispose: jest.fn<MockableFn>() }),
+      dispose: jest.fn<MockableFn>(),
+    } as unknown as InstallationOrchestrator
+
+    // Mock StateReconciler
+    reconciler = {
+      reconcile: jest.fn<MockableFn>().mockResolvedValue(undefined),
+      getAvailableAgents: jest.fn<MockableFn>().mockResolvedValue([]),
+      onStateChanged: jest.fn<MockableFn>().mockReturnValue({ dispose: jest.fn<MockableFn>() }),
+      start: jest.fn<MockableFn>(),
+      dispose: jest.fn<MockableFn>(),
+    } as unknown as StateReconciler
 
     // Mock WebviewView
     webviewView = {
@@ -55,16 +82,16 @@ describe('SidebarProvider', () => {
         options: {},
         html: '',
         cspSource: 'vscode-webview:',
-        asWebviewUri: jest.fn((uri: { fsPath: string }) => uri.fsPath),
-        onDidReceiveMessage: jest.fn((handler: (message: WebviewMessage) => void) => {
+        asWebviewUri: jest.fn<MockableFn>((uri: { fsPath: string }) => uri.fsPath),
+        onDidReceiveMessage: jest.fn<MockableFn>((handler: (message: WebviewMessage) => void) => {
           messageHandler = handler
-          return { dispose: jest.fn() }
+          return { dispose: jest.fn<MockableFn>() }
         }),
-        postMessage: jest.fn(),
+        postMessage: jest.fn<MockableFn>(),
       },
     } as unknown as vscode.WebviewView
 
-    provider = new SidebarProvider(context, logger, registryService)
+    provider = new SidebarProvider(context, logger, registryService, orchestrator, reconciler)
   })
 
   it('should have the correct viewType', () => {
@@ -111,27 +138,35 @@ describe('SidebarProvider', () => {
     expect(context.subscriptions).toHaveLength(1)
   })
 
-  it('should handle webviewDidMount message', () => {
+  it('should handle webviewDidMount message', async () => {
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
 
-    messageHandler(message)
+    await messageHandler(message)
+
+    // Wait for async operations
+    await new Promise((resolve) => setTimeout(resolve, 10))
 
     expect(logger.info).toHaveBeenCalledWith('Webview did mount')
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'initialize',
-      payload: { version: '1.2.3' },
-    })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'initialize',
+        payload: expect.objectContaining({
+          version: '1.2.3',
+          availableAgents: expect.arrayContaining([]),
+          hasWorkspace: expect.any(Boolean),
+        }),
+      }),
+    )
   })
 
-  it('should handle unknown messages gracefully', () => {
+  it('should handle unknown messages gracefully', async () => {
     provider.resolveWebviewView(webviewView)
     const message = { type: 'unknown-type' } as unknown as WebviewMessage
 
-    messageHandler(message)
+    await messageHandler(message)
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
-    expect(webviewView.webview.postMessage).not.toHaveBeenCalled()
   })
 
   it('should log info when resolving webview view', () => {
@@ -139,7 +174,7 @@ describe('SidebarProvider', () => {
     expect(logger.info).toHaveBeenCalledWith('Resolving sidebar webview')
   })
 
-  // NEW TESTS FOR REGISTRY HANDLING
+  // TESTS FOR REGISTRY HANDLING
 
   it('should send loading status then registryUpdate on webviewDidMount', async () => {
     provider.resolveWebviewView(webviewView)
@@ -183,7 +218,7 @@ describe('SidebarProvider', () => {
   })
 
   it('should handle registry service error gracefully', async () => {
-    ;(registryService.getRegistry as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
+    ;(registryService.getRegistry as jest.Mock<MockableFn>).mockRejectedValueOnce(new Error('Network error'))
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }

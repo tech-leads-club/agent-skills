@@ -7,9 +7,14 @@ describe('Shared Messages', () => {
   })
 
   it('should construct ExtensionMessage with initialize', () => {
-    const msg: ExtensionMessage = { type: 'initialize', payload: { version: '1.0.0' } }
+    const msg: ExtensionMessage = {
+      type: 'initialize',
+      payload: { version: '1.0.0', availableAgents: [], hasWorkspace: true },
+    }
     expect(msg.type).toBe('initialize')
-    expect(msg.payload.version).toBe('1.0.0')
+    if (msg.type === 'initialize') {
+      expect(msg.payload.version).toBe('1.0.0')
+    }
   })
 
   it('should use discriminated union in switch statement for WebviewMessage', () => {
@@ -24,7 +29,10 @@ describe('Shared Messages', () => {
   })
 
   it('should use discriminated union in switch statement for ExtensionMessage', () => {
-    const msg: ExtensionMessage = { type: 'initialize', payload: { version: '1.0.0' } }
+    const msg: ExtensionMessage = {
+      type: 'initialize',
+      payload: { version: '1.0.0', availableAgents: [], hasWorkspace: true },
+    }
     let version = ''
     switch (msg.type) {
       case 'initialize':

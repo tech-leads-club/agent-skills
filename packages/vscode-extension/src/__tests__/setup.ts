@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
-import { toHaveNoViolations } from 'jest-axe'
+import jestAxe from 'jest-axe'
 
+const { toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)

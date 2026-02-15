@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import jestAxe from 'jest-axe'
 import { CategoryFilter } from '../../webview/components/CategoryFilter'
 
+const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
 describe('CategoryFilter Accessibility', () => {

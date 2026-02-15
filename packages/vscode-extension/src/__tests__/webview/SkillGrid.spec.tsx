@@ -1,9 +1,15 @@
 import { render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
-import type { Category, Skill } from '../../shared/types'
+import jestAxe from 'jest-axe'
+import type { AvailableAgent, Category, InstalledSkillsMap, Skill } from '../../shared/types'
 import { SkillGrid } from '../../webview/components/SkillGrid'
 
+const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
+
+// Mock the vscode-api module used by SkillGrid/SkillCard
+jest.mock('../../webview/lib/vscode-api', () => ({
+  postMessage: jest.fn(),
+}))
 
 describe('SkillGrid Accessibility', () => {
   const mockSkills: Skill[] = [
@@ -32,27 +38,36 @@ describe('SkillGrid Accessibility', () => {
     testing: { name: 'Testing', description: 'Testing tools' },
   }
 
+  const mockInstalledSkills: InstalledSkillsMap = {}
+
+  const mockAvailableAgents: AvailableAgent[] = [{ agent: 'cursor', displayName: 'Cursor' }]
+
   const defaultProps = {
     skills: mockSkills,
     categories: mockCategories,
+    installedSkills: mockInstalledSkills,
+    isOperating: () => false,
+    getOperationMessage: () => undefined as string | undefined,
+    availableAgents: mockAvailableAgents,
+    hasWorkspace: true,
   }
 
   it('should render all skill cards', () => {
     render(<SkillGrid {...defaultProps} />)
 
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('article')
     expect(cards).toHaveLength(2)
   })
 
   it('should show empty state with role="status"', () => {
-    render(<SkillGrid skills={[]} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={[]} />)
 
     const emptyState = screen.getByRole('status')
     expect(emptyState).toHaveTextContent(/no skills found/i)
   })
 
   it('should announce empty state to screen readers', () => {
-    render(<SkillGrid skills={[]} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={[]} />)
 
     const status = screen.getByRole('status')
     expect(status).toBeInTheDocument()
@@ -61,7 +76,7 @@ describe('SkillGrid Accessibility', () => {
   it('should render cards in correct order', () => {
     render(<SkillGrid {...defaultProps} />)
 
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('article')
     expect(cards[0]).toHaveAccessibleName(/skill-one/i)
     expect(cards[1]).toHaveAccessibleName(/skill-two/i)
   })
@@ -93,23 +108,12 @@ describe('SkillGrid Accessibility', () => {
       contentHash: 'hash3',
     }
 
-    render(<SkillGrid skills={[skillWithMissingCategory]} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={[skillWithMissingCategory]} />)
 
     // Should still render the card
-    expect(screen.getByRole('button')).toBeInTheDocument()
+    expect(screen.getByRole('article')).toBeInTheDocument()
     // Category name should fallback to category key
     expect(screen.getByText('nonexistent')).toBeInTheDocument()
-  })
-
-  it('should maintain focus order for keyboard navigation', () => {
-    render(<SkillGrid {...defaultProps} />)
-
-    const cards = screen.getAllByRole('button')
-
-    // All cards should be focusable in order
-    cards.forEach((card) => {
-      expect(card).toHaveAttribute('tabIndex', '0')
-    })
   })
 
   it('should have container with appropriate structure', () => {
@@ -122,16 +126,16 @@ describe('SkillGrid Accessibility', () => {
   it('should render different skills with unique attributes', () => {
     render(<SkillGrid {...defaultProps} />)
 
-    const skillOne = screen.getByRole('button', { name: /skill-one/i })
-    const skillTwo = screen.getByRole('button', { name: /skill-two/i })
+    const skillOne = screen.getByRole('article', { name: /skill-one/i })
+    const skillTwo = screen.getByRole('article', { name: /skill-two/i })
 
     expect(skillOne).not.toBe(skillTwo)
   })
 
   it('should handle single skill correctly', () => {
-    render(<SkillGrid skills={[mockSkills[0]]} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={[mockSkills[0]]} />)
 
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('article')
     expect(cards).toHaveLength(1)
   })
 
@@ -145,9 +149,9 @@ describe('SkillGrid Accessibility', () => {
       contentHash: `hash${i}`,
     }))
 
-    render(<SkillGrid skills={manySkills} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={manySkills} />)
 
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('article')
     expect(cards).toHaveLength(50)
   })
 
@@ -173,9 +177,9 @@ describe('SkillGrid Accessibility', () => {
       },
     ]
 
-    render(<SkillGrid skills={mixedSkills} categories={mockCategories} />)
+    render(<SkillGrid {...defaultProps} skills={mixedSkills} />)
 
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('article')
     expect(cards).toHaveLength(2)
 
     // Both should have proper labels
@@ -191,7 +195,7 @@ describe('SkillGrid Accessibility', () => {
     })
 
     it('should have no accessibility violations (empty state)', async () => {
-      const { container } = render(<SkillGrid skills={[]} categories={mockCategories} />)
+      const { container } = render(<SkillGrid {...defaultProps} skills={[]} />)
       const results = await axe(container)
       expect(results).toHaveNoViolations()
     })
