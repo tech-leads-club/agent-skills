@@ -1,6 +1,8 @@
 import * as vscode from 'vscode'
+import type { InstallationOrchestrator } from '../services/installation-orchestrator'
 import { LoggingService } from '../services/logging-service'
 import { SkillRegistryService } from '../services/skill-registry-service'
+import type { StateReconciler } from '../services/state-reconciler'
 import type { ExtensionMessage, WebviewMessage } from '../shared/messages'
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -12,7 +14,51 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
     private readonly registryService: SkillRegistryService,
-  ) {}
+    private readonly orchestrator: InstallationOrchestrator,
+    private readonly reconciler: StateReconciler,
+  ) {
+    // Subscribe to state changes and push to webview
+    this.reconciler.onStateChanged((installedSkills) => {
+      this.postMessage({
+        type: 'reconcileState',
+        payload: { installedSkills },
+      })
+    })
+
+    // Subscribe to orchestrator events
+    this.orchestrator.onOperationEvent((event) => {
+      if (event.type === 'started') {
+        this.postMessage({
+          type: 'operationStarted',
+          payload: {
+            operationId: event.operationId,
+            operation: event.operation,
+            skillName: event.skillName,
+          },
+        })
+      } else if (event.type === 'progress') {
+        this.postMessage({
+          type: 'operationProgress',
+          payload: {
+            operationId: event.operationId,
+            message: event.message || '',
+            increment: undefined, // CLI doesn't support % yet
+          },
+        })
+      } else if (event.type === 'completed') {
+        this.postMessage({
+          type: 'operationCompleted',
+          payload: {
+            operationId: event.operationId,
+            operation: event.operation,
+            skillName: event.skillName,
+            success: event.success ?? false,
+            errorMessage: event.errorMessage,
+          },
+        })
+      }
+    })
+  }
 
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.logger.info('Resolving sidebar webview')
@@ -32,23 +78,87 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.context.subscriptions.push(messageDisposable)
   }
 
+  private async postMessage(message: ExtensionMessage): Promise<void> {
+    if (this.webviewView?.webview) {
+      await this.webviewView.webview.postMessage(message)
+    }
+  }
+
   private async handleMessage(message: WebviewMessage, webview: vscode.Webview): Promise<void> {
     switch (message.type) {
       case 'webviewDidMount': {
         this.logger.info('Webview did mount')
         const version = this.context.extension.packageJSON.version ?? 'unknown'
-        const response: ExtensionMessage = {
+        const availableAgents = await this.reconciler.getAvailableAgents()
+        const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+
+        await this.postMessage({
           type: 'initialize',
-          payload: { version },
-        }
-        await webview.postMessage(response)
+          payload: { version, availableAgents, hasWorkspace },
+        })
         // Trigger registry load and push to webview
         void this.loadAndPushRegistry(webview)
+        // Trigger initial state reconciliation push
+        void this.reconciler.reconcile()
         break
       }
       case 'requestRefresh': {
         this.logger.info('Refresh requested from webview')
         void this.loadAndPushRegistry(webview, true)
+        void this.reconciler.reconcile()
+        break
+      }
+      case 'installSkill': {
+        const { skillName, agent, scope } = message.payload
+        const agents = [agent]
+        try {
+          if (scope === 'all') {
+            await this.orchestrator.install(skillName, 'local', agents)
+            await this.orchestrator.install(skillName, 'global', agents)
+          } else {
+            await this.orchestrator.install(skillName, scope, agents)
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err)
+          this.logger.error(`Failed to enqueue install: ${msg}`)
+          vscode.window.showErrorMessage(`Failed to start installation: ${msg}`)
+        }
+        break
+      }
+      case 'removeSkill': {
+        const { skillName, agent, scope } = message.payload
+        const confirmed = await this.confirmRemoval(skillName, agent, scope)
+        if (!confirmed) return
+
+        const agents = [agent]
+        try {
+          if (scope === 'all') {
+            await this.orchestrator.remove(skillName, 'local', agents)
+            await this.orchestrator.remove(skillName, 'global', agents)
+          } else {
+            await this.orchestrator.remove(skillName, scope, agents)
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err)
+          this.logger.error(`Failed to enqueue remove: ${msg}`)
+          vscode.window.showErrorMessage(`Failed to start removal: ${msg}`)
+        }
+        break
+      }
+      case 'updateSkill': {
+        const { skillName } = message.payload
+        try {
+          await this.orchestrator.update(skillName)
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err)
+          this.logger.error(`Failed to enqueue update: ${msg}`)
+          vscode.window.showErrorMessage(`Failed to start update: ${msg}`)
+        }
+        break
+      }
+      case 'cancelOperation': {
+        const { operationId } = message.payload
+        this.orchestrator.cancel(operationId)
         break
       }
       default:
@@ -62,37 +172,40 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    */
   private async loadAndPushRegistry(webview: vscode.Webview, forceRefresh = false): Promise<void> {
     // Send loading status
-    const loadingMsg: ExtensionMessage = {
+    await this.postMessage({
       type: 'registryUpdate',
       payload: { status: 'loading', registry: null },
-    }
-    await webview.postMessage(loadingMsg)
+    })
 
     try {
       const registry = forceRefresh ? await this.registryService.refresh() : await this.registryService.getRegistry()
 
-      const successMsg: ExtensionMessage = {
+      await this.postMessage({
         type: 'registryUpdate',
         payload: {
           status: 'ready',
           registry,
           fromCache: false, // TODO: detect if from cache
         },
-      }
-      await webview.postMessage(successMsg)
+      })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       this.logger.error(`Failed to load registry: ${errorMessage}`)
-      const errorMsg: ExtensionMessage = {
+      await this.postMessage({
         type: 'registryUpdate',
         payload: {
           status: 'error',
           registry: null,
           errorMessage: errorMessage || 'Failed to load skill registry',
         },
-      }
-      await webview.postMessage(errorMsg)
+      })
     }
+  }
+
+  private async confirmRemoval(skillName: string, agent: string, scope: string): Promise<boolean> {
+    const message = `Remove skill '${skillName}' from ${agent} (${scope === 'all' ? 'Local + Global' : scope})? This will delete the skill files.`
+    const selection = await vscode.window.showWarningMessage(message, { modal: true }, 'Remove')
+    return selection === 'Remove'
   }
 
   private getHtmlForWebview(webview: vscode.Webview): string {

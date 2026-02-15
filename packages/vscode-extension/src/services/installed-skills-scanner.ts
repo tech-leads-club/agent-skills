@@ -1,0 +1,229 @@
+import { access } from 'node:fs/promises'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo, InstalledSkillsMap, Skill } from '../shared/types'
+import type { LoggingService } from './logging-service'
+
+/**
+ * Agent configuration for skill directory scanning.
+ * Mirrors the structure from @tech-leads-club/core but defined inline
+ * until the core package exports agent configs.
+ */
+interface AgentScanConfig {
+  name: string
+  displayName: string
+  skillsDir: string // Relative to workspace root
+  globalSkillsDir: string // Absolute path
+}
+
+/**
+ * All 18 agent configurations for scanning.
+ * Source of truth: packages/cli/src/agents.ts
+ */
+const AGENT_CONFIGS: AgentScanConfig[] = [
+  {
+    name: 'cursor',
+    displayName: 'Cursor',
+    skillsDir: '.cursor/skills',
+    globalSkillsDir: join(homedir(), '.cursor/skills'),
+  },
+  {
+    name: 'claude-code',
+    displayName: 'Claude Code',
+    skillsDir: '.claude/skills',
+    globalSkillsDir: join(homedir(), '.claude/skills'),
+  },
+  {
+    name: 'github-copilot',
+    displayName: 'GitHub Copilot',
+    skillsDir: '.github/skills',
+    globalSkillsDir: join(homedir(), '.copilot/skills'),
+  },
+  {
+    name: 'windsurf',
+    displayName: 'Windsurf',
+    skillsDir: '.windsurf/skills',
+    globalSkillsDir: join(homedir(), '.codeium/windsurf/skills'),
+  },
+  {
+    name: 'cline',
+    displayName: 'Cline',
+    skillsDir: '.cline/skills',
+    globalSkillsDir: join(homedir(), '.cline/skills'),
+  },
+  {
+    name: 'aider',
+    displayName: 'Aider',
+    skillsDir: '.aider/skills',
+    globalSkillsDir: join(homedir(), '.aider/skills'),
+  },
+  {
+    name: 'codex',
+    displayName: 'OpenAI Codex',
+    skillsDir: '.codex/skills',
+    globalSkillsDir: join(homedir(), '.codex/skills'),
+  },
+  {
+    name: 'gemini',
+    displayName: 'Gemini CLI',
+    skillsDir: '.gemini/skills',
+    globalSkillsDir: join(homedir(), '.gemini/skills'),
+  },
+  {
+    name: 'antigravity',
+    displayName: 'Antigravity',
+    skillsDir: '.agent/skills',
+    globalSkillsDir: join(homedir(), '.gemini/antigravity/global_skills'),
+  },
+  { name: 'roo', displayName: 'Roo Code', skillsDir: '.roo/skills', globalSkillsDir: join(homedir(), '.roo/skills') },
+  {
+    name: 'kilocode',
+    displayName: 'Kilo Code',
+    skillsDir: '.kilocode/skills',
+    globalSkillsDir: join(homedir(), '.kilocode/skills'),
+  },
+  { name: 'trae', displayName: 'TRAE', skillsDir: '.trae/skills', globalSkillsDir: join(homedir(), '.trae/skills') },
+  {
+    name: 'amazon-q',
+    displayName: 'Amazon Q',
+    skillsDir: '.amazonq/skills',
+    globalSkillsDir: join(homedir(), '.amazonq/skills'),
+  },
+  {
+    name: 'augment',
+    displayName: 'Augment',
+    skillsDir: '.augment/skills',
+    globalSkillsDir: join(homedir(), '.augment/skills'),
+  },
+  {
+    name: 'tabnine',
+    displayName: 'Tabnine',
+    skillsDir: '.tabnine/skills',
+    globalSkillsDir: join(homedir(), '.tabnine/skills'),
+  },
+  {
+    name: 'opencode',
+    displayName: 'OpenCode',
+    skillsDir: '.opencode/skills',
+    globalSkillsDir: join(homedir(), '.config/opencode/skills'),
+  },
+  {
+    name: 'sourcegraph',
+    displayName: 'Sourcegraph Cody',
+    skillsDir: '.sourcegraph/skills',
+    globalSkillsDir: join(homedir(), '.sourcegraph/skills'),
+  },
+  {
+    name: 'droid',
+    displayName: 'Droid (Factory.ai)',
+    skillsDir: '.factory/skills',
+    globalSkillsDir: join(homedir(), '.factory/skills'),
+  },
+]
+
+/**
+ * Scans disk to build an InstalledSkillsMap reflecting which skills are installed
+ * in which scopes, with per-agent granularity.
+ */
+export class InstalledSkillsScanner {
+  constructor(private readonly logger: LoggingService) {}
+
+  /**
+   * Scans all agent directories (local + global) for installed skills.
+   * @param registrySkills List of known skills from the registry
+   * @param workspaceRoot Workspace folder path (null if no workspace open)
+   * @returns Map of skill name → installation metadata
+   */
+  async scan(registrySkills: Skill[], workspaceRoot: string | null): Promise<InstalledSkillsMap> {
+    this.logger.debug(`Scanning installed skills (workspace: ${workspaceRoot ?? 'none'})`)
+
+    const map: InstalledSkillsMap = {}
+
+    for (const skill of registrySkills) {
+      const info = await this.scanSkill(skill.name, workspaceRoot)
+      map[skill.name] = info.agents.length > 0 ? info : null
+    }
+
+    const installedCount = Object.values(map).filter((v) => v !== null).length
+    this.logger.debug(`Scan complete: ${installedCount} skills installed`)
+
+    return map
+  }
+
+  /**
+   * Scans a single skill across all agents and scopes.
+   */
+  private async scanSkill(skillName: string, workspaceRoot: string | null): Promise<InstalledSkillInfo> {
+    const agentResults: AgentInstallInfo[] = []
+    let localAny = false
+    let globalAny = false
+
+    for (const config of AGENT_CONFIGS) {
+      const localInstalled = workspaceRoot
+        ? await this.checkExists(join(workspaceRoot, config.skillsDir, skillName, 'SKILL.md'))
+        : false
+      const globalInstalled = await this.checkExists(join(config.globalSkillsDir, skillName, 'SKILL.md'))
+
+      if (localInstalled || globalInstalled) {
+        localAny = localAny || localInstalled
+        globalAny = globalAny || globalInstalled
+        agentResults.push({
+          agent: config.name,
+          displayName: config.displayName,
+          local: localInstalled,
+          global: globalInstalled,
+        })
+      }
+    }
+
+    return {
+      local: localAny,
+      global: globalAny,
+      agents: agentResults,
+    }
+  }
+
+  /**
+   * Checks if a file exists using fs.promises.access (fast, no read).
+   */
+  private async checkExists(path: string): Promise<boolean> {
+    try {
+      await access(path)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Returns a list of agents detected on the system.
+   * Checks if the agent's configuration directory exists locally or globally.
+   */
+  async getAvailableAgents(workspaceRoot: string | null): Promise<AvailableAgent[]> {
+    const results: AvailableAgent[] = []
+
+    for (const config of AGENT_CONFIGS) {
+      // Check global existence (parent of globalSkillsDir)
+      // e.g. ~/.cursor/skills -> ~/.cursor
+      const globalDir = join(config.globalSkillsDir, '..')
+      const globalExists = await this.checkExists(globalDir)
+
+      // Check local existence (parent of skillsDir)
+      // e.g. .cursor/skills -> .cursor
+      let localExists = false
+      if (workspaceRoot) {
+        const localDir = join(workspaceRoot, config.skillsDir, '..')
+        localExists = await this.checkExists(localDir)
+      }
+
+      if (globalExists || localExists) {
+        results.push({
+          agent: config.name,
+          displayName: config.displayName,
+        })
+      }
+    }
+
+    return results
+  }
+}

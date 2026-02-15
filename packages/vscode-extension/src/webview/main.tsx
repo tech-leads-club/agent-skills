@@ -2,30 +2,38 @@ import Fuse from 'fuse.js'
 import { StrictMode, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage } from '../shared/messages'
-import type { SkillRegistry } from '../shared/types'
+import type { AvailableAgent, SkillRegistry } from '../shared/types'
 import { CategoryFilter } from './components/CategoryFilter'
 import { SearchBar } from './components/SearchBar'
 import { SkillGrid } from './components/SkillGrid'
+import { useInstalledState } from './hooks/useInstalledState'
+import { useOperations } from './hooks/useOperations'
 import './index.css'
 import { onMessage, postMessage } from './lib/vscode-api'
 
 type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
 
 function App() {
-  const [version, setVersion] = useState<string | null>(null)
   const [registry, setRegistry] = useState<SkillRegistry | null>(null)
   const [status, setStatus] = useState<AppStatus>('loading')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [fromCache, setFromCache] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
+  const [hasWorkspace, setHasWorkspace] = useState(false)
+
+  // Custom Hooks for Lifecycle Management
+  const { installedSkills } = useInstalledState()
+  const { isOperating, getMessage: getOperationMessage } = useOperations()
 
   useEffect(() => {
     // Listen for messages from Extension Host
     const dispose = onMessage((msg: ExtensionMessage) => {
       switch (msg.type) {
         case 'initialize':
-          setVersion(msg.payload.version)
+          setAvailableAgents(msg.payload.availableAgents)
+          setHasWorkspace(msg.payload.hasWorkspace)
           break
         case 'registryUpdate':
           setStatus(msg.payload.status)
@@ -52,16 +60,14 @@ function App() {
     })
   }, [registry])
 
-  // Filtered skills based on search query and category
+  // Filter skills based on search query and category
   const filteredSkills = useMemo(() => {
     let result = registry?.skills ?? []
 
-    // Apply category filter first
     if (activeCategory) {
       result = result.filter((s) => s.category === activeCategory)
     }
 
-    // Apply search filter with Fuse.js
     if (searchQuery.trim() && fuseInstance) {
       const searchResults = fuseInstance.search(searchQuery).map((r) => r.item)
       // If category is active, intersect the two filters
@@ -75,7 +81,7 @@ function App() {
     return result
   }, [registry, activeCategory, searchQuery, fuseInstance])
 
-  // Skill counts per category (for filter chips)
+  // Skill counts per category
   const skillCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     registry?.skills.forEach((skill) => {
@@ -84,7 +90,7 @@ function App() {
     return counts
   }, [registry])
 
-  // Category list for filter
+  // Category list
   const categories = useMemo(() => {
     if (!registry) return []
     return Object.entries(registry.categories).map(([key, category]) => ({ key, category }))
@@ -103,7 +109,6 @@ function App() {
   if (status === 'loading') {
     return (
       <div className="app">
-        <h1>Agent Skills</h1>
         <div className="loading-state">
           <div className="spinner" />
           <p>Loading skills...</p>
@@ -116,7 +121,6 @@ function App() {
   if (status === 'error') {
     return (
       <div className="app">
-        <h1>Agent Skills</h1>
         <div className="error-state">
           <p className="error-message">{errorMessage || 'Failed to load skill registry'}</p>
           <button className="retry-button" onClick={handleRefresh}>
@@ -127,12 +131,10 @@ function App() {
     )
   }
 
-  // Ready/Offline state with data
+  // Ready/Offline state
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Agent Skills</h1>
-        {version && <span className="version-badge">v{version}</span>}
         {fromCache && status === 'offline' && (
           <div className="offline-banner" role="status">
             Offline — showing cached data
@@ -159,7 +161,15 @@ function App() {
               </button>
             </div>
           ) : (
-            <SkillGrid skills={filteredSkills} categories={registry.categories} />
+            <SkillGrid
+              skills={filteredSkills}
+              categories={registry.categories}
+              installedSkills={installedSkills}
+              isOperating={isOperating}
+              getOperationMessage={getOperationMessage}
+              availableAgents={availableAgents}
+              hasWorkspace={hasWorkspace}
+            />
           )}
         </>
       )}
