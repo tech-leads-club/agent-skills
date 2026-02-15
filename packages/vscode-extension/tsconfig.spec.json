@@ -4,7 +4,16 @@
     "outDir": "../../dist/out-tsc",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["jest", "node"]
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["jest", "node", "@testing-library/jest-dom"]
   },
-  "include": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": [
+    "jest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.tsx",
+    "src/**/*.d.ts"
+  ]
 }

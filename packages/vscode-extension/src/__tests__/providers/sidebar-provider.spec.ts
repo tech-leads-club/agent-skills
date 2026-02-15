@@ -1,7 +1,9 @@
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
 import { LoggingService } from '../../services/logging-service'
+import { SkillRegistryService } from '../../services/skill-registry-service'
 import { WebviewMessage } from '../../shared/messages'
+import type { SkillRegistry } from '../../shared/types'
 
 // Mock vscode module (handled by jest.config.ts moduleNameMapper)
 
@@ -9,8 +11,15 @@ describe('SidebarProvider', () => {
   let provider: SidebarProvider
   let context: vscode.ExtensionContext
   let logger: LoggingService
+  let registryService: SkillRegistryService
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
+
+  const mockRegistry: SkillRegistry = {
+    version: '1.0.0',
+    categories: {},
+    skills: [],
+  }
 
   beforeEach(() => {
     // Mock ExtensionContext
@@ -33,6 +42,13 @@ describe('SidebarProvider', () => {
       dispose: jest.fn(),
     } as unknown as LoggingService
 
+    // Mock SkillRegistryService
+    registryService = {
+      getRegistry: jest.fn().mockResolvedValue(mockRegistry),
+      refresh: jest.fn().mockResolvedValue(mockRegistry),
+      dispose: jest.fn(),
+    } as unknown as SkillRegistryService
+
     // Mock WebviewView
     webviewView = {
       webview: {
@@ -48,7 +64,7 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.WebviewView
 
-    provider = new SidebarProvider(context, logger)
+    provider = new SidebarProvider(context, logger, registryService)
   })
 
   it('should have the correct viewType', () => {
@@ -121,5 +137,70 @@ describe('SidebarProvider', () => {
   it('should log info when resolving webview view', () => {
     provider.resolveWebviewView(webviewView)
     expect(logger.info).toHaveBeenCalledWith('Resolving sidebar webview')
+  })
+
+  // NEW TESTS FOR REGISTRY HANDLING
+
+  it('should send loading status then registryUpdate on webviewDidMount', async () => {
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = { type: 'webviewDidMount' }
+
+    await messageHandler(message)
+
+    // Wait for async operations
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'registryUpdate',
+      payload: { status: 'loading', registry: null },
+    })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'registryUpdate',
+      payload: {
+        status: 'ready',
+        registry: mockRegistry,
+        fromCache: false,
+      },
+    })
+    expect(registryService.getRegistry).toHaveBeenCalled()
+  })
+
+  it('should trigger registry refresh on requestRefresh message', async () => {
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = { type: 'requestRefresh' }
+
+    await messageHandler(message)
+
+    // Wait for async operations
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(registryService.refresh).toHaveBeenCalled()
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'registryUpdate',
+      }),
+    )
+  })
+
+  it('should handle registry service error gracefully', async () => {
+    ;(registryService.getRegistry as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = { type: 'webviewDidMount' }
+
+    await messageHandler(message)
+
+    // Wait for async operations
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load registry'))
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'registryUpdate',
+      payload: {
+        status: 'error',
+        registry: null,
+        errorMessage: expect.stringContaining('Network error'),
+      },
+    })
   })
 })

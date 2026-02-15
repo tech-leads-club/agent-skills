@@ -33,4 +33,41 @@ describe('Shared Messages', () => {
     }
     expect(version).toBe('1.0.0')
   })
+
+  // NEW TESTS FOR REGISTRY MESSAGES
+
+  it('should construct WebviewMessage with requestRefresh', () => {
+    const msg: WebviewMessage = { type: 'requestRefresh' }
+    expect(msg.type).toBe('requestRefresh')
+  })
+
+  it('should construct ExtensionMessage with registryUpdate', () => {
+    const msg: ExtensionMessage = {
+      type: 'registryUpdate',
+      payload: {
+        status: 'ready',
+        registry: { version: '1.0.0', categories: {}, skills: [] },
+        fromCache: false,
+      },
+    }
+    expect(msg.type).toBe('registryUpdate')
+    expect(msg.payload.status).toBe('ready')
+    expect(msg.payload.registry).toBeTruthy()
+  })
+
+  it('should support all status variants in RegistryUpdatePayload', () => {
+    const statuses: Array<'loading' | 'ready' | 'error' | 'offline'> = ['loading', 'ready', 'error', 'offline']
+    statuses.forEach((status) => {
+      const msg: ExtensionMessage = {
+        type: 'registryUpdate',
+        payload: {
+          status,
+          registry: null,
+          errorMessage: 'test error',
+          fromCache: true,
+        },
+      }
+      expect(msg.payload.status).toBe(status)
+    })
+  })
 })

@@ -2,8 +2,10 @@ import * as vscode from 'vscode'
 import { activate, deactivate } from '../extension'
 import { SidebarProvider } from '../providers/sidebar-provider'
 import { LoggingService } from '../services/logging-service'
+import { SkillRegistryService } from '../services/skill-registry-service'
 
 jest.mock('../services/logging-service')
+jest.mock('../services/skill-registry-service')
 jest.mock('../providers/sidebar-provider', () => {
   const MockSidebarProvider = jest.fn()
   // @ts-expect-error - we are assigning a static property to a mock function
@@ -14,6 +16,7 @@ jest.mock('../providers/sidebar-provider', () => {
 describe('Extension Activation', () => {
   let context: vscode.ExtensionContext
   let mockLoggingService: { info: jest.Mock; dispose: jest.Mock }
+  let mockRegistryService: { getRegistry: jest.Mock; refresh: jest.Mock; dispose: jest.Mock }
   let mockSidebarProvider: Record<string, unknown>
 
   beforeEach(() => {
@@ -35,6 +38,13 @@ describe('Extension Activation', () => {
     }
     ;(LoggingService as jest.Mock).mockImplementation(() => mockLoggingService)
 
+    mockRegistryService = {
+      getRegistry: jest.fn().mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] }),
+      refresh: jest.fn().mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] }),
+      dispose: jest.fn(),
+    }
+    ;(SkillRegistryService as unknown as jest.Mock).mockImplementation(() => mockRegistryService)
+
     mockSidebarProvider = {}
     ;(SidebarProvider as unknown as jest.Mock).mockImplementation(() => mockSidebarProvider)
   })
@@ -47,12 +57,12 @@ describe('Extension Activation', () => {
     expect(LoggingService).toHaveBeenCalledTimes(1)
     expect(context.subscriptions).toContain(mockLoggingService)
 
-    // Verify SidebarProvider
-    expect(SidebarProvider).toHaveBeenCalledWith(context, mockLoggingService)
+    // Verify SidebarProvider (now receives 3 args: context, logger, registryService)
+    expect(SidebarProvider).toHaveBeenCalledWith(context, mockLoggingService, mockRegistryService)
     expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalledWith('agentSkillsSidebar', mockSidebarProvider)
     // Check if the disposable from registerWebviewViewProvider is in subscriptions
     // The mock returns an object with dispose, we can check logic or just count
-    expect(context.subscriptions.length).toBeGreaterThanOrEqual(2)
+    expect(context.subscriptions.length).toBeGreaterThanOrEqual(3)
   })
 
   it('should register extension commands', () => {
@@ -71,16 +81,17 @@ describe('Extension Activation', () => {
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('Workspace trusted'))
   })
 
-  it('should handle agentSkills.refresh command', () => {
+  it('should handle agentSkills.refresh command', async () => {
     activate(context)
     const calls = (vscode.commands.registerCommand as jest.Mock).mock.calls
     const refreshCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.refresh')
-    const handler = refreshCall?.[1] as (...args: unknown[]) => unknown
+    const handler = refreshCall?.[1] as (...args: unknown[]) => Promise<void>
 
-    handler()
+    await handler()
 
     expect(mockLoggingService.info).toHaveBeenCalledWith('Refresh command invoked')
-    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Agent Skills: Refreshing...')
+    expect(mockRegistryService.refresh).toHaveBeenCalled()
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Agent Skills: Registry refreshed')
   })
 
   it('should handle agentSkills.openSettings command', () => {

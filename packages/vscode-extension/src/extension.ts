@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { SidebarProvider } from './providers/sidebar-provider'
 import { LoggingService } from './services/logging-service'
+import { SkillRegistryService } from './services/skill-registry-service'
 
 export function activate(context: vscode.ExtensionContext): void {
   // ① Core services
@@ -8,15 +9,25 @@ export function activate(context: vscode.ExtensionContext): void {
   const logger = new LoggingService(outputChannel)
   context.subscriptions.push(logger)
 
-  // ② Providers
-  const sidebarProvider = new SidebarProvider(context, logger)
+  // ② Domain services
+  const registryService = new SkillRegistryService(context, logger)
+  context.subscriptions.push(registryService)
+
+  // ③ Providers
+  const sidebarProvider = new SidebarProvider(context, logger, registryService)
   context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider))
 
-  // ③ Commands
+  // ④ Commands
   context.subscriptions.push(
-    vscode.commands.registerCommand('agentSkills.refresh', () => {
+    vscode.commands.registerCommand('agentSkills.refresh', async () => {
       logger.info('Refresh command invoked')
-      vscode.window.showInformationMessage('Agent Skills: Refreshing...')
+      try {
+        await registryService.refresh()
+        vscode.window.showInformationMessage('Agent Skills: Registry refreshed')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+        vscode.window.showErrorMessage(`Agent Skills: Failed to refresh — ${errorMessage}`)
+      }
     }),
   )
 

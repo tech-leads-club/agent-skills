@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { LoggingService } from '../services/logging-service'
+import { SkillRegistryService } from '../services/skill-registry-service'
 import type { ExtensionMessage, WebviewMessage } from '../shared/messages'
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -10,6 +11,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
+    private readonly registryService: SkillRegistryService,
   ) {}
 
   resolveWebviewView(webviewView: vscode.WebviewView): void {
@@ -30,7 +32,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.context.subscriptions.push(messageDisposable)
   }
 
-  private handleMessage(message: WebviewMessage, webview: vscode.Webview): void {
+  private async handleMessage(message: WebviewMessage, webview: vscode.Webview): Promise<void> {
     switch (message.type) {
       case 'webviewDidMount': {
         this.logger.info('Webview did mount')
@@ -39,11 +41,57 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           type: 'initialize',
           payload: { version },
         }
-        webview.postMessage(response)
+        await webview.postMessage(response)
+        // Trigger registry load and push to webview
+        void this.loadAndPushRegistry(webview)
+        break
+      }
+      case 'requestRefresh': {
+        this.logger.info('Refresh requested from webview')
+        void this.loadAndPushRegistry(webview, true)
         break
       }
       default:
         this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
+    }
+  }
+
+  /**
+   * Load registry from service and push to webview.
+   * Sends loading status first, then ready/error/offline.
+   */
+  private async loadAndPushRegistry(webview: vscode.Webview, forceRefresh = false): Promise<void> {
+    // Send loading status
+    const loadingMsg: ExtensionMessage = {
+      type: 'registryUpdate',
+      payload: { status: 'loading', registry: null },
+    }
+    await webview.postMessage(loadingMsg)
+
+    try {
+      const registry = forceRefresh ? await this.registryService.refresh() : await this.registryService.getRegistry()
+
+      const successMsg: ExtensionMessage = {
+        type: 'registryUpdate',
+        payload: {
+          status: 'ready',
+          registry,
+          fromCache: false, // TODO: detect if from cache
+        },
+      }
+      await webview.postMessage(successMsg)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      this.logger.error(`Failed to load registry: ${errorMessage}`)
+      const errorMsg: ExtensionMessage = {
+        type: 'registryUpdate',
+        payload: {
+          status: 'error',
+          registry: null,
+          errorMessage: errorMessage || 'Failed to load skill registry',
+        },
+      }
+      await webview.postMessage(errorMsg)
     }
   }
 

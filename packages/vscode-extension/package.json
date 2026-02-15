@@ -35,7 +35,8 @@
         {
           "type": "webview",
           "id": "agentSkillsSidebar",
-          "name": "Skills Marketplace"
+          "name": "Skills Marketplace",
+          "icon": "resources/icon.svg"
         }
       ]
     },
@@ -73,12 +74,15 @@
     "typecheck": "tsc --noEmit",
     "package": "nx package"
   },
-  "dependencies": {},
   "devDependencies": {
     "@tech-leads-club/core": "0.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.6.0",
     "@types/node": "^22",
     "@types/vscode": "^1.96.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "fuse.js": "^7.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^5.9.3",
