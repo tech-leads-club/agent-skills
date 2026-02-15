@@ -10,6 +10,7 @@ export interface SkillGridProps {
   getOperationMessage: (skillName: string) => string | undefined
   availableAgents: AvailableAgent[]
   hasWorkspace: boolean
+  onMarkPending: (skillName: string, action: 'add' | 'remove') => void
 }
 
 /**
@@ -23,6 +24,7 @@ export function SkillGrid({
   isOperating,
   getOperationMessage,
   availableAgents,
+  onMarkPending,
 }: SkillGridProps) {
   if (skills.length === 0) {
     return (
@@ -70,6 +72,7 @@ export function SkillGrid({
                 })
               }}
               onRequestAgentPick={(action) => {
+                onMarkPending(skill.name, action)
                 postMessage({
                   type: 'requestAgentPick',
                   payload: { skillName: skill.name, action },

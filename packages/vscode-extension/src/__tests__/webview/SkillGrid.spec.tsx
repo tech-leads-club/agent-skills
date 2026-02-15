@@ -50,6 +50,7 @@ describe('SkillGrid Accessibility', () => {
     getOperationMessage: () => undefined as string | undefined,
     availableAgents: mockAvailableAgents,
     hasWorkspace: true,
+    onMarkPending: jest.fn(),
   }
 
   it('should render all skill cards', () => {

@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type {
+  AgentPickResultPayload,
   ExtensionMessage,
   OperationCompletedPayload,
   OperationProgressPayload,
   OperationStartedPayload,
+  ScopePickResultPayload,
 } from '../../shared/messages'
 import type { OperationType } from '../../shared/types'
 
@@ -16,6 +18,7 @@ export interface OperationState {
   skillName: string
   message: string // Progress message
   increment?: number // Optional progress %
+  pending?: boolean // True when awaiting QuickPick selection
 }
 
 /**
@@ -24,6 +27,40 @@ export interface OperationState {
  */
 export function useOperations() {
   const [operations, setOperations] = useState<Map<string, OperationState>>(new Map())
+
+  /**
+   * Marks a skill as "pending" (awaiting QuickPick selection).
+   * Called by the UI immediately when Add/Remove is clicked.
+   */
+  const markPending = useCallback((skillName: string, action: 'add' | 'remove') => {
+    setOperations((prev) => {
+      const next = new Map(prev)
+      next.set(skillName, {
+        operationId: '', // No real operation yet
+        operation: action === 'add' ? 'install' : 'remove',
+        skillName,
+        message: 'Selecting...',
+        pending: true,
+      })
+      return next
+    })
+  }, [])
+
+  /**
+   * Clears the pending state for a skill (e.g. user cancelled QuickPick).
+   */
+  const clearPending = useCallback((skillName: string) => {
+    setOperations((prev) => {
+      const current = prev.get(skillName)
+      // Only clear if still in pending state (not yet replaced by a real operation)
+      if (current?.pending) {
+        const next = new Map(prev)
+        next.delete(skillName)
+        return next
+      }
+      return prev
+    })
+  }, [])
 
   useEffect(() => {
     // Handler for incoming messages
@@ -71,13 +108,38 @@ export function useOperations() {
         const payload = message.payload as OperationCompletedPayload
         setOperations((prev) => {
           const next = new Map(prev)
-          // Remove operation regardless of success/failure
-          // In a real app, we might want to show error state, but here we clear it
-          // as the toast notification handles the result feedback.
-          // Wait, if we clear it, the UI won't show anything. But the card has no ongoing op.
           next.delete(payload.skillName)
           return next
         })
+      } else if (message.type === 'agentPickResult') {
+        const payload = message.payload as AgentPickResultPayload
+        if (payload.agents === null) {
+          // User cancelled agent pick → clear pending state
+          setOperations((prev) => {
+            const current = prev.get(payload.skillName)
+            if (current?.pending) {
+              const next = new Map(prev)
+              next.delete(payload.skillName)
+              return next
+            }
+            return prev
+          })
+        }
+      } else if (message.type === 'scopePickResult') {
+        const payload = message.payload as ScopePickResultPayload
+        if (payload.scope === null) {
+          // User cancelled scope pick → clear pending state
+          setOperations((prev) => {
+            const current = prev.get(payload.skillName)
+            if (current?.pending) {
+              const next = new Map(prev)
+              next.delete(payload.skillName)
+              return next
+            }
+            return prev
+          })
+        }
+        // If scope is selected, the pending state will be replaced by operationStarted
       }
     }
 
@@ -93,5 +155,5 @@ export function useOperations() {
   const isOperating = (skillName: string) => operations.has(skillName)
   const getMessage = (skillName: string) => operations.get(skillName)?.message
 
-  return { operations, isOperating, getMessage }
+  return { operations, isOperating, getMessage, markPending, clearPending }
 }

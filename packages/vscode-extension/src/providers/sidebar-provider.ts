@@ -57,6 +57,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             errorMessage: event.errorMessage,
           },
         })
+        // Reconcile installed state after operation completes to refresh UI
+        void this.reconciler.reconcile()
       }
     })
   }

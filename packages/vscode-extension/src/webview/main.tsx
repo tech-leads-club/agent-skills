@@ -25,7 +25,7 @@ function App() {
 
   // Custom Hooks for Lifecycle Management
   const { installedSkills } = useInstalledState()
-  const { isOperating, getMessage: getOperationMessage } = useOperations()
+  const { isOperating, getMessage: getOperationMessage, markPending } = useOperations()
 
   useEffect(() => {
     // Listen for messages from Extension Host
@@ -169,6 +169,7 @@ function App() {
               getOperationMessage={getOperationMessage}
               availableAgents={availableAgents}
               hasWorkspace={hasWorkspace}
+              onMarkPending={markPending}
             />
           )}
         </>
