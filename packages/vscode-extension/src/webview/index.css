@@ -1,3 +1,10 @@
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -5,8 +12,35 @@ body {
   color: var(--vscode-foreground);
   font-family: var(--vscode-font-family);
   font-size: var(--vscode-font-size);
+  line-height: 1.4;
+}
+
+/* Focus visibility for accessibility (P2: High Contrast) */
+:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
 }
 
 .app {
   padding: 16px;
+}
+
+.app h1 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--vscode-foreground);
+}
+
+.status {
+  font-size: 0.85em;
+  margin: 0;
+}
+
+.status.connecting {
+  color: var(--vscode-descriptionForeground);
+}
+
+.status.connected {
+  color: var(--vscode-testing-iconPassed);
 }

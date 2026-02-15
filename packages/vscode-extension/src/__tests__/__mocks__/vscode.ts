@@ -25,7 +25,11 @@ export const workspace = {
 
 export const Uri = {
   file: (path: string) => ({ fsPath: path }),
-  joinPath: (...parts: unknown[]) => ({ fsPath: parts.join('/') }),
+  joinPath: (...parts: unknown[]) => ({
+    fsPath: (parts as Array<{ fsPath?: string } | string>)
+      .map((p) => (typeof p === 'string' ? p : (p.fsPath ?? '')))
+      .join('/'),
+  }),
 }
 
 export const ExtensionContext = jest.fn()
