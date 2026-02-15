@@ -10,7 +10,7 @@ import { StateReconciler } from './services/state-reconciler'
 
 export function activate(context: vscode.ExtensionContext): void {
   // ① Core services
-  const outputChannel = vscode.window.createOutputChannel('Agent Skills')
+  const outputChannel = vscode.window.createOutputChannel('Agent Skills', { log: true })
   const logger = new LoggingService(outputChannel)
   context.subscriptions.push(logger)
 

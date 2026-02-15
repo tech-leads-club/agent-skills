@@ -3,6 +3,11 @@ import { jest } from '@jest/globals'
 export const window = {
   createOutputChannel: jest.fn(() => ({
     appendLine: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
     dispose: jest.fn(),
   })),
   registerWebviewViewProvider: jest.fn(() => ({ dispose: jest.fn() })),

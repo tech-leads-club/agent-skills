@@ -1,57 +1,39 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { LoggingService } from '../../services/logging-service'
 
 describe('LoggingService', () => {
-  let outputChannel: vscode.OutputChannel
+  let outputChannel: vscode.LogOutputChannel
   let loggingService: LoggingService
-
-  const ANSI = {
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    red: '\x1b[31m',
-    magenta: '\x1b[35m',
-    reset: '\x1b[0m',
-  }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2024-01-01T12:00:00.000Z'))
 
     outputChannel = {
-      appendLine: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
       dispose: jest.fn(),
-    } as unknown as vscode.OutputChannel
-
-    // Default: debug disabled
-    ;(vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
-    })
+    } as unknown as vscode.LogOutputChannel
 
     loggingService = new LoggingService(outputChannel)
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
-  it('should log info messages with green color', () => {
+  it('should log info messages via LogOutputChannel.info()', () => {
     loggingService.info('test info')
-    const timestamp = new Date().toISOString()
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.green}[INFO  ${timestamp}]${ANSI.reset} test info`)
+    expect(outputChannel.info).toHaveBeenCalledWith('test info')
   })
 
-  it('should log warn messages with yellow color', () => {
+  it('should log warn messages via LogOutputChannel.warn()', () => {
     loggingService.warn('test warn')
-    const timestamp = new Date().toISOString()
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.yellow}[WARN  ${timestamp}]${ANSI.reset} test warn`)
+    expect(outputChannel.warn).toHaveBeenCalledWith('test warn')
   })
 
-  it('should log error messages with red color', () => {
+  it('should log error messages via LogOutputChannel.error()', () => {
     loggingService.error('test error')
-    const timestamp = new Date().toISOString()
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.red}[ERROR ${timestamp}]${ANSI.reset} test error`)
+    expect(outputChannel.error).toHaveBeenCalledWith('test error')
   })
 
   it('should log error stack traces', () => {
@@ -59,27 +41,13 @@ describe('LoggingService', () => {
     error.stack = 'Error: oops\n    at test'
     loggingService.error('test error', error)
 
-    const timestamp = new Date().toISOString()
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.red}[ERROR ${timestamp}]${ANSI.reset} test error`)
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.red}${error.stack}${ANSI.reset}`)
+    expect(outputChannel.error).toHaveBeenCalledWith('test error')
+    expect(outputChannel.error).toHaveBeenCalledWith(error.stack)
   })
 
-  it('should not log debug messages when debug is disabled', () => {
+  it('should log debug messages via LogOutputChannel.debug()', () => {
     loggingService.debug('test debug')
-    expect(outputChannel.appendLine).not.toHaveBeenCalled()
-  })
-
-  it('should log debug messages with magenta color when debug is enabled', () => {
-    // Mock debug: true
-    ;(vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string, defaultValue: unknown) => (key === 'debug' ? true : defaultValue)),
-    })
-
-    const debugService = new LoggingService(outputChannel)
-    debugService.debug('test debug')
-
-    const timestamp = new Date().toISOString()
-    expect(outputChannel.appendLine).toHaveBeenCalledWith(`${ANSI.magenta}[DEBUG ${timestamp}]${ANSI.reset} test debug`)
+    expect(outputChannel.debug).toHaveBeenCalledWith('test debug')
   })
 
   it('should dispose the output channel', () => {

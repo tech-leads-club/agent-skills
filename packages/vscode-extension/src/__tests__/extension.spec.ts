@@ -101,7 +101,7 @@ describe('Extension Activation', () => {
   it('should create services and register webview provider', () => {
     activate(context)
 
-    expect(vscode.window.createOutputChannel).toHaveBeenCalledWith('Agent Skills')
+    expect(vscode.window.createOutputChannel).toHaveBeenCalledWith('Agent Skills', { log: true })
     expect(LoggingService).toHaveBeenCalledTimes(1)
     expect(context.subscriptions).toContain(mockLoggingService)
 
