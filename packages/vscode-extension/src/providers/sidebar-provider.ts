@@ -168,11 +168,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.logger.info('Webview did mount')
     const version = this.context.extension.packageJSON.version ?? 'unknown'
     const availableAgents = await this.reconciler.getAvailableAgents()
+    const installedSkills = await this.reconciler.getInstalledSkills()
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
 
     await this.postMessage({
       type: 'initialize',
       payload: { version, availableAgents, hasWorkspace },
+    })
+
+    await this.postMessage({
+      type: 'reconcileState',
+      payload: { installedSkills },
     })
 
     await this.postMessage({

@@ -176,6 +176,23 @@ describe('SidebarProvider', () => {
   })
 
   it('should handle webviewDidMount message', async () => {
+    const installedSkills: InstalledSkillsMap = {
+      'test-skill': {
+        local: true,
+        global: false,
+        agents: [
+          {
+            agent: 'cursor',
+            displayName: 'Cursor',
+            local: true,
+            global: false,
+            corrupted: false,
+          },
+        ],
+      },
+    }
+    reconciler.getInstalledSkills.mockResolvedValue(installedSkills)
+
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
 
@@ -185,6 +202,7 @@ describe('SidebarProvider', () => {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     expect(logger.info).toHaveBeenCalledWith('Webview did mount')
+    expect(reconciler.getInstalledSkills).toHaveBeenCalled()
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'initialize',
@@ -195,6 +213,10 @@ describe('SidebarProvider', () => {
         }),
       }),
     )
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'reconcileState',
+      payload: { installedSkills },
+    })
   })
 
   it('should handle unknown messages gracefully', async () => {
