@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals'
+import type * as vscode from 'vscode'
+import type { VerifyResult } from '../../shared/types'
+import type { JobResult, OperationQueue, QueuedJob } from '../../services/operation-queue'
+import type { PostInstallVerifier } from '../../services/post-install-verifier'
+import type { LoggingService } from '../../services/logging-service'
 
 // Mock dependencies
 const mockLogger = {
@@ -9,10 +14,10 @@ const mockLogger = {
 }
 
 // Helper type for mocked async function
-type MockAsyncFn<T = any> = jest.Mock<() => Promise<T>>
+type MockAsyncFn<T> = jest.Mock<() => Promise<T>>
 
 const mockVerifier = {
-  verify: jest.fn<() => Promise<any>>(),
+  verify: jest.fn<() => Promise<VerifyResult>>(),
 }
 
 const mockQueue = {
@@ -33,9 +38,14 @@ const mockVscode = {
     showErrorMessage: jest.fn(),
     showWarningMessage: jest.fn<() => Promise<string | undefined>>(),
     showInformationMessage: jest.fn(),
-    withProgress: jest.fn((options: any, callback: any) => {
+    withProgress: jest.fn<
+      (
+        options: vscode.ProgressOptions,
+        callback: (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => Thenable<void>,
+      ) => Thenable<void>
+    >((_options, callback) => {
       const token = { onCancellationRequested: jest.fn() }
-      return callback({ report: jest.fn() }, token)
+      return callback({ report: jest.fn() }, token as unknown as vscode.CancellationToken)
     }),
   },
   ProgressLocation: { Notification: 15 },
@@ -64,7 +74,11 @@ describe('InstallationOrchestrator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    orchestrator = new InstallationOrchestrator(mockQueue as any, mockVerifier as any, mockLogger as any)
+    orchestrator = new InstallationOrchestrator(
+      mockQueue as unknown as OperationQueue,
+      mockVerifier as unknown as PostInstallVerifier,
+      mockLogger as unknown as LoggingService,
+    )
   })
 
   it('should enqueue install job with correct args', async () => {
@@ -115,16 +129,16 @@ describe('InstallationOrchestrator', () => {
   it('should perform post-install verification on success', async () => {
     // Simulate install started (stores metadata)
     await orchestrator.install('skill', 'local', ['agent1'])
-    const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as any
+    const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as QueuedJob
     const opId = job.operationId
 
     // Simulate completion
-    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0]
+    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (result: JobResult) => Promise<void> | void
 
     // Verification pass
-    ;(mockVerifier.verify as MockAsyncFn).mockResolvedValue({ ok: true, corrupted: [] })
+    ;(mockVerifier.verify as MockAsyncFn<VerifyResult>).mockResolvedValue({ ok: true, corrupted: [] })
 
-    await (completeHandler as any)({
+    await completeHandler({
       operationId: opId,
       operation: 'install',
       skillName: 'skill',
@@ -137,23 +151,22 @@ describe('InstallationOrchestrator', () => {
 
   it('should warn and offer repair if post-install verification fails', async () => {
     await orchestrator.install('skill', 'local', ['agent1'])
-    const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as any
+    const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as QueuedJob
     const opId = job.operationId
 
-    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0]
+    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (result: JobResult) => Promise<void> | void
 
     // Verification fails
-    ;(mockVerifier.verify as MockAsyncFn).mockResolvedValue({
+    ;(mockVerifier.verify as MockAsyncFn<VerifyResult>).mockResolvedValue({
       ok: false,
       corrupted: [{ agent: 'agent1', scope: 'local', expectedPath: '...' }],
     })
 
     // Simulate user clicking "Repair"
-    ;(mockVscode.window.showWarningMessage as MockAsyncFn).mockResolvedValue('Repair')
+    ;(mockVscode.window.showWarningMessage as MockAsyncFn<string | undefined>).mockResolvedValue('Repair')
 
-    await (completeHandler as any)({
+    await completeHandler({
       operationId: opId,
-
       operation: 'install',
       skillName: 'skill',
       status: 'completed',
@@ -161,7 +174,7 @@ describe('InstallationOrchestrator', () => {
 
     expect(mockVscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('corrupted'), 'Repair')
     expect(mockQueue.enqueue).toHaveBeenCalledTimes(2) // 1 install + 1 repair
-    const repairJob = (mockQueue.enqueue as jest.Mock).mock.calls[1][0] as any
+    const repairJob = (mockQueue.enqueue as jest.Mock).mock.calls[1][0] as QueuedJob
     expect(repairJob.operation).toBe('repair')
   })
 })

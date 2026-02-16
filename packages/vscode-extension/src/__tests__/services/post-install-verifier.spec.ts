@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import type { LoggingService } from '../../services/logging-service'
 
 // Mock fs/promises
 const mockAccess = jest.fn<() => Promise<void>>()
@@ -19,7 +20,7 @@ describe('PostInstallVerifier', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    verifier = new PostInstallVerifier(mockLogger as any)
+    verifier = new PostInstallVerifier(mockLogger as unknown as LoggingService)
   })
 
   it('should return ok if all checks pass', async () => {

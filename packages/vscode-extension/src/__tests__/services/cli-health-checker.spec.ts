@@ -1,20 +1,26 @@
 import { jest } from '@jest/globals'
-import type { CliProcess, CliResult } from '../../services/cli-spawner'
+import type { CliProcess, CliResult, CliSpawner, SpawnOptions } from '../../services/cli-spawner'
+import type { LoggingService } from '../../services/logging-service'
 
 // Mock dependencies
 const mockCliProcess = {
-  onOutput: jest.fn(),
-  onComplete: jest.fn(),
+  onOutput: jest.fn<(handler: (line: string) => void) => void>(),
+  onComplete: jest.fn<() => Promise<CliResult>>(),
   kill: jest.fn(),
-} as unknown as CliProcess
+  operationId: 'health-check',
+} satisfies CliProcess
 
 const mockCliSpawner = {
-  spawn: jest.fn().mockReturnValue(mockCliProcess),
+  spawn: jest.fn<(args: string[], options: SpawnOptions) => CliProcess>().mockReturnValue(mockCliProcess),
+  dispose: jest.fn(),
 }
 
 const mockLoggingService = {
   debug: jest.fn(),
   warn: jest.fn(),
+  info: jest.fn(),
+  error: jest.fn(),
+  dispose: jest.fn(),
 }
 
 // Setup ESM mocks
@@ -37,11 +43,11 @@ describe('CliHealthChecker', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    checker = new CliHealthChecker(mockCliSpawner as any, mockLoggingService as any)
+    checker = new CliHealthChecker(mockCliSpawner as unknown as CliSpawner, mockLoggingService as unknown as LoggingService)
   })
 
   it('should return ok status when version is compatible', async () => {
-    ;(mockCliProcess.onOutput as jest.Mock).mockImplementation((cb: any) => {
+    mockCliProcess.onOutput.mockImplementation((cb: (line: string) => void) => {
       cb('1.5.0')
     })
     ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
@@ -53,7 +59,7 @@ describe('CliHealthChecker', () => {
   })
 
   it('should return outdated status when version is below minimum', async () => {
-    ;(mockCliProcess.onOutput as jest.Mock).mockImplementation((cb: any) => {
+    mockCliProcess.onOutput.mockImplementation((cb: (line: string) => void) => {
       cb('0.9.0')
     })
     ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
@@ -92,7 +98,7 @@ describe('CliHealthChecker', () => {
   })
 
   it('should cache the result', async () => {
-    ;(mockCliProcess.onOutput as jest.Mock).mockImplementation((cb: any) => cb('1.0.0'))
+    mockCliProcess.onOutput.mockImplementation((cb: (line: string) => void) => cb('1.0.0'))
     ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
 
     await checker.check()

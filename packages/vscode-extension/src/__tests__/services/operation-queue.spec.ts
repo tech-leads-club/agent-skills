@@ -1,16 +1,18 @@
 import { jest } from '@jest/globals'
-import type { CliProcess } from '../../services/cli-spawner'
+import type { CliProcess, CliResult, CliSpawner, SpawnOptions } from '../../services/cli-spawner'
 import type { QueuedJob } from '../../services/operation-queue'
 
 // Mock dependencies
 const mockCliProcess = {
-  onOutput: jest.fn(),
-  onComplete: jest.fn(),
+  onOutput: jest.fn<(handler: (line: string) => void) => void>(),
+  onComplete: jest.fn<() => Promise<CliResult>>(),
   kill: jest.fn(),
-} as unknown as CliProcess
+  operationId: 'queue-op',
+} satisfies CliProcess
 
 const mockCliSpawner = {
-  spawn: jest.fn().mockReturnValue(mockCliProcess),
+  spawn: jest.fn<(args: string[], options: SpawnOptions) => CliProcess>().mockReturnValue(mockCliProcess),
+  dispose: jest.fn(),
 }
 
 jest.unstable_mockModule('../../services/cli-spawner', () => ({
@@ -18,7 +20,7 @@ jest.unstable_mockModule('../../services/cli-spawner', () => ({
 }))
 
 jest.unstable_mockModule('../../services/error-classifier', () => ({
-  classifyError: jest.fn((stderr: string, code: number | null, signal: any) => ({
+  classifyError: jest.fn((stderr: string, code: number | null, signal: NodeJS.Signals | null) => ({
     category:
       signal === 'SIGTERM'
         ? 'cancelled'
@@ -44,7 +46,7 @@ describe('OperationQueue', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
-    queue = new OperationQueue(mockCliSpawner as any)
+    queue = new OperationQueue(mockCliSpawner as unknown as CliSpawner)
   })
 
   afterEach(() => {
@@ -52,7 +54,7 @@ describe('OperationQueue', () => {
   })
 
   it('should execute a job successfully', async () => {
-    ;(mockCliProcess.onComplete as MockAsyncFn<any>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
     const onCompleted = jest.fn()
     queue.onJobCompleted(onCompleted)
 
@@ -67,7 +69,7 @@ describe('OperationQueue', () => {
 
   it('should retry on retryable error', async () => {
     // First attempt fails with EPERM (retryable)
-    ;(mockCliProcess.onComplete as MockAsyncFn<any>)
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>)
       .mockResolvedValueOnce({ exitCode: 1, stderr: 'EPERM', signal: null })
       // Second attempt succeeds
       .mockResolvedValueOnce({ exitCode: 0, stderr: '', signal: null })
@@ -88,7 +90,7 @@ describe('OperationQueue', () => {
   })
 
   it('should fail after exhausting retries', async () => {
-    ;(mockCliProcess.onComplete as MockAsyncFn<any>).mockResolvedValue({ exitCode: 1, stderr: 'EPERM', signal: null })
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 1, stderr: 'EPERM', signal: null })
     const onCompleted = jest.fn()
     queue.onJobCompleted(onCompleted)
 
@@ -102,8 +104,8 @@ describe('OperationQueue', () => {
 
   it('should cancel an in-flight job', async () => {
     // Job hangs until we resolve it manually
-    let resolveJob: (val: any) => void
-    ;(mockCliProcess.onComplete as MockAsyncFn<any>).mockReturnValue(new Promise((r) => (resolveJob = r)))
+    let resolveJob: (val: CliResult) => void
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockReturnValue(new Promise((r) => (resolveJob = r)))
 
     queue.enqueue({ operationId: '1', operation: 'install', skillName: 'skill', args: [], cwd: '/' })
 
@@ -122,7 +124,7 @@ describe('OperationQueue', () => {
 
   it('should cancel a queued job', async () => {
     // Make first job hang
-    ;(mockCliProcess.onComplete as MockAsyncFn<any>).mockReturnValue(new Promise(() => {}))
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockReturnValue(new Promise(() => {}))
     queue.enqueue({ operationId: '1', operation: 'install', skillName: 'skill1', args: [], cwd: '/' })
 
     // Queue second job

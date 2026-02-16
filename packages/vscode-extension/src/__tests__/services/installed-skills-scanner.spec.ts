@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import type { LoggingService } from '../../services/logging-service'
 
 // Mock fs/promises
 const mockAccess = jest.fn<(path: string) => Promise<void>>()
@@ -19,7 +20,7 @@ describe('InstalledSkillsScanner', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    scanner = new InstalledSkillsScanner(mockLogger as any)
+    scanner = new InstalledSkillsScanner(mockLogger as unknown as LoggingService)
   })
 
   it('should detect valid installation', async () => {

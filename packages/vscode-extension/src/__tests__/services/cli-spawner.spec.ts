@@ -1,11 +1,19 @@
 import { jest } from '@jest/globals'
 import { EventEmitter } from 'node:events'
+import type { ChildProcess } from 'node:child_process'
+import type { LoggingService } from '../../services/logging-service'
 
 // Mock child_process
-const mockChildProcess = new EventEmitter() as any
-mockChildProcess.stdout = new EventEmitter()
-mockChildProcess.stderr = new EventEmitter()
-mockChildProcess.kill = jest.fn()
+const mockChildProcess = new EventEmitter() as EventEmitter &
+  Partial<ChildProcess> & {
+    stdout: ChildProcess['stdout']
+    stderr: ChildProcess['stderr']
+    kill: jest.Mock<(signal?: NodeJS.Signals) => boolean>
+    killed: boolean
+  }
+mockChildProcess.stdout = new EventEmitter() as unknown as ChildProcess['stdout']
+mockChildProcess.stderr = new EventEmitter() as unknown as ChildProcess['stderr']
+mockChildProcess.kill = jest.fn<(signal?: NodeJS.Signals) => boolean>().mockReturnValue(true)
 // Mock killed property
 Object.defineProperty(mockChildProcess, 'killed', {
   value: false,
@@ -36,13 +44,13 @@ describe('CliSpawner', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockChildProcess.removeAllListeners()
-    mockChildProcess.stdout.removeAllListeners()
-    mockChildProcess.stderr.removeAllListeners()
+    mockChildProcess.stdout!.removeAllListeners()
+    mockChildProcess.stderr!.removeAllListeners()
 
     // Reset child process mock state
     mockChildProcess.killed = false
 
-    spawner = new CliSpawner(mockLoggingService as any)
+    spawner = new CliSpawner(mockLoggingService as unknown as LoggingService)
   })
 
   it('should spawn npx with correct arguments', () => {
@@ -66,7 +74,7 @@ describe('CliSpawner', () => {
     const onOutput = jest.fn()
     process.onOutput(onOutput)
 
-    mockChildProcess.stdout.emit('data', Buffer.from('line1\nline2\n'))
+    mockChildProcess.stdout!.emit('data', Buffer.from('line1\nline2\n'))
 
     expect(onOutput).toHaveBeenCalledWith('line1')
     expect(onOutput).toHaveBeenCalledWith('line2')
@@ -77,7 +85,7 @@ describe('CliSpawner', () => {
     const onOutput = jest.fn()
     process.onOutput(onOutput)
 
-    mockChildProcess.stdout.emit('data', Buffer.from('\u001b[31mError\u001b[0m\n'))
+    mockChildProcess.stdout!.emit('data', Buffer.from('\u001b[31mError\u001b[0m\n'))
 
     expect(onOutput).toHaveBeenCalledWith('Error')
   })
@@ -96,7 +104,7 @@ describe('CliSpawner', () => {
     const process = spawner.spawn(['cmd'], { cwd: '/cwd', operationId: 'op1' })
     const promise = process.onComplete()
 
-    mockChildProcess.stderr.emit('data', Buffer.from('error output'))
+    mockChildProcess.stderr!.emit('data', Buffer.from('error output'))
     mockChildProcess.emit('close', 1, null)
 
     const result = await promise

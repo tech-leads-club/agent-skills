@@ -45,7 +45,7 @@ describe('RetryHandler', () => {
     const error = { category: 'file-locked', retryable: true } as ErrorInfo
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
 
-    const promise = withRetry(fn as any, {
+    const promise = withRetry(fn, {
       maxRetries: 2,
       baseDelayMs: 100,
       shouldRetry: (err) => err.retryable,
@@ -68,7 +68,7 @@ describe('RetryHandler', () => {
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
 
     await expect(
-      withRetry(fn as any, {
+      withRetry(fn, {
         maxRetries: 3,
         baseDelayMs: 100,
         shouldRetry: (err) => err.retryable,
@@ -83,7 +83,7 @@ describe('RetryHandler', () => {
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
     const onRetry = jest.fn()
 
-    const promise = withRetry(fn as any, {
+    const promise = withRetry(fn, {
       maxRetries: 3,
       baseDelayMs: 100,
       shouldRetry: () => true,
