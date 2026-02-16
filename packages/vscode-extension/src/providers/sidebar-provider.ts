@@ -1,9 +1,9 @@
 import * as vscode from 'vscode'
 import type { InstallationOrchestrator } from '../services/installation-orchestrator'
 import { LoggingService } from '../services/logging-service'
-import { SkillRegistryService } from '../services/skill-registry-service'
+import { SkillRegistryService, type RegistryResult } from '../services/skill-registry-service'
 import type { StateReconciler } from '../services/state-reconciler'
-import type { ExtensionMessage, WebviewMessage } from '../shared/messages'
+import type { ExtensionMessage, WebviewMessage, RegistryUpdatePayload } from '../shared/messages'
 import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo } from '../shared/types'
 
 interface AgentQuickPickItem extends vscode.QuickPickItem {
@@ -518,15 +518,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     try {
-      const registry = forceRefresh ? await this.registryService.refresh() : await this.registryService.getRegistry()
+      const { data: registry, fromCache, offline }: RegistryResult = await this.registryService.getRegistryWithMetadata(
+        forceRefresh,
+      )
+      const status: RegistryUpdatePayload['status'] = offline ? 'offline' : 'ready'
+      const payload = {
+        status,
+        registry,
+        fromCache,
+        ...(offline
+          ? {
+              errorMessage:
+                'Unable to refresh the skills registry. Showing cached data. Please check your connection and retry.',
+            }
+          : {}),
+      }
 
       await this.postMessage({
         type: 'registryUpdate',
-          payload: {
-            status: 'ready',
-            registry,
-            fromCache: false, // #TODO: Propagate registry metadata so we know when cache data is returned.
-          },
+        payload,
       })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'

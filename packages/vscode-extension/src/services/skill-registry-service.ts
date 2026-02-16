@@ -11,8 +11,25 @@ interface RegistryCacheEntry {
 }
 
 /**
+ * Result produced by CDN fetch operations.
+ */
+interface CdnFetchResult {
+  registry: SkillRegistry
+  offlineFallback: boolean
+}
+
+/**
+ * Metadata returned to callers that need cache provenance.
+ */
+export interface RegistryResult {
+  data: SkillRegistry
+  fromCache: boolean
+  offline: boolean
+}
+
+/**
  * Service for fetching, caching, and validating the skills registry from CDN.
- * Implements stale-while-revalidate pattern for optimal UX.
+ * Implements stale-while-revalidate UX for the marketplace view.
  */
 export class SkillRegistryService implements vscode.Disposable {
   private static readonly CDN_URL =
@@ -20,7 +37,7 @@ export class SkillRegistryService implements vscode.Disposable {
   private static readonly CACHE_KEY = 'agentSkills.registryCache'
   private static readonly TTL = 3_600_000 // 1 hour in milliseconds
 
-  private inFlightFetch: Promise<SkillRegistry> | null = null
+  private inFlightFetch: Promise<CdnFetchResult> | null = null
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -28,57 +45,67 @@ export class SkillRegistryService implements vscode.Disposable {
   ) {}
 
   /**
-   * Get registry data. Returns cached data immediately if available, then refreshes in background.
-   * First call fetches from network.
+   * Get registry data synchronously for consumers that only care about the payload.
    */
   public async getRegistry(): Promise<SkillRegistry> {
+    return (await this.loadRegistryInternal(false)).data
+  }
+
+  /**
+   * Force-fetch fresh registry data, bypassing cache TTL.
+   */
+  public async refresh(): Promise<SkillRegistry> {
+    return (await this.loadRegistryInternal(true)).data
+  }
+
+  /**
+   * Get registry data along with cache metadata for UI consumers.
+   */
+  public async getRegistryWithMetadata(forceRefresh = false): Promise<RegistryResult> {
+    return this.loadRegistryInternal(forceRefresh)
+  }
+
+  /**
+   * Centralized loader that handles cache staleness and metadata reporting.
+   */
+  private async loadRegistryInternal(forceRefresh: boolean): Promise<RegistryResult> {
     const cached = this.loadCache()
 
-    if (!cached) {
-      // No cache — must fetch from network
-      this.logger.info('[SkillRegistry] No cache found, fetching from CDN...')
-      return this.fetchFromCdn()
+    if (!cached || forceRefresh) {
+      this.logger.info(
+        !cached
+          ? '[SkillRegistry] No cache found, fetching from CDN...'
+          : '[SkillRegistry] Forced refresh requested, fetching the latest registry...',
+      )
+      const fetchResult = await this.fetchFromCdn()
+      return {
+        data: fetchResult.registry,
+        fromCache: fetchResult.offlineFallback,
+        offline: fetchResult.offlineFallback,
+      }
     }
 
     const age = Date.now() - cached.timestamp
     const stale = age >= SkillRegistryService.TTL
 
     if (stale) {
-      this.logger.info(`[SkillRegistry] Cache is stale (${Math.round(age / 1000 / 60)}m old), fetching fresh data...`)
-      // #TODO: Return cached data immediately and refresh in background (true stale-while-revalidate).
-      // Stale cache — return it immediately but also await fresh data
-      try {
-        return await this.fetchFromCdn()
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        this.logger.warn(`[SkillRegistry] Network fetch failed: ${errorMessage}, using stale cache as fallback`)
-        return cached.data
-      }
+      this.logger.info(
+        `[SkillRegistry] Cache is stale (${Math.round(age / 1000 / 60)}m old), emitting cached data and refreshing in background...`,
+      )
+      void this.refreshInBackground()
+      return { data: cached.data, fromCache: true, offline: false }
     }
 
-    // Fresh cache — return it and trigger background refresh
     this.logger.debug('[SkillRegistry] Cache is fresh, returning cached data and refreshing in background')
-    this.fetchFromCdn().catch((err: unknown) => {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.warn(`[SkillRegistry] Background refresh failed: ${errorMessage}`)
-    })
-    return cached.data
-  }
-
-  /**
-   * Force-fetch fresh data from CDN, bypassing cache TTL logic.
-   */
-  public async refresh(): Promise<SkillRegistry> {
-    this.logger.info('[SkillRegistry] Forced refresh requested')
-    return this.fetchFromCdn()
+    void this.refreshInBackground()
+    return { data: cached.data, fromCache: false, offline: false }
   }
 
   /**
    * Fetch registry from CDN, validate, and cache the result.
    * Deduplicates concurrent calls.
    */
-  private async fetchFromCdn(): Promise<SkillRegistry> {
-    // Deduplicate concurrent fetches
+  private async fetchFromCdn(): Promise<CdnFetchResult> {
     if (this.inFlightFetch) {
       this.logger.debug('[SkillRegistry] Deduplicating concurrent fetch')
       return this.inFlightFetch
@@ -87,8 +114,7 @@ export class SkillRegistryService implements vscode.Disposable {
     this.inFlightFetch = this.doFetch()
 
     try {
-      const result = await this.inFlightFetch
-      return result
+      return await this.inFlightFetch
     } finally {
       this.inFlightFetch = null
     }
@@ -97,7 +123,7 @@ export class SkillRegistryService implements vscode.Disposable {
   /**
    * Actual HTTP fetch logic.
    */
-  private async doFetch(): Promise<SkillRegistry> {
+  private async doFetch(): Promise<CdnFetchResult> {
     try {
       this.logger.debug(`[SkillRegistry] Fetching from ${SkillRegistryService.CDN_URL}`)
 
@@ -110,24 +136,36 @@ export class SkillRegistryService implements vscode.Disposable {
       const raw = await response.json()
       const validated = this.validate(raw)
 
-      // Save to cache
       this.saveCache({ data: validated, timestamp: Date.now() })
       this.logger.info(`[SkillRegistry] Fetched and cached ${validated.skills.length} skills`)
 
-      return validated
+      return { registry: validated, offlineFallback: false }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       this.logger.error(`[SkillRegistry] Fetch failed: ${errorMessage}`)
 
-      // Try to return cached data if available
       const cached = this.loadCache()
       if (cached) {
-        this.logger.warn('[SkillRegistry] Returning cached data due to network failure')
-        return cached.data
+        this.logger.warn(`[SkillRegistry] Returning cached data due to error: ${errorMessage}`)
+        return { registry: cached.data, offlineFallback: true }
       }
 
-      // No cache, no network — throw
       throw new Error(`Failed to fetch registry: ${errorMessage}`)
+    }
+  }
+
+  /**
+   * Attempts a background refresh without blocking the caller.
+   */
+  private async refreshInBackground(): Promise<void> {
+    try {
+      const result = await this.fetchFromCdn()
+      if (result.offlineFallback) {
+        this.logger.warn('[SkillRegistry] Background refresh could not reach CDN; operating with cached data')
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      this.logger.warn(`[SkillRegistry] Background refresh failed: ${errorMessage}`)
     }
   }
 
@@ -146,7 +184,6 @@ export class SkillRegistryService implements vscode.Disposable {
       throw new Error('Invalid registry: missing or invalid "skills" array')
     }
 
-    // Filter out skills missing required fields
     const validSkills = data.skills.filter((skill: unknown): skill is Skill => {
       if (typeof skill !== 'object' || skill === null) {
         this.logger.warn(`[SkillRegistry] Skipping non-object skill entry`)

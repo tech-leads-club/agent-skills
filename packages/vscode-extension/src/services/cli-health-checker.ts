@@ -3,6 +3,14 @@ import type { CliHealthStatus } from '../shared/types'
 import type { CliSpawner } from './cli-spawner'
 import type { LoggingService } from './logging-service'
 
+const ERRNO_ENOENT = 'ENOENT'
+
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'An unexpected error occurred while checking CLI health'
+
+const isErrnoException = (error: unknown): error is NodeJS.ErrnoException =>
+  typeof error === 'object' && error !== null && 'code' in error && typeof (error as NodeJS.ErrnoException).code === 'string'
+
 /** Minimum CLI version supported by the extension. */
 export const MIN_SUPPORTED_CLI_VERSION = '1.0.0'
 
@@ -61,24 +69,18 @@ export class CliHealthChecker implements vscode.Disposable {
           clearTimeout(timeout)
           this.activeProcess = null
 
-        const lowerError = result.stderr.toLowerCase()
+          const lowerError = result.stderr.toLowerCase()
 
-        if (result.exitCode === null && lowerError.includes('enoent')) {
-          resolve({ status: 'npx-missing' })
-          return
-        }
-
-        if (lowerError.includes('enoent') && lowerError.includes('npx')) {
-          resolve({ status: 'npx-missing' })
-          return
-        }
+          if (
+            (result.exitCode === null && lowerError.includes('enoent')) ||
+            (lowerError.includes('enoent') && lowerError.includes('npx'))
+          ) {
+            resolve({ status: 'npx-missing' })
+            return
+          }
 
           if (result.exitCode !== 0) {
-            if (result.stderr.includes('MODULE_NOT_FOUND') || result.stderr.includes('ERR_MODULE_NOT_FOUND')) {
-              resolve({ status: 'cli-missing' })
-            } else {
-              resolve({ status: 'cli-missing' })
-            }
+            resolve({ status: 'cli-missing' })
             return
           }
 
@@ -90,20 +92,21 @@ export class CliHealthChecker implements vscode.Disposable {
             } else {
               resolve({ status: 'outdated', version, minVersion: MIN_SUPPORTED_CLI_VERSION })
             }
-          } else {
-            resolve({ status: 'cli-missing' }) // Fallback if no version output
+            return
           }
+
+          resolve({ status: 'cli-missing' })
         })
       })
 
       this.cachedStatus = await checkPromise
       return this.cachedStatus
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+      if (isErrnoException(error) && error.code === ERRNO_ENOENT) {
         this.cachedStatus = { status: 'npx-missing' }
         return this.cachedStatus
       }
-      this.cachedStatus = { status: 'unknown', error: String(error) }
+      this.cachedStatus = { status: 'unknown', error: toErrorMessage(error) }
       return this.cachedStatus
     }
   }

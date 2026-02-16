@@ -4,12 +4,29 @@ import { SidebarProvider } from '../../providers/sidebar-provider'
 import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
 import { LoggingService } from '../../services/logging-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
+import type { RegistryResult } from '../../services/skill-registry-service'
 import type { StateReconciler } from '../../services/state-reconciler'
-import { WebviewMessage } from '../../shared/messages'
-import type { SkillRegistry } from '../../shared/types'
+import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
+import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MockableFn = (...args: any[]) => any
+const showQuickPickMock = vscode.window.showQuickPick as jest.Mock<
+  (...args: Array<unknown>) => Promise<unknown>
+>
+const showWarningMessageMock = vscode.window.showWarningMessage as jest.Mock<
+  (...args: Array<unknown>) => Promise<unknown>
+>
+
+type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
+  ...args: TArgs
+) => TReturn
+
+type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
+  ...args: TArgs
+) => Promise<TReturn>
+
+type WebviewUriFn = (uri: { fsPath: string }) => string
+type WebviewReceiveHandler = (handler: (message: WebviewMessage) => void) => vscode.Disposable
+type PostMessageFn = (message: ExtensionMessage) => Promise<boolean>
 
 // Mock vscode module (handled by jest.config.ts moduleNameMapper)
 
@@ -17,9 +34,9 @@ describe('SidebarProvider', () => {
   let provider: SidebarProvider
   let context: vscode.ExtensionContext
   let logger: LoggingService
-  let registryService: SkillRegistryService
-  let orchestrator: InstallationOrchestrator
-  let reconciler: StateReconciler
+  let registryService: jest.Mocked<SkillRegistryService>
+  let orchestrator: jest.Mocked<InstallationOrchestrator>
+  let reconciler: jest.Mocked<StateReconciler>
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
 
@@ -44,41 +61,57 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.ExtensionContext
 
-    // Mock LoggingService
-    logger = {
-      info: jest.fn<MockableFn>(),
-      warn: jest.fn<MockableFn>(),
-      error: jest.fn<MockableFn>(),
-      debug: jest.fn<MockableFn>(),
-      dispose: jest.fn<MockableFn>(),
-    } as unknown as LoggingService
+    const mockLoggerImpl = {
+      info: jest.fn<SyncMockableFn>(),
+      warn: jest.fn<SyncMockableFn>(),
+      error: jest.fn<SyncMockableFn>(),
+      debug: jest.fn<SyncMockableFn>(),
+      dispose: jest.fn<SyncMockableFn>(),
+    }
+    logger = mockLoggerImpl as unknown as jest.Mocked<LoggingService>
 
-    // Mock SkillRegistryService
-    registryService = {
-      getRegistry: jest.fn<MockableFn>().mockResolvedValue(mockRegistry),
-      refresh: jest.fn<MockableFn>().mockResolvedValue(mockRegistry),
-      dispose: jest.fn<MockableFn>(),
-    } as unknown as SkillRegistryService
+    const registryMetadata: RegistryResult = {
+      data: mockRegistry,
+      fromCache: false,
+      offline: false,
+    }
+    const mockRegistryService = {
+      getRegistry: jest.fn<AsyncMockableFn<SkillRegistry>>().mockResolvedValue(mockRegistry),
+      refresh: jest.fn<AsyncMockableFn<SkillRegistry>>().mockResolvedValue(mockRegistry),
+      getRegistryWithMetadata: jest
+        .fn<AsyncMockableFn<RegistryResult>>()
+        .mockResolvedValue(registryMetadata),
+      dispose: jest.fn<SyncMockableFn>(),
+    } as unknown as jest.Mocked<SkillRegistryService>
+    registryService = mockRegistryService
 
-    // Mock InstallationOrchestrator
-    orchestrator = {
-      install: jest.fn<MockableFn>().mockResolvedValue(undefined),
-      remove: jest.fn<MockableFn>().mockResolvedValue(undefined),
-      update: jest.fn<MockableFn>().mockResolvedValue(undefined),
-      cancel: jest.fn<MockableFn>(),
-      onOperationEvent: jest.fn<MockableFn>().mockReturnValue({ dispose: jest.fn<MockableFn>() }),
-      dispose: jest.fn<MockableFn>(),
-    } as unknown as InstallationOrchestrator
+    const mockOrchestrator = {
+      install: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      remove: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      update: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      cancel: jest.fn<SyncMockableFn>(),
+      onOperationEvent: jest
+        .fn<SyncMockableFn<vscode.Disposable>>()
+        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+      dispose: jest.fn<SyncMockableFn>(),
+    } as unknown as jest.Mocked<InstallationOrchestrator>
+    orchestrator = mockOrchestrator
 
-    // Mock StateReconciler
-    reconciler = {
-      reconcile: jest.fn<MockableFn>().mockResolvedValue(undefined),
-      getAvailableAgents: jest.fn<MockableFn>().mockResolvedValue([]),
-      getInstalledSkills: jest.fn<MockableFn>().mockResolvedValue({}),
-      onStateChanged: jest.fn<MockableFn>().mockReturnValue({ dispose: jest.fn<MockableFn>() }),
-      start: jest.fn<MockableFn>(),
-      dispose: jest.fn<MockableFn>(),
-    } as unknown as StateReconciler
+    const mockReconciler = {
+      reconcile: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      getAvailableAgents: jest
+        .fn<AsyncMockableFn<AvailableAgent[]>>()
+        .mockResolvedValue([]),
+      getInstalledSkills: jest
+        .fn<AsyncMockableFn<InstalledSkillsMap>>()
+        .mockResolvedValue({}),
+      onStateChanged: jest
+        .fn<SyncMockableFn<vscode.Disposable>>()
+        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+      start: jest.fn<SyncMockableFn>(),
+      dispose: jest.fn<SyncMockableFn>(),
+    } as unknown as jest.Mocked<StateReconciler>
+    reconciler = mockReconciler
 
     // Mock WebviewView
     webviewView = {
@@ -86,12 +119,12 @@ describe('SidebarProvider', () => {
         options: {},
         html: '',
         cspSource: 'vscode-webview:',
-        asWebviewUri: jest.fn<MockableFn>((uri: { fsPath: string }) => uri.fsPath),
-        onDidReceiveMessage: jest.fn<MockableFn>((handler: (message: WebviewMessage) => void) => {
+        asWebviewUri: jest.fn<WebviewUriFn>((uri) => uri.fsPath),
+        onDidReceiveMessage: jest.fn<WebviewReceiveHandler>((handler) => {
           messageHandler = handler
-          return { dispose: jest.fn<MockableFn>() }
+          return { dispose: jest.fn<SyncMockableFn>() }
         }),
-        postMessage: jest.fn<MockableFn>(),
+        postMessage: jest.fn<PostMessageFn>(),
       },
     } as unknown as vscode.WebviewView
 
@@ -149,7 +182,7 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
 
     // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
     expect(logger.info).toHaveBeenCalledWith('Webview did mount')
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
@@ -201,7 +234,32 @@ describe('SidebarProvider', () => {
         fromCache: false,
       },
     })
-    expect(registryService.getRegistry).toHaveBeenCalled()
+    expect(registryService.getRegistryWithMetadata).toHaveBeenCalled()
+  })
+
+  it('should notify the webview when registry data is served from cache during offline mode', async () => {
+    const offlineMetadata: RegistryResult = {
+      data: mockRegistry,
+      fromCache: true,
+      offline: true,
+    }
+    registryService.getRegistryWithMetadata.mockResolvedValueOnce(offlineMetadata)
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = { type: 'webviewDidMount' }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'registryUpdate',
+      payload: {
+        status: 'offline',
+        registry: mockRegistry,
+        fromCache: true,
+        errorMessage: expect.stringContaining('Unable to refresh'),
+      },
+    })
   })
 
   it('should trigger registry refresh on requestRefresh message', async () => {
@@ -213,7 +271,7 @@ describe('SidebarProvider', () => {
     // Wait for async operations
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(registryService.refresh).toHaveBeenCalled()
+    expect(registryService.getRegistryWithMetadata).toHaveBeenCalledWith(true)
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'registryUpdate',
@@ -222,7 +280,7 @@ describe('SidebarProvider', () => {
   })
 
   it('should handle registry service error gracefully', async () => {
-    ;(registryService.getRegistry as jest.Mock<MockableFn>).mockRejectedValueOnce(new Error('Network error'))
+    registryService.getRegistryWithMetadata.mockRejectedValueOnce(new Error('Network error'))
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
@@ -230,8 +288,9 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
 
     // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
+    expect(registryService.getRegistryWithMetadata).toHaveBeenCalled()
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load registry'))
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
@@ -246,11 +305,11 @@ describe('SidebarProvider', () => {
   // TESTS FOR QUICK PICK FLOW
 
   it('should show quick pick with available agents (no "All" option)', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
       { agent: 'claude-code', displayName: 'Claude Code' },
     ])
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+    showQuickPickMock.mockResolvedValue(null) // User cancels
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -261,7 +320,7 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const quickPickCall = showQuickPickMock.mock.calls[0]
     const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
 
     // Should NOT contain "All" option
@@ -282,10 +341,10 @@ describe('SidebarProvider', () => {
   })
 
   it('should send null agents when agent pick is cancelled', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
     ])
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null)
+    showQuickPickMock.mockResolvedValue(null)
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -303,22 +362,28 @@ describe('SidebarProvider', () => {
   })
 
   it('should exclude fully saturated agents from ADD pick', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
       { agent: 'claude-code', displayName: 'Claude Code' },
     ])
     // cursor is fully installed (local + global), claude-code is not
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+    reconciler.getInstalledSkills.mockResolvedValue({
       'test-skill': {
         local: true,
         global: true,
         agents: [
-          { agent: 'cursor', displayName: 'Cursor', local: true, global: true },
-          { agent: 'claude-code', displayName: 'Claude Code', local: false, global: false },
+          { agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false },
+          {
+            agent: 'claude-code',
+            displayName: 'Claude Code',
+            local: false,
+            global: false,
+            corrupted: false,
+          },
         ],
       },
     })
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+    showQuickPickMock.mockResolvedValue(null) // User cancels
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -329,7 +394,7 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const quickPickCall = showQuickPickMock.mock.calls[0]
     const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
 
     // cursor should be excluded (fully saturated)
@@ -341,20 +406,28 @@ describe('SidebarProvider', () => {
   })
 
   it('should only show installed agents in REMOVE pick', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
       { agent: 'claude-code', displayName: 'Claude Code' },
       { agent: 'opencode', displayName: 'OpenCode' },
     ])
     // Only opencode has the skill installed
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+    reconciler.getInstalledSkills.mockResolvedValue({
       'test-skill': {
         local: true,
         global: false,
-        agents: [{ agent: 'opencode', displayName: 'OpenCode', local: true, global: false }],
+        agents: [
+          {
+            agent: 'opencode',
+            displayName: 'OpenCode',
+            local: true,
+            global: false,
+            corrupted: false,
+          },
+        ],
       },
     })
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValue(null) // User cancels
+    showQuickPickMock.mockResolvedValue(null) // User cancels
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -365,7 +438,7 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const quickPickCall = (vscode.window.showQuickPick as jest.Mock<MockableFn>).mock.calls[0]
+    const quickPickCall = showQuickPickMock.mock.calls[0]
     const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
 
     // Only opencode should be in the list
@@ -374,21 +447,29 @@ describe('SidebarProvider', () => {
   })
 
   it('should only show "Locally" scope when skill is only installed locally for REMOVE', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'opencode', displayName: 'OpenCode' },
     ])
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+    reconciler.getInstalledSkills.mockResolvedValue({
       'test-skill': {
         local: true,
         global: false,
-        agents: [{ agent: 'opencode', displayName: 'OpenCode', local: true, global: false }],
+        agents: [
+          {
+            agent: 'opencode',
+            displayName: 'OpenCode',
+            local: true,
+            global: false,
+            corrupted: false,
+          },
+        ],
       },
     })
     // User selects opencode for removal
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>).mockResolvedValueOnce([
+    showQuickPickMock.mockResolvedValueOnce([
       { label: 'OpenCode', agentId: 'opencode' },
     ]) // agent pick
-    ;(vscode.window.showWarningMessage as jest.Mock<MockableFn>).mockResolvedValue('Remove')
+    showWarningMessageMock.mockResolvedValue('Remove')
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -408,11 +489,11 @@ describe('SidebarProvider', () => {
   })
 
   it('should chain to scope pick after agent selection', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
     ])
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({}) // not installed
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+    reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
+    showQuickPickMock
       .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
       .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
 
@@ -433,11 +514,11 @@ describe('SidebarProvider', () => {
   })
 
   it('should handle "all" scope by installing both local and global', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
     ])
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({}) // not installed
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+    reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
+    showQuickPickMock
       .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
       .mockResolvedValueOnce({ label: 'All', scopeId: 'all' }) // scope pick
 
@@ -455,20 +536,28 @@ describe('SidebarProvider', () => {
   })
 
   it('should confirm removal before executing remove action', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
     ])
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+    reconciler.getInstalledSkills.mockResolvedValue({
       'test-skill': {
         local: true,
         global: true,
-        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true }],
+        agents: [
+          {
+            agent: 'cursor',
+            displayName: 'Cursor',
+            local: true,
+            global: true,
+            corrupted: false,
+          },
+        ],
       },
     })
-    ;(vscode.window.showQuickPick as jest.Mock<MockableFn>)
+    showQuickPickMock
       .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
       .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
-    ;(vscode.window.showWarningMessage as jest.Mock<MockableFn>).mockResolvedValue('Remove')
+    showWarningMessageMock.mockResolvedValue('Remove')
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
@@ -509,14 +598,22 @@ describe('SidebarProvider', () => {
   })
 
   it('should show info message when all agents are saturated for ADD', async () => {
-    ;(reconciler.getAvailableAgents as jest.Mock<MockableFn>).mockResolvedValue([
+    reconciler.getAvailableAgents.mockResolvedValue([
       { agent: 'cursor', displayName: 'Cursor' },
     ])
-    ;(reconciler.getInstalledSkills as jest.Mock<MockableFn>).mockResolvedValue({
+    reconciler.getInstalledSkills.mockResolvedValue({
       'test-skill': {
         local: true,
         global: true,
-        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true }],
+        agents: [
+          {
+            agent: 'cursor',
+            displayName: 'Cursor',
+            local: true,
+            global: true,
+            corrupted: false,
+          },
+        ],
       },
     })
 

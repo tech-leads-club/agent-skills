@@ -4,6 +4,12 @@ import type { VerifyResult } from '../shared/types'
 import { AGENT_CONFIGS } from './installed-skills-scanner'
 import type { LoggingService } from './logging-service'
 
+const isErrnoException = (value: unknown): value is NodeJS.ErrnoException =>
+  typeof value === 'object' && value !== null && 'code' in value && typeof (value as NodeJS.ErrnoException).code === 'string'
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'Unknown filesystem error during verification'
+
 /**
  * Verifies that a skill was correctly installed by checking for SKILL.md
  * in the expected target directories.
@@ -47,19 +53,17 @@ export class PostInstallVerifier {
       try {
         await access(expectedPath)
         // File exists, verification passed for this agent
-      } catch (error: any) {
-        if (error.code === 'ENOENT') {
-          // File missing - definitely corrupted
+      } catch (error: unknown) {
+        if (isErrnoException(error) && error.code === 'ENOENT') {
           corrupted.push({
             agent: agentName,
             scope,
             expectedPath,
           })
         } else {
-          // Permission error or other FS error.
-          // Log warning but do not mark as corrupted to avoid false positives?
-          // Task says: "On filesystem error (not ENOENT...) log warning, treat as 'unverified' (not corrupted)"
-          this.logger.warn(`Verification failed for ${agentName} at ${expectedPath}: ${error.message}`)
+          this.logger.warn(
+            `Verification failed for ${agentName} at ${expectedPath}: ${getErrorMessage(error)}`,
+          )
         }
       }
     }

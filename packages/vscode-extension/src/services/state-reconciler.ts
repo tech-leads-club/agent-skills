@@ -14,6 +14,7 @@ export class StateReconciler implements vscode.Disposable {
   private debounceTimer: NodeJS.Timeout | null = null
   private previousState: InstalledSkillsMap = {}
   private stateChangedHandlers: Array<(state: InstalledSkillsMap) => void> = []
+  private watchersInitialized = false
 
   private readonly DEBOUNCE_MS = 500
 
@@ -120,6 +121,8 @@ export class StateReconciler implements vscode.Disposable {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
     }
+    this.watchers = []
+    this.watchersInitialized = false
   }
 
   /**
@@ -132,7 +135,11 @@ export class StateReconciler implements vscode.Disposable {
       return
     }
 
-    // #FIXME: Running createLocalWatchers multiple times (e.g. on trust grant) accumulates duplicate watchers.
+    if (this.watchersInitialized || this.watchers.length > 0) {
+      this.logger.debug('Local FileSystemWatchers already initialized, skipping duplicate creation')
+      return
+    }
+
     // Watch patterns for all agent skill directories
     const patterns = [
       '**/.cursor/skills/**',
@@ -163,6 +170,7 @@ export class StateReconciler implements vscode.Disposable {
       this.watchers.push(watcher)
     }
 
+    this.watchersInitialized = true
     this.logger.debug(`Created ${this.watchers.length} FileSystemWatchers`)
   }
 

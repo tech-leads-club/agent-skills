@@ -1,74 +1,82 @@
 import { jest } from '@jest/globals'
 import * as vscode from 'vscode'
+import type { CliHealthStatus, SkillRegistry } from '../shared/types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MockableFn = (...args: any[]) => any
+type MockableFn<T = unknown> = (...args: Array<unknown>) => T
+
+const mockRegistryPayload: SkillRegistry = {
+  version: '1.0.0',
+  categories: {},
+  skills: [],
+}
+
+const mockHealthStatus: CliHealthStatus = { status: 'ok', version: '1.0.0' }
 
 // ---- Mock Instances (shared across all tests) ----
 const mockLoggingService = {
-  info: jest.fn<MockableFn>(),
-  dispose: jest.fn<MockableFn>(),
+  info: jest.fn<MockableFn<void>>(),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 
 const mockRegistryService = {
-  getRegistry: jest.fn<MockableFn>().mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] }),
-  refresh: jest.fn<MockableFn>().mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] }),
-  dispose: jest.fn<MockableFn>(),
+  getRegistry: jest.fn<MockableFn<Promise<SkillRegistry>>>().mockResolvedValue(mockRegistryPayload),
+  refresh: jest.fn<MockableFn<Promise<SkillRegistry>>>().mockResolvedValue(mockRegistryPayload),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 
-const mockCliSpawner = { dispose: jest.fn<MockableFn>() }
-const mockOperationQueue = { dispose: jest.fn<MockableFn>() }
+const mockCliSpawner = { dispose: jest.fn<MockableFn<void>>() }
+const mockOperationQueue = { dispose: jest.fn<MockableFn<void>>() }
 const mockOrchestrator = {
-  setCliHealthy: jest.fn<MockableFn>(),
-  dispose: jest.fn<MockableFn>(),
+  setCliHealthy: jest.fn<MockableFn<void>>(),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 const mockHealthChecker = {
-  check: jest.fn<MockableFn>().mockResolvedValue({ status: 'ok', version: '1.0.0' }),
-  dispose: jest.fn<MockableFn>(),
+  check: jest.fn<MockableFn<Promise<CliHealthStatus>>>().mockResolvedValue(mockHealthStatus),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 const mockScanner = {}
 const mockReconciler = {
-  reconcile: jest.fn<MockableFn>().mockResolvedValue(undefined),
-  start: jest.fn<MockableFn>(),
-  dispose: jest.fn<MockableFn>(),
+  reconcile: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
+  start: jest.fn<MockableFn<void>>(),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 const mockSidebarProvider = {}
 
 // ---- ESM Module Mocks (must be before dynamic imports) ----
 jest.unstable_mockModule('../services/logging-service', () => ({
-  LoggingService: jest.fn<MockableFn>(() => mockLoggingService),
+  LoggingService: jest.fn<MockableFn<typeof mockLoggingService>>(() => mockLoggingService),
 }))
 
 jest.unstable_mockModule('../services/skill-registry-service', () => ({
-  SkillRegistryService: jest.fn<MockableFn>(() => mockRegistryService),
+  SkillRegistryService: jest.fn<MockableFn<typeof mockRegistryService>>(() => mockRegistryService),
 }))
 
 jest.unstable_mockModule('../services/cli-spawner', () => ({
-  CliSpawner: jest.fn<MockableFn>(() => mockCliSpawner),
+  CliSpawner: jest.fn<MockableFn<typeof mockCliSpawner>>(() => mockCliSpawner),
 }))
 
 jest.unstable_mockModule('../services/operation-queue', () => ({
-  OperationQueue: jest.fn<MockableFn>(() => mockOperationQueue),
+  OperationQueue: jest.fn<MockableFn<typeof mockOperationQueue>>(() => mockOperationQueue),
 }))
 
 jest.unstable_mockModule('../services/installation-orchestrator', () => ({
-  InstallationOrchestrator: jest.fn<MockableFn>(() => mockOrchestrator),
+  InstallationOrchestrator: jest.fn<MockableFn<typeof mockOrchestrator>>(() => mockOrchestrator),
 }))
 
 jest.unstable_mockModule('../services/cli-health-checker', () => ({
-  CliHealthChecker: jest.fn<MockableFn>(() => mockHealthChecker),
+  CliHealthChecker: jest.fn<MockableFn<typeof mockHealthChecker>>(() => mockHealthChecker),
 }))
 
 jest.unstable_mockModule('../services/installed-skills-scanner', () => ({
-  InstalledSkillsScanner: jest.fn<MockableFn>(() => mockScanner),
+  InstalledSkillsScanner: jest.fn<MockableFn<typeof mockScanner>>(() => mockScanner),
   AGENT_CONFIGS: [],
 }))
 
 jest.unstable_mockModule('../services/state-reconciler', () => ({
-  StateReconciler: jest.fn<MockableFn>(() => mockReconciler),
+  StateReconciler: jest.fn<MockableFn<typeof mockReconciler>>(() => mockReconciler),
 }))
 
-const MockSidebarProviderFn = jest.fn<MockableFn>(() => mockSidebarProvider)
+const MockSidebarProviderFn = jest.fn<MockableFn<typeof mockSidebarProvider>>(() => mockSidebarProvider)
 // @ts-expect-error - we are assigning a static property to a mock function
 MockSidebarProviderFn.viewType = 'agentSkillsSidebar'
 jest.unstable_mockModule('../providers/sidebar-provider', () => ({
@@ -89,10 +97,18 @@ describe('Extension Activation', () => {
     jest.clearAllMocks()
 
     // Re-apply mock implementations after clearAllMocks
-    ;(LoggingService as jest.Mock<MockableFn>).mockImplementation(() => mockLoggingService)
-    ;(SkillRegistryService as unknown as jest.Mock<MockableFn>).mockImplementation(() => mockRegistryService)
-    ;(SidebarProvider as unknown as jest.Mock<MockableFn>).mockImplementation(() => mockSidebarProvider)
-    ;(StateReconciler as jest.Mock<MockableFn>).mockImplementation(() => mockReconciler)
+    ;(LoggingService as unknown as jest.Mock<() => typeof mockLoggingService>).mockImplementation(
+      () => mockLoggingService,
+    )
+    ;(
+      SkillRegistryService as unknown as jest.Mock<() => typeof mockRegistryService>
+    ).mockImplementation(() => mockRegistryService)
+    ;(SidebarProvider as unknown as jest.Mock<() => typeof mockSidebarProvider>).mockImplementation(
+      () => mockSidebarProvider,
+    )
+    ;(
+      StateReconciler as unknown as jest.Mock<() => typeof mockReconciler>
+    ).mockImplementation(() => mockReconciler)
 
     // Reset mock return values
     mockRegistryService.getRegistry.mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] })
@@ -140,7 +156,9 @@ describe('Extension Activation', () => {
 
   it('should handle agentSkills.refresh command', async () => {
     activate(context)
-    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<MockableFn>).mock.calls
+    const calls = (
+      vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>
+    ).mock.calls
     const refreshCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.refresh')
     const handler = refreshCall?.[1] as (...args: unknown[]) => Promise<void>
 
@@ -153,7 +171,9 @@ describe('Extension Activation', () => {
 
   it('should handle agentSkills.openSettings command', () => {
     activate(context)
-    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<MockableFn>).mock.calls
+    const calls = (
+      vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>
+    ).mock.calls
     const settingsCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.openSettings')
     const handler = settingsCall?.[1] as (...args: unknown[]) => unknown
 

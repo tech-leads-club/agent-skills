@@ -1,7 +1,25 @@
-import type { OperationType } from '../shared/types'
+import type { ErrorInfo, OperationType } from '../shared/types'
 import type { CliProcess, CliSpawner } from './cli-spawner'
 import { classifyError } from './error-classifier'
 import { withRetry } from './retry-handler'
+
+const UNKNOWN_ERROR_MESSAGE = 'An unexpected error occurred. Check the Agent Skills output channel for details.'
+
+const isErrorInfo = (value: unknown): value is ErrorInfo =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as ErrorInfo).category === 'string' &&
+  typeof (value as ErrorInfo).message === 'string'
+
+const toErrorMessage = (value: unknown): string => {
+  if (isErrorInfo(value)) {
+    return value.message
+  }
+  if (value instanceof Error) {
+    return value.message
+  }
+  return UNKNOWN_ERROR_MESSAGE
+}
 
 /**
  * A queued job waiting to be executed.
@@ -153,24 +171,21 @@ export class OperationQueue {
       const result = await withRetry(() => this.executeOnce(job), {
         maxRetries: 3,
         baseDelayMs: 500,
-        shouldRetry: (error: any) => error.retryable === true,
+        shouldRetry: (error: ErrorInfo) => error.retryable === true,
         onRetry: (attempt, max) => {
           this.jobProgressHandlers.forEach((handler) => handler(job, `Retrying (attempt ${attempt}/${max})...`))
         },
       })
 
       this.jobCompletedHandlers.forEach((handler) => handler(result))
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle final failure
       let status: 'error' | 'cancelled' = 'error'
-      let errorMessage = error.message
+      let errorMessage: string | undefined = toErrorMessage(error)
 
-      if (error.category === 'cancelled') {
+      if (isErrorInfo(error) && error.category === 'cancelled') {
         status = 'cancelled'
         errorMessage = undefined
-      } else if (error.category) {
-        // It's an ErrorInfo
-        errorMessage = error.message
       }
 
       this.jobCompletedHandlers.forEach((handler) =>

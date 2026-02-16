@@ -4,17 +4,29 @@ import type { LoggingService } from '../../services/logging-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
 import type { SkillRegistry } from '../../shared/types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MockableFn = (...args: any[]) => any
+type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
+  ...args: TArgs
+) => TReturn
+
+type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
+  ...args: TArgs
+) => Promise<TReturn>
+
+type FetchResponse = {
+  ok: boolean
+  json: () => Promise<unknown>
+}
 
 // Mock fetch globally
-global.fetch = jest.fn<MockableFn>() as typeof global.fetch
+global.fetch = jest.fn<AsyncMockableFn<FetchResponse>>() as unknown as typeof global.fetch
+const fetchMock = global.fetch as unknown as jest.Mock<AsyncMockableFn<FetchResponse>>
 
 describe('SkillRegistryService', () => {
   let service: SkillRegistryService
   let mockContext: vscode.ExtensionContext
   let mockLogger: LoggingService
   let mockGlobalState: vscode.Memento
+  const getStateMock = () => mockGlobalState.get as jest.Mock<SyncMockableFn>
 
   const mockRegistry: SkillRegistry = {
     version: '1.0.0',
@@ -36,10 +48,10 @@ describe('SkillRegistryService', () => {
   beforeEach(() => {
     // Mock globalState
     mockGlobalState = {
-      get: jest.fn<MockableFn>(),
-      update: jest.fn<MockableFn>().mockResolvedValue(undefined),
-      keys: jest.fn<MockableFn>(),
-      setKeysForSync: jest.fn<MockableFn>(),
+      get: jest.fn<SyncMockableFn>(),
+      update: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      keys: jest.fn<SyncMockableFn>(),
+      setKeysForSync: jest.fn<SyncMockableFn>(),
     } as unknown as vscode.Memento
 
     // Mock context
@@ -49,14 +61,14 @@ describe('SkillRegistryService', () => {
 
     // Mock logger
     mockLogger = {
-      info: jest.fn<MockableFn>(),
-      warn: jest.fn<MockableFn>(),
-      error: jest.fn<MockableFn>(),
-      debug: jest.fn<MockableFn>(),
+      info: jest.fn<SyncMockableFn>(),
+      warn: jest.fn<SyncMockableFn>(),
+      error: jest.fn<SyncMockableFn>(),
+      debug: jest.fn<SyncMockableFn>(),
     } as unknown as LoggingService
 
     // Clear fetch mock
-    ;(global.fetch as jest.Mock<MockableFn>).mockClear()
+    fetchMock.mockClear()
 
     service = new SkillRegistryService(mockContext, mockLogger)
   })
@@ -66,7 +78,7 @@ describe('SkillRegistryService', () => {
   })
 
   it('fetches registry from CDN and returns parsed data', async () => {
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => mockRegistry,
     })
@@ -80,7 +92,7 @@ describe('SkillRegistryService', () => {
   })
 
   it('caches successful response in globalState', async () => {
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => mockRegistry,
     })
@@ -101,7 +113,7 @@ describe('SkillRegistryService', () => {
       data: mockRegistry,
       timestamp: Date.now() - 1000 * 60 * 30, // 30 minutes ago (fresh)
     }
-    ;(mockGlobalState.get as jest.Mock<MockableFn>).mockReturnValue(cachedEntry)
+    getStateMock().mockReturnValue(cachedEntry)
 
     const result = await service.getRegistry()
 
@@ -115,8 +127,8 @@ describe('SkillRegistryService', () => {
       data: mockRegistry,
       timestamp: Date.now() - 1000 * 60 * 90, // 90 minutes ago (stale)
     }
-    ;(mockGlobalState.get as jest.Mock<MockableFn>).mockReturnValue(staleEntry)
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    getStateMock().mockReturnValue(staleEntry)
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => mockRegistry,
     })
@@ -132,8 +144,8 @@ describe('SkillRegistryService', () => {
       data: mockRegistry,
       timestamp: Date.now() - 1000 * 60 * 90, // stale
     }
-    ;(mockGlobalState.get as jest.Mock<MockableFn>).mockReturnValue(cachedEntry)
-    ;(global.fetch as jest.Mock<MockableFn>).mockRejectedValueOnce(new Error('Network error'))
+    getStateMock().mockReturnValue(cachedEntry)
+    fetchMock.mockRejectedValueOnce(new Error('Network error'))
 
     const result = await service.getRegistry()
 
@@ -142,14 +154,14 @@ describe('SkillRegistryService', () => {
   })
 
   it('throws when network fails and no cache exists', async () => {
-    ;(mockGlobalState.get as jest.Mock<MockableFn>).mockReturnValue(null)
-    ;(global.fetch as jest.Mock<MockableFn>).mockRejectedValueOnce(new Error('Network error'))
+    getStateMock().mockReturnValue(null)
+    fetchMock.mockRejectedValueOnce(new Error('Network error'))
 
     await expect(service.getRegistry()).rejects.toThrow('Failed to fetch registry')
   })
 
   it('rejects malformed JSON (non-object)', async () => {
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => 'not an object',
     })
@@ -158,7 +170,7 @@ describe('SkillRegistryService', () => {
   })
 
   it('rejects registry missing skills array', async () => {
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ version: '1.0.0' }),
     })
@@ -183,7 +195,7 @@ describe('SkillRegistryService', () => {
         { description: 'missing-name', category: 'test' }, // Missing name
       ],
     }
-    ;(global.fetch as jest.Mock<MockableFn>).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => dirtyRegistry,
     })
@@ -196,7 +208,7 @@ describe('SkillRegistryService', () => {
   })
 
   it('deduplicates concurrent fetch calls', async () => {
-    ;(global.fetch as jest.Mock<MockableFn>).mockImplementation(
+    fetchMock.mockImplementation(
       () =>
         new Promise((resolve) =>
           setTimeout(
