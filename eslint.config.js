@@ -54,7 +54,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/packages/vscode-extension/package.json'],
+    files: ['packages/vscode-extension/package.json', '**/packages/vscode-extension/package.json'],
     rules: {
       '@nx/dependency-checks': [
         'error',
@@ -72,6 +72,8 @@ export default defineConfig([
             '@testing-library/jest-dom',
             '@testing-library/react',
             '@testing-library/user-event',
+            'glob',
+            'mocha',
           ],
         },
       ],
