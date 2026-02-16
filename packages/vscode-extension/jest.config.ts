@@ -5,6 +5,7 @@ const config: Config = {
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
   testMatch: ['**/__tests__/**/*.spec.{ts,tsx}', '**/+(*.)+(spec|test).{ts,tsx}'],
+  testPathIgnorePatterns: ['<rootDir>/src/__tests__/integration/'],
   transform: { '^.+\\.[tj]sx?$': ['ts-jest', { useESM: true, tsconfig: '<rootDir>/tsconfig.spec.json' }] },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/packages/vscode-extension',

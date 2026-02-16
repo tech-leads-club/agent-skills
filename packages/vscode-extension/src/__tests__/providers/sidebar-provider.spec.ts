@@ -139,7 +139,7 @@ describe('SidebarProvider', () => {
   it('should register message handler', () => {
     provider.resolveWebviewView(webviewView)
     expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalled()
-    expect(context.subscriptions).toHaveLength(1)
+    expect(context.subscriptions).toHaveLength(2)
   })
 
   it('should handle webviewDidMount message', async () => {

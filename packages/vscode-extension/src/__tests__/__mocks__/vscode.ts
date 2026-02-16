@@ -26,6 +26,7 @@ export const workspace = {
   getConfiguration: jest.fn(() => ({
     get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
   })),
+  onDidGrantWorkspaceTrust: jest.fn(() => ({ dispose: jest.fn() })),
   isTrusted: true,
   workspaceFolders: [{ uri: { fsPath: '/test/workspace' }, name: 'test', index: 0 }],
 }

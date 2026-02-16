@@ -18,7 +18,14 @@ const mockRegistryService = {
 
 const mockCliSpawner = { dispose: jest.fn<MockableFn>() }
 const mockOperationQueue = { dispose: jest.fn<MockableFn>() }
-const mockOrchestrator = { dispose: jest.fn<MockableFn>() }
+const mockOrchestrator = {
+  setCliHealthy: jest.fn<MockableFn>(),
+  dispose: jest.fn<MockableFn>(),
+}
+const mockHealthChecker = {
+  check: jest.fn<MockableFn>().mockResolvedValue({ status: 'ok', version: '1.0.0' }),
+  dispose: jest.fn<MockableFn>(),
+}
 const mockScanner = {}
 const mockReconciler = {
   reconcile: jest.fn<MockableFn>().mockResolvedValue(undefined),
@@ -48,8 +55,13 @@ jest.unstable_mockModule('../services/installation-orchestrator', () => ({
   InstallationOrchestrator: jest.fn<MockableFn>(() => mockOrchestrator),
 }))
 
+jest.unstable_mockModule('../services/cli-health-checker', () => ({
+  CliHealthChecker: jest.fn<MockableFn>(() => mockHealthChecker),
+}))
+
 jest.unstable_mockModule('../services/installed-skills-scanner', () => ({
   InstalledSkillsScanner: jest.fn<MockableFn>(() => mockScanner),
+  AGENT_CONFIGS: [],
 }))
 
 jest.unstable_mockModule('../services/state-reconciler', () => ({

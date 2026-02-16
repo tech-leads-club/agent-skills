@@ -51,6 +51,7 @@ describe('SkillGrid Accessibility', () => {
     availableAgents: mockAvailableAgents,
     hasWorkspace: true,
     onMarkPending: jest.fn(),
+    onRepair: jest.fn(),
   }
 
   it('should render all skill cards', () => {
