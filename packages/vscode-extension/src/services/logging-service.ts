@@ -1,5 +1,8 @@
 import * as vscode from 'vscode'
 
+/**
+ * Wraps a VS Code output channel and exposes structured logging helpers.
+ */
 export class LoggingService implements vscode.Disposable {
   constructor(private readonly outputChannel: vscode.LogOutputChannel) {}
 

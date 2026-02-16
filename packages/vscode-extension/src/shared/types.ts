@@ -66,6 +66,9 @@ export interface AgentInstallInfo {
   corrupted: boolean // NEW: true if dir exists but SKILL.md missing
 }
 
+/**
+ * Represents an agent that can host skills, used for filtering and selections.
+ */
 export interface AvailableAgent {
   agent: string
   displayName: string

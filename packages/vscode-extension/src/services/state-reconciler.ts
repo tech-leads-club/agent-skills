@@ -132,6 +132,7 @@ export class StateReconciler implements vscode.Disposable {
       return
     }
 
+    // #FIXME: Running createLocalWatchers multiple times (e.g. on trust grant) accumulates duplicate watchers.
     // Watch patterns for all agent skill directories
     const patterns = [
       '**/.cursor/skills/**',

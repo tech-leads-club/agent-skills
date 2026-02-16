@@ -4,8 +4,19 @@ import { LoggingService } from '../services/logging-service'
 import { SkillRegistryService } from '../services/skill-registry-service'
 import type { StateReconciler } from '../services/state-reconciler'
 import type { ExtensionMessage, WebviewMessage } from '../shared/messages'
-import type { InstalledSkillInfo } from '../shared/types'
+import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo } from '../shared/types'
 
+interface AgentQuickPickItem extends vscode.QuickPickItem {
+  agentId: string
+}
+
+interface ScopeQuickPickItem extends vscode.QuickPickItem {
+  scopeId: 'local' | 'global' | 'all'
+}
+
+/**
+ * Manages the sidebar Webview life cycle, message routing, and registry synchronization.
+ */
 export class SidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'agentSkillsSidebar'
 
@@ -97,170 +108,128 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private async handleMessage(message: WebviewMessage, webview: vscode.Webview): Promise<void> {
-    switch (message.type) {
-      case 'webviewDidMount': {
-        this.logger.info('Webview did mount')
-        const version = this.context.extension.packageJSON.version ?? 'unknown'
-        const availableAgents = await this.reconciler.getAvailableAgents()
-        const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+    const handler = this.getMessageHandler(message.type)
+    if (!handler) {
+      this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
+      return
+    }
+    await handler(message, webview)
+  }
 
-        await this.postMessage({
-          type: 'initialize',
-          payload: { version, availableAgents, hasWorkspace },
-        })
-
-        // Push initial trust state
-        await this.postMessage({
-          type: 'trustState',
-          payload: { isTrusted: vscode.workspace.isTrusted },
-        })
-
-        // Trigger registry load and push to webview
-        void this.loadAndPushRegistry(webview)
-        // Trigger initial state reconciliation push
-        void this.reconciler.reconcile()
-        break
-      }
-      case 'requestRefresh': {
-        this.logger.info('Refresh requested from webview')
-        void this.loadAndPushRegistry(webview, true)
-        void this.reconciler.reconcile()
-        break
-      }
-      case 'requestAgentPick': {
-        const { skillName, action } = message.payload
-        void this.handleAgentPick(skillName, action)
-        break
-      }
-      case 'requestScopePick': {
-        const { skillName, action, agents } = message.payload
-        void this.handleScopePick(skillName, action, agents)
-        break
-      }
-      case 'installSkill': {
-        const { skillName, agents, scope } = message.payload
-        try {
-          if (scope === 'all') {
-            await this.orchestrator.install(skillName, 'local', agents)
-            await this.orchestrator.install(skillName, 'global', agents)
-          } else {
-            await this.orchestrator.install(skillName, scope, agents)
-          }
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err)
-          this.logger.error(`Failed to enqueue install: ${msg}`)
-          vscode.window.showErrorMessage(`Failed to start installation: ${msg}`)
+  private getMessageHandler(
+    type: WebviewMessage['type'],
+  ): ((message: WebviewMessage, webview: vscode.Webview) => Promise<void>) | undefined {
+    switch (type) {
+      case 'webviewDidMount':
+        return (message, webview) => this.handleWebviewDidMount(message, webview)
+      case 'requestRefresh':
+        return (_, webview) => this.handleRefreshRequest(webview)
+      case 'requestAgentPick':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'requestAgentPick' }>
+          return this.handleAgentPick(typed.payload.skillName, typed.payload.action)
         }
-        break
-      }
-      case 'removeSkill': {
-        const { skillName, agents, scope } = message.payload
-        const agentNames = agents.join(', ')
-        const confirmed = await this.confirmRemoval(skillName, agentNames, scope)
-        if (!confirmed) return
-
-        try {
-          if (scope === 'all') {
-            await this.orchestrator.remove(skillName, 'local', agents)
-            await this.orchestrator.remove(skillName, 'global', agents)
-          } else {
-            await this.orchestrator.remove(skillName, scope, agents)
-          }
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err)
-          this.logger.error(`Failed to enqueue remove: ${msg}`)
-          vscode.window.showErrorMessage(`Failed to start removal: ${msg}`)
+      case 'requestScopePick':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'requestScopePick' }>
+          return this.handleScopePick(typed.payload.skillName, typed.payload.action, typed.payload.agents)
         }
-        break
-      }
-      case 'updateSkill': {
-        const { skillName } = message.payload
-        try {
-          await this.orchestrator.update(skillName)
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err)
-          this.logger.error(`Failed to enqueue update: ${msg}`)
-          vscode.window.showErrorMessage(`Failed to start update: ${msg}`)
+      case 'installSkill':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'installSkill' }>
+          return this.handleInstallSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
         }
-        break
-      }
-      case 'repairSkill': {
-        const { skillName, agents, scope } = message.payload
-        try {
-          await this.orchestrator.repair(skillName, scope, agents)
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err)
-          this.logger.error(`Failed to enqueue repair: ${msg}`)
-          vscode.window.showErrorMessage(`Failed to start repair: ${msg}`)
+      case 'removeSkill':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'removeSkill' }>
+          return this.handleRemoveSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
         }
-        break
-      }
-      case 'cancelOperation': {
-        const { operationId } = message.payload
-        this.orchestrator.cancel(operationId)
-        break
-      }
+      case 'updateSkill':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'updateSkill' }>
+          return this.handleUpdateSkill(typed.payload.skillName)
+        }
+      case 'repairSkill':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'repairSkill' }>
+          return this.handleRepairSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
+        }
+      case 'cancelOperation':
+        return async (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'cancelOperation' }>
+          this.handleCancelOperation(typed.payload.operationId)
+        }
       default:
-        this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
+        return undefined
     }
   }
 
+  private async handleWebviewDidMount(_message: WebviewMessage, webview: vscode.Webview): Promise<void> {
+    this.logger.info('Webview did mount')
+    const version = this.context.extension.packageJSON.version ?? 'unknown'
+    const availableAgents = await this.reconciler.getAvailableAgents()
+    const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+
+    await this.postMessage({
+      type: 'initialize',
+      payload: { version, availableAgents, hasWorkspace },
+    })
+
+    await this.postMessage({
+      type: 'trustState',
+      payload: { isTrusted: vscode.workspace.isTrusted },
+    })
+
+    void this.loadAndPushRegistry(webview)
+    void this.reconciler.reconcile()
+  }
+
+  private async handleRefreshRequest(webview: vscode.Webview): Promise<void> {
+    this.logger.info('Refresh requested from webview')
+    void this.loadAndPushRegistry(webview, true)
+    void this.reconciler.reconcile()
+  }
+
+  private async handleInstallSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
+    await this.runQueueAction('install', () => this.enqueueInstall(skillName, scope, agents))
+  }
+
+  private async handleRemoveSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
+    const agentNames = agents.join(', ')
+    const confirmed = await this.confirmRemoval(skillName, agentNames, scope)
+    if (!confirmed) return
+    await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scope, agents))
+  }
+
+  private async handleUpdateSkill(skillName: string): Promise<void> {
+    await this.runQueueAction('update', () => this.orchestrator.update(skillName))
+  }
+
+  private async handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
+    await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, scope, agents))
+  }
+
+  private handleCancelOperation(operationId: string): void {
+    this.orchestrator.cancel(operationId)
+  }
+
+
   /**
    * Shows a multi-select QuickPick for agent selection.
-   * For ADD: only agents with available (non-saturated) scope combinations are shown.
-   * For REMOVE: only agents where the skill is currently installed are shown.
    */
   private async handleAgentPick(skillName: string, action: 'add' | 'remove'): Promise<void> {
     const availableAgents = await this.reconciler.getAvailableAgents()
     const installedSkills = await this.reconciler.getInstalledSkills()
     const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
 
-    interface AgentQuickPickItem extends vscode.QuickPickItem {
-      agentId: string
-    }
-
-    const agentItems: AgentQuickPickItem[] = []
-
-    for (const agent of availableAgents) {
-      const installed = installedInfo?.agents.find((ia) => ia.agent === agent.agent)
-
-      if (action === 'add') {
-        // Skip agents that are fully saturated (installed in both local + global)
-        if (installed?.local && installed?.global) continue
-
-        let description = ''
-        if (installed) {
-          if (installed.local) description = 'Installed locally'
-          else if (installed.global) description = 'Installed globally'
-        }
-
-        agentItems.push({
-          label: agent.displayName,
-          description,
-          agentId: agent.agent,
-        })
-      } else {
-        // REMOVE: only show agents where the skill is installed
-        if (!installed || (!installed.local && !installed.global)) continue
-
-        const scopes = []
-        if (installed.local) scopes.push('Local')
-        if (installed.global) scopes.push('Global')
-
-        agentItems.push({
-          label: agent.displayName,
-          description: scopes.join(' + '),
-          agentId: agent.agent,
-        })
-      }
-    }
+    const agentItems = this.buildAgentPickItems(availableAgents, installedInfo, action)
 
     if (agentItems.length === 0) {
-      const message =
+      const emptyMessage =
         action === 'add'
           ? 'This skill is already installed for all agents in every scope.'
           : 'This skill is not installed for any agent.'
-      vscode.window.showInformationMessage(message)
+      vscode.window.showInformationMessage(emptyMessage)
       return
     }
 
@@ -271,7 +240,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     if (!selected || selected.length === 0) {
-      // User cancelled
       await this.postMessage({
         type: 'agentPickResult',
         payload: { skillName, action, agents: null },
@@ -281,20 +249,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     const selectedAgentIds = selected.map((item) => item.agentId)
 
-    // Send result and immediately proceed to scope pick
     await this.postMessage({
       type: 'agentPickResult',
       payload: { skillName, action, agents: selectedAgentIds },
     })
 
-    // Automatically chain into scope pick
     void this.handleScopePick(skillName, action, selectedAgentIds)
   }
 
   /**
    * Shows a QuickPick for scope selection (Local, Global, All).
-   * For ADD: only scopes where at least one selected agent is NOT yet installed are shown.
-   * For REMOVE: only scopes where at least one selected agent IS installed are shown.
    */
   private async handleScopePick(skillName: string, action: 'add' | 'remove', agents: string[]): Promise<void> {
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
@@ -302,29 +266,130 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
     const isTrusted = vscode.workspace.isTrusted
 
-    interface ScopeQuickPickItem extends vscode.QuickPickItem {
-      scopeId: 'local' | 'global' | 'all'
+    const scopeItems = this.buildScopeQuickPickItems(action, agents, installedInfo, hasWorkspace, isTrusted)
+
+    if (scopeItems.length === 0) {
+      const message = this.getScopePickEmptyMessage(action, isTrusted, installedInfo, agents)
+      vscode.window.showInformationMessage(message)
+      return
     }
 
+    const selectedScope = await this.selectScopeItem(scopeItems, skillName, action)
+    if (!selectedScope) {
+      await this.postMessage({
+        type: 'scopePickResult',
+        payload: { skillName, action, agents, scope: null },
+      })
+      return
+    }
+
+    await this.postMessage({
+      type: 'scopePickResult',
+      payload: { skillName, action, agents, scope: selectedScope.scopeId },
+    })
+
+    await this.executeScopeAction(skillName, action, agents, selectedScope.scopeId)
+  }
+
+  private async runQueueAction(
+    action: 'install' | 'remove' | 'update' | 'repair',
+    executor: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await executor()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      this.logger.error(`Failed to enqueue ${action}: ${msg}`)
+      const userFacing = action === 'install' ? 'installation' : action === 'remove' ? 'removal' : action
+      vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
+    }
+  }
+
+  private async enqueueInstall(
+    skillName: string,
+    scope: 'local' | 'global' | 'all',
+    agents: string[],
+  ): Promise<void> {
+    if (scope === 'all') {
+      await this.orchestrator.install(skillName, 'local', agents)
+      await this.orchestrator.install(skillName, 'global', agents)
+      return
+    }
+    await this.orchestrator.install(skillName, scope, agents)
+  }
+
+  private async enqueueRemove(
+    skillName: string,
+    scope: 'local' | 'global' | 'all',
+    agents: string[],
+  ): Promise<void> {
+    if (scope === 'all') {
+      await this.orchestrator.remove(skillName, 'local', agents)
+      await this.orchestrator.remove(skillName, 'global', agents)
+      return
+    }
+    await this.orchestrator.remove(skillName, scope, agents)
+  }
+
+  private buildAgentPickItems(
+    availableAgents: AvailableAgent[],
+    installedInfo: InstalledSkillInfo | null,
+    action: 'add' | 'remove',
+  ): AgentQuickPickItem[] {
+    const items: AgentQuickPickItem[] = []
+    for (const agent of availableAgents) {
+      const installed = this.findAgentInstall(installedInfo, agent.agent)
+
+      if (action === 'add') {
+        if (installed?.local && installed?.global) continue
+        items.push({
+          label: agent.displayName,
+          description: this.describeAgentInstallStatus(installed),
+          agentId: agent.agent,
+        })
+      } else {
+        if (!installed || (!installed.local && !installed.global)) continue
+        items.push({
+          label: agent.displayName,
+          description: this.describeInstalledScopes(installed),
+          agentId: agent.agent,
+        })
+      }
+    }
+
+    return items
+  }
+
+  private describeAgentInstallStatus(installed?: AgentInstallInfo): string {
+    if (!installed) return ''
+    if (installed.local) return 'Installed locally'
+    if (installed.global) return 'Installed globally'
+    return ''
+  }
+
+  private describeInstalledScopes(installed: AgentInstallInfo): string {
+    const scopes: string[] = []
+    if (installed.local) scopes.push('Local')
+    if (installed.global) scopes.push('Global')
+    return scopes.join(' + ')
+  }
+
+  private findAgentInstall(installedInfo: InstalledSkillInfo | null, agentId: string): AgentInstallInfo | undefined {
+    return installedInfo?.agents.find((ia) => ia.agent === agentId)
+  }
+
+  private buildScopeQuickPickItems(
+    action: 'add' | 'remove',
+    agents: string[],
+    installedInfo: InstalledSkillInfo | null,
+    hasWorkspace: boolean,
+    isTrusted: boolean,
+  ): ScopeQuickPickItem[] {
     const scopeItems: ScopeQuickPickItem[] = []
 
     if (action === 'add') {
-      // Check if at least one selected agent is NOT installed locally
-      // AND workspace is open AND trusted
-      const canAddLocal =
-        hasWorkspace &&
-        isTrusted &&
-        agents.some((agentId) => {
-          const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
-          return !installed || !installed.local
-        })
-
-      // Check if at least one selected agent is NOT installed globally
-      const canAddGlobal = agents.some((agentId) => {
-        const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
-        return !installed || !installed.global
-      })
-
+      const canAddLocal = this.canAddLocal(hasWorkspace, isTrusted, agents, installedInfo)
+      const canAddGlobal = this.canAddGlobal(agents, installedInfo)
       if (canAddLocal) {
         scopeItems.push({ label: 'Locally', description: 'Install in the current workspace', scopeId: 'local' })
       }
@@ -335,20 +400,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         scopeItems.push({ label: 'All', description: 'Install both locally and globally', scopeId: 'all' })
       }
     } else {
-      // REMOVE: only show scopes where at least one selected agent IS installed
-      const canRemoveLocal =
-        hasWorkspace &&
-        isTrusted &&
-        agents.some((agentId) => {
-          const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
-          return installed?.local === true
-        })
-
-      const canRemoveGlobal = agents.some((agentId) => {
-        const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
-        return installed?.global === true
-      })
-
+      const canRemoveLocal = this.canRemoveLocal(hasWorkspace, isTrusted, agents, installedInfo)
+      const canRemoveGlobal = this.canRemoveGlobal(agents, installedInfo)
       if (canRemoveLocal) {
         scopeItems.push({ label: 'Locally', description: 'Remove from the current workspace', scopeId: 'local' })
       }
@@ -360,91 +413,97 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
     }
 
-    if (scopeItems.length === 0) {
-      // If no options due to trust issues or existing installs
-      let message = ''
-      if (action === 'add') {
-        if (!isTrusted) {
-          message = 'Workspace is restricted. You can only install skills globally.'
-          if (
-            agents.some((agentId) => {
-              const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
-              return installed?.global
-            })
-          ) {
-            message += ' The selected agents already have this skill installed globally.'
-          }
-        } else {
-          message = 'This skill is already installed in all available scopes for the selected agents.'
-        }
-      } else {
-        message = 'This skill is not installed in any scope for the selected agents.'
-      }
+    return scopeItems
+  }
 
-      vscode.window.showInformationMessage(message)
+  private canAddLocal(
+    hasWorkspace: boolean,
+    isTrusted: boolean,
+    agents: string[],
+    installedInfo: InstalledSkillInfo | null,
+  ): boolean {
+    if (!hasWorkspace || !isTrusted) return false
+    return this.hasAgentSatisfying(agents, installedInfo, (installed) => !installed?.local)
+  }
+
+  private canAddGlobal(agents: string[], installedInfo: InstalledSkillInfo | null): boolean {
+    return this.hasAgentSatisfying(agents, installedInfo, (installed) => !installed?.global)
+  }
+
+  private canRemoveLocal(
+    hasWorkspace: boolean,
+    isTrusted: boolean,
+    agents: string[],
+    installedInfo: InstalledSkillInfo | null,
+  ): boolean {
+    if (!hasWorkspace || !isTrusted) return false
+    return this.hasAgentSatisfying(agents, installedInfo, (installed) => installed?.local === true)
+  }
+
+  private canRemoveGlobal(agents: string[], installedInfo: InstalledSkillInfo | null): boolean {
+    return this.hasAgentSatisfying(agents, installedInfo, (installed) => installed?.global === true)
+  }
+
+  private hasAgentSatisfying(
+    agents: string[],
+    installedInfo: InstalledSkillInfo | null,
+    predicate: (installed: AgentInstallInfo | undefined) => boolean,
+  ): boolean {
+    return agents.some((agentId) => predicate(this.findAgentInstall(installedInfo, agentId)))
+  }
+
+  private async selectScopeItem(
+    scopeItems: ScopeQuickPickItem[],
+    skillName: string,
+    action: 'add' | 'remove',
+  ): Promise<ScopeQuickPickItem | null> {
+    if (scopeItems.length === 1) {
+      return scopeItems[0]
+    }
+
+    const picked = await vscode.window.showQuickPick(scopeItems, {
+      title: `${action === 'add' ? 'Add' : 'Remove'} skill: ${skillName} — Select scope`,
+      placeHolder:
+        action === 'add' ? 'Where should the skill be installed?' : 'Where should the skill be removed from?',
+    })
+
+    return picked ?? null
+  }
+
+  private getScopePickEmptyMessage(
+    action: 'add' | 'remove',
+    isTrusted: boolean,
+    installedInfo: InstalledSkillInfo | null,
+    agents: string[],
+  ): string {
+    if (action === 'add') {
+      if (!isTrusted) {
+        let message = 'Workspace is restricted. You can only install skills globally.'
+        if (this.canRemoveGlobal(agents, installedInfo)) {
+          message += ' The selected agents already have this skill installed globally.'
+        }
+        return message
+      }
+      return 'This skill is already installed in all available scopes for the selected agents.'
+    }
+    return 'This skill is not installed in any scope for the selected agents.'
+  }
+
+  private async executeScopeAction(
+    skillName: string,
+    action: 'add' | 'remove',
+    agents: string[],
+    scopeId: 'local' | 'global' | 'all',
+  ): Promise<void> {
+    if (action === 'add') {
+      await this.runQueueAction('install', () => this.enqueueInstall(skillName, scopeId, agents))
       return
     }
 
-    // If only one scope option is available, auto-select it
-    let selectedScope: ScopeQuickPickItem
-    if (scopeItems.length === 1) {
-      selectedScope = scopeItems[0]
-    } else {
-      const picked = await vscode.window.showQuickPick(scopeItems, {
-        title: `${action === 'add' ? 'Add' : 'Remove'} skill: ${skillName} — Select scope`,
-        placeHolder:
-          action === 'add' ? 'Where should the skill be installed?' : 'Where should the skill be removed from?',
-      })
-
-      if (!picked) {
-        // User cancelled
-        await this.postMessage({
-          type: 'scopePickResult',
-          payload: { skillName, action, agents, scope: null },
-        })
-        return
-      }
-      selectedScope = picked
-    }
-
-    // Send result back to webview
-    await this.postMessage({
-      type: 'scopePickResult',
-      payload: { skillName, action, agents, scope: selectedScope.scopeId },
-    })
-
-    // Execute the action directly
-    if (action === 'add') {
-      try {
-        if (selectedScope.scopeId === 'all') {
-          await this.orchestrator.install(skillName, 'local', agents)
-          await this.orchestrator.install(skillName, 'global', agents)
-        } else {
-          await this.orchestrator.install(skillName, selectedScope.scopeId, agents)
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err)
-        this.logger.error(`Failed to enqueue install: ${msg}`)
-        vscode.window.showErrorMessage(`Failed to start installation: ${msg}`)
-      }
-    } else {
-      const agentNames = agents.join(', ')
-      const confirmed = await this.confirmRemoval(skillName, agentNames, selectedScope.scopeId)
-      if (!confirmed) return
-
-      try {
-        if (selectedScope.scopeId === 'all') {
-          await this.orchestrator.remove(skillName, 'local', agents)
-          await this.orchestrator.remove(skillName, 'global', agents)
-        } else {
-          await this.orchestrator.remove(skillName, selectedScope.scopeId, agents)
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err)
-        this.logger.error(`Failed to enqueue remove: ${msg}`)
-        vscode.window.showErrorMessage(`Failed to start removal: ${msg}`)
-      }
-    }
+    const agentNames = agents.join(', ')
+    const confirmed = await this.confirmRemoval(skillName, agentNames, scopeId)
+    if (!confirmed) return
+    await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scopeId, agents))
   }
 
   /**
@@ -463,11 +522,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
       await this.postMessage({
         type: 'registryUpdate',
-        payload: {
-          status: 'ready',
-          registry,
-          fromCache: false, // TODO: detect if from cache
-        },
+          payload: {
+            status: 'ready',
+            registry,
+            fromCache: false, // #TODO: Propagate registry metadata so we know when cache data is returned.
+          },
       })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'

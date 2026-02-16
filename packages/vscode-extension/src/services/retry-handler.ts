@@ -1,5 +1,8 @@
 import { ErrorInfo } from '../shared/types'
 
+/**
+ * Configuration for retrying CLI operations with backoff and optional hooks.
+ */
 export interface RetryOptions {
   maxRetries: number // Default: 3
   baseDelayMs: number // Default: 500

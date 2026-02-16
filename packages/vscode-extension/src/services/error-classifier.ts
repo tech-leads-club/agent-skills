@@ -1,5 +1,63 @@
 import { ErrorInfo } from '../shared/types'
 
+const signalErrorMap: Partial<Record<NodeJS.Signals, ErrorInfo>> = {
+  SIGTERM: {
+    category: 'cancelled',
+    message: 'Operation cancelled',
+    retryable: false,
+  },
+  SIGKILL: {
+    category: 'terminated',
+    message: 'Operation was unexpectedly terminated.',
+    retryable: false,
+  },
+}
+
+const stderrRules: Array<{ predicate: (value: string) => boolean; info: ErrorInfo }> = [
+  {
+    predicate: (value) => value.includes('eperm') || value.includes('ebusy'),
+    info: {
+      category: 'file-locked',
+      message:
+        'Files are currently in use by another process. Please close any open files in the skill directory and try again.',
+      retryable: true,
+    },
+  },
+  {
+    predicate: (value) => value.includes('enoent') && value.includes('npx'),
+    info: {
+      category: 'npx-missing',
+      message: "Cannot find 'npx'. Ensure Node.js is installed and available in your system PATH.",
+      retryable: false,
+    },
+  },
+  {
+    predicate: (value) => value.includes('enospc'),
+    info: {
+      category: 'disk-full',
+      message: 'Insufficient disk space. Free up disk space and try again.',
+      retryable: false,
+    },
+  },
+  {
+    predicate: (value) => value.includes('eacces'),
+    info: {
+      category: 'permission-denied',
+      message: 'Permission denied. Check file permissions for the skill directory.',
+      retryable: false,
+    },
+  },
+  {
+    predicate: (value) => value.includes('module_not_found') || value.includes('err_module_not_found'),
+    info: {
+      category: 'cli-missing',
+      message: 'The @tech-leads-club/agent-skills CLI is not installed.',
+      retryable: false,
+      action: { label: 'Install CLI', command: 'npm install -g @tech-leads-club/agent-skills' },
+    },
+  },
+]
+
 /**
  * Classifies CLI stderr output into user-friendly error types with actionable messages.
  * Evaluates rules in priority order: Signal > Stderr Patterns > Exit Code > Fallback.
@@ -10,68 +68,17 @@ import { ErrorInfo } from '../shared/types'
  * @returns Categorized error information
  */
 export function classifyError(stderr: string, exitCode: number | null, signal: NodeJS.Signals | null): ErrorInfo {
-  // 1. Signal-based classification
-  if (signal === 'SIGTERM') {
-    return {
-      category: 'cancelled',
-      message: 'Operation cancelled',
-      retryable: false,
-    }
-  }
-  if (signal === 'SIGKILL') {
-    return {
-      category: 'terminated',
-      message: 'Operation was unexpectedly terminated.',
-      retryable: false,
-    }
+  if (signal && signalErrorMap[signal]) {
+    return signalErrorMap[signal] as ErrorInfo
   }
 
-  // 2. Stderr pattern matching (case-insensitive)
   const lower = stderr.toLowerCase()
-
-  if (lower.includes('eperm') || lower.includes('ebusy')) {
-    return {
-      category: 'file-locked',
-      message:
-        'Files are currently in use by another process. Please close any open files in the skill directory and try again.',
-      retryable: true,
+  for (const { predicate, info } of stderrRules) {
+    if (predicate(lower)) {
+      return info
     }
   }
 
-  if (lower.includes('enoent') && lower.includes('npx')) {
-    return {
-      category: 'npx-missing',
-      message: "Cannot find 'npx'. Ensure Node.js is installed and available in your system PATH.",
-      retryable: false,
-    }
-  }
-
-  if (lower.includes('enospc')) {
-    return {
-      category: 'disk-full',
-      message: 'Insufficient disk space. Free up disk space and try again.',
-      retryable: false,
-    }
-  }
-
-  if (lower.includes('eacces')) {
-    return {
-      category: 'permission-denied',
-      message: 'Permission denied. Check file permissions for the skill directory.',
-      retryable: false,
-    }
-  }
-
-  if (lower.includes('module_not_found') || lower.includes('err_module_not_found')) {
-    return {
-      category: 'cli-missing',
-      message: 'The @tech-leads-club/agent-skills CLI is not installed.',
-      retryable: false,
-      action: { label: 'Install CLI', command: 'npm install -g @tech-leads-club/agent-skills' },
-    }
-  }
-
-  // 3. Generic non-zero exit
   if (exitCode !== null && exitCode !== 0) {
     return {
       category: 'cli-error',
@@ -80,7 +87,6 @@ export function classifyError(stderr: string, exitCode: number | null, signal: N
     }
   }
 
-  // 4. Fallback
   return {
     category: 'unknown',
     message: "An unexpected error occurred. Check the 'Agent Skills' output channel for details.",

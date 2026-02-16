@@ -39,6 +39,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
   private eventHandlers: OperationEventHandler[] = []
   private activeOperations = new Map<string, vscode.CancellationTokenSource>()
   private jobMetadata = new Map<string, JobMetadata>()
+  private progressResolvers = new Map<string, () => void>()
   private cliHealthy = true // Default true until health check says otherwise
 
   constructor(
@@ -130,11 +131,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
       cwd = process.env.HOME || process.env.USERPROFILE || '~'
     }
 
-    // For update, scope/agents are implicit/all, but we store dummy metadata or handle gracefully
-    // Update affects all installed instances.
-    // We don't strictly need metadata for verification unless update installs new files?
-    // Update might re-install.
-    // For now, metadata is crucial for install/repair.
+    // Updates apply globally; metadata is only tracked for install/repair verification.
 
     const job: QueuedJob = {
       operationId,
@@ -262,7 +259,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
   private async handleJobCompleted(result: JobResult): Promise<void> {
     this.logger.info(`[${result.operationId}] Job completed: ${result.status}`)
 
-    // Emit completed event
     this.emitEvent({
       operationId: result.operationId,
       operation: result.operation,
@@ -272,59 +268,8 @@ export class InstallationOrchestrator implements vscode.Disposable {
       errorMessage: result.errorMessage,
     })
 
-    // Clean up active operation
-    const tokenSource = this.activeOperations.get(result.operationId)
-    if (tokenSource) {
-      tokenSource.dispose()
-      this.activeOperations.delete(result.operationId)
-    }
-
-    // Show completion notification
-    if (result.status === 'completed') {
-      const metadata = this.jobMetadata.get(result.operationId)
-
-      // Perform post-install verification for install/repair
-      if ((result.operation === 'install' || result.operation === 'repair') && metadata) {
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || null
-        const verifyResult = await this.verifier.verify(
-          result.skillName,
-          metadata.agents,
-          metadata.scope,
-          workspaceRoot,
-        )
-
-        if (!verifyResult.ok) {
-          this.logger.warn(
-            `[${result.operationId}] Post-install verification failed: ${JSON.stringify(verifyResult.corrupted)}`,
-          )
-
-          const action = await vscode.window.showWarningMessage(
-            `Skill '${result.skillName}' may be corrupted — SKILL.md not found in expected locations.`,
-            'Repair',
-          )
-
-          if (action === 'Repair') {
-            void this.repair(result.skillName, metadata.scope, metadata.agents)
-          }
-          // Don't show success message if corrupted
-          this.jobMetadata.delete(result.operationId)
-          return
-        }
-      }
-
-      void vscode.window.showInformationMessage(
-        `✓ ${this.getOperationLabel(result.operation)} '${result.skillName}' completed`,
-      )
-    } else if (result.status === 'error') {
-      void vscode.window.showErrorMessage(
-        `✗ ${this.getOperationLabel(result.operation)} '${result.skillName}' failed: ${result.errorMessage}`,
-      )
-    } else if (result.status === 'cancelled') {
-      void vscode.window.showWarningMessage(
-        `⊘ ${this.getOperationLabel(result.operation)} '${result.skillName}' cancelled`,
-      )
-    }
-
+    this.cleanupActiveOperation(result.operationId)
+    await this.handleCompletionNotification(result)
     this.jobMetadata.delete(result.operationId)
   }
 
@@ -335,49 +280,97 @@ export class InstallationOrchestrator implements vscode.Disposable {
     const tokenSource = new vscode.CancellationTokenSource()
     this.activeOperations.set(job.operationId, tokenSource)
 
+    const completionPromise = new Promise<void>((resolve) => {
+      this.progressResolvers.set(job.operationId, resolve)
+    })
+
     void vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: `${this.getOperationLabel(job.operation)} '${job.skillName}'...`,
         cancellable: true,
       },
-      async (progress, token) => {
+      async (_progress, token) => {
         token.onCancellationRequested(() => {
           this.cancel(job.operationId)
         })
 
-        // Listen for progress updates specifically for this job
-        // Note: The global handler emits events, but here we update the specific notification
-        // We could attach a listener here, but since handleJobProgress calls emitEvent,
-        // we might rely on that. But for withProgress, we need to call progress.report().
-        // Let's hook into jobProgressHandlers in constructor and route it here?
-        // Or simpler: handleJobProgress can update a map of progress reporters?
-        // But withProgress callback has the `progress` object scoped.
-
-        // We can just poll or use a dedicated event emitter.
-        // Actually, let's keep it simple: progress notification stays open until job completes.
-        // If we want "Retrying..." text update, we need access to `progress`.
-        // Let's store the progress reporter in a map?
-        // Or just let the notification stay with the title.
-        // The task T7 says: "Add onJobProgress(handler) method for subscribing to progress events".
-        // T8 says: "getOperationLabel case for 'repair' -> 'Repairing'".
-        // It doesn't explicitly require updating the progress notification text in UI,
-        // but it would be nice.
-        // However, I'll stick to the core requirement: notification shows title.
-        // "Retrying..." is emitted via event handler, which the Webview might consume.
-        // If I want the Notification to update, I'd need to store `progress` object.
-
-        // Wait for completion
-        return new Promise<void>((resolve) => {
-          const checkInterval = setInterval(() => {
-            if (!this.activeOperations.has(job.operationId)) {
-              clearInterval(checkInterval)
-              resolve()
-            }
-          }, 100)
-        })
+        await completionPromise
       },
     )
+  }
+
+  private cleanupActiveOperation(operationId: string): void {
+    const tokenSource = this.activeOperations.get(operationId)
+    if (tokenSource) {
+      tokenSource.dispose()
+      this.activeOperations.delete(operationId)
+    }
+    this.resolveProgress(operationId)
+  }
+
+  private resolveProgress(operationId: string): void {
+    const resolver = this.progressResolvers.get(operationId)
+    if (resolver) {
+      resolver()
+      this.progressResolvers.delete(operationId)
+    }
+  }
+
+  private async handleCompletionNotification(result: JobResult): Promise<void> {
+    if (result.status === 'completed') {
+      const metadata = this.jobMetadata.get(result.operationId)
+      if ((result.operation === 'install' || result.operation === 'repair') && metadata) {
+        const verified = await this.verifyInstallation(result, metadata)
+        if (!verified) {
+          return
+        }
+      }
+
+      void vscode.window.showInformationMessage(
+        `✓ ${this.getOperationLabel(result.operation)} '${result.skillName}' completed`,
+      )
+      return
+    }
+
+    if (result.status === 'error') {
+      void vscode.window.showErrorMessage(
+        `✗ ${this.getOperationLabel(result.operation)} '${result.skillName}' failed: ${result.errorMessage}`,
+      )
+    } else if (result.status === 'cancelled') {
+      void vscode.window.showWarningMessage(
+        `⊘ ${this.getOperationLabel(result.operation)} '${result.skillName}' cancelled`,
+      )
+    }
+  }
+
+  private async verifyInstallation(result: JobResult, metadata: JobMetadata): Promise<boolean> {
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || null
+    const verifyResult = await this.verifier.verify(
+      result.skillName,
+      metadata.agents,
+      metadata.scope,
+      workspaceRoot,
+    )
+
+    if (verifyResult.ok) {
+      return true
+    }
+
+    this.logger.warn(
+      `[${result.operationId}] Post-install verification failed: ${JSON.stringify(verifyResult.corrupted)}`,
+    )
+
+    const action = await vscode.window.showWarningMessage(
+      `Skill '${result.skillName}' may be corrupted — SKILL.md not found in expected locations.`,
+      'Repair',
+    )
+
+    if (action === 'Repair') {
+      void this.repair(result.skillName, metadata.scope, metadata.agents)
+    }
+
+    return false
   }
 
   /**

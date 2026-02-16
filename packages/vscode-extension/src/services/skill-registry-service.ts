@@ -45,6 +45,7 @@ export class SkillRegistryService implements vscode.Disposable {
 
     if (stale) {
       this.logger.info(`[SkillRegistry] Cache is stale (${Math.round(age / 1000 / 60)}m old), fetching fresh data...`)
+      // #TODO: Return cached data immediately and refresh in background (true stale-while-revalidate).
       // Stale cache — return it immediately but also await fresh data
       try {
         return await this.fetchFromCdn()

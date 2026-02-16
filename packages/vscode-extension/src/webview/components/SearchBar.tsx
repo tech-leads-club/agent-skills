@@ -1,3 +1,6 @@
+/**
+ * Props for the top-level search input in the sidebar.
+ */
 export interface SearchBarProps {
   value: string
   onChange: (query: string) => void

@@ -1,8 +1,8 @@
 import Fuse from 'fuse.js'
-import { StrictMode, useEffect, useMemo, useState } from 'react'
+import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage } from '../shared/messages'
-import type { AvailableAgent, SkillRegistry } from '../shared/types'
+import type { AvailableAgent, Category, InstalledSkillsMap, Skill, SkillRegistry } from '../shared/types'
 import { CategoryFilter } from './components/CategoryFilter'
 import { RestrictedModeBanner } from './components/RestrictedModeBanner'
 import { SearchBar } from './components/SearchBar'
@@ -13,6 +13,106 @@ import './index.css'
 import { onMessage, postMessage } from './lib/vscode-api'
 
 type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
+
+function LoadingState() {
+  return (
+    <div className="loading-state">
+      <div className="spinner" />
+      <p>Loading skills...</p>
+    </div>
+  )
+}
+
+function ErrorState({ message, onRetry }: { message: string | null; onRetry: () => void }) {
+  return (
+    <div className="error-state">
+      <p className="error-message">{message || 'Failed to load skill registry'}</p>
+      <button className="retry-button" onClick={onRetry}>
+        Retry
+      </button>
+    </div>
+  )
+}
+
+function NoRegistryState() {
+  return (
+    <div className="empty-state">
+      <p>No skills available in the registry</p>
+    </div>
+  )
+}
+
+interface RegistryContentProps {
+  registry: SkillRegistry
+  filteredSkills: Skill[]
+  categories: Array<{ key: string; category: Category }>
+  skillCounts: Record<string, number>
+  searchQuery: string
+  activeCategory: string | null
+  onSearchChange: (value: string) => void
+  onCategorySelect: (value: string | null) => void
+  installedSkills: InstalledSkillsMap
+  isOperating: (skillName: string) => boolean
+  getOperationMessage: (skillName: string) => string | undefined
+  availableAgents: AvailableAgent[]
+  hasWorkspace: boolean
+  onMarkPending: (skillName: string, action: 'add' | 'remove' | 'repair') => void
+  onRepair: (skillName: string, agents: string[], scope: 'local' | 'global') => void
+  onClearSearch: () => void
+}
+
+function RegistryContent({
+  registry,
+  filteredSkills,
+  categories,
+  skillCounts,
+  searchQuery,
+  activeCategory,
+  onSearchChange,
+  onCategorySelect,
+  installedSkills,
+  isOperating,
+  getOperationMessage,
+  availableAgents,
+  hasWorkspace,
+  onMarkPending,
+  onRepair,
+  onClearSearch,
+}: RegistryContentProps) {
+  return (
+    <>
+      <SearchBar value={searchQuery} onChange={onSearchChange} resultCount={filteredSkills.length} />
+
+      <CategoryFilter
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelect={onCategorySelect}
+        skillCounts={skillCounts}
+      />
+
+      {filteredSkills.length === 0 && (searchQuery || activeCategory) ? (
+        <div className="empty-state">
+          <p>No skills match your search</p>
+          <button className="clear-button" onClick={onClearSearch}>
+            Clear filters
+          </button>
+        </div>
+      ) : (
+        <SkillGrid
+          skills={filteredSkills}
+          categories={registry.categories}
+          installedSkills={installedSkills}
+          isOperating={isOperating}
+          getOperationMessage={getOperationMessage}
+          availableAgents={availableAgents}
+          hasWorkspace={hasWorkspace}
+          onMarkPending={onMarkPending}
+          onRepair={onRepair}
+        />
+      )}
+    </>
+  )
+}
 
 function App() {
   const [registry, setRegistry] = useState<SkillRegistry | null>(null)
@@ -25,12 +125,26 @@ function App() {
   const [hasWorkspace, setHasWorkspace] = useState(false)
   const [isTrusted, setIsTrusted] = useState(true)
 
-  // Custom Hooks for Lifecycle Management
   const { installedSkills } = useInstalledState()
   const { isOperating, getMessage: getOperationMessage, markPending } = useOperations()
 
+  const handleRefresh = useCallback(() => {
+    postMessage({ type: 'requestRefresh' })
+  }, [])
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('')
+    setActiveCategory(null)
+  }, [])
+
+  const handleRepair = useCallback((skillName: string, agents: string[], scope: 'local' | 'global') => {
+    postMessage({
+      type: 'repairSkill',
+      payload: { skillName, agents, scope },
+    })
+  }, [])
+
   useEffect(() => {
-    // Listen for messages from Extension Host
     const dispose = onMessage((msg: ExtensionMessage) => {
       switch (msg.type) {
         case 'initialize':
@@ -38,7 +152,7 @@ function App() {
           setHasWorkspace(msg.payload.hasWorkspace)
           break
         case 'registryUpdate':
-          setStatus(msg.payload.status)
+          setStatus(msg.payload.status as AppStatus)
           setRegistry(msg.payload.registry)
           setErrorMessage(msg.payload.errorMessage || null)
           setFromCache(msg.payload.fromCache || false)
@@ -49,13 +163,10 @@ function App() {
       }
     })
 
-    // Signal readiness to Extension Host
     postMessage({ type: 'webviewDidMount' })
-
     return dispose
   }, [])
 
-  // Fuse.js instance for fuzzy search
   const fuseInstance = useMemo(() => {
     if (!registry) return null
     return new Fuse(registry.skills, {
@@ -65,7 +176,6 @@ function App() {
     })
   }, [registry])
 
-  // Filter skills based on search query and category
   const filteredSkills = useMemo(() => {
     let result = registry?.skills ?? []
 
@@ -75,7 +185,6 @@ function App() {
 
     if (searchQuery.trim() && fuseInstance) {
       const searchResults = fuseInstance.search(searchQuery).map((r) => r.item)
-      // If category is active, intersect the two filters
       if (activeCategory) {
         result = result.filter((s) => searchResults.includes(s))
       } else {
@@ -86,7 +195,6 @@ function App() {
     return result
   }, [registry, activeCategory, searchQuery, fuseInstance])
 
-  // Skill counts per category
   const skillCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     registry?.skills.forEach((skill) => {
@@ -95,102 +203,59 @@ function App() {
     return counts
   }, [registry])
 
-  // Category list
   const categories = useMemo(() => {
     if (!registry) return []
     return Object.entries(registry.categories).map(([key, category]) => ({ key, category }))
   }, [registry])
 
-  const handleRefresh = () => {
-    postMessage({ type: 'requestRefresh' })
-  }
+  const statusContent = useMemo(() => {
+    if (status === 'loading') {
+      return <LoadingState />
+    }
+    if (status === 'error') {
+      return <ErrorState message={errorMessage} onRetry={handleRefresh} />
+    }
+    return null
+  }, [status, errorMessage, handleRefresh])
 
-  const handleClearSearch = () => {
-    setSearchQuery('')
-    setActiveCategory(null)
-  }
-
-  // Loading state
-  if (status === 'loading') {
-    return (
-      <div className="app">
-        <div className="loading-state">
-          <div className="spinner" />
-          <p>Loading skills...</p>
-        </div>
+  const offlineBanner =
+    fromCache && status === 'offline' ? (
+      <div className="offline-banner" role="status">
+        Offline — showing cached data
       </div>
-    )
+    ) : null
+
+  if (statusContent) {
+    return <div className="app">{statusContent}</div>
   }
 
-  // Error state
-  if (status === 'error') {
-    return (
-      <div className="app">
-        <div className="error-state">
-          <p className="error-message">{errorMessage || 'Failed to load skill registry'}</p>
-          <button className="retry-button" onClick={handleRefresh}>
-            Retry
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Ready/Offline state
   return (
     <div className="app">
       <header className="app-header">
         <RestrictedModeBanner visible={!isTrusted} />
-        {fromCache && status === 'offline' && (
-          <div className="offline-banner" role="status">
-            Offline — showing cached data
-          </div>
-        )}
+        {offlineBanner}
       </header>
-
-      {registry && (
-        <>
-          <SearchBar value={searchQuery} onChange={setSearchQuery} resultCount={filteredSkills.length} />
-
-          <CategoryFilter
-            categories={categories}
-            activeCategory={activeCategory}
-            onSelect={setActiveCategory}
-            skillCounts={skillCounts}
-          />
-
-          {filteredSkills.length === 0 && (searchQuery || activeCategory) ? (
-            <div className="empty-state">
-              <p>No skills match your search</p>
-              <button className="clear-button" onClick={handleClearSearch}>
-                Clear filters
-              </button>
-            </div>
-          ) : (
-            <SkillGrid
-              skills={filteredSkills}
-              categories={registry.categories}
-              installedSkills={installedSkills}
-              isOperating={isOperating}
-              getOperationMessage={getOperationMessage}
-              availableAgents={availableAgents}
-              hasWorkspace={hasWorkspace}
-              onMarkPending={markPending}
-              onRepair={(skillName, agents, scope) => {
-                postMessage({
-                  type: 'repairSkill',
-                  payload: { skillName, agents, scope },
-                })
-              }}
-            />
-          )}
-        </>
-      )}
-
-      {!registry && (
-        <div className="empty-state">
-          <p>No skills available in the registry</p>
-        </div>
+      {registry ? (
+        <RegistryContent
+          registry={registry}
+          filteredSkills={filteredSkills}
+          categories={categories}
+          skillCounts={skillCounts}
+          searchQuery={searchQuery}
+          activeCategory={activeCategory}
+          onSearchChange={setSearchQuery}
+          onCategorySelect={setActiveCategory}
+          installedSkills={installedSkills}
+          isOperating={isOperating}
+          getOperationMessage={getOperationMessage}
+          availableAgents={availableAgents}
+          hasWorkspace={hasWorkspace}
+          onMarkPending={markPending}
+          onRepair={handleRepair}
+          onClearSearch={handleClearSearch}
+        />
+      ) : (
+        <NoRegistryState />
       )}
     </div>
   )

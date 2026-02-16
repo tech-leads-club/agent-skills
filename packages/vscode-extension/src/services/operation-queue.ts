@@ -30,6 +30,9 @@ export interface JobResult {
   errorMessage?: string
 }
 
+/**
+ * Receives progress notifications emitted while a job runs.
+ */
 export type JobProgressHandler = (job: QueuedJob, message: string) => void
 
 /**

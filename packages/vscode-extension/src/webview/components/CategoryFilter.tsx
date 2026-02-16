@@ -1,5 +1,8 @@
 import type { Category } from '../../shared/types'
 
+/**
+ * Props driving the rendering of category filter chips.
+ */
 export interface CategoryFilterProps {
   categories: Array<{ key: string; category: Category }>
   activeCategory: string | null

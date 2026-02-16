@@ -16,10 +16,16 @@ const vscodeApi: VsCodeApi = (
     : { postMessage: () => {}, getState: () => undefined, setState: () => {} }
 ) as VsCodeApi
 
+/**
+ * Sends a strongly-typed message to the extension host.
+ */
 export function postMessage(msg: WebviewMessage): void {
   vscodeApi.postMessage(msg)
 }
 
+/**
+ * Subscribes to messages sent from the extension host.
+ */
 export function onMessage(handler: (msg: ExtensionMessage) => void): () => void {
   const listener = (event: MessageEvent) => {
     handler(event.data as ExtensionMessage)
@@ -28,10 +34,16 @@ export function onMessage(handler: (msg: ExtensionMessage) => void): () => void 
   return () => window.removeEventListener('message', listener)
 }
 
+/**
+ * Returns the cached webview state previously persisted via `setState`.
+ */
 export function getState<T>(): T | undefined {
   return vscodeApi.getState<T>()
 }
 
+/**
+ * Persists data in the webview state for future reloads.
+ */
 export function setState<T>(state: T): void {
   vscodeApi.setState(state)
 }

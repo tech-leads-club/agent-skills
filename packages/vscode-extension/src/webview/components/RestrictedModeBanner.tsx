@@ -1,3 +1,6 @@
+/**
+ * Provides a banner warning when the workspace is in restricted (untrusted) mode.
+ */
 export function RestrictedModeBanner({ visible }: { visible: boolean }) {
   if (!visible) return null
 

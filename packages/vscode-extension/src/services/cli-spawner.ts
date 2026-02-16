@@ -34,7 +34,7 @@ export interface CliProcess {
  * Handles ANSI stripping, line-by-line output parsing, and process lifecycle.
  */
 export class CliSpawner implements vscode.Disposable {
-  private readonly ANSI_REGEX = /\u001b\[[0-9;]*m/g
+  private readonly ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
   private readonly SKILL_NAME_REGEX = /^[a-z0-9-]+$/
 
   constructor(private readonly logger: LoggingService) {}
@@ -103,7 +103,16 @@ export class CliSpawner implements vscode.Disposable {
 
     // Promise that resolves when process exits
     const completionPromise = new Promise<CliResult>((resolve) => {
+      let resolved = false
+      const resolveCompletion = (result: CliResult) => {
+        if (resolved) return
+        resolved = true
+        resolve(result)
+      }
+
       childProcess.on('close', (exitCode, signal) => {
+        if (resolved) return
+
         // Flush remaining stdout buffer
         if (stdoutBuffer.trim()) {
           const stripped = this.stripAnsi(stdoutBuffer)
@@ -112,10 +121,19 @@ export class CliSpawner implements vscode.Disposable {
         }
 
         this.logger.debug(`[${options.operationId}] Process exited: code=${exitCode}, signal=${signal}`)
-        resolve({
+        resolveCompletion({
           exitCode,
           signal,
           stderr: this.stripAnsi(stderrBuffer),
+        })
+      })
+
+      childProcess.on('error', (error: NodeJS.ErrnoException) => {
+        this.logger.error(`[${options.operationId}] Spawn error: ${error.message}`)
+        resolveCompletion({
+          exitCode: null,
+          signal: null,
+          stderr: this.stripAnsi(error.message ?? String(error)),
         })
       })
     })

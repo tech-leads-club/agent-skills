@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import type { ReconcileStatePayload } from '../../shared/messages'
 import type { InstalledSkillsMap } from '../../shared/types'
 
+/**
+ * Hook that mirrors the latest installed skills snapshot pushed from the extension host.
+ */
 export function useInstalledState() {
   const [installedSkills, setInstalledSkills] = useState<InstalledSkillsMap>({})
 

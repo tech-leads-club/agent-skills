@@ -17,8 +17,7 @@ export interface AgentScanConfig {
 }
 
 /**
- * All 18 agent configurations for scanning.
- * Source of truth: packages/cli/src/agents.ts
+ * All agent configurations (local + global paths) referenced during scanning.
  */
 export const AGENT_CONFIGS: AgentScanConfig[] = [
   {
@@ -121,6 +120,11 @@ export const AGENT_CONFIGS: AgentScanConfig[] = [
   },
 ]
 
+interface ScopeCheck {
+  scope: 'local' | 'global'
+  path: string
+}
+
 /**
  * Scans disk to build an InstalledSkillsMap reflecting which skills are installed
  * in which scopes, with per-agent granularity.
@@ -159,53 +163,52 @@ export class InstalledSkillsScanner {
     let globalAny = false
 
     for (const config of AGENT_CONFIGS) {
-      // Check local scope
-      let localInstalled = false
-      let localCorrupted = false
-      if (workspaceRoot) {
-        const localDir = join(workspaceRoot, config.skillsDir, skillName)
-        if (await this.checkExists(localDir)) {
-          const mdExists = await this.checkExists(join(localDir, 'SKILL.md'))
-          if (mdExists) {
-            localInstalled = true
-          } else {
-            localCorrupted = true
-          }
-        }
-      }
+      const agentInfo = await this.buildAgentInstallInfo(config, skillName, workspaceRoot)
+      if (!agentInfo) continue
 
-      // Check global scope
-      let globalInstalled = false
-      let globalCorrupted = false
-      const globalDir = join(config.globalSkillsDir, skillName)
-      if (await this.checkExists(globalDir)) {
-        const mdExists = await this.checkExists(join(globalDir, 'SKILL.md'))
-        if (mdExists) {
-          globalInstalled = true
-        } else {
-          globalCorrupted = true
-        }
-      }
-
-      // If installed (healthy) or corrupted in either scope, add to results
-      if (localInstalled || globalInstalled || localCorrupted || globalCorrupted) {
-        localAny = localAny || localInstalled
-        globalAny = globalAny || globalInstalled
-
-        agentResults.push({
-          agent: config.name,
-          displayName: config.displayName,
-          local: localInstalled,
-          global: globalInstalled,
-          corrupted: localCorrupted || globalCorrupted,
-        })
-      }
+      localAny ||= agentInfo.local
+      globalAny ||= agentInfo.global
+      agentResults.push(agentInfo)
     }
 
     return {
       local: localAny,
       global: globalAny,
       agents: agentResults,
+    }
+  }
+
+  private async buildAgentInstallInfo(
+    config: AgentScanConfig,
+    skillName: string,
+    workspaceRoot: string | null,
+  ): Promise<AgentInstallInfo | null> {
+    const scopeChecks = this.buildScopeChecks(config, skillName, workspaceRoot)
+    let local = false
+    let global = false
+    let corrupted = false
+
+    for (const check of scopeChecks) {
+      const { installed, corrupted: checkCorrupted } = await this.evaluateScope(check)
+      if (installed) {
+        if (check.scope === 'local') local = true
+        else global = true
+      }
+      if (checkCorrupted) {
+        corrupted = true
+      }
+    }
+
+    if (!local && !global && !corrupted) {
+      return null
+    }
+
+    return {
+      agent: config.name,
+      displayName: config.displayName,
+      local,
+      global,
+      corrupted,
     }
   }
 
@@ -251,5 +254,23 @@ export class InstalledSkillsScanner {
     }
 
     return results
+  }
+
+  private buildScopeChecks(config: AgentScanConfig, skillName: string, workspaceRoot: string | null): ScopeCheck[] {
+    const checks: ScopeCheck[] = []
+    if (workspaceRoot) {
+      checks.push({ scope: 'local', path: join(workspaceRoot, config.skillsDir, skillName) })
+    }
+    checks.push({ scope: 'global', path: join(config.globalSkillsDir, skillName) })
+    return checks
+  }
+
+  private async evaluateScope(check: ScopeCheck): Promise<{ installed: boolean; corrupted: boolean }> {
+    if (!(await this.checkExists(check.path))) {
+      return { installed: false, corrupted: false }
+    }
+
+    const mdExists = await this.checkExists(join(check.path, 'SKILL.md'))
+    return { installed: mdExists, corrupted: !mdExists }
   }
 }

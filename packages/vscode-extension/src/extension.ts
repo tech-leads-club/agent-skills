@@ -11,6 +11,10 @@ import { PostInstallVerifier } from './services/post-install-verifier'
 import { SkillRegistryService } from './services/skill-registry-service'
 import { StateReconciler } from './services/state-reconciler'
 
+/**
+ * Entry point invoked by VS Code when the extension activates.
+ * Wires service dependencies, providers, commands, and diagnostics.
+ */
 export function activate(context: vscode.ExtensionContext): void {
   // ① Core services
   const outputChannel = vscode.window.createOutputChannel('Agent Skills', { log: true })
@@ -97,6 +101,9 @@ export function activate(context: vscode.ExtensionContext): void {
   logger.info(`Workspace trusted: ${vscode.workspace.isTrusted}`)
 }
 
+/**
+ * Clean-up hook used by VS Code when the extension is deactivated.
+ */
 export function deactivate(): void {
   // All cleanup handled by context.subscriptions disposal
 }

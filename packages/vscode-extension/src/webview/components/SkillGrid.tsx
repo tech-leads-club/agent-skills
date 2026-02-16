@@ -2,6 +2,9 @@ import type { AgentInstallInfo, AvailableAgent, Category, InstalledSkillsMap, Sk
 import { postMessage } from '../lib/vscode-api'
 import { SkillCard } from './SkillCard'
 
+/**
+ * Props consumed by the skill grid, covering display data and action hooks.
+ */
 export interface SkillGridProps {
   skills: Skill[]
   categories: Record<string, Category>

@@ -1,5 +1,8 @@
 import type { AgentInstallInfo, InstalledSkillInfo, Skill } from '../../shared/types'
 
+/**
+ * Props used by each skill card, including installation metadata and callbacks.
+ */
 export interface SkillCardProps {
   skill: Skill
   categoryName: string
