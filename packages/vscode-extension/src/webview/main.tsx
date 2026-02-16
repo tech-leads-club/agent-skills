@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage } from '../shared/messages'
 import type { AvailableAgent, SkillRegistry } from '../shared/types'
 import { CategoryFilter } from './components/CategoryFilter'
+import { RestrictedModeBanner } from './components/RestrictedModeBanner'
 import { SearchBar } from './components/SearchBar'
 import { SkillGrid } from './components/SkillGrid'
 import { useInstalledState } from './hooks/useInstalledState'
@@ -22,6 +23,7 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
   const [hasWorkspace, setHasWorkspace] = useState(false)
+  const [isTrusted, setIsTrusted] = useState(true)
 
   // Custom Hooks for Lifecycle Management
   const { installedSkills } = useInstalledState()
@@ -40,6 +42,9 @@ function App() {
           setRegistry(msg.payload.registry)
           setErrorMessage(msg.payload.errorMessage || null)
           setFromCache(msg.payload.fromCache || false)
+          break
+        case 'trustState':
+          setIsTrusted(msg.payload.isTrusted)
           break
       }
     })
@@ -135,6 +140,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
+        <RestrictedModeBanner visible={!isTrusted} />
         {fromCache && status === 'offline' && (
           <div className="offline-banner" role="status">
             Offline — showing cached data
@@ -170,6 +176,12 @@ function App() {
               availableAgents={availableAgents}
               hasWorkspace={hasWorkspace}
               onMarkPending={markPending}
+              onRepair={(skillName, agents, scope) => {
+                postMessage({
+                  type: 'repairSkill',
+                  payload: { skillName, agents, scope },
+                })
+              }}
             />
           )}
         </>

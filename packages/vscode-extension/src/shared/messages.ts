@@ -13,6 +13,7 @@ export type WebviewMessage =
   | { type: 'cancelOperation'; payload: CancelOperationPayload }
   | { type: 'requestAgentPick'; payload: RequestAgentPickPayload }
   | { type: 'requestScopePick'; payload: RequestScopePickPayload }
+  | { type: 'repairSkill'; payload: RepairSkillPayload }
 
 /**
  * Messages sent FROM the Extension Host TO the Webview.
@@ -27,6 +28,7 @@ export type ExtensionMessage =
   | { type: 'reconcileState'; payload: ReconcileStatePayload }
   | { type: 'agentPickResult'; payload: AgentPickResultPayload }
   | { type: 'scopePickResult'; payload: ScopePickResultPayload }
+  | { type: 'trustState'; payload: TrustStatePayload }
 
 /**
  * Payload for initialize message.
@@ -152,4 +154,20 @@ export interface ScopePickResultPayload {
   action: 'add' | 'remove'
   agents: string[]
   scope: 'local' | 'global' | 'all' | null // null if user cancelled
+}
+
+/**
+ * Payload for repairSkill message (Webview → Extension).
+ */
+export interface RepairSkillPayload {
+  skillName: string
+  agents: string[]
+  scope: 'local' | 'global'
+}
+
+/**
+ * Payload for trustState message (Extension → Webview).
+ */
+export interface TrustStatePayload {
+  isTrusted: boolean
 }

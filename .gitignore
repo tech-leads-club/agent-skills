@@ -53,3 +53,6 @@ out
 
 # Specs
 .specs
+
+# VS Code Extension Test
+.vscode-test/

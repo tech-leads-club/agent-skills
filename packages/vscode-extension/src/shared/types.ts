@@ -63,6 +63,7 @@ export interface AgentInstallInfo {
   displayName: string // Human-readable name (e.g., 'Cursor', 'Claude Code')
   local: boolean // installed in this agent's local skillsDir
   global: boolean // installed in this agent's globalSkillsDir
+  corrupted: boolean // NEW: true if dir exists but SKILL.md missing
 }
 
 export interface AvailableAgent {
@@ -73,4 +74,54 @@ export interface AvailableAgent {
 /**
  * Type of lifecycle operation being performed.
  */
-export type OperationType = 'install' | 'remove' | 'update'
+export type OperationType = 'install' | 'remove' | 'update' | 'repair'
+
+/**
+ * CLI health status result from CliHealthChecker.
+ */
+export type CliHealthStatus =
+  | { status: 'ok'; version: string }
+  | { status: 'outdated'; version: string; minVersion: string }
+  | { status: 'cli-missing' }
+  | { status: 'npx-missing' }
+  | { status: 'unknown'; error: string }
+
+/**
+ * Classified error information from ErrorClassifier.
+ */
+export interface ErrorInfo {
+  category: ErrorCategory
+  message: string // User-friendly message
+  retryable: boolean // Whether the operation should be retried
+  action?: {
+    // Optional action button
+    label: string // Button label (e.g., "Install CLI")
+    command: string // Command to run
+  }
+}
+
+/**
+ * Known error categories for classification.
+ */
+export type ErrorCategory =
+  | 'cancelled' // SIGTERM — user cancelled
+  | 'terminated' // SIGKILL — unexpected kill
+  | 'file-locked' // EPERM/EBUSY — Windows file locking
+  | 'npx-missing' // npx not in PATH
+  | 'disk-full' // ENOSPC
+  | 'permission-denied' // EACCES
+  | 'cli-missing' // MODULE_NOT_FOUND
+  | 'cli-error' // Generic non-zero exit
+  | 'unknown' // Unclassified error
+
+/**
+ * Result of post-install verification.
+ */
+export interface VerifyResult {
+  ok: boolean
+  corrupted: Array<{
+    agent: string
+    scope: 'local' | 'global'
+    expectedPath: string
+  }>
+}

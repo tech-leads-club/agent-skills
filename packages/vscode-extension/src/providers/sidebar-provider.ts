@@ -79,6 +79,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.handleMessage(message, webviewView.webview),
     )
     this.context.subscriptions.push(messageDisposable)
+
+    // Listen for trust change
+    const trustDisposable = vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      this.postMessage({
+        type: 'trustState',
+        payload: { isTrusted: true },
+      })
+    })
+    this.context.subscriptions.push(trustDisposable)
   }
 
   private async postMessage(message: ExtensionMessage): Promise<void> {
@@ -99,6 +108,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           type: 'initialize',
           payload: { version, availableAgents, hasWorkspace },
         })
+
+        // Push initial trust state
+        await this.postMessage({
+          type: 'trustState',
+          payload: { isTrusted: vscode.workspace.isTrusted },
+        })
+
         // Trigger registry load and push to webview
         void this.loadAndPushRegistry(webview)
         // Trigger initial state reconciliation push
@@ -165,6 +181,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const msg = err instanceof Error ? err.message : String(err)
           this.logger.error(`Failed to enqueue update: ${msg}`)
           vscode.window.showErrorMessage(`Failed to start update: ${msg}`)
+        }
+        break
+      }
+      case 'repairSkill': {
+        const { skillName, agents, scope } = message.payload
+        try {
+          await this.orchestrator.repair(skillName, scope, agents)
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err)
+          this.logger.error(`Failed to enqueue repair: ${msg}`)
+          vscode.window.showErrorMessage(`Failed to start repair: ${msg}`)
         }
         break
       }
@@ -273,6 +300,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
     const installedSkills = await this.reconciler.getInstalledSkills()
     const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
+    const isTrusted = vscode.workspace.isTrusted
 
     interface ScopeQuickPickItem extends vscode.QuickPickItem {
       scopeId: 'local' | 'global' | 'all'
@@ -282,8 +310,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     if (action === 'add') {
       // Check if at least one selected agent is NOT installed locally
+      // AND workspace is open AND trusted
       const canAddLocal =
         hasWorkspace &&
+        isTrusted &&
         agents.some((agentId) => {
           const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
           return !installed || !installed.local
@@ -308,6 +338,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       // REMOVE: only show scopes where at least one selected agent IS installed
       const canRemoveLocal =
         hasWorkspace &&
+        isTrusted &&
         agents.some((agentId) => {
           const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
           return installed?.local === true
@@ -330,10 +361,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     if (scopeItems.length === 0) {
-      const message =
-        action === 'add'
-          ? 'This skill is already installed in all available scopes for the selected agents.'
-          : 'This skill is not installed in any scope for the selected agents.'
+      // If no options due to trust issues or existing installs
+      let message = ''
+      if (action === 'add') {
+        if (!isTrusted) {
+          message = 'Workspace is restricted. You can only install skills globally.'
+          if (
+            agents.some((agentId) => {
+              const installed = installedInfo?.agents.find((ia) => ia.agent === agentId)
+              return installed?.global
+            })
+          ) {
+            message += ' The selected agents already have this skill installed globally.'
+          }
+        } else {
+          message = 'This skill is already installed in all available scopes for the selected agents.'
+        }
+      } else {
+        message = 'This skill is not installed in any scope for the selected agents.'
+      }
+
       vscode.window.showInformationMessage(message)
       return
     }

@@ -29,8 +29,12 @@ export class StateReconciler implements vscode.Disposable {
   start(): void {
     this.logger.info('Starting state reconciliation')
 
-    // Create FileSystemWatchers for all agent skill directories
-    this.createWatchers()
+    if (vscode.workspace.isTrusted) {
+      // Create local FileSystemWatchers only for trusted workspaces
+      this.createLocalWatchers()
+    } else {
+      this.logger.info('Workspace untrusted — skipping local FileSystemWatchers')
+    }
 
     // Subscribe to window focus events (catches global directory changes)
     const focusSubscription = vscode.window.onDidChangeWindowState((state) => {
@@ -40,6 +44,14 @@ export class StateReconciler implements vscode.Disposable {
       }
     })
     this.subscriptions.push(focusSubscription)
+
+    // Listen for trust grant
+    const trustSubscription = vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      this.logger.info('Workspace trust granted — creating local FileSystemWatchers')
+      this.createLocalWatchers()
+      this.scheduleReconciliation()
+    })
+    this.subscriptions.push(trustSubscription)
 
     // Initial reconciliation
     void this.reconcile()
@@ -53,7 +65,11 @@ export class StateReconciler implements vscode.Disposable {
 
     try {
       const registry = await this.registryService.getRegistry()
-      const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null
+      // Only scan local if workspace is trusted
+      const workspaceRoot = vscode.workspace.isTrusted
+        ? (vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null)
+        : null
+
       const newState = await this.scanner.scan(registry.skills, workspaceRoot)
 
       // Compare with previous state
@@ -74,7 +90,9 @@ export class StateReconciler implements vscode.Disposable {
    * Returns a list of agents detected on the system.
    */
   async getAvailableAgents(): Promise<AvailableAgent[]> {
-    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null
+    const workspaceRoot = vscode.workspace.isTrusted
+      ? (vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null)
+      : null
     return this.scanner.getAvailableAgents(workspaceRoot)
   }
 
@@ -107,7 +125,7 @@ export class StateReconciler implements vscode.Disposable {
   /**
    * Creates FileSystemWatchers for all agent skill directories.
    */
-  private createWatchers(): void {
+  private createLocalWatchers(): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
     if (!workspaceRoot) {
       this.logger.debug('No workspace folder, skipping FileSystemWatcher creation')

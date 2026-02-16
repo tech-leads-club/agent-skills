@@ -19,7 +19,9 @@ describe('SkillCard Accessibility', () => {
     version: '1.0.0',
   }
 
-  const mockAgents: AgentInstallInfo[] = [{ agent: 'cursor', displayName: 'Cursor', local: false, global: false }]
+  const mockAgents: AgentInstallInfo[] = [
+    { agent: 'cursor', displayName: 'Cursor', local: false, global: false, corrupted: false },
+  ]
 
   const defaultProps = {
     skill: mockSkill,
@@ -27,8 +29,10 @@ describe('SkillCard Accessibility', () => {
     installedInfo: null,
     isOperating: false,
     hasUpdate: false,
+    isCorrupted: false,
     agents: mockAgents,
     onUpdate: jest.fn(),
+    onRepair: jest.fn(),
     onRequestAgentPick: jest.fn(),
   }
 
@@ -114,7 +118,7 @@ describe('SkillCard Accessibility', () => {
     const installedInfo = {
       local: true,
       global: false,
-      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false }],
+      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
     }
     render(<SkillCard {...defaultProps} installedInfo={installedInfo} />)
     expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument()
@@ -167,12 +171,33 @@ describe('SkillCard Accessibility', () => {
     const installedInfo = {
       local: true,
       global: false,
-      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false }],
+      agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
     }
     render(<SkillCard {...defaultProps} installedInfo={installedInfo} onRequestAgentPick={onRequestAgentPick} />)
 
     await user.click(screen.getByRole('button', { name: /remove/i }))
     expect(onRequestAgentPick).toHaveBeenCalledWith('remove')
+  })
+
+  it('should show Repair button when isCorrupted is true', () => {
+    render(<SkillCard {...defaultProps} isCorrupted={true} />)
+    expect(screen.getByRole('button', { name: /repair/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /add/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /update/i })).not.toBeInTheDocument()
+  })
+
+  it('should show corrupted badge when isCorrupted is true', () => {
+    render(<SkillCard {...defaultProps} isCorrupted={true} />)
+    expect(screen.getByText(/⚠ Corrupted/i)).toBeInTheDocument()
+  })
+
+  it('should call onRepair when Repair button is clicked', async () => {
+    const onRepair = jest.fn()
+    const user = userEvent.setup()
+    render(<SkillCard {...defaultProps} isCorrupted={true} onRepair={onRepair} />)
+
+    await user.click(screen.getByRole('button', { name: /repair/i }))
+    expect(onRepair).toHaveBeenCalled()
   })
 
   describe('Automated WCAG Checks', () => {

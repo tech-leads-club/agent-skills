@@ -10,7 +10,8 @@ export interface SkillGridProps {
   getOperationMessage: (skillName: string) => string | undefined
   availableAgents: AvailableAgent[]
   hasWorkspace: boolean
-  onMarkPending: (skillName: string, action: 'add' | 'remove') => void
+  onMarkPending: (skillName: string, action: 'add' | 'remove' | 'repair') => void
+  onRepair: (skillName: string, agents: string[], scope: 'local' | 'global') => void
 }
 
 /**
@@ -24,7 +25,9 @@ export function SkillGrid({
   isOperating,
   getOperationMessage,
   availableAgents,
+  hasWorkspace,
   onMarkPending,
+  onRepair,
 }: SkillGridProps) {
   if (skills.length === 0) {
     return (
@@ -40,6 +43,9 @@ export function SkillGrid({
         const categoryName = categories[skill.category]?.name || skill.category
         const installedInfo = installedSkills[skill.name] || null
 
+        // Derive corruption state from agents
+        const isCorrupted = installedInfo?.agents.some((a) => a.corrupted) ?? false
+
         // Merge available agents with installation status
         const cardAgents: AgentInstallInfo[] = availableAgents.map((avail) => {
           const installed = installedInfo?.agents.find((ia) => ia.agent === avail.agent)
@@ -49,6 +55,7 @@ export function SkillGrid({
             displayName: avail.displayName,
             local: false,
             global: false,
+            corrupted: false,
           }
         })
 
@@ -64,12 +71,27 @@ export function SkillGrid({
               isOperating={isOperating(skill.name)}
               operationMessage={getOperationMessage(skill.name)}
               hasUpdate={hasUpdate}
+              isCorrupted={isCorrupted}
               agents={cardAgents}
               onUpdate={() => {
                 postMessage({
                   type: 'updateSkill',
                   payload: { skillName: skill.name },
                 })
+              }}
+              onRepair={() => {
+                // Determine what to repair. If multiple agents are corrupted, repair all?
+                if (!installedInfo) return
+
+                const agents = installedInfo.agents.map((a) => a.agent)
+
+                // If hasWorkspace, default to 'local' repair if possible, else 'global'
+                // Or just send 'local' if hasWorkspace is true, and Orchestrator handles it?
+                // Orchestrator needs specific scope.
+
+                const targetScope = hasWorkspace ? 'local' : 'global'
+                onRepair(skill.name, agents, targetScope)
+                onMarkPending(skill.name, 'repair')
               }}
               onRequestAgentPick={(action) => {
                 onMarkPending(skill.name, action)

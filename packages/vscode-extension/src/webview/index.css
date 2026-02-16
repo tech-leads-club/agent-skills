@@ -78,6 +78,23 @@ body {
   font-size: 0.85em;
 }
 
+.restricted-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--vscode-editorWarning-foreground, #cca700);
+  color: var(--vscode-editor-background);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+.restricted-mode-icon {
+  font-size: 1.2em;
+}
+
 /* Loading State */
 .loading-state {
   display: flex;
@@ -195,7 +212,6 @@ body {
   display: none;
 }
 
-
 .search-clear-button {
   position: absolute;
   right: 4px;
@@ -254,7 +270,9 @@ body {
   white-space: nowrap;
   font-family: var(--vscode-font-family);
   opacity: 0.7;
-  transition: opacity 0.2s, background-color 0.2s;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
 }
 
 .category-chip:hover {
@@ -283,7 +301,9 @@ body {
   border: 1px solid var(--vscode-panel-border);
   border-radius: 4px;
   background-color: var(--vscode-sideBar-background);
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
   cursor: pointer;
 }
 
@@ -320,12 +340,17 @@ body {
   font-weight: 500;
 }
 
+.skill-card-badge--warning {
+  background-color: var(--vscode-editorWarning-foreground);
+  color: var(--vscode-editor-background);
+}
+
 .skill-card-description {
   margin: 0 0 8px 0;
   font-size: 0.9em;
   color: var(--vscode-descriptionForeground);
   line-height: 1.4;
-  
+
   /* 2-line truncation */
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -391,6 +416,15 @@ body {
 .btn-update {
   background-color: var(--vscode-charts-blue); /* Distinctive update color */
   color: var(--vscode-foreground);
+}
+
+.btn-repair {
+  background-color: var(--vscode-editorWarning-foreground);
+  color: var(--vscode-editor-background);
+}
+
+.btn-repair:hover {
+  opacity: 0.9;
 }
 
 .selection-flow {
@@ -467,6 +501,12 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

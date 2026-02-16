@@ -30,14 +30,28 @@ export function useOperations() {
 
   /**
    * Marks a skill as "pending" (awaiting QuickPick selection).
-   * Called by the UI immediately when Add/Remove is clicked.
+   * Called by the UI immediately when Add/Remove/Repair is clicked.
    */
-  const markPending = useCallback((skillName: string, action: 'add' | 'remove') => {
+  const markPending = useCallback((skillName: string, action: 'add' | 'remove' | 'repair') => {
     setOperations((prev) => {
       const next = new Map(prev)
+      let operation: OperationType
+
+      switch (action) {
+        case 'add':
+          operation = 'install'
+          break
+        case 'remove':
+          operation = 'remove'
+          break
+        case 'repair':
+          operation = 'repair'
+          break
+      }
+
       next.set(skillName, {
         operationId: '', // No real operation yet
-        operation: action === 'add' ? 'install' : 'remove',
+        operation,
         skillName,
         message: 'Selecting...',
         pending: true,

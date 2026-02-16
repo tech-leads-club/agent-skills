@@ -9,7 +9,7 @@ import type { LoggingService } from './logging-service'
  * Mirrors the structure from @tech-leads-club/core but defined inline
  * until the core package exports agent configs.
  */
-interface AgentScanConfig {
+export interface AgentScanConfig {
   name: string
   displayName: string
   skillsDir: string // Relative to workspace root
@@ -20,7 +20,7 @@ interface AgentScanConfig {
  * All 18 agent configurations for scanning.
  * Source of truth: packages/cli/src/agents.ts
  */
-const AGENT_CONFIGS: AgentScanConfig[] = [
+export const AGENT_CONFIGS: AgentScanConfig[] = [
   {
     name: 'cursor',
     displayName: 'Cursor',
@@ -159,19 +159,45 @@ export class InstalledSkillsScanner {
     let globalAny = false
 
     for (const config of AGENT_CONFIGS) {
-      const localInstalled = workspaceRoot
-        ? await this.checkExists(join(workspaceRoot, config.skillsDir, skillName, 'SKILL.md'))
-        : false
-      const globalInstalled = await this.checkExists(join(config.globalSkillsDir, skillName, 'SKILL.md'))
+      // Check local scope
+      let localInstalled = false
+      let localCorrupted = false
+      if (workspaceRoot) {
+        const localDir = join(workspaceRoot, config.skillsDir, skillName)
+        if (await this.checkExists(localDir)) {
+          const mdExists = await this.checkExists(join(localDir, 'SKILL.md'))
+          if (mdExists) {
+            localInstalled = true
+          } else {
+            localCorrupted = true
+          }
+        }
+      }
 
-      if (localInstalled || globalInstalled) {
+      // Check global scope
+      let globalInstalled = false
+      let globalCorrupted = false
+      const globalDir = join(config.globalSkillsDir, skillName)
+      if (await this.checkExists(globalDir)) {
+        const mdExists = await this.checkExists(join(globalDir, 'SKILL.md'))
+        if (mdExists) {
+          globalInstalled = true
+        } else {
+          globalCorrupted = true
+        }
+      }
+
+      // If installed (healthy) or corrupted in either scope, add to results
+      if (localInstalled || globalInstalled || localCorrupted || globalCorrupted) {
         localAny = localAny || localInstalled
         globalAny = globalAny || globalInstalled
+
         agentResults.push({
           agent: config.name,
           displayName: config.displayName,
           local: localInstalled,
           global: globalInstalled,
+          corrupted: localCorrupted || globalCorrupted,
         })
       }
     }

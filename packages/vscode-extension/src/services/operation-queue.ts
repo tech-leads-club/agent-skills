@@ -1,5 +1,7 @@
 import type { OperationType } from '../shared/types'
 import type { CliProcess, CliSpawner } from './cli-spawner'
+import { classifyError } from './error-classifier'
+import { withRetry } from './retry-handler'
 
 /**
  * A queued job waiting to be executed.
@@ -24,9 +26,11 @@ export interface JobResult {
   operationId: string
   operation: OperationType
   skillName: string
-  status: JobStatus
+  status: 'completed' | 'cancelled' | 'error'
   errorMessage?: string
 }
+
+export type JobProgressHandler = (job: QueuedJob, message: string) => void
 
 /**
  * Sequential job queue with concurrency=1 (mutex pattern).
@@ -34,22 +38,23 @@ export interface JobResult {
  */
 export class OperationQueue {
   private queue: QueuedJob[] = []
-  private inFlight: { job: QueuedJob; process: CliProcess } | null = null
-  private draining = false
+  private activeJob: { job: QueuedJob; process: CliProcess } | null = null
+  private processing = false
 
   private jobStartedHandlers: Array<(job: QueuedJob) => void> = []
   private jobCompletedHandlers: Array<(result: JobResult) => void> = []
+  private jobProgressHandlers: JobProgressHandler[] = []
 
   constructor(private readonly spawner: CliSpawner) {}
 
   /**
-   * Enqueues a job and starts drain if idle.
+   * Enqueues a job for execution.
    * @returns The operationId of the enqueued job
    */
   enqueue(job: QueuedJob): string {
     this.queue.push(job)
-    if (!this.draining) {
-      void this.drain()
+    if (!this.processing) {
+      void this.processQueue()
     }
     return job.operationId
   }
@@ -62,8 +67,8 @@ export class OperationQueue {
    */
   cancel(operationId: string): boolean {
     // Check if in-flight
-    if (this.inFlight && this.inFlight.job.operationId === operationId) {
-      this.inFlight.process.kill()
+    if (this.activeJob && this.activeJob.job.operationId === operationId) {
+      this.activeJob.process.kill()
       // The completion handler will emit 'cancelled' status
       return true
     }
@@ -90,12 +95,12 @@ export class OperationQueue {
    * Disposes the queue: kills in-flight job and clears pending jobs.
    */
   dispose(): void {
-    if (this.inFlight) {
-      this.inFlight.process.kill()
-      this.inFlight = null
+    if (this.activeJob) {
+      this.activeJob.process.kill()
+      this.activeJob = null
     }
     this.queue = []
-    this.draining = false
+    this.processing = false
   }
 
   /**
@@ -113,64 +118,101 @@ export class OperationQueue {
   }
 
   /**
+   * Registers a handler for job progress events.
+   */
+  onJobProgress(handler: JobProgressHandler): void {
+    this.jobProgressHandlers.push(handler)
+  }
+
+  /**
    * Drains the queue sequentially (concurrency=1).
    */
-  private async drain(): Promise<void> {
-    if (this.draining) return
-    this.draining = true
+  private async processQueue(): Promise<void> {
+    if (this.processing) return
+    this.processing = true
 
     while (this.queue.length > 0) {
       const job = this.queue.shift()!
       await this.executeJob(job)
     }
 
-    this.draining = false
+    this.processing = false
   }
 
   /**
-   * Executes a single job.
+   * Executes a single job with retry logic.
    */
   private async executeJob(job: QueuedJob): Promise<void> {
     // Emit job started
     this.jobStartedHandlers.forEach((handler) => handler(job))
 
-    // Spawn the CLI process
-    const process = this.spawner.spawn(job.args, {
-      cwd: job.cwd,
-      operationId: job.operationId,
-    })
+    try {
+      const result = await withRetry(() => this.executeOnce(job), {
+        maxRetries: 3,
+        baseDelayMs: 500,
+        shouldRetry: (error: any) => error.retryable === true,
+        onRetry: (attempt, max) => {
+          this.jobProgressHandlers.forEach((handler) => handler(job, `Retrying (attempt ${attempt}/${max})...`))
+        },
+      })
 
-    this.inFlight = { job, process }
+      this.jobCompletedHandlers.forEach((handler) => handler(result))
+    } catch (error: any) {
+      // Handle final failure
+      let status: 'error' | 'cancelled' = 'error'
+      let errorMessage = error.message
 
-    // Wait for completion
-    const result = await process.onComplete()
+      if (error.category === 'cancelled') {
+        status = 'cancelled'
+        errorMessage = undefined
+      } else if (error.category) {
+        // It's an ErrorInfo
+        errorMessage = error.message
+      }
 
-    // Clear in-flight
-    this.inFlight = null
-
-    // Determine status
-    let status: JobStatus
-    let errorMessage: string | undefined
-
-    if (result.signal === 'SIGTERM') {
-      // User-initiated cancellation
-      status = 'cancelled'
-    } else if (result.exitCode === 0) {
-      status = 'completed'
-    } else {
-      status = 'error'
-      errorMessage = result.stderr || `Process exited with code ${result.exitCode}`
+      this.jobCompletedHandlers.forEach((handler) =>
+        handler({
+          operationId: job.operationId,
+          operation: job.operation,
+          skillName: job.skillName,
+          status,
+          errorMessage,
+        }),
+      )
     }
+  }
 
-    // Emit job completed
-    this.jobCompletedHandlers.forEach((handler) =>
-      handler({
+  /**
+   * Executes the job once, returns promise that resolves on success
+   * or rejects with ErrorInfo on failure.
+   */
+  private executeOnce(job: QueuedJob): Promise<JobResult> {
+    return new Promise<JobResult>((resolve, reject) => {
+      const process = this.spawner.spawn(job.args, {
+        cwd: job.cwd,
         operationId: job.operationId,
-        operation: job.operation,
-        skillName: job.skillName,
-        status,
-        errorMessage,
-      }),
-    )
+      })
+
+      this.activeJob = { job, process }
+
+      process.onComplete().then((result) => {
+        this.activeJob = null
+
+        // Classify the result
+        const errorInfo = classifyError(result.stderr, result.exitCode, result.signal)
+
+        if (result.exitCode === 0) {
+          resolve({
+            operationId: job.operationId,
+            operation: job.operation,
+            skillName: job.skillName,
+            status: 'completed',
+          })
+        } else {
+          // Reject with ErrorInfo to trigger retry logic if applicable
+          reject(errorInfo)
+        }
+      })
+    })
   }
 }
