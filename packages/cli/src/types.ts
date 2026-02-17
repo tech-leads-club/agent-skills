@@ -21,3 +21,11 @@ export interface InstallResult {
 }
 
 export type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, SkillInfo }
+
+export type GroupedSkills = Map<CategoryInfo, SkillInfo[]>
+
+export interface GitHubContributor {
+  login: string
+  avatarUrl: string
+  contributions: number
+}
