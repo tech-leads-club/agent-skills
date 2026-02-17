@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run Affected
-        run: npx nx affected -t lint test build --parallel=3 || npx nx affected -t lint test build --parallel=3 --skip-nx-cache
+        run: npx nx affected -t lint test build --parallel=3 || NX_NO_CLOUD=true npx nx affected -t lint test build --parallel=3
         continue-on-error: false
 
       - name: Validate Skills Structure
@@ -57,7 +57,7 @@ jobs:
 
       - name: Self-Healing CI
         if: always()
-        run: npx nx fix-ci
+        run: npx nx fix-ci || NX_NO_CLOUD=true npx nx fix-ci
         continue-on-error: true
 
   snapshot:
@@ -99,9 +99,12 @@ jobs:
       - name: Publish Snapshot
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
-          npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
-            --git-tag=false --git-commit=false --stage-changes=false
-          npx nx release publish --tag snapshot --provenance
+          (npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
+            --git-tag=false --git-commit=false --stage-changes=false && \
+          npx nx release publish --tag snapshot --provenance) || \
+          (NX_NO_CLOUD=true npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
+            --git-tag=false --git-commit=false --stage-changes=false && \
+          NX_NO_CLOUD=true npx nx release publish --tag snapshot --provenance)
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: 'true'
@@ -206,7 +209,7 @@ jobs:
           fi
 
       - name: Release Version and Publish
-        run: npx nx release --yes
+        run: npx nx release --yes || NX_NO_CLOUD=true npx nx release --yes
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NODE_AUTH_TOKEN: ''
