@@ -47,5 +47,5 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifact-name }}
-        path: security-scan-results.json
+        path: .security-scan-results.json
         retention-days: ${{ inputs.retention-days }}
