@@ -1,5 +1,5 @@
 {
-  "name": "skills-catalog",
+  "name": "@tech-leads-club/skills-catalog",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/skills-catalog",
   "projectType": "library",
@@ -23,7 +23,7 @@
     "generate-data": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx nx run skills-catalog:generate-registry",
+        "command": "npx nx run @tech-leads-club/skills-catalog:generate-registry",
         "cwd": "{workspaceRoot}"
       }
     },
