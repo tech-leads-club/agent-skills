@@ -102,7 +102,7 @@
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "85d9c4ef94e00ddfc937d50aab72a307e80b98bc7e6744ec6e239ef68819c2d7"
+      "contentHash": "670b3a219e694480e6e19cfd5ac3c49f2ec1462a9fefd86a866b411320a6bd84"
     },
     {
       "name": "cloudflare-deploy",
@@ -628,7 +628,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "f24def7dfa73df37434d7a40f28ffbe3d823417599205d56f03388ebc68eaf64"
+      "contentHash": "844e7f23cee13dce2b2b9ca1428f659beb0c1360ef887a2a89210dadd4cb4c98"
     },
     {
       "name": "gh-fix-ci",
@@ -760,7 +760,7 @@
         "package.json",
         "run.js"
       ],
-      "contentHash": "704ae04b9fbb96ce4eeb2a340fb2137eb2995436a1aca165f403dc24d57a350f"
+      "contentHash": "aabce31e848ffb6c0f6769d9ba5ee0bd41341f17d4c2ce1cabaec4ad10748bab"
     },
     {
       "name": "react-best-practices",
@@ -837,7 +837,7 @@
     },
     {
       "name": "react-composition-patterns",
-      "description": "React composition patterns that scale. Use when refactoring components with",
+      "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture. Includes React 19 API changes.",
       "category": "architecture",
       "path": "(architecture)/react-composition-patterns",
       "files": [
@@ -857,7 +857,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "5c0b8f9ad2754a52a02a08cdace9ffef6cdafed917e88da8089b845ce5084b8d"
+      "contentHash": "2b93a24df3e90c7ac3751c0bafcccca6bd9518df00cd34475369e61370e5630d"
     },
     {
       "name": "react-native-skills",
@@ -932,7 +932,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "8d20fd36768334e023de5cdff07a05519668d253b9294a0bdf833a811e2918b9"
+      "contentHash": "9def463262f85c71e3d66f1580e5d13d96c9434b7a287b24f7cc6aece686d839"
     },
     {
       "name": "run-nx-generator",
@@ -1124,11 +1124,12 @@
       "category": "design",
       "path": "(design)/web-design-guidelines",
       "files": [
-        "SKILL.md"
+        "SKILL.md",
+        "references/guideline.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+      "contentHash": "c13084a3dad5e597c3a7322b42971b3f9a1d5b180e69a3a7e548942ce6fffddc"
     },
     {
       "name": "web-quality-audit",
