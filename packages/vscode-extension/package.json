@@ -1,5 +1,5 @@
 {
-  "name": "@tech-leads-club/vscode-extension",
+  "name": "agent-skills",
   "displayName": "Agent Skills Manager",
   "description": "Discover, install, and manage AI agent skills directly within VS Code",
   "version": "0.0.1",

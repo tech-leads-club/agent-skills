@@ -1,0 +1,57 @@
+name: VS Code Extension CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/vscode-extension/**'
+      - '.github/workflows/vscode-extension-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/vscode-extension/**'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ci:
+    name: Extension quality gates
+    runs-on: ubuntu-latest
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository }}
+      NODE_OPTIONS: '--experimental-vm-modules'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Lint extension
+        run: npx nx run vscode-extension:lint
+
+      - name: Run unit tests
+        run: npx nx run vscode-extension:test
+
+      - name: Build extension
+        run: npx nx run vscode-extension:build
+
+      - name: Run integration tests
+        run: npm run test:integration --workspace=agent-skills
+
+      - name: Package VSIX
+        run: npx nx run vscode-extension:package
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: packages/vscode-extension/*.vsix
+          retention-days: 7

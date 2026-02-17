@@ -225,33 +225,186 @@ Downloaded skills are cached in `~/.cache/agent-skills/` for offline use.
 rm -rf ~/.cache/agent-skills
 ```
 
-## 🔌 MCP Server
+## 🛠 For Contributors
 
-`@tech-leads-club/agent-skills-mcp` is an MCP server that exposes the skills catalog directly to AI agents via **progressive disclosure** — search first, then fetch only what's needed.
+### Prerequisites
 
-| Tool                | Purpose                              |
-| :------------------ | :----------------------------------- |
-| `list_skills`       | Browse all skills by category        |
-| `search_skills`     | Find skills by intent (fuzzy search) |
-| `read_skill`        | Load a skill's main instructions     |
-| `fetch_skill_files` | Fetch specific reference files       |
+- **Node.js** ≥ 22
+- **npm** (comes with Node.js)
 
-`list_skills` should be called only when the user explicitly asks to browse/list the catalog.
+### Setup
 
-**Quick install** (works with any MCP-compatible client):
+```bash
+git clone https://github.com/tech-leads-club/agent-skills.git
+cd agent-skills
+npm ci
+npm run build
+```
+
+### Development Commands
+
+| Command             | Description                        |
+| ------------------- | ---------------------------------- |
+| `npm run start:dev` | Run CLI locally (interactive mode) |
+| `npm run g <name>`  | Generate a new skill               |
+| `npm run build`     | Build all packages                 |
+| `npm run test`      | Run all tests                      |
+| `npm run lint`      | Lint codebase                      |
+| `npm run format`    | Format code with Prettier          |
+| `npm run scan`      | Run incremental security scan      |
+
+### Creating a New Skill
+
+```bash
+# With category (recommended)
+nx g @tech-leads-club/skill-plugin:skill my-skill --category=development
+
+# Full options
+nx g @tech-leads-club/skill-plugin:skill my-skill \
+  --description="What my skill does" \
+  --category=development \
+  --author="github.com/username" \
+  --skillVersion="1.0.0"
+```
+
+The generator creates:
+
+- `packages/skills-catalog/skills/(development)/my-skill/SKILL.md`
+
+## 📁 Project Structure
+
+```
+agent-skills/
+├── packages/
+│   ├── cli/                      # @tech-leads-club/agent-skills CLI
+│   └── skills-catalog/           # Skills collection
+│       └── skills/               # All skill definitions
+│           ├── (category-name)/  # Categorized skills
+│           └── _category.json    # Category metadata
+├── tools/
+│   └── skill-plugin/             # Nx skill generator
+├── skills-registry.json          # Auto-generated catalog
+├── .github/
+│   └── workflows/                # CI/CD pipelines
+└── nx.json                       # Nx configuration
+```
+
+## 📝 Skill Structure
+
+```
+packages/skills-catalog/skills/
+├── (category-name)/              # Category folder
+│   └── my-skill/                 # Skill folder
+│       ├── SKILL.md              # Required: main instructions
+│       ├── scripts/              # Optional: executable scripts
+│       ├── templates/            # Optional: file templates
+│       └── references/           # Optional: on-demand docs
+└── _category.json                # Category metadata
+```
+
+### SKILL.md Format
+
+```markdown
+---
+name: my-skill
+description: What this skill does. Use when user says "trigger phrase".
+metadata:
+  version: 1.0.0
+  author: github.com/username
+---
+
+# My Skill
+
+Brief description.
+
+## Process
+
+1. Step one
+2. Step two
+```
+
+### Category Metadata
+
+`_category.json`:
 
 ```json
 {
-  "mcpServers": {
-    "agent-skills": {
-      "command": "npx",
-      "args": ["-y", "@tech-leads-club/agent-skills-mcp"]
-    }
+  "(development)": {
+    "name": "Development",
+    "description": "Skills for software development",
+    "priority": 1
   }
 }
 ```
 
-→ Full setup for all clients (Cursor, Claude Code, VS Code, etc.), caching, and error reference: **[packages/mcp/README.md](packages/mcp/README.md)**
+### Best Practices
+
+- **Keep SKILL.md under 500 lines** — use `references/` for detailed docs
+- **Write specific descriptions** — include trigger phrases
+- **Assume the agent is smart** — only add what it doesn't already know
+- **Prefer scripts over inline code** — reduces context window usage
+
+## 🔒 Security Scan
+
+Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+
+```bash
+npm run scan              # Incremental (default)
+npm run scan -- --force   # Force full re-scan
+```
+
+### How it works
+
+Each skill has a SHA-256 content hash (computed from all its files). Results are cached in `.security-scan-cache.json` (gitignored). On the next run, skills whose hash hasn't changed skip re-scanning and load results from cache.
+
+```
+Content hash unchanged → load from cache (fast)
+Content hash changed   → re-scan with mcp-scan
+```
+
+### Handling false positives
+
+If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
+
+**`packages/skills-catalog/security-scan-allowlist.yaml`**
+
+```yaml
+version: '1.0.0'
+
+entries:
+  - skill: my-skill
+    code: W011
+    reason: >
+      Fetches from trusted first-party API — expected behavior.
+    allowedBy: github.com/username
+    allowedAt: '2026-01-01'
+    expiresAt: '2027-01-01' # Optional but recommended
+```
+
+- Match is by `skill + code` — no re-scan needed after adding an entry
+- `expiresAt` is optional but recommended — forces periodic review
+- Expired entries re-activate the finding automatically
+- Use YAML for better readability, comments, and cleaner diffs
+
+The allowlist is committed to the repo and reviewable in PRs.
+
+## 🔄 Release Process
+
+This project uses **Conventional Commits** for automated versioning:
+
+| Commit Prefix | Version Bump  | Example                      |
+| ------------- | ------------- | ---------------------------- |
+| `feat:`       | Minor (0.X.0) | `feat: add new skill`        |
+| `fix:`        | Patch (0.0.X) | `fix: correct symlink path`  |
+| `feat!:`      | Major (X.0.0) | `feat!: breaking API change` |
+| `docs:`       | No bump       | `docs: update README`        |
+| `chore:`      | No bump       | `chore: update deps`         |
+
+Releases are automated via GitHub Actions when merging to `main`.
+
+### VS Code Extension Release
+
+Extension publishing follows a dedicated CI/CD runbook to keep packaging, publishing, and secrets isolated. See `.docs/CI-CD-VSCODE-EXTENSION.md` for workflow names, `VSCE_PAT`/`OVSX_PAT` handling, dry-run commands, and rerun guidance.
 
 ## 🤝 Contributing
 

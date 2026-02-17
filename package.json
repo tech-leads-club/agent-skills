@@ -35,6 +35,9 @@
     "validate": "npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills",
     "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
+    "release:vscode:package": "semantic-release --extends ./.github/release/vscode-extension/package.config.mjs",
+    "release:vscode:publish": "semantic-release --extends ./.github/release/vscode-extension/publish.config.mjs",
+    "start:dev": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
   },
   "repository": {
@@ -71,6 +74,13 @@
     "@swc-node/register": "^1.11.1",
     "@swc/core": "1.15.13",
     "@swc/helpers": "~0.5.19",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^25.0.3",
+    "semantic-release-stop-before-publish": "^2.0.0",
+    "semantic-release-vsce": "^6.0.24",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.6.0",
