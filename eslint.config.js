@@ -9,7 +9,16 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
-  globalIgnores(['dist/**', 'node_modules/**', '**/*.js', '**/*.d.ts']),
+  globalIgnores([
+    'dist/**',
+    'node_modules/**',
+    '**/*.js',
+    '**/*.d.ts',
+    '.nx/**',
+    '**/.*/**',
+    '**/next.config.mjs',
+    '**/postcss.config.cjs',
+  ]),
   {
     name: 'tlc-typescript',
     files: ['**/*.ts'],
