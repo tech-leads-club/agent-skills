@@ -11,7 +11,7 @@ runs:
           const fs = require('fs');
           let results;
           try {
-            results = JSON.parse(fs.readFileSync('security-scan-results.json', 'utf8'));
+            results = JSON.parse(fs.readFileSync('.security-scan-results.json', 'utf8'));
           } catch {
             results = { summary: { critical: 0, high: 0, medium: 0 }, skills: [] };
           }
