@@ -21,6 +21,7 @@ runs:
       run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
       env:
         NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
+        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
       continue-on-error: true
 
     - uses: actions/setup-node@v4
