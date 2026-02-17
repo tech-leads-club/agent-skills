@@ -48,6 +48,7 @@
 - [🛠 For Contributors](#-for-contributors)
 - [📁 Project Structure](#-project-structure)
 - [📝 Skill Structure](#-skill-structure)
+- [🔒 Security Scan](#-security-scan)
 - [🔄 Release Process](#-release-process)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -59,7 +60,7 @@ Skills are packaged instructions and resources that extend AI agent capabilities
 ```
 packages/skills-catalog/skills/
   (category-name)/
-    spec-driven-dev/
+    skill/
       SKILL.md          ← Main instructions
       templates/        ← File templates
       references/       ← On-demand documentation
@@ -127,44 +128,74 @@ Each step shows a **← Back** option to return and revise your choices.
 
 ### CLI Options
 
+> **Note**: You can use either `npx @tech-leads-club/agent-skills` or install globally and use `agent-skills` directly.
+
 ```bash
 # Interactive mode (default)
 npx @tech-leads-club/agent-skills
+# or: agent-skills (if installed globally)
 
 # List available skills
-npx @tech-leads-club/agent-skills list
+agent-skills list
+agent-skills ls        # Alias
 
-# Install a specific skill
-npx @tech-leads-club/agent-skills install -s tlc-spec-driven
+# Install one skill
+agent-skills install -s tlc-spec-driven
+
+# Install multiple skills at once
+agent-skills install -s aws-advisor coding-guidelines docs-writer
 
 # Install to specific agents
-npx @tech-leads-club/agent-skills install -a cursor claude-code
+agent-skills install -s my-skill -a cursor claude-code
+
+# Install multiple skills to multiple agents
+agent-skills install -s aws-advisor nx-workspace -a cursor windsurf cline
 
 # Install globally (to ~/.gemini, ~/.claude, etc.)
-npx @tech-leads-club/agent-skills install -g
+agent-skills install -s my-skill -g
+
+# Use symlink instead of copy
+agent-skills install -s my-skill --symlink
 
 # Force re-download (bypass cache)
-npx @tech-leads-club/agent-skills install -s my-skill --force
+agent-skills install -s my-skill --force
 
 # Update a specific skill
-npx @tech-leads-club/agent-skills update -s my-skill
+agent-skills update -s my-skill
 
-# Remove skills
-npx @tech-leads-club/agent-skills remove
+# Update all installed skills
+agent-skills update
+
+# Remove one skill
+agent-skills remove -s my-skill
+
+# Remove multiple skills at once
+agent-skills remove -s skill1 skill2 skill3
+agent-skills rm -s my-skill    # Alias
+
+# Remove from specific agents
+agent-skills remove -s my-skill -a cursor windsurf
+
+# Force removal (bypass lockfile check)
+agent-skills remove -s my-skill --force
 
 # Manage cache
-npx @tech-leads-club/agent-skills cache --clear   # Clear all cache
-npx @tech-leads-club/agent-skills cache --path    # Show cache location
+agent-skills cache --clear           # Clear all cache
+agent-skills cache --clear-registry  # Clear only registry
+agent-skills cache --path            # Show cache location
+
+# Show contributors and credits
+agent-skills credits
 
 # Show help
-npx @tech-leads-club/agent-skills --help
+agent-skills --help
 ```
 
 ### Global Installation (Optional)
 
 ```bash
 npm install -g @tech-leads-club/agent-skills
-tlc-skills  # Use 'tlc-skills' instead of 'npx @tech-leads-club/agent-skills'
+agent-skills  # Use 'agent-skills' instead of 'npx @tech-leads-club/agent-skills'
 ```
 
 ## ⚡ How It Works
@@ -211,6 +242,7 @@ npm run build
 | `npm run test`      | Run all tests                      |
 | `npm run lint`      | Lint codebase                      |
 | `npm run format`    | Format code with Prettier          |
+| `npm run scan`      | Run incremental security scan      |
 
 ### Creating a New Skill
 
@@ -302,6 +334,50 @@ Brief description.
 - **Write specific descriptions** — include trigger phrases
 - **Assume the agent is smart** — only add what it doesn't already know
 - **Prefer scripts over inline code** — reduces context window usage
+
+## 🔒 Security Scan
+
+Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+
+```bash
+npm run scan              # Incremental (default)
+npm run scan -- --force   # Force full re-scan
+```
+
+### How it works
+
+Each skill has a SHA-256 content hash (computed from all its files). Results are cached in `.security-scan-cache.json` (gitignored). On the next run, skills whose hash hasn't changed skip re-scanning and load results from cache.
+
+```
+Content hash unchanged → load from cache (fast)
+Content hash changed   → re-scan with mcp-scan
+```
+
+### Handling false positives
+
+If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
+
+**`packages/skills-catalog/security-scan-allowlist.yaml`**
+
+```yaml
+version: "1.0.0"
+
+entries:
+  - skill: my-skill
+    code: W011
+    reason: >
+      Fetches from trusted first-party API — expected behavior.
+    allowedBy: github.com/username
+    allowedAt: "2026-01-01"
+    expiresAt: "2027-01-01"  # Optional but recommended
+```
+
+- Match is by `skill + code` — no re-scan needed after adding an entry
+- `expiresAt` is optional but recommended — forces periodic review
+- Expired entries re-activate the finding automatically
+- Use YAML for better readability, comments, and cleaner diffs
+
+The allowlist is committed to the repo and reviewable in PRs.
 
 ## 🔄 Release Process
 
