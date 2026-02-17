@@ -42,6 +42,20 @@ entries:
     allowedAt: '2026-02-17'
 
   # ============================================================================
+  # CLOUD CATEGORY (AWS)
+  # Skills for AWS cloud services and architecture
+  # ============================================================================
+
+  - skill: aws-advisor
+    code: W011
+    reason: >
+      AWS Documentation MCP server is a trusted first-party integration that searches official
+      AWS documentation. The "Search Before Answer" workflow using aws___search_documentation
+      and aws___read_documentation tools is the core functionality of this skill.
+    allowedBy: felipefr
+    allowedAt: '2026-02-17'
+
+  # ============================================================================
   # ARCHITECTURE CATEGORY
   # Skills for system design, domain analysis, and diagram generation
   # ============================================================================
