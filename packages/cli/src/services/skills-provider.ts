@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 import {
   CATEGORY_FOLDER_PATTERN,
@@ -10,10 +9,8 @@ import {
 } from '@tech-leads-club/core'
 
 import type { CategoryInfo, SkillInfo } from '../types'
+import { getLocalSkillsDirectory } from '../utils/paths'
 import { ensureSkillDownloaded, getRemoteCategories, getRemoteSkills, getSkillMetadata } from './registry'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 export type SkillsMode = 'local' | 'remote'
 
@@ -23,15 +20,6 @@ interface ModeCache {
 }
 
 const cache: ModeCache = { mode: null, localDir: null }
-
-// In dev mode, __dirname = packages/cli/src/services/
-// Go 4 levels up to monorepo root, then into packages/skills-catalog/skills
-// In production, this path won't exist → falls through to remote mode
-const LOCAL_SKILLS_PATHS = [join(__dirname, '..', '..', '..', '..', 'packages', 'skills-catalog', 'skills')]
-
-function getLocalSkillsDirectory(): string | null {
-  return LOCAL_SKILLS_PATHS.find((path) => existsSync(path)) ?? null
-}
 
 function isCategoryFolder(folderName: string): boolean {
   return CATEGORY_FOLDER_PATTERN.test(folderName)
