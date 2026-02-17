@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { z } from 'zod'
 
 import type { AgentType } from '../types'
-import { AGENTS_DIR, LOCK_FILE, LOCK_FILE_BACKUP } from '../constants'
+import { AGENTS_DIR, LOCK_FILE, LOCK_FILE_BACKUP } from '../utils/constants'
 import { findProjectRoot } from './project-root'
 
 const CURRENT_VERSION = 2
