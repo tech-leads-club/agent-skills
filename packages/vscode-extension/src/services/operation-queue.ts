@@ -5,12 +5,24 @@ import { withRetry } from './retry-handler'
 
 const UNKNOWN_ERROR_MESSAGE = 'An unexpected error occurred. Check the Agent Skills output channel for details.'
 
+/**
+ * Type guard for normalized error payloads used by queue error handling.
+ *
+ * @param value - Unknown value to validate.
+ * @returns `true` when the value conforms to {@link ErrorInfo}.
+ */
 const isErrorInfo = (value: unknown): value is ErrorInfo =>
   typeof value === 'object' &&
   value !== null &&
   typeof (value as ErrorInfo).category === 'string' &&
   typeof (value as ErrorInfo).message === 'string'
 
+/**
+ * Converts unknown failures into a user-facing error message.
+ *
+ * @param value - Unknown error value.
+ * @returns A best-effort message suitable for UI display.
+ */
 const toErrorMessage = (value: unknown): string => {
   if (isErrorInfo(value)) {
     return value.message
@@ -66,10 +78,17 @@ export class OperationQueue {
   private jobCompletedHandlers: Array<(result: JobResult) => void> = []
   private jobProgressHandlers: JobProgressHandler[] = []
 
+  /**
+   * Creates an operation queue bound to a CLI spawner.
+   *
+   * @param spawner - Service used to spawn CLI commands.
+   */
   constructor(private readonly spawner: CliSpawner) {}
 
   /**
    * Enqueues a job for execution.
+   *
+   * @param job - Job definition to append to the queue.
    * @returns The operationId of the enqueued job
    */
   enqueue(job: QueuedJob): string {
@@ -84,6 +103,8 @@ export class OperationQueue {
    * Cancels a job by operationId.
    * If queued: removes from queue.
    * If in-flight: sends SIGTERM to the process.
+   *
+   * @param operationId - Identifier of the job to cancel.
    * @returns true if the job was found and cancelled
    */
   cancel(operationId: string): boolean {
@@ -114,6 +135,8 @@ export class OperationQueue {
 
   /**
    * Disposes the queue: kills in-flight job and clears pending jobs.
+   *
+   * @returns Nothing.
    */
   dispose(): void {
     if (this.activeJob) {
@@ -126,6 +149,9 @@ export class OperationQueue {
 
   /**
    * Registers a handler for job started events.
+   *
+   * @param handler - Callback invoked when a job starts running.
+   * @returns Nothing.
    */
   onJobStarted(handler: (job: QueuedJob) => void): void {
     this.jobStartedHandlers.push(handler)
@@ -133,6 +159,9 @@ export class OperationQueue {
 
   /**
    * Registers a handler for job completed events.
+   *
+   * @param handler - Callback invoked when a job completes, errors, or is cancelled.
+   * @returns Nothing.
    */
   onJobCompleted(handler: (result: JobResult) => void): void {
     this.jobCompletedHandlers.push(handler)
@@ -140,6 +169,9 @@ export class OperationQueue {
 
   /**
    * Registers a handler for job progress events.
+   *
+   * @param handler - Callback invoked when a running job emits progress output.
+   * @returns Nothing.
    */
   onJobProgress(handler: JobProgressHandler): void {
     this.jobProgressHandlers.push(handler)
@@ -147,6 +179,8 @@ export class OperationQueue {
 
   /**
    * Drains the queue sequentially (concurrency=1).
+   *
+   * @returns A promise that resolves when the queue becomes empty.
    */
   private async processQueue(): Promise<void> {
     if (this.processing) return
@@ -162,6 +196,9 @@ export class OperationQueue {
 
   /**
    * Executes a single job with retry logic.
+   *
+   * @param job - Job to execute.
+   * @returns A promise that resolves when the job reaches a terminal state.
    */
   private async executeJob(job: QueuedJob): Promise<void> {
     // Emit job started
@@ -203,6 +240,9 @@ export class OperationQueue {
   /**
    * Executes the job once, returns promise that resolves on success
    * or rejects with ErrorInfo on failure.
+   *
+   * @param job - Job to execute once.
+   * @returns A promise that resolves with completion metadata.
    */
   private executeOnce(job: QueuedJob): Promise<JobResult> {
     return new Promise<JobResult>((resolve, reject) => {

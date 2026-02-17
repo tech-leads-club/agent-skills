@@ -18,6 +18,13 @@ export class StateReconciler implements vscode.Disposable {
 
   private readonly DEBOUNCE_MS = 500
 
+  /**
+   * Creates a state reconciler that bridges scanner output to subscribers.
+   *
+   * @param scanner - Filesystem scanner for installed skills.
+   * @param registryService - Registry service used to resolve known skills.
+   * @param logger - Logging service for reconciliation diagnostics.
+   */
   constructor(
     private readonly scanner: InstalledSkillsScanner,
     private readonly registryService: SkillRegistryService,
@@ -26,6 +33,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Starts watching filesystem and window focus events.
+   *
+   * @returns Nothing.
    */
   start(): void {
     this.logger.info('Starting state reconciliation')
@@ -60,6 +69,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Forces an immediate reconciliation scan.
+   *
+   * @returns A promise that resolves when reconciliation finishes.
    */
   async reconcile(): Promise<void> {
     this.logger.debug('Reconciling installed state')
@@ -89,6 +100,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Returns a list of agents detected on the system.
+   *
+   * @returns A promise with currently detected agent hosts.
    */
   async getAvailableAgents(): Promise<AvailableAgent[]> {
     const workspaceRoot = vscode.workspace.isTrusted
@@ -99,6 +112,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Returns the current installed skills map from the last reconciliation.
+   *
+   * @returns A promise with the latest cached installed-skill state.
    */
   async getInstalledSkills(): Promise<InstalledSkillsMap> {
     return this.previousState
@@ -106,6 +121,9 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Subscribes to state change events.
+   *
+   * @param handler - Callback invoked when installed state changes.
+   * @returns Nothing.
    */
   onStateChanged(handler: (state: InstalledSkillsMap) => void): void {
     this.stateChangedHandlers.push(handler)
@@ -113,6 +131,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Disposes all watchers and subscriptions.
+   *
+   * @returns Nothing.
    */
   dispose(): void {
     this.logger.info('Disposing state reconciler')
@@ -127,6 +147,8 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Creates FileSystemWatchers for all agent skill directories.
+   *
+   * @returns Nothing.
    */
   private createLocalWatchers(): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
@@ -177,6 +199,8 @@ export class StateReconciler implements vscode.Disposable {
   /**
    * Schedules a debounced reconciliation.
    * Trailing-edge debounce: resets on each event.
+   *
+   * @returns Nothing.
    */
   private scheduleReconciliation(): void {
     if (this.debounceTimer) {
@@ -191,6 +215,9 @@ export class StateReconciler implements vscode.Disposable {
 
   /**
    * Checks if the state has changed using deep equality.
+   *
+   * @param newState - Newly scanned installed-skill state.
+   * @returns `true` when serialized state differs from the previous snapshot.
    */
   private hasStateChanged(newState: InstalledSkillsMap): boolean {
     return JSON.stringify(this.previousState) !== JSON.stringify(newState)

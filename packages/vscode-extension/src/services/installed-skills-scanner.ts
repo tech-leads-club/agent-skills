@@ -130,6 +130,11 @@ interface ScopeCheck {
  * in which scopes, with per-agent granularity.
  */
 export class InstalledSkillsScanner {
+  /**
+   * Creates a scanner instance.
+   *
+   * @param logger - Logging service used for scan diagnostics.
+   */
   constructor(private readonly logger: LoggingService) {}
 
   /**
@@ -156,6 +161,10 @@ export class InstalledSkillsScanner {
 
   /**
    * Scans a single skill across all agents and scopes.
+   *
+   * @param skillName - Skill identifier to scan.
+   * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @returns Installation metadata aggregated across all agent configs.
    */
   private async scanSkill(skillName: string, workspaceRoot: string | null): Promise<InstalledSkillInfo> {
     const agentResults: AgentInstallInfo[] = []
@@ -178,6 +187,14 @@ export class InstalledSkillsScanner {
     }
   }
 
+  /**
+   * Builds per-agent installation metadata by checking local/global scopes.
+   *
+   * @param config - Agent directory configuration.
+   * @param skillName - Skill identifier to scan.
+   * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @returns Agent install info when any installation/corruption exists; otherwise `null`.
+   */
   private async buildAgentInstallInfo(
     config: AgentScanConfig,
     skillName: string,
@@ -214,6 +231,9 @@ export class InstalledSkillsScanner {
 
   /**
    * Checks if a file exists using fs.promises.access (fast, no read).
+   *
+   * @param path - Absolute path to test.
+   * @returns `true` when the path exists and is accessible.
    */
   private async checkExists(path: string): Promise<boolean> {
     try {
@@ -227,6 +247,9 @@ export class InstalledSkillsScanner {
   /**
    * Returns a list of agents detected on the system.
    * Checks if the agent's configuration directory exists locally or globally.
+   *
+   * @param workspaceRoot - Workspace path used for local agent detection, or `null`.
+   * @returns Detected agents with id and display name.
    */
   async getAvailableAgents(workspaceRoot: string | null): Promise<AvailableAgent[]> {
     const results: AvailableAgent[] = []
@@ -256,6 +279,14 @@ export class InstalledSkillsScanner {
     return results
   }
 
+  /**
+   * Builds local/global scope checks for a given agent and skill.
+   *
+   * @param config - Agent directory configuration.
+   * @param skillName - Skill identifier.
+   * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @returns Ordered list of scope checks to evaluate.
+   */
   private buildScopeChecks(config: AgentScanConfig, skillName: string, workspaceRoot: string | null): ScopeCheck[] {
     const checks: ScopeCheck[] = []
     if (workspaceRoot) {
@@ -265,6 +296,12 @@ export class InstalledSkillsScanner {
     return checks
   }
 
+  /**
+   * Evaluates installation and corruption state for a single scope path.
+   *
+   * @param check - Scope/path pair to evaluate.
+   * @returns Installation/corruption flags for the checked scope.
+   */
   private async evaluateScope(check: ScopeCheck): Promise<{ installed: boolean; corrupted: boolean }> {
     if (!(await this.checkExists(check.path))) {
       return { installed: false, corrupted: false }

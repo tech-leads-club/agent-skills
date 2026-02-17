@@ -14,6 +14,11 @@ import { onMessage, postMessage } from './lib/vscode-api'
 
 type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
 
+/**
+ * Renders the loading state shown while registry data is being fetched.
+ *
+ * @returns Loading UI for the skills view.
+ */
 function LoadingState() {
   return (
     <div className="loading-state">
@@ -23,6 +28,12 @@ function LoadingState() {
   )
 }
 
+/**
+ * Renders an error state with a retry action.
+ *
+ * @param props - Error message and retry callback.
+ * @returns Error UI for failed registry loading.
+ */
 function ErrorState({ message, onRetry }: { message: string | null; onRetry: () => void }) {
   return (
     <div className="error-state">
@@ -34,6 +45,11 @@ function ErrorState({ message, onRetry }: { message: string | null; onRetry: () 
   )
 }
 
+/**
+ * Renders the empty state shown when no registry payload is available.
+ *
+ * @returns Empty-state UI for missing registry data.
+ */
 function NoRegistryState() {
   return (
     <div className="empty-state">
@@ -61,6 +77,12 @@ interface RegistryContentProps {
   onClearSearch: () => void
 }
 
+/**
+ * Renders search/filter controls and the resulting skill list.
+ *
+ * @param props - Registry data, filtered view state, and UI callbacks.
+ * @returns Registry content section with filters and skill grid.
+ */
 function RegistryContent({
   registry,
   filteredSkills,
@@ -114,6 +136,11 @@ function RegistryContent({
   )
 }
 
+/**
+ * Root webview application component.
+ *
+ * @returns Sidebar app UI with state-driven content.
+ */
 function App() {
   const [registry, setRegistry] = useState<SkillRegistry | null>(null)
   const [status, setStatus] = useState<AppStatus>('loading')

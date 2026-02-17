@@ -39,6 +39,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private webviewView?: vscode.WebviewView
 
+  /**
+   * Creates a sidebar provider and wires orchestrator/reconciler event forwarding to the webview.
+   *
+   * @param context - Extension context used for URIs and disposable registration.
+   * @param logger - Logging service for telemetry and diagnostics.
+   * @param registryService - Service that loads and caches the skills registry.
+   * @param orchestrator - Operation orchestrator used for install/remove/update/repair flows.
+   * @param reconciler - State reconciler that publishes installed-skill updates.
+   * @param skillLockService - Service that reads installed lockfile hashes for update checks.
+   */
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
@@ -92,6 +102,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
   }
 
+  /**
+   * Resolves and initializes the sidebar webview instance.
+   *
+   * @param webviewView - Webview container provided by VS Code for this view contribution.
+   * @returns Nothing. Side effects include HTML initialization and event subscriptions.
+   */
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.logger.info('Resolving sidebar webview')
     this.webviewView = webviewView
@@ -119,12 +135,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.context.subscriptions.push(trustDisposable)
   }
 
+  /**
+   * Posts a typed message to the active webview, if mounted.
+   *
+   * @param message - Extension-to-webview message payload.
+   * @returns A promise that resolves after VS Code receives the message.
+   */
   private async postMessage(message: ExtensionMessage): Promise<void> {
     if (this.webviewView?.webview) {
       await this.webviewView.webview.postMessage(message)
     }
   }
 
+  /**
+   * Dispatches an incoming webview message to its typed handler.
+   *
+   * @param message - Raw message received from the webview runtime.
+   * @param webview - Webview instance that emitted the message.
+   * @returns A promise that resolves when message handling completes.
+   */
   private async handleMessage(message: WebviewMessage, webview: vscode.Webview): Promise<void> {
     const handler = this.getMessageHandler(message.type)
     if (!handler) {
@@ -134,6 +163,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await handler(message, webview)
   }
 
+  /**
+   * Resolves a handler function for a given message type.
+   *
+   * @param type - Discriminant from {@link WebviewMessage}.
+   * @returns An async handler when supported; otherwise `undefined`.
+   */
   private getMessageHandler(
     type: WebviewMessage['type'],
   ): ((message: WebviewMessage, webview: vscode.Webview) => Promise<void>) | undefined {
@@ -182,6 +217,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Handles initial webview mount and sends bootstrap state.
+   *
+   * @param _message - Mount message payload (unused).
+   * @param webview - Destination webview for bootstrap updates.
+   * @returns A promise that resolves after initialization messages are posted.
+   */
   private async handleWebviewDidMount(_message: WebviewMessage, webview: vscode.Webview): Promise<void> {
     this.logger.info('Webview did mount')
     const version = this.context.extension.packageJSON.version ?? 'unknown'
@@ -208,12 +250,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     void this.reconciler.reconcile()
   }
 
+  /**
+   * Handles refresh requests originating from the webview UI.
+   *
+   * @param webview - Destination webview used for registry updates.
+   * @returns A promise that resolves once refresh orchestration is triggered.
+   */
   private async handleRefreshRequest(webview: vscode.Webview): Promise<void> {
     this.logger.info('Refresh requested from webview')
     void this.loadAndPushRegistry(webview, true)
     void this.reconciler.reconcile()
   }
 
+  /**
+   * Enqueues an install operation for a skill.
+   *
+   * @param skillName - Skill identifier to install.
+   * @param scope - Target installation scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves when enqueueing logic completes.
+   */
   private async handleInstallSkill(
     skillName: string,
     scope: 'local' | 'global' | 'all',
@@ -222,6 +278,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.runQueueAction('install', () => this.enqueueInstall(skillName, scope, agents))
   }
 
+  /**
+   * Enqueues a remove operation for a skill after user confirmation.
+   *
+   * @param skillName - Skill identifier to remove.
+   * @param scope - Removal scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves when enqueueing logic completes.
+   */
   private async handleRemoveSkill(
     skillName: string,
     scope: 'local' | 'global' | 'all',
@@ -233,18 +297,43 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scope, agents))
   }
 
+  /**
+   * Enqueues an update operation for a skill.
+   *
+   * @param skillName - Skill identifier to update.
+   * @returns A promise that resolves when enqueueing logic completes.
+   */
   private async handleUpdateSkill(skillName: string): Promise<void> {
     await this.runQueueAction('update', () => this.orchestrator.update(skillName))
   }
 
+  /**
+   * Enqueues a repair operation for a skill.
+   *
+   * @param skillName - Skill identifier to repair.
+   * @param scope - Repair scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves when enqueueing logic completes.
+   */
   private async handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, scope, agents))
   }
 
+  /**
+   * Cancels a queued or active operation.
+   *
+   * @param operationId - Operation identifier generated by the orchestrator.
+   * @returns Nothing.
+   */
   private handleCancelOperation(operationId: string): void {
     this.orchestrator.cancel(operationId)
   }
 
+  /**
+   * Runs the command-palette flow for adding one or more skills.
+   *
+   * @returns A promise that resolves when the flow completes or is cancelled.
+   */
   async runCommandPaletteAdd(): Promise<void> {
     const availableAgents = await this.reconciler.getAvailableAgents()
     if (availableAgents.length === 0) {
@@ -295,6 +384,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Runs the command-palette flow for removing one or more skills.
+   *
+   * @returns A promise that resolves when the flow completes or is cancelled.
+   */
   async runCommandPaletteRemove(): Promise<void> {
     const availableAgents = await this.reconciler.getAvailableAgents()
     if (availableAgents.length === 0) {
@@ -349,6 +443,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Runs the command-palette flow for updating one or more skills.
+   *
+   * @returns A promise that resolves when the flow completes or is cancelled.
+   */
   async runCommandPaletteUpdate(): Promise<void> {
     const registry = await this.loadRegistryForCommand()
     if (!registry) return
@@ -362,6 +461,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Runs the command-palette flow for repairing corrupted skills.
+   *
+   * @returns A promise that resolves when the flow completes or is cancelled.
+   */
   async runCommandPaletteRepair(): Promise<void> {
     const registry = await this.loadRegistryForCommand()
     if (!registry) return
@@ -401,6 +505,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   /**
    * Shows a multi-select QuickPick for agent selection.
+   *
+   * @param skillName - Skill being acted on.
+   * @param action - Whether the flow is adding or removing the skill.
+   * @returns A promise that resolves after agent selection is handled.
    */
   private async handleAgentPick(skillName: string, action: 'add' | 'remove'): Promise<void> {
     const availableAgents = await this.reconciler.getAvailableAgents()
@@ -444,6 +552,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   /**
    * Shows a QuickPick for scope selection (Local, Global, All).
+   *
+   * @param skillName - Skill being acted on.
+   * @param action - Whether the flow is adding or removing the skill.
+   * @param agents - Agents selected in the previous picker.
+   * @returns A promise that resolves after scope selection and execution.
    */
   private async handleScopePick(skillName: string, action: 'add' | 'remove', agents: string[]): Promise<void> {
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
@@ -476,6 +589,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.executeScopeAction(skillName, action, agents, selectedScope.scopeId)
   }
 
+  /**
+   * Executes an enqueue action and handles user-facing enqueue failures.
+   *
+   * @param action - Operation label used for logging and UI errors.
+   * @param executor - Async callback that performs the enqueue call.
+   * @returns A promise that resolves when enqueueing completes or errors are surfaced.
+   */
   private async runQueueAction(
     action: 'install' | 'remove' | 'update' | 'repair',
     executor: () => Promise<void>,
@@ -490,6 +610,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Enqueues install operations for one or both scopes.
+   *
+   * @param skillName - Skill to install.
+   * @param scope - Target scope or both scopes.
+   * @param agents - Selected agent identifiers.
+   * @returns A promise that resolves after all required enqueue calls are made.
+   */
   private async enqueueInstall(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
     if (scope === 'all') {
       await this.orchestrator.install(skillName, 'local', agents)
@@ -499,6 +627,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.orchestrator.install(skillName, scope, agents)
   }
 
+  /**
+   * Enqueues remove operations for one or both scopes.
+   *
+   * @param skillName - Skill to remove.
+   * @param scope - Target scope or both scopes.
+   * @param agents - Selected agent identifiers.
+   * @returns A promise that resolves after all required enqueue calls are made.
+   */
   private async enqueueRemove(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
     if (scope === 'all') {
       await this.orchestrator.remove(skillName, 'local', agents)
@@ -508,6 +644,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.orchestrator.remove(skillName, scope, agents)
   }
 
+  /**
+   * Builds per-agent quick pick items based on current install state and action.
+   *
+   * @param availableAgents - Agents detected on the machine.
+   * @param installedInfo - Installation metadata for the selected skill.
+   * @param action - Whether the picker is for add or remove.
+   * @returns Filtered quick pick items that represent valid actions.
+   */
   private buildAgentPickItems(
     availableAgents: AvailableAgent[],
     installedInfo: InstalledSkillInfo | null,
@@ -537,6 +681,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return items
   }
 
+  /**
+   * Produces a short install-state description used by add-agent picker items.
+   *
+   * @param installed - Agent installation state, when present.
+   * @returns A human-readable status string.
+   */
   private describeAgentInstallStatus(installed?: AgentInstallInfo): string {
     if (!installed) return ''
     if (installed.local) return 'Installed locally'
@@ -544,6 +694,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return ''
   }
 
+  /**
+   * Formats scope labels for remove-agent picker items.
+   *
+   * @param installed - Agent installation state.
+   * @returns Scope label string such as `Local`, `Global`, or `Local + Global`.
+   */
   private describeInstalledScopes(installed: AgentInstallInfo): string {
     const scopes: string[] = []
     if (installed.local) scopes.push('Local')
@@ -551,10 +707,27 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return scopes.join(' + ')
   }
 
+  /**
+   * Looks up an agent installation entry by agent id.
+   *
+   * @param installedInfo - Skill installation metadata.
+   * @param agentId - Agent identifier to resolve.
+   * @returns Matching install info, when available.
+   */
   private findAgentInstall(installedInfo: InstalledSkillInfo | null, agentId: string): AgentInstallInfo | undefined {
     return installedInfo?.agents.find((ia) => ia.agent === agentId)
   }
 
+  /**
+   * Builds scope quick pick items for single-skill add/remove flows.
+   *
+   * @param action - Whether the flow is add or remove.
+   * @param agents - Selected agents.
+   * @param installedInfo - Current installation metadata for the skill.
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @returns Scope options that are valid for the current state.
+   */
   private buildScopeQuickPickItems(
     action: 'add' | 'remove',
     agents: string[],
@@ -593,6 +766,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return scopeItems
   }
 
+  /**
+   * Checks whether local installation is possible for at least one selected agent.
+   *
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @param agents - Selected agents.
+   * @param installedInfo - Current installation metadata for the skill.
+   * @returns `true` when local install should be offered.
+   */
   private canAddLocal(
     hasWorkspace: boolean,
     isTrusted: boolean,
@@ -603,10 +785,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return this.hasAgentSatisfying(agents, installedInfo, (installed) => !installed?.local)
   }
 
+  /**
+   * Checks whether global installation is possible for at least one selected agent.
+   *
+   * @param agents - Selected agents.
+   * @param installedInfo - Current installation metadata for the skill.
+   * @returns `true` when global install should be offered.
+   */
   private canAddGlobal(agents: string[], installedInfo: InstalledSkillInfo | null): boolean {
     return this.hasAgentSatisfying(agents, installedInfo, (installed) => !installed?.global)
   }
 
+  /**
+   * Checks whether local removal is possible for at least one selected agent.
+   *
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @param agents - Selected agents.
+   * @param installedInfo - Current installation metadata for the skill.
+   * @returns `true` when local removal should be offered.
+   */
   private canRemoveLocal(
     hasWorkspace: boolean,
     isTrusted: boolean,
@@ -617,10 +815,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return this.hasAgentSatisfying(agents, installedInfo, (installed) => installed?.local === true)
   }
 
+  /**
+   * Checks whether global removal is possible for at least one selected agent.
+   *
+   * @param agents - Selected agents.
+   * @param installedInfo - Current installation metadata for the skill.
+   * @returns `true` when global removal should be offered.
+   */
   private canRemoveGlobal(agents: string[], installedInfo: InstalledSkillInfo | null): boolean {
     return this.hasAgentSatisfying(agents, installedInfo, (installed) => installed?.global === true)
   }
 
+  /**
+   * Evaluates whether any selected agent satisfies the provided predicate.
+   *
+   * @param agents - Selected agent identifiers.
+   * @param installedInfo - Skill installation metadata.
+   * @param predicate - Predicate evaluated for each agent installation record.
+   * @returns `true` when at least one agent satisfies the predicate.
+   */
   private hasAgentSatisfying(
     agents: string[],
     installedInfo: InstalledSkillInfo | null,
@@ -629,6 +842,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return agents.some((agentId) => predicate(this.findAgentInstall(installedInfo, agentId)))
   }
 
+  /**
+   * Opens a scope picker for single-skill flows.
+   *
+   * @param scopeItems - Available scope options.
+   * @param skillName - Skill being acted on.
+   * @param action - Whether the flow is add or remove.
+   * @returns The selected scope item, or `null` if cancelled.
+   */
   private async selectScopeItem(
     scopeItems: ScopeQuickPickItem[],
     skillName: string,
@@ -647,6 +868,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return picked ?? null
   }
 
+  /**
+   * Opens a scope picker for multi-skill command-palette flows.
+   *
+   * @param scopeItems - Available scope options.
+   * @param action - Whether the flow is add or remove.
+   * @returns The selected scope item, or `null` if cancelled.
+   */
   private async selectScopeItemForCommand(
     scopeItems: ScopeQuickPickItem[],
     action: 'add' | 'remove',
@@ -664,6 +892,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return picked ?? null
   }
 
+  /**
+   * Shows a multi-select skill picker filtered by action mode.
+   *
+   * @param mode - Selection mode that controls candidate filtering.
+   * @param registry - Registry data used to build picker entries.
+   * @param installedSkills - Current installed-skill state.
+   * @param availableAgents - Optional detected agents used for add eligibility.
+   * @param installedHashes - Optional lockfile hashes used for update eligibility.
+   * @returns Selected skill names, or `null` if cancelled/empty.
+   */
   private async pickSkills(
     mode: SkillSelectionMode,
     registry: SkillRegistry,
@@ -692,6 +930,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return selection.map((item) => item.skillName)
   }
 
+  /**
+   * Builds quick pick items for the skill-selection dialog.
+   *
+   * @param registry - Registry data used to source skills and categories.
+   * @param installedSkills - Current installed-skill state.
+   * @param mode - Selection mode that controls filtering and labels.
+   * @param availableAgents - Optional detected agents for add-mode filtering.
+   * @param installedHashes - Optional lockfile hashes for update-mode details.
+   * @returns Quick pick entries matching the current mode.
+   */
   private buildSkillQuickPickItems(
     registry: SkillRegistry,
     installedSkills: InstalledSkillsMap,
@@ -732,6 +980,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return items
   }
 
+  /**
+   * Determines whether a skill should be shown for the given selection mode.
+   *
+   * @param skill - Candidate registry skill.
+   * @param installedInfo - Installed metadata for the candidate skill.
+   * @param mode - Selection mode.
+   * @param availableAgents - Optional detected agents.
+   * @param installedHashes - Optional installed hash map.
+   * @returns `true` when the skill is a valid candidate for the mode.
+   */
   private isSkillCandidate(
     skill: Skill,
     installedInfo: InstalledSkillInfo | null,
@@ -758,6 +1016,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Builds mode-specific detail text for a skill quick pick item.
+   *
+   * @param skill - Candidate registry skill.
+   * @param installedHashes - Optional installed hash map.
+   * @param installedInfo - Installed metadata for the candidate skill.
+   * @param mode - Selection mode.
+   * @returns Detail text for the quick pick entry, when available.
+   */
   private getSkillDetailForMode(
     skill: Skill,
     installedHashes: Record<string, string | undefined> | undefined,
@@ -780,6 +1047,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return undefined
   }
 
+  /**
+   * Returns the title used by the skill picker for a given mode.
+   *
+   * @param mode - Selection mode.
+   * @returns User-facing quick pick title.
+   */
   private getSkillQuickPickTitle(mode: SkillSelectionMode): string {
     switch (mode) {
       case 'add':
@@ -793,6 +1066,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Returns the message shown when no skills are available for a mode.
+   *
+   * @param mode - Selection mode.
+   * @returns User-facing empty-state message.
+   */
   private getEmptySkillMessage(mode: SkillSelectionMode): string {
     switch (mode) {
       case 'add':
@@ -806,11 +1085,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Shortens a content hash for display in quick pick metadata.
+   *
+   * @param hash - Full hash value.
+   * @returns A compact hash string, or `unknown` fallback.
+   */
   private shortenHash(hash: string | undefined): string {
     const normalized = hash ?? 'unknown'
     return normalized.length <= 7 ? normalized : normalized.slice(0, 7)
   }
 
+  /**
+   * Shows an agent picker for multi-skill command-palette actions.
+   *
+   * @param action - Whether the flow is add or remove.
+   * @param skillNames - Skills selected in the first picker.
+   * @param availableAgents - Agents detected on the machine.
+   * @param installedSkills - Current installed-skill state.
+   * @returns Selected agent ids, or `null` if cancelled.
+   */
   private async pickAgentsForSkills(
     action: 'add' | 'remove',
     skillNames: string[],
@@ -837,6 +1131,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return picker.map((item) => item.agentId)
   }
 
+  /**
+   * Builds deduplicated agent picker items across multiple selected skills.
+   *
+   * @param skillNames - Selected skill names.
+   * @param availableAgents - Agents detected on the machine.
+   * @param installedSkills - Current installed-skill state.
+   * @param action - Whether the flow is add or remove.
+   * @returns Unique agent quick pick items.
+   */
   private buildMultiSkillAgentPickItems(
     skillNames: string[],
     availableAgents: AvailableAgent[],
@@ -857,6 +1160,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return Array.from(uniqueAgents.values())
   }
 
+  /**
+   * Shows a scope picker for multi-skill command-palette actions.
+   *
+   * @param action - Whether the flow is add or remove.
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @returns Selected scope item, or `null` if no valid scope/cancelled.
+   */
   private async pickScopeForSkills(
     action: 'add' | 'remove',
     skillNames: string[],
@@ -886,6 +1200,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return this.selectScopeItemForCommand(scopeItems, action)
   }
 
+  /**
+   * Builds scope options for multi-skill command-palette actions.
+   *
+   * @param action - Whether the flow is add or remove.
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @returns Scope quick pick entries that are currently valid.
+   */
   private buildScopeQuickPickItemsForSkills(
     action: 'add' | 'remove',
     skillNames: string[],
@@ -925,6 +1250,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return scopeItems
   }
 
+  /**
+   * Checks whether at least one selected skill supports local installation.
+   *
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @returns `true` when local add should be offered.
+   */
   private canAddLocalForSkills(
     skillNames: string[],
     agents: string[],
@@ -938,12 +1273,30 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
   }
 
+  /**
+   * Checks whether at least one selected skill supports global installation.
+   *
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @returns `true` when global add should be offered.
+   */
   private canAddGlobalForSkills(skillNames: string[], agents: string[], installedSkills: InstalledSkillsMap): boolean {
     return skillNames.some((skillName) =>
       this.hasAgentSatisfying(agents, installedSkills[skillName] ?? null, (installed) => !installed?.global),
     )
   }
 
+  /**
+   * Checks whether at least one selected skill supports local removal.
+   *
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @param hasWorkspace - Whether a workspace folder is open.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @returns `true` when local remove should be offered.
+   */
   private canRemoveLocalForSkills(
     skillNames: string[],
     agents: string[],
@@ -957,6 +1310,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
   }
 
+  /**
+   * Checks whether at least one selected skill supports global removal.
+   *
+   * @param skillNames - Selected skills.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @returns `true` when global remove should be offered.
+   */
   private canRemoveGlobalForSkills(
     skillNames: string[],
     agents: string[],
@@ -967,6 +1328,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
   }
 
+  /**
+   * Determines whether an action is still needed for a skill in the selected scope.
+   *
+   * @param skillName - Skill being evaluated.
+   * @param agents - Selected agents.
+   * @param installedSkills - Current installed-skill state.
+   * @param scopeId - Scope selected by the user.
+   * @param action - Whether the action is add or remove.
+   * @returns `true` when an operation should be enqueued.
+   */
   private doesSkillNeedActionForScope(
     skillName: string,
     agents: string[],
@@ -993,10 +1364,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
   }
 
+  /**
+   * Maps agent ids to user-facing display names.
+   *
+   * @param agentIds - Agent identifiers to resolve.
+   * @param availableAgents - Available agents list used for lookup.
+   * @returns Ordered display names with id fallback when unknown.
+   */
   private getAgentDisplayNames(agentIds: string[], availableAgents: AvailableAgent[]): string[] {
     return agentIds.map((id) => availableAgents.find((agent) => agent.agent === id)?.displayName ?? id)
   }
 
+  /**
+   * Shows a modal confirmation for batch removal operations.
+   *
+   * @param skills - Skill names selected for removal.
+   * @param agents - Preformatted agent names.
+   * @param scope - Target scope selection.
+   * @returns `true` when the user confirms removal.
+   */
   private async confirmBatchRemoval(
     skills: string[],
     agents: string,
@@ -1009,10 +1395,22 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return selection === 'Remove'
   }
 
+  /**
+   * Returns agent ids that currently have a skill installed in a given scope.
+   *
+   * @param installedInfo - Installation metadata for a skill.
+   * @param scope - Scope to filter by.
+   * @returns Agent ids that are installed in the requested scope.
+   */
   private getScopeAgents(installedInfo: InstalledSkillInfo, scope: 'local' | 'global'): string[] {
     return installedInfo.agents.filter((agent) => agent[scope]).map((agent) => agent.agent)
   }
 
+  /**
+   * Loads registry data for command-palette flows with error handling.
+   *
+   * @returns Registry payload, or `null` when loading fails.
+   */
   private async loadRegistryForCommand(): Promise<SkillRegistry | null> {
     try {
       return await this.registryService.getRegistry()
@@ -1024,6 +1422,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Returns a user-facing empty-state message for scope selection.
+   *
+   * @param action - Whether the flow is add or remove.
+   * @param isTrusted - Whether the workspace is trusted.
+   * @param installedInfo - Installed metadata for the skill.
+   * @param agents - Selected agent identifiers.
+   * @returns Scope-specific informational message.
+   */
   private getScopePickEmptyMessage(
     action: 'add' | 'remove',
     isTrusted: boolean,
@@ -1043,6 +1450,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return 'This skill is not installed in any scope for the selected agents.'
   }
 
+  /**
+   * Executes the selected add/remove action for a chosen scope.
+   *
+   * @param skillName - Skill to mutate.
+   * @param action - Action type selected by the user.
+   * @param agents - Target agent identifiers.
+   * @param scopeId - Selected scope.
+   * @returns A promise that resolves when execution completes or is cancelled.
+   */
   private async executeScopeAction(
     skillName: string,
     action: 'add' | 'remove',
@@ -1063,6 +1479,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   /**
    * Load registry from service and push to webview.
    * Sends loading status first, then ready/error/offline.
+   *
+   * @param webview - Destination webview for registry state messages.
+   * @param forceRefresh - When true, bypasses cache TTL during fetch.
+   * @returns A promise that resolves once status messages are posted.
    */
   private async loadAndPushRegistry(webview: vscode.Webview, forceRefresh = false): Promise<void> {
     // Send loading status
@@ -1108,12 +1528,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Shows a modal confirmation for single-skill removal actions.
+   *
+   * @param skillName - Skill selected for removal.
+   * @param agentNames - Agent labels included in the confirmation text.
+   * @param scope - Scope selection (`local`, `global`, or `all`).
+   * @returns `true` when the user confirms removal.
+   */
   private async confirmRemoval(skillName: string, agentNames: string, scope: string): Promise<boolean> {
     const message = `Remove skill '${skillName}' from ${agentNames} (${scope === 'all' ? 'Local + Global' : scope})? This will delete the skill files.`
     const selection = await vscode.window.showWarningMessage(message, { modal: true }, 'Remove')
     return selection === 'Remove'
   }
 
+  /**
+   * Generates the webview HTML shell and CSP for the sidebar app.
+   *
+   * @param webview - Webview instance used to resolve resource URIs.
+   * @returns Fully composed HTML document string.
+   */
   private getHtmlForWebview(webview: vscode.Webview): string {
     const distUri = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview')
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(distUri, 'index.js'))
@@ -1136,6 +1570,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 </html>`
   }
 
+  /**
+   * Generates a nonce value for CSP script whitelisting.
+   *
+   * @returns Random nonce string suitable for CSP script tags.
+   */
   private getNonce(): string {
     const array = new Uint32Array(4)
     crypto.getRandomValues(array)

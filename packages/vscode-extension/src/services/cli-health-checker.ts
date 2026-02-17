@@ -5,11 +5,26 @@ import type { LoggingService } from './logging-service'
 
 const ERRNO_ENOENT = 'ENOENT'
 
+/**
+ * Normalizes unknown health-check errors into a user-facing message.
+ *
+ * @param error - Unknown error captured during health checks.
+ * @returns Human-readable error message.
+ */
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : 'An unexpected error occurred while checking CLI health'
 
+/**
+ * Type guard for Node errno-style exceptions.
+ *
+ * @param error - Unknown value to validate.
+ * @returns `true` when the value includes a string errno `code`.
+ */
 const isErrnoException = (error: unknown): error is NodeJS.ErrnoException =>
-  typeof error === 'object' && error !== null && 'code' in error && typeof (error as NodeJS.ErrnoException).code === 'string'
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  typeof (error as NodeJS.ErrnoException).code === 'string'
 
 /** Minimum CLI version supported by the extension. */
 export const MIN_SUPPORTED_CLI_VERSION = '1.0.0'
@@ -21,11 +36,22 @@ export class CliHealthChecker implements vscode.Disposable {
   private cachedStatus: CliHealthStatus | null = null
   private activeProcess: { kill: () => void } | null = null
 
+  /**
+   * Creates a health checker bound to CLI process spawning and logging.
+   *
+   * @param spawner - Spawner used to run `tlc-skills --version`.
+   * @param logger - Logging service for diagnostics.
+   */
   constructor(
     private readonly spawner: CliSpawner,
     private readonly logger: LoggingService,
   ) {}
 
+  /**
+   * Stops any active health-check process.
+   *
+   * @returns Nothing.
+   */
   dispose(): void {
     if (this.activeProcess) {
       this.activeProcess.kill()
@@ -35,6 +61,8 @@ export class CliHealthChecker implements vscode.Disposable {
 
   /**
    * Returns the last known health status.
+   *
+   * @returns Cached health status, or `null` when never checked.
    */
   getStatus(): CliHealthStatus | null {
     return this.cachedStatus
@@ -42,6 +70,8 @@ export class CliHealthChecker implements vscode.Disposable {
 
   /**
    * Performs a fresh health check by spawning 'npx tlc-skills --version'.
+   *
+   * @returns A promise with normalized CLI health status.
    */
   async check(): Promise<CliHealthStatus> {
     this.logger.debug('Checking CLI health...')
@@ -111,6 +141,12 @@ export class CliHealthChecker implements vscode.Disposable {
     }
   }
 
+  /**
+   * Compares a CLI version against the minimum supported version.
+   *
+   * @param version - Semver version string returned by the CLI.
+   * @returns `true` when the version is supported by this extension.
+   */
   private isVersionCompatible(version: string): boolean {
     const [major, minor, patch] = version.split('.').map(Number)
     const [minMajor, minMinor, minPatch] = MIN_SUPPORTED_CLI_VERSION.split('.').map(Number)

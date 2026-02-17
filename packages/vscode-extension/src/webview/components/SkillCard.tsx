@@ -20,6 +20,9 @@ export interface SkillCardProps {
 /**
  * Card component for displaying a single skill with lifecycle management actions.
  * Agent and scope selection is handled via vscode.window.showQuickPick in the extension host.
+ *
+ * @param props - Skill card data and operation callbacks.
+ * @returns Rendered skill card with contextual action buttons.
  */
 export function SkillCard({
   skill,

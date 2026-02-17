@@ -7,6 +7,9 @@ import type { PostInstallVerifier } from './post-install-verifier'
 
 /**
  * Event handler for operation lifecycle events.
+ *
+ * @param event - Operation event emitted by the orchestrator.
+ * @returns Nothing.
  */
 export interface OperationEventHandler {
   (event: OperationEvent): void
@@ -42,6 +45,13 @@ export class InstallationOrchestrator implements vscode.Disposable {
   private progressResolvers = new Map<string, () => void>()
   private cliHealthy = true // Default true until health check says otherwise
 
+  /**
+   * Creates a new orchestrator and subscribes to queue lifecycle events.
+   *
+   * @param queue - Serialized operation queue for CLI jobs.
+   * @param verifier - Post-install verifier used for install/repair validation.
+   * @param logger - Logging service for diagnostics.
+   */
   constructor(
     private readonly queue: OperationQueue,
     private readonly verifier: PostInstallVerifier,
@@ -55,6 +65,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Sets the CLI health status. If unhealthy, mutations are blocked.
+   *
+   * @param healthy - Whether the CLI is available for operations.
+   * @returns Nothing.
    */
   setCliHealthy(healthy: boolean): void {
     this.cliHealthy = healthy
@@ -62,6 +75,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Installs a skill to the specified scope and agents.
+   *
+   * @param skillName - Skill identifier to install.
+   * @param scope - Installation scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves once the job is enqueued.
    */
   async install(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     if (!this.checkHealth()) return
@@ -89,6 +107,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Removes a skill from the specified scope and agents.
+   *
+   * @param skillName - Skill identifier to remove.
+   * @param scope - Removal scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves once the job is enqueued.
    */
   async remove(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     if (!this.checkHealth()) return
@@ -116,6 +139,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Updates a skill to the latest version.
+   *
+   * @param skillName - Skill identifier to update.
+   * @returns A promise that resolves once the job is enqueued.
    */
   async update(skillName: string): Promise<void> {
     if (!this.checkHealth()) return
@@ -147,6 +173,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Repairs a skill by force-reinstalling.
+   *
+   * @param skillName - Skill identifier to repair.
+   * @param scope - Repair scope.
+   * @param agents - Agent identifiers to target.
+   * @returns A promise that resolves once the job is enqueued.
    */
   async repair(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     if (!this.checkHealth()) return
@@ -175,6 +206,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Cancels an in-flight or queued operation.
+   *
+   * @param operationId - Operation identifier to cancel.
+   * @returns Nothing.
    */
   cancel(operationId: string): void {
     this.logger.info(`[${operationId}] Cancelling operation`)
@@ -191,6 +225,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Subscribes to operation lifecycle events.
+   *
+   * @param handler - Callback invoked for started/progress/completed events.
+   * @returns Nothing.
    */
   onOperationEvent(handler: OperationEventHandler): void {
     this.eventHandlers.push(handler)
@@ -198,6 +235,8 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Disposes the orchestrator and cleans up resources.
+   *
+   * @returns Nothing.
    */
   dispose(): void {
     this.queue.dispose()
@@ -209,6 +248,8 @@ export class InstallationOrchestrator implements vscode.Disposable {
   /**
    * Checks CLI health and shows error if unhealthy.
    * Returns true if healthy.
+   *
+   * @returns `true` when operations are allowed; otherwise `false`.
    */
   private checkHealth(): boolean {
     if (!this.cliHealthy) {
@@ -223,6 +264,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Handles job started event from the queue.
+   *
+   * @param job - Job that just transitioned to running.
+   * @returns Nothing.
    */
   private handleJobStarted(job: QueuedJob): void {
     this.logger.info(`[${job.operationId}] Job started: ${job.operation} ${job.skillName}`)
@@ -241,6 +285,10 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Handles job progress event.
+   *
+   * @param job - Running job that emitted progress.
+   * @param message - Progress line from the CLI.
+   * @returns Nothing.
    */
   private handleJobProgress(job: QueuedJob, message: string): void {
     // Emit progress event
@@ -255,6 +303,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Handles job completed event from the queue.
+   *
+   * @param result - Completed job result payload.
+   * @returns A promise that resolves after notifications and cleanup finish.
    */
   private async handleJobCompleted(result: JobResult): Promise<void> {
     this.logger.info(`[${result.operationId}] Job completed: ${result.status}`)
@@ -275,6 +326,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Shows a VS Code progress notification for a job.
+   *
+   * @param job - Job currently being executed.
+   * @returns Nothing.
    */
   private showProgress(job: QueuedJob): void {
     const tokenSource = new vscode.CancellationTokenSource()
@@ -300,6 +354,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     )
   }
 
+  /**
+   * Disposes cancellation state and progress completion for an operation.
+   *
+   * @param operationId - Operation identifier to clean up.
+   * @returns Nothing.
+   */
   private cleanupActiveOperation(operationId: string): void {
     const tokenSource = this.activeOperations.get(operationId)
     if (tokenSource) {
@@ -309,6 +369,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.resolveProgress(operationId)
   }
 
+  /**
+   * Resolves the progress promise associated with an operation.
+   *
+   * @param operationId - Operation identifier whose progress should complete.
+   * @returns Nothing.
+   */
   private resolveProgress(operationId: string): void {
     const resolver = this.progressResolvers.get(operationId)
     if (resolver) {
@@ -317,6 +383,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Shows completion feedback for successful, failed, or cancelled operations.
+   *
+   * @param result - Completed job result payload.
+   * @returns A promise that resolves when notification handling completes.
+   */
   private async handleCompletionNotification(result: JobResult): Promise<void> {
     if (result.status === 'completed') {
       const metadata = this.jobMetadata.get(result.operationId)
@@ -344,14 +416,16 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Performs post-install verification for install and repair operations.
+   *
+   * @param result - Completed job result payload.
+   * @param metadata - Job metadata required for verification scope/agents.
+   * @returns `true` when verification succeeds; otherwise `false`.
+   */
   private async verifyInstallation(result: JobResult, metadata: JobMetadata): Promise<boolean> {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || null
-    const verifyResult = await this.verifier.verify(
-      result.skillName,
-      metadata.agents,
-      metadata.scope,
-      workspaceRoot,
-    )
+    const verifyResult = await this.verifier.verify(result.skillName, metadata.agents, metadata.scope, workspaceRoot)
 
     if (verifyResult.ok) {
       return true
@@ -375,6 +449,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Emits an operation event to all registered handlers.
+   *
+   * @param event - Event payload to broadcast.
+   * @returns Nothing.
    */
   private emitEvent(event: OperationEvent): void {
     this.eventHandlers.forEach((handler) => handler(event))
@@ -382,6 +459,10 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Gets the working directory for a scope.
+   *
+   * @param scope - Target operation scope.
+   * @returns Filesystem path used as process working directory.
+   * @throws {Error} When local scope is requested without an open workspace.
    */
   private getCwd(scope: 'local' | 'global'): string {
     if (scope === 'local') {
@@ -398,6 +479,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
 
   /**
    * Gets a human-readable label for an operation type.
+   *
+   * @param operation - Operation type.
+   * @returns Present-progress label used in notifications.
    */
   private getOperationLabel(operation: OperationType): string {
     switch (operation) {

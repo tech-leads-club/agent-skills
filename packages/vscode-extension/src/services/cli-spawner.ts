@@ -37,8 +37,18 @@ export class CliSpawner implements vscode.Disposable {
   private readonly ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
   private readonly SKILL_NAME_REGEX = /^[a-z0-9-]+$/
 
+  /**
+   * Creates a CLI spawner instance.
+   *
+   * @param logger - Logging service used for process diagnostics.
+   */
   constructor(private readonly logger: LoggingService) {}
 
+  /**
+   * Disposes the spawner.
+   *
+   * @returns Nothing. Active process cleanup is handled by higher-level services.
+   */
   dispose(): void {
     // No-op: CliSpawner is stateless. Active processes are managed by OperationQueue.
   }
@@ -73,6 +83,10 @@ export class CliSpawner implements vscode.Disposable {
 
   /**
    * Creates a CliProcess handle from a ChildProcess.
+   *
+   * @param childProcess - Spawned Node child process instance.
+   * @param options - Spawn metadata used for logging and correlation.
+   * @returns Wrapped process handle with output and completion APIs.
    */
   private createCliProcess(childProcess: ChildProcess, options: SpawnOptions): CliProcess {
     const outputHandlers: Array<(line: string) => void> = []
@@ -156,6 +170,9 @@ export class CliSpawner implements vscode.Disposable {
 
   /**
    * Strips ANSI color codes from a string.
+   *
+   * @param text - Text that may include ANSI escape codes.
+   * @returns Sanitized plain-text output.
    */
   private stripAnsi(text: string): string {
     return text.replace(this.ANSI_REGEX, '')

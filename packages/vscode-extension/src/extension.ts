@@ -15,6 +15,9 @@ import { StateReconciler } from './services/state-reconciler'
 /**
  * Entry point invoked by VS Code when the extension activates.
  * Wires service dependencies, providers, commands, and diagnostics.
+ *
+ * @param context - Extension lifecycle context used to register disposables and access metadata.
+ * @returns Nothing. Activation side effects are performed through VS Code registrations.
  */
 export function activate(context: vscode.ExtensionContext): void {
   // ① Core services
@@ -129,6 +132,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 /**
  * Clean-up hook used by VS Code when the extension is deactivated.
+ *
+ * @returns Nothing. Cleanup is handled by disposal of registered subscriptions.
  */
 export function deactivate(): void {
   // All cleanup handled by context.subscriptions disposal

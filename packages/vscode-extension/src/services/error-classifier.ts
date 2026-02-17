@@ -1,5 +1,8 @@
 import { ErrorInfo } from '../shared/types'
 
+/**
+ * Maps termination signals to normalized operation error metadata.
+ */
 const signalErrorMap: Partial<Record<NodeJS.Signals, ErrorInfo>> = {
   SIGTERM: {
     category: 'cancelled',
@@ -13,6 +16,9 @@ const signalErrorMap: Partial<Record<NodeJS.Signals, ErrorInfo>> = {
   },
 }
 
+/**
+ * Ordered stderr classification rules used for mapping CLI failures to categories.
+ */
 const stderrRules: Array<{ predicate: (value: string) => boolean; info: ErrorInfo }> = [
   {
     predicate: (value) => value.includes('eperm') || value.includes('ebusy'),

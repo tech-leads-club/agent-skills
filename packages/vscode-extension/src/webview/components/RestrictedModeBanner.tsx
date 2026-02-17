@@ -1,5 +1,8 @@
 /**
  * Provides a banner warning when the workspace is in restricted (untrusted) mode.
+ *
+ * @param props - Visibility flag for the restricted-mode notice.
+ * @returns Banner element when visible, otherwise `null`.
  */
 export function RestrictedModeBanner({ visible }: { visible: boolean }) {
   if (!visible) return null

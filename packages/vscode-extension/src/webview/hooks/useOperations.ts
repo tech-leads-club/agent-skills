@@ -24,6 +24,8 @@ export interface OperationState {
 /**
  * Hook to track in-flight operations and their progress messages.
  * Listens for 'operationStarted', 'operationProgress', and 'operationCompleted'.
+ *
+ * @returns Operation state map plus helpers for status lookup and pending markers.
  */
 export function useOperations() {
   const [operations, setOperations] = useState<Map<string, OperationState>>(new Map())
@@ -31,6 +33,10 @@ export function useOperations() {
   /**
    * Marks a skill as "pending" (awaiting QuickPick selection).
    * Called by the UI immediately when Add/Remove/Repair is clicked.
+   *
+   * @param skillName - Skill currently awaiting picker completion.
+   * @param action - Pending user action requested for the skill.
+   * @returns Nothing.
    */
   const markPending = useCallback((skillName: string, action: 'add' | 'remove' | 'repair') => {
     setOperations((prev) => {
@@ -62,6 +68,9 @@ export function useOperations() {
 
   /**
    * Clears the pending state for a skill (e.g. user cancelled QuickPick).
+   *
+   * @param skillName - Skill whose pending state should be removed.
+   * @returns Nothing.
    */
   const clearPending = useCallback((skillName: string) => {
     setOperations((prev) => {

@@ -10,6 +10,9 @@ export interface SearchBarProps {
 /**
  * Sticky search input for filtering skills by keyword.
  * Uses VS Code native input styling and includes screen reader announcements.
+ *
+ * @param props - Search value, change callback, and visible result count.
+ * @returns Rendered search input with clear action and SR announcement.
  */
 export function SearchBar({ value, onChange, resultCount }: SearchBarProps) {
   const handleClear = () => {

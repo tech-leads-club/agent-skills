@@ -16,8 +16,18 @@ interface SkillLockfile {
  * The extension only reads the file and never mutates it.
  */
 export class SkillLockService {
+  /**
+   * Creates a lockfile reader service.
+   *
+   * @param logger - Logging service for lockfile read diagnostics.
+   */
   constructor(private readonly logger: LoggingService) {}
 
+  /**
+   * Reads all installed skill hashes from the lockfile.
+   *
+   * @returns A map of skill name to installed content hash (if known).
+   */
   async getInstalledHashes(): Promise<Record<string, string | undefined>> {
     const lockfilePath = this.getLockfilePath()
     try {
@@ -39,15 +49,32 @@ export class SkillLockService {
     }
   }
 
+  /**
+   * Reads the installed hash for a single skill.
+   *
+   * @param skillName - Skill identifier to resolve.
+   * @returns Installed content hash, or `undefined` when missing.
+   */
   async getInstalledHash(skillName: string): Promise<string | undefined> {
     const hashes = await this.getInstalledHashes()
     return hashes[skillName]
   }
 
+  /**
+   * Returns the absolute path to the skill lockfile.
+   *
+   * @returns Lockfile path under the current user home directory.
+   */
   private getLockfilePath(): string {
     return path.join(os.homedir(), '.agents', '.skill-lock.json')
   }
 
+  /**
+   * Detects missing-file errors from unknown exceptions.
+   *
+   * @param err - Unknown error value.
+   * @returns `true` when the error indicates `ENOENT`.
+   */
   private isNotFoundError(err: unknown): boolean {
     if (typeof err === 'object' && err !== null && 'code' in err) {
       return (err as { code?: unknown }).code === 'ENOENT'
@@ -55,6 +82,12 @@ export class SkillLockService {
     return false
   }
 
+  /**
+   * Converts unknown errors to a log-friendly string.
+   *
+   * @param err - Unknown error value.
+   * @returns Error message string.
+   */
   private formatError(err: unknown): string {
     if (err instanceof Error) {
       return err.message

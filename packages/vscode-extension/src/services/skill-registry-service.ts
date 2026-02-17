@@ -39,6 +39,12 @@ export class SkillRegistryService implements vscode.Disposable {
 
   private inFlightFetch: Promise<CdnFetchResult> | null = null
 
+  /**
+   * Creates a registry service instance.
+   *
+   * @param context - Extension context used for persisted global state.
+   * @param logger - Logging service for registry fetch/cache diagnostics.
+   */
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
@@ -46,6 +52,8 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Get registry data synchronously for consumers that only care about the payload.
+   *
+   * @returns A promise resolving to registry data.
    */
   public async getRegistry(): Promise<SkillRegistry> {
     return (await this.loadRegistryInternal(false)).data
@@ -53,6 +61,8 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Force-fetch fresh registry data, bypassing cache TTL.
+   *
+   * @returns A promise resolving to freshly loaded registry data.
    */
   public async refresh(): Promise<SkillRegistry> {
     return (await this.loadRegistryInternal(true)).data
@@ -60,6 +70,9 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Get registry data along with cache metadata for UI consumers.
+   *
+   * @param forceRefresh - When true, bypasses cache TTL.
+   * @returns A promise resolving to registry data and cache metadata.
    */
   public async getRegistryWithMetadata(forceRefresh = false): Promise<RegistryResult> {
     return this.loadRegistryInternal(forceRefresh)
@@ -67,6 +80,9 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Centralized loader that handles cache staleness and metadata reporting.
+   *
+   * @param forceRefresh - When true, bypasses cache TTL.
+   * @returns A promise resolving to registry data and cache metadata.
    */
   private async loadRegistryInternal(forceRefresh: boolean): Promise<RegistryResult> {
     const cached = this.loadCache()
@@ -104,6 +120,8 @@ export class SkillRegistryService implements vscode.Disposable {
   /**
    * Fetch registry from CDN, validate, and cache the result.
    * Deduplicates concurrent calls.
+   *
+   * @returns A promise resolving to fetch result and offline fallback metadata.
    */
   private async fetchFromCdn(): Promise<CdnFetchResult> {
     if (this.inFlightFetch) {
@@ -122,6 +140,9 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Actual HTTP fetch logic.
+   *
+   * @returns A promise resolving to fetched registry payload metadata.
+   * @throws {Error} When fetching fails and no cache is available.
    */
   private async doFetch(): Promise<CdnFetchResult> {
     try {
@@ -156,6 +177,8 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Attempts a background refresh without blocking the caller.
+   *
+   * @returns A promise that resolves after refresh attempt completes.
    */
   private async refreshInBackground(): Promise<void> {
     try {
@@ -172,6 +195,10 @@ export class SkillRegistryService implements vscode.Disposable {
   /**
    * Validate and sanitize registry JSON.
    * Filters out invalid skill entries.
+   *
+   * @param raw - Untrusted JSON payload from CDN.
+   * @returns Sanitized registry object.
+   * @throws {Error} When required top-level registry structure is invalid.
    */
   private validate(raw: unknown): SkillRegistry {
     if (typeof raw !== 'object' || raw === null) {
@@ -221,6 +248,8 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Load cache from globalState.
+   *
+   * @returns Cached registry entry, or `null` when unavailable.
    */
   private loadCache(): RegistryCacheEntry | null {
     const cached = this.context.globalState.get<RegistryCacheEntry>(SkillRegistryService.CACHE_KEY)
@@ -229,6 +258,9 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Save cache to globalState.
+   *
+   * @param entry - Cache payload to persist.
+   * @returns Nothing.
    */
   private saveCache(entry: RegistryCacheEntry): void {
     this.context.globalState.update(SkillRegistryService.CACHE_KEY, entry).then(
@@ -242,6 +274,8 @@ export class SkillRegistryService implements vscode.Disposable {
 
   /**
    * Cleanup (no-op for this service, but required by Disposable).
+   *
+   * @returns Nothing.
    */
   public dispose(): void {
     this.logger.debug('[SkillRegistry] Service disposed')

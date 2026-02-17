@@ -18,6 +18,9 @@ const vscodeApi: VsCodeApi = (
 
 /**
  * Sends a strongly-typed message to the extension host.
+ *
+ * @param msg - Message payload sent from webview to extension host.
+ * @returns Nothing.
  */
 export function postMessage(msg: WebviewMessage): void {
   vscodeApi.postMessage(msg)
@@ -25,6 +28,9 @@ export function postMessage(msg: WebviewMessage): void {
 
 /**
  * Subscribes to messages sent from the extension host.
+ *
+ * @param handler - Callback invoked for each extension-to-webview message.
+ * @returns Unsubscribe function that removes the message listener.
  */
 export function onMessage(handler: (msg: ExtensionMessage) => void): () => void {
   const listener = (event: MessageEvent) => {
@@ -36,6 +42,8 @@ export function onMessage(handler: (msg: ExtensionMessage) => void): () => void 
 
 /**
  * Returns the cached webview state previously persisted via `setState`.
+ *
+ * @returns Persisted webview state of type `T`, or `undefined` if unset.
  */
 export function getState<T>(): T | undefined {
   return vscodeApi.getState<T>()
@@ -43,6 +51,9 @@ export function getState<T>(): T | undefined {
 
 /**
  * Persists data in the webview state for future reloads.
+ *
+ * @param state - Serializable state payload to persist.
+ * @returns Nothing.
  */
 export function setState<T>(state: T): void {
   vscodeApi.setState(state)

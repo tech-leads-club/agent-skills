@@ -13,6 +13,9 @@ export interface CategoryFilterProps {
 /**
  * Horizontal scrollable row of category filter chips.
  * Includes "All" chip and one chip per category with skill counts.
+ *
+ * @param props - Component props containing categories, active state, and callbacks.
+ * @returns Rendered category filter controls.
  */
 export function CategoryFilter({ categories, activeCategory, onSelect, skillCounts }: CategoryFilterProps) {
   const totalCount = Object.values(skillCounts).reduce((sum, count) => sum + count, 0)

@@ -20,6 +20,9 @@ export interface SkillGridProps {
 /**
  * Container component that renders a vertical list of SkillCard components.
  * Resolves category display names and constructs per-card installation state.
+ *
+ * @param props - Grid data, state selectors, and action callbacks.
+ * @returns Rendered skill grid or an empty-state message.
  */
 export function SkillGrid({
   skills,
