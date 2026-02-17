@@ -43,6 +43,10 @@ coverage/
 .env.local
 .env.*.local
 
+# Security scan
+.security-scan-cache.json
+.security-scan-results.json
+
 # Next.js
 .next
 out
