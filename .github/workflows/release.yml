@@ -10,12 +10,14 @@ permissions:
   actions: read
   contents: write
   id-token: write
+  issues: write
   pull-requests: write
 
 jobs:
   ci:
     name: CI Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: github.event_name == 'pull_request' && github.event.action != 'labeled'
     concurrency:
       group: ci-${{ github.event.pull_request.number }}
@@ -37,10 +39,21 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run Affected
-        run: npx nx affected -t lint test build --parallel=3
+        run: npx nx affected -t lint test build --parallel=3 || npx nx affected -t lint test build --parallel=3 --skip-nx-cache
+        continue-on-error: false
 
       - name: Validate Skills Structure
         uses: ./.github/actions/validate-skills
+
+      - name: Security Scan
+        id: security-scan
+        uses: ./.github/actions/security-scan
+        with:
+          artifact-name: security-scan-results-pr
+
+      - name: Fail if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
 
       - name: Self-Healing CI
         if: always()
@@ -50,6 +63,7 @@ jobs:
   snapshot:
     name: Snapshot Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     concurrency:
       group: snapshot-${{ github.event.pull_request.number }}
       cancel-in-progress: false
@@ -100,12 +114,13 @@ jobs:
   approve-release:
     name: Approve Release
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     environment: publish
     concurrency:
       group: release-${{ github.ref }}
       cancel-in-progress: false
     if: |
-      github.event_name == 'push' && 
+      github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       github.actor != 'tech-leads-club-release-bot[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore(release):')
@@ -113,10 +128,44 @@ jobs:
       - name: Approval Gate
         run: echo "✅ Release approved for publish"
 
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor != 'tech-leads-club-release-bot[bot]' &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Security Scan
+        id: security-scan
+        uses: ./.github/actions/security-scan
+        with:
+          artifact-name: security-scan-results
+          retention-days: '30'
+
+      - name: Notify on failure
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        uses: ./.github/actions/security-scan-notify
+
+      - name: Fail job if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
+
   release:
     name: Production Release
     runs-on: ubuntu-latest
-    needs: [approve-release]
+    timeout-minutes: 20
+    needs: [approve-release, security-scan]
     concurrency:
       group: publish-${{ github.ref }}
       cancel-in-progress: false
@@ -153,7 +202,7 @@ jobs:
           MARKETPLACE_DATA_PATH="packages/marketplace/src/data/skills.json"
           if ! git diff --quiet "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH" 2>/dev/null; then
             git add "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH"
-            git commit -m "chore: update generated skills data" || true
+            git commit -m "chore(release): update generated skills data" || true
           fi
 
       - name: Release Version and Publish
