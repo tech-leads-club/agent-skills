@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { PACKAGE_NAME } from '../constants'
+import { PACKAGE_NAME } from '../utils/constants'
 
 export function getNpmGlobalRoot(): string | null {
   try {
