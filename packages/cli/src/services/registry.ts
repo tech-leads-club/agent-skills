@@ -15,7 +15,7 @@ import {
   SKILL_META_FILE,
   SKILLS_CATALOG_PACKAGE,
   SKILLS_SUBDIR,
-} from '../constants'
+} from '../utils/constants'
 import type { CategoryInfo, SkillInfo } from '../types'
 
 export interface SkillMetadata {
