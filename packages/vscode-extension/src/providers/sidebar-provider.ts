@@ -814,7 +814,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return localHash !== skill.contentHash || localHash === undefined
       }
       case 'repair':
-        return !!installedInfo && (installedInfo.local || installedInfo.global)
+        return !!installedInfo && installedInfo.agents.some((agent) => agent.corrupted)
     }
   }
 
@@ -862,7 +862,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       case 'update':
         return 'All installed skills are up to date.'
       case 'repair':
-        return 'No installed skills are available to repair.'
+        return 'No corrupted skills are available to repair.'
     }
   }
 

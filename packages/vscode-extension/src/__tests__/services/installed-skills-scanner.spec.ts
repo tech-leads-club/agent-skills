@@ -53,9 +53,9 @@ describe('InstalledSkillsScanner', () => {
 
     // Agents should be listed (because dir exists)
     expect(result['skill']).not.toBeNull()
-    // But local/global flags should be false (because not validly installed)
-    expect(result['skill']?.local).toBe(false)
-    expect(result['skill']?.global).toBe(false)
+    // local/global should remain true (dir exists), while corrupted marks missing SKILL.md
+    expect(result['skill']?.local).toBe(true)
+    expect(result['skill']?.global).toBe(true)
     // And corrupted should be true
     expect(result['skill']?.agents.some((a) => a.corrupted)).toBe(true)
   })

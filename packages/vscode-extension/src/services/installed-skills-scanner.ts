@@ -271,6 +271,6 @@ export class InstalledSkillsScanner {
     }
 
     const mdExists = await this.checkExists(join(check.path, 'SKILL.md'))
-    return { installed: mdExists, corrupted: !mdExists }
+    return { installed: true, corrupted: !mdExists }
   }
 }

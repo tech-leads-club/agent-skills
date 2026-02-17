@@ -861,7 +861,7 @@ describe('SidebarProvider', () => {
               displayName: 'Cursor',
               local: true,
               global: true,
-              corrupted: false,
+              corrupted: true,
             },
           ],
         },
@@ -876,6 +876,32 @@ describe('SidebarProvider', () => {
 
       expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'local', ['cursor'])
       expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'global', ['cursor'])
+    })
+
+    it('does not show healthy installed skills in repair candidates', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({
+        seo: {
+          local: true,
+          global: false,
+          agents: [
+            {
+              agent: 'cursor',
+              displayName: 'Cursor',
+              local: true,
+              global: false,
+              corrupted: false,
+            },
+          ],
+        },
+      } as InstalledSkillsMap)
+
+      await provider.runCommandPaletteRepair()
+
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('No corrupted skills are available to repair.')
+      expect(vscode.window.createQuickPick).not.toHaveBeenCalled()
+      expect(orchestrator.repair).not.toHaveBeenCalled()
     })
 
     it('does nothing when skill selection is cancelled', async () => {
