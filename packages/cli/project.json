@@ -6,15 +6,9 @@
   "tags": [
     "scope:cli"
   ],
-  "implicitDependencies": [
-    "skills-catalog"
-  ],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "dependsOn": [
-        "skills-catalog:generate-registry"
-      ],
       "outputs": [
         "{options.outputPath}"
       ],
@@ -47,6 +41,11 @@
             "glob": "package.json",
             "input": ".",
             "output": "."
+          },
+          {
+            "glob": "**/*.mp3",
+            "input": "packages/cli/src/assets",
+            "output": "assets"
           }
         ],
         "esbuildOptions": {
@@ -57,7 +56,11 @@
           "banner": {
             "js": "#!/usr/bin/env node"
           },
-          "platform": "node"
+          "platform": "node",
+          "jsx": "automatic",
+          "loader": {
+            ".tsx": "tsx"
+          }
         }
       },
       "configurations": {
