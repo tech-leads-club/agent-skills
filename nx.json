@@ -39,11 +39,15 @@
     "projectsRelationship": "independent",
     "groups": {
       "cli": {
-        "projects": ["@tech-leads-club/agent-skills"],
+        "projects": [
+          "@tech-leads-club/agent-skills"
+        ],
         "releaseTagPattern": "v{version}"
       },
       "skills-catalog": {
-        "projects": ["@tech-leads-club/skills-catalog"],
+        "projects": [
+          "@tech-leads-club/skills-catalog"
+        ],
         "releaseTagPattern": "skills-catalog-v{version}"
       }
     },
