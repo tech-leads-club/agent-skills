@@ -12,10 +12,6 @@ jest.mock('ink', () => ({
   }),
 }))
 
-jest.mock('picocolors', () => ({
-  dim: jest.fn((str) => `dim(${str})`),
-}))
-
 describe('AnimatedTransition - Property-Based Tests', () => {
   beforeEach(() => {
     jest.useFakeTimers()

@@ -1,10 +1,7 @@
 /** @jest-environment jsdom */
 import { render, screen } from '@testing-library/react'
-import { CategoryHeader } from '../CategoryHeader'
 
-jest.mock('picocolors', () => ({
-  dim: jest.fn((str) => `dim(${str})`),
-}))
+import { CategoryHeader } from '../CategoryHeader'
 
 jest.mock('../../services/badge-format', () => ({
   formatCategoryBadge: (installed: number, total: number) => (installed > 0 ? `(${installed}/${total})` : `(${total})`),

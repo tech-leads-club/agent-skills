@@ -1,11 +1,8 @@
 /** @jest-environment jsdom */
 import { render } from '@testing-library/react'
 import * as fc from 'fast-check'
-import { CategoryHeader } from '../CategoryHeader'
 
-jest.mock('picocolors', () => ({
-  dim: jest.fn((str) => `dim(${str})`),
-}))
+import { CategoryHeader } from '../CategoryHeader'
 
 jest.mock('../../services/badge-format', () => ({
   formatCategoryBadge: (installed: number, total: number) => (installed > 0 ? `(${installed}/${total})` : `(${total})`),

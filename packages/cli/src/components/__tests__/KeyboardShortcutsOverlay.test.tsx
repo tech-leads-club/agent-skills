@@ -31,10 +31,6 @@ jest.mock('../../theme', () => ({
   },
 }))
 
-jest.mock('picocolors', () => ({
-  dim: jest.fn((str) => `dim(${str})`),
-}))
-
 jest.mock('../AnimatedTransition', () => ({
   AnimatedTransition: ({ children, visible }: { children: React.ReactNode; visible: boolean }) =>
     visible ? <div data-testid="overlay">{children}</div> : null,
