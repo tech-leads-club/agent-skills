@@ -1,11 +1,10 @@
-import Fuse from 'fuse.js'
 import * as vscode from 'vscode'
 import type { InstallationOrchestrator } from '../services/installation-orchestrator'
 import { LoggingService } from '../services/logging-service'
 import { SkillLockService } from '../services/skill-lock-service'
 import { SkillRegistryService, type RegistryResult } from '../services/skill-registry-service'
 import type { StateReconciler } from '../services/state-reconciler'
-import type { ExtensionMessage, WebviewMessage, RegistryUpdatePayload } from '../shared/messages'
+import type { ExtensionMessage, RegistryUpdatePayload, WebviewMessage } from '../shared/messages'
 import type {
   AgentInstallInfo,
   AvailableAgent,
@@ -215,11 +214,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     void this.reconciler.reconcile()
   }
 
-  private async handleInstallSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
+  private async handleInstallSkill(
+    skillName: string,
+    scope: 'local' | 'global' | 'all',
+    agents: string[],
+  ): Promise<void> {
     await this.runQueueAction('install', () => this.enqueueInstall(skillName, scope, agents))
   }
 
-  private async handleRemoveSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
+  private async handleRemoveSkill(
+    skillName: string,
+    scope: 'local' | 'global' | 'all',
+    agents: string[],
+  ): Promise<void> {
     const agentNames = agents.join(', ')
     const confirmed = await this.confirmRemoval(skillName, agentNames, scope)
     if (!confirmed) return
@@ -347,13 +354,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     if (!registry) return
     const installedSkills = await this.reconciler.getInstalledSkills()
     const installedHashes = await this.skillLockService.getInstalledHashes()
-    const selectedSkills = await this.pickSkills(
-      'update',
-      registry,
-      installedSkills,
-      undefined,
-      installedHashes,
-    )
+    const selectedSkills = await this.pickSkills('update', registry, installedSkills, undefined, installedHashes)
     if (!selectedSkills || selectedSkills.length === 0) return
 
     for (const skillName of selectedSkills) {
@@ -397,7 +398,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       )
     }
   }
-
 
   /**
    * Shows a multi-select QuickPick for agent selection.
@@ -490,11 +490,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async enqueueInstall(
-    skillName: string,
-    scope: 'local' | 'global' | 'all',
-    agents: string[],
-  ): Promise<void> {
+  private async enqueueInstall(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
     if (scope === 'all') {
       await this.orchestrator.install(skillName, 'local', agents)
       await this.orchestrator.install(skillName, 'global', agents)
@@ -503,11 +499,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     await this.orchestrator.install(skillName, scope, agents)
   }
 
-  private async enqueueRemove(
-    skillName: string,
-    scope: 'local' | 'global' | 'all',
-    agents: string[],
-  ): Promise<void> {
+  private async enqueueRemove(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
     if (scope === 'all') {
       await this.orchestrator.remove(skillName, 'local', agents)
       await this.orchestrator.remove(skillName, 'global', agents)
@@ -685,70 +677,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       return null
     }
 
-    const quickPick = vscode.window.createQuickPick<SkillQuickPickItem>()
-    quickPick.canSelectMany = true
-    quickPick.title = this.getSkillQuickPickTitle(mode)
-    quickPick.placeholder = 'Filter skills or type @category'
-    quickPick.matchOnDescription = true
-    quickPick.matchOnDetail = true
-    quickPick.items = items
-    quickPick.show()
-
-    const fuse = new Fuse(items, {
-      keys: ['label', 'description', 'detail'],
-      threshold: 0.4,
+    const selection = await vscode.window.showQuickPick(items, {
+      title: this.getSkillQuickPickTitle(mode),
+      placeHolder: 'Filter skills',
+      canPickMany: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
     })
-
-    const disposables: vscode.Disposable[] = []
-    let resolved = false
-
-    disposables.push(
-      quickPick.onDidChangeValue((value) => {
-        const { categoryId, textQuery } = this.parseSkillQuery(value)
-        let filtered = items
-        const normalizedCategory = categoryId ? categoryId.toLowerCase() : null
-
-        if (categoryId) {
-          if (!this.categoryExists(registry, normalizedCategory)) {
-            filtered = []
-            quickPick.placeholder = `No category matches '@${categoryId}'`
-          } else {
-            filtered = filtered.filter((item) => this.normalizeCategoryId(item.categoryId) === normalizedCategory)
-            quickPick.placeholder = 'Filter skills or type @category'
-          }
-        } else {
-          quickPick.placeholder = 'Filter skills or type @category'
-        }
-
-        if (textQuery) {
-          const results = fuse.search(textQuery)
-          const matches = new Set(results.map((result) => result.item.skillName))
-          filtered = filtered.filter((item) => matches.has(item.skillName))
-        }
-
-        quickPick.items = filtered
-      }),
-    )
-
-    const selection = await new Promise<SkillQuickPickItem[] | null>((resolve) => {
-      const accept = quickPick.onDidAccept(() => {
-        if (resolved) return
-        resolved = true
-        resolve([...quickPick.selectedItems])
-        quickPick.hide()
-      })
-
-      const hide = quickPick.onDidHide(() => {
-        if (resolved) return
-        resolved = true
-        resolve(null)
-      })
-
-      disposables.push(accept, hide)
-    })
-
-    disposables.forEach((disposable) => disposable.dispose())
-    quickPick.dispose()
 
     if (!selection || selection.length === 0) {
       return null
@@ -767,21 +702,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const items: SkillQuickPickItem[] = []
     for (const skill of registry.skills) {
       const installedInfo = installedSkills[skill.name] ?? null
-      if (
-        !this.isSkillCandidate(skill, installedInfo, mode, availableAgents, installedHashes ?? undefined)
-      ) {
+      if (!this.isSkillCandidate(skill, installedInfo, mode, availableAgents, installedHashes ?? undefined)) {
         continue
       }
 
       const categoryName = registry.categories[skill.category]?.name ?? skill.category
-      const detail = this.getSkillDetailForMode(skill, installedHashes, installedInfo, mode)
-      const description = mode === 'update' ? detail : categoryName
-      const itemDetail = mode === 'update' ? categoryName : detail
+      const modeDetail = this.getSkillDetailForMode(skill, installedHashes, installedInfo, mode)
+      const detailParts: string[] = []
+      if (modeDetail) {
+        detailParts.push(modeDetail)
+      }
+      if (categoryName) {
+        detailParts.push(categoryName)
+      }
+      const detail = detailParts.length > 0 ? detailParts.join(' — ') : undefined
+      const description = skill.description?.trim() || 'No description'
 
       items.push({
         label: skill.name,
         description,
-        detail: itemDetail,
+        detail,
         skillName: skill.name,
         categoryId: skill.category,
         registryHash: skill.contentHash,
@@ -864,31 +804,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       case 'repair':
         return 'No corrupted skills are available to repair.'
     }
-  }
-
-  private parseSkillQuery(value: string): { categoryId: string | null; textQuery: string } {
-    const tokens = value.split(/\s+/).filter((token) => token.length > 0)
-    let categoryId: string | null = null
-    const remaining: string[] = []
-    for (const token of tokens) {
-      if (categoryId === null && token.startsWith('@') && token.length > 1) {
-        categoryId = token.slice(1)
-        continue
-      }
-      remaining.push(token)
-    }
-    return { categoryId: categoryId?.toLowerCase() ?? null, textQuery: remaining.join(' ') }
-  }
-
-  private categoryExists(registry: SkillRegistry, categoryId: string | null): boolean {
-    if (!categoryId) return false
-    return Object.keys(registry.categories).some(
-      (key) => this.normalizeCategoryId(key) === this.normalizeCategoryId(categoryId),
-    )
-  }
-
-  private normalizeCategoryId(categoryId: string): string {
-    return categoryId.trim().toLowerCase()
   }
 
   private shortenHash(hash: string | undefined): string {
@@ -1042,7 +957,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
   }
 
-  private canRemoveGlobalForSkills(skillNames: string[], agents: string[], installedSkills: InstalledSkillsMap): boolean {
+  private canRemoveGlobalForSkills(
+    skillNames: string[],
+    agents: string[],
+    installedSkills: InstalledSkillsMap,
+  ): boolean {
     return skillNames.some((skillName) =>
       this.hasAgentSatisfying(agents, installedSkills[skillName] ?? null, (installed) => installed?.global === true),
     )
@@ -1064,27 +983,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     const installedInfo = installedSkills[skillName] ?? null
     if (scopeId === 'local') {
-      return this.hasAgentSatisfying(
-        agents,
-        installedInfo,
-        (installed) => (action === 'add' ? !installed?.local : installed?.local === true),
+      return this.hasAgentSatisfying(agents, installedInfo, (installed) =>
+        action === 'add' ? !installed?.local : installed?.local === true,
       )
     }
 
-    return this.hasAgentSatisfying(
-      agents,
-      installedInfo,
-      (installed) => (action === 'add' ? !installed?.global : installed?.global === true),
+    return this.hasAgentSatisfying(agents, installedInfo, (installed) =>
+      action === 'add' ? !installed?.global : installed?.global === true,
     )
   }
 
   private getAgentDisplayNames(agentIds: string[], availableAgents: AvailableAgent[]): string[] {
-    return agentIds.map(
-      (id) => availableAgents.find((agent) => agent.agent === id)?.displayName ?? id,
-    )
+    return agentIds.map((id) => availableAgents.find((agent) => agent.agent === id)?.displayName ?? id)
   }
 
-  private async confirmBatchRemoval(skills: string[], agents: string, scope: ScopeQuickPickItem['scopeId']): Promise<boolean> {
+  private async confirmBatchRemoval(
+    skills: string[],
+    agents: string,
+    scope: ScopeQuickPickItem['scopeId'],
+  ): Promise<boolean> {
     const scopeLabel = scope === 'all' ? 'Local + Global' : scope
     const skillList = skills.join(', ')
     const message = `Remove ${skills.length} skill(s) (${skillList}) from ${agents} (${scopeLabel})? This will delete the skill files.`
@@ -1155,9 +1072,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     try {
-      const { data: registry, fromCache, offline }: RegistryResult = await this.registryService.getRegistryWithMetadata(
-        forceRefresh,
-      )
+      const {
+        data: registry,
+        fromCache,
+        offline,
+      }: RegistryResult = await this.registryService.getRegistryWithMetadata(forceRefresh)
       const status: RegistryUpdatePayload['status'] = offline ? 'offline' : 'ready'
       const payload = {
         status,

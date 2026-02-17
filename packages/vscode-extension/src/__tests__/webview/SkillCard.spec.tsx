@@ -181,7 +181,10 @@ describe('SkillCard Accessibility', () => {
 
   it('should show Repair button when isCorrupted is true', () => {
     render(<SkillCard {...defaultProps} isCorrupted={true} />)
-    expect(screen.getByRole('button', { name: /repair/i })).toBeInTheDocument()
+    const repairButton = screen.getByRole('button', { name: /repair/i })
+    expect(repairButton).toBeInTheDocument()
+    expect(repairButton).toHaveClass('btn-repair')
+    expect(repairButton.closest('.skill-card-actions')).toHaveClass('skill-card-actions')
     expect(screen.queryByRole('button', { name: /add/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /update/i })).not.toBeInTheDocument()
   })

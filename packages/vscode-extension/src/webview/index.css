@@ -381,6 +381,7 @@ body {
 .btn-add,
 .btn-remove,
 .btn-update,
+.btn-repair,
 .selection-confirm,
 .selection-cancel {
   padding: 4px 12px;
