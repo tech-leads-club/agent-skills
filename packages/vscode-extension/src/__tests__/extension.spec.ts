@@ -42,6 +42,11 @@ const mockReconciler = {
 }
 const mockSidebarProvider = {}
 
+const mockSkillLockService = {
+  getInstalledHashes: jest.fn<MockableFn<Promise<Record<string, string | undefined>>>>().mockResolvedValue({}),
+  getInstalledHash: jest.fn<MockableFn<Promise<string | undefined>>>().mockResolvedValue(undefined),
+}
+
 // ---- ESM Module Mocks (must be before dynamic imports) ----
 jest.unstable_mockModule('../services/logging-service', () => ({
   LoggingService: jest.fn<MockableFn<typeof mockLoggingService>>(() => mockLoggingService),
@@ -49,6 +54,10 @@ jest.unstable_mockModule('../services/logging-service', () => ({
 
 jest.unstable_mockModule('../services/skill-registry-service', () => ({
   SkillRegistryService: jest.fn<MockableFn<typeof mockRegistryService>>(() => mockRegistryService),
+}))
+
+jest.unstable_mockModule('../services/skill-lock-service', () => ({
+  SkillLockService: jest.fn<MockableFn<typeof mockSkillLockService>>(() => mockSkillLockService),
 }))
 
 jest.unstable_mockModule('../services/cli-spawner', () => ({
@@ -87,6 +96,7 @@ jest.unstable_mockModule('../providers/sidebar-provider', () => ({
 const { activate, deactivate } = await import('../extension')
 const { LoggingService } = await import('../services/logging-service')
 const { SkillRegistryService } = await import('../services/skill-registry-service')
+const { SkillLockService } = await import('../services/skill-lock-service')
 const { SidebarProvider } = await import('../providers/sidebar-provider')
 const { StateReconciler } = await import('../services/state-reconciler')
 
@@ -109,6 +119,9 @@ describe('Extension Activation', () => {
     ;(
       StateReconciler as unknown as jest.Mock<() => typeof mockReconciler>
     ).mockImplementation(() => mockReconciler)
+    ;(
+      SkillLockService as unknown as jest.Mock<() => typeof mockSkillLockService>
+    ).mockImplementation(() => mockSkillLockService)
 
     // Reset mock return values
     mockRegistryService.getRegistry.mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] })
@@ -143,6 +156,10 @@ describe('Extension Activation', () => {
 
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.refresh', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.openSettings', expect.any(Function))
+    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.add', expect.any(Function))
+    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.remove', expect.any(Function))
+    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.update', expect.any(Function))
+    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.repair', expect.any(Function))
     expect(context.subscriptions.length).toBeGreaterThanOrEqual(4)
   })
 

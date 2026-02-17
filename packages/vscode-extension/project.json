@@ -48,6 +48,16 @@
         "jestConfig": "packages/vscode-extension/jest.config.ts"
       }
     },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^production"],
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "command": "eslint . --ignore-pattern .vscode-test",
+        "cwd": "packages/vscode-extension"
+      }
+    },
     "package": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],

@@ -47,6 +47,22 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "agentSkills.add",
+        "title": "Agent Skills: Add"
+      },
+      {
+        "command": "agentSkills.remove",
+        "title": "Agent Skills: Remove"
+      },
+      {
+        "command": "agentSkills.update",
+        "title": "Agent Skills: Update"
+      },
+      {
+        "command": "agentSkills.repair",
+        "title": "Agent Skills: Repair"
+      },
+      {
         "command": "agentSkills.openSettings",
         "title": "Agent Skills: Open Settings"
       }

@@ -8,6 +8,7 @@ import { InstalledSkillsScanner } from './services/installed-skills-scanner'
 import { LoggingService } from './services/logging-service'
 import { OperationQueue } from './services/operation-queue'
 import { PostInstallVerifier } from './services/post-install-verifier'
+import { SkillLockService } from './services/skill-lock-service'
 import { SkillRegistryService } from './services/skill-registry-service'
 import { StateReconciler } from './services/state-reconciler'
 
@@ -29,13 +30,21 @@ export function activate(context: vscode.ExtensionContext): void {
   const orchestrator = new InstallationOrchestrator(operationQueue, verifier, logger)
   const scanner = new InstalledSkillsScanner(logger)
   const reconciler = new StateReconciler(scanner, registryService, logger)
+  const skillLockService = new SkillLockService(logger)
   const healthChecker = new CliHealthChecker(cliSpawner, logger)
 
   // Register disposables
   context.subscriptions.push(registryService, cliSpawner, operationQueue, orchestrator, reconciler, healthChecker)
 
   // ③ Providers
-  const sidebarProvider = new SidebarProvider(context, logger, registryService, orchestrator, reconciler)
+  const sidebarProvider = new SidebarProvider(
+    context,
+    logger,
+    registryService,
+    orchestrator,
+    reconciler,
+    skillLockService,
+  )
   context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider))
 
   // ④ Start reconciliation
@@ -93,6 +102,23 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:tech-leads-club.vscode-extension')
     }),
   )
+
+  const registerPaletteCommand = (
+    commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update' | 'agentSkills.repair',
+    handler: () => Promise<void>,
+  ) => {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(commandId, async () => {
+        logger.info(`${commandId} command invoked`)
+        await handler()
+      }),
+    )
+  }
+
+  registerPaletteCommand('agentSkills.add', () => sidebarProvider.runCommandPaletteAdd())
+  registerPaletteCommand('agentSkills.remove', () => sidebarProvider.runCommandPaletteRemove())
+  registerPaletteCommand('agentSkills.update', () => sidebarProvider.runCommandPaletteUpdate())
+  registerPaletteCommand('agentSkills.repair', () => sidebarProvider.runCommandPaletteRepair())
 
   // ⑦ Diagnostics (P3)
   const extensionVersion = context.extension?.packageJSON?.version ?? 'unknown'

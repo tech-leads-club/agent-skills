@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
 import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
 import { LoggingService } from '../../services/logging-service'
+import { SkillLockService } from '../../services/skill-lock-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
 import type { RegistryResult } from '../../services/skill-registry-service'
 import type { StateReconciler } from '../../services/state-reconciler'
@@ -28,6 +29,48 @@ type WebviewUriFn = (uri: { fsPath: string }) => string
 type WebviewReceiveHandler = (handler: (message: WebviewMessage) => void) => vscode.Disposable
 type PostMessageFn = (message: ExtensionMessage) => Promise<boolean>
 
+const createQuickPickMock = () => {
+  const changeHandlers: Array<(value: string) => void> = []
+  const acceptHandlers: Array<() => void> = []
+  const hideHandlers: Array<() => void> = []
+
+  return {
+    canSelectMany: false,
+    title: '',
+    placeholder: '',
+    matchOnDescription: false,
+    matchOnDetail: false,
+    selectedItems: [] as Array<{ label: string; skillName: string; categoryId: string }>,
+    items: [] as Array<{ label: string; detail?: string; description?: string; skillName: string; categoryId: string }>,
+    show: jest.fn<SyncMockableFn>(),
+    hide: jest.fn<SyncMockableFn>(() => {
+      hideHandlers.forEach((handler) => handler())
+    }),
+    onDidChangeValue: jest.fn<SyncMockableFn<vscode.Disposable, [(value: string) => void]>>((handler) => {
+      changeHandlers.push(handler)
+      return { dispose: jest.fn<SyncMockableFn>() }
+    }),
+    onDidAccept: jest.fn<SyncMockableFn<vscode.Disposable, [() => void]>>((handler) => {
+      acceptHandlers.push(handler)
+      return { dispose: jest.fn<SyncMockableFn>() }
+    }),
+    onDidHide: jest.fn<SyncMockableFn<vscode.Disposable, [() => void]>>((handler) => {
+      hideHandlers.push(handler)
+      return { dispose: jest.fn<SyncMockableFn>() }
+    }),
+    dispose: jest.fn<SyncMockableFn>(),
+    triggerChangeValue(value: string) {
+      changeHandlers.forEach((handler) => handler(value))
+    },
+    triggerAccept() {
+      acceptHandlers.forEach((handler) => handler())
+    },
+    triggerHide() {
+      hideHandlers.forEach((handler) => handler())
+    },
+  }
+}
+
 // Mock vscode module (handled by jest.config.ts moduleNameMapper)
 
 describe('SidebarProvider', () => {
@@ -39,6 +82,7 @@ describe('SidebarProvider', () => {
   let reconciler: jest.Mocked<StateReconciler>
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
+  let skillLockService: jest.Mocked<SkillLockService>
 
   const mockRegistry: SkillRegistry = {
     version: '1.0.0',
@@ -49,6 +93,7 @@ describe('SidebarProvider', () => {
   beforeEach(() => {
     // Reset all mocks (including module-level vscode mocks and their implementations)
     jest.resetAllMocks()
+    ;(vscode.window.createQuickPick as jest.Mock).mockImplementation(() => createQuickPickMock())
 
     // Mock ExtensionContext
     context = {
@@ -89,6 +134,7 @@ describe('SidebarProvider', () => {
       install: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       remove: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       update: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      repair: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       cancel: jest.fn<SyncMockableFn>(),
       onOperationEvent: jest
         .fn<SyncMockableFn<vscode.Disposable>>()
@@ -113,6 +159,14 @@ describe('SidebarProvider', () => {
     } as unknown as jest.Mocked<StateReconciler>
     reconciler = mockReconciler
 
+    const mockSkillLockService = {
+      getInstalledHashes: jest
+        .fn<AsyncMockableFn<Record<string, string | undefined>>>()
+        .mockResolvedValue({}),
+      getInstalledHash: jest.fn<AsyncMockableFn<string | undefined>>().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<SkillLockService>
+    skillLockService = mockSkillLockService
+
     // Mock WebviewView
     webviewView = {
       webview: {
@@ -128,7 +182,7 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.WebviewView
 
-    provider = new SidebarProvider(context, logger, registryService, orchestrator, reconciler)
+    provider = new SidebarProvider(context, logger, registryService, orchestrator, reconciler, skillLockService)
   })
 
   it('should have the correct viewType', () => {
@@ -651,5 +705,192 @@ describe('SidebarProvider', () => {
     expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('already installed'))
     // Should NOT show the quick pick
     expect(vscode.window.showQuickPick).not.toHaveBeenCalled()
+  })
+
+  describe('Command palette flows', () => {
+    const createRegistry = (): SkillRegistry => ({
+      version: '1.0.0',
+      categories: {
+        general: { name: 'General', description: 'General category' },
+        tools: { name: 'Tools', description: 'Tools category' },
+      },
+      skills: [
+        {
+          name: 'seo',
+          description: 'SEO helper',
+          category: 'general',
+          path: '/skills/seo',
+          files: ['SKILL.md'],
+          contentHash: 'abcde12345',
+        },
+        {
+          name: 'accessibility',
+          description: 'Accessibility helper',
+          category: 'tools',
+          path: '/skills/accessibility',
+          files: ['SKILL.md'],
+          contentHash: 'fghij67890',
+        },
+      ],
+    })
+
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+    const getLatestQuickPick = () =>
+      (vscode.window.createQuickPick as jest.Mock).mock.results[0].value as {
+        items: Array<{ skillName: string; label: string; categoryId: string }>
+        selectedItems: Array<{ skillName: string; label: string; categoryId: string }>
+        placeholder: string
+        triggerAccept: () => void
+        triggerChangeValue: (value: string) => void
+        triggerHide: () => void
+      }
+
+    it('enqueues install operations for the selected skills', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({})
+      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      showQuickPickMock
+        .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
+        .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
+
+      const commandPromise = provider.runCommandPaletteAdd()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.selectedItems = [...quickPick.items]
+      quickPick.triggerAccept()
+      await commandPromise
+
+      expect(orchestrator.install).toHaveBeenCalledWith('seo', 'local', ['cursor'])
+      expect(orchestrator.install).toHaveBeenCalledWith('accessibility', 'local', ['cursor'])
+      expect(orchestrator.install).toHaveBeenCalledTimes(2)
+    })
+
+    it('respects @category filters in the skill picker', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({})
+      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      showQuickPickMock
+        .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
+        .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
+
+      const commandPromise = provider.runCommandPaletteAdd()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.triggerChangeValue('@nonexistent')
+      expect(quickPick.items).toHaveLength(0)
+      expect(quickPick.placeholder).toContain("No category matches '@nonexistent'")
+      quickPick.triggerChangeValue('@tools')
+      expect(quickPick.items.every((item) => item.categoryId === 'tools')).toBe(true)
+      quickPick.selectedItems = [...quickPick.items]
+      quickPick.triggerAccept()
+      await commandPromise
+
+      expect(orchestrator.install).toHaveBeenCalled()
+    })
+
+    it('prompts for removal confirmation before enqueuing removals', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      reconciler.getInstalledSkills.mockResolvedValue({
+        seo: {
+          local: true,
+          global: false,
+          agents: [
+            {
+              agent: 'cursor',
+              displayName: 'Cursor',
+              local: true,
+              global: false,
+              corrupted: false,
+            },
+          ],
+        },
+      })
+      showQuickPickMock
+        .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
+        .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
+      showWarningMessageMock.mockResolvedValue('Remove')
+
+      const commandPromise = provider.runCommandPaletteRemove()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.selectedItems = [...quickPick.items]
+      quickPick.triggerAccept()
+      await commandPromise
+
+      expect(orchestrator.remove).toHaveBeenCalledWith('seo', 'local', ['cursor'])
+    })
+
+    it('selects only outdated skills for update operations', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({
+        seo: {
+          local: true,
+          global: false,
+          agents: [],
+        },
+      } as InstalledSkillsMap)
+      skillLockService.getInstalledHashes.mockResolvedValue({ seo: 'old-hash', accessibility: 'fghij67890' })
+
+      const commandPromise = provider.runCommandPaletteUpdate()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.selectedItems = quickPick.items.filter((item) => item.skillName === 'seo')
+      quickPick.triggerAccept()
+      await commandPromise
+
+      expect(orchestrator.update).toHaveBeenCalledTimes(1)
+      expect(orchestrator.update).toHaveBeenCalledWith('seo')
+    })
+
+    it('enqueues repairs per scope for selected skills', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({
+        seo: {
+          local: true,
+          global: true,
+          agents: [
+            {
+              agent: 'cursor',
+              displayName: 'Cursor',
+              local: true,
+              global: true,
+              corrupted: false,
+            },
+          ],
+        },
+      } as InstalledSkillsMap)
+
+      const commandPromise = provider.runCommandPaletteRepair()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.selectedItems = quickPick.items.filter((item) => item.skillName === 'seo')
+      quickPick.triggerAccept()
+      await commandPromise
+
+      expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'local', ['cursor'])
+      expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'global', ['cursor'])
+    })
+
+    it('does nothing when skill selection is cancelled', async () => {
+      const registry = createRegistry()
+      registryService.getRegistry.mockResolvedValue(registry)
+      reconciler.getInstalledSkills.mockResolvedValue({})
+      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+
+      const commandPromise = provider.runCommandPaletteAdd()
+      await flush()
+      const quickPick = getLatestQuickPick()
+      quickPick.triggerHide()
+      await commandPromise
+
+      expect(orchestrator.install).not.toHaveBeenCalled()
+    })
   })
 })
