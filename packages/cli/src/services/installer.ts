@@ -3,9 +3,9 @@ import { homedir, platform } from 'node:os'
 import { join, normalize, relative, resolve, sep } from 'node:path'
 
 import type { AgentType, InstallOptions, InstallResult, SkillInfo } from '../types'
+import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../utils/constants'
 import { getAgentConfig } from './agents'
 import { logAudit } from './audit-log'
-import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../utils/constants'
 import { isGloballyInstalled } from './global-path'
 import { addSkillToLock, getSkillFromLock, removeSkillFromLock } from './lockfile'
 import { findProjectRoot } from './project-root'
@@ -114,10 +114,7 @@ const createErrorResult = (ctx: InstallContext, method: 'symlink' | 'copy', erro
 
 const installHandlers: Record<InstallMode, (ctx: InstallContext) => Promise<InstallResult>> = {
   'symlink-global': async (ctx) => {
-    if (await createSymlink(ctx.skill.path, ctx.skillTargetPath)) {
-      return createSuccessResult(ctx, 'symlink')
-    }
-
+    if (await createSymlink(ctx.skill.path, ctx.skillTargetPath)) return createSuccessResult(ctx, 'symlink')
     await copySkillDirectory(ctx.skill.path, ctx.skillTargetPath)
     return createSuccessResult(ctx, 'copy', { symlinkFailed: true })
   },
@@ -210,6 +207,13 @@ export const installSkills = async (skills: SkillInfo[], options: InstallOptions
     agents: options.agents.map((a) => getAgentConfig(a).displayName),
     success: results.filter((r) => r.success).length,
     failed: results.filter((r) => !r.success).length,
+    details: results.map((r) => ({
+      skill: r.skill,
+      agent: r.agent,
+      success: r.success,
+      error: r.error,
+      path: r.path,
+    })),
   })
 
   return results
@@ -352,6 +356,12 @@ export const removeSkill = async (
     success: results.filter((r) => r.success).length,
     failed: results.filter((r) => !r.success).length,
     forced: options.force,
+    details: results.map((r) => ({
+      skill: r.skill,
+      agent: r.agent,
+      success: r.success,
+      error: r.error,
+    })),
   })
 
   return results
