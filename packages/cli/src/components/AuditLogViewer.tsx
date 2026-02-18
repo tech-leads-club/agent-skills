@@ -6,7 +6,7 @@ interface AuditEntry {
   agents: string[]
   success: number
   failed: number
-  timestamp: string
+  timestamp?: string
   forced?: boolean
 }
 
@@ -36,8 +36,8 @@ export function AuditLogViewer({ entries, limit = 10 }: Props) {
       </Box>
 
       {displayEntries.map((entry, idx) => {
-        const date = new Date(entry.timestamp)
-        const timeAgo = getTimeAgo(date)
+        const date = entry.timestamp ? new Date(entry.timestamp) : new Date()
+        const timeAgo = entry.timestamp ? getTimeAgo(date) : 'unknown time'
         const actionColor = entry.action === 'install' ? 'green' : entry.action === 'remove' ? 'red' : 'yellow'
         const statusIcon = entry.failed === 0 ? '✓' : entry.success > 0 ? '⚠' : '✗'
 
