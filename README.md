@@ -184,6 +184,11 @@ agent-skills cache --clear           # Clear all cache
 agent-skills cache --clear-registry  # Clear only registry
 agent-skills cache --path            # Show cache location
 
+# View audit log
+agent-skills audit                   # Show recent operations
+agent-skills audit -n 20             # Show last 20 entries
+agent-skills audit --path            # Show audit log location
+
 # Show contributors and credits
 agent-skills credits
 
