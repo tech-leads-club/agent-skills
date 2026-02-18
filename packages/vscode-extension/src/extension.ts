@@ -8,9 +8,11 @@ import { InstalledSkillsScanner } from './services/installed-skills-scanner'
 import { LoggingService } from './services/logging-service'
 import { OperationQueue } from './services/operation-queue'
 import { PostInstallVerifier } from './services/post-install-verifier'
+import { ScopePolicyService } from './services/scope-policy-service'
 import { SkillLockService } from './services/skill-lock-service'
 import { SkillRegistryService } from './services/skill-registry-service'
 import { StateReconciler } from './services/state-reconciler'
+import { AllowedScopesSetting } from './shared/types'
 
 /**
  * Entry point invoked by VS Code when the extension activates.
@@ -49,6 +51,43 @@ export function activate(context: vscode.ExtensionContext): void {
     skillLockService,
   )
   context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider))
+
+  // Policy Service
+  const scopePolicyService = new ScopePolicyService()
+
+  const updatePolicy = () => {
+    const config = vscode.workspace.getConfiguration('agentSkills')
+    const allowedScopes = config.get<AllowedScopesSetting>('scopes.allowedScopes') || 'all'
+    const isWorkspaceTrusted = vscode.workspace.isTrusted
+    const hasWorkspaceFolder = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+
+    const policy = scopePolicyService.evaluate({
+      allowedScopes,
+      isWorkspaceTrusted,
+      hasWorkspaceFolder,
+    })
+
+    reconciler.updatePolicy(policy)
+    sidebarProvider.updatePolicy(policy)
+  }
+
+  // Initial update
+  updatePolicy()
+
+  // Watch for configuration changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('agentSkills.scopes.allowedScopes')) {
+        updatePolicy()
+      }
+    }),
+  )
+
+  // Watch for trust/workspace changes (affect policy evaluation)
+  context.subscriptions.push(
+    vscode.workspace.onDidGrantWorkspaceTrust(() => updatePolicy()),
+    vscode.workspace.onDidChangeWorkspaceFolders(() => updatePolicy()),
+  )
 
   // ④ Start reconciliation
   reconciler.start()
@@ -102,7 +141,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('agentSkills.openSettings', () => {
       logger.info('Open Settings command invoked')
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:tech-leads-club.vscode-extension')
+      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:tech-leads-club.agent-skills')
     }),
   )
 

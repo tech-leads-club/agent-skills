@@ -15,6 +15,7 @@ export interface SkillGridProps {
   hasWorkspace: boolean
   onMarkPending: (skillName: string, action: 'add' | 'remove' | 'repair') => void
   onRepair: (skillName: string, agents: string[], scope: 'local' | 'global') => void
+  isLifecycleBlocked: boolean
 }
 
 /**
@@ -34,6 +35,7 @@ export function SkillGrid({
   hasWorkspace,
   onMarkPending,
   onRepair,
+  isLifecycleBlocked,
 }: SkillGridProps) {
   if (skills.length === 0) {
     return (
@@ -106,6 +108,7 @@ export function SkillGrid({
                   payload: { skillName: skill.name, action },
                 })
               }}
+              isLifecycleBlocked={isLifecycleBlocked}
             />
           </div>
         )

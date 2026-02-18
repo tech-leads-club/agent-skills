@@ -1,7 +1,7 @@
 import Fuse from 'fuse.js'
 import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import type { ExtensionMessage } from '../shared/messages'
+import type { ExtensionMessage, ScopePolicyStatePayload } from '../shared/messages'
 import type { AvailableAgent, Category, InstalledSkillsMap, Skill, SkillRegistry } from '../shared/types'
 import { CategoryFilter } from './components/CategoryFilter'
 import { RestrictedModeBanner } from './components/RestrictedModeBanner'
@@ -75,6 +75,7 @@ interface RegistryContentProps {
   onMarkPending: (skillName: string, action: 'add' | 'remove' | 'repair') => void
   onRepair: (skillName: string, agents: string[], scope: 'local' | 'global') => void
   onClearSearch: () => void
+  isLifecycleBlocked: boolean
 }
 
 /**
@@ -100,6 +101,7 @@ function RegistryContent({
   onMarkPending,
   onRepair,
   onClearSearch,
+  isLifecycleBlocked,
 }: RegistryContentProps) {
   return (
     <>
@@ -130,6 +132,7 @@ function RegistryContent({
           hasWorkspace={hasWorkspace}
           onMarkPending={onMarkPending}
           onRepair={onRepair}
+          isLifecycleBlocked={isLifecycleBlocked}
         />
       )}
     </>
@@ -151,6 +154,7 @@ function App() {
   const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
   const [hasWorkspace, setHasWorkspace] = useState(false)
   const [isTrusted, setIsTrusted] = useState(true)
+  const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
 
   const { installedSkills } = useInstalledState()
   const { isOperating, getMessage: getOperationMessage, markPending } = useOperations()
@@ -186,6 +190,9 @@ function App() {
           break
         case 'trustState':
           setIsTrusted(msg.payload.isTrusted)
+          break
+        case 'policyState':
+          setPolicy(msg.payload)
           break
       }
     })
@@ -252,6 +259,8 @@ function App() {
       </div>
     ) : null
 
+  const isLifecycleBlocked = policy?.effectiveScopes.length === 0
+
   if (statusContent) {
     return <div className="app">{statusContent}</div>
   }
@@ -280,9 +289,24 @@ function App() {
           onMarkPending={markPending}
           onRepair={handleRepair}
           onClearSearch={handleClearSearch}
+          isLifecycleBlocked={isLifecycleBlocked}
         />
       ) : (
         <NoRegistryState />
+      )}
+      {isLifecycleBlocked && (
+        <div
+          className="footer-warning"
+          style={{
+            backgroundColor: 'var(--vscode-inputValidation-warningBackground)',
+            color: 'var(--vscode-inputValidation-warningForeground)',
+            padding: '8px',
+            borderTop: '1px solid var(--vscode-inputValidation-warningBorder)',
+            fontSize: '12px',
+          }}
+        >
+          Lifecycle actions are disabled: {policy?.blockedReason}
+        </div>
       )}
     </div>
   )

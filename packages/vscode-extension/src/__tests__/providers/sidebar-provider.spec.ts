@@ -8,7 +8,13 @@ import type { RegistryResult } from '../../services/skill-registry-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
 import type { StateReconciler } from '../../services/state-reconciler'
 import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
-import type { AvailableAgent, InstalledSkillsMap, Skill, SkillRegistry } from '../../shared/types'
+import type {
+  AvailableAgent,
+  InstalledSkillsMap,
+  ScopePolicyEvaluation,
+  Skill,
+  SkillRegistry,
+} from '../../shared/types'
 
 const showQuickPickMock = vscode.window.showQuickPick as jest.Mock<(...args: Array<unknown>) => Promise<unknown>>
 const showWarningMessageMock = vscode.window.showWarningMessage as jest.Mock<
@@ -885,5 +891,67 @@ describe('SidebarProvider', () => {
 
       expect(orchestrator.install).not.toHaveBeenCalled()
     })
+  })
+
+  it('should block command palette action if policy blocks everything', async () => {
+    const policy: ScopePolicyEvaluation = {
+      allowedScopes: 'none',
+      environmentScopes: ['local', 'global'],
+      effectiveScopes: [],
+      blockedReason: 'policy-none',
+    }
+
+    provider.updatePolicy(policy)
+
+    // Mock executeCommand for "Open Settings"
+    const executeCommandMock = jest.spyOn(vscode.commands, 'executeCommand').mockImplementation(async () => {})
+    showWarningMessageMock.mockResolvedValue(undefined)
+    // Fix showErrorMessage mock signature mismatch by casting
+    const showErrorMessageMock = jest
+      .spyOn(vscode.window, 'showErrorMessage')
+      .mockResolvedValue('Open Settings' as unknown as vscode.MessageItem)
+
+    await provider.runCommandPaletteAdd()
+
+    expect(showErrorMessageMock).toHaveBeenCalledWith(
+      expect.stringContaining('Lifecycle actions are disabled'),
+      'Open Settings',
+    )
+    expect(executeCommandMock).toHaveBeenCalledWith('agentSkills.openSettings')
+    expect(orchestrator.install).not.toHaveBeenCalled()
+  })
+
+  it('should skip scope picker if only one scope is effective (local)', async () => {
+    const policy: ScopePolicyEvaluation = {
+      allowedScopes: 'local',
+      environmentScopes: ['local', 'global'],
+      effectiveScopes: ['local'],
+      blockedReason: undefined,
+    }
+
+    provider.updatePolicy(policy)
+
+    // Setup registry and agents
+    const registry = {
+      version: '1.0.0',
+      categories: {},
+      skills: [{ name: 'skill1', category: 'cat1', path: 'p', files: [], contentHash: 'h' }],
+    }
+    registryService.getRegistry.mockResolvedValue(registry as unknown as SkillRegistry)
+    reconciler.getInstalledSkills.mockResolvedValue({})
+    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'a1', displayName: 'A1' }])
+
+    // Mocks
+    showQuickPickMock
+      .mockResolvedValueOnce([{ label: 'skill1', skillName: 'skill1' }]) // skill pick
+      .mockResolvedValueOnce([{ label: 'A1', agentId: 'a1' }]) // agent pick
+    // No scope pick expected!
+
+    await provider.runCommandPaletteAdd()
+
+    // Should auto-select 'local'
+    expect(orchestrator.install).toHaveBeenCalledWith('skill1', 'local', ['a1'])
+    // Check that showQuickPick was called exactly twice (skill + agent)
+    expect(showQuickPickMock).toHaveBeenCalledTimes(2)
   })
 })

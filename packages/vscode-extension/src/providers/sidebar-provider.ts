@@ -10,6 +10,7 @@ import type {
   AvailableAgent,
   InstalledSkillInfo,
   InstalledSkillsMap,
+  ScopePolicyEvaluation,
   Skill,
   SkillRegistry,
 } from '../shared/types'
@@ -38,6 +39,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'agentSkillsSidebar'
 
   private webviewView?: vscode.WebviewView
+  private policy?: ScopePolicyEvaluation
 
   /**
    * Creates a sidebar provider and wires orchestrator/reconciler event forwarding to the webview.
@@ -99,6 +101,23 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         // Reconcile installed state after operation completes to refresh UI
         void this.reconciler.reconcile()
       }
+    })
+  }
+
+  /**
+   * Updates the effective scope policy used for lifecycle actions.
+   *
+   * @param policy - Evaluated policy state.
+   */
+  public updatePolicy(policy: ScopePolicyEvaluation): void {
+    this.policy = policy
+    void this.postMessage({
+      type: 'policyState',
+      payload: {
+        allowedScopes: policy.allowedScopes,
+        effectiveScopes: policy.effectiveScopes,
+        blockedReason: policy.blockedReason,
+      },
     })
   }
 
@@ -246,6 +265,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       payload: { isTrusted: vscode.workspace.isTrusted },
     })
 
+    if (this.policy) {
+      await this.postMessage({
+        type: 'policyState',
+        payload: {
+          allowedScopes: this.policy.allowedScopes,
+          effectiveScopes: this.policy.effectiveScopes,
+          blockedReason: this.policy.blockedReason,
+        },
+      })
+    }
+
     void this.loadAndPushRegistry(webview)
     void this.reconciler.reconcile()
   }
@@ -330,11 +360,35 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
+   * Checks if the current policy blocks lifecycle actions.
+   * If blocked, shows an error message with a link to settings.
+   *
+   * @returns `true` if actions are blocked.
+   */
+  private checkPolicyBlocking(): boolean {
+    if (!this.policy) return false // Assume allowed if policy not yet loaded
+
+    if (this.policy.effectiveScopes.length === 0) {
+      const reason = this.policy.blockedReason ?? 'policy-none'
+      const message = `Lifecycle actions are disabled by policy: ${reason}`
+      void vscode.window.showErrorMessage(message, 'Open Settings').then((selection) => {
+        if (selection === 'Open Settings') {
+          void vscode.commands.executeCommand('agentSkills.openSettings')
+        }
+      })
+      return true
+    }
+    return false
+  }
+
+  /**
    * Runs the command-palette flow for adding one or more skills.
    *
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteAdd(): Promise<void> {
+    if (this.checkPolicyBlocking()) return
+
     const availableAgents = await this.reconciler.getAvailableAgents()
     if (availableAgents.length === 0) {
       vscode.window.showInformationMessage('No agent hosts detected on this system.')
@@ -390,6 +444,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteRemove(): Promise<void> {
+    if (this.checkPolicyBlocking()) return
+
     const availableAgents = await this.reconciler.getAvailableAgents()
     if (availableAgents.length === 0) {
       vscode.window.showInformationMessage('No agent hosts detected on this system.')
@@ -449,6 +505,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteUpdate(): Promise<void> {
+    if (this.checkPolicyBlocking()) return
+
     const registry = await this.loadRegistryForCommand()
     if (!registry) return
     const installedSkills = await this.reconciler.getInstalledSkills()
@@ -467,6 +525,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteRepair(): Promise<void> {
+    if (this.checkPolicyBlocking()) return
+
     const registry = await this.loadRegistryForCommand()
     if (!registry) return
     const installedSkills = await this.reconciler.getInstalledSkills()
@@ -483,15 +543,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       const localAgents = this.getScopeAgents(installedInfo, 'local')
       const globalAgents = this.getScopeAgents(installedInfo, 'global')
 
-      if (localAgents.length === 0 && globalAgents.length === 0) {
-        skipped.push(skillName)
-        continue
-      }
+      const allowLocal = this.policy?.effectiveScopes.includes('local') ?? true
+      const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? true
 
-      if (localAgents.length > 0) {
+      if (allowLocal && localAgents.length > 0) {
         await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, 'local', localAgents))
       }
-      if (globalAgents.length > 0) {
+      if (allowGlobal && globalAgents.length > 0) {
         await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, 'global', globalAgents))
       }
     }
@@ -559,6 +617,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves after scope selection and execution.
    */
   private async handleScopePick(skillName: string, action: 'add' | 'remove', agents: string[]): Promise<void> {
+    if (this.checkPolicyBlocking()) return
+
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
     const installedSkills = await this.reconciler.getInstalledSkills()
     const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
@@ -658,18 +718,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     action: 'add' | 'remove',
   ): AgentQuickPickItem[] {
     const items: AgentQuickPickItem[] = []
+    const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
+    const allowLocal = effectiveScopes.includes('local')
+    const allowGlobal = effectiveScopes.includes('global')
+
     for (const agent of availableAgents) {
       const installed = this.findAgentInstall(installedInfo, agent.agent)
 
       if (action === 'add') {
-        if (installed?.local && installed?.global) continue
+        // Check if fully installed relative to policy
+        const fullyInstalledLocal = allowLocal ? installed?.local : true
+        const fullyInstalledGlobal = allowGlobal ? installed?.global : true
+
+        if (fullyInstalledLocal && fullyInstalledGlobal) continue
+
         items.push({
           label: agent.displayName,
           description: this.describeAgentInstallStatus(installed),
           agentId: agent.agent,
         })
       } else {
-        if (!installed || (!installed.local && !installed.global)) continue
+        if (!installed) continue
+
+        const hasRemovableLocal = allowLocal && installed.local
+        const hasRemovableGlobal = allowGlobal && installed.global
+
+        if (!hasRemovableLocal && !hasRemovableGlobal) continue
+
         items.push({
           label: agent.displayName,
           description: this.describeInstalledScopes(installed),
@@ -737,9 +812,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   ): ScopeQuickPickItem[] {
     const scopeItems: ScopeQuickPickItem[] = []
 
+    const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
+    const allowLocal = effectiveScopes.includes('local')
+    const allowGlobal = effectiveScopes.includes('global')
+
     if (action === 'add') {
-      const canAddLocal = this.canAddLocal(hasWorkspace, isTrusted, agents, installedInfo)
-      const canAddGlobal = this.canAddGlobal(agents, installedInfo)
+      const canAddLocal = allowLocal && this.canAddLocal(hasWorkspace, isTrusted, agents, installedInfo)
+      const canAddGlobal = allowGlobal && this.canAddGlobal(agents, installedInfo)
       if (canAddLocal) {
         scopeItems.push({ label: 'Locally', description: 'Install in the current workspace', scopeId: 'local' })
       }
@@ -750,8 +829,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         scopeItems.push({ label: 'All', description: 'Install both locally and globally', scopeId: 'all' })
       }
     } else {
-      const canRemoveLocal = this.canRemoveLocal(hasWorkspace, isTrusted, agents, installedInfo)
-      const canRemoveGlobal = this.canRemoveGlobal(agents, installedInfo)
+      const canRemoveLocal = allowLocal && this.canRemoveLocal(hasWorkspace, isTrusted, agents, installedInfo)
+      const canRemoveGlobal = allowGlobal && this.canRemoveGlobal(agents, installedInfo)
       if (canRemoveLocal) {
         scopeItems.push({ label: 'Locally', description: 'Remove from the current workspace', scopeId: 'local' })
       }
@@ -997,6 +1076,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     availableAgents?: AvailableAgent[],
     installedHashes?: Record<string, string | undefined>,
   ): boolean {
+    const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
+    const allowLocal = effectiveScopes.includes('local')
+    const allowGlobal = effectiveScopes.includes('global')
+
     switch (mode) {
       case 'add': {
         if (!availableAgents || availableAgents.length === 0) {
@@ -1008,11 +1091,32 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return !!installedInfo && (installedInfo.local || installedInfo.global)
       case 'update': {
         if (!installedInfo || !skill.contentHash) return false
+
+        // Enforce policy: if only local is allowed, don't update if skill is only global
+        if (!allowLocal && installedInfo.local && !installedInfo.global) return false
+        if (!allowGlobal && installedInfo.global && !installedInfo.local) return false
+
+        // If strict policy: if local-only, but skill is global, can we update?
+        // Requirement: "If local only: Update/Repair only local installs."
+        // If skill has GLOBAL install, and we are LOCAL ONLY, we probably shouldn't show it for update
+        // unless update is scoped (which it isn't, based on orchestrator).
+        // Assuming strict filtering:
+        if (!allowLocal && installedInfo.local) return false
+        if (!allowGlobal && installedInfo.global) return false
+
         const localHash = installedHashes?.[skill.name]
         return localHash !== skill.contentHash || localHash === undefined
       }
-      case 'repair':
-        return !!installedInfo && installedInfo.agents.some((agent) => agent.corrupted)
+      case 'repair': {
+        if (!installedInfo) return false
+        // Filter by policy
+        const hasLocalCorruption = installedInfo.agents.some((a) => a.local && a.corrupted)
+        const hasGlobalCorruption = installedInfo.agents.some((a) => a.global && a.corrupted)
+
+        if (allowLocal && hasLocalCorruption) return true
+        if (allowGlobal && hasGlobalCorruption) return true
+        return false
+      }
     }
   }
 
@@ -1221,9 +1325,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   ): ScopeQuickPickItem[] {
     const scopeItems: ScopeQuickPickItem[] = []
 
+    const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
+    const allowLocal = effectiveScopes.includes('local')
+    const allowGlobal = effectiveScopes.includes('global')
+
     if (action === 'add') {
-      const canLocal = this.canAddLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
-      const canGlobal = this.canAddGlobalForSkills(skillNames, agents, installedSkills)
+      const canLocal =
+        allowLocal && this.canAddLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
+      const canGlobal = allowGlobal && this.canAddGlobalForSkills(skillNames, agents, installedSkills)
       if (canLocal) {
         scopeItems.push({ label: 'Locally', description: 'Install in the current workspace', scopeId: 'local' })
       }
@@ -1234,8 +1343,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         scopeItems.push({ label: 'All', description: 'Install both locally and globally', scopeId: 'all' })
       }
     } else {
-      const canLocal = this.canRemoveLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
-      const canGlobal = this.canRemoveGlobalForSkills(skillNames, agents, installedSkills)
+      const canLocal =
+        allowLocal && this.canRemoveLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
+      const canGlobal = allowGlobal && this.canRemoveGlobalForSkills(skillNames, agents, installedSkills)
       if (canLocal) {
         scopeItems.push({ label: 'Locally', description: 'Remove from the current workspace', scopeId: 'local' })
       }

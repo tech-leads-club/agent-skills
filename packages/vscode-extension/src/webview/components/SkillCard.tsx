@@ -15,6 +15,7 @@ export interface SkillCardProps {
   onUpdate: () => void
   onRepair: () => void
   onRequestAgentPick: (action: 'add' | 'remove') => void
+  isLifecycleBlocked: boolean
 }
 
 /**
@@ -36,6 +37,7 @@ export function SkillCard({
   onUpdate,
   onRepair,
   onRequestAgentPick,
+  isLifecycleBlocked,
 }: SkillCardProps) {
   const ariaLabel =
     `${skill.name}. ${skill.description}. Category: ${categoryName}.` +
@@ -56,7 +58,7 @@ export function SkillCard({
             e.stopPropagation()
             onRepair()
           }}
-          disabled={isOperating}
+          disabled={isOperating || isLifecycleBlocked}
         >
           Repair
         </button>,
@@ -71,7 +73,7 @@ export function SkillCard({
             e.stopPropagation()
             onUpdate()
           }}
-          disabled={isOperating}
+          disabled={isOperating || isLifecycleBlocked}
         >
           Update
         </button>,
@@ -93,7 +95,7 @@ export function SkillCard({
               e.stopPropagation()
               onRequestAgentPick('add')
             }}
-            disabled={isOperating}
+            disabled={isOperating || isLifecycleBlocked}
           >
             Add
           </button>,
@@ -111,7 +113,7 @@ export function SkillCard({
             e.stopPropagation()
             onRequestAgentPick('remove')
           }}
-          disabled={isOperating}
+          disabled={isOperating || isLifecycleBlocked}
         >
           Remove
         </button>,

@@ -52,6 +52,7 @@ describe('SkillGrid Accessibility', () => {
     hasWorkspace: true,
     onMarkPending: jest.fn(),
     onRepair: jest.fn(),
+    isLifecycleBlocked: false,
   }
 
   it('should render all skill cards', () => {

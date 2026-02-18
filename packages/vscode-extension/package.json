@@ -42,6 +42,11 @@
     },
     "commands": [
       {
+        "command": "agentSkills.openSettings",
+        "title": "Agent Skills: Open Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
         "command": "agentSkills.refresh",
         "title": "Agent Skills: Refresh Skills",
         "icon": "$(refresh)"
@@ -61,20 +66,38 @@
       {
         "command": "agentSkills.repair",
         "title": "Agent Skills: Repair"
-      },
-      {
-        "command": "agentSkills.openSettings",
-        "title": "Agent Skills: Open Settings"
       }
     ],
     "menus": {
       "view/title": [
         {
+          "command": "agentSkills.openSettings",
+          "when": "view == agentSkillsSidebar",
+          "group": "navigation@2"
+        },
+        {
           "command": "agentSkills.refresh",
           "when": "view == agentSkillsSidebar",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ]
+    },
+    "configuration": {
+      "title": "Agent Skills",
+      "properties": {
+        "agentSkills.scopes.allowedScopes": {
+          "type": "string",
+          "enum": [
+            "all",
+            "global",
+            "local",
+            "none"
+          ],
+          "default": "all",
+          "description": "Controls which scopes are allowed for skill installation and management. 'all' allows both local and global. 'global' restricts to global user scope. 'local' restricts to workspace scope. 'none' disables all lifecycle operations.",
+          "scope": "window"
+        }
+      }
     }
   },
   "capabilities": {

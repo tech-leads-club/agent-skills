@@ -1,12 +1,16 @@
 import { jest } from '@jest/globals'
-import type { AvailableAgent, InstalledSkillsMap, Skill, SkillRegistry } from '../../shared/types'
 import type { InstalledSkillsScanner } from '../../services/installed-skills-scanner'
 import type { LoggingService } from '../../services/logging-service'
 import type { SkillRegistryService } from '../../services/skill-registry-service'
+import type {
+  AvailableAgent,
+  InstalledSkillsMap,
+  ScopePolicyEvaluation,
+  Skill,
+  SkillRegistry,
+} from '../../shared/types'
 
-type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
-  ...args: TArgs
-) => TReturn
+type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (...args: TArgs) => TReturn
 
 type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
   ...args: TArgs
@@ -15,7 +19,6 @@ type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unk
 type Listener = () => void
 type DisposableLike = { dispose: () => void }
 
-let trustGrantedHandler: Listener | undefined
 let changeHandler: Listener | undefined
 
 // Mock dependencies
@@ -34,15 +37,12 @@ const mockVscode = {
     workspaceFolders: [{ uri: { fsPath: '/workspace' } }],
     createFileSystemWatcher: jest.fn<SyncMockableFn<typeof mockWatcher, [string]>>(() => mockWatcher),
     isTrusted: true,
-    onDidGrantWorkspaceTrust: jest.fn<SyncMockableFn<DisposableLike, [Listener]>>((handler) => {
-      trustGrantedHandler = handler
-      return { dispose: jest.fn() }
-    }),
+    onDidGrantWorkspaceTrust: jest.fn<SyncMockableFn<DisposableLike, [Listener]>>(() => ({ dispose: jest.fn() })),
   },
   window: {
-    onDidChangeWindowState: jest.fn<SyncMockableFn<DisposableLike, [(_state: { focused: boolean }) => void]>>(
-      () => ({ dispose: jest.fn() }),
-    ),
+    onDidChangeWindowState: jest.fn<SyncMockableFn<DisposableLike, [(_state: { focused: boolean }) => void]>>(() => ({
+      dispose: jest.fn(),
+    })),
   },
 }
 
@@ -80,13 +80,19 @@ const { StateReconciler } = await import('../../services/state-reconciler')
 
 describe('StateReconciler', () => {
   let reconciler: InstanceType<typeof StateReconciler>
+  let localOnlyPolicy: ScopePolicyEvaluation
 
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
-    trustGrantedHandler = undefined
     changeHandler = undefined
     mockVscode.workspace.isTrusted = true
+    localOnlyPolicy = {
+      allowedScopes: 'all',
+      environmentScopes: ['local', 'global'],
+      effectiveScopes: ['local'],
+      blockedReason: undefined,
+    }
     reconciler = new StateReconciler(
       mockScanner as InstalledSkillsScanner,
       mockRegistry as SkillRegistryService,
@@ -98,41 +104,30 @@ describe('StateReconciler', () => {
     jest.useRealTimers()
   })
 
-  it('should create local watchers if workspace is trusted', () => {
-    reconciler.start()
+  it('should create local watchers when policy allows local scope', () => {
+    reconciler.updatePolicy(localOnlyPolicy)
     expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalled()
   })
 
-  it('should NOT create local watchers if workspace is untrusted', () => {
-    mockVscode.workspace.isTrusted = false
-    reconciler.start()
+  it('should NOT create local watchers when policy excludes local scope', () => {
+    reconciler.updatePolicy({
+      ...localOnlyPolicy,
+      effectiveScopes: ['global'],
+    })
     expect(mockVscode.workspace.createFileSystemWatcher).not.toHaveBeenCalled()
   })
 
-  it('should create watchers when trust is granted', () => {
-    mockVscode.workspace.isTrusted = false
-    reconciler.start()
-
-    // Simulate trust grant
-    expect(trustGrantedHandler).toBeDefined()
-    mockVscode.workspace.isTrusted = true
-    trustGrantedHandler?.()
-
-    expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalled()
-  })
-
-  it('should not recreate watchers on repeated trust events', () => {
-    reconciler.start()
+  it('should not recreate watchers on repeated policy updates', () => {
+    reconciler.updatePolicy(localOnlyPolicy)
     const initialCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls.length
 
-    expect(trustGrantedHandler).toBeDefined()
-    trustGrantedHandler?.()
+    reconciler.updatePolicy(localOnlyPolicy)
 
     expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalledTimes(initialCalls)
   })
 
   it('should reconcile on watcher events (debounced)', async () => {
-    reconciler.start()
+    reconciler.updatePolicy(localOnlyPolicy)
 
     // Simulate event
     expect(changeHandler).toBeDefined()
@@ -143,6 +138,6 @@ describe('StateReconciler', () => {
 
     await jest.runAllTimersAsync()
 
-    expect(mockScanner.scan).toHaveBeenCalledTimes(2) // Initial + 1 debounced
+    expect(mockScanner.scan).toHaveBeenCalledTimes(1)
   })
 })

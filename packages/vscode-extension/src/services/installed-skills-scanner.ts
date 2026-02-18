@@ -125,6 +125,11 @@ interface ScopeCheck {
   path: string
 }
 
+export interface ScanOptions {
+  includeLocal: boolean
+  includeGlobal: boolean
+}
+
 /**
  * Scans disk to build an InstalledSkillsMap reflecting which skills are installed
  * in which scopes, with per-agent granularity.
@@ -141,15 +146,24 @@ export class InstalledSkillsScanner {
    * Scans all agent directories (local + global) for installed skills.
    * @param registrySkills List of known skills from the registry
    * @param workspaceRoot Workspace folder path (null if no workspace open)
+   * @param options Scope filtering options (defaults to all)
    * @returns Map of skill name → installation metadata
    */
-  async scan(registrySkills: Skill[], workspaceRoot: string | null): Promise<InstalledSkillsMap> {
-    this.logger.debug(`Scanning installed skills (workspace: ${workspaceRoot ?? 'none'})`)
+  async scan(
+    registrySkills: Skill[],
+    workspaceRoot: string | null,
+    options: ScanOptions = { includeLocal: true, includeGlobal: true },
+  ): Promise<InstalledSkillsMap> {
+    this.logger.debug(
+      `Scanning installed skills (workspace: ${workspaceRoot ?? 'none'}, local: ${options.includeLocal}, global: ${
+        options.includeGlobal
+      })`,
+    )
 
     const map: InstalledSkillsMap = {}
 
     for (const skill of registrySkills) {
-      const info = await this.scanSkill(skill.name, workspaceRoot)
+      const info = await this.scanSkill(skill.name, workspaceRoot, options)
       map[skill.name] = info.agents.length > 0 ? info : null
     }
 
@@ -164,15 +178,20 @@ export class InstalledSkillsScanner {
    *
    * @param skillName - Skill identifier to scan.
    * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @param options - Scope filtering options.
    * @returns Installation metadata aggregated across all agent configs.
    */
-  private async scanSkill(skillName: string, workspaceRoot: string | null): Promise<InstalledSkillInfo> {
+  private async scanSkill(
+    skillName: string,
+    workspaceRoot: string | null,
+    options: ScanOptions,
+  ): Promise<InstalledSkillInfo> {
     const agentResults: AgentInstallInfo[] = []
     let localAny = false
     let globalAny = false
 
     for (const config of AGENT_CONFIGS) {
-      const agentInfo = await this.buildAgentInstallInfo(config, skillName, workspaceRoot)
+      const agentInfo = await this.buildAgentInstallInfo(config, skillName, workspaceRoot, options)
       if (!agentInfo) continue
 
       localAny ||= agentInfo.local
@@ -193,14 +212,16 @@ export class InstalledSkillsScanner {
    * @param config - Agent directory configuration.
    * @param skillName - Skill identifier to scan.
    * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @param options - Scope filtering options.
    * @returns Agent install info when any installation/corruption exists; otherwise `null`.
    */
   private async buildAgentInstallInfo(
     config: AgentScanConfig,
     skillName: string,
     workspaceRoot: string | null,
+    options: ScanOptions,
   ): Promise<AgentInstallInfo | null> {
-    const scopeChecks = this.buildScopeChecks(config, skillName, workspaceRoot)
+    const scopeChecks = this.buildScopeChecks(config, skillName, workspaceRoot, options)
     let local = false
     let global = false
     let corrupted = false
@@ -285,14 +306,22 @@ export class InstalledSkillsScanner {
    * @param config - Agent directory configuration.
    * @param skillName - Skill identifier.
    * @param workspaceRoot - Workspace path used for local scope checks, or `null`.
+   * @param options - Scope filtering options.
    * @returns Ordered list of scope checks to evaluate.
    */
-  private buildScopeChecks(config: AgentScanConfig, skillName: string, workspaceRoot: string | null): ScopeCheck[] {
+  private buildScopeChecks(
+    config: AgentScanConfig,
+    skillName: string,
+    workspaceRoot: string | null,
+    options: ScanOptions,
+  ): ScopeCheck[] {
     const checks: ScopeCheck[] = []
-    if (workspaceRoot) {
+    if (workspaceRoot && options.includeLocal) {
       checks.push({ scope: 'local', path: join(workspaceRoot, config.skillsDir, skillName) })
     }
-    checks.push({ scope: 'global', path: join(config.globalSkillsDir, skillName) })
+    if (options.includeGlobal) {
+      checks.push({ scope: 'global', path: join(config.globalSkillsDir, skillName) })
+    }
     return checks
   }
 

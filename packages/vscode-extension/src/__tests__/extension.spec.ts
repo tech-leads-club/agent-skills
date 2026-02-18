@@ -37,10 +37,13 @@ const mockHealthChecker = {
 const mockScanner = {}
 const mockReconciler = {
   reconcile: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
+  updatePolicy: jest.fn<MockableFn<void>>(),
   start: jest.fn<MockableFn<void>>(),
   dispose: jest.fn<MockableFn<void>>(),
 }
-const mockSidebarProvider = {}
+const mockSidebarProvider = {
+  updatePolicy: jest.fn<MockableFn<void>>(),
+}
 
 const mockSkillLockService = {
   getInstalledHashes: jest.fn<MockableFn<Promise<Record<string, string | undefined>>>>().mockResolvedValue({}),
@@ -110,18 +113,16 @@ describe('Extension Activation', () => {
     ;(LoggingService as unknown as jest.Mock<() => typeof mockLoggingService>).mockImplementation(
       () => mockLoggingService,
     )
-    ;(
-      SkillRegistryService as unknown as jest.Mock<() => typeof mockRegistryService>
-    ).mockImplementation(() => mockRegistryService)
+    ;(SkillRegistryService as unknown as jest.Mock<() => typeof mockRegistryService>).mockImplementation(
+      () => mockRegistryService,
+    )
     ;(SidebarProvider as unknown as jest.Mock<() => typeof mockSidebarProvider>).mockImplementation(
       () => mockSidebarProvider,
     )
-    ;(
-      StateReconciler as unknown as jest.Mock<() => typeof mockReconciler>
-    ).mockImplementation(() => mockReconciler)
-    ;(
-      SkillLockService as unknown as jest.Mock<() => typeof mockSkillLockService>
-    ).mockImplementation(() => mockSkillLockService)
+    ;(StateReconciler as unknown as jest.Mock<() => typeof mockReconciler>).mockImplementation(() => mockReconciler)
+    ;(SkillLockService as unknown as jest.Mock<() => typeof mockSkillLockService>).mockImplementation(
+      () => mockSkillLockService,
+    )
 
     // Reset mock return values
     mockRegistryService.getRegistry.mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] })
@@ -173,9 +174,8 @@ describe('Extension Activation', () => {
 
   it('should handle agentSkills.refresh command', async () => {
     activate(context)
-    const calls = (
-      vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>
-    ).mock.calls
+    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>).mock
+      .calls
     const refreshCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.refresh')
     const handler = refreshCall?.[1] as (...args: unknown[]) => Promise<void>
 
@@ -188,9 +188,8 @@ describe('Extension Activation', () => {
 
   it('should handle agentSkills.openSettings command', () => {
     activate(context)
-    const calls = (
-      vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>
-    ).mock.calls
+    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>).mock
+      .calls
     const settingsCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.openSettings')
     const handler = settingsCall?.[1] as (...args: unknown[]) => unknown
 
@@ -199,7 +198,7 @@ describe('Extension Activation', () => {
     expect(mockLoggingService.info).toHaveBeenCalledWith('Open Settings command invoked')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       'workbench.action.openSettings',
-      '@ext:tech-leads-club.vscode-extension',
+      '@ext:tech-leads-club.agent-skills',
     )
   })
 

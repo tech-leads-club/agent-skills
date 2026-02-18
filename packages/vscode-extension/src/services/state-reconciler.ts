@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import type { AvailableAgent, InstalledSkillsMap } from '../shared/types'
+import type { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation } from '../shared/types'
 import type { InstalledSkillsScanner } from './installed-skills-scanner'
 import type { LoggingService } from './logging-service'
 import type { SkillRegistryService } from './skill-registry-service'
@@ -18,6 +18,9 @@ export class StateReconciler implements vscode.Disposable {
 
   private readonly DEBOUNCE_MS = 500
 
+  private policy?: ScopePolicyEvaluation
+  private globalFocusSubscription?: vscode.Disposable
+
   /**
    * Creates a state reconciler that bridges scanner output to subscribers.
    *
@@ -32,39 +35,65 @@ export class StateReconciler implements vscode.Disposable {
   ) {}
 
   /**
-   * Starts watching filesystem and window focus events.
-   *
-   * @returns Nothing.
+   * Starts reconciliation (watchers are managed via updatePolicy).
    */
   start(): void {
     this.logger.info('Starting state reconciliation')
-
-    if (vscode.workspace.isTrusted) {
-      // Create local FileSystemWatchers only for trusted workspaces
-      this.createLocalWatchers()
-    } else {
-      this.logger.info('Workspace untrusted — skipping local FileSystemWatchers')
-    }
-
-    // Subscribe to window focus events (catches global directory changes)
-    const focusSubscription = vscode.window.onDidChangeWindowState((state) => {
-      if (state.focused) {
-        this.logger.debug('Window focused, triggering reconciliation')
-        this.scheduleReconciliation()
-      }
-    })
-    this.subscriptions.push(focusSubscription)
-
-    // Listen for trust grant
-    const trustSubscription = vscode.workspace.onDidGrantWorkspaceTrust(() => {
-      this.logger.info('Workspace trust granted — creating local FileSystemWatchers')
-      this.createLocalWatchers()
-      this.scheduleReconciliation()
-    })
-    this.subscriptions.push(trustSubscription)
-
     // Initial reconciliation
     void this.reconcile()
+  }
+
+  /**
+   * Updates the scope policy and refreshes watchers accordingly.
+   *
+   * @param policy - Evaluated policy state.
+   */
+  updatePolicy(policy: ScopePolicyEvaluation): void {
+    this.policy = policy
+    this.refreshLocalWatchers()
+    this.refreshGlobalWatcher()
+    this.scheduleReconciliation()
+  }
+
+  private refreshLocalWatchers(): void {
+    const allowLocal = this.policy?.effectiveScopes.includes('local') ?? false
+    if (allowLocal) {
+      this.createLocalWatchers()
+    } else {
+      this.disposeLocalWatchers()
+    }
+  }
+
+  private disposeLocalWatchers(): void {
+    if (this.watchers.length > 0) {
+      this.logger.debug(`Disposing ${this.watchers.length} local FileSystemWatchers`)
+      this.watchers.forEach((watcher) => watcher.dispose())
+      this.watchers = []
+      this.watchersInitialized = false
+    }
+  }
+
+  private refreshGlobalWatcher(): void {
+    const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? false
+
+    if (allowGlobal) {
+      if (!this.globalFocusSubscription) {
+        this.logger.debug('Enabling global focus watcher')
+        // Subscribe to window focus events (catches global directory changes)
+        this.globalFocusSubscription = vscode.window.onDidChangeWindowState((state) => {
+          if (state.focused) {
+            this.logger.debug('Window focused, triggering reconciliation')
+            this.scheduleReconciliation()
+          }
+        })
+      }
+    } else {
+      if (this.globalFocusSubscription) {
+        this.logger.debug('Disabling global focus watcher')
+        this.globalFocusSubscription.dispose()
+        this.globalFocusSubscription = undefined
+      }
+    }
   }
 
   /**
@@ -82,7 +111,10 @@ export class StateReconciler implements vscode.Disposable {
         ? (vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null)
         : null
 
-      const newState = await this.scanner.scan(registry.skills, workspaceRoot)
+      const includeLocal = this.policy?.effectiveScopes.includes('local') ?? vscode.workspace.isTrusted
+      const includeGlobal = this.policy?.effectiveScopes.includes('global') ?? true
+
+      const newState = await this.scanner.scan(registry.skills, workspaceRoot, { includeLocal, includeGlobal })
 
       // Compare with previous state
       if (this.hasStateChanged(newState)) {

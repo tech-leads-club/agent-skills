@@ -15,6 +15,7 @@ export const window = {
   showErrorMessage: jest.fn(),
   showWarningMessage: jest.fn(),
   showQuickPick: jest.fn(),
+  onDidChangeWindowState: jest.fn(() => ({ dispose: jest.fn() })),
   createQuickPick: jest.fn(() => {
     const changeHandlers: Array<(value: string) => void> = []
     const acceptHandlers: Array<() => void> = []
@@ -79,7 +80,15 @@ export const workspace = {
   getConfiguration: jest.fn(() => ({
     get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
   })),
+  createFileSystemWatcher: jest.fn(() => ({
+    onDidCreate: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidDelete: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChange: jest.fn(() => ({ dispose: jest.fn() })),
+    dispose: jest.fn(),
+  })),
   onDidGrantWorkspaceTrust: jest.fn(() => ({ dispose: jest.fn() })),
+  onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
+  onDidChangeWorkspaceFolders: jest.fn(() => ({ dispose: jest.fn() })),
   isTrusted: true,
   workspaceFolders: [{ uri: { fsPath: '/test/workspace' }, name: 'test', index: 0 }],
 }

@@ -34,6 +34,7 @@ describe('SkillCard Accessibility', () => {
     onUpdate: jest.fn(),
     onRepair: jest.fn(),
     onRequestAgentPick: jest.fn(),
+    isLifecycleBlocked: false,
   }
 
   it('should have article role for the card element', () => {
@@ -126,6 +127,12 @@ describe('SkillCard Accessibility', () => {
 
   it('should disable buttons when isOperating is true', () => {
     render(<SkillCard {...defaultProps} isOperating={true} />)
+    const addButton = screen.getByRole('button', { name: /add/i })
+    expect(addButton).toBeDisabled()
+  })
+
+  it('should disable buttons when isLifecycleBlocked is true', () => {
+    render(<SkillCard {...defaultProps} isLifecycleBlocked={true} />)
     const addButton = screen.getByRole('button', { name: /add/i })
     expect(addButton).toBeDisabled()
   })

@@ -1,4 +1,12 @@
-import type { AvailableAgent, InstalledSkillsMap, OperationType, SkillRegistry } from './types'
+import type {
+  AllowedScopesSetting,
+  AvailableAgent,
+  BlockedReason,
+  InstalledSkillsMap,
+  LifecycleScope,
+  OperationType,
+  SkillRegistry,
+} from './types'
 
 /**
  * Messages sent FROM the Webview TO the Extension Host.
@@ -29,6 +37,7 @@ export type ExtensionMessage =
   | { type: 'agentPickResult'; payload: AgentPickResultPayload }
   | { type: 'scopePickResult'; payload: ScopePickResultPayload }
   | { type: 'trustState'; payload: TrustStatePayload }
+  | { type: 'policyState'; payload: ScopePolicyStatePayload }
 
 /**
  * Payload for initialize message.
@@ -170,4 +179,13 @@ export interface RepairSkillPayload {
  */
 export interface TrustStatePayload {
   isTrusted: boolean
+}
+
+/**
+ * Payload for policyState message (Extension → Webview).
+ */
+export interface ScopePolicyStatePayload {
+  allowedScopes: AllowedScopesSetting
+  effectiveScopes: LifecycleScope[]
+  blockedReason?: BlockedReason
 }
