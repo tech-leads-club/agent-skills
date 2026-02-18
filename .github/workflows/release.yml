@@ -217,7 +217,7 @@ jobs:
           git-config: true
 
       - name: Generate Skills Data
-        run: npm run generate:data
+        run: npm run generate:data || NX_NO_CLOUD=true npm run generate:data
 
       - name: Commit Data if Changed
         run: |
