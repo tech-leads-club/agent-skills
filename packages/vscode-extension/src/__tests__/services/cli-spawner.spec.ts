@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
-import { EventEmitter } from 'node:events'
 import type { ChildProcess } from 'node:child_process'
+import { EventEmitter } from 'node:events'
 import type { LoggingService } from '../../services/logging-service'
 
 // Mock child_process
@@ -30,6 +30,8 @@ jest.unstable_mockModule('node:child_process', () => ({
 const mockLoggingService = {
   debug: jest.fn(),
   info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
 }
 
 jest.unstable_mockModule('../../services/logging-service', () => ({
@@ -58,8 +60,9 @@ describe('CliSpawner', () => {
 
     expect(mockSpawn).toHaveBeenCalledWith('npx', ['tlc-skills', 'install', '-s', 'skill'], {
       cwd: '/cwd',
-      shell: false,
+      shell: process.platform === 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
+      windowsHide: true,
     })
   })
 

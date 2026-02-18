@@ -60,23 +60,43 @@ export class CliSpawner implements vscode.Disposable {
    * @returns A CliProcess handle for output streaming and lifecycle control
    */
   spawn(args: string[], options: SpawnOptions): CliProcess {
-    this.logger.debug(`[${options.operationId}] Spawning CLI: npx tlc-skills ${args.join(' ')}`)
+    this.logger.debug(
+      `[${options.operationId}] Spawn requested: command=npx tlc-skills args="${args.join(' ')}" cwd="${options.cwd}" platform=${process.platform}`,
+    )
 
     // Security: Validate skill name if present
     const skillNameIndex = args.indexOf('-s')
     if (skillNameIndex !== -1 && skillNameIndex + 1 < args.length) {
       const skillName = args[skillNameIndex + 1]
       if (!this.SKILL_NAME_REGEX.test(skillName)) {
+        this.logger.error(`[${options.operationId}] Skill name validation failed: ${skillName}`)
         throw new Error(`Invalid skill name: ${skillName}. Only lowercase alphanumeric and hyphens allowed.`)
       }
     }
 
-    // Spawn with security-hardened configuration
-    const childProcess = spawn('npx', ['tlc-skills', ...args], {
-      cwd: options.cwd,
-      shell: false, // Prevents shell injection
-      stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr
-    })
+    const isWindows = process.platform === 'win32'
+    const command = 'npx'
+    const useShell = isWindows
+    this.logger.debug(
+      `[${options.operationId}] Spawning process: ${command} tlc-skills ${args.join(' ')} (shell=${String(useShell)})`,
+    )
+    let childProcess: ChildProcess
+    try {
+      childProcess = spawn(command, ['tlc-skills', ...args], {
+        cwd: options.cwd,
+        shell: useShell,
+        stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr
+        windowsHide: true,
+      })
+    } catch (error: unknown) {
+      const errnoError = error as NodeJS.ErrnoException
+      this.logger.error(
+        `[${options.operationId}] Spawn threw before process started: command=${command} cwd="${options.cwd}" code=${errnoError.code ?? 'unknown'} errno=${errnoError.errno ?? 'unknown'} message="${errnoError.message ?? String(error)}"`,
+      )
+      throw error
+    }
+
+    this.logger.debug(`[${options.operationId}] Process spawned: pid=${childProcess.pid ?? 'unknown'}`)
 
     return this.createCliProcess(childProcess, options)
   }
@@ -143,7 +163,9 @@ export class CliSpawner implements vscode.Disposable {
       })
 
       childProcess.on('error', (error: NodeJS.ErrnoException) => {
-        this.logger.error(`[${options.operationId}] Spawn error: ${error.message}`)
+        this.logger.error(
+          `[${options.operationId}] Process error event: message="${error.message}" code=${error.code ?? 'unknown'} errno=${error.errno ?? 'unknown'}`,
+        )
         resolveCompletion({
           exitCode: null,
           signal: null,
@@ -151,6 +173,8 @@ export class CliSpawner implements vscode.Disposable {
         })
       })
     })
+
+    const logger = this.logger
 
     return {
       onOutput(handler: (line: string) => void): void {
@@ -161,7 +185,10 @@ export class CliSpawner implements vscode.Disposable {
       },
       kill(): void {
         if (!childProcess.killed) {
+          logger.warn(`[${options.operationId}] Kill requested, sending SIGTERM`)
           childProcess.kill('SIGTERM')
+        } else {
+          logger.debug(`[${options.operationId}] Kill requested, process already terminated`)
         }
       },
       operationId: options.operationId,

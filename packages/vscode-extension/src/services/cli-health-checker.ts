@@ -1,9 +1,12 @@
+import { existsSync } from 'node:fs'
+import { homedir } from 'node:os'
 import * as vscode from 'vscode'
 import type { CliHealthStatus } from '../shared/types'
 import type { CliSpawner } from './cli-spawner'
 import type { LoggingService } from './logging-service'
 
 const ERRNO_ENOENT = 'ENOENT'
+const ERRNO_EINVAL = 'EINVAL'
 
 /**
  * Normalizes unknown health-check errors into a user-facing message.
@@ -54,6 +57,7 @@ export class CliHealthChecker implements vscode.Disposable {
    */
   dispose(): void {
     if (this.activeProcess) {
+      this.logger.warn('Active health-check process found during dispose, terminating process')
       this.activeProcess.kill()
       this.activeProcess = null
     }
@@ -75,18 +79,34 @@ export class CliHealthChecker implements vscode.Disposable {
    */
   async check(): Promise<CliHealthStatus> {
     this.logger.debug('Checking CLI health...')
+    let timeout: NodeJS.Timeout | null = null
 
     try {
-      const checkPromise = new Promise<CliHealthStatus>((resolve) => {
-        const timeout = setTimeout(() => {
+      const checkPromise = new Promise<CliHealthStatus>((resolve, reject) => {
+        timeout = setTimeout(() => {
           this.logger.warn('CLI version check timed out')
+          if (this.activeProcess) {
+            this.logger.warn('Terminating active health-check process after timeout')
+            this.activeProcess.kill()
+            this.activeProcess = null
+          }
           resolve({ status: 'unknown', error: 'Timeout waiting for CLI version' })
         }, 15000)
 
-        const cliProcess = this.spawner.spawn(['--version'], {
-          cwd: process.cwd(),
-          operationId: 'health-check',
-        })
+        const cwd = this.getHealthCheckCwd()
+        this.logger.debug(`Using health-check cwd: ${cwd}`)
+
+        this.logger.debug('Spawning CLI process for --version')
+        let cliProcess: ReturnType<CliSpawner['spawn']>
+        try {
+          cliProcess = this.spawner.spawn(['--version'], {
+            cwd,
+            operationId: 'health-check',
+          })
+        } catch (error: unknown) {
+          reject(error)
+          return
+        }
 
         this.activeProcess = cliProcess
 
@@ -95,50 +115,102 @@ export class CliHealthChecker implements vscode.Disposable {
           output += line + '\n'
         })
 
-        cliProcess.onComplete().then((result) => {
-          clearTimeout(timeout)
-          this.activeProcess = null
-
-          const lowerError = result.stderr.toLowerCase()
-
-          if (
-            (result.exitCode === null && lowerError.includes('enoent')) ||
-            (lowerError.includes('enoent') && lowerError.includes('npx'))
-          ) {
-            resolve({ status: 'npx-missing' })
-            return
-          }
-
-          if (result.exitCode !== 0) {
-            resolve({ status: 'cli-missing' })
-            return
-          }
-
-          const match = output.match(/(\d+\.\d+\.\d+)/)
-          if (match) {
-            const version = match[1]
-            if (this.isVersionCompatible(version)) {
-              resolve({ status: 'ok', version })
-            } else {
-              resolve({ status: 'outdated', version, minVersion: MIN_SUPPORTED_CLI_VERSION })
+        cliProcess
+          .onComplete()
+          .then((result) => {
+            if (timeout) {
+              clearTimeout(timeout)
+              timeout = null
             }
-            return
-          }
+            this.activeProcess = null
 
-          resolve({ status: 'cli-missing' })
-        })
+            const lowerError = result.stderr.toLowerCase()
+
+            if (
+              (result.exitCode === null && lowerError.includes('enoent')) ||
+              (lowerError.includes('enoent') && lowerError.includes('npx'))
+            ) {
+              this.logger.warn('Detected missing npx from CLI health-check output')
+              resolve({ status: 'npx-missing' })
+              return
+            }
+
+            if (result.exitCode !== 0) {
+              this.logger.warn(`CLI health-check failed with non-zero exit code: ${result.exitCode}`)
+              resolve({ status: 'cli-missing' })
+              return
+            }
+
+            const match = output.match(/(\d+\.\d+\.\d+)/)
+            if (match) {
+              const version = match[1]
+              if (this.isVersionCompatible(version)) {
+                resolve({ status: 'ok', version })
+              } else {
+                this.logger.warn(`CLI version is outdated: current=${version}, min=${MIN_SUPPORTED_CLI_VERSION}`)
+                resolve({ status: 'outdated', version, minVersion: MIN_SUPPORTED_CLI_VERSION })
+              }
+              return
+            }
+
+            this.logger.warn('Unable to parse CLI version from output, marking CLI as missing')
+            resolve({ status: 'cli-missing' })
+          })
+          .catch((error: unknown) => {
+            reject(error)
+          })
       })
 
       this.cachedStatus = await checkPromise
       return this.cachedStatus
     } catch (error: unknown) {
       if (isErrnoException(error) && error.code === ERRNO_ENOENT) {
+        this.logger.error('Health-check failed due to missing npx executable (ENOENT)')
         this.cachedStatus = { status: 'npx-missing' }
         return this.cachedStatus
       }
+      if (isErrnoException(error) && error.code === ERRNO_EINVAL) {
+        this.logger.error('Health-check failed due to invalid spawn parameters (EINVAL)')
+        this.cachedStatus = {
+          status: 'unknown',
+          error: 'Failed to start CLI process (EINVAL). Check shell environment and working directory.',
+        }
+        return this.cachedStatus
+      }
+      this.logger.error(`Health-check failed unexpectedly: ${toErrorMessage(error)}`)
       this.cachedStatus = { status: 'unknown', error: toErrorMessage(error) }
       return this.cachedStatus
+    } finally {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
     }
+  }
+
+  /**
+   * Picks a valid working directory for CLI health checks.
+   */
+  private getHealthCheckCwd(): string {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+    if (workspacePath && existsSync(workspacePath)) {
+      return workspacePath
+    }
+
+    try {
+      const current = process.cwd()
+      if (existsSync(current)) {
+        return current
+      }
+    } catch {
+      this.logger.warn('process.cwd() is unavailable while selecting health-check cwd')
+    }
+
+    const userHome = homedir()
+    if (existsSync(userHome)) {
+      return userHome
+    }
+
+    return '.'
   }
 
   /**
