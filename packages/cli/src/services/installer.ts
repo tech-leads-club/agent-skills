@@ -84,6 +84,7 @@ const validateSymlinkTarget = async (linkPath: string, baseDir: string): Promise
 
 const copySkillDirectory = async (src: string, dest: string): Promise<void> => {
   await rm(dest, { recursive: true, force: true })
+  await mkdir(join(dest, '..'), { recursive: true })
   await cp(src, dest, { recursive: true })
 }
 
