@@ -39,7 +39,7 @@ runs:
     - name: Run security scan
       id: scan
       shell: bash
-      run: npx nx run skills-catalog:security-scan || NX_NO_CLOUD=true npx nx run skills-catalog:security-scan
+      run: npx nx run @tech-leads-club/skills-catalog:security-scan || NX_NO_CLOUD=true npx nx run @tech-leads-club/skills-catalog:security-scan
       continue-on-error: true
 
     - name: Upload scan results
