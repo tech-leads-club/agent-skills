@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
@@ -50,8 +50,19 @@ export async function saveConfig(config: Partial<UserConfig>): Promise<void> {
   const updatedConfig = { ...currentConfig, ...config }
   await mkdir(dirname(configPath), { recursive: true })
   const tempPath = `${configPath}.tmp`
-  await writeFile(tempPath, JSON.stringify(updatedConfig, null, 2), 'utf-8')
-  await writeFile(configPath, JSON.stringify(updatedConfig, null, 2), 'utf-8')
+  const content = JSON.stringify(updatedConfig, null, 2)
+
+  try {
+    await writeFile(tempPath, content, 'utf-8')
+    await rename(tempPath, configPath)
+  } catch (error) {
+    try {
+      await rm(tempPath, { force: true })
+    } catch {
+      // Ignore cleanup error
+    }
+    throw error
+  }
 }
 
 export async function isFirstLaunch(): Promise<boolean> {
