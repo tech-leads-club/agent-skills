@@ -1,10 +1,12 @@
 import { Box, Text, useInput } from 'ink'
 import Spinner from 'ink-spinner'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
 
+import { installedSkillsAtom, installedSkillsRefreshAtom } from '../atoms/installedSkills'
+import { selectedAgentsAtom, selectedSkillsAtom } from '../atoms/wizard'
 import { Header } from '../components/Header'
 import { InstallResults } from '../components/InstallResults'
-import { useInstalledSkills } from '../hooks/useInstalledSkills'
 import { useInstaller } from '../hooks/useInstaller'
 import { useSkills } from '../hooks/useSkills'
 import { useWizardStep } from '../hooks/useWizardStep'
@@ -20,18 +22,19 @@ import { UpdateView } from './UpdateView'
 
 export function InstallWizard({ onExit }: { onExit: () => void }) {
   const { step, next, back } = useWizardStep(5)
-  const [selectedAgents, setSelectedAgents] = useState<AgentType[]>([])
+  const [selectedAgents, setSelectedAgents] = useAtom(selectedAgentsAtom)
+  const [selectedSkills, setSelectedSkills] = useAtom(selectedSkillsAtom)
+  const refreshInstalledSkills = useSetAtom(installedSkillsRefreshAtom)
+  const installedSkills = useAtomValue(installedSkillsAtom)
   const [action, setAction] = useState<'install' | 'update' | 'remove'>('install')
   const [showCredits, setShowCredits] = useState(false)
   const [showUpdate, setShowUpdate] = useState(false)
   const [showRemove, setShowRemove] = useState(false)
-  const [selectedSkills, setSelectedSkills] = useState<SkillInfo[]>([])
   const [installConfig, setInstallConfig] = useState<{ method: 'copy' | 'symlink'; global: boolean }>({
     method: 'copy',
     global: false,
   })
 
-  const { installedSkills } = useInstalledSkills()
   const { skills } = useSkills()
   const { install, progress, results, installing } = useInstaller()
   const [installStarted, setInstallStarted] = useState(false)
@@ -90,10 +93,11 @@ export function InstallWizard({ onExit }: { onExit: () => void }) {
           global: installConfig.global,
         })
         setInstallComplete(true)
+        refreshInstalledSkills((prev) => prev + 1)
       }
     }
     runInstall()
-  }, [step, installStarted, installComplete, install, selectedSkills, selectedAgents])
+  }, [step, installStarted, installComplete, install, selectedSkills, selectedAgents, refreshInstalledSkills])
 
   if (step === 5) {
     if (installComplete) {
@@ -122,17 +126,9 @@ export function InstallWizard({ onExit }: { onExit: () => void }) {
     )
   }
 
-  if (showUpdate) {
-    return <UpdateView selectedAgents={selectedAgents} onExit={() => setShowUpdate(false)} />
-  }
-
-  if (showRemove) {
-    return <RemoveWizard selectedAgents={selectedAgents} onExit={() => setShowRemove(false)} />
-  }
-
-  if (showCredits) {
-    return <CreditsView onExit={() => setShowCredits(false)} />
-  }
+  if (showUpdate) return <UpdateView selectedAgents={selectedAgents} onExit={() => setShowUpdate(false)} />
+  if (showRemove) return <RemoveWizard selectedAgents={selectedAgents} onExit={() => setShowRemove(false)} />
+  if (showCredits) return <CreditsView onExit={() => setShowCredits(false)} />
 
   return (
     <Box flexDirection="column">
