@@ -1,7 +1,7 @@
 {
   "name": "@tech-leads-club/agent-skills",
   "version": "1.0.0-beta.0",
-  "description": "CLI to install and manage skills for AI coding agents",
+  "description": "Secure, verifiable CLI to install and manage skills for professional AI coding agents",
   "author": "Tech Leads Club",
   "license": "MIT",
   "repository": {
@@ -20,8 +20,8 @@
   },
   "scripts": {
     "build": "nx build",
-    "postbuild": "chmod +x dist/index.js",
     "dev": "tsx src/index.ts",
+    "postbuild": "chmod +x dist/index.js",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest",
     "typecheck": "tsc --noEmit"
   },
