@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { colors, symbols } from '../theme'
 import { FooterBar, type FooterHint } from './FooterBar'
+import { KeyboardShortcutsOverlay, type ShortcutEntry } from './KeyboardShortcutsOverlay'
 
 export interface MultiSelectOption<T> {
   label: string
@@ -28,6 +29,7 @@ export function MultiSelectPrompt<T>({
   const [selected, setSelected] = useState<T[]>(initialSelected)
   const [focusIndex, setFocusIndex] = useState(0)
   const [offset, setOffset] = useState(0)
+  const [showShortcuts, setShowShortcuts] = useState(false)
   const prevInitialSelectedRef = useRef<T[]>(initialSelected)
 
   useEffect(() => {
@@ -41,6 +43,16 @@ export function MultiSelectPrompt<T>({
   }, [initialSelected])
 
   useInput((input, key) => {
+    if (input === '?') {
+      setShowShortcuts((prev) => !prev)
+      return
+    }
+
+    if (showShortcuts) {
+      setShowShortcuts(false)
+      return
+    }
+
     if (key.return) {
       onSubmit(selected)
       return
@@ -99,6 +111,26 @@ export function MultiSelectPrompt<T>({
   const visibleItems = items.slice(offset, offset + limit)
   const hasItemsAbove = offset > 0
   const hasItemsBelow = items.length > offset + limit
+
+  const shortcuts: ShortcutEntry[] = [
+    { key: '↑/↓', description: 'Navigate' },
+    { key: 'space', description: 'Toggle selection' },
+    { key: 'enter', description: 'Confirm' },
+    { key: 'ctrl+a', description: 'Select all / none' },
+    ...(onCancel ? [{ key: 'esc', description: 'Cancel' }] : []),
+  ]
+
+  if (showShortcuts) {
+    return (
+      <Box flexDirection="column" flexGrow={1} alignItems="center" justifyContent="center">
+        <KeyboardShortcutsOverlay
+          visible={showShortcuts}
+          onDismiss={() => setShowShortcuts(false)}
+          shortcuts={shortcuts}
+        />
+      </Box>
+    )
+  }
 
   return (
     <Box flexDirection="column">
