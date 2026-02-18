@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
 import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
@@ -915,7 +915,7 @@ describe('SidebarProvider', () => {
 
     expect(showErrorMessageMock).toHaveBeenCalledWith(
       expect.stringContaining('Lifecycle actions are disabled'),
-      'Open Settings',
+      'Open Settings' as unknown as vscode.MessageOptions,
     )
     expect(executeCommandMock).toHaveBeenCalledWith('agentSkills.openSettings')
     expect(orchestrator.install).not.toHaveBeenCalled()
