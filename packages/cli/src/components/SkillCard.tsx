@@ -21,13 +21,21 @@ export function SkillCard({
   focused = false,
   readOnly = false,
 }: SkillCardProps) {
-  const checkbox = selected ? symbols.checkboxActive : symbols.checkboxInactive
-  const checkboxColor = selected ? colors.success : colors.textMuted
+  const isInstalled = status === 'installed'
+
+  const checkbox = isInstalled ? symbols.checkboxActive : selected ? symbols.checkboxActive : symbols.checkboxInactive
+  const checkboxColor = isInstalled ? colors.textMuted : selected ? colors.success : colors.textMuted
 
   const pointer = focused ? symbols.bullet : ' '
-  const pointerColor = selected ? colors.success : colors.accent
-  const nameColor = focused ? colors.primary : selected ? colors.primaryLight : colors.text
-  const descColor = focused ? colors.textDim : colors.textMuted
+  const pointerColor = isInstalled ? colors.textMuted : selected ? colors.success : colors.accent
+  const nameColor = isInstalled
+    ? colors.textDim
+    : focused
+      ? colors.primary
+      : selected
+        ? colors.primaryLight
+        : colors.text
+  const descColor = colors.textMuted
   const bgColor = focused ? colors.bgLight : undefined
 
   return (
