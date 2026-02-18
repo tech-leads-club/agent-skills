@@ -1,10 +1,13 @@
 import { Box, Text, useInput, useStdout } from 'ink'
+import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 
+import { installedSkillsAtom } from '../atoms/installedSkills'
+import { selectedAgentsAtom } from '../atoms/wizard'
 import { CategoryHeader, Header, SearchInput, SkillCard, SkillDetailPanel } from '../components'
 import { FooterBar } from '../components/FooterBar'
 import { KeyboardShortcutsOverlay, type ShortcutEntry } from '../components/KeyboardShortcutsOverlay'
-import { useFilter, useInstalledSkills, useSkills } from '../hooks'
+import { useFilter, useSkills } from '../hooks'
 import { groupSkillsByCategory } from '../services/categories'
 import { canShowDetailPanel } from '../services/terminal-dimensions'
 import { colors, symbols } from '../theme'
@@ -49,7 +52,8 @@ const getShortcuts = (readOnly: boolean): ShortcutEntry[] => {
 export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = false }: SkillBrowserProps) => {
   const { skills: fetchedSkills, loading: fetching, error } = useSkills()
   const { stdout } = useStdout()
-  const { installedSkills } = useInstalledSkills()
+  const selectedAgents = useAtomValue(selectedAgentsAtom)
+  const installedSkills = useAtomValue(installedSkillsAtom)
 
   const skills = overrideSkills || fetchedSkills
   const loading = overrideSkills ? false : fetching
@@ -92,7 +96,11 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
     const list: VisualItem[] = []
 
     for (const [category, categorySkills] of groupedMap.entries()) {
-      const installedCount = categorySkills.filter((s) => installedSkills[s.name]?.length > 0).length
+      const installedCount = categorySkills.filter((s) => {
+        const agents = installedSkills[s.name] || []
+        if (selectedAgents.length > 0) return agents.some((a) => selectedAgents.includes(a))
+        return agents.length > 0
+      }).length
 
       list.push({
         type: 'header',
@@ -102,13 +110,11 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
         installedCount,
       })
 
-      if (isCategoryExpanded(category.name)) {
-        categorySkills.forEach((skill) => list.push({ type: 'skill', skill }))
-      }
+      if (isCategoryExpanded(category.name)) categorySkills.forEach((skill) => list.push({ type: 'skill', skill }))
     }
 
     return list
-  }, [groupedMap, expandedCategory, isSearchExpanded, installedSkills])
+  }, [groupedMap, expandedCategory, isSearchExpanded, installedSkills, selectedAgents])
 
   const handleToggleShortcuts = () => setShowShortcuts((prev) => !prev)
 
@@ -160,6 +166,13 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
     }
 
     if (item.type === 'skill' && !readOnly) {
+      const isInstalled =
+        selectedAgents.length > 0
+          ? (installedSkills[item.skill.name]?.some((a) => selectedAgents.includes(a)) ?? false)
+          : (installedSkills[item.skill.name]?.length ?? 0) > 0
+
+      if (isInstalled && !overrideSkills) return
+
       const newSet = new Set(selectedSet)
       if (newSet.has(item.skill.name)) {
         newSet.delete(item.skill.name)
@@ -181,9 +194,7 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
     if (readOnly) return
 
     const selectedSkills = skills.filter((s) => selectedSet.has(s.name))
-    if (selectedSkills.length > 0) {
-      onInstall?.(selectedSkills)
-    }
+    if (selectedSkills.length > 0) onInstall?.(selectedSkills)
   }
 
   const handleTabOrRightArrow = (isTab: boolean) => {
@@ -195,16 +206,12 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
       return
     }
 
-    if (!isTab && item.type === 'header' && !isCategoryExpanded(item.category)) {
-      setExpandedCategory(item.category)
-    }
+    if (!isTab && item.type === 'header' && !isCategoryExpanded(item.category)) setExpandedCategory(item.category)
   }
 
   const handleLeftArrow = () => {
     const item = visualList[listIndex]
-    if (item.type === 'header' && isCategoryExpanded(item.category)) {
-      setExpandedCategory(null)
-    }
+    if (item.type === 'header' && isCategoryExpanded(item.category)) setExpandedCategory(null)
   }
 
   const isRegularCharacter = (
@@ -333,7 +340,10 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
     }
 
     const isSelected = selectedSet.has(item.skill.name)
-    const isInstalled = installedSkills[item.skill.name]?.length > 0
+    const isInstalled =
+      selectedAgents.length > 0
+        ? (installedSkills[item.skill.name]?.some((a) => selectedAgents.includes(a)) ?? false)
+        : (installedSkills[item.skill.name]?.length ?? 0) > 0
     const status = isInstalled ? 'installed' : null
 
     return (
