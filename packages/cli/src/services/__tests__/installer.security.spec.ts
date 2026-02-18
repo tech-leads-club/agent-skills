@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
