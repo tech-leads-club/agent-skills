@@ -40,10 +40,14 @@ export default defineConfig([
         {
           ignoredDependencies: [
             '@tech-leads-club/core',
+            'react-dom', // Peer dependency of Next.js
             '@tailwindcss/postcss', // Used in postcss.config.cjs
             'tailwindcss', // Used in global.css via @import
             'github-markdown-css', // Used in global.css via @import
             'highlight.js', // Used in global.css via @import
+            '@jest/globals', // Used in tests only
+            '@testing-library/react', // Used in tests only
+            'fast-check', // Used in tests only
           ],
         },
       ],
