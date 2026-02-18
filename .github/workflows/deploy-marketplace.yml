@@ -2,7 +2,7 @@ name: Deploy Marketplace (GitHub Pages)
 
 on:
   workflow_run:
-    workflows: ["CI/CD Pipeline"]
+    workflows: ['CI/CD Pipeline']
     types: [completed]
     branches: [main]
   workflow_dispatch: {}
@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Generate skills data
-        run: npm run generate:data
+        run: npm run generate:data || NX_NO_CLOUD=true npm run generate:data
 
       - name: Build (static export)
         run: npx nx run marketplace:export || NX_NO_CLOUD=true npx nx run marketplace:export
