@@ -1,11 +1,12 @@
 import { Box, Text, useInput } from 'ink'
 import Spinner from 'ink-spinner'
+import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 
+import { installedSkillsAtom } from '../atoms/installedSkills'
 import { Header } from '../components/Header'
 import { MultiSelectPrompt } from '../components/MultiSelectPrompt'
 import { SelectPrompt } from '../components/SelectPrompt'
-import { useInstalledSkills } from '../hooks/useInstalledSkills'
 import { useRemover } from '../hooks/useRemover'
 import { colors, symbols } from '../theme'
 import type { AgentType } from '../types'
@@ -13,19 +14,20 @@ import { AgentSelector } from './AgentSelector'
 
 export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: AgentType[]; onExit: () => void }) {
   const [internalAgents, setInternalAgents] = useState<AgentType[]>(selectedAgents || [])
-  const { installedSkills, loading } = useInstalledSkills()
+  const installedSkills = useAtomValue(installedSkillsAtom)
   const { removeMultiple, progress, results } = useRemover()
 
   const [step, setStep] = useState<'agent-select' | 'select' | 'confirm' | 'removing' | 'done'>(
     selectedAgents ? 'select' : 'agent-select',
   )
+
   const [selectedToRemove, setSelectedToRemove] = useState<string[]>([])
   const activeAgents = selectedAgents || internalAgents
 
   const filteredSkills = useMemo(() => {
     const filtered: Record<string, AgentType[]> = {}
     Object.entries(installedSkills).forEach(([skillName, agents]) => {
-      const matchingAgents = agents.filter((a) => activeAgents.includes(a))
+      const matchingAgents = agents.filter((a: AgentType) => activeAgents.includes(a))
       if (matchingAgents.length > 0) filtered[skillName] = matchingAgents
     })
     return filtered
@@ -42,9 +44,7 @@ export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: Agen
   }, [skillNames, filteredSkills])
 
   useInput((_, key) => {
-    if (step === 'done' && (key.return || key.escape)) {
-      onExit()
-    }
+    if (step === 'done' && (key.return || key.escape)) onExit()
   })
 
   if (step === 'agent-select') {
@@ -56,19 +56,6 @@ export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: Agen
         }}
         onBack={onExit}
       />
-    )
-  }
-
-  if (loading) {
-    return (
-      <Box flexDirection="column" paddingX={1}>
-        <Header />
-        <Box marginTop={1}>
-          <Text color={colors.accent}>
-            <Spinner type="dots" /> Loading installed skills...
-          </Text>
-        </Box>
-      </Box>
     )
   }
 
@@ -99,11 +86,7 @@ export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: Agen
 
   const executeRemoval = async () => {
     setStep('removing')
-    const targets = selectedToRemove.map((name) => ({
-      name,
-      agents: filteredSkills[name] || [],
-    }))
-
+    const targets = selectedToRemove.map((name) => ({ name, agents: filteredSkills[name] || [] }))
     await removeMultiple(targets)
     setStep('done')
   }
