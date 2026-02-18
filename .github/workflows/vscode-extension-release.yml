@@ -14,6 +14,9 @@ permissions:
   contents: write
   actions: read
 
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
 concurrency:
   group: vscode-extension-release
   cancel-in-progress: false
@@ -35,7 +38,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run semantic release (package)
-        run: npm run release:vscode:package
+        run: npm run release:vscode:package || NX_NO_CLOUD=true npm run release:vscode:package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

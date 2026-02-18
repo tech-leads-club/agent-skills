@@ -19,8 +19,8 @@ jobs:
     name: Extension quality gates
     runs-on: ubuntu-latest
     env:
-      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
-      NX_NO_CLOUD: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ (github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository)) && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
       NODE_OPTIONS: '--experimental-vm-modules'
     steps:
       - name: Checkout code
@@ -35,19 +35,19 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Lint extension
-        run: npx nx run vscode-extension:lint
+        run: npx nx run vscode-extension:lint || NX_NO_CLOUD=true npx nx run vscode-extension:lint
 
       - name: Run unit tests
-        run: npx nx run vscode-extension:test
+        run: npx nx run vscode-extension:test || NX_NO_CLOUD=true npx nx run vscode-extension:test
 
       - name: Build extension
-        run: npx nx run vscode-extension:build
+        run: npx nx run vscode-extension:build || NX_NO_CLOUD=true npx nx run vscode-extension:build
 
       - name: Run integration tests
         run: npm run test:integration --workspace=agent-skills
 
       - name: Package VSIX
-        run: npx nx run vscode-extension:package
+        run: npx nx run vscode-extension:package || NX_NO_CLOUD=true npx nx run vscode-extension:package
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
