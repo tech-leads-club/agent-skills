@@ -157,3 +157,31 @@ export interface ScopePolicyEvaluation {
   effectiveScopes: LifecycleScope[]
   blockedReason?: BlockedReason
 }
+
+/**
+ * Extended scope values used in batch planning and metadata.
+ */
+export type LifecycleScopeHint = LifecycleScope | 'all' | 'auto'
+
+/**
+ * Intent representing a batch lifecycle request originating from UI selections.
+ */
+export interface LifecycleBatchSelection {
+  action: OperationType
+  skills: string[]
+  agents?: string[]
+  scope: LifecycleScopeHint
+  source: 'card' | 'command-palette'
+  updateAll?: boolean
+}
+
+/**
+ * Metadata preserved on queued jobs for grouped feedback.
+ */
+export interface OperationBatchMetadata {
+  batchId: string
+  batchSize: number
+  skillNames: string[]
+  scope: LifecycleScopeHint
+  agents: string[]
+}

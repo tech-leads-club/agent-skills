@@ -10,6 +10,8 @@ import type {
   AvailableAgent,
   InstalledSkillInfo,
   InstalledSkillsMap,
+  LifecycleBatchSelection,
+  LifecycleScopeHint,
   ScopePolicyEvaluation,
   Skill,
   SkillRegistry,
@@ -31,6 +33,13 @@ interface SkillQuickPickItem extends vscode.QuickPickItem {
 }
 
 type SkillSelectionMode = 'add' | 'remove' | 'update' | 'repair'
+
+interface ConfirmationSummary {
+  title: string
+  message: string
+  detail?: string
+  confirmLabel: 'Install' | 'Remove' | 'Update' | 'Repair'
+}
 
 /**
  * Manages the sidebar Webview life cycle, message routing, and registry synchronization.
@@ -76,6 +85,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             operationId: event.operationId,
             operation: event.operation,
             skillName: event.skillName,
+            metadata: event.metadata,
           },
         })
       } else if (event.type === 'progress') {
@@ -84,6 +94,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           payload: {
             operationId: event.operationId,
             message: event.message || '',
+            metadata: event.metadata,
             increment: undefined, // CLI doesn't support % yet
           },
         })
@@ -96,6 +107,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             skillName: event.skillName,
             success: event.success ?? false,
             errorMessage: event.errorMessage,
+            metadata: event.metadata,
           },
         })
         // Reconcile installed state after operation completes to refresh UI
@@ -305,7 +317,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     scope: 'local' | 'global' | 'all',
     agents: string[],
   ): Promise<void> {
-    await this.runQueueAction('install', () => this.enqueueInstall(skillName, scope, agents))
+    const availableAgents = await this.reconciler.getAvailableAgents()
+    const agentNames = this.getAgentDisplayNames(agents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: 'install',
+      skills: [skillName],
+      agents,
+      scope,
+      source: 'card',
+    }
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+    await this.runQueueAction('install', () => this.orchestrator.installMany(selection.skills, scope, agents))
   }
 
   /**
@@ -321,10 +344,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     scope: 'local' | 'global' | 'all',
     agents: string[],
   ): Promise<void> {
-    const agentNames = agents.join(', ')
-    const confirmed = await this.confirmRemoval(skillName, agentNames, scope)
+    const availableAgents = await this.reconciler.getAvailableAgents()
+    const agentNames = this.getAgentDisplayNames(agents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: 'remove',
+      skills: [skillName],
+      agents,
+      scope,
+      source: 'card',
+    }
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
     if (!confirmed) return
-    await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scope, agents))
+    await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scope, agents))
   }
 
   /**
@@ -334,7 +365,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when enqueueing logic completes.
    */
   private async handleUpdateSkill(skillName: string): Promise<void> {
-    await this.runQueueAction('update', () => this.orchestrator.update(skillName))
+    const selection: LifecycleBatchSelection = {
+      action: 'update',
+      skills: [skillName],
+      agents: [],
+      scope: 'auto',
+      source: 'card',
+    }
+    const confirmed = await this.confirmLifecycleAction(selection, [])
+    if (!confirmed) return
+    await this.runQueueAction('update', () => this.orchestrator.updateMany(selection.skills, 'card'))
   }
 
   /**
@@ -346,7 +386,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when enqueueing logic completes.
    */
   private async handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
-    await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, scope, agents))
+    const availableAgents = await this.reconciler.getAvailableAgents()
+    const agentNames = this.getAgentDisplayNames(agents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: 'repair',
+      skills: [skillName],
+      agents,
+      scope,
+      source: 'card',
+    }
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+    await this.runQueueAction('repair', () => this.orchestrator.repairMany(selection.skills, scope, agents))
   }
 
   /**
@@ -415,6 +466,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
     if (!scopeItem) return
 
+    const pendingSkills: string[] = []
     const skipped: string[] = []
     for (const skillName of selectedSkills) {
       const needsInstall = this.doesSkillNeedActionForScope(
@@ -428,8 +480,31 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         skipped.push(skillName)
         continue
       }
-      await this.runQueueAction('install', () => this.enqueueInstall(skillName, scopeItem.scopeId, selectedAgents))
+      pendingSkills.push(skillName)
     }
+
+    if (pendingSkills.length === 0) {
+      vscode.window.showInformationMessage(
+        `Skipped ${skipped.length} skill(s) because they are already installed in the selected scope.`,
+      )
+      return
+    }
+
+    const agentNames = this.getAgentDisplayNames(selectedAgents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: 'install',
+      skills: pendingSkills,
+      agents: selectedAgents,
+      scope: scopeItem.scopeId,
+      source: 'command-palette',
+    }
+
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+
+    await this.runQueueAction('install', () =>
+      this.orchestrator.installMany(pendingSkills, scopeItem.scopeId, selectedAgents, 'command-palette'),
+    )
 
     if (skipped.length > 0) {
       vscode.window.showInformationMessage(
@@ -472,10 +547,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     )
     if (!scopeItem) return
 
-    const agentNames = this.getAgentDisplayNames(selectedAgents, availableAgents).join(', ')
-    const confirmed = await this.confirmBatchRemoval(selectedSkills, agentNames, scopeItem.scopeId)
-    if (!confirmed) return
-
+    const pendingSkills: string[] = []
     const skipped: string[] = []
     for (const skillName of selectedSkills) {
       const needsRemoval = this.doesSkillNeedActionForScope(
@@ -489,8 +561,31 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         skipped.push(skillName)
         continue
       }
-      await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scopeItem.scopeId, selectedAgents))
+      pendingSkills.push(skillName)
     }
+
+    if (pendingSkills.length === 0) {
+      vscode.window.showInformationMessage(
+        `Skipped ${skipped.length} skill(s) because they are no longer installed in the selected scope.`,
+      )
+      return
+    }
+
+    const agentNames = this.getAgentDisplayNames(selectedAgents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: 'remove',
+      skills: pendingSkills,
+      agents: selectedAgents,
+      scope: scopeItem.scopeId,
+      source: 'command-palette',
+    }
+
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+
+    await this.runQueueAction('remove', () =>
+      this.orchestrator.removeMany(pendingSkills, scopeItem.scopeId, selectedAgents, 'command-palette'),
+    )
 
     if (skipped.length > 0) {
       vscode.window.showInformationMessage(
@@ -514,9 +609,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const selectedSkills = await this.pickSkills('update', registry, installedSkills, undefined, installedHashes)
     if (!selectedSkills || selectedSkills.length === 0) return
 
-    for (const skillName of selectedSkills) {
-      await this.runQueueAction('update', () => this.orchestrator.update(skillName))
+    const selection: LifecycleBatchSelection = {
+      action: 'update',
+      skills: selectedSkills,
+      agents: [],
+      scope: 'auto',
+      source: 'command-palette',
     }
+    const confirmed = await this.confirmLifecycleAction(selection, [])
+    if (!confirmed) return
+
+    await this.runQueueAction('update', () => this.orchestrator.updateMany(selectedSkills, 'command-palette'))
   }
 
   /**
@@ -533,26 +636,80 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const selectedSkills = await this.pickSkills('repair', registry, installedSkills)
     if (!selectedSkills || selectedSkills.length === 0) return
 
+    const allowLocal = this.policy?.effectiveScopes.includes('local') ?? true
+    const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? true
+    const localSkills = new Set<string>()
+    const globalSkills = new Set<string>()
+    const localAgents = new Set<string>()
+    const globalAgents = new Set<string>()
     const skipped: string[] = []
+
     for (const skillName of selectedSkills) {
       const installedInfo = installedSkills[skillName]
       if (!installedInfo) {
         skipped.push(skillName)
         continue
       }
-      const localAgents = this.getScopeAgents(installedInfo, 'local')
-      const globalAgents = this.getScopeAgents(installedInfo, 'global')
 
-      const allowLocal = this.policy?.effectiveScopes.includes('local') ?? true
-      const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? true
+      const localCorruptedAgents = installedInfo.agents
+        .filter((agent) => agent.local && agent.corrupted)
+        .map((agent) => agent.agent)
+      const globalCorruptedAgents = installedInfo.agents
+        .filter((agent) => agent.global && agent.corrupted)
+        .map((agent) => agent.agent)
 
-      if (allowLocal && localAgents.length > 0) {
-        await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, 'local', localAgents))
+      let added = false
+      if (allowLocal && localCorruptedAgents.length > 0) {
+        localSkills.add(skillName)
+        localCorruptedAgents.forEach((agentId) => localAgents.add(agentId))
+        added = true
       }
-      if (allowGlobal && globalAgents.length > 0) {
-        await this.runQueueAction('repair', () => this.orchestrator.repair(skillName, 'global', globalAgents))
+      if (allowGlobal && globalCorruptedAgents.length > 0) {
+        globalSkills.add(skillName)
+        globalCorruptedAgents.forEach((agentId) => globalAgents.add(agentId))
+        added = true
+      }
+
+      if (!added) {
+        skipped.push(skillName)
       }
     }
+
+    const hasLocalTargets = allowLocal && localSkills.size > 0 && localAgents.size > 0
+    const hasGlobalTargets = allowGlobal && globalSkills.size > 0 && globalAgents.size > 0
+
+    if (!hasLocalTargets && !hasGlobalTargets) {
+      vscode.window.showInformationMessage('Skipped selected skills with no eligible installations to repair.')
+      return
+    }
+
+    const unionAgents = Array.from(new Set([...localAgents, ...globalAgents]))
+    const unionSkills = Array.from(new Set([...localSkills, ...globalSkills]))
+    const selection: LifecycleBatchSelection = {
+      action: 'repair',
+      skills: unionSkills,
+      agents: unionAgents,
+      scope: hasLocalTargets && hasGlobalTargets ? 'all' : hasGlobalTargets ? 'global' : 'local',
+      source: 'command-palette',
+    }
+    const agentNames = this.getAgentDisplayNames(unionAgents, await this.reconciler.getAvailableAgents())
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+
+    await this.runQueueAction('repair', async () => {
+      const tasks: Promise<void>[] = []
+      if (hasLocalTargets) {
+        tasks.push(
+          this.orchestrator.repairMany(Array.from(localSkills), 'local', Array.from(localAgents), 'command-palette'),
+        )
+      }
+      if (hasGlobalTargets) {
+        tasks.push(
+          this.orchestrator.repairMany(Array.from(globalSkills), 'global', Array.from(globalAgents), 'command-palette'),
+        )
+      }
+      await Promise.all(tasks)
+    })
 
     if (skipped.length > 0) {
       vscode.window.showInformationMessage(
@@ -668,40 +825,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       const userFacing = action === 'install' ? 'installation' : action === 'remove' ? 'removal' : action
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
     }
-  }
-
-  /**
-   * Enqueues install operations for one or both scopes.
-   *
-   * @param skillName - Skill to install.
-   * @param scope - Target scope or both scopes.
-   * @param agents - Selected agent identifiers.
-   * @returns A promise that resolves after all required enqueue calls are made.
-   */
-  private async enqueueInstall(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
-    if (scope === 'all') {
-      await this.orchestrator.install(skillName, 'local', agents)
-      await this.orchestrator.install(skillName, 'global', agents)
-      return
-    }
-    await this.orchestrator.install(skillName, scope, agents)
-  }
-
-  /**
-   * Enqueues remove operations for one or both scopes.
-   *
-   * @param skillName - Skill to remove.
-   * @param scope - Target scope or both scopes.
-   * @param agents - Selected agent identifiers.
-   * @returns A promise that resolves after all required enqueue calls are made.
-   */
-  private async enqueueRemove(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void> {
-    if (scope === 'all') {
-      await this.orchestrator.remove(skillName, 'local', agents)
-      await this.orchestrator.remove(skillName, 'global', agents)
-      return
-    }
-    await this.orchestrator.remove(skillName, scope, agents)
   }
 
   /**
@@ -1486,26 +1609,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Shows a modal confirmation for batch removal operations.
-   *
-   * @param skills - Skill names selected for removal.
-   * @param agents - Preformatted agent names.
-   * @param scope - Target scope selection.
-   * @returns `true` when the user confirms removal.
-   */
-  private async confirmBatchRemoval(
-    skills: string[],
-    agents: string,
-    scope: ScopeQuickPickItem['scopeId'],
-  ): Promise<boolean> {
-    const scopeLabel = scope === 'all' ? 'Local + Global' : scope
-    const skillList = skills.join(', ')
-    const message = `Remove ${skills.length} skill(s) (${skillList}) from ${agents} (${scopeLabel})? This will delete the skill files.`
-    const selection = await vscode.window.showWarningMessage(message, { modal: true }, 'Remove')
-    return selection === 'Remove'
-  }
-
-  /**
    * Returns agent ids that currently have a skill installed in a given scope.
    *
    * @param installedInfo - Installation metadata for a skill.
@@ -1575,15 +1678,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     agents: string[],
     scopeId: 'local' | 'global' | 'all',
   ): Promise<void> {
+    const availableAgents = await this.reconciler.getAvailableAgents()
+    const agentNames = this.getAgentDisplayNames(agents, availableAgents)
+    const selection: LifecycleBatchSelection = {
+      action: action === 'add' ? 'install' : 'remove',
+      skills: [skillName],
+      agents,
+      scope: scopeId,
+      source: 'card',
+    }
+    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
+    if (!confirmed) return
+
     if (action === 'add') {
-      await this.runQueueAction('install', () => this.enqueueInstall(skillName, scopeId, agents))
+      await this.runQueueAction('install', () => this.orchestrator.installMany(selection.skills, scopeId, agents))
       return
     }
 
-    const agentNames = agents.join(', ')
-    const confirmed = await this.confirmRemoval(skillName, agentNames, scopeId)
-    if (!confirmed) return
-    await this.runQueueAction('remove', () => this.enqueueRemove(skillName, scopeId, agents))
+    await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scopeId, agents))
   }
 
   /**
@@ -1646,10 +1758,63 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param scope - Scope selection (`local`, `global`, or `all`).
    * @returns `true` when the user confirms removal.
    */
-  private async confirmRemoval(skillName: string, agentNames: string, scope: string): Promise<boolean> {
-    const message = `Remove skill '${skillName}' from ${agentNames} (${scope === 'all' ? 'Local + Global' : scope})? This will delete the skill files.`
-    const selection = await vscode.window.showWarningMessage(message, { modal: true }, 'Remove')
-    return selection === 'Remove'
+  private async confirmLifecycleAction(selection: LifecycleBatchSelection, agentNames: string[]): Promise<boolean> {
+    const summary = this.formatConfirmationSummary(selection, agentNames)
+    const titleMessage = `${summary.title}\n\n${summary.message}`
+    const detailMessage = summary.detail ? `${titleMessage}\n\n${summary.detail}` : titleMessage
+    const result = await vscode.window.showWarningMessage(detailMessage, { modal: true }, summary.confirmLabel)
+    return result === summary.confirmLabel
+  }
+
+  private formatConfirmationSummary(selection: LifecycleBatchSelection, agentNames: string[]): ConfirmationSummary {
+    const actionLabel = this.getActionDisplayName(selection.action)
+    const scopeLabel = this.getScopeLabel(selection.scope)
+    const skillCount = selection.skills.length
+    const subject = skillCount > 0 ? `${skillCount} skill(s)` : 'All installed skills'
+    const agentLabel = agentNames.length > 0 ? agentNames.join(', ') : 'Managed by the CLI'
+    const messageParts = [`${actionLabel} ${subject}`, `Scope: ${scopeLabel}`]
+    if (selection.action !== 'update') {
+      messageParts.push(`Agents: ${agentLabel}`)
+    } else {
+      messageParts.push(`Agents: ${agentLabel}`)
+    }
+    const detail = skillCount > 0 ? selection.skills.join(', ') : undefined
+    return {
+      title: `${actionLabel} ${subject}`,
+      message: messageParts.join(' · '),
+      detail: detail ? `Skills: ${detail}` : undefined,
+      confirmLabel: this.getConfirmLabel(selection.action),
+    }
+  }
+
+  private getScopeLabel(scope: LifecycleScopeHint): string {
+    switch (scope) {
+      case 'local':
+        return 'Local'
+      case 'global':
+        return 'Global'
+      case 'all':
+        return 'Local + Global'
+      case 'auto':
+        return 'Auto (CLI determines scope)'
+    }
+  }
+
+  private getActionDisplayName(action: LifecycleBatchSelection['action']): string {
+    switch (action) {
+      case 'install':
+        return 'Install'
+      case 'remove':
+        return 'Remove'
+      case 'update':
+        return 'Update'
+      case 'repair':
+        return 'Repair'
+    }
+  }
+
+  private getConfirmLabel(action: LifecycleBatchSelection['action']): ConfirmationSummary['confirmLabel'] {
+    return this.getActionDisplayName(action) as ConfirmationSummary['confirmLabel']
   }
 
   /**

@@ -1,4 +1,4 @@
-import type { ErrorInfo, OperationType } from '../shared/types'
+import type { ErrorInfo, OperationBatchMetadata, OperationType } from '../shared/types'
 import type { CliProcess, CliSpawner } from './cli-spawner'
 import { classifyError } from './error-classifier'
 import { withRetry } from './retry-handler'
@@ -42,6 +42,7 @@ export interface QueuedJob {
   skillName: string
   args: string[] // CLI arguments for this job
   cwd: string // Working directory
+  metadata?: OperationBatchMetadata
 }
 
 /**
@@ -58,6 +59,7 @@ export interface JobResult {
   skillName: string
   status: 'completed' | 'cancelled' | 'error'
   errorMessage?: string
+  metadata?: OperationBatchMetadata
 }
 
 /**
@@ -125,6 +127,7 @@ export class OperationQueue {
           operation: job.operation,
           skillName: job.skillName,
           status: 'cancelled',
+          metadata: job.metadata,
         }),
       )
       return true
@@ -232,6 +235,7 @@ export class OperationQueue {
           skillName: job.skillName,
           status,
           errorMessage,
+          metadata: job.metadata,
         }),
       )
     }
@@ -265,6 +269,7 @@ export class OperationQueue {
             operation: job.operation,
             skillName: job.skillName,
             status: 'completed',
+            metadata: job.metadata,
           })
         } else {
           // Reject with ErrorInfo to trigger retry logic if applicable

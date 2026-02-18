@@ -4,6 +4,7 @@ import type {
   BlockedReason,
   InstalledSkillsMap,
   LifecycleScope,
+  OperationBatchMetadata,
   OperationType,
   SkillRegistry,
 } from './types'
@@ -97,6 +98,7 @@ export interface OperationStartedPayload {
   operationId: string
   operation: OperationType
   skillName: string
+  metadata?: OperationBatchMetadata
 }
 
 /**
@@ -106,6 +108,7 @@ export interface OperationProgressPayload {
   operationId: string
   message: string
   increment?: number // Optional progress percentage increment
+  metadata?: OperationBatchMetadata
 }
 
 /**
@@ -117,6 +120,7 @@ export interface OperationCompletedPayload {
   skillName: string
   success: boolean
   errorMessage?: string
+  metadata?: OperationBatchMetadata
 }
 
 /**

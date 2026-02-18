@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals'
 import type { CliProcess, CliResult, CliSpawner, SpawnOptions } from '../../services/cli-spawner'
 import type { QueuedJob } from '../../services/operation-queue'
+import type { OperationBatchMetadata } from '../../shared/types'
 
 // Mock dependencies
 const mockCliProcess = {
@@ -90,7 +91,11 @@ describe('OperationQueue', () => {
   })
 
   it('should fail after exhausting retries', async () => {
-    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 1, stderr: 'EPERM', signal: null })
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({
+      exitCode: 1,
+      stderr: 'EPERM',
+      signal: null,
+    })
     const onCompleted = jest.fn()
     queue.onJobCompleted(onCompleted)
 
@@ -135,5 +140,27 @@ describe('OperationQueue', () => {
 
     // Should remove from queue, so if we finish job 1, job 2 never runs
     expect(mockCliSpawner.spawn).toHaveBeenCalledTimes(1) // Only job 1
+  })
+
+  it('preserves metadata across queue events', async () => {
+    const onStarted = jest.fn()
+    const onCompleted = jest.fn()
+    queue.onJobStarted(onStarted)
+    queue.onJobCompleted(onCompleted)
+    ;(mockCliProcess.onComplete as MockAsyncFn<CliResult>).mockResolvedValue({ exitCode: 0, stderr: '', signal: null })
+
+    const metadata: OperationBatchMetadata = {
+      batchId: 'batch-1',
+      batchSize: 2,
+      skillNames: ['a', 'b'],
+      scope: 'local',
+      agents: ['cursor'],
+    }
+    queue.enqueue({ operationId: 'meta', operation: 'install', skillName: 'meta', args: [], cwd: '/', metadata })
+
+    await jest.runAllTimersAsync()
+
+    expect(onStarted).toHaveBeenCalledWith(expect.objectContaining({ metadata }))
+    expect(onCompleted).toHaveBeenCalledWith(expect.objectContaining({ metadata }))
   })
 })

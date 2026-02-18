@@ -93,6 +93,10 @@ describe('SidebarProvider', () => {
     registryService = mockRegistryService
 
     const mockOrchestrator = {
+      installMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      removeMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      updateMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      repairMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       install: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       remove: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       update: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
@@ -511,10 +515,11 @@ describe('SidebarProvider', () => {
     expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(1)
 
     // Should still call remove with local scope
-    expect(orchestrator.remove).toHaveBeenCalledWith('test-skill', 'local', ['opencode'])
+    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'local', ['opencode'])
   })
 
   it('should chain to scope pick after agent selection', async () => {
+    showWarningMessageMock.mockResolvedValue('Install')
     reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
     reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
     showQuickPickMock
@@ -534,10 +539,11 @@ describe('SidebarProvider', () => {
     expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(2)
 
     // Should install the skill
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'])
   })
 
   it('should handle "all" scope by installing both local and global', async () => {
+    showWarningMessageMock.mockResolvedValue('Install')
     reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
     reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
     showQuickPickMock
@@ -553,8 +559,7 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'global', ['cursor'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
   })
 
   it('should confirm removal before executing remove action', async () => {
@@ -589,10 +594,11 @@ describe('SidebarProvider', () => {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     expect(vscode.window.showWarningMessage).toHaveBeenCalled()
-    expect(orchestrator.remove).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
+    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'])
   })
 
   it('should handle installSkill message with multiple agents', async () => {
+    showWarningMessageMock.mockResolvedValue('Install')
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
       type: 'installSkill',
@@ -601,10 +607,11 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor', 'claude-code'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor', 'claude-code'])
   })
 
   it('should handle installSkill with scope "all" by installing local and global', async () => {
+    showWarningMessageMock.mockResolvedValue('Install')
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
       type: 'installSkill',
@@ -613,8 +620,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'local', ['cursor'])
-    expect(orchestrator.install).toHaveBeenCalledWith('test-skill', 'global', ['cursor'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
   })
 
   it('should show info message when all agents are saturated for ADD', async () => {
@@ -705,6 +711,8 @@ describe('SidebarProvider', () => {
         .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
         .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
 
+      showWarningMessageMock.mockResolvedValue('Install')
+      showWarningMessageMock.mockResolvedValue('Install')
       const commandPromise = provider.runCommandPaletteAdd()
       await flush()
 
@@ -715,9 +723,13 @@ describe('SidebarProvider', () => {
 
       await commandPromise
 
-      expect(orchestrator.install).toHaveBeenCalledWith('seo', 'local', ['cursor'])
-      expect(orchestrator.install).toHaveBeenCalledWith('accessibility', 'local', ['cursor'])
-      expect(orchestrator.install).toHaveBeenCalledTimes(2)
+      expect(orchestrator.installMany).toHaveBeenCalledWith(
+        ['seo', 'accessibility'],
+        'local',
+        ['cursor'],
+        'command-palette',
+      )
+      expect(orchestrator.installMany).toHaveBeenCalledTimes(1)
     })
 
     it('shows skill descriptions and fallback text in the add quick pick', async () => {
@@ -733,6 +745,7 @@ describe('SidebarProvider', () => {
         return null
       })
 
+      showWarningMessageMock.mockResolvedValue('Install')
       const commandPromise = provider.runCommandPaletteAdd()
       await flush()
 
@@ -782,7 +795,7 @@ describe('SidebarProvider', () => {
 
       await commandPromise
 
-      expect(orchestrator.remove).toHaveBeenCalledWith('seo', 'local', ['cursor'])
+      expect(orchestrator.removeMany).toHaveBeenCalledWith(['seo'], 'local', ['cursor'], 'command-palette')
     })
 
     it('selects only outdated skills for update operations', async () => {
@@ -803,6 +816,7 @@ describe('SidebarProvider', () => {
         return skillItems.filter((item) => item.skillName === 'seo')
       })
 
+      showWarningMessageMock.mockResolvedValue('Update')
       const commandPromise = provider.runCommandPaletteUpdate()
       await flush()
 
@@ -811,8 +825,8 @@ describe('SidebarProvider', () => {
 
       await commandPromise
 
-      expect(orchestrator.update).toHaveBeenCalledTimes(1)
-      expect(orchestrator.update).toHaveBeenCalledWith('seo')
+      expect(orchestrator.updateMany).toHaveBeenCalledTimes(1)
+      expect(orchestrator.updateMany).toHaveBeenCalledWith(['seo'], 'command-palette')
     })
 
     it('enqueues repairs per scope for selected skills', async () => {
@@ -840,6 +854,7 @@ describe('SidebarProvider', () => {
         return skillItems.filter((item) => item.skillName === 'seo')
       })
 
+      showWarningMessageMock.mockResolvedValue('Repair')
       const commandPromise = provider.runCommandPaletteRepair()
       await flush()
 
@@ -848,8 +863,8 @@ describe('SidebarProvider', () => {
 
       await commandPromise
 
-      expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'local', ['cursor'])
-      expect(orchestrator.repair).toHaveBeenCalledWith('seo', 'global', ['cursor'])
+      expect(orchestrator.repairMany).toHaveBeenCalledWith(['seo'], 'local', ['cursor'], 'command-palette')
+      expect(orchestrator.repairMany).toHaveBeenCalledWith(['seo'], 'global', ['cursor'], 'command-palette')
     })
 
     it('does not show healthy installed skills in repair candidates', async () => {
@@ -875,7 +890,7 @@ describe('SidebarProvider', () => {
 
       expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('No corrupted skills are available to repair.')
       expect(vscode.window.showQuickPick).not.toHaveBeenCalled()
-      expect(orchestrator.repair).not.toHaveBeenCalled()
+      expect(orchestrator.repairMany).not.toHaveBeenCalled()
     })
 
     it('does nothing when skill selection is cancelled', async () => {
@@ -889,7 +904,7 @@ describe('SidebarProvider', () => {
       await flush()
       await commandPromise
 
-      expect(orchestrator.install).not.toHaveBeenCalled()
+      expect(orchestrator.installMany).not.toHaveBeenCalled()
     })
   })
 
@@ -911,6 +926,7 @@ describe('SidebarProvider', () => {
       .spyOn(vscode.window, 'showErrorMessage')
       .mockResolvedValue('Open Settings' as unknown as vscode.MessageItem)
 
+    showWarningMessageMock.mockResolvedValue('Install')
     await provider.runCommandPaletteAdd()
 
     expect(showErrorMessageMock).toHaveBeenCalledWith(
@@ -918,10 +934,11 @@ describe('SidebarProvider', () => {
       'Open Settings' as unknown as vscode.MessageOptions,
     )
     expect(executeCommandMock).toHaveBeenCalledWith('agentSkills.openSettings')
-    expect(orchestrator.install).not.toHaveBeenCalled()
+    expect(orchestrator.installMany).not.toHaveBeenCalled()
   })
 
   it('should skip scope picker if only one scope is effective (local)', async () => {
+    showWarningMessageMock.mockResolvedValue('Install')
     const policy: ScopePolicyEvaluation = {
       allowedScopes: 'local',
       environmentScopes: ['local', 'global'],
@@ -950,7 +967,7 @@ describe('SidebarProvider', () => {
     await provider.runCommandPaletteAdd()
 
     // Should auto-select 'local'
-    expect(orchestrator.install).toHaveBeenCalledWith('skill1', 'local', ['a1'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['skill1'], 'local', ['a1'], 'command-palette')
     // Check that showQuickPick was called exactly twice (skill + agent)
     expect(showQuickPickMock).toHaveBeenCalledTimes(2)
   })

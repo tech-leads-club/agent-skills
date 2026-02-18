@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals'
 import type * as vscode from 'vscode'
-import type { VerifyResult } from '../../shared/types'
+import type { LoggingService } from '../../services/logging-service'
 import type { JobResult, OperationQueue, QueuedJob } from '../../services/operation-queue'
 import type { PostInstallVerifier } from '../../services/post-install-verifier'
-import type { LoggingService } from '../../services/logging-service'
+import type { VerifyResult } from '../../shared/types'
 
 // Mock dependencies
 const mockLogger = {
@@ -41,7 +41,10 @@ const mockVscode = {
     withProgress: jest.fn<
       (
         options: vscode.ProgressOptions,
-        callback: (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => Thenable<void>,
+        callback: (
+          progress: vscode.Progress<{ message?: string; increment?: number }>,
+          token: vscode.CancellationToken,
+        ) => Thenable<void>,
       ) => Thenable<void>
     >((_options, callback) => {
       const token = { onCancellationRequested: jest.fn() }
@@ -90,6 +93,13 @@ describe('InstallationOrchestrator', () => {
         skillName: 'skill',
         args: ['install', '-s', 'skill', '-a', 'agent1'],
         cwd: '/workspace',
+        metadata: expect.objectContaining({
+          scope: 'local',
+          agents: ['agent1'],
+          skillNames: ['skill'],
+          batchSize: 1,
+          batchId: expect.any(String),
+        }),
       }),
     )
   })
@@ -100,6 +110,7 @@ describe('InstallationOrchestrator', () => {
     expect(mockQueue.enqueue).toHaveBeenCalledWith(
       expect.objectContaining({
         args: ['install', '-s', 'skill', '-a', 'agent1', '-g'],
+        metadata: expect.objectContaining({ scope: 'global' }),
       }),
     )
   })
@@ -110,7 +121,12 @@ describe('InstallationOrchestrator', () => {
     expect(mockQueue.enqueue).toHaveBeenCalledWith(
       expect.objectContaining({
         operation: 'repair',
-        args: ['install', '-s', 'skill', '-a', 'agent1', '-f'],
+        args: ['install', '-f', '-s', 'skill', '-a', 'agent1'],
+        metadata: expect.objectContaining({
+          scope: 'local',
+          agents: ['agent1'],
+          skillNames: ['skill'],
+        }),
       }),
     )
   })
@@ -133,16 +149,20 @@ describe('InstallationOrchestrator', () => {
     const opId = job.operationId
 
     // Simulate completion
-    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (result: JobResult) => Promise<void> | void
+    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (
+      result: JobResult,
+    ) => Promise<void> | void
 
     // Verification pass
     ;(mockVerifier.verify as MockAsyncFn<VerifyResult>).mockResolvedValue({ ok: true, corrupted: [] })
 
+    expect(job.metadata).toBeDefined()
     await completeHandler({
       operationId: opId,
       operation: 'install',
       skillName: 'skill',
       status: 'completed',
+      metadata: job.metadata,
     })
 
     expect(mockVerifier.verify).toHaveBeenCalledWith('skill', ['agent1'], 'local', '/workspace')
@@ -154,7 +174,9 @@ describe('InstallationOrchestrator', () => {
     const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as QueuedJob
     const opId = job.operationId
 
-    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (result: JobResult) => Promise<void> | void
+    const completeHandler = (mockQueue.onJobCompleted as jest.Mock).mock.calls[0][0] as (
+      result: JobResult,
+    ) => Promise<void> | void
 
     // Verification fails
     ;(mockVerifier.verify as MockAsyncFn<VerifyResult>).mockResolvedValue({
@@ -165,11 +187,13 @@ describe('InstallationOrchestrator', () => {
     // Simulate user clicking "Repair"
     ;(mockVscode.window.showWarningMessage as MockAsyncFn<string | undefined>).mockResolvedValue('Repair')
 
+    expect(job.metadata).toBeDefined()
     await completeHandler({
       operationId: opId,
       operation: 'install',
       skillName: 'skill',
       status: 'completed',
+      metadata: job.metadata,
     })
 
     expect(mockVscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('corrupted'), 'Repair')

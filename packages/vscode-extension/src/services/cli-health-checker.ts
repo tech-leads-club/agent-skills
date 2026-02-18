@@ -42,7 +42,7 @@ export class CliHealthChecker implements vscode.Disposable {
   /**
    * Creates a health checker bound to CLI process spawning and logging.
    *
-   * @param spawner - Spawner used to run `tlc-skills --version`.
+   * @param spawner - Spawner used to run `agent-skills --version`.
    * @param logger - Logging service for diagnostics.
    */
   constructor(
@@ -73,7 +73,7 @@ export class CliHealthChecker implements vscode.Disposable {
   }
 
   /**
-   * Performs a fresh health check by spawning 'npx tlc-skills --version'.
+   * Performs a fresh health check by spawning 'npx agent-skills --version'.
    *
    * @returns A promise with normalized CLI health status.
    */

@@ -61,7 +61,7 @@ export class CliSpawner implements vscode.Disposable {
    */
   spawn(args: string[], options: SpawnOptions): CliProcess {
     this.logger.debug(
-      `[${options.operationId}] Spawn requested: command=npx tlc-skills args="${args.join(' ')}" cwd="${options.cwd}" platform=${process.platform}`,
+      `[${options.operationId}] Spawn requested: command=npx agent-skills args="${args.join(' ')}" cwd="${options.cwd}" platform=${process.platform}`,
     )
 
     // Security: Validate skill name if present
@@ -78,11 +78,11 @@ export class CliSpawner implements vscode.Disposable {
     const command = 'npx'
     const useShell = isWindows
     this.logger.debug(
-      `[${options.operationId}] Spawning process: ${command} tlc-skills ${args.join(' ')} (shell=${String(useShell)})`,
+      `[${options.operationId}] Spawning process: ${command} agent-skills ${args.join(' ')} (shell=${String(useShell)})`,
     )
     let childProcess: ChildProcess
     try {
-      childProcess = spawn(command, ['tlc-skills', ...args], {
+      childProcess = spawn(command, ['agent-skills', ...args], {
         cwd: options.cwd,
         shell: useShell,
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr

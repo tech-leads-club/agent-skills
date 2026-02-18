@@ -58,7 +58,7 @@ describe('CliSpawner', () => {
   it('should spawn npx with correct arguments', () => {
     spawner.spawn(['install', '-s', 'skill'], { cwd: '/cwd', operationId: 'op1' })
 
-    expect(mockSpawn).toHaveBeenCalledWith('npx', ['tlc-skills', 'install', '-s', 'skill'], {
+    expect(mockSpawn).toHaveBeenCalledWith('npx', ['agent-skills', 'install', '-s', 'skill'], {
       cwd: '/cwd',
       shell: process.platform === 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
