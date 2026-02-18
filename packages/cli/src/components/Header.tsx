@@ -1,11 +1,12 @@
 import { Box, Text } from 'ink'
 import BigText from 'ink-big-text'
 import Gradient from 'ink-gradient'
+import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 
 import { PACKAGE_VERSION } from '../services/package-info'
 
-import { useEnvironmentCheck } from '../hooks/useEnvironmentCheck'
+import { environmentCheckAtom } from '../atoms/environmentCheck'
 import { symbols } from '../theme/symbols'
 
 const DESCRIPTION = 'Curated skills to power up your coding agents'
@@ -13,11 +14,12 @@ const crystalColors = ['#1e3a8a', '#3b82f6', '#0ea5e9', '#06b6d4', '#22d3ee']
 const SEPARATOR_CHAR = '─'
 
 export const Header = ({ notification: overrideNotification }: { notification?: React.ReactNode }) => {
-  const { updateAvailable, currentVersion, isGlobal, loading } = useEnvironmentCheck()
+  const envCheck = useAtomValue(environmentCheckAtom)
 
   const notification = useMemo(() => {
     if (overrideNotification) return overrideNotification
-    if (loading) return null
+
+    const { updateAvailable, currentVersion, isGlobal } = envCheck
 
     if (updateAvailable) {
       return (
@@ -38,7 +40,7 @@ export const Header = ({ notification: overrideNotification }: { notification?: 
     }
 
     return null
-  }, [overrideNotification, loading, updateAvailable, currentVersion, isGlobal])
+  }, [overrideNotification, envCheck])
 
   return (
     <Box flexDirection="column" paddingBottom={1}>
