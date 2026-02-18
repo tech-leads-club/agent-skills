@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import matter from 'gray-matter'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+
 import type { Category, MarketplaceData, Skill } from '../src/types'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -43,7 +44,7 @@ function loadRegistry(): SkillsRegistry {
 
 function readSkillContent(registrySkill: RegistrySkill): { content: string; lastModified: string } {
   const skillFile = path.join(SKILLS_DIR, registrySkill.path, 'SKILL.md')
-  
+
   if (!fs.existsSync(skillFile)) {
     console.warn(`SKILL.md not found at ${skillFile}`)
     return { content: '', lastModified: new Date().toISOString().split('T')[0] }
@@ -52,22 +53,22 @@ function readSkillContent(registrySkill: RegistrySkill): { content: string; last
   const fileContent = fs.readFileSync(skillFile, 'utf-8')
   const stats = fs.statSync(skillFile)
   const lastModified = stats.mtime.toISOString().split('T')[0]
-  
+
   try {
     const { content } = matter(fileContent)
     return { content: content.trim(), lastModified }
-  } catch (error) {
+  } catch {
     // If YAML frontmatter parsing fails, extract content manually
     console.warn(`Failed to parse frontmatter for ${registrySkill.name}, using fallback`)
     const lines = fileContent.split('\n')
     let contentStart = 0
-    
+
     // Skip frontmatter if it exists (between --- markers)
     if (lines[0] === '---') {
       const endIndex = lines.findIndex((line, idx) => idx > 0 && line === '---')
       contentStart = endIndex > 0 ? endIndex + 1 : 1
     }
-    
+
     const content = lines.slice(contentStart).join('\n').trim()
     return { content, lastModified }
   }
@@ -76,9 +77,9 @@ function readSkillContent(registrySkill: RegistrySkill): { content: string; last
 function generateMarketplaceData(): MarketplaceData {
   console.log('Loading skills registry...')
   const registry = loadRegistry()
-  
+
   console.log(`Found ${registry.skills.length} skills in registry`)
-  
+
   // Transform categories from Record to Array
   const categories: Category[] = Object.entries(registry.categories).map(([id, meta]) => ({
     id,

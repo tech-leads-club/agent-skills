@@ -27,11 +27,13 @@
 <h1 align="center">🧠 Agent Skills</h1>
 
 <p align="center">
-  <strong>A curated collection of skills for AI coding agents</strong>
+  <strong>The secure, validated skill registry for professional AI coding agents</strong>
 </p>
 
 <p align="center">
-  Extend the capabilities of <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, <b>GitHub Copilot</b>, and more with reusable, packaged instructions.
+  In an ecosystem where <a href="https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf">over 13% of marketplace skills contain critical vulnerabilities</a>, 
+  <b>Agent Skills</b> stands apart as a hardened library of <b>verified</b>, <b>tested</b>, and <b>safe</b> capabilities.
+  Extend <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, and more with absolute confidence.
 </p>
 
 <p align="center">
@@ -41,6 +43,7 @@
 ## 📖 Table of Contents
 
 - [✨ What are Skills?](#-what-are-skills)
+- [🛡️ Security & Trust](#️-security--trust)
 - [🤖 Supported Agents](#-supported-agents)
 - [🌟 Featured Skills](#-featured-skills)
 - [🚀 Quick Start](#-quick-start)
@@ -48,6 +51,7 @@
 - [🛠 For Contributors](#-for-contributors)
 - [📁 Project Structure](#-project-structure)
 - [📝 Skill Structure](#-skill-structure)
+- [🔒 Security Scan](#-security-scan)
 - [🔄 Release Process](#-release-process)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -59,48 +63,56 @@ Skills are packaged instructions and resources that extend AI agent capabilities
 ```
 packages/skills-catalog/skills/
   (category-name)/
-    spec-driven-dev/
+    skill/
       SKILL.md          ← Main instructions
       templates/        ← File templates
       references/       ← On-demand documentation
 ```
 
+## 🛡️ Security & Trust
+
+Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library.
+
+### Vulnerability Mitigation
+
+We directly address the threats identified in the [Snyk 2026 Agent Threat Report](https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf):
+
+| Threat                   | Public Marketplaces                                         | Agent Skills Guarantee                                                                                          |
+| :----------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| **Malicious Payloads**   | Obfuscated code, binaries, or "black box" instructions      | **100% Open Source**: No binaries, fully readable text/code. Every line is auditable.                           |
+| **Credential Theft**     | Skills silently exfiltrating env vars to remote servers     | **Static Analysis**: CI/CD pipeline blocks skills with suspicious network calls or secret access.               |
+| **Supply Chain Attacks** | Authors pushing malicious updates to existing skills        | **Immutable Integrity**: Lockfiles and content-hashing ensure code never changes without your explicit upgrade. |
+| **Prompt Injection**     | Hidden instructions to hijack agent behavior ("jailbreaks") | **Human Curation**: Every prompt is manually code-reviewed by maintainers for safety boundaries.                |
+
+### CLI Defense-in-Depth
+
+The installer itself implements strict technical controls:
+
+- **Filesystem Isolation**: Recursive path traversal protection preventing access outside target directories.
+- **Input Sanitization**: Strict validation of skill names and paths to neutralize injection vectors.
+- **Symlink Guard**: Safe handling of symbolic links to prevent aliasing attacks.
+- **Integrity Verification**: Lockfile-based validation ensuring reproducible and authorized skill management.
+- **Automated Auditing**: All skills undergo continuous security scanning with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan).
+
 ## 🤖 Supported Agents
 
 Install skills to any of these AI coding agents:
 
-**Tier 1 — Most Popular**
+<div align="center">
+<br />
 
-<p align="center">
-  <a href="https://cursor.com"><img src="https://img.shields.io/badge/Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white" alt="Cursor" /></a>
-  <a href="https://claude.ai/code"><img src="https://img.shields.io/badge/Claude_Code-191919?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Code" /></a>
-  <a href="https://github.com/features/copilot"><img src="https://img.shields.io/badge/GitHub_Copilot-000000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Copilot" /></a>
-  <a href="https://codeium.com/windsurf"><img src="https://img.shields.io/badge/Windsurf-0066FF?style=for-the-badge&logo=codeium&logoColor=white" alt="Windsurf" /></a>
-  <a href="https://github.com/cline/cline"><img src="https://img.shields.io/badge/Cline-4A154B?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Cline" /></a>
-</p>
+|                     Tier 1 (Popular)                      |                            Tier 2 (Rising)                             |                   Tier 3 (Enterprise)                   |
+| :-------------------------------------------------------: | :--------------------------------------------------------------------: | :-----------------------------------------------------: |
+|         **[Claude Code](https://claude.ai/code)**         |                    **[Aider](https://aider.chat)**                     |   **[Amazon Q](https://aws.amazon.com/q/developer/)**   |
+|        **[Cline](https://github.com/cline/cline)**        |               **[Antigravity](https://idx.google.com)**                |       **[Augment](https://www.augmentcode.com)**        |
+|             **[Cursor](https://cursor.com)**              | **[Gemini CLI](https://ai.google.dev/gemini-api/docs/code-execution)** |    **[Droid (Factory.ai)](https://www.factory.ai)**     |
+| **[GitHub Copilot](https://github.com/features/copilot)** |                  **[Kilo Code](https://kilocode.ai)**                  | **[OpenCode](https://github.com/opencode-ai/opencode)** |
+|       **[Windsurf](https://codeium.com/windsurf)**        |                     **[Kiro](https://kiro.dev/)**                      |  **[Sourcegraph Cody](https://sourcegraph.com/cody)**   |
+|                                                           |    **[OpenAI Codex](https://openai.com/index/introducing-codex/)**     |         **[Tabnine](https://www.tabnine.com)**          |
+|                                                           |                    **[Roo Code](https://roo.dev)**                     |                                                         |
+|                                                           |                    **[TRAE](https://docs.trae.ai)**                    |                                                         |
 
-**Tier 2 — Rising Stars**
-
-<p align="center">
-  <a href="https://aider.chat"><img src="https://img.shields.io/badge/Aider-FF6B6B?style=for-the-badge&logo=terminal&logoColor=white" alt="Aider" /></a>
-  <a href="https://openai.com/index/introducing-codex/"><img src="https://img.shields.io/badge/OpenAI_Codex-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI Codex" /></a>
-  <a href="https://ai.google.dev/gemini-api/docs/code-execution"><img src="https://img.shields.io/badge/Gemini_CLI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini CLI" /></a>
-  <a href="https://idx.google.com"><img src="https://img.shields.io/badge/Antigravity-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Antigravity" /></a>
-  <a href="https://roo.dev"><img src="https://img.shields.io/badge/Roo_Code-FF4081?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Roo Code" /></a>
-  <a href="https://kilocode.ai"><img src="https://img.shields.io/badge/Kilo_Code-00D4AA?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Kilo Code" /></a>
-  <a href="https://docs.trae.ai"><img src="https://img.shields.io/badge/TRAE-8B5CF6?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="TRAE" /></a>
-</p>
-
-**Tier 3 — Enterprise & Specialized**
-
-<p align="center">
-  <a href="https://aws.amazon.com/q/developer/"><img src="https://img.shields.io/badge/Amazon_Q-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Amazon Q" /></a>
-  <a href="https://www.augmentcode.com"><img src="https://img.shields.io/badge/Augment-6366F1?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Augment" /></a>
-  <a href="https://www.tabnine.com"><img src="https://img.shields.io/badge/Tabnine-5B5BD6?style=for-the-badge&logo=tabnine&logoColor=white" alt="Tabnine" /></a>
-  <a href="https://github.com/opencode-ai/opencode"><img src="https://img.shields.io/badge/OpenCode-1A1A1A?style=for-the-badge&logo=terminal&logoColor=white" alt="OpenCode" /></a>
-  <a href="https://sourcegraph.com/cody"><img src="https://img.shields.io/badge/Sourcegraph_Cody-FF5733?style=for-the-badge&logo=sourcegraph&logoColor=white" alt="Sourcegraph Cody" /></a>
-  <a href="https://www.factory.ai"><img src="https://img.shields.io/badge/Droid_(Factory.ai)-121212?style=for-the-badge&logo=robot&logoColor=white" alt="Droid (Factory.ai)" /></a>
-</p>
+</div>
 
 <p align="center">
   <sub>Missing your favorite agent? <a href="https://github.com/tech-leads-club/agent-skills/issues/new"><strong>Open an issue</strong></a> and we'll add support!</sub>
@@ -144,44 +156,79 @@ Each step shows a **← Back** option to return and revise your choices.
 
 ### CLI Options
 
+> **Note**: You can use either `npx @tech-leads-club/agent-skills` or install globally and use `agent-skills` directly.
+
 ```bash
 # Interactive mode (default)
 npx @tech-leads-club/agent-skills
+# or: agent-skills (if installed globally)
 
 # List available skills
-npx @tech-leads-club/agent-skills list
+agent-skills list
+agent-skills ls        # Alias
 
-# Install a specific skill
-npx @tech-leads-club/agent-skills install -s tlc-spec-driven
+# Install one skill
+agent-skills install -s tlc-spec-driven
+
+# Install multiple skills at once
+agent-skills install -s aws-advisor coding-guidelines docs-writer
 
 # Install to specific agents
-npx @tech-leads-club/agent-skills install -a cursor claude-code
+agent-skills install -s my-skill -a cursor claude-code
+
+# Install multiple skills to multiple agents
+agent-skills install -s aws-advisor nx-workspace -a cursor windsurf cline
 
 # Install globally (to ~/.gemini, ~/.claude, etc.)
-npx @tech-leads-club/agent-skills install -g
+agent-skills install -s my-skill -g
+
+# Use symlink instead of copy
+agent-skills install -s my-skill --symlink
 
 # Force re-download (bypass cache)
-npx @tech-leads-club/agent-skills install -s my-skill --force
+agent-skills install -s my-skill --force
 
 # Update a specific skill
-npx @tech-leads-club/agent-skills update -s my-skill
+agent-skills update -s my-skill
 
-# Remove skills
-npx @tech-leads-club/agent-skills remove
+# Update all installed skills
+agent-skills update
+
+# Remove one skill
+agent-skills remove -s my-skill
+
+# Remove multiple skills at once
+agent-skills remove -s skill1 skill2 skill3
+agent-skills rm -s my-skill    # Alias
+
+# Remove from specific agents
+agent-skills remove -s my-skill -a cursor windsurf
+
+# Force removal (bypass lockfile check)
+agent-skills remove -s my-skill --force
 
 # Manage cache
-npx @tech-leads-club/agent-skills cache --clear   # Clear all cache
-npx @tech-leads-club/agent-skills cache --path    # Show cache location
+agent-skills cache --clear           # Clear all cache
+agent-skills cache --clear-registry  # Clear only registry
+agent-skills cache --path            # Show cache location
+
+# View audit log
+agent-skills audit                   # Show recent operations
+agent-skills audit -n 20             # Show last 20 entries
+agent-skills audit --path            # Show audit log location
+
+# Show contributors and credits
+agent-skills credits
 
 # Show help
-npx @tech-leads-club/agent-skills --help
+agent-skills --help
 ```
 
 ### Global Installation (Optional)
 
 ```bash
 npm install -g @tech-leads-club/agent-skills
-tlc-skills  # Use 'tlc-skills' instead of 'npx @tech-leads-club/agent-skills'
+agent-skills  # Use 'agent-skills' instead of 'npx @tech-leads-club/agent-skills'
 ```
 
 ## ⚡ How It Works
@@ -195,11 +242,11 @@ The CLI fetches skills **on-demand** from our CDN:
 
 ### Caching
 
-Downloaded skills are cached in `~/.cache/tlc-skills/` for offline use.
+Downloaded skills are cached in `~/.cache/agent-skills/` for offline use.
 
 ```bash
 # Clear the cache
-rm -rf ~/.cache/tlc-skills
+rm -rf ~/.cache/agent-skills
 ```
 
 ## 🛠 For Contributors
@@ -228,6 +275,7 @@ npm run build
 | `npm run test`      | Run all tests                      |
 | `npm run lint`      | Lint codebase                      |
 | `npm run format`    | Format code with Prettier          |
+| `npm run scan`      | Run incremental security scan      |
 
 ### Creating a New Skill
 
@@ -319,6 +367,50 @@ Brief description.
 - **Write specific descriptions** — include trigger phrases
 - **Assume the agent is smart** — only add what it doesn't already know
 - **Prefer scripts over inline code** — reduces context window usage
+
+## 🔒 Security Scan
+
+Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+
+```bash
+npm run scan              # Incremental (default)
+npm run scan -- --force   # Force full re-scan
+```
+
+### How it works
+
+Each skill has a SHA-256 content hash (computed from all its files). Results are cached in `.security-scan-cache.json` (gitignored). On the next run, skills whose hash hasn't changed skip re-scanning and load results from cache.
+
+```
+Content hash unchanged → load from cache (fast)
+Content hash changed   → re-scan with mcp-scan
+```
+
+### Handling false positives
+
+If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
+
+**`packages/skills-catalog/security-scan-allowlist.yaml`**
+
+```yaml
+version: '1.0.0'
+
+entries:
+  - skill: my-skill
+    code: W011
+    reason: >
+      Fetches from trusted first-party API — expected behavior.
+    allowedBy: github.com/username
+    allowedAt: '2026-01-01'
+    expiresAt: '2027-01-01' # Optional but recommended
+```
+
+- Match is by `skill + code` — no re-scan needed after adding an entry
+- `expiresAt` is optional but recommended — forces periodic review
+- Expired entries re-activate the finding automatically
+- Use YAML for better readability, comments, and cleaner diffs
+
+The allowlist is committed to the repo and reviewable in PRs.
 
 ## 🔄 Release Process
 

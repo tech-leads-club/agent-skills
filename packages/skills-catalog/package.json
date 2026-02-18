@@ -1,0 +1,23 @@
+{
+  "name": "@tech-leads-club/skills-catalog",
+  "version": "0.2.0",
+  "description": "Skills catalog registry for agent-skills CLI (CDN distribution)",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tech-leads-club/agent-skills.git",
+    "directory": "packages/skills-catalog"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "skills-registry.json",
+    "skills/"
+  ],
+  "devDependencies": {
+    "chalk": "^5.6.2"
+  }
+}

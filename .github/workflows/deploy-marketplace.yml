@@ -1,7 +1,9 @@
 name: Deploy Marketplace (GitHub Pages)
 
 on:
-  push:
+  workflow_run:
+    workflows: ['CI/CD Pipeline']
+    types: [completed]
     branches: [main]
   pull_request:
     types: [opened, synchronize, labeled]
@@ -18,6 +20,10 @@ jobs:
   build:
     name: Build Marketplace
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     concurrency:
       group: ci-${{ github.event.pull_request.number }}
       cancel-in-progress: true
@@ -29,6 +35,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set Nx SHAs
@@ -38,10 +45,10 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Generate skills data
-        run: npx nx run marketplace:generate-data
+        run: npm run generate:data || NX_NO_CLOUD=true npm run generate:data
 
       - name: Build (static export)
-        run: npx nx run marketplace:export
+        run: npx nx run marketplace:export || NX_NO_CLOUD=true npx nx run marketplace:export
         env:
           NODE_ENV: production
 

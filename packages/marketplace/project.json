@@ -6,7 +6,9 @@
   "tags": [],
   "targets": {
     "generate-data": {
-      "dependsOn": ["skills-catalog:generate-registry"],
+      "dependsOn": [
+        "@tech-leads-club/skills-catalog:generate-registry"
+      ],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsx scripts/generate-data.ts",
@@ -14,9 +16,13 @@
       }
     },
     "build": {
-      "dependsOn": ["generate-data"],
+      "dependsOn": [
+        "generate-data"
+      ],
       "executor": "@nx/next:build",
-      "outputs": ["{projectRoot}/.next"],
+      "outputs": [
+        "{projectRoot}/.next"
+      ],
       "options": {
         "outputPath": "packages/marketplace/.next"
       }
@@ -25,7 +31,9 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "packages/marketplace",
-        "commands": ["next build"]
+        "commands": [
+          "next build"
+        ]
       }
     },
     "dev": {

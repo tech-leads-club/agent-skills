@@ -1,102 +1,25 @@
 #!/usr/bin/env tsx
 
-import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import {
+  CATEGORY_FOLDER_PATTERN,
+  CATEGORY_METADATA_FILE,
+  type CategoryMetadata,
+  type SkillMetadata,
+  type SkillsRegistry,
+  computeSkillHash,
+  getFilesInDirectory,
+  parseSkillFrontmatter,
+} from './utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const SKILLS_DIR = join(__dirname, '..', 'skills')
 const OUTPUT_FILE = join(__dirname, '..', 'skills-registry.json')
-const CATEGORY_FOLDER_PATTERN = /^\(([a-z][a-z0-9-]*)\)$/
-const CATEGORY_METADATA_FILE = '_category.json'
-
-interface SkillMetadata {
-  name: string
-  description: string
-  category: string
-  path: string
-  files: string[]
-  author?: string
-  version?: string
-  contentHash: string
-}
-
-interface CategoryMetadata {
-  name: string
-  description?: string
-}
-
-interface SkillsRegistry {
-  version: string
-  categories: Record<string, CategoryMetadata>
-  skills: SkillMetadata[]
-}
-
-function parseSkillFrontmatter(content: string): {
-  name?: string
-  description?: string
-  author?: string
-  version?: string
-} {
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
-  if (!frontmatterMatch) return {}
-
-  const frontmatter = frontmatterMatch[1]
-  const nameMatch = frontmatter.match(/^name:\s*(.+)$/m)
-  const descMatch = frontmatter.match(/^description:\s*(.+)$/m)
-  const metadataBlock = frontmatter.match(/^metadata:\s*\n((?:\s{2,}.+\n?)*)/m)
-  const metadata = metadataBlock?.[1] || ''
-  const authorMatch = metadata.match(/author:\s*(.+)$/m)
-  const versionMatch = metadata.match(/version:\s*['"]?([^'"]+)['"]?$/m)
-
-  return {
-    name: nameMatch?.[1]?.trim(),
-    description: descMatch?.[1]?.trim(),
-    author: authorMatch?.[1]?.trim(),
-    version: versionMatch?.[1]?.trim(),
-  }
-}
-
-const IGNORED_FILES = ['.DS_Store', '.gitkeep', 'Thumbs.db', '.gitignore']
-
-function getFilesInDirectory(dir: string): string[] {
-  const files: string[] = []
-
-  function walk(currentDir: string, prefix = '') {
-    const entries = readdirSync(currentDir, { withFileTypes: true })
-    for (const entry of entries) {
-      if (IGNORED_FILES.includes(entry.name) || entry.name.startsWith('.')) continue
-
-      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name
-      if (entry.isDirectory()) {
-        walk(join(currentDir, entry.name), relativePath)
-      } else {
-        files.push(relativePath)
-      }
-    }
-  }
-
-  walk(dir)
-  return files
-}
-
-function computeSkillHash(skillDir: string, files: string[]): string {
-  const hash = createHash('sha256')
-  const sortedFiles = [...files].sort()
-
-  for (const file of sortedFiles) {
-    const filePath = join(skillDir, file)
-    if (existsSync(filePath)) {
-      hash.update(file)
-      hash.update(readFileSync(filePath))
-    }
-  }
-
-  return hash.digest('hex')
-}
 
 function isCategoryFolder(name: string): boolean {
   return CATEGORY_FOLDER_PATTERN.test(name)

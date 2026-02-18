@@ -2,8 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "ESNext",
+    "moduleResolution": "node16",
+    "allowImportingTsExtensions": false,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "types": [
       "jest",
       "node"
@@ -12,7 +17,9 @@
   "include": [
     "jest.config.ts",
     "src/**/*.test.ts",
+    "src/**/*.test.tsx",
     "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
     "src/**/*.d.ts"
   ]
 }

@@ -9,7 +9,16 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
-  globalIgnores(['dist/**', 'node_modules/**', '**/*.js', '**/*.d.ts']),
+  globalIgnores([
+    'dist/**',
+    'node_modules/**',
+    '**/*.js',
+    '**/*.d.ts',
+    '.nx/**',
+    '**/.*/**',
+    '**/next.config.mjs',
+    '**/postcss.config.cjs',
+  ]),
   {
     name: 'tlc-typescript',
     files: ['**/*.ts'],
@@ -25,6 +34,23 @@ export default defineConfig([
     files: ['packages/*/package.json'],
     plugins: { '@nx': nxPlugin },
     languageOptions: { parser: jsoncParser },
-    rules: { '@nx/dependency-checks': ['error', { ignoredDependencies: ['@tech-leads-club/core'] }] },
+    rules: {
+      '@nx/dependency-checks': [
+        'error',
+        {
+          ignoredDependencies: [
+            '@tech-leads-club/core',
+            'react-dom', // Peer dependency of Next.js
+            '@tailwindcss/postcss', // Used in postcss.config.cjs
+            'tailwindcss', // Used in global.css via @import
+            'github-markdown-css', // Used in global.css via @import
+            'highlight.js', // Used in global.css via @import
+            '@jest/globals', // Used in tests only
+            '@testing-library/react', // Used in tests only
+            'fast-check', // Used in tests only
+          ],
+        },
+      ],
+    },
   },
 ])

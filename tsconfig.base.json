@@ -28,12 +28,6 @@
       "@tech-leads-club/agent-skills": [
         "packages/cli/src/index.ts"
       ],
-      "@tech-leads-club/workspace-plugin": [
-        "tools/workspace-plugin/src/index.ts"
-      ],
-      "@tech-leads-club/skill-plugin": [
-        "tools/skill-plugin/src/index.ts"
-      ],
       "@tech-leads-club/core": [
         "libs/core/src/index.ts"
       ]

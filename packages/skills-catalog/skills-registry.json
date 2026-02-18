@@ -95,6 +95,16 @@
       "contentHash": "397e1833b5a71830f875b57926aafe6b450e76a4407282506e5d74766411c991"
     },
     {
+      "name": "chrome-devtools",
+      "description": "'Expert-level browser automation, debugging, and performance analysis using Chrome DevTools MCP. Use for interacting with web pages, capturing screenshots, analyzing network traffic, and profiling performance.'",
+      "category": "tooling",
+      "path": "(tooling)/chrome-devtools",
+      "files": [
+        "SKILL.md"
+      ],
+      "contentHash": "670b3a219e694480e6e19cfd5ac3c49f2ec1462a9fefd86a866b411320a6bd84"
+    },
+    {
       "name": "cloudflare-deploy",
       "description": "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.",
       "category": "cloud",
@@ -555,6 +565,30 @@
       "contentHash": "61d58b48277065dc4f2990ede13e37e9814234859506b14c2370c88ee04b4a35"
     },
     {
+      "name": "excalidraw-diagram-generator",
+      "description": "'Generate Excalidraw diagrams from natural language descriptions. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", or \"generate an Excalidraw file\". Supports flowcharts, relationship diagrams, mind maps, and system architecture diagrams. Outputs .excalidraw JSON files that can be opened directly in Excalidraw.'",
+      "category": "architecture",
+      "path": "(architecture)/excalidraw-diagram-generator",
+      "files": [
+        "SKILL.md",
+        "references/element-types.md",
+        "references/excalidraw-schema.md",
+        "scripts/README.md",
+        "scripts/add-arrow.py",
+        "scripts/add-icon-to-diagram.py",
+        "scripts/split-excalidraw-library.py",
+        "templates/business-flow-swimlane-template.excalidraw",
+        "templates/class-diagram-template.excalidraw",
+        "templates/data-flow-diagram-template.excalidraw",
+        "templates/er-diagram-template.excalidraw",
+        "templates/flowchart-template.excalidraw",
+        "templates/mindmap-template.excalidraw",
+        "templates/relationship-template.excalidraw",
+        "templates/sequence-diagram-template.excalidraw"
+      ],
+      "contentHash": "30b5f2d67d1bbb6073ba3f38a9ba656089a35fb9729cdff31b8fb2c7738a2bf0"
+    },
+    {
       "name": "figma",
       "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.",
       "category": "design",
@@ -594,7 +628,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "f24def7dfa73df37434d7a40f28ffbe3d823417599205d56f03388ebc68eaf64"
+      "contentHash": "844e7f23cee13dce2b2b9ca1428f659beb0c1360ef887a2a89210dadd4cb4c98"
     },
     {
       "name": "gh-fix-ci",
@@ -726,7 +760,156 @@
         "package.json",
         "run.js"
       ],
-      "contentHash": "704ae04b9fbb96ce4eeb2a340fb2137eb2995436a1aca165f403dc24d57a350f"
+      "contentHash": "aabce31e848ffb6c0f6769d9ba5ee0bd41341f17d4c2ce1cabaec4ad10748bab"
+    },
+    {
+      "name": "react-best-practices",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+      "category": "quality",
+      "path": "(quality)/react-best-practices",
+      "files": [
+        "AGENTS.md",
+        "README.md",
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "rules/advanced-event-handler-refs.md",
+        "rules/advanced-init-once.md",
+        "rules/advanced-use-latest.md",
+        "rules/async-api-routes.md",
+        "rules/async-defer-await.md",
+        "rules/async-dependencies.md",
+        "rules/async-parallel.md",
+        "rules/async-suspense-boundaries.md",
+        "rules/bundle-barrel-imports.md",
+        "rules/bundle-conditional.md",
+        "rules/bundle-defer-third-party.md",
+        "rules/bundle-dynamic-imports.md",
+        "rules/bundle-preload.md",
+        "rules/client-event-listeners.md",
+        "rules/client-localstorage-schema.md",
+        "rules/client-passive-event-listeners.md",
+        "rules/client-swr-dedup.md",
+        "rules/js-batch-dom-css.md",
+        "rules/js-cache-function-results.md",
+        "rules/js-cache-property-access.md",
+        "rules/js-cache-storage.md",
+        "rules/js-combine-iterations.md",
+        "rules/js-early-exit.md",
+        "rules/js-hoist-regexp.md",
+        "rules/js-index-maps.md",
+        "rules/js-length-check-first.md",
+        "rules/js-min-max-loop.md",
+        "rules/js-set-map-lookups.md",
+        "rules/js-tosorted-immutable.md",
+        "rules/rendering-activity.md",
+        "rules/rendering-animate-svg-wrapper.md",
+        "rules/rendering-conditional-render.md",
+        "rules/rendering-content-visibility.md",
+        "rules/rendering-hoist-jsx.md",
+        "rules/rendering-hydration-no-flicker.md",
+        "rules/rendering-hydration-suppress-warning.md",
+        "rules/rendering-svg-precision.md",
+        "rules/rendering-usetransition-loading.md",
+        "rules/rerender-defer-reads.md",
+        "rules/rerender-dependencies.md",
+        "rules/rerender-derived-state-no-effect.md",
+        "rules/rerender-derived-state.md",
+        "rules/rerender-functional-setstate.md",
+        "rules/rerender-lazy-state-init.md",
+        "rules/rerender-memo-with-default-value.md",
+        "rules/rerender-memo.md",
+        "rules/rerender-move-effect-to-event.md",
+        "rules/rerender-simple-expression-in-memo.md",
+        "rules/rerender-transitions.md",
+        "rules/rerender-use-ref-transient-values.md",
+        "rules/server-after-nonblocking.md",
+        "rules/server-auth-actions.md",
+        "rules/server-cache-lru.md",
+        "rules/server-cache-react.md",
+        "rules/server-dedup-props.md",
+        "rules/server-parallel-fetching.md",
+        "rules/server-serialization.md"
+      ],
+      "author": "vercel",
+      "version": "1.0.0",
+      "contentHash": "078a4a2ea3c5d32f79ef3ab3366630f25c70e10479445aa82fc2c5a89cc9aa59"
+    },
+    {
+      "name": "react-composition-patterns",
+      "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture. Includes React 19 API changes.",
+      "category": "architecture",
+      "path": "(architecture)/react-composition-patterns",
+      "files": [
+        "AGENTS.md",
+        "README.md",
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "rules/architecture-avoid-boolean-props.md",
+        "rules/architecture-compound-components.md",
+        "rules/patterns-children-over-render-props.md",
+        "rules/patterns-explicit-variants.md",
+        "rules/react19-no-forwardref.md",
+        "rules/state-context-interface.md",
+        "rules/state-decouple-implementation.md",
+        "rules/state-lift-state.md"
+      ],
+      "author": "vercel",
+      "version": "1.0.0",
+      "contentHash": "2b93a24df3e90c7ac3751c0bafcccca6bd9518df00cd34475369e61370e5630d"
+    },
+    {
+      "name": "react-native-skills",
+      "description": "React Native and Expo best practices for building performant mobile apps. Use",
+      "category": "development",
+      "path": "(development)/react-native-skills",
+      "files": [
+        "AGENTS.md",
+        "README.md",
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "rules/animation-derived-value.md",
+        "rules/animation-gesture-detector-press.md",
+        "rules/animation-gpu-properties.md",
+        "rules/design-system-compound-components.md",
+        "rules/fonts-config-plugin.md",
+        "rules/imports-design-system-folder.md",
+        "rules/js-hoist-intl.md",
+        "rules/list-performance-callbacks.md",
+        "rules/list-performance-function-references.md",
+        "rules/list-performance-images.md",
+        "rules/list-performance-inline-objects.md",
+        "rules/list-performance-item-expensive.md",
+        "rules/list-performance-item-memo.md",
+        "rules/list-performance-item-types.md",
+        "rules/list-performance-virtualize.md",
+        "rules/monorepo-native-deps-in-app.md",
+        "rules/monorepo-single-dependency-versions.md",
+        "rules/navigation-native-navigators.md",
+        "rules/react-compiler-destructure-functions.md",
+        "rules/react-compiler-reanimated-shared-values.md",
+        "rules/react-state-dispatcher.md",
+        "rules/react-state-fallback.md",
+        "rules/react-state-minimize.md",
+        "rules/rendering-no-falsy-and.md",
+        "rules/rendering-text-in-text-component.md",
+        "rules/scroll-position-no-state.md",
+        "rules/state-ground-truth.md",
+        "rules/ui-expo-image.md",
+        "rules/ui-image-gallery.md",
+        "rules/ui-measure-views.md",
+        "rules/ui-menus.md",
+        "rules/ui-native-modals.md",
+        "rules/ui-pressable.md",
+        "rules/ui-safe-area-scroll.md",
+        "rules/ui-scrollview-content-inset.md",
+        "rules/ui-styling.md"
+      ],
+      "author": "vercel",
+      "version": "1.0.0",
+      "contentHash": "33bbf1cdf655f24e7cfc6ecbe7035976b6df3a866858f50c2931c8b858a38aaf"
     },
     {
       "name": "render-deploy",
@@ -749,7 +932,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "8d20fd36768334e023de5cdff07a05519668d253b9294a0bdf833a811e2918b9"
+      "contentHash": "9def463262f85c71e3d66f1580e5d13d96c9434b7a287b24f7cc6aece686d839"
     },
     {
       "name": "run-nx-generator",
@@ -844,6 +1027,27 @@
       "contentHash": "7b124e46a34303039b08aefe1c60aac89f05aee348c2c8522e69533fd7a6f62e"
     },
     {
+      "name": "shopify-developer",
+      "description": "Complete Shopify development reference for Liquid templating, theme development (OS 2.0), GraphQL Admin API, Storefront API, custom app development, Shopify Functions, Hydrogen, performance optimisation, and debugging. Use when working with .liquid files, creating theme sections and blocks, writing GraphQL queries or mutations for Shopify, building Shopify apps with CLI and Polaris, implementing cart operations via Ajax API, optimising Core Web Vitals for Shopify stores, debugging Liquid or API errors, configuring settings_schema.json, accessing Shopify objects (product, collection, cart, customer), using Liquid filters, creating app extensions, working with webhooks, migrating from Scripts to Functions, or building headless storefronts with Hydrogen and React Router 7. Covers API version 2026-01.",
+      "category": "development",
+      "path": "(development)/shopify-developer",
+      "files": [
+        "SKILL.md",
+        "references/api-admin.md",
+        "references/api-storefront.md",
+        "references/app-development.md",
+        "references/debugging.md",
+        "references/functions.md",
+        "references/hydrogen.md",
+        "references/liquid-filters.md",
+        "references/liquid-objects.md",
+        "references/liquid-syntax.md",
+        "references/performance.md",
+        "references/theme-development.md"
+      ],
+      "contentHash": "1732419cd1dfc1096790931db29f5bd665d54d27f9ebb80238cb8abb92ab986a"
+    },
+    {
       "name": "skill-creator",
       "description": "Guide for creating effective AI agent skills. Use when users want to create a new skill (or update an existing skill) that extends an AI agent's capabilities with specialized knowledge, workflows, or tool integrations. Works with any agent that supports the SKILL.md format (Claude Code, Cursor, Roo, Cline, Windsurf, etc.). Triggers on \"create skill\", \"new skill\", \"package knowledge\", \"skill for\".",
       "category": "creation",
@@ -876,7 +1080,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when: (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\".",
+      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\".",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -898,7 +1102,7 @@
       ],
       "author": "github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "64ba71efa2195b58970f0400ee2d893ba577bebacddb0b371705ee4a74eef329"
+      "contentHash": "1879205e8a56503b2093a9e5fa4fad0253431aca753cdde7e32762ca39469a0b"
     },
     {
       "name": "vercel-deploy",
@@ -913,6 +1117,19 @@
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "8628bf69eb47fd1f243c6dac0060390dead25d1fa7063fd8225bde4cbca5294c"
+    },
+    {
+      "name": "web-design-guidelines",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+      "category": "design",
+      "path": "(design)/web-design-guidelines",
+      "files": [
+        "SKILL.md",
+        "references/guideline.md"
+      ],
+      "author": "vercel",
+      "version": "1.0.0",
+      "contentHash": "c13084a3dad5e597c3a7322b42971b3f9a1d5b180e69a3a7e548942ce6fffddc"
     },
     {
       "name": "web-quality-audit",

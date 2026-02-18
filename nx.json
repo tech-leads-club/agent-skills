@@ -2,10 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/nrwl/nx/master/packages/nx/schemas/nx-schema.json",
   "nxCloudId": "69766724b12521140b82d456",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [],
     "production": [
       "default",
@@ -36,9 +33,21 @@
     }
   ],
   "release": {
-    "projects": [
-      "@tech-leads-club/agent-skills"
-    ],
+    "projectsRelationship": "independent",
+    "groups": {
+      "cli": {
+        "projects": ["@tech-leads-club/agent-skills"],
+        "releaseTagPattern": "v{version}"
+      },
+      "skills-catalog": {
+        "projects": ["@tech-leads-club/skills-catalog"],
+        "releaseTagPattern": "skills-catalog-v{version}"
+      }
+    },
+    "git": {
+      "commit": true,
+      "tag": true
+    },
     "version": {
       "conventionalCommits": true,
       "fallbackCurrentVersionResolver": "disk",
@@ -64,62 +73,37 @@
     },
     "changelog": {
       "automaticFromRef": true,
-      "projectChangelogs": true,
-      "workspaceChangelog": {
+      "projectChangelogs": {
         "createRelease": "github"
-      }
-    },
-    "git": {
-      "commit": true,
-      "tag": true
+      },
+      "workspaceChangelog": false
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "cache": true,
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "inputs": ["production", "^production"]
     },
     "nx-release-publish": {
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["post-build"],
       "options": {
         "packageRoot": "{projectRoot}/dist"
       },
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "inputs": ["production", "^production"]
     },
     "test": {
       "cache": true,
-      "inputs": [
-        "default",
-        "^production"
-      ]
+      "inputs": ["default", "^production"]
     },
     "eslint:lint": {
       "cache": true,
-      "inputs": [
-        "default",
-        "^production"
-      ]
+      "inputs": ["default", "^production"]
     },
     "@nx/js:tsc": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "defaultBase": "main"

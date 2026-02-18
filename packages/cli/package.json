@@ -1,7 +1,7 @@
 {
   "name": "@tech-leads-club/agent-skills",
-  "version": "0.13.0",
-  "description": "CLI to install and manage skills for AI coding agents",
+  "version": "1.0.0",
+  "description": "Secure, verifiable CLI to install and manage skills for professional AI coding agents",
   "author": "Tech Leads Club",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,7 @@
   },
   "type": "module",
   "bin": {
-    "tlc-skills": "./index.js"
+    "agent-skills": "./index.js"
   },
   "engines": {
     "node": ">=22"
@@ -21,6 +21,7 @@
   "scripts": {
     "build": "nx build",
     "dev": "tsx src/index.ts",
+    "postbuild": "chmod +x dist/index.js",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest",
     "typecheck": "tsc --noEmit"
   },
@@ -31,19 +32,28 @@
     "cli"
   ],
   "dependencies": {
-    "@clack/core": "^0.5.0",
-    "commander": "^14.0.2",
-    "figlet": "^1.10.0",
-    "gradient-string": "^3.0.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "ink": "^6.7.0",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^4.0.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "jotai": "^2.17.1",
     "ky": "^1.14.3",
-    "ora": "^9.3.0",
     "package-json": "^10.0.1",
-    "picocolors": "^1.1.1"
+    "react": "^19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@jest/globals": "30.2.0",
     "@tech-leads-club/core": "0.0.1",
+    "@testing-library/react": "^16.3.2",
     "@types/figlet": "^1.7.0",
     "@types/node": "^22",
+    "@types/react": "^19.2.14",
+    "fast-check": "^4.5.3",
+    "jest-environment-jsdom": "^30.2.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

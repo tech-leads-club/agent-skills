@@ -9,9 +9,9 @@ metadata:
 
 # PR Comment Handler
 
-Guide to find the open PR for the current branch and address its comments with gh CLI. Run all `gh` commands with elevated network access.
+Guide to find the open PR for the current branch and address its comments with gh CLI.
 
-Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), then run `gh auth status` with escalated permissions (include workflow/repo scopes) so `gh` commands succeed. If sandboxing blocks `gh auth status`, rerun it with `sandbox_permissions=require_escalated`.
+**Prerequisites:** Ensure `gh` is authenticated before running commands. Check authentication status with `gh auth status`. If not authenticated, instruct the user to run `gh auth login` to authenticate with GitHub.
 
 ## 1) Inspect comments needing attention
 

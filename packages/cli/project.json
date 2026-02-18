@@ -3,32 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/cli/src",
   "projectType": "library",
-  "tags": [
-    "scope:cli"
-  ],
-  "implicitDependencies": [
-    "skills-catalog"
-  ],
+  "tags": ["scope:cli"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "dependsOn": [
-        "skills-catalog:generate-registry"
-      ],
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
-      "inputs": [
-        "production",
-        "^production"
-      ],
+      "inputs": ["production", "^production"],
       "options": {
         "platform": "node",
         "outputPath": "packages/cli/dist",
-        "format": [
-          "esm"
-        ],
+        "format": ["esm"],
         "bundle": true,
         "main": "packages/cli/src/index.ts",
         "tsConfig": "packages/cli/tsconfig.json",
@@ -47,6 +32,11 @@
             "glob": "package.json",
             "input": ".",
             "output": "."
+          },
+          {
+            "glob": "**/*.mp3",
+            "input": "packages/cli/src/assets",
+            "output": "assets"
           }
         ],
         "esbuildOptions": {
@@ -57,7 +47,11 @@
           "banner": {
             "js": "#!/usr/bin/env node"
           },
-          "platform": "node"
+          "platform": "node",
+          "jsx": "automatic",
+          "loader": {
+            ".tsx": "tsx"
+          }
         }
       },
       "configurations": {
@@ -68,6 +62,13 @@
           "minify": true
         }
       }
+    },
+    "post-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "chmod +x packages/cli/dist/index.js"
+      },
+      "dependsOn": ["build"]
     }
   }
 }

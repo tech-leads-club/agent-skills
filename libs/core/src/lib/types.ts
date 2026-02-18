@@ -13,25 +13,29 @@ export interface CategoryMetadata {
   }
 }
 
-export type AgentType =
-  | 'cursor'
-  | 'claude-code'
-  | 'github-copilot'
-  | 'windsurf'
-  | 'cline'
-  | 'aider'
-  | 'codex'
-  | 'gemini'
-  | 'antigravity'
-  | 'roo'
-  | 'kilocode'
-  | 'amazon-q'
-  | 'augment'
-  | 'tabnine'
-  | 'opencode'
-  | 'sourcegraph'
-  | 'droid'
-  | 'trae'
+export const AGENT_TYPES = [
+  'cursor',
+  'claude-code',
+  'github-copilot',
+  'windsurf',
+  'cline',
+  'aider',
+  'codex',
+  'gemini',
+  'antigravity',
+  'roo',
+  'kilocode',
+  'amazon-q',
+  'augment',
+  'tabnine',
+  'opencode',
+  'sourcegraph',
+  'droid',
+  'trae',
+  'kiro',
+] as const
+
+export type AgentType = (typeof AGENT_TYPES)[number]
 
 export interface AgentConfig {
   name: string

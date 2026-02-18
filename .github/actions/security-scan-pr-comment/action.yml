@@ -1,0 +1,63 @@
+name: 'Security Scan PR Comment'
+description: 'Comments on PR when security scan fails'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Comment Security Scan Results
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          let results;
+          try {
+            results = JSON.parse(fs.readFileSync('.security-scan-results.json', 'utf8'));
+          } catch {
+            results = { summary: { critical: 0, high: 0, medium: 0 }, skills: [] };
+          }
+          const { summary, skills } = results;
+
+          const bySkill = {};
+          for (const issue of (skills || [])) {
+            if (!bySkill[issue.skill]) bySkill[issue.skill] = [];
+            bySkill[issue.skill].push(issue);
+          }
+
+          const body = [
+            '## 🔒 Security Scan Failed',
+            '',
+            '| Severity | Count |',
+            '|----------|-------|',
+            `| 🔴 Critical | ${summary.critical} |`,
+            `| 🟠 High | ${summary.high} |`,
+            `| 🟡 Medium | ${summary.medium} |`,
+            '',
+            '### Affected Skills',
+            '',
+            ...Object.entries(bySkill).map(([skill, issues]) =>
+              `#### ${skill}\n` + issues.map(i =>
+                `- **[${i.code}]** (${i.severity}) ${i.extra_data?.reason || i.message}`
+              ).join('\n')
+            ),
+            '',
+            '---',
+            '',
+            '**How to fix:**',
+            '1. Fix the security issue in the skill',
+            '2. If this is a false positive, add an entry to `packages/skills-catalog/security-scan-allowlist.yaml`',
+            '',
+            `[View full scan results](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`
+          ].join('\n');
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body
+          });

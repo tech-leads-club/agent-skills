@@ -11,7 +11,7 @@
     "libs/*"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "bugs": {
     "url": "https://github.com/tech-leads-club/agent-skills/issues"
@@ -22,13 +22,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "g": "nx g @tech-leads-club/skill-plugin:skill",
-    "generate:registry": "nx run skills-catalog:generate-registry",
+    "generate:data": "nx run-many -t generate-data --output-style=stream",
+    "generate:registry": "nx run @tech-leads-club/skills-catalog:generate-registry",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "nx release",
-    "release:beta": "nx release --preid beta",
+    "prepublishOnly": "npm run scan",
+    "release": "npm run scan && nx release",
+    "release:beta": "npm run scan && nx release --preid beta",
     "release:beta:dry": "nx release --preid beta --dry-run",
     "release:dry": "nx release --dry-run",
+    "scan": "npx nx run @tech-leads-club/skills-catalog:security-scan",
     "start:dev": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
   },
@@ -53,29 +56,30 @@
   ],
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@nx/devkit": "^22.5.0",
-    "@nx/esbuild": "^22.5.0",
-    "@nx/eslint": "^22.5.0",
-    "@nx/eslint-plugin": "^22.5.0",
-    "@nx/jest": "22.5.0",
-    "@nx/js": "^22.5.0",
-    "@nx/next": "^22.5.0",
-    "@nx/plugin": "^22.5.0",
+    "@nx/devkit": "^22.5.1",
+    "@nx/esbuild": "^22.5.1",
+    "@nx/eslint": "^22.5.1",
+    "@nx/eslint-plugin": "^22.5.1",
+    "@nx/jest": "22.5.1",
+    "@nx/js": "^22.5.1",
+    "@nx/next": "^22.5.1",
+    "@nx/plugin": "^22.5.1",
     "@swc-node/register": "^1.11.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "~0.5.18",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22",
+    "@types/node": "^24",
     "cross-env": "^10.1.0",
     "esbuild": "^0.27.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
+    "fast-check": "^4.5.3",
     "jest": "^30.2.0",
     "jest-environment-node": "^30.2.0",
     "jest-util": "^30.2.0",
     "jsonc-eslint-parser": "^2.4.2",
     "next": "~16.1.6",
-    "nx": "^22.5.0",
+    "nx": "^22.5.1",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "react": "^19.2.4",
@@ -83,8 +87,10 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.56.0",
+    "yaml": "^2.8.2"
   },
   "nx": {
     "includedScripts": []
