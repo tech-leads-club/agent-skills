@@ -26,6 +26,7 @@ jobs:
       NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
       NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
       NODE_OPTIONS: '--experimental-vm-modules'
+      PARALLEL_JOBS: 8
     steps:
       - name: Generate App Token
         uses: actions/create-github-app-token@v1
@@ -157,6 +158,8 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.actor != 'tech-leads-club-release-bot[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore(release):')
+    env:
+      PARALLEL_JOBS: 8
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
