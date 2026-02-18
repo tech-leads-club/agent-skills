@@ -1,8 +1,19 @@
 import { mkdir, rm, symlink, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { removeSkill, getInstallPath, getCanonicalPath } from '../installer'
+import { join } from 'node:path'
+
 import type { AgentType } from '../../types'
+import { getCanonicalPath, getInstallPath, removeSkill } from '../installer'
+
+jest.mock('../audit-log', () => ({
+  logAudit: jest.fn(),
+  getAuditLogPath: jest.fn(),
+  readAuditLog: jest.fn(),
+}))
+
+jest.mock('../registry', () => ({
+  getCachedContentHash: jest.fn(),
+}))
 
 describe('Installer Security', () => {
   let testDir: string
@@ -53,7 +64,7 @@ describe('Installer Security', () => {
     it('should reject removal of skills not in lockfile', async () => {
       const agents: AgentType[] = ['cursor']
       const results = await removeSkill('non-existent-skill', agents, { force: false })
-      
+
       expect(results).toHaveLength(1)
       expect(results[0].success).toBe(false)
       expect(results[0].error).toContain('lockfile')
@@ -61,14 +72,14 @@ describe('Installer Security', () => {
 
     it('should allow forced removal without lockfile check', async () => {
       const agents: AgentType[] = ['cursor']
-      
+
       // Create a skill directory
       const skillDir = join(testDir, '.cursor', 'skills', 'test-skill')
       await mkdir(skillDir, { recursive: true })
       await writeFile(join(skillDir, 'test.md'), 'test')
-      
+
       const results = await removeSkill('test-skill', agents, { force: true })
-      
+
       expect(results).toHaveLength(1)
       // May succeed or fail depending on directory structure, but shouldn't error on lockfile
       if (!results[0].success) {
@@ -82,16 +93,16 @@ describe('Installer Security', () => {
       const agents: AgentType[] = ['cursor']
       const skillsDir = join(testDir, '.cursor', 'skills')
       await mkdir(skillsDir, { recursive: true })
-      
+
       const targetDir = join(testDir, 'target')
       await mkdir(targetDir, { recursive: true })
-      
+
       const linkPath = join(skillsDir, 'test-skill')
       await symlink(targetDir, linkPath, 'dir')
-      
+
       // Should handle symlink removal without following it
       const results = await removeSkill('test-skill', agents, { force: true })
-      
+
       expect(results).toHaveLength(1)
     })
   })
