@@ -1,9 +1,9 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { findProjectRoot } from './project-root'
 import type { AgentConfig, AgentType } from '../types'
+import { findProjectRoot } from './project-root'
 
 const home = homedir()
 const projectRoot = findProjectRoot()
@@ -48,7 +48,10 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'Autonomous AI coding agent for VS Code',
     skillsDir: '.cline/skills',
     globalSkillsDir: join(home, '.cline/skills'),
-    detectInstalled: () => existsSync(join(home, '.cline')) || existsSync(join(projectRoot, '.cline')),
+    detectInstalled: () =>
+      existsSync(join(home, '.cline')) ||
+      existsSync(join(projectRoot, '.cline')) ||
+      isExtensionInstalled('saoudrizwan', 'claude-dev'),
   },
 
   // Tier 2: Rising stars
@@ -90,7 +93,10 @@ export const agents: Record<AgentType, AgentConfig> = {
     description: 'AI coding assistant for VS Code',
     skillsDir: '.roo/skills',
     globalSkillsDir: join(home, '.roo/skills'),
-    detectInstalled: () => existsSync(join(home, '.roo')) || existsSync(join(projectRoot, '.roo')),
+    detectInstalled: () =>
+      existsSync(join(home, '.roo')) ||
+      existsSync(join(projectRoot, '.roo')) ||
+      isExtensionInstalled('RooVetGit', 'roo-cline'),
   },
   kilocode: {
     name: 'kilocode',
@@ -183,4 +189,27 @@ export function getAgentConfig(type: AgentType): AgentConfig {
 
 export function getAllAgentTypes(): AgentType[] {
   return (Object.keys(agents) as AgentType[]).sort((a, b) => agents[a].displayName.localeCompare(agents[b].displayName))
+}
+
+const isExtensionInstalled = (publisher: string, name: string): boolean => {
+  const extensionsDirs = [
+    join(home, '.vscode/extensions'),
+    join(home, '.vscode-server/extensions'),
+    join(home, '.vscode-oss/extensions'),
+  ]
+
+  for (const dir of extensionsDirs) {
+    if (existsSync(dir)) {
+      try {
+        const entries = readdirSync(dir)
+        if (entries.some((e) => e.startsWith(`${publisher}.${name}-`))) {
+          return true
+        }
+      } catch {
+        // Ignore errors accessing extension dirs
+      }
+    }
+  }
+
+  return false
 }
