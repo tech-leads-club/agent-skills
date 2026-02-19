@@ -5,28 +5,14 @@ on:
     workflows: ['CI/CD Pipeline']
     types: [completed]
     branches: [main]
-<<<<<<< HEAD
   workflow_dispatch: {}
-||||||| parent of 1b1622c (fix: fix link to github folder)
-  pull_request:
-    types: [opened, synchronize, labeled]
-=======
-  pull_request:
-    types: [opened, synchronize, labeled]
-  workflow_dispatch: {}
->>>>>>> 1b1622c (fix: fix link to github folder)
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
-
-env:
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
-
-concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  pull-requests: write
 
 jobs:
   build:
@@ -36,6 +22,13 @@ jobs:
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    concurrency:
+      group: ci-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+      NODE_OPTIONS: '--experimental-vm-modules'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
