@@ -7,12 +7,14 @@ import { fileURLToPath } from 'node:url'
 import {
   CATEGORY_FOLDER_PATTERN,
   CATEGORY_METADATA_FILE,
-  type CategoryMetadata,
-  type SkillMetadata,
-  type SkillsRegistry,
   computeSkillHash,
   getFilesInDirectory,
   parseSkillFrontmatter,
+  SKILL_NAME_SLUG_PATTERN,
+  toSlug,
+  type CategoryMetadata,
+  type SkillMetadata,
+  type SkillsRegistry,
 } from './utils'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -71,9 +73,13 @@ function scanSkillsInCategory(categoryPath: string, categoryId: string): SkillMe
     const files = getFilesInDirectory(skillPath)
     const contentHash = computeSkillHash(skillPath, files)
     const relativePath = categoryId === 'uncategorized' ? entry.name : `(${categoryId})/${entry.name}`
+    const rawName = name || entry.name
+    const skillName = SKILL_NAME_SLUG_PATTERN.test(rawName) ? rawName : toSlug(rawName)
+
+    if (skillName !== rawName) fixSkillNameInFile(skillMdPath, rawName, skillName)
 
     skills.push({
-      name: name || entry.name,
+      name: skillName,
       description: description || 'No description',
       category: categoryId,
       path: relativePath,
@@ -111,25 +117,10 @@ function generateRegistry(): SkillsRegistry {
         }
       }
     } else {
-      // Uncategorized skill at root
-      const skillMdPath = join(SKILLS_DIR, entry.name, 'SKILL.md')
-      if (existsSync(skillMdPath)) {
-        const content = readFileSync(skillMdPath, 'utf-8')
-        const { name, description, author, version } = parseSkillFrontmatter(content)
-        const skillDir = join(SKILLS_DIR, entry.name)
-        const files = getFilesInDirectory(skillDir)
-        const contentHash = computeSkillHash(skillDir, files)
-
-        skills.push({
-          name: name || entry.name,
-          description: description || 'No description',
-          category: 'uncategorized',
-          path: entry.name,
-          files,
-          author,
-          version,
-          contentHash,
-        })
+      // Uncategorized skill at root — reuse scanSkillsInCategory with 'uncategorized'
+      const skillDir = join(SKILLS_DIR, entry.name)
+      if (existsSync(join(skillDir, 'SKILL.md'))) {
+        skills.push(...scanSkillsInCategory(skillDir, 'uncategorized'))
       }
     }
   }
@@ -147,6 +138,14 @@ function generateRegistry(): SkillsRegistry {
     categories,
     skills: skills.sort((a, b) => a.name.localeCompare(b.name)),
   }
+}
+
+function fixSkillNameInFile(skillMdPath: string, rawName: string, slugName: string): void {
+  const content = readFileSync(skillMdPath, 'utf-8')
+  const updated = content.replace(/^(name:\s*)(.+)$/m, `$1${slugName}`)
+  writeFileSync(skillMdPath, updated, 'utf-8')
+  console.log(`✏️  Auto-fixed skill name in ${skillMdPath}`)
+  console.log(`   "${rawName}" → "${slugName}"`)
 }
 
 // Main execution
