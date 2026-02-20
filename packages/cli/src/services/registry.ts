@@ -2,7 +2,9 @@ import ky from 'ky'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import packageJson from 'package-json'
 
+import type { CategoryInfo, SkillInfo } from '../types'
 import {
   CACHE_BASE_DIR,
   CACHE_NAMESPACE,
@@ -16,7 +18,6 @@ import {
   SKILLS_CATALOG_PACKAGE,
   SKILLS_SUBDIR,
 } from '../utils/constants'
-import type { CategoryInfo, SkillInfo } from '../types'
 
 export interface SkillMetadata {
   name: string
@@ -67,30 +68,6 @@ const PATHS = {
   },
   get skillsCacheDir() {
     return join(this.cacheDir, SKILLS_SUBDIR)
-  },
-} as const
-
-const URLS = {
-  get cdnRef() {
-    return process.env.SKILLS_CDN_REF ?? 'latest'
-  },
-  get cdnBase() {
-    return `https://cdn.jsdelivr.net/npm/${SKILLS_CATALOG_PACKAGE}@${this.cdnRef}`
-  },
-  get fallbackCdnBase() {
-    return `https://unpkg.com/${SKILLS_CATALOG_PACKAGE}@${this.cdnRef}`
-  },
-  get registry() {
-    return `${this.cdnBase}/skills-registry.json`
-  },
-  get fallbackRegistry() {
-    return `${this.fallbackCdnBase}/skills-registry.json`
-  },
-  get skillsBase() {
-    return `${this.cdnBase}/skills`
-  },
-  get fallbackSkillsBase() {
-    return `${this.fallbackCdnBase}/skills`
   },
 } as const
 
@@ -149,16 +126,46 @@ async function fetchWithFallback(url: string, fallbackUrl?: string): Promise<Res
   }
 }
 
+let cachedCdnRef: string | null = null
+
+async function getResolvedCdnRef(): Promise<string> {
+  if (process.env.SKILLS_CDN_REF) return process.env.SKILLS_CDN_REF
+  if (cachedCdnRef) return cachedCdnRef
+
+  try {
+    const pkg = await packageJson(SKILLS_CATALOG_PACKAGE, { version: 'latest' })
+    cachedCdnRef = pkg.version as string
+    return cachedCdnRef
+  } catch {
+    return 'latest'
+  }
+}
+
+function buildUrls(cdnRef: string) {
+  const cdnBase = `https://cdn.jsdelivr.net/npm/${SKILLS_CATALOG_PACKAGE}@${cdnRef}`
+  const fallbackCdnBase = `https://unpkg.com/${SKILLS_CATALOG_PACKAGE}@${cdnRef}`
+  return {
+    registry: `${cdnBase}/skills-registry.json`,
+    fallbackRegistry: `${fallbackCdnBase}/skills-registry.json`,
+    skillsBase: `${cdnBase}/skills`,
+    fallbackSkillsBase: `${fallbackCdnBase}/skills`,
+  }
+}
+
 export async function fetchRegistry(forceRefresh = false): Promise<SkillsRegistry | null> {
   ensureCacheDir()
 
+  const resolvedRef = await getResolvedCdnRef()
+
   if (!forceRefresh) {
     const cached = tryReadCachedRegistry()
-    if (cached && isCacheValid(cached.fetchedAt)) return cached.registry
+    const versionChanged = cached && resolvedRef !== 'latest' && cached.registry.version !== resolvedRef
+    if (cached && isCacheValid(cached.fetchedAt) && !versionChanged) return cached.registry
   }
 
   try {
-    const response = await fetchWithFallback(URLS.registry, URLS.fallbackRegistry)
+    const urls = buildUrls(resolvedRef)
+    const response = await fetchWithFallback(urls.registry, urls.fallbackRegistry)
     const registry = (await response.json()) as SkillsRegistry
     saveRegistryToCache(registry)
     return registry
@@ -252,8 +259,10 @@ async function downloadSkillFile(skill: SkillMetadata, file: string, skillCacheP
 
   const parentDir = join(filePath, '..')
   if (!existsSync(parentDir)) mkdirSync(parentDir, { recursive: true })
-  const fileUrl = `${URLS.skillsBase}/${skill.path}/${file}`
-  const fallbackUrl = `${URLS.fallbackSkillsBase}/${skill.path}/${file}`
+
+  const urls = buildUrls(await getResolvedCdnRef())
+  const fileUrl = `${urls.skillsBase}/${skill.path}/${file}`
+  const fallbackUrl = `${urls.fallbackSkillsBase}/${skill.path}/${file}`
   const response = await fetchWithFallback(fileUrl, fallbackUrl)
   if (!response.ok) throw new Error(`Failed to download ${file}: HTTP ${response.status}`)
   writeFileSync(filePath, await response.text())
