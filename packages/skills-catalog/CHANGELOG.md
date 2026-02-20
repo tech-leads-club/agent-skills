@@ -1,3 +1,13 @@
+## 0.3.0 (2026-02-20)
+
+### 🚀 Features
+
+- add coupling analysis skill ([5507168f3](https://github.com/tech-leads-club/agent-skills/commit/5507168f3))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
 ## 0.2.0 (2026-02-18)
 
 ### 🚀 Features
