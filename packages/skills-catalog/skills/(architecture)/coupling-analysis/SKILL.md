@@ -1,5 +1,5 @@
 ---
-name: Coupling Analysis
+name: coupling-analysis
 description: Analyzes coupling in a codebase following the three-dimensional model from "Balancing Coupling in Software Design" (Vlad Khononov). Use when evaluating architectural quality, identifying problematic dependencies, understanding integration strength between modules, or getting recommendations to improve modularity.
 ---
 
