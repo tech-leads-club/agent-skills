@@ -1,3 +1,19 @@
+## 0.4.0 (2026-02-20)
+
+### 🚀 Features
+
+- add slug generation function for skill names ([fa2d01255](https://github.com/tech-leads-club/agent-skills/commit/fa2d01255))
+- auto-fix skill names to use slug format in registry generation ([889e81c26](https://github.com/tech-leads-club/agent-skills/commit/889e81c26))
+- update coupling analysis skill name and content hash ([a5ac2e4dc](https://github.com/tech-leads-club/agent-skills/commit/a5ac2e4dc))
+
+### 📖 Documentation
+
+- update skill name to lowercase for consistency ([435e0af0d](https://github.com/tech-leads-club/agent-skills/commit/435e0af0d))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.3.0 (2026-02-20)
 
 ### 🚀 Features
