@@ -220,8 +220,12 @@ jobs:
         run: |
           REGISTRY_PATH="packages/skills-catalog/skills-registry.json"
           MARKETPLACE_DATA_PATH="packages/marketplace/src/data/skills.json"
-          if ! git diff --quiet "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH" 2>/dev/null; then
-            git add "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH"
+          SKILLS_DIR="packages/skills-catalog/skills"
+
+          git add "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH"
+          git add "$SKILLS_DIR"
+
+          if ! git diff --cached --quiet; then
             git commit -m "chore(release): update generated skills data" || true
           fi
 
