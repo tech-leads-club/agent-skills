@@ -11,7 +11,7 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
   const installCommand = `npx @tech-leads-club/agent-skills install --skill ${skill.id}`
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-800 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-800 p-4">
       <div className="flex items-start justify-between mb-3">
         <Link
           href={`/skills/${skill.id}`}
@@ -51,10 +51,16 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
         <span>{skill.metadata.lastModified}</span>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 flex items-center justify-between">
-        <code className="text-xs text-gray-700 dark:text-gray-300 flex-1 overflow-x-auto">{installCommand}</code>
-        <CopyButton text={installCommand} />
+      <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 mb-4 flex items-center justify-between">      
+        <code className="text-sm text-green-400 break-all font-mono">{installCommand}</code>        
       </div>
+      <CopyButton text={installCommand} className="w-full mb-3" />
+      <Link
+        href={`/skills/${skill.id}`}
+        className="block text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+      >
+        View Details →
+      </Link>
     </div>
   )
 }

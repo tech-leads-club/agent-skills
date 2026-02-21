@@ -20,6 +20,21 @@
   }
 }
 
+/* Fix for README badges - keep them inline */
+.about-readme p[align='center'] {
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.about-readme p[align='center'] img {
+  display: inline-block;
+  margin: 0;
+}
+
 /* Dark mode overrides for github-markdown-css */
 .dark .markdown-body {
   --bgColor-default: theme(--color-gray-900);

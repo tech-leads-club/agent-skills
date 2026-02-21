@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/og-image.png',
-        width: 1200,
-        height: 630,
+        width: 800,
+        height: 422,
         alt: SITE_NAME,
       },
     ],
@@ -82,13 +82,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0">
-                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-6 sm:h-8 w-auto shrink-0" />
+                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-6 sm:h-8 w-auto shrink-0 dark:hidden" />
+                  <img src="/white_logo.png" alt="Tech Leads Club" className="h-6 sm:h-8 w-auto shrink-0 hidden dark:block" />
                   <div className="flex flex-col min-w-0">
                     <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">Agent Skills</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight hidden sm:block">by Tech Leads Club</span>
                   </div>
                 </Link>
                 <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                  <Link href="/" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
+                    Home
+                  </Link>
+                  <Link href="/about" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors hidden sm:block">
+                    About
+                  </Link>
                   <Link href="/skills" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
                     Skills
                   </Link>

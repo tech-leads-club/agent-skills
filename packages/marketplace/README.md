@@ -6,11 +6,14 @@ A Next.js static site that serves as a marketplace for browsing and discovering 
 
 The marketplace automatically generates a static website from the skills in the `skills/` directory. It includes:
 
-- Homepage with featured skills and stats
-- Skills listing page with search and category filtering
-- Individual skill detail pages with full content
+- Homepage with featured skills, stats, and NPM download metrics
+- Skills listing page with search, category filtering, and pagination
+- Individual skill detail pages with full content and markdown rendering
+- About page displaying repository README
+- Dark mode support with theme persistence
+- SEO optimized with JSON-LD structured data
 - Responsive design with Tailwind CSS
-- Static site generation for GitHub Pages
+- Static site generation deployed to custom domain
 
 ## Development
 
@@ -36,7 +39,7 @@ nx run marketplace:dev
 
 Open http://localhost:3000 in your browser.
 
-**Note**: The site runs without the `/agent-skills` prefix in development. The prefix is automatically added in production builds for GitHub Pages.
+**Note**: The site runs with the actual production configuration in development for consistency.
 
 ### Build for Production
 
@@ -48,14 +51,14 @@ This generates static files in `out/.next/` ready for deployment.
 
 ## Deployment
 
-The site automatically deploys to GitHub Pages when changes are pushed to the `main` branch via the `.github/workflows/deploy-marketplace.yml` workflow.
+The site automatically deploys to the custom domain `agent-skills.techleads.club` when changes are pushed to the `main` branch via the `.github/workflows/deploy-marketplace.yml` workflow.
 
 ### Manual Deployment
 
 To deploy manually:
 
 1. Ensure the build succeeds: `nx run marketplace:build`
-2. The static files are in `packages/marketplace/out/.next/`
+2. The static files are in `packages/marketplace/.next/`
 3. Deploy these files to any static hosting service
 
 ## Project Structure
@@ -68,6 +71,8 @@ marketplace/
 │   ├── app/
 │   │   ├── page.tsx            # Homepage
 │   │   ├── layout.tsx          # Root layout with navigation
+│   │   ├── about/
+│   │   │   └── page.tsx        # About page (displays README)
 │   │   └── skills/
 │   │       ├── page.tsx        # Skills listing page (wrapper)
 │   │       ├── SkillsClient.tsx # Skills listing (client component)
@@ -76,9 +81,14 @@ marketplace/
 │   ├── components/
 │   │   ├── CategoryFilter.tsx  # Category filter buttons
 │   │   ├── CopyButton.tsx      # Copy to clipboard button
+│   │   ├── JsonLd.tsx          # Structured data (SEO)
+│   │   ├── NpmDownloadsCard.tsx # NPM download stats
+│   │   ├── Pagination.tsx      # Pagination component
 │   │   ├── SearchBar.tsx       # Search input with debounce
 │   │   ├── SkillCard.tsx       # Skill preview card
-│   │   └── StatsCard.tsx       # Stats display card
+│   │   ├── StatsCard.tsx       # Stats display card
+│   │   ├── ThemeProvider.tsx   # Dark mode context provider
+│   │   └── ThemeToggle.tsx     # Dark/light mode toggle
 │   ├── data/
 │   │   └── skills.json         # Generated skills data
 │   └── types/
@@ -95,17 +105,40 @@ marketplace/
 - **TypeScript**: Type safety
 - **React Markdown**: Markdown rendering for skill content
 - **Gray Matter**: YAML frontmatter parsing
+- **Rehype/Remark**: Markdown plugins (syntax highlighting, GFM support)
 - **Nx**: Build system and monorepo tooling
+
+## Features
+
+### Dark Mode
+The site includes a fully functional dark mode with:
+- System preference detection
+- Manual toggle control
+- Theme persistence in localStorage
+- Smooth transitions between themes
+
+### SEO Optimization
+- JSON-LD structured data for all pages
+- OpenGraph and Twitter Card metadata
+- Canonical URLs and proper meta tags
+- Sitemap generation support
+
+### Performance
+- Static site generation (SSG)
+- Optimized build output
+- Responsive images
+- Code splitting
 
 ## Configuration
 
-The site is configured for GitHub Pages deployment:
+The site is configured for deployment to a custom domain:
 
-- Base path: `/agent-skills` (configured in `next.config.mjs`)
+- Domain: `agent-skills.techleads.club`
 - Static export: `output: 'export'`
 - Unoptimized images: Required for static export
+- Trailing slashes: Enabled for better compatibility
 
-To deploy to a different domain or path, update the `basePath` in `next.config.mjs`.
+To deploy to a different domain, update the `metadataBase` URL in `src/app/layout.tsx`.
 
 ## Adding New Skills
 
