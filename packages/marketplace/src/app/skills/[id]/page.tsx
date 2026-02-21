@@ -1,15 +1,62 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 import { CopyButton } from '../../../components/CopyButton'
+import { JsonLd } from '../../../components/JsonLd'
 import marketplaceData from '../../../data/skills.json'
 
 export function generateStaticParams() {
   return marketplaceData.skills.map((skill) => ({
     id: skill.id,
   }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const skill = marketplaceData.skills.find((s) => s.id === id)
+
+  if (!skill) {
+    return {}
+  }
+
+  const category = marketplaceData.categories.find((c) => c.id === skill.category)
+
+  return {
+    title: skill.name,
+    description: skill.description,
+    alternates: {
+      canonical: `/skills/${skill.id}`,
+    },
+    openGraph: {
+      title: `${skill.name} - Agent Skill`,
+      description: skill.description,
+      type: 'article',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: skill.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${skill.name} - Agent Skill`,
+      description: skill.description,
+    },
+    keywords: [
+      skill.name,
+      skill.category,
+      category?.name || '',
+      'AI agent skill',
+      'coding agent',
+      'agent automation',
+    ],
+  }
 }
 
 export default async function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,8 +70,48 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
   const category = marketplaceData.categories.find((c) => c.id === skill.category)
   const installCommand = `npx @tech-leads-club/agent-skills install --skill ${skill.id}`
 
+  const softwareSourceCodeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: skill.name,
+    description: skill.description,
+    url: `https://agent-skills.techleads.club/skills/${skill.id}`,
+    codeRepository: `https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`,
+    programmingLanguage: 'Markdown',
+    runtimePlatform: 'AI Coding Agents',
+    applicationCategory: category?.name || skill.category,
+    author: {
+      '@type': 'Organization',
+      name: 'Tech Leads Club',
+      url: 'https://github.com/tech-leads-club',
+    },
+    dateModified: skill.metadata.lastModified,
+    keywords: [skill.name, skill.category, 'AI agent skill', 'coding automation'],
+  }
+
+  const softwareSourceCodeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: skill.name,
+    description: skill.description,
+    url: `https://agent-skills.techleads.club/skills/${skill.id}`,
+    codeRepository: `https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`,
+    programmingLanguage: 'Markdown',
+    runtimePlatform: 'AI Coding Agents',
+    applicationCategory: category?.name || skill.category,
+    author: {
+      '@type': 'Organization',
+      name: 'Tech Leads Club',
+      url: 'https://github.com/tech-leads-club',
+    },
+    dateModified: skill.metadata.lastModified,
+    keywords: [skill.name, skill.category, 'AI agent skill', 'coding automation'],
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      <JsonLd data={softwareSourceCodeSchema} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Back link */}
       <Link
         href="/skills/"
@@ -129,7 +216,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             {/* GitHub Link */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <a
-                href={`https://github.com/tech-leads-club/agent-skills/tree/main/${skill.path}`}
+                href={`https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm font-medium"
@@ -148,5 +235,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
     </div>
+    </>
   )
 }

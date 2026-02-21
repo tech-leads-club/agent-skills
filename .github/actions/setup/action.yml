@@ -31,11 +31,13 @@ runs:
         scope: '@tech-leads-club'
         cache: 'npm'
 
+    - name: Upgrade npm
+      shell: bash
+      run: npm install -g npm@latest
+
     - name: Install Dependencies
       shell: bash
-      run: |
-        npm ci
-        npm install -g npm@latest
+      run: npm ci
 
     - name: Git Config
       if: inputs.git-config == 'true' && inputs.app-slug != '' && inputs.github-app-token != ''

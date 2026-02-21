@@ -1,11 +1,65 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ThemeProvider } from '../components/ThemeProvider'
 import { ThemeToggle } from '../components/ThemeToggle'
 import './global.css'
 
-export const metadata = {
-  title: 'Agent Skills Marketplace',
-  description: 'A curated collection of skills for AI coding agents',
+const SITE_URL = 'https://agent-skills.techleads.club'
+const SITE_NAME = 'Agent Skills Marketplace'
+const SITE_DESCRIPTION =
+  'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Agent Skills Marketplace | Tech Leads Club',
+    template: '%s | Agent Skills',
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'AI coding agents',
+    'agent skills',
+    'cursor skills',
+    'claude code',
+    'github copilot',
+    'windsurf',
+    'cline',
+    'AI assistant plugins',
+    'coding automation',
+    'tech leads club',
+    'developer tools',
+  ],
+  authors: [{ name: 'Tech Leads Club', url: 'https://github.com/tech-leads-club' }],
+  creator: 'Tech Leads Club',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: SITE_NAME,
+    title: 'Agent Skills Marketplace | Tech Leads Club',
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Agent Skills Marketplace | Tech Leads Club',
+    description: SITE_DESCRIPTION,
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -13,27 +67,29 @@ export const metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
+  alternates: {
+    canonical: SITE_URL,
+  },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+export default function RootLayout({ children }: { children: React.ReactNode }) {  
   
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors">
         <ThemeProvider>
           <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
               <div className="flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <img src={`${basePath}/tlc-logo-dark.svg`} alt="Tech Leads Club" className="h-8 w-auto" />
-                  <div className="flex flex-col">
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Agent Skills</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">by Tech Leads Club</span>
+                <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0">
+                  <img src="/tlc-logo-dark.svg" alt="Tech Leads Club" className="h-6 sm:h-8 w-auto shrink-0" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">Agent Skills</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight hidden sm:block">by Tech Leads Club</span>
                   </div>
                 </Link>
-                <div className="flex items-center gap-6">
-                  <Link href="/skills" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
+                <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                  <Link href="/skills" className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
                     Skills
                   </Link>
                   <a
@@ -49,7 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>GitHub</span>
+                    <span className="hidden sm:inline">GitHub</span>
                   </a>
                   <ThemeToggle />
                 </div>
