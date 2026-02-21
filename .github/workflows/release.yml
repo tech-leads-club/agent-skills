@@ -229,10 +229,54 @@ jobs:
             git commit -m "chore(release): update generated skills data" || true
           fi
 
+      - name: Check for Releasable Changes
+        id: check-changes
+        run: |
+          CLI_TAG=$(git tag --sort=-creatordate --list 'v[0-9]*' | head -1)
+          CATALOG_TAG=$(git tag --sort=-creatordate --list 'skills-catalog-v[0-9]*' | head -1)
+
+          echo "Latest CLI tag: $CLI_TAG"
+          echo "Latest Catalog tag: $CATALOG_TAG"
+
+          HAS_CHANGES=false
+
+          if [ -n "$CLI_TAG" ]; then
+            CLI_CHANGES=$(git diff --name-only "$CLI_TAG"..HEAD -- packages/cli/ libs/core/ | head -1)
+            if [ -n "$CLI_CHANGES" ]; then
+              echo "✅ CLI has source changes since $CLI_TAG"
+              HAS_CHANGES=true
+            else
+              echo "⏭️ CLI has no source changes since $CLI_TAG"
+            fi
+          else
+            echo "⚠️ No CLI release tag found, treating as first release"
+            HAS_CHANGES=true
+          fi
+
+          if [ -n "$CATALOG_TAG" ]; then
+            CATALOG_CHANGES=$(git diff --name-only "$CATALOG_TAG"..HEAD -- packages/skills-catalog/ | head -1)
+            if [ -n "$CATALOG_CHANGES" ]; then
+              echo "✅ skills-catalog has source changes since $CATALOG_TAG"
+              HAS_CHANGES=true
+            else
+              echo "⏭️ skills-catalog has no source changes since $CATALOG_TAG"
+            fi
+          else
+            echo "⚠️ No skills-catalog release tag found, treating as first release"
+            HAS_CHANGES=true
+          fi
+
+          echo "has_changes=$HAS_CHANGES" >> "$GITHUB_OUTPUT"
+
       - name: Release Version and Publish
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: npx nx release --yes || NX_NO_CLOUD=true npx nx release --yes
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NODE_AUTH_TOKEN: ''
           NPM_CONFIG_PROVENANCE: true
           NX_NO_CLOUD: true
+
+      - name: Skip Release (No Changes)
+        if: steps.check-changes.outputs.has_changes != 'true'
+        run: echo "⏭️ No releasable changes detected in release-group projects. Skipping release."
