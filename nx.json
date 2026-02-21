@@ -51,6 +51,7 @@
     "version": {
       "conventionalCommits": true,
       "fallbackCurrentVersionResolver": "disk",
+      "updateDependents": "never",
       "preVersionCommand": "npx nx run-many -t build --skip-nx-cache"
     },
     "conventionalCommits": {
