@@ -70,8 +70,8 @@ export default function HomePage() {
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 mb-16 border border-gray-200 dark:border-gray-800">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Quick Start</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">Install skills directly from the command line:</p>
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-4 mb-4">
-          <code className="text-sm text-gray-800 dark:text-gray-200">
+        <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 mb-4">
+          <code className="text-sm text-green-400 break-all font-mono">
             npx @tech-leads-club/agent-skills install --skill [skill-name]
           </code>
         </div>
@@ -99,7 +99,14 @@ export default function HomePage() {
                 key={skill.id}
                 className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6"
               >
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{skill.name}</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  <Link
+                    href={`/skills/${skill.id}`}
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
+                  >
+                    {skill.name}
+                  </Link>
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">{skill.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full">

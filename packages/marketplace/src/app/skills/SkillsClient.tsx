@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CategoryFilter } from '../../components/CategoryFilter'
+import { Pagination } from '../../components/Pagination'
 import { SearchBar } from '../../components/SearchBar'
 import { SkillCard } from '../../components/SkillCard'
 import type { MarketplaceData } from '../../types'
@@ -10,9 +11,12 @@ interface SkillsClientProps {
   data: MarketplaceData
 }
 
+const PAGE_SIZE = 12
+
 export function SkillsClient({ data }: SkillsClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const filteredSkills = useMemo(() => {
     return data.skills.filter((skill) => {
@@ -26,6 +30,15 @@ export function SkillsClient({ data }: SkillsClientProps) {
       return matchesSearch && matchesCategory
     })
   }, [data.skills, searchQuery, selectedCategory])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedCategory])
+
+  const totalPages = Math.ceil(filteredSkills.length / PAGE_SIZE)
+  const startIndex = (currentPage - 1) * PAGE_SIZE
+  const endIndex = startIndex + PAGE_SIZE
+  const paginatedSkills = filteredSkills.slice(startIndex, endIndex)
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -53,16 +66,24 @@ export function SkillsClient({ data }: SkillsClientProps) {
           <p className="text-gray-500 dark:text-gray-400 text-lg">No skills found matching your criteria</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSkills.map((skill) => {
-            const category = data.categories.find((c) => c.id === skill.category)
-            return <SkillCard key={skill.id} skill={skill} categoryName={category?.name || skill.category} />
-          })}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedSkills.map((skill) => {
+              const category = data.categories.find((c) => c.id === skill.category)
+              return <SkillCard key={skill.id} skill={skill} categoryName={category?.name || skill.category} />
+            })}
+          </div>
+
+          <div className="mt-8">
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          </div>
+        </>
       )}
 
       <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        Showing {filteredSkills.length} of {data.stats.totalSkills} skills
+        {filteredSkills.length === 0
+          ? `No skills found`
+          : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredSkills.length)} of ${filteredSkills.length} skills`}
       </div>
     </div>
   )
