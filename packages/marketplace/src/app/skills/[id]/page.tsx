@@ -89,25 +89,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
     keywords: [skill.name, skill.category, 'AI agent skill', 'coding automation'],
   }
 
-  const softwareSourceCodeSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareSourceCode',
-    name: skill.name,
-    description: skill.description,
-    url: `https://agent-skills.techleads.club/skills/${skill.id}`,
-    codeRepository: `https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`,
-    programmingLanguage: 'Markdown',
-    runtimePlatform: 'AI Coding Agents',
-    applicationCategory: category?.name || skill.category,
-    author: {
-      '@type': 'Organization',
-      name: 'Tech Leads Club',
-      url: 'https://github.com/tech-leads-club',
-    },
-    dateModified: skill.metadata.lastModified,
-    keywords: [skill.name, skill.category, 'AI agent skill', 'coding automation'],
-  }
-
   return (
     <>
       <JsonLd data={softwareSourceCodeSchema} />
