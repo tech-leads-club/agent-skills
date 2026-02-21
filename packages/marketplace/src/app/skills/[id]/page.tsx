@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       canonical: `/skills/${skill.id}`,
     },
     openGraph: {
-      title: `${skill.name} - Agent Skill`,
+      title: `${skill.name} - Agent Skill | Tech Leads Club`,
       description: skill.description,
       type: 'article',
       images: [
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${skill.name} - Agent Skill`,
+      title: `${skill.name} - Agent Skill | Tech Leads Club`,
       description: skill.description,
     },
     keywords: [

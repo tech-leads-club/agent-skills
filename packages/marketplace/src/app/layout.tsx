@@ -5,14 +5,14 @@ import { ThemeToggle } from '../components/ThemeToggle'
 import './global.css'
 
 const SITE_URL = 'https://agent-skills.techleads.club'
-const SITE_NAME = 'Agent Skills Marketplace'
+const SITE_NAME = 'Agent Skills'
 const SITE_DESCRIPTION =
   'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Agent Skills Marketplace | Tech Leads Club',
+    default: 'Agent Skills | Tech Leads Club',
     template: '%s | Agent Skills',
   },
   description: SITE_DESCRIPTION,
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: SITE_NAME,
-    title: 'Agent Skills Marketplace | Tech Leads Club',
+    title: 'Agent Skills | Tech Leads Club',
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Agent Skills Marketplace | Tech Leads Club',
+    title: 'Agent Skills | Tech Leads Club',
     description: SITE_DESCRIPTION,
     images: ['/og-image.png'],
   },
