@@ -1,3 +1,7 @@
+## 0.6.0 (2026-02-21)
+
+This was a version bump only for @tech-leads-club/skills-catalog to align it with other projects, there were no code changes.
+
 ## 0.5.0 (2026-02-21)
 
 This was a version bump only for @tech-leads-club/skills-catalog to align it with other projects, there were no code changes.
