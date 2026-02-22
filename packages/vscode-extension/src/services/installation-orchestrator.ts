@@ -219,7 +219,16 @@ export class InstallationOrchestrator implements vscode.Disposable {
   }
 
   private async handleJobCompleted(result: JobResult): Promise<void> {
-    this.logger.info(`[${result.operationId}] Job completed: ${result.status}`)
+    if (result.status === 'error') {
+      const errorMessage = result.errorMessage ?? 'Unknown error'
+      this.logger.error(
+        `[${result.operationId}] Job completed: error ${result.operation} ${result.skillName} - ${errorMessage}`,
+        result.error ?? errorMessage,
+      )
+    } else {
+      this.logger.info(`[${result.operationId}] Job completed: ${result.status}`)
+    }
+
     this.emitEvent({
       operationId: result.operationId,
       operation: result.operation,

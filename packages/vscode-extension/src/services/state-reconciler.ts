@@ -126,7 +126,7 @@ export class StateReconciler implements vscode.Disposable {
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`Reconciliation failed: ${errorMessage}`)
+      this.logger.error(`Reconciliation failed: ${errorMessage}`, err)
     }
   }
 

@@ -59,6 +59,7 @@ export interface JobResult {
   skillName: string
   status: 'completed' | 'cancelled' | 'error'
   errorMessage?: string
+  error?: unknown
   metadata?: OperationBatchMetadata
 }
 
@@ -235,6 +236,7 @@ export class OperationQueue {
           skillName: job.skillName,
           status,
           errorMessage,
+          error: status === 'error' ? error : undefined,
           metadata: job.metadata,
         }),
       )
@@ -272,8 +274,14 @@ export class OperationQueue {
             metadata: job.metadata,
           })
         } else {
+          const normalizedStderr = result.stderr.trim()
+          const errorWithTrace: ErrorInfo & { stack?: string } = {
+            ...errorInfo,
+            ...(normalizedStderr.length > 0 ? { stack: normalizedStderr } : {}),
+          }
+
           // Reject with ErrorInfo to trigger retry logic if applicable
-          reject(errorInfo)
+          reject(errorWithTrace)
         }
       })
     })

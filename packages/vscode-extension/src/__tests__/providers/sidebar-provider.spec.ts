@@ -366,7 +366,7 @@ describe('SidebarProvider', () => {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     expect(registryService.getRegistryWithMetadata).toHaveBeenCalled()
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load registry'))
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load registry'), expect.any(Error))
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
       payload: {

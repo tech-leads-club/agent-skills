@@ -971,7 +971,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       await executor()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      this.logger.error(`Failed to enqueue ${action}: ${msg}`)
+      this.logger.error(`Failed to enqueue ${action}: ${msg}`, err)
       const userFacing = this.getQueueActionNoun(action)
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
     }
@@ -1816,7 +1816,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       return await this.registryService.getRegistry()
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`Unable to load registry for command palette: ${message}`)
+      this.logger.error(`Unable to load registry for command palette: ${message}`, err)
       vscode.window.showErrorMessage(`Unable to load skills registry: ${message}`)
       return null
     }
@@ -1925,7 +1925,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`Failed to load registry: ${errorMessage}`)
+      this.logger.error(`Failed to load registry: ${errorMessage}`, err)
       await this.postMessage({
         type: 'registryUpdate',
         payload: {

@@ -165,19 +165,19 @@ export class CliHealthChecker implements vscode.Disposable {
       return this.cachedStatus
     } catch (error: unknown) {
       if (isErrnoException(error) && error.code === ERRNO_ENOENT) {
-        this.logger.error('Health-check failed due to missing npx executable (ENOENT)')
+        this.logger.error('Health-check failed due to missing npx executable (ENOENT)', error)
         this.cachedStatus = { status: 'npx-missing' }
         return this.cachedStatus
       }
       if (isErrnoException(error) && error.code === ERRNO_EINVAL) {
-        this.logger.error('Health-check failed due to invalid spawn parameters (EINVAL)')
+        this.logger.error('Health-check failed due to invalid spawn parameters (EINVAL)', error)
         this.cachedStatus = {
           status: 'unknown',
           error: 'Failed to start CLI process (EINVAL). Check shell environment and working directory.',
         }
         return this.cachedStatus
       }
-      this.logger.error(`Health-check failed unexpectedly: ${toErrorMessage(error)}`)
+      this.logger.error('Health-check failed unexpectedly', error)
       this.cachedStatus = { status: 'unknown', error: toErrorMessage(error) }
       return this.cachedStatus
     } finally {

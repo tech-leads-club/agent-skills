@@ -42,7 +42,17 @@ describe('LoggingService', () => {
     loggingService.error('test error', error)
 
     expect(outputChannel.error).toHaveBeenCalledWith('test error')
+    expect(outputChannel.error).toHaveBeenCalledWith('Details: Error: oops')
     expect(outputChannel.error).toHaveBeenCalledWith(error.stack)
+    expect(outputChannel.trace).toHaveBeenCalledWith(error.stack)
+  })
+
+  it('should log non-Error error values', () => {
+    loggingService.error('test error', 'boom')
+
+    expect(outputChannel.error).toHaveBeenCalledWith('test error')
+    expect(outputChannel.error).toHaveBeenCalledWith('Details: boom')
+    expect(outputChannel.trace).not.toHaveBeenCalled()
   })
 
   it('should log debug messages via LogOutputChannel.debug()', () => {

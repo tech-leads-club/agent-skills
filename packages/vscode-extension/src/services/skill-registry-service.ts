@@ -163,7 +163,7 @@ export class SkillRegistryService implements vscode.Disposable {
       return { registry: validated, offlineFallback: false }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`[SkillRegistry] Fetch failed: ${errorMessage}`)
+      this.logger.error(`[SkillRegistry] Fetch failed: ${errorMessage}`, err)
 
       const cached = this.loadCache()
       if (cached) {
@@ -267,7 +267,7 @@ export class SkillRegistryService implements vscode.Disposable {
       () => this.logger.debug('[SkillRegistry] Cache saved'),
       (saveErr: unknown) => {
         const errMsg = saveErr instanceof Error ? saveErr.message : 'Unknown error'
-        this.logger.error(`[SkillRegistry] Failed to save cache: ${errMsg}`)
+        this.logger.error(`[SkillRegistry] Failed to save cache: ${errMsg}`, saveErr)
       },
     )
   }

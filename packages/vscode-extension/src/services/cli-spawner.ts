@@ -69,8 +69,11 @@ export class CliSpawner implements vscode.Disposable {
     if (skillNameIndex !== -1 && skillNameIndex + 1 < args.length) {
       const skillName = args[skillNameIndex + 1]
       if (!this.SKILL_NAME_REGEX.test(skillName)) {
-        this.logger.error(`[${options.operationId}] Skill name validation failed: ${skillName}`)
-        throw new Error(`Invalid skill name: ${skillName}. Only lowercase alphanumeric and hyphens allowed.`)
+        const validationError = new Error(
+          `Invalid skill name: ${skillName}. Only lowercase alphanumeric and hyphens allowed.`,
+        )
+        this.logger.error(`[${options.operationId}] Skill name validation failed: ${skillName}`, validationError)
+        throw validationError
       }
     }
 
@@ -92,6 +95,7 @@ export class CliSpawner implements vscode.Disposable {
       const errnoError = error as NodeJS.ErrnoException
       this.logger.error(
         `[${options.operationId}] Spawn threw before process started: command=${command} cwd="${options.cwd}" code=${errnoError.code ?? 'unknown'} errno=${errnoError.errno ?? 'unknown'} message="${errnoError.message ?? String(error)}"`,
+        error,
       )
       throw error
     }
@@ -165,6 +169,7 @@ export class CliSpawner implements vscode.Disposable {
       childProcess.on('error', (error: NodeJS.ErrnoException) => {
         this.logger.error(
           `[${options.operationId}] Process error event: message="${error.message}" code=${error.code ?? 'unknown'} errno=${error.errno ?? 'unknown'}`,
+          error,
         )
         resolveCompletion({
           exitCode: null,
