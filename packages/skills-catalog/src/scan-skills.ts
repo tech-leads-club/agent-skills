@@ -3,7 +3,9 @@
 import chalk from 'chalk'
 import { execSync, spawn } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 import { dirname, join } from 'node:path'
+import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 import { parse as parseYaml } from 'yaml'
 
@@ -72,7 +74,8 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 // Global configuration for parallel scanning - can be set via env var
-const PARALLEL_JOBS = Number(process.env['PARALLEL_JOBS'] ?? 30)
+const DEFAULT_CONCURRENCY = Math.max(2, Math.min(os.cpus().length, 10))
+const PARALLEL_JOBS = Number(process.env['PARALLEL_JOBS'] ?? DEFAULT_CONCURRENCY)
 
 // Configuration
 const WORKSPACE_ROOT = join(__dirname, '..', '..', '..')
@@ -144,9 +147,11 @@ async function main() {
         chalk.cyan(`🚀 Scanning ${toScan.length} skills (parallel: ${Math.min(PARALLEL_JOBS, toScan.length)})...`),
       )
 
-      // Check uvx availability
+      // Check uvx availability and pre-heat the scanner installation
       try {
-        execSync('uvx --version', { stdio: 'ignore' })
+        process.stdout.write(chalk.cyan('⏳ Checking environment and updating mcp-scan tool...\n'))
+        execSync('uvx --refresh mcp-scan@latest --help', { stdio: 'ignore' })
+        process.stdout.write(chalk.green('✓ mcp-scan is ready and updated.\n\n'))
       } catch {
         console.error(chalk.red("❌ 'uvx' not found. Install uv: https://docs.astral.sh/uv/"))
         // Generate a failure report instead of just exiting
@@ -161,30 +166,67 @@ async function main() {
         process.exit(1)
       }
 
-      await scanParallel(toScan, PARALLEL_JOBS, (skill, issues) => {
-        const critCount = issues.filter((i) => i.severity === 'critical').length
-        const highCount = issues.filter((i) => i.severity === 'high').length
-        const mediumCount = issues.filter((i) => i.severity === 'medium').length
+      const activeScanning = new Set<string>()
+      let doneCount = 0
+      const issueLogs: string[] = []
 
-        if (critCount > 0 || highCount > 0) {
-          const parts = []
-          if (critCount > 0) parts.push(chalk.red(`${critCount}C`))
-          if (highCount > 0) parts.push(chalk.red(`${highCount}H`))
-          if (mediumCount > 0) parts.push(chalk.yellow(`${mediumCount}M`))
-          console.log(
-            `   ${chalk.red('✗')} ${chalk.gray(skill.name)} ${chalk.gray('(')}${parts.join(' ')}${chalk.gray(')')}`,
-          )
-        } else if (mediumCount > 0) {
-          console.log(
-            `   ${chalk.yellow('⚠')} ${chalk.gray(skill.name)} ${chalk.gray('(')}${chalk.yellow(`${mediumCount}M`)}${chalk.gray(')')}`,
-          )
-        } else {
-          console.log(`   ${chalk.green('✓')} ${chalk.gray(skill.name)}`)
-        }
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+      let frameIndex = 0
 
-        // Update cache
-        cache.skills[skill.name] = { contentHash: skill.contentHash, issues, scannedAt: new Date().toISOString() }
-      })
+      const renderProgress = () => {
+        const activeList = Array.from(activeScanning).slice(0, 3).join(', ') + (activeScanning.size > 3 ? ', ...' : '')
+        frameIndex = (frameIndex + 1) % frames.length
+        readline.clearLine(process.stdout, 0)
+        readline.cursorTo(process.stdout, 0)
+        process.stdout.write(
+          `  ${chalk.cyan(frames[frameIndex])} ${chalk.bold(`${doneCount}/${toScan.length}`)} - Active: ${chalk.gray(activeList || 'none')}`,
+        )
+      }
+
+      const spinnerInterval = setInterval(renderProgress, 80)
+
+      await scanParallel(
+        toScan,
+        PARALLEL_JOBS,
+        (skill) => {
+          activeScanning.add(skill.name)
+        },
+        (skill, issues) => {
+          activeScanning.delete(skill.name)
+          doneCount++
+
+          const critCount = issues.filter((i) => i.severity === 'critical').length
+          const highCount = issues.filter((i) => i.severity === 'high').length
+          const mediumCount = issues.filter((i) => i.severity === 'medium').length
+
+          if (critCount > 0 || highCount > 0) {
+            const parts = []
+            if (critCount > 0) parts.push(chalk.red(`${critCount}C`))
+            if (highCount > 0) parts.push(chalk.red(`${highCount}H`))
+            if (mediumCount > 0) parts.push(chalk.yellow(`${mediumCount}M`))
+            issueLogs.push(
+              `   ${chalk.red('✗')} ${chalk.gray(skill.name)} ${chalk.gray('(')}${parts.join(' ')}${chalk.gray(')')}`,
+            )
+          } else if (mediumCount > 0) {
+            issueLogs.push(
+              `   ${chalk.yellow('⚠')} ${chalk.gray(skill.name)} ${chalk.gray('(')}${chalk.yellow(`${mediumCount}M`)}${chalk.gray(')')}`,
+            )
+          }
+
+          // Update cache
+          cache.skills[skill.name] = { contentHash: skill.contentHash, issues, scannedAt: new Date().toISOString() }
+        },
+      )
+
+      clearInterval(spinnerInterval)
+      readline.clearLine(process.stdout, 0)
+      readline.cursorTo(process.stdout, 0)
+      console.log(`  ${chalk.green('✓')} ${chalk.bold(`Scanned ${toScan.length} skills successfully.`)}`)
+
+      if (issueLogs.length > 0) {
+        console.log()
+        issueLogs.forEach((log) => console.log(log))
+      }
 
       console.log()
     }
@@ -328,39 +370,128 @@ main().catch((err) => {
 async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
   return new Promise((resolve) => {
     const chunks: Buffer[] = []
+    const errChunks: Buffer[] = []
+
     const proc = spawn('uvx', ['mcp-scan@latest', '--skills', skill.dir, '--json'], { timeout: 120_000 })
 
     proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
-    proc.on('close', () => {
+    proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk))
+
+    proc.on('close', (code) => {
       try {
         const raw = Buffer.concat(chunks).toString('utf-8')
+        const stderr = Buffer.concat(errChunks).toString('utf-8')
+
         const output = raw
           .split('\n')
           .filter((line) => !line.startsWith('Installed') && line.trim())
           .join('\n')
 
-        if (!output) return resolve([])
+        if (!output || code !== 0) {
+          return resolve([
+            {
+              code: 'SCANNER_PROCESS_FAILED',
+              message: `mcp-scan execution failed (code ${code}): ${stderr.slice(0, 250) || 'No output'}`,
+              reference: [0, null],
+              extra_data: {
+                risk_score: 10,
+                reason: 'Scanner process crashed or did not return valid output',
+                thought_process: '',
+                severity: 'critical',
+              },
+              skill: skill.name,
+              severity: 'critical',
+            },
+          ])
+        }
 
-        const data = JSON.parse(output) as Record<string, { issues?: ScanIssue[] }>
+        const data = JSON.parse(output) as Record<string, { issues?: ScanIssue[]; error?: Record<string, unknown> }>
         const firstKey = Object.keys(data)[0]
-        if (!firstKey) return resolve([])
-        const rawIssues = data[firstKey]?.issues || []
-        resolve(
-          rawIssues
-            .filter((issue) => issue.extra_data?.severity)
-            .map((issue) => ({ ...issue, skill: skill.name, severity: issue.extra_data.severity })),
-        )
-      } catch {
-        resolve([])
+
+        if (!firstKey) {
+          return resolve([
+            {
+              code: 'SCANNER_MISSING_OUTPUT',
+              message: `mcp-scan returned empty JSON for ${skill.name}`,
+              reference: [0, null],
+              extra_data: {
+                risk_score: 10,
+                reason: 'Scanner returned empty valid JSON',
+                thought_process: '',
+                severity: 'critical',
+              },
+              skill: skill.name,
+              severity: 'critical',
+            },
+          ])
+        }
+
+        const result = data[firstKey]!
+        const issues: ScanIssue[] = []
+
+        // Catch internal mcp-scan errors
+        if (result.error && result.error.is_failure !== false) {
+          issues.push({
+            code: 'SCANNER_INTERNAL_ERROR',
+            message: `mcp-scan error: ${result.error.message || result.error.category || 'Unknown error'}`,
+            reference: [0, null],
+            extra_data: {
+              risk_score: 10,
+              reason: 'mcp-scan encountered an error while scanning',
+              thought_process: JSON.stringify(result.error.traceback || ''),
+              severity: 'critical',
+            },
+            skill: skill.name,
+            severity: 'critical',
+          })
+        }
+
+        const rawIssues = result.issues || []
+        const mappedIssues = rawIssues
+          .filter((i) => i.extra_data?.severity)
+          .map((i) => ({ ...i, skill: skill.name, severity: i.extra_data.severity }))
+
+        resolve([...issues, ...mappedIssues])
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e)
+        resolve([
+          {
+            code: 'SCANNER_PARSE_ERROR',
+            message: `Failed to parse mcp-scan output: ${msg}`,
+            reference: [0, null],
+            extra_data: {
+              risk_score: 10,
+              reason: 'Invalid JSON from scanner',
+              thought_process: '',
+              severity: 'critical',
+            },
+            skill: skill.name,
+            severity: 'critical',
+          },
+        ])
       }
     })
-    proc.on('error', () => resolve([]))
+
+    // If we can't even spawn the process
+    proc.on('error', (err) =>
+      resolve([
+        {
+          code: 'SCANNER_SPAWN_ERROR',
+          message: `Failed to spawn mcp-scan: ${err.message}`,
+          reference: [0, null],
+          extra_data: { risk_score: 10, reason: 'Tool execution failed', thought_process: '', severity: 'critical' },
+          skill: skill.name,
+          severity: 'critical',
+        },
+      ]),
+    )
   })
 }
 
 async function scanParallel(
   skills: SkillInfo[],
   concurrency: number,
+  onStart: (skill: SkillInfo) => void,
   onDone: (skill: SkillInfo, issues: ScanIssue[]) => void,
 ): Promise<Map<string, ScanIssue[]>> {
   const results = new Map<string, ScanIssue[]>()
@@ -369,6 +500,7 @@ async function scanParallel(
   async function worker(): Promise<void> {
     while (queue.length > 0) {
       const skill = queue.shift()!
+      onStart(skill)
       const issues = await scanSkill(skill)
       results.set(skill.name, issues)
       onDone(skill, issues)
