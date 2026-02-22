@@ -5,6 +5,9 @@ export interface SearchBarProps {
   value: string
   onChange: (query: string) => void
   resultCount: number
+  placeholder?: string
+  ariaLabel?: string
+  resultLabel?: string
 }
 
 /**
@@ -14,7 +17,14 @@ export interface SearchBarProps {
  * @param props - Search value, change callback, and visible result count.
  * @returns Rendered search input with clear action and SR announcement.
  */
-export function SearchBar({ value, onChange, resultCount }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  resultCount,
+  placeholder = 'Search skills...',
+  ariaLabel = 'Search skills',
+  resultLabel = 'skill',
+}: SearchBarProps) {
   const handleClear = () => {
     onChange('')
   }
@@ -25,10 +35,10 @@ export function SearchBar({ value, onChange, resultCount }: SearchBarProps) {
         <input
           type="search"
           className="search-input"
-          placeholder="Search skills..."
+          placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          aria-label="Search skills"
+          aria-label={ariaLabel}
         />
         {value && (
           <button className="search-clear-button" onClick={handleClear} aria-label="Clear search" title="Clear search">
@@ -38,7 +48,7 @@ export function SearchBar({ value, onChange, resultCount }: SearchBarProps) {
       </div>
       {/* Screen reader announcement for result count */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {value ? `${resultCount} skill${resultCount === 1 ? '' : 's'} found` : ''}
+        {value ? `${resultCount} ${resultLabel}${resultCount === 1 ? '' : 's'} found` : ''}
       </div>
     </div>
   )

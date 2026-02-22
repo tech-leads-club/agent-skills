@@ -26,6 +26,10 @@ export function useAppState() {
     setCurrentView('selectAgents')
   }, [])
 
+  const goToSkillsView = useCallback(() => {
+    setCurrentView('selectSkills')
+  }, [])
+
   const goHome = useCallback(() => {
     setCurrentView('home')
     setCurrentAction(null)
@@ -60,6 +64,28 @@ export function useAppState() {
     setSelectedAgents([])
   }, [])
 
+  const selectAllSkills = useCallback(
+    (skills: string[]) => {
+      selectAll('skills', skills)
+    },
+    [selectAll],
+  )
+
+  const clearSkillSelection = useCallback(() => {
+    clearSelection('skills')
+  }, [clearSelection])
+
+  const selectAllAgents = useCallback(
+    (agents: string[]) => {
+      selectAll('agents', agents)
+    },
+    [selectAll],
+  )
+
+  const clearAgentSelection = useCallback(() => {
+    clearSelection('agents')
+  }, [clearSelection])
+
   return useMemo(
     () => ({
       currentView,
@@ -69,12 +95,17 @@ export function useAppState() {
       activeScope,
       setScope: setActiveScope,
       goToSkills,
+      goToSkillsView,
       goToAgents,
       goHome,
       toggleSkill,
       toggleAgent,
       selectAll,
       clearSelection,
+      selectAllSkills,
+      clearSkillSelection,
+      selectAllAgents,
+      clearAgentSelection,
     }),
     [
       activeScope,
@@ -84,11 +115,16 @@ export function useAppState() {
       goHome,
       goToAgents,
       goToSkills,
+      goToSkillsView,
       selectAll,
+      selectAllAgents,
+      selectAllSkills,
       selectedAgents,
       selectedSkills,
       toggleAgent,
       toggleSkill,
+      clearAgentSelection,
+      clearSkillSelection,
     ],
   )
 }
