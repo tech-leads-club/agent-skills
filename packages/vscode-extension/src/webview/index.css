@@ -127,9 +127,9 @@ body {
   --home-action-accent-color: var(--vscode-foreground);
   width: 100%;
   text-align: left;
-  border: 1px solid var(--home-action-accent-color);
+  border: 1px solid var(--vscode-panel-border);
   background-color: var(--vscode-editorWidget-background);
-  color: var(--home-action-accent-color);
+  color: var(--vscode-foreground);
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -139,7 +139,7 @@ body {
 }
 
 .home-action-button:hover:not(:disabled) {
-  border-color: var(--home-action-accent-color);
+  border-color: var(--vscode-focusBorder);
   background-color: var(--vscode-list-hoverBackground);
 }
 
@@ -178,6 +178,7 @@ body {
 
 .home-action-icon {
   font-size: 16px;
+  color: var(--home-action-accent-color);
 }
 
 .home-action-copy {
@@ -194,6 +195,7 @@ body {
 
 .home-action-chevron {
   font-size: 14px;
+  color: var(--home-action-accent-color);
 }
 
 .scope-selector {
