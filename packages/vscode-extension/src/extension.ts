@@ -164,7 +164,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // ⑦ Diagnostics (P3)
   const extensionVersion = context.extension?.packageJSON?.version ?? 'unknown'
-  logger.info(`Agent Skills Manager v${extensionVersion} activated`)
+  logger.info(`Agent Skills v${extensionVersion} activated`)
   logger.info(`VS Code ${vscode.version} | Platform: ${process.platform}`)
   logger.info(`Workspace trusted: ${vscode.workspace.isTrusted}`)
 }

@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "displayName": "Agent Skills Manager",
+  "displayName": "Agent Skills",
   "description": "Discover, install, and manage AI agent skills directly within VS Code",
   "version": "0.0.1",
   "publisher": "tech-leads-club",
@@ -35,7 +35,7 @@
         {
           "type": "webview",
           "id": "agentSkillsSidebar",
-          "name": "Skills Marketplace",
+          "name": "Agent Skills",
           "icon": "resources/icon.svg"
         }
       ]
