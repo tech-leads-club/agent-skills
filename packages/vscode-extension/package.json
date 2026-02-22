@@ -124,6 +124,7 @@
     "@types/node": "^22",
     "@types/vscode": "^1.96.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "@vscode/codicons": "^0.0.44",
     "@vscode/test-electron": "^2.5.2",
     "fuse.js": "^7.1.0",
     "glob": "^10.5.0",

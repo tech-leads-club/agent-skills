@@ -1,3 +1,4 @@
+import '@vscode/codicons/dist/codicon.css'
 import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage, ScopePolicyStatePayload } from '../shared/messages'

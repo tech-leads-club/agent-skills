@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   root: 'src/webview',
   build: {
@@ -10,7 +11,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         entryFileNames: 'index.js',
-        assetFileNames: 'index.css',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'index.css'
+          }
+
+          return 'assets/[name]-[hash][extname]'
+        },
       },
     },
   },

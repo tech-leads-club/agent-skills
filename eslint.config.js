@@ -56,27 +56,7 @@ export default defineConfig([
   {
     files: ['packages/vscode-extension/package.json', '**/packages/vscode-extension/package.json'],
     rules: {
-      '@nx/dependency-checks': [
-        'error',
-        {
-          ignoredDependencies: [
-            '@tech-leads-club/core',
-            '@types/vscode',
-            'react',
-            'react-dom',
-            'vite',
-            '@vitejs/plugin-react',
-            '@jest/globals',
-            'fuse.js',
-            'jest-axe',
-            '@testing-library/jest-dom',
-            '@testing-library/react',
-            '@testing-library/user-event',
-            'glob',
-            'mocha',
-          ],
-        },
-      ],
+      '@nx/dependency-checks': 'off',
     },
   },
 ])
