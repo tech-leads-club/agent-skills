@@ -47,7 +47,13 @@ export function SearchBar({
           aria-label={ariaLabel}
         />
         {value && (
-          <button className="search-clear-button" onClick={handleClear} aria-label="Clear search" title="Clear search">
+          <button
+            type="button"
+            className="search-clear-button"
+            onClick={handleClear}
+            aria-label="Clear search"
+            title="Clear search"
+          >
             ×
           </button>
         )}

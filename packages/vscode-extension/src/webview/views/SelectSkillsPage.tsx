@@ -18,6 +18,12 @@ export interface SelectSkillsPageProps {
   onNext: () => void
 }
 
+interface SearchableSkillEntry {
+  skill: SkillRegistry['skills'][number]
+  categoryName: string
+  authorName: string
+}
+
 function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
   if (!installed) return false
   return scope === 'local' ? installed.local : installed.global
@@ -52,18 +58,30 @@ export function SelectSkillsPage({
     })
   }, [action, installedSkills, registry.skills, scope])
 
+  const searchableSkills = useMemo<SearchableSkillEntry[]>(
+    () =>
+      candidateSkills.map((skill) => ({
+        skill,
+        categoryName: registry.categories[skill.category]?.name ?? skill.category,
+        authorName: skill.author ?? '',
+      })),
+    [candidateSkills, registry.categories],
+  )
+
   const fuseInstance = useMemo(
     () =>
-      new Fuse(candidateSkills, {
-        keys: ['name', 'description', 'category'],
+      new Fuse(searchableSkills, {
+        keys: ['skill.name', 'skill.description', 'skill.category', 'categoryName', 'authorName'],
         threshold: 0.3,
+        ignoreLocation: true,
       }),
-    [candidateSkills],
+    [searchableSkills],
   )
 
   const visibleSkills = useMemo(() => {
-    if (!searchQuery.trim()) return candidateSkills
-    return fuseInstance.search(searchQuery).map((result) => result.item)
+    const normalizedSearchQuery = searchQuery.trim()
+    if (!normalizedSearchQuery) return candidateSkills
+    return fuseInstance.search(normalizedSearchQuery).map((result) => result.item.skill)
   }, [candidateSkills, fuseInstance, searchQuery])
 
   const visibleSkillNames = useMemo(() => visibleSkills.map((skill) => skill.name), [visibleSkills])

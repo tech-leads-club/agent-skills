@@ -9,7 +9,10 @@ expect.extend(toHaveNoViolations)
 
 const registry: SkillRegistry = {
   version: '1',
-  categories: { quality: { name: 'Quality', description: 'Quality tools' } },
+  categories: {
+    quality: { name: 'Quality Assurance', description: 'Quality tools' },
+    search: { name: 'Search and Metadata', description: 'Discovery and indexing' },
+  },
   skills: [
     {
       name: 'accessibility',
@@ -17,14 +20,16 @@ const registry: SkillRegistry = {
       category: 'quality',
       path: 'skills/accessibility',
       files: ['SKILL.md'],
+      author: 'A11y Guild',
       contentHash: 'a',
     },
     {
       name: 'seo',
       description: 'SEO optimization techniques',
-      category: 'quality',
+      category: 'search',
       path: 'skills/seo',
       files: ['SKILL.md'],
+      author: 'SEO Team',
       contentHash: 'b',
     },
   ],
@@ -96,6 +101,89 @@ describe('SelectSkillsPage', () => {
     await user.type(screen.getByRole('searchbox', { name: /search skills/i }), 'access')
     expect(screen.getByText('accessibility')).toBeInTheDocument()
     expect(screen.queryByText('seo')).not.toBeInTheDocument()
+  })
+
+  it('matches words that appear later in long descriptions', async () => {
+    const user = userEvent.setup()
+    const registryWithLongDescription: SkillRegistry = {
+      ...registry,
+      skills: [
+        ...registry.skills,
+        {
+          name: 'chrome-devtools',
+          description:
+            'Expert-level browser automation, debugging, and performance analysis using Chrome DevTools MCP. Use for interacting with web pages, capturing screenshots, analyzing network traffic, and profiling performance.',
+          category: 'search',
+          path: 'skills/chrome-devtools',
+          files: ['SKILL.md'],
+          author: 'Tooling Team',
+          contentHash: 'c',
+        },
+      ],
+    }
+
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registryWithLongDescription}
+        installedSkills={{ accessibility: null, seo: null, 'chrome-devtools': null }}
+        scope="local"
+        selectedSkills={[]}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    await user.type(screen.getByRole('searchbox', { name: /search skills/i }), 'analyzing')
+    expect(screen.getByText('chrome-devtools')).toBeInTheDocument()
+    expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
+  })
+
+  it('filters by author search term', async () => {
+    const user = userEvent.setup()
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{ accessibility: null, seo: null }}
+        scope="local"
+        selectedSkills={[]}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    await user.type(screen.getByRole('searchbox', { name: /search skills/i }), 'seo team')
+    expect(screen.getByText('seo')).toBeInTheDocument()
+    expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
+  })
+
+  it('filters by category search term', async () => {
+    const user = userEvent.setup()
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{ accessibility: null, seo: null }}
+        scope="local"
+        selectedSkills={[]}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    await user.type(screen.getByRole('searchbox', { name: /search skills/i }), 'metadata')
+    expect(screen.getByText('seo')).toBeInTheDocument()
+    expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
   })
 
   it('disables select agents button when nothing is selected', () => {
