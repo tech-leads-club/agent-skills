@@ -170,17 +170,77 @@ body {
   align-items: center;
 }
 
-.scope-selector-input {
-  background-color: transparent;
-  color: var(--vscode-dropdown-foreground);
-  border: 1px solid var(--vscode-dropdown-border);
-  border-radius: 6px;
-  padding: 6px 8px;
+.scope-selector-input-wrapper {
+  position: relative;
+  width: fit-content;
 }
 
-.scope-selector-input:hover,
-.scope-selector-input:focus-visible {
-  background-color: var(--vscode-dropdown-background);
+.scope-selector-input-wrapper--open .scope-selector-chevron {
+  transform: rotate(180deg);
+}
+
+.scope-selector-input {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 1ch;
+  background-color: transparent;
+  color: var(--vscode-dropdown-foreground);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scope-selector-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--vscode-dropdown-foreground);
+  transition: transform 120ms ease;
+}
+
+.scope-selector-input:disabled .scope-selector-chevron {
+  opacity: 0.6;
+}
+
+.scope-selector-input:hover:not(:disabled),
+.scope-selector-input:focus-visible,
+.scope-selector-input-wrapper--open .scope-selector-input {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.scope-selector-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  min-width: 100%;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  background-color: var(--vscode-sideBar-background);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.scope-selector-option {
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  color: var(--vscode-dropdown-foreground);
+  padding: 6px 8px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.scope-selector-option:hover,
+.scope-selector-option:focus-visible,
+.scope-selector-option--selected {
+  background-color: var(--vscode-list-hoverBackground);
 }
 
 .select-page {

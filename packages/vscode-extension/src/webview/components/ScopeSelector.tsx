@@ -1,3 +1,4 @@
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { AllowedScopesSetting, LifecycleScope } from '../../shared/types'
 
 const SCOPE_OPTIONS_BY_SETTING: Readonly<Record<AllowedScopesSetting, LifecycleScope[]>> = {
@@ -33,38 +34,117 @@ export function ScopeSelector({
   disabled = false,
   disabledReason,
 }: ScopeSelectorProps) {
-  if (allowedScopes === 'none') {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const labelId = useId()
+  const menuId = useId()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const visibleScopes = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
+  const selectedScope = visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
+  const isDisabled = disabled
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return
+    }
+
+    const handleDocumentPointerDown = (event: MouseEvent) => {
+      const target = event.target
+      if (!(target instanceof Node) || !wrapperRef.current?.contains(target)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    const handleDocumentKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleDocumentPointerDown)
+    document.addEventListener('keydown', handleDocumentKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentPointerDown)
+      document.removeEventListener('keydown', handleDocumentKeyDown)
+    }
+  }, [isMenuOpen])
+
+  useEffect(() => {
+    if (isDisabled && isMenuOpen) {
+      setIsMenuOpen(false)
+    }
+  }, [isDisabled, isMenuOpen])
+
+  if (visibleScopes.length === 0) {
     return null
   }
 
-  const visibleScopes = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
-  const selectedScope = visibleScopes.includes(value) ? value : visibleScopes[0]
-  const isDisabled = disabled
+  const handleTriggerKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (isDisabled) {
+      return
+    }
+
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      setIsMenuOpen(true)
+    }
+  }
+
+  const handleOptionSelect = (nextScope: LifecycleScope) => {
+    if (visibleScopes.includes(nextScope)) {
+      onChange(nextScope)
+    }
+
+    setIsMenuOpen(false)
+  }
 
   return (
     <div className="scope-selector">
-      <label htmlFor="scope-selector" className="sr-only">
+      <span id={labelId} className="sr-only">
         Installation scope
-      </label>
-      <select
-        id="scope-selector"
-        className="scope-selector-input"
-        value={selectedScope}
-        onChange={(event) => {
-          const nextScope = event.target.value as LifecycleScope
-          if (visibleScopes.includes(nextScope)) {
-            onChange(nextScope)
-          }
-        }}
-        disabled={isDisabled}
-        title={isDisabled && disabledReason ? disabledReason : undefined}
+      </span>
+      <div
+        className={`scope-selector-input-wrapper${isMenuOpen ? ' scope-selector-input-wrapper--open' : ''}`}
+        ref={wrapperRef}
       >
-        {visibleScopes.map((scopeOption) => (
-          <option key={scopeOption} value={scopeOption}>
-            {SCOPE_LABELS[scopeOption]}
-          </option>
-        ))}
-      </select>
+        <button
+          id="scope-selector"
+          className="scope-selector-input"
+          type="button"
+          aria-labelledby={labelId}
+          aria-haspopup="listbox"
+          aria-expanded={isMenuOpen}
+          aria-controls={menuId}
+          onClick={() => {
+            if (!isDisabled) {
+              setIsMenuOpen((open) => !open)
+            }
+          }}
+          onKeyDown={handleTriggerKeyDown}
+          disabled={isDisabled}
+          title={isDisabled && disabledReason ? disabledReason : undefined}
+        >
+          <span className="scope-selector-chevron codicon codicon-chevron-down" aria-hidden="true" />
+          <span className="scope-selector-value">{SCOPE_LABELS[selectedScope]}</span>
+        </button>
+
+        {isMenuOpen && !isDisabled && (
+          <div id={menuId} className="scope-selector-menu" role="listbox" aria-label="Installation scope">
+            {visibleScopes.map((scopeOption) => (
+              <button
+                key={scopeOption}
+                type="button"
+                role="option"
+                aria-selected={scopeOption === selectedScope}
+                className={`scope-selector-option${scopeOption === selectedScope ? ' scope-selector-option--selected' : ''}`}
+                onClick={() => handleOptionSelect(scopeOption)}
+              >
+                {SCOPE_LABELS[scopeOption]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
