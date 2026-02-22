@@ -29,10 +29,10 @@ describe('ScopeSelector', () => {
     expect(screen.queryByRole('option', { name: 'Global' })).not.toBeInTheDocument()
   })
 
-  it('disables the selector when policy is none', () => {
+  it('does not render the selector when policy is none', () => {
     render(<ScopeSelector value="local" onChange={jest.fn()} allowedScopes="none" />)
 
-    expect(screen.getByRole('combobox', { name: /installation scope/i })).toBeDisabled()
+    expect(screen.queryByRole('combobox', { name: /installation scope/i })).not.toBeInTheDocument()
   })
 
   it('calls onChange when selection updates', async () => {

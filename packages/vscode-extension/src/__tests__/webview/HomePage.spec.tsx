@@ -203,7 +203,7 @@ describe('HomePage', () => {
     expect(screen.queryByRole('option', { name: 'Global' })).not.toBeInTheDocument()
   })
 
-  it('disables scope selector when user setting is none', () => {
+  it('does not render scope selector when user setting is none', () => {
     render(
       <HomePage
         registry={registry}
@@ -220,9 +220,7 @@ describe('HomePage', () => {
       />,
     )
 
-    const scope = screen.getByRole('combobox', { name: /installation scope/i })
-    expect(scope).toBeDisabled()
-    expect(scope).toHaveAttribute('title', 'Lifecycle actions are disabled: policy-none')
+    expect(screen.queryByRole('combobox', { name: /installation scope/i })).not.toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {

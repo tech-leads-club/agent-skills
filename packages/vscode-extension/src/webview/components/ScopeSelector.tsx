@@ -12,11 +12,6 @@ const SCOPE_LABELS: Readonly<Record<LifecycleScope, string>> = {
   global: 'Global',
 }
 
-function getVisibleScopes(allowedScopes: AllowedScopesSetting, currentScope: LifecycleScope): LifecycleScope[] {
-  const configuredScopes = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
-  return configuredScopes.length > 0 ? configuredScopes : [currentScope]
-}
-
 export interface ScopeSelectorProps {
   value: LifecycleScope
   onChange: (scope: LifecycleScope) => void
@@ -29,7 +24,7 @@ export interface ScopeSelectorProps {
  * Scope dropdown used to switch between local and global install contexts.
  *
  * @param props - Current scope, policy-constrained options, and disabled metadata.
- * @returns Scope selector control anchored to the home page footer.
+ * @returns Scope selector control anchored to the home page footer, or null when policy disallows all scopes.
  */
 export function ScopeSelector({
   value,
@@ -38,9 +33,13 @@ export function ScopeSelector({
   disabled = false,
   disabledReason,
 }: ScopeSelectorProps) {
-  const visibleScopes = getVisibleScopes(allowedScopes, value)
+  if (allowedScopes === 'none') {
+    return null
+  }
+
+  const visibleScopes = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
   const selectedScope = visibleScopes.includes(value) ? value : visibleScopes[0]
-  const isDisabled = disabled || allowedScopes === 'none'
+  const isDisabled = disabled
 
   return (
     <div className="scope-selector">

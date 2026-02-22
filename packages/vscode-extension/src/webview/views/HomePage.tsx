@@ -27,7 +27,7 @@ function isInstalledForScope(installed: InstalledSkillsMap[string], scope: Lifec
  * Home page action hub for install/uninstall/update/repair flows.
  *
  * @param props - Home page state and action callbacks.
- * @returns Home view with action cards and scope selector.
+ * @returns Home view with action cards and scope controls when permitted.
  */
 export function HomePage({
   registry,
@@ -44,6 +44,8 @@ export function HomePage({
   onRepair,
 }: HomePageProps) {
   const skills = registry?.skills ?? []
+  const allowedScopes = policy?.allowedScopes ?? 'all'
+  const shouldShowScopeSelector = allowedScopes !== 'none'
   const allInstalled =
     skills.length > 0 && skills.every((skill) => isInstalledForScope(installedSkills[skill.name], scope))
   const noneInstalled = skills.every((skill) => !isInstalledForScope(installedSkills[skill.name], scope))
@@ -75,12 +77,9 @@ export function HomePage({
     maintenanceDisabledReason = lifecycleBlockedMessage
   }
 
-  const scopeDisabledByPolicy = policy?.allowedScopes === 'none'
-  const scopeDisabled = !isTrusted || !hasWorkspace || scopeDisabledByPolicy
+  const scopeDisabled = !isTrusted || !hasWorkspace
   let scopeDisabledReason: string | undefined
-  if (scopeDisabledByPolicy) {
-    scopeDisabledReason = lifecycleBlockedMessage
-  } else if (!isTrusted) {
+  if (!isTrusted) {
     scopeDisabledReason = 'Local scope is unavailable in Restricted Mode'
   } else if (!hasWorkspace) {
     scopeDisabledReason = 'Local scope requires an open workspace'
@@ -146,13 +145,15 @@ export function HomePage({
         </button>
       </div>
 
-      <ScopeSelector
-        value={scopeDisabled ? 'global' : scope}
-        onChange={onScopeChange}
-        allowedScopes={policy?.allowedScopes ?? 'all'}
-        disabled={scopeDisabled}
-        disabledReason={scopeDisabledReason}
-      />
+      {shouldShowScopeSelector && (
+        <ScopeSelector
+          value={scopeDisabled ? 'global' : scope}
+          onChange={onScopeChange}
+          allowedScopes={allowedScopes}
+          disabled={scopeDisabled}
+          disabledReason={scopeDisabledReason}
+        />
+      )}
     </section>
   )
 }
