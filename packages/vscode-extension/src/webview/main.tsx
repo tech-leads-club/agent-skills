@@ -2,11 +2,12 @@ import Fuse from 'fuse.js'
 import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage, ScopePolicyStatePayload } from '../shared/messages'
-import type { AvailableAgent, Category, InstalledSkillsMap, Skill, SkillRegistry } from '../shared/types'
+import type { AvailableAgent, SkillRegistry } from '../shared/types'
 import { CategoryFilter } from './components/CategoryFilter'
 import { RestrictedModeBanner } from './components/RestrictedModeBanner'
 import { SearchBar } from './components/SearchBar'
 import { SkillGrid } from './components/SkillGrid'
+import { useAppState } from './hooks/useAppState'
 import { useInstalledState } from './hooks/useInstalledState'
 import { useOperations } from './hooks/useOperations'
 import './index.css'
@@ -58,87 +59,6 @@ function NoRegistryState() {
   )
 }
 
-interface RegistryContentProps {
-  registry: SkillRegistry
-  filteredSkills: Skill[]
-  categories: Array<{ key: string; category: Category }>
-  skillCounts: Record<string, number>
-  searchQuery: string
-  activeCategory: string | null
-  onSearchChange: (value: string) => void
-  onCategorySelect: (value: string | null) => void
-  installedSkills: InstalledSkillsMap
-  isOperating: (skillName: string) => boolean
-  getOperationMessage: (skillName: string) => string | undefined
-  availableAgents: AvailableAgent[]
-  hasWorkspace: boolean
-  onMarkPending: (skillName: string, action: 'add' | 'remove' | 'repair') => void
-  onRepair: (skillName: string, agents: string[], scope: 'local' | 'global') => void
-  onClearSearch: () => void
-  isLifecycleBlocked: boolean
-}
-
-/**
- * Renders search/filter controls and the resulting skill list.
- *
- * @param props - Registry data, filtered view state, and UI callbacks.
- * @returns Registry content section with filters and skill grid.
- */
-function RegistryContent({
-  registry,
-  filteredSkills,
-  categories,
-  skillCounts,
-  searchQuery,
-  activeCategory,
-  onSearchChange,
-  onCategorySelect,
-  installedSkills,
-  isOperating,
-  getOperationMessage,
-  availableAgents,
-  hasWorkspace,
-  onMarkPending,
-  onRepair,
-  onClearSearch,
-  isLifecycleBlocked,
-}: RegistryContentProps) {
-  return (
-    <>
-      <SearchBar value={searchQuery} onChange={onSearchChange} resultCount={filteredSkills.length} />
-
-      <CategoryFilter
-        categories={categories}
-        activeCategory={activeCategory}
-        onSelect={onCategorySelect}
-        skillCounts={skillCounts}
-      />
-
-      {filteredSkills.length === 0 && (searchQuery || activeCategory) ? (
-        <div className="empty-state">
-          <p>No skills match your search</p>
-          <button className="clear-button" onClick={onClearSearch}>
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <SkillGrid
-          skills={filteredSkills}
-          categories={registry.categories}
-          installedSkills={installedSkills}
-          isOperating={isOperating}
-          getOperationMessage={getOperationMessage}
-          availableAgents={availableAgents}
-          hasWorkspace={hasWorkspace}
-          onMarkPending={onMarkPending}
-          onRepair={onRepair}
-          isLifecycleBlocked={isLifecycleBlocked}
-        />
-      )}
-    </>
-  )
-}
-
 /**
  * Root webview application component.
  *
@@ -156,6 +76,7 @@ function App() {
   const [isTrusted, setIsTrusted] = useState(true)
   const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
 
+  const { currentView, goToSkills, goToAgents, goHome } = useAppState()
   const { installedSkills } = useInstalledState()
   const { isOperating, getMessage: getOperationMessage, markPending } = useOperations()
 
@@ -265,35 +186,89 @@ function App() {
     return <div className="app">{statusContent}</div>
   }
 
+  const renderCurrentView = () => {
+    if (!registry) {
+      return <NoRegistryState />
+    }
+
+    if (currentView === 'home') {
+      return (
+        <div className="empty-state">
+          <p>Choose an action to continue.</p>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="retry-button" onClick={() => goToSkills('install')}>
+              Install
+            </button>
+            <button className="retry-button" onClick={() => goToSkills('uninstall')}>
+              Uninstall
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    if (currentView === 'selectAgents') {
+      return (
+        <div className="empty-state">
+          <p>Agent selection view is loading.</p>
+          <button className="retry-button" onClick={goHome}>
+            Back to Home
+          </button>
+        </div>
+      )
+    }
+
+    return (
+      <>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+          <button className="retry-button" onClick={goHome}>
+            Back
+          </button>
+          <button className="retry-button" onClick={goToAgents}>
+            Select Agents
+          </button>
+        </div>
+        <SearchBar value={searchQuery} onChange={setSearchQuery} resultCount={filteredSkills.length} />
+
+        <CategoryFilter
+          categories={categories}
+          activeCategory={activeCategory}
+          onSelect={setActiveCategory}
+          skillCounts={skillCounts}
+        />
+
+        {filteredSkills.length === 0 && (searchQuery || activeCategory) ? (
+          <div className="empty-state">
+            <p>No skills match your search</p>
+            <button className="clear-button" onClick={handleClearSearch}>
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <SkillGrid
+            skills={filteredSkills}
+            categories={registry.categories}
+            installedSkills={installedSkills}
+            isOperating={isOperating}
+            getOperationMessage={getOperationMessage}
+            availableAgents={availableAgents}
+            hasWorkspace={hasWorkspace}
+            onMarkPending={markPending}
+            onRepair={handleRepair}
+            isLifecycleBlocked={isLifecycleBlocked}
+          />
+        )}
+      </>
+    )
+  }
+
   return (
     <div className="app">
       <header className="app-header">
         <RestrictedModeBanner visible={!isTrusted} />
         {offlineBanner}
       </header>
-      {registry ? (
-        <RegistryContent
-          registry={registry}
-          filteredSkills={filteredSkills}
-          categories={categories}
-          skillCounts={skillCounts}
-          searchQuery={searchQuery}
-          activeCategory={activeCategory}
-          onSearchChange={setSearchQuery}
-          onCategorySelect={setActiveCategory}
-          installedSkills={installedSkills}
-          isOperating={isOperating}
-          getOperationMessage={getOperationMessage}
-          availableAgents={availableAgents}
-          hasWorkspace={hasWorkspace}
-          onMarkPending={markPending}
-          onRepair={handleRepair}
-          onClearSearch={handleClearSearch}
-          isLifecycleBlocked={isLifecycleBlocked}
-        />
-      ) : (
-        <NoRegistryState />
-      )}
+      {renderCurrentView()}
       {isLifecycleBlocked && (
         <div
           className="footer-warning"

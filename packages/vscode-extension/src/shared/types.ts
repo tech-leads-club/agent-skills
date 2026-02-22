@@ -75,6 +75,16 @@ export interface AvailableAgent {
 }
 
 /**
+ * Client-side view routing.
+ */
+export type ViewRoute = 'home' | 'selectSkills' | 'selectAgents'
+
+/**
+ * Actions that navigate to skill selection.
+ */
+export type WebviewAction = 'install' | 'uninstall'
+
+/**
  * Type of lifecycle operation being performed.
  */
 export type OperationType = 'install' | 'remove' | 'update' | 'repair'

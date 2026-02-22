@@ -18,6 +18,7 @@ export type WebviewMessage =
   | { type: 'requestRefresh' } // User clicked Retry/Refresh button
   | { type: 'installSkill'; payload: InstallSkillPayload }
   | { type: 'removeSkill'; payload: RemoveSkillPayload }
+  | { type: 'executeBatch'; payload: ExecuteBatchPayload }
   | { type: 'updateSkill'; payload: UpdateSkillPayload }
   | { type: 'cancelOperation'; payload: CancelOperationPayload }
   | { type: 'requestAgentPick'; payload: RequestAgentPickPayload }
@@ -34,6 +35,7 @@ export type ExtensionMessage =
   | { type: 'operationStarted'; payload: OperationStartedPayload }
   | { type: 'operationProgress'; payload: OperationProgressPayload }
   | { type: 'operationCompleted'; payload: OperationCompletedPayload }
+  | { type: 'batchCompleted'; payload: BatchCompletedPayload }
   | { type: 'reconcileState'; payload: ReconcileStatePayload }
   | { type: 'agentPickResult'; payload: AgentPickResultPayload }
   | { type: 'scopePickResult'; payload: ScopePickResultPayload }
@@ -75,6 +77,16 @@ export interface RemoveSkillPayload {
   skillName: string
   agents: string[] // Selected agent identifiers (supports multi-select)
   scope: 'local' | 'global' | 'all'
+}
+
+/**
+ * Payload for executeBatch message (Webview → Extension).
+ */
+export interface ExecuteBatchPayload {
+  action: OperationType
+  skills: string[]
+  agents: string[]
+  scope: 'local' | 'global'
 }
 
 /**
@@ -121,6 +133,16 @@ export interface OperationCompletedPayload {
   success: boolean
   errorMessage?: string
   metadata?: OperationBatchMetadata
+}
+
+/**
+ * Payload for batchCompleted message (Extension → Webview).
+ */
+export interface BatchCompletedPayload {
+  batchId: string
+  success: boolean
+  failedSkills?: string[]
+  errorMessage?: string
 }
 
 /**
