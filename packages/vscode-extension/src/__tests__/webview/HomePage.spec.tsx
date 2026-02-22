@@ -152,12 +152,13 @@ describe('HomePage', () => {
       />,
     )
 
-    const scope = screen.getByRole('combobox', { name: /installation scope/i })
-    expect(scope).toBeDisabled()
-    expect(scope).toHaveValue('global')
+    const scopeTrigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(scopeTrigger).toBeDisabled()
+    expect(scopeTrigger).toHaveTextContent('Global')
   })
 
-  it('shows only global scope when user setting is global', () => {
+  it('shows only global scope when user setting is global', async () => {
+    const user = userEvent.setup()
     render(
       <HomePage
         registry={registry}
@@ -174,13 +175,16 @@ describe('HomePage', () => {
       />,
     )
 
-    const scope = screen.getByRole('combobox', { name: /installation scope/i })
-    expect(scope).toHaveValue('global')
+    const scopeTrigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(scopeTrigger).toHaveTextContent('Global')
+
+    await user.click(scopeTrigger)
     expect(screen.queryByRole('option', { name: 'Local' })).not.toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Global' })).toBeInTheDocument()
   })
 
-  it('shows only local scope when user setting is local', () => {
+  it('shows only local scope when user setting is local', async () => {
+    const user = userEvent.setup()
     render(
       <HomePage
         registry={registry}
@@ -197,8 +201,10 @@ describe('HomePage', () => {
       />,
     )
 
-    const scope = screen.getByRole('combobox', { name: /installation scope/i })
-    expect(scope).toHaveValue('local')
+    const scopeTrigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(scopeTrigger).toHaveTextContent('Local')
+
+    await user.click(scopeTrigger)
     expect(screen.getByRole('option', { name: 'Local' })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: 'Global' })).not.toBeInTheDocument()
   })
@@ -220,7 +226,7 @@ describe('HomePage', () => {
       />,
     )
 
-    expect(screen.queryByRole('combobox', { name: /installation scope/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /installation scope/i })).not.toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {

@@ -7,24 +7,39 @@ const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
 describe('ScopeSelector', () => {
-  it('renders local and global options by default', () => {
+  it('renders local and global options by default', async () => {
+    const user = userEvent.setup()
     render(<ScopeSelector value="local" onChange={jest.fn()} />)
 
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(trigger).toHaveTextContent('Local')
+
+    await user.click(trigger)
     expect(screen.getByRole('option', { name: 'Local' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Global' })).toBeInTheDocument()
     expect(screen.getByText('Installation scope')).toHaveClass('sr-only')
   })
 
-  it('shows only the global option when policy is global', () => {
+  it('shows only the global option when policy is global', async () => {
+    const user = userEvent.setup()
     render(<ScopeSelector value="local" onChange={jest.fn()} allowedScopes="global" />)
 
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(trigger).toHaveTextContent('Global')
+
+    await user.click(trigger)
     expect(screen.getByRole('option', { name: 'Global' })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: 'Local' })).not.toBeInTheDocument()
   })
 
-  it('shows only the local option when policy is local', () => {
+  it('shows only the local option when policy is local', async () => {
+    const user = userEvent.setup()
     render(<ScopeSelector value="global" onChange={jest.fn()} allowedScopes="local" />)
 
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(trigger).toHaveTextContent('Local')
+
+    await user.click(trigger)
     expect(screen.getByRole('option', { name: 'Local' })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: 'Global' })).not.toBeInTheDocument()
   })
@@ -32,7 +47,7 @@ describe('ScopeSelector', () => {
   it('does not render the selector when policy is none', () => {
     render(<ScopeSelector value="local" onChange={jest.fn()} allowedScopes="none" />)
 
-    expect(screen.queryByRole('combobox', { name: /installation scope/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /installation scope/i })).not.toBeInTheDocument()
   })
 
   it('calls onChange when selection updates', async () => {
@@ -40,7 +55,8 @@ describe('ScopeSelector', () => {
     const user = userEvent.setup()
     render(<ScopeSelector value="local" onChange={onChange} />)
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /installation scope/i }), 'global')
+    await user.click(screen.getByRole('button', { name: /installation scope/i }))
+    await user.click(screen.getByRole('option', { name: 'Global' }))
     expect(onChange).toHaveBeenCalledWith('global')
   })
 
@@ -55,9 +71,9 @@ describe('ScopeSelector', () => {
       />,
     )
 
-    const select = screen.getByRole('combobox', { name: /installation scope/i })
-    expect(select).toBeDisabled()
-    expect(select).toHaveAttribute('title', 'Local scope is unavailable in Restricted Mode')
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    expect(trigger).toBeDisabled()
+    expect(trigger).toHaveAttribute('title', 'Local scope is unavailable in Restricted Mode')
   })
 
   it('has no accessibility violations', async () => {
