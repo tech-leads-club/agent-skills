@@ -308,9 +308,25 @@ body {
 .icon-button {
   width: 30px;
   height: 30px;
-  background-color: var(--vscode-button-secondaryBackground);
+  background-color: transparent;
   color: var(--vscode-button-secondaryForeground);
   flex-shrink: 0;
+}
+
+.icon-button:hover:not(:disabled),
+.icon-button:focus-visible,
+.selection-menu-button:hover:not(:disabled),
+.selection-menu-button:focus-visible,
+.selection-menu-clear:hover:not(:disabled),
+.selection-menu-clear:focus-visible {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.icon-button:disabled,
+.selection-menu-button:disabled,
+.selection-menu-clear:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .search-bar {
@@ -353,7 +369,7 @@ body {
 
 .selection-menu-button,
 .selection-menu-clear {
-  background-color: var(--vscode-button-secondaryBackground);
+  background-color: transparent;
   color: var(--vscode-button-secondaryForeground);
   padding: 6px 8px;
 }
