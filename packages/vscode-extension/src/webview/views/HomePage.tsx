@@ -32,6 +32,8 @@ function hasUpdatesForScope(
     const installed = installedSkills[skill.name]
     if (!installed || !isInstalledForScope(installed, scope)) return false
 
+    if (!installed.contentHash) return false
+
     return installed.contentHash !== skill.contentHash
   })
 }

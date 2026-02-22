@@ -78,10 +78,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   ) {
     // Subscribe to state changes and push to webview
     this.reconciler.onStateChanged((installedSkills) => {
-      this.postMessage({
-        type: 'reconcileState',
-        payload: { installedSkills },
-      })
+      void this.postReconciledState(installedSkills)
     })
 
     // Subscribe to orchestrator events
@@ -168,7 +165,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
 
         // Reconcile installed state after operation completes to refresh UI
-        void this.reconciler.reconcile()
+        void this.reconcileAndPostInstalledState()
       }
     })
   }
@@ -233,6 +230,71 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     if (this.webviewView?.webview) {
       await this.webviewView.webview.postMessage(message)
     }
+  }
+
+  /**
+   * Posts reconciled installed-skill state enriched with lockfile hashes.
+   *
+   * @param installedSkills - Installed-skill map from disk reconciliation.
+   * @returns A promise that resolves after the webview receives the state.
+   */
+  private async postReconciledState(installedSkills: InstalledSkillsMap): Promise<void> {
+    if (!this.webviewView?.webview) {
+      return
+    }
+
+    const installedHashes = await this.skillLockService.getInstalledHashes()
+    const installedSkillsWithHashes = this.withInstalledHashes(installedSkills, installedHashes)
+
+    await this.postMessage({
+      type: 'reconcileState',
+      payload: { installedSkills: installedSkillsWithHashes },
+    })
+  }
+
+  /**
+   * Reconciles disk state, then posts the latest installed map with lockfile hashes.
+   *
+   * @returns A promise that resolves when reconciliation and state post complete.
+   */
+  private async reconcileAndPostInstalledState(): Promise<void> {
+    await this.reconciler.reconcile()
+    const installedSkills = await this.reconciler.getInstalledSkills()
+    await this.postReconciledState(installedSkills)
+  }
+
+  /**
+   * Merges lockfile content hashes into installed-skill entries.
+   *
+   * @param installedSkills - Installed-skill map keyed by skill name.
+   * @param installedHashes - Lockfile hash map keyed by skill name.
+   * @returns Installed-skill map with content hashes attached when available.
+   */
+  private withInstalledHashes(
+    installedSkills: InstalledSkillsMap,
+    installedHashes: Record<string, string | undefined>,
+  ): InstalledSkillsMap {
+    const merged: InstalledSkillsMap = {}
+
+    for (const [skillName, installedInfo] of Object.entries(installedSkills)) {
+      if (!installedInfo) {
+        merged[skillName] = null
+        continue
+      }
+
+      const installedHash = installedHashes[skillName]
+      if (installedHash === undefined) {
+        merged[skillName] = installedInfo
+        continue
+      }
+
+      merged[skillName] = {
+        ...installedInfo,
+        contentHash: installedHash,
+      }
+    }
+
+    return merged
   }
 
   /**
@@ -324,10 +386,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       payload: { version, availableAgents, hasWorkspace },
     })
 
-    await this.postMessage({
-      type: 'reconcileState',
-      payload: { installedSkills },
-    })
+    await this.postReconciledState(installedSkills)
 
     await this.postMessage({
       type: 'trustState',
@@ -346,7 +405,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     void this.loadAndPushRegistry(webview)
-    void this.reconciler.reconcile()
+    void this.reconcileAndPostInstalledState()
   }
 
   /**
@@ -358,7 +417,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private async handleRefreshRequest(webview: vscode.Webview): Promise<void> {
     this.logger.info('Refresh requested from webview')
     void this.loadAndPushRegistry(webview, true)
-    void this.reconciler.reconcile()
+    void this.reconcileAndPostInstalledState()
   }
 
   /**

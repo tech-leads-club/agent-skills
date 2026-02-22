@@ -233,6 +233,45 @@ describe('SidebarProvider', () => {
     })
   })
 
+  it('hydrates installed-skill hashes before posting reconcile state', async () => {
+    const installedInfo = {
+      local: true,
+      global: false,
+      agents: [
+        {
+          agent: 'cursor',
+          displayName: 'Cursor',
+          local: true,
+          global: false,
+          corrupted: false,
+        },
+      ],
+    }
+    const installedSkills: InstalledSkillsMap = {
+      'test-skill': installedInfo,
+    }
+    reconciler.getInstalledSkills.mockResolvedValue(installedSkills)
+    skillLockService.getInstalledHashes.mockResolvedValue({ 'test-skill': 'hash-123' })
+
+    provider.resolveWebviewView(webviewView)
+    const message: WebviewMessage = { type: 'webviewDidMount' }
+
+    await messageHandler(message)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'reconcileState',
+      payload: {
+        installedSkills: {
+          'test-skill': {
+            ...installedInfo,
+            contentHash: 'hash-123',
+          },
+        },
+      },
+    })
+  })
+
   it('should handle unknown messages gracefully', async () => {
     provider.resolveWebviewView(webviewView)
     const message = { type: 'unknown-type' } as unknown as WebviewMessage
@@ -435,6 +474,58 @@ describe('SidebarProvider', () => {
         success: true,
         failedSkills: undefined,
         errorMessage: undefined,
+      },
+    })
+  })
+
+  it('posts refreshed reconcile state after operation completion', async () => {
+    provider.resolveWebviewView(webviewView)
+
+    const installedInfo = {
+      local: true,
+      global: false,
+      agents: [
+        {
+          agent: 'cursor',
+          displayName: 'Cursor',
+          local: true,
+          global: false,
+          corrupted: false,
+        },
+      ],
+    }
+
+    reconciler.getInstalledSkills.mockResolvedValueOnce({
+      seo: installedInfo,
+    })
+    skillLockService.getInstalledHashes.mockResolvedValueOnce({ seo: 'new-hash' })
+
+    const eventHandler = (orchestrator.onOperationEvent as jest.Mock).mock.calls[0][0] as (
+      event: Parameters<NonNullable<InstallationOrchestrator['onOperationEvent']>>[0] extends (e: infer E) => void
+        ? E
+        : never,
+    ) => void
+
+    eventHandler({
+      type: 'completed',
+      operationId: 'op-update',
+      operation: 'update',
+      skillName: 'seo',
+      success: true,
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(reconciler.reconcile).toHaveBeenCalled()
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'reconcileState',
+      payload: {
+        installedSkills: {
+          seo: {
+            ...installedInfo,
+            contentHash: 'new-hash',
+          },
+        },
       },
     })
   })

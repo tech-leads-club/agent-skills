@@ -164,6 +164,34 @@ describe('HomePage', () => {
     expect(update).toHaveAttribute('title', 'No updates are available')
   })
 
+  it('disables update when installed hash is unavailable', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: true,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false }],
+          },
+        }}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const update = screen.getByRole('button', { name: /^update/i })
+    expect(update).toBeDisabled()
+    expect(update).toHaveAttribute('title', 'No updates are available')
+  })
+
   it('enables update when an installed skill hash differs', () => {
     render(
       <HomePage
