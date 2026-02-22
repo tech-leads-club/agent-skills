@@ -260,6 +260,7 @@ function App() {
           onSelectAll={selectAllSkills}
           onClear={clearSkillSelection}
           onBack={goHome}
+          onCancel={goHome}
           onNext={goToAgents}
         />
       )
@@ -278,6 +279,7 @@ function App() {
         onSelectAll={selectAllAgents}
         onClear={clearAgentSelection}
         onBack={goToSkillsView}
+        onCancel={goHome}
         onProceed={handleExecuteBatch}
       />
     )

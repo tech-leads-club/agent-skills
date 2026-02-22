@@ -22,6 +22,7 @@ export interface SelectSkillsPageProps {
   onSelectAll: (skills: string[]) => void
   onClear: () => void
   onBack: () => void
+  onCancel?: () => void
   onNext: () => void
 }
 
@@ -68,6 +69,7 @@ export function SelectSkillsPage({
   onSelectAll,
   onClear,
   onBack,
+  onCancel = onBack,
   onNext,
 }: SelectSkillsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -175,14 +177,19 @@ export function SelectSkillsPage({
       </div>
 
       <footer className="select-page-footer">
-        <button
-          className={`primary-footer-button ${nextStepActionClassName}`}
-          onClick={onNext}
-          disabled={selectedSkills.length === 0}
-        >
-          Select Agents
-          <span className="codicon codicon-arrow-right" aria-hidden="true" />
-        </button>
+        <div className="select-page-footer-actions">
+          <button className="secondary-footer-button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            className={`primary-footer-button ${nextStepActionClassName}`}
+            onClick={onNext}
+            disabled={selectedSkills.length === 0}
+          >
+            Select Agents
+            <span className="codicon codicon-arrow-right" aria-hidden="true" />
+          </button>
+        </div>
       </footer>
     </section>
   )

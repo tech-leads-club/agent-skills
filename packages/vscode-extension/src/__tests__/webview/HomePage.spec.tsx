@@ -2,7 +2,13 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
 import type { AvailableAgent, SkillRegistry } from '../../shared/types'
+import { getState, setState } from '../../webview/lib/vscode-api'
 import { HomePage } from '../../webview/views/HomePage'
+
+jest.mock('../../webview/lib/vscode-api', () => ({
+  getState: jest.fn(),
+  setState: jest.fn(),
+}))
 
 const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
@@ -28,6 +34,12 @@ const allAgents: AvailableAgent[] = [
 ]
 
 describe('HomePage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(getState as jest.Mock).mockReturnValue(undefined)
+    ;(setState as jest.Mock).mockImplementation(() => {})
+  })
+
   it('renders 4 action buttons', () => {
     render(
       <HomePage

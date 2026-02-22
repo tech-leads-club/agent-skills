@@ -17,6 +17,7 @@ export interface SelectAgentsPageProps {
   onSelectAll: (agents: string[]) => void
   onClear: () => void
   onBack: () => void
+  onCancel?: () => void
   onProceed: () => void
 }
 
@@ -53,6 +54,7 @@ export function SelectAgentsPage({
   onSelectAll,
   onClear,
   onBack,
+  onCancel = onBack,
   onProceed,
 }: SelectAgentsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -177,14 +179,19 @@ export function SelectAgentsPage({
       </div>
 
       <footer className="select-page-footer">
-        <button
-          className={`primary-footer-button ${proceedActionClassName}`}
-          onClick={onProceed}
-          disabled={selectedAgents.length === 0 || isProcessing}
-          title={isProcessing ? 'Operation in progress' : undefined}
-        >
-          {isProcessing ? 'Processing...' : proceedLabel}
-        </button>
+        <div className="select-page-footer-actions">
+          <button className="secondary-footer-button" onClick={onCancel} disabled={isProcessing}>
+            Cancel
+          </button>
+          <button
+            className={`primary-footer-button ${proceedActionClassName}`}
+            onClick={onProceed}
+            disabled={selectedAgents.length === 0 || isProcessing}
+            title={isProcessing ? 'Operation in progress' : undefined}
+          >
+            {isProcessing ? 'Processing...' : proceedLabel}
+          </button>
+        </div>
       </footer>
     </section>
   )

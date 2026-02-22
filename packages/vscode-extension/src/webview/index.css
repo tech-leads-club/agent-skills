@@ -94,6 +94,7 @@ body {
 .clear-button,
 .icon-button,
 .primary-footer-button,
+.secondary-footer-button,
 .selection-menu-button,
 .selection-menu-clear {
   border: 1px solid transparent;
@@ -629,6 +630,37 @@ body {
   border-top: 1px solid var(--vscode-panel-border);
   background-color: var(--vscode-sideBar-background);
   padding: 10px 12px;
+}
+
+.select-page-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.select-page-footer-actions .primary-footer-button,
+.select-page-footer-actions .secondary-footer-button {
+  flex: 1;
+  width: auto;
+}
+
+.secondary-footer-button {
+  background-color: var(--vscode-button-secondaryBackground, var(--vscode-editorWidget-background));
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  padding: 9px 12px;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.secondary-footer-button:hover:not(:disabled),
+.secondary-footer-button:focus-visible {
+  border-color: var(--vscode-focusBorder);
+  background-color: var(--vscode-button-secondaryHoverBackground, var(--vscode-list-hoverBackground));
+}
+
+.secondary-footer-button:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .primary-footer-button {
