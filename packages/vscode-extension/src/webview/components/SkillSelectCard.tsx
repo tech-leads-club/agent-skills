@@ -15,6 +15,8 @@ export interface SkillSelectCardProps {
  */
 export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: SkillSelectCardProps) {
   const inputId = `skill-select-${skill.name}`
+  const descriptionId = `${inputId}-description`
+  const selectLabel = `Select ${skill.name}`
 
   return (
     <label className={`skill-select-card ${isSelected ? 'skill-select-card--selected' : ''}`} htmlFor={inputId}>
@@ -22,7 +24,9 @@ export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: S
         <p>{skill.name}</p>
         <span className="skill-select-card-category">{categoryName}</span>
       </div>
-      <p className="skill-select-card-description">{skill.description}</p>
+      <p id={descriptionId} className="skill-select-card-description" title={skill.description}>
+        {skill.description}
+      </p>
       <div className="skill-select-card-meta">
         <span>{skill.author ?? 'Unknown author'}</span>
         <span>{skill.version ? `v${skill.version}` : 'no version'}</span>
@@ -31,7 +35,8 @@ export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: S
           type="checkbox"
           checked={isSelected}
           onChange={onToggle}
-          aria-label={`Select ${skill.name}`}
+          aria-label={selectLabel}
+          aria-describedby={descriptionId}
         />
       </div>
     </label>

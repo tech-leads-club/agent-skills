@@ -400,6 +400,13 @@ body {
   gap: 8px;
 }
 
+.skill-select-card {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 112px;
+  max-height: 144px;
+  overflow: hidden;
+}
+
 .skill-select-card:hover,
 .agent-select-card:hover {
   border-color: var(--vscode-focusBorder);
@@ -440,6 +447,20 @@ body {
   margin: 0;
   color: var(--vscode-descriptionForeground);
   font-size: 12px;
+}
+
+.skill-select-card-description {
+  min-height: 0;
+  max-height: calc(1.35em * 2);
+  line-height: 1.35;
+  color: currentColor;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .agent-select-card-name {

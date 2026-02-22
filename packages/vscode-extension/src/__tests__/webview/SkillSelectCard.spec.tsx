@@ -24,6 +24,16 @@ describe('SkillSelectCard', () => {
     expect(screen.getByText(/Audit and improve/i)).toBeInTheDocument()
   })
 
+  it('keeps the full description available for hover and screen readers', () => {
+    render(<SkillSelectCard skill={skill} categoryName="Quality" isSelected={false} onToggle={jest.fn()} />)
+
+    const description = screen.getByText(skill.description)
+    expect(description).toHaveAttribute('title', skill.description)
+
+    const checkbox = screen.getByRole('checkbox', { name: /select accessibility/i })
+    expect(checkbox).toHaveAccessibleDescription(skill.description)
+  })
+
   it('toggles checkbox selection', async () => {
     const onToggle = jest.fn()
     const user = userEvent.setup()
