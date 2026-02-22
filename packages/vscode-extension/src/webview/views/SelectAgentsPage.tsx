@@ -66,6 +66,8 @@ export function SelectAgentsPage({
   onProceed,
 }: SelectAgentsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const proceedActionClassName =
+    action === 'uninstall' ? 'primary-footer-button--uninstall' : 'primary-footer-button--install'
 
   const candidateAgents = useMemo(() => {
     return availableAgents.filter((agent) => {
@@ -98,8 +100,9 @@ export function SelectAgentsPage({
   )
 
   const visibleAgents = useMemo(() => {
-    if (!searchQuery.trim()) return searchableAgents
-    return fuseInstance.search(searchQuery).map((result) => result.item)
+    const normalizedSearchQuery = searchQuery.trim()
+    if (!normalizedSearchQuery) return searchableAgents
+    return fuseInstance.search(normalizedSearchQuery).map((result) => result.item)
   }, [fuseInstance, searchQuery, searchableAgents])
 
   const visibleAgentIds = useMemo(() => visibleAgents.map((agent) => agent.agent), [visibleAgents])
@@ -177,7 +180,7 @@ export function SelectAgentsPage({
 
       <footer className="select-page-footer">
         <button
-          className="primary-footer-button"
+          className={`primary-footer-button ${proceedActionClassName}`}
           onClick={onProceed}
           disabled={selectedAgents.length === 0 || isProcessing}
           title={isProcessing ? 'Operation in progress' : undefined}

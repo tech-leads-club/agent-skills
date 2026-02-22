@@ -15,20 +15,22 @@ export interface AgentSelectCardProps {
  */
 export function AgentSelectCard({ agent, company, isSelected, onToggle }: AgentSelectCardProps) {
   const inputId = `agent-select-${agent.agent}`
+  const selectLabel = `Select ${agent.displayName}`
 
   return (
     <label className={`agent-select-card ${isSelected ? 'agent-select-card--selected' : ''}`} htmlFor={inputId}>
-      <div className="agent-select-card-body">
+      <div className="agent-select-card-header">
         <p className="agent-select-card-name">{agent.displayName}</p>
-        <p>{company}</p>
+        <input
+          id={inputId}
+          className="select-card-checkbox"
+          type="checkbox"
+          checked={isSelected}
+          onChange={onToggle}
+          aria-label={selectLabel}
+        />
       </div>
-      <input
-        id={inputId}
-        type="checkbox"
-        checked={isSelected}
-        onChange={onToggle}
-        aria-label={`Select ${agent.displayName}`}
-      />
+      <p className="agent-select-card-company">{company}</p>
     </label>
   )
 }

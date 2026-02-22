@@ -437,7 +437,7 @@ body {
 }
 
 .skill-select-card-header,
-.agent-select-card {
+.agent-select-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -448,6 +448,10 @@ body {
   align-items: flex-start;
 }
 
+.agent-select-card-header {
+  align-items: flex-start;
+}
+
 .skill-select-card-header-end {
   display: flex;
   align-items: flex-start;
@@ -455,7 +459,7 @@ body {
   flex-shrink: 0;
 }
 
-.skill-select-card-checkbox {
+.select-card-checkbox {
   appearance: none;
   width: 16px;
   height: 16px;
@@ -471,7 +475,7 @@ body {
     background-color 120ms ease-out;
 }
 
-.skill-select-card-checkbox::before {
+.select-card-checkbox::before {
   content: '';
   width: 9px;
   height: 9px;
@@ -482,16 +486,16 @@ body {
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
-.skill-select-card-checkbox:checked {
+.select-card-checkbox:checked {
   border-color: var(--vscode-checkbox-selectBorder, var(--vscode-focusBorder));
   background-color: var(--vscode-checkbox-selectBackground, var(--vscode-focusBorder));
 }
 
-.skill-select-card-checkbox:checked::before {
+.select-card-checkbox:checked::before {
   transform: scale(1);
 }
 
-.skill-select-card-checkbox:focus-visible {
+.select-card-checkbox:focus-visible {
   outline: 2px solid var(--vscode-focusBorder);
   outline-offset: 1px;
 }
@@ -563,7 +567,7 @@ body {
 }
 
 .skill-select-card-description,
-.agent-select-card-body p {
+.agent-select-card-company {
   margin: 0;
   color: var(--vscode-descriptionForeground);
   font-size: 12px;

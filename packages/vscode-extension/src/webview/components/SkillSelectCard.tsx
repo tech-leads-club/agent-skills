@@ -28,7 +28,7 @@ export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: S
           </span>
           <input
             id={inputId}
-            className="skill-select-card-checkbox"
+            className="select-card-checkbox"
             type="checkbox"
             checked={isSelected}
             onChange={onToggle}
