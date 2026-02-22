@@ -1,3 +1,14 @@
+## 0.7.0 (2026-02-22)
+
+### 🚀 Features
+
+- enhance skill scanning with progress indication and error handling ([61ee7d787](https://github.com/tech-leads-club/agent-skills/commit/61ee7d787))
+- add new skills to security scan allowlist with reasons for exceptions ([cd53eef20](https://github.com/tech-leads-club/agent-skills/commit/cd53eef20))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.6.0 (2026-02-21)
 
 This was a version bump only for @tech-leads-club/skills-catalog to align it with other projects, there were no code changes.

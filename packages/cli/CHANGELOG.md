@@ -1,3 +1,18 @@
+## 1.2.2 (2026-02-22)
+
+### 🩹 Fixes
+
+- enhance notification messages and loading state handling ([2307432a5](https://github.com/tech-leads-club/agent-skills/commit/2307432a5))
+
+### 💅 Refactors
+
+- add UI messages for update and installation tips ([58fe98d09](https://github.com/tech-leads-club/agent-skills/commit/58fe98d09))
+- include loading state in environment check response ([ca4c2df2c](https://github.com/tech-leads-club/agent-skills/commit/ca4c2df2c))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 1.2.1 (2026-02-21)
 
 ### 🩹 Fixes
