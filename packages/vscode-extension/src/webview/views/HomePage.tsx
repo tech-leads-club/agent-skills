@@ -91,7 +91,7 @@ export function HomePage({
 
       <div className="home-page-actions" role="group" aria-label="Skill actions">
         <button
-          className="home-action-button"
+          className="home-action-button home-action-button--install"
           onClick={() => onNavigate('install')}
           disabled={installDisabledReason !== null}
           title={installDisabledReason ?? undefined}
@@ -105,7 +105,7 @@ export function HomePage({
         </button>
 
         <button
-          className="home-action-button"
+          className="home-action-button home-action-button--uninstall"
           onClick={() => onNavigate('uninstall')}
           disabled={uninstallDisabledReason !== null}
           title={uninstallDisabledReason ?? undefined}
@@ -119,7 +119,7 @@ export function HomePage({
         </button>
 
         <button
-          className="home-action-button"
+          className="home-action-button home-action-button--update"
           onClick={onUpdate}
           disabled={maintenanceDisabledReason !== null}
           title={maintenanceDisabledReason ?? undefined}
@@ -132,7 +132,7 @@ export function HomePage({
         </button>
 
         <button
-          className="home-action-button"
+          className="home-action-button home-action-button--repair"
           onClick={onRepair}
           disabled={maintenanceDisabledReason !== null}
           title={maintenanceDisabledReason ?? undefined}

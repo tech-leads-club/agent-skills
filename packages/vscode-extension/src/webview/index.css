@@ -124,11 +124,12 @@ body {
 }
 
 .home-action-button {
+  --home-action-accent-color: var(--vscode-foreground);
   width: 100%;
   text-align: left;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--home-action-accent-color);
   background-color: var(--vscode-editorWidget-background);
-  color: var(--vscode-foreground);
+  color: var(--home-action-accent-color);
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -138,8 +139,36 @@ body {
 }
 
 .home-action-button:hover:not(:disabled) {
-  border-color: var(--vscode-focusBorder);
+  border-color: var(--home-action-accent-color);
   background-color: var(--vscode-list-hoverBackground);
+}
+
+.home-action-button--install {
+  --home-action-accent-color: var(
+    --vscode-testing-iconPassed,
+    var(--vscode-charts-green, var(--vscode-terminal-ansiGreen, var(--vscode-foreground)))
+  );
+}
+
+.home-action-button--uninstall {
+  --home-action-accent-color: var(
+    --vscode-testing-iconFailed,
+    var(--vscode-charts-red, var(--vscode-errorForeground, var(--vscode-foreground)))
+  );
+}
+
+.home-action-button--update {
+  --home-action-accent-color: var(
+    --vscode-charts-blue,
+    var(--vscode-textLink-foreground, var(--vscode-focusBorder, var(--vscode-foreground)))
+  );
+}
+
+.home-action-button--repair {
+  --home-action-accent-color: var(
+    --vscode-editorWarning-foreground,
+    var(--vscode-charts-yellow, var(--vscode-terminal-ansiYellow, var(--vscode-foreground)))
+  );
 }
 
 .home-action-icon {
@@ -154,7 +183,8 @@ body {
 }
 
 .home-action-copy small {
-  color: var(--vscode-descriptionForeground);
+  color: inherit;
+  opacity: 0.85;
 }
 
 .home-action-chevron {
