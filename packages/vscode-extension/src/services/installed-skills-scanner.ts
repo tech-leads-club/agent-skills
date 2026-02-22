@@ -210,6 +210,19 @@ export class InstalledSkillsScanner {
   }
 
   /**
+   * Returns all supported agents, regardless of local/global detection status.
+   *
+   * @returns Complete agent host catalog for selection UIs.
+   */
+  getAllAgents(): AvailableAgent[] {
+    return AGENT_CONFIGS.map((config) => ({
+      agent: config.name,
+      displayName: config.displayName,
+      company: config.company,
+    }))
+  }
+
+  /**
    * Builds local/global scope checks for a given agent and skill.
    *
    * @param config - Agent directory configuration.

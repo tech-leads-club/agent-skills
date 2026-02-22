@@ -81,6 +81,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [fromCache, setFromCache] = useState(false)
   const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
+  const [allAgents, setAllAgents] = useState<AvailableAgent[]>([])
   const [hasWorkspace, setHasWorkspace] = useState(false)
   const [isTrusted, setIsTrusted] = useState(true)
   const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
@@ -140,6 +141,7 @@ function App() {
       switch (msg.type) {
         case 'initialize':
           setAvailableAgents(msg.payload.availableAgents)
+          setAllAgents(msg.payload.allAgents)
           setHasWorkspace(msg.payload.hasWorkspace)
           break
         case 'registryUpdate':
@@ -226,6 +228,7 @@ function App() {
         <HomePage
           registry={registry}
           installedSkills={installedSkills}
+          allAgents={allAgents}
           policy={policy}
           isTrusted={isTrusted}
           hasWorkspace={hasWorkspace}
@@ -250,6 +253,7 @@ function App() {
           action={currentAction}
           registry={registry}
           installedSkills={installedSkills}
+          allAgents={allAgents}
           scope={activeScope}
           selectedSkills={selectedSkills}
           onToggleSkill={toggleSkill}
@@ -264,7 +268,7 @@ function App() {
     return (
       <SelectAgentsPage
         action={currentAction}
-        availableAgents={availableAgents}
+        availableAgents={allAgents.length > 0 ? allAgents : availableAgents}
         installedSkills={installedSkills}
         selectedSkills={selectedSkills}
         selectedAgents={selectedAgents}

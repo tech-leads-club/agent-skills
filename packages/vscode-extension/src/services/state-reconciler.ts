@@ -143,6 +143,15 @@ export class StateReconciler implements vscode.Disposable {
   }
 
   /**
+   * Returns all supported agents, regardless of detection status.
+   *
+   * @returns Agent catalog entries usable in selection UIs.
+   */
+  getAllAgents(): AvailableAgent[] {
+    return this.scanner.getAllAgents()
+  }
+
+  /**
    * Returns the current installed skills map from the last reconciliation.
    *
    * @returns A promise with the latest cached installed-skill state.

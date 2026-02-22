@@ -1,6 +1,12 @@
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { InstalledSkillsMap, LifecycleScope, SkillRegistry, WebviewAction } from '../../shared/types'
+import type {
+  AvailableAgent,
+  InstalledSkillsMap,
+  LifecycleScope,
+  SkillRegistry,
+  WebviewAction,
+} from '../../shared/types'
 import { SearchBar } from '../components/SearchBar'
 import { SelectionMenu } from '../components/SelectionMenu'
 import { SkillSelectCard } from '../components/SkillSelectCard'
@@ -9,6 +15,7 @@ export interface SelectSkillsPageProps {
   action: WebviewAction
   registry: SkillRegistry
   installedSkills: InstalledSkillsMap
+  allAgents?: AvailableAgent[]
   scope: LifecycleScope
   selectedSkills: string[]
   onToggleSkill: (skillName: string) => void
@@ -29,6 +36,21 @@ function isInstalledForScope(installed: InstalledSkillsMap[string], scope: Lifec
   return scope === 'local' ? installed.local : installed.global
 }
 
+function isInstalledForAllAgents(
+  installed: InstalledSkillsMap[string],
+  allAgents: AvailableAgent[],
+  scope: LifecycleScope,
+): boolean {
+  if (!installed) return false
+  if (allAgents.length === 0) return isInstalledForScope(installed, scope)
+
+  return allAgents.every((agent) => {
+    const installInfo = installed.agents.find((entry) => entry.agent === agent.agent)
+    if (!installInfo) return false
+    return scope === 'local' ? installInfo.local : installInfo.global
+  })
+}
+
 /**
  * Skills page for searching and selecting skills for a batch action.
  *
@@ -39,6 +61,7 @@ export function SelectSkillsPage({
   action,
   registry,
   installedSkills,
+  allAgents = [],
   scope,
   selectedSkills,
   onToggleSkill,
@@ -53,10 +76,13 @@ export function SelectSkillsPage({
 
   const candidateSkills = useMemo(() => {
     return registry.skills.filter((skill) => {
-      const installed = isInstalledForScope(installedSkills[skill.name], scope)
+      const installed =
+        action === 'install'
+          ? isInstalledForAllAgents(installedSkills[skill.name], allAgents, scope)
+          : isInstalledForScope(installedSkills[skill.name], scope)
       return action === 'install' ? !installed : installed
     })
-  }, [action, installedSkills, registry.skills, scope])
+  }, [action, allAgents, installedSkills, registry.skills, scope])
 
   const searchableSkills = useMemo<SearchableSkillEntry[]>(
     () =>

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
-import type { SkillRegistry } from '../../shared/types'
+import type { AvailableAgent, SkillRegistry } from '../../shared/types'
 import { HomePage } from '../../webview/views/HomePage'
 
 const { axe, toHaveNoViolations } = jestAxe
@@ -21,6 +21,11 @@ const registry: SkillRegistry = {
     },
   ],
 }
+
+const allAgents: AvailableAgent[] = [
+  { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+  { agent: 'claude-code', displayName: 'Claude Code', company: 'Anthropic' },
+]
 
 describe('HomePage', () => {
   it('renders 4 action buttons', () => {
@@ -94,7 +99,17 @@ describe('HomePage', () => {
     render(
       <HomePage
         registry={registry}
-        installedSkills={{ accessibility: { local: true, global: true, agents: [] } }}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: true,
+            agents: [
+              { agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false },
+              { agent: 'claude-code', displayName: 'Claude Code', local: true, global: true, corrupted: false },
+            ],
+          },
+        }}
+        allAgents={allAgents}
         policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
         isTrusted={true}
         hasWorkspace={true}
@@ -110,6 +125,34 @@ describe('HomePage', () => {
     const install = screen.getByRole('button', { name: /install add new capabilities/i })
     expect(install).toBeDisabled()
     expect(install).toHaveAttribute('title', 'All skills are already installed')
+  })
+
+  it('keeps install enabled when skills are not installed for every agent', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: false,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+          },
+        }}
+        allAgents={allAgents}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const install = screen.getByRole('button', { name: /install add new capabilities/i })
+    expect(install).toBeEnabled()
   })
 
   it('disables all action buttons during processing', () => {

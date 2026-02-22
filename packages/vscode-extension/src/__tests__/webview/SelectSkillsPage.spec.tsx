@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
-import type { InstalledSkillsMap, SkillRegistry } from '../../shared/types'
+import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 import { SelectSkillsPage } from '../../webview/views/SelectSkillsPage'
 
 const { axe, toHaveNoViolations } = jestAxe
@@ -39,6 +39,11 @@ const installedSkills: InstalledSkillsMap = {
   accessibility: { local: true, global: false, agents: [] },
   seo: null,
 }
+
+const allAgents: AvailableAgent[] = [
+  { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+  { agent: 'claude-code', displayName: 'Claude Code', company: 'Anthropic' },
+]
 
 describe('SelectSkillsPage', () => {
   it('filters install flow to only uninstalled skills', () => {
@@ -79,6 +84,34 @@ describe('SelectSkillsPage', () => {
 
     expect(screen.getByText('accessibility')).toBeInTheDocument()
     expect(screen.queryByText('seo')).not.toBeInTheDocument()
+  })
+
+  it('keeps install candidates when skill is not installed on every agent', () => {
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: false,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+          },
+          seo: null,
+        }}
+        allAgents={allAgents}
+        scope="local"
+        selectedSkills={[]}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('accessibility')).toBeInTheDocument()
+    expect(screen.getByText('seo')).toBeInTheDocument()
   })
 
   it('filters by search term across skill fields', async () => {

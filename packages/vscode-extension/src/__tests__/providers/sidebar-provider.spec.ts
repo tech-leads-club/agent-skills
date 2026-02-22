@@ -112,6 +112,7 @@ describe('SidebarProvider', () => {
     const mockReconciler = {
       reconcile: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       getAvailableAgents: jest.fn<AsyncMockableFn<AvailableAgent[]>>().mockResolvedValue([]),
+      getAllAgents: jest.fn<SyncMockableFn<AvailableAgent[]>>().mockReturnValue([]),
       getInstalledSkills: jest.fn<AsyncMockableFn<InstalledSkillsMap>>().mockResolvedValue({}),
       onStateChanged: jest
         .fn<SyncMockableFn<vscode.Disposable>>()
@@ -223,6 +224,7 @@ describe('SidebarProvider', () => {
         payload: expect.objectContaining({
           version: '1.2.3',
           availableAgents: expect.arrayContaining([]),
+          allAgents: expect.arrayContaining([]),
           hasWorkspace: expect.any(Boolean),
         }),
       }),

@@ -1,11 +1,18 @@
 import type { ScopePolicyStatePayload } from '../../shared/messages'
-import type { InstalledSkillsMap, LifecycleScope, SkillRegistry, WebviewAction } from '../../shared/types'
+import type {
+  AvailableAgent,
+  InstalledSkillsMap,
+  LifecycleScope,
+  SkillRegistry,
+  WebviewAction,
+} from '../../shared/types'
 import { RestrictedModeBanner } from '../components/RestrictedModeBanner'
 import { ScopeSelector } from '../components/ScopeSelector'
 
 export interface HomePageProps {
   registry: SkillRegistry | null
   installedSkills: InstalledSkillsMap
+  allAgents?: AvailableAgent[]
   policy: ScopePolicyStatePayload | null
   isTrusted: boolean
   hasWorkspace: boolean
@@ -21,6 +28,20 @@ export interface HomePageProps {
 function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
   if (!installed) return false
   return scope === 'local' ? installed.local : installed.global
+}
+
+function isInstalledForAllAgents(
+  installed: InstalledSkillsMap[string],
+  allAgents: AvailableAgent[],
+  scope: LifecycleScope,
+): boolean {
+  if (!installed || allAgents.length === 0) return false
+
+  return allAgents.every((agent) => {
+    const installInfo = installed.agents.find((entry) => entry.agent === agent.agent)
+    if (!installInfo) return false
+    return scope === 'local' ? installInfo.local : installInfo.global
+  })
 }
 
 function hasUpdatesForScope(
@@ -58,6 +79,7 @@ function hasCorruptedInstallationsForScope(installedSkills: InstalledSkillsMap, 
 export function HomePage({
   registry,
   installedSkills,
+  allAgents = [],
   policy,
   isTrusted,
   hasWorkspace,
@@ -73,7 +95,7 @@ export function HomePage({
   const allowedScopes = policy?.allowedScopes ?? 'all'
   const shouldShowScopeSelector = allowedScopes !== 'none'
   const allInstalled =
-    skills.length > 0 && skills.every((skill) => isInstalledForScope(installedSkills[skill.name], scope))
+    skills.length > 0 && skills.every((skill) => isInstalledForAllAgents(installedSkills[skill.name], allAgents, scope))
   const noneInstalled = skills.every((skill) => !isInstalledForScope(installedSkills[skill.name], scope))
   const hasUpdatesAvailable = hasUpdatesForScope(skills, installedSkills, scope)
   const hasRepairableSkills = hasCorruptedInstallationsForScope(installedSkills, scope)

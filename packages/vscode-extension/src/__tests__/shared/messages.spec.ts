@@ -9,7 +9,7 @@ describe('Shared Messages', () => {
   it('should construct ExtensionMessage with initialize', () => {
     const msg: ExtensionMessage = {
       type: 'initialize',
-      payload: { version: '1.0.0', availableAgents: [], hasWorkspace: true },
+      payload: { version: '1.0.0', availableAgents: [], allAgents: [], hasWorkspace: true },
     }
     expect(msg.type).toBe('initialize')
     if (msg.type === 'initialize') {
@@ -31,7 +31,7 @@ describe('Shared Messages', () => {
   it('should use discriminated union in switch statement for ExtensionMessage', () => {
     const msg: ExtensionMessage = {
       type: 'initialize',
-      payload: { version: '1.0.0', availableAgents: [], hasWorkspace: true },
+      payload: { version: '1.0.0', availableAgents: [], allAgents: [], hasWorkspace: true },
     }
     let version = ''
     switch (msg.type) {

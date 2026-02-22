@@ -48,6 +48,7 @@ export type ExtensionMessage =
 export interface InitializePayload {
   version: string
   availableAgents: AvailableAgent[]
+  allAgents: AvailableAgent[]
   hasWorkspace: boolean
 }
 

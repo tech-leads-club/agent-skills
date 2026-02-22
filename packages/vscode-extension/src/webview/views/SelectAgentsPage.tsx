@@ -63,11 +63,19 @@ export function SelectAgentsPage({
     return availableAgents.filter((agent) => {
       if (selectedSkills.length === 0) return false
 
-      const hasRelevantSkill = selectedSkills.some((skillName) =>
+      const hasAnySelectedSkillInstalled = selectedSkills.some((skillName) =>
         isSkillInstalledOnAgent(installedSkills, skillName, agent.agent, scope),
       )
 
-      return action === 'install' ? !hasRelevantSkill : hasRelevantSkill
+      if (action === 'uninstall') {
+        return hasAnySelectedSkillInstalled
+      }
+
+      const hasAllSelectedSkillsInstalled = selectedSkills.every((skillName) =>
+        isSkillInstalledOnAgent(installedSkills, skillName, agent.agent, scope),
+      )
+
+      return !hasAllSelectedSkillsInstalled
     })
   }, [action, availableAgents, installedSkills, scope, selectedSkills])
 
