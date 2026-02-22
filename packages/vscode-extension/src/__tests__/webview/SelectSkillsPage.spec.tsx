@@ -117,6 +117,44 @@ describe('SelectSkillsPage', () => {
     expect(screen.getByRole('button', { name: /select agents/i })).toBeDisabled()
   })
 
+  it('applies install accent class to select agents button', () => {
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{ accessibility: null, seo: null }}
+        scope="local"
+        selectedSkills={['accessibility']}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /select agents/i })).toHaveClass('primary-footer-button--install')
+  })
+
+  it('applies uninstall accent class to select agents button', () => {
+    render(
+      <SelectSkillsPage
+        action="uninstall"
+        registry={registry}
+        installedSkills={installedSkills}
+        scope="local"
+        selectedSkills={['accessibility']}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /select agents/i })).toHaveClass('primary-footer-button--uninstall')
+  })
+
   it('supports Ctrl+A bulk selection shortcut', async () => {
     const onSelectAll = jest.fn()
     const user = userEvent.setup()

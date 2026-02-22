@@ -483,14 +483,34 @@ body {
 }
 
 .primary-footer-button {
+  --primary-footer-button-foreground: var(--vscode-button-foreground);
   width: 100%;
   background-color: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
+  color: var(--primary-footer-button-foreground);
   padding: 9px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+.primary-footer-button--install {
+  --primary-footer-button-foreground: var(
+    --vscode-testing-iconPassed,
+    var(--vscode-charts-green, var(--vscode-terminal-ansiGreen, var(--vscode-button-foreground)))
+  );
+}
+
+.primary-footer-button--uninstall {
+  --primary-footer-button-foreground: var(
+    --vscode-testing-iconFailed,
+    var(--vscode-charts-red, var(--vscode-errorForeground, var(--vscode-button-foreground)))
+  );
+}
+
+.primary-footer-button:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .footer-warning {

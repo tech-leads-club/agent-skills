@@ -42,6 +42,8 @@ export function SelectSkillsPage({
   onNext,
 }: SelectSkillsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const nextStepActionClassName =
+    action === 'uninstall' ? 'primary-footer-button--uninstall' : 'primary-footer-button--install'
 
   const candidateSkills = useMemo(() => {
     return registry.skills.filter((skill) => {
@@ -129,7 +131,11 @@ export function SelectSkillsPage({
       </div>
 
       <footer className="select-page-footer">
-        <button className="primary-footer-button" onClick={onNext} disabled={selectedSkills.length === 0}>
+        <button
+          className={`primary-footer-button ${nextStepActionClassName}`}
+          onClick={onNext}
+          disabled={selectedSkills.length === 0}
+        >
           Select Agents
           <span className="codicon codicon-arrow-right" aria-hidden="true" />
         </button>
