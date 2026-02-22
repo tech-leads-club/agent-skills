@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { AllowedScopesSetting, LifecycleScope } from '../../shared/types'
+import { getState, setState } from '../lib/vscode-api'
 
 const SCOPE_OPTIONS_BY_SETTING: Readonly<Record<AllowedScopesSetting, LifecycleScope[]>> = {
   all: ['local', 'global'],
@@ -11,6 +12,35 @@ const SCOPE_OPTIONS_BY_SETTING: Readonly<Record<AllowedScopesSetting, LifecycleS
 const SCOPE_LABELS: Readonly<Record<LifecycleScope, string>> = {
   local: 'Local',
   global: 'Global',
+}
+
+const SCOPE_SELECTOR_STATE_KEY = 'scopeSelectorState'
+
+interface PersistedWebviewState {
+  [SCOPE_SELECTOR_STATE_KEY]?: {
+    selectedScope: LifecycleScope
+  }
+  [key: string]: unknown
+}
+
+function isLifecycleScope(scope: unknown): scope is LifecycleScope {
+  return scope === 'local' || scope === 'global'
+}
+
+function readPersistedScope(): LifecycleScope | null {
+  const persistedState = getState<PersistedWebviewState>()
+  const persistedScope = persistedState?.[SCOPE_SELECTOR_STATE_KEY]?.selectedScope
+  return isLifecycleScope(persistedScope) ? persistedScope : null
+}
+
+function persistSelectedScope(selectedScope: LifecycleScope): void {
+  const persistedState = getState<PersistedWebviewState>() ?? {}
+  setState<PersistedWebviewState>({
+    ...persistedState,
+    [SCOPE_SELECTOR_STATE_KEY]: {
+      selectedScope,
+    },
+  })
 }
 
 export interface ScopeSelectorProps {
@@ -35,6 +65,7 @@ export function ScopeSelector({
   disabledReason,
 }: ScopeSelectorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const hasAppliedPersistedScopeRef = useRef(false)
   const labelId = useId()
   const menuId = useId()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -74,6 +105,23 @@ export function ScopeSelector({
       setIsMenuOpen(false)
     }
   }, [isDisabled, isMenuOpen])
+
+  useEffect(() => {
+    if (isDisabled || visibleScopes.length === 0) {
+      return
+    }
+
+    if (allowedScopes === 'all' && !hasAppliedPersistedScopeRef.current) {
+      hasAppliedPersistedScopeRef.current = true
+      const persistedScope = readPersistedScope()
+      if (persistedScope && persistedScope !== selectedScope && visibleScopes.includes(persistedScope)) {
+        onChange(persistedScope)
+        return
+      }
+    }
+
+    persistSelectedScope(selectedScope)
+  }, [allowedScopes, isDisabled, onChange, selectedScope, visibleScopes])
 
   if (visibleScopes.length === 0) {
     return null

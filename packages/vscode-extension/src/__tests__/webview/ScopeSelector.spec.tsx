@@ -1,12 +1,24 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
+import { useState } from 'react'
 import { ScopeSelector } from '../../webview/components/ScopeSelector'
+import { getState, setState } from '../../webview/lib/vscode-api'
+
+jest.mock('../../webview/lib/vscode-api', () => ({
+  getState: jest.fn(),
+  setState: jest.fn(),
+}))
 
 const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
 describe('ScopeSelector', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(getState as jest.Mock).mockReturnValue(undefined)
+  })
+
   it('renders local and global options by default', async () => {
     const user = userEvent.setup()
     render(<ScopeSelector value="local" onChange={jest.fn()} />)
@@ -58,6 +70,50 @@ describe('ScopeSelector', () => {
     await user.click(screen.getByRole('button', { name: /installation scope/i }))
     await user.click(screen.getByRole('option', { name: 'Global' }))
     expect(onChange).toHaveBeenCalledWith('global')
+  })
+
+  it('restores persisted scope when user setting allows all scopes', () => {
+    const onChange = jest.fn()
+    ;(getState as jest.Mock).mockReturnValue({
+      scopeSelectorState: { selectedScope: 'global' },
+    })
+
+    render(<ScopeSelector value="local" onChange={onChange} allowedScopes="all" />)
+
+    expect(onChange).toHaveBeenCalledWith('global')
+  })
+
+  it('updates persisted scope when policy restricts available scopes', () => {
+    ;(getState as jest.Mock).mockReturnValue({
+      existingState: 'keep-me',
+      scopeSelectorState: { selectedScope: 'local' },
+    })
+
+    render(<ScopeSelector value="local" onChange={jest.fn()} allowedScopes="global" />)
+
+    expect(setState).toHaveBeenCalledWith({
+      existingState: 'keep-me',
+      scopeSelectorState: { selectedScope: 'global' },
+    })
+  })
+
+  it('keeps user-selected scope in all mode after initial restore', async () => {
+    const user = userEvent.setup()
+    ;(getState as jest.Mock).mockReturnValue({
+      scopeSelectorState: { selectedScope: 'local' },
+    })
+
+    function StatefulWrapper() {
+      const [scope, setScope] = useState<'local' | 'global'>('local')
+      return <ScopeSelector value={scope} onChange={setScope} allowedScopes="all" />
+    }
+
+    render(<StatefulWrapper />)
+
+    await user.click(screen.getByRole('button', { name: /installation scope/i }))
+    await user.click(screen.getByRole('option', { name: 'Global' }))
+
+    expect(screen.getByRole('button', { name: /installation scope/i })).toHaveTextContent('Global')
   })
 
   it('supports disabled mode with tooltip', () => {
