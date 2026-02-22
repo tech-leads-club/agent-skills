@@ -75,9 +75,12 @@ export function HomePage({
     maintenanceDisabledReason = lifecycleBlockedMessage
   }
 
-  const scopeDisabled = !isTrusted || !hasWorkspace
+  const scopeDisabledByPolicy = policy?.allowedScopes === 'none'
+  const scopeDisabled = !isTrusted || !hasWorkspace || scopeDisabledByPolicy
   let scopeDisabledReason: string | undefined
-  if (!isTrusted) {
+  if (scopeDisabledByPolicy) {
+    scopeDisabledReason = lifecycleBlockedMessage
+  } else if (!isTrusted) {
     scopeDisabledReason = 'Local scope is unavailable in Restricted Mode'
   } else if (!hasWorkspace) {
     scopeDisabledReason = 'Local scope requires an open workspace'
@@ -146,6 +149,7 @@ export function HomePage({
       <ScopeSelector
         value={scopeDisabled ? 'global' : scope}
         onChange={onScopeChange}
+        allowedScopes={policy?.allowedScopes ?? 'all'}
         disabled={scopeDisabled}
         disabledReason={scopeDisabledReason}
       />

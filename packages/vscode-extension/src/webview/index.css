@@ -170,17 +170,17 @@ body {
   align-items: center;
 }
 
-.scope-selector-label {
-  color: var(--vscode-descriptionForeground);
-  font-size: 12px;
-}
-
 .scope-selector-input {
-  background-color: var(--vscode-dropdown-background);
+  background-color: transparent;
   color: var(--vscode-dropdown-foreground);
   border: 1px solid var(--vscode-dropdown-border);
   border-radius: 6px;
   padding: 6px 8px;
+}
+
+.scope-selector-input:hover,
+.scope-selector-input:focus-visible {
+  background-color: var(--vscode-dropdown-background);
 }
 
 .select-page {

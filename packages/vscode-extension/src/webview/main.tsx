@@ -1,7 +1,7 @@
 import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { ExtensionMessage, ScopePolicyStatePayload } from '../shared/messages'
-import type { AvailableAgent, SkillRegistry } from '../shared/types'
+import type { AvailableAgent, LifecycleScope, SkillRegistry } from '../shared/types'
 import { useAppState } from './hooks/useAppState'
 import { useInstalledState } from './hooks/useInstalledState'
 import { useOperations } from './hooks/useOperations'
@@ -55,6 +55,18 @@ function NoRegistryState() {
       <p>No skills available in the registry</p>
     </div>
   )
+}
+
+function getFallbackScope(policy: ScopePolicyStatePayload | null, currentScope: LifecycleScope): LifecycleScope | null {
+  if (!policy || policy.effectiveScopes.length === 0) {
+    return null
+  }
+
+  if (policy.effectiveScopes.includes(currentScope)) {
+    return null
+  }
+
+  return policy.effectiveScopes[0]
 }
 
 /**
@@ -153,6 +165,13 @@ function App() {
     postMessage({ type: 'webviewDidMount' })
     return dispose
   }, [])
+
+  useEffect(() => {
+    const fallbackScope = getFallbackScope(policy, activeScope)
+    if (!fallbackScope) return
+
+    setScope(fallbackScope)
+  }, [activeScope, policy, setScope])
 
   const statusContent = useMemo(() => {
     if (status === 'loading') {

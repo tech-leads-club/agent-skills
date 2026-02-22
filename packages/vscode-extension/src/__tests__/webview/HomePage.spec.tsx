@@ -157,6 +157,74 @@ describe('HomePage', () => {
     expect(scope).toHaveValue('global')
   })
 
+  it('shows only global scope when user setting is global', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{}}
+        policy={{ allowedScopes: 'global', effectiveScopes: ['global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const scope = screen.getByRole('combobox', { name: /installation scope/i })
+    expect(scope).toHaveValue('global')
+    expect(screen.queryByRole('option', { name: 'Local' })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Global' })).toBeInTheDocument()
+  })
+
+  it('shows only local scope when user setting is local', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{}}
+        policy={{ allowedScopes: 'local', effectiveScopes: ['local'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="global"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const scope = screen.getByRole('combobox', { name: /installation scope/i })
+    expect(scope).toHaveValue('local')
+    expect(screen.getByRole('option', { name: 'Local' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'Global' })).not.toBeInTheDocument()
+  })
+
+  it('disables scope selector when user setting is none', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{}}
+        policy={{ allowedScopes: 'none', effectiveScopes: [], blockedReason: 'policy-none' }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const scope = screen.getByRole('combobox', { name: /installation scope/i })
+    expect(scope).toBeDisabled()
+    expect(scope).toHaveAttribute('title', 'Lifecycle actions are disabled: policy-none')
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = render(
       <HomePage
