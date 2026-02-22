@@ -510,7 +510,9 @@ describe('SidebarProvider', () => {
       const registry = createRegistry()
       registryService.getRegistry.mockResolvedValue(registry)
       reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      reconciler.getAvailableAgents.mockResolvedValue([
+        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+      ])
 
       let skillItems: SkillQuickPickItem[] | undefined
       showQuickPickMock
@@ -547,7 +549,9 @@ describe('SidebarProvider', () => {
       addSkillWithoutDescription(registry, 'missing-description')
       registryService.getRegistry.mockResolvedValue(registry)
       reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      reconciler.getAvailableAgents.mockResolvedValue([
+        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+      ])
 
       let skillItems: SkillQuickPickItem[] | undefined
       showQuickPickMock.mockImplementationOnce(async (items) => {
@@ -570,7 +574,9 @@ describe('SidebarProvider', () => {
     it('prompts for removal confirmation before enqueuing removals', async () => {
       const registry = createRegistry()
       registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      reconciler.getAvailableAgents.mockResolvedValue([
+        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+      ])
       reconciler.getInstalledSkills.mockResolvedValue({
         seo: {
           local: true,
@@ -707,7 +713,9 @@ describe('SidebarProvider', () => {
       const registry = createRegistry()
       registryService.getRegistry.mockResolvedValue(registry)
       reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
+      reconciler.getAvailableAgents.mockResolvedValue([
+        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+      ])
 
       showQuickPickMock.mockResolvedValueOnce(null)
       const commandPromise = provider.runCommandPaletteAdd()
@@ -766,7 +774,7 @@ describe('SidebarProvider', () => {
     }
     registryService.getRegistry.mockResolvedValue(registry as unknown as SkillRegistry)
     reconciler.getInstalledSkills.mockResolvedValue({})
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'a1', displayName: 'A1' }])
+    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'a1', displayName: 'A1', company: 'Acme' }])
 
     // Mocks
     showQuickPickMock

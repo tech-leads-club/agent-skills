@@ -5,16 +5,6 @@ import { AgentSelectCard } from '../components/AgentSelectCard'
 import { SearchBar } from '../components/SearchBar'
 import { SelectionMenu } from '../components/SelectionMenu'
 
-const AGENT_COMPANY_MAP: Record<string, string> = {
-  cursor: 'Anysphere',
-  'claude-code': 'Anthropic',
-  copilot: 'GitHub',
-  windsurf: 'Codeium',
-  cline: 'Cline',
-  codex: 'OpenAI',
-  opencode: 'OpenCode',
-}
-
 export interface SelectAgentsPageProps {
   action: WebviewAction
   availableAgents: AvailableAgent[]
@@ -85,7 +75,7 @@ export function SelectAgentsPage({
     () =>
       candidateAgents.map((agent) => ({
         ...agent,
-        company: AGENT_COMPANY_MAP[agent.agent] ?? 'Unknown',
+        company: agent.company || 'Unknown',
       })),
     [candidateAgents],
   )

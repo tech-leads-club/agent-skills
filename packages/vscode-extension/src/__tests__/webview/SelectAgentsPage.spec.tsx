@@ -8,8 +8,8 @@ const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
 const availableAgents = [
-  { agent: 'cursor', displayName: 'Cursor' },
-  { agent: 'claude-code', displayName: 'Claude Code' },
+  { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
+  { agent: 'claude-code', displayName: 'Claude Code', company: 'Anthropic' },
 ]
 
 const installedSkills: InstalledSkillsMap = {

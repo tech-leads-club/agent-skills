@@ -72,6 +72,7 @@ export interface AgentInstallInfo {
 export interface AvailableAgent {
   agent: string
   displayName: string
+  company: string
 }
 
 /**

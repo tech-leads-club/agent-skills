@@ -1,3 +1,4 @@
+import { getAgentMetadata } from '@tech-leads-club/core'
 import { access } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -6,12 +7,12 @@ import type { LoggingService } from './logging-service'
 
 /**
  * Agent configuration for skill directory scanning.
- * Mirrors the structure from @tech-leads-club/core but defined inline
- * until the core package exports agent configs.
+ * Sourced from the shared core agent metadata.
  */
 export interface AgentScanConfig {
   name: string
   displayName: string
+  company: string
   skillsDir: string // Relative to workspace root
   globalSkillsDir: string // Absolute path
 }
@@ -19,106 +20,13 @@ export interface AgentScanConfig {
 /**
  * All agent configurations (local + global paths) referenced during scanning.
  */
-export const AGENT_CONFIGS: AgentScanConfig[] = [
-  {
-    name: 'cursor',
-    displayName: 'Cursor',
-    skillsDir: '.cursor/skills',
-    globalSkillsDir: join(homedir(), '.cursor/skills'),
-  },
-  {
-    name: 'claude-code',
-    displayName: 'Claude Code',
-    skillsDir: '.claude/skills',
-    globalSkillsDir: join(homedir(), '.claude/skills'),
-  },
-  {
-    name: 'github-copilot',
-    displayName: 'GitHub Copilot',
-    skillsDir: '.github/skills',
-    globalSkillsDir: join(homedir(), '.copilot/skills'),
-  },
-  {
-    name: 'windsurf',
-    displayName: 'Windsurf',
-    skillsDir: '.windsurf/skills',
-    globalSkillsDir: join(homedir(), '.codeium/windsurf/skills'),
-  },
-  {
-    name: 'cline',
-    displayName: 'Cline',
-    skillsDir: '.cline/skills',
-    globalSkillsDir: join(homedir(), '.cline/skills'),
-  },
-  {
-    name: 'aider',
-    displayName: 'Aider',
-    skillsDir: '.aider/skills',
-    globalSkillsDir: join(homedir(), '.aider/skills'),
-  },
-  {
-    name: 'codex',
-    displayName: 'OpenAI Codex',
-    skillsDir: '.codex/skills',
-    globalSkillsDir: join(homedir(), '.codex/skills'),
-  },
-  {
-    name: 'gemini',
-    displayName: 'Gemini CLI',
-    skillsDir: '.gemini/skills',
-    globalSkillsDir: join(homedir(), '.gemini/skills'),
-  },
-  {
-    name: 'antigravity',
-    displayName: 'Antigravity',
-    skillsDir: '.agent/skills',
-    globalSkillsDir: join(homedir(), '.gemini/antigravity/global_skills'),
-  },
-  { name: 'roo', displayName: 'Roo Code', skillsDir: '.roo/skills', globalSkillsDir: join(homedir(), '.roo/skills') },
-  {
-    name: 'kilocode',
-    displayName: 'Kilo Code',
-    skillsDir: '.kilocode/skills',
-    globalSkillsDir: join(homedir(), '.kilocode/skills'),
-  },
-  { name: 'trae', displayName: 'TRAE', skillsDir: '.trae/skills', globalSkillsDir: join(homedir(), '.trae/skills') },
-  {
-    name: 'amazon-q',
-    displayName: 'Amazon Q',
-    skillsDir: '.amazonq/skills',
-    globalSkillsDir: join(homedir(), '.amazonq/skills'),
-  },
-  {
-    name: 'augment',
-    displayName: 'Augment',
-    skillsDir: '.augment/skills',
-    globalSkillsDir: join(homedir(), '.augment/skills'),
-  },
-  {
-    name: 'tabnine',
-    displayName: 'Tabnine',
-    skillsDir: '.tabnine/skills',
-    globalSkillsDir: join(homedir(), '.tabnine/skills'),
-  },
-  {
-    name: 'opencode',
-    displayName: 'OpenCode',
-    skillsDir: '.opencode/skills',
-    globalSkillsDir: join(homedir(), '.config/opencode/skills'),
-  },
-  {
-    name: 'sourcegraph',
-    displayName: 'Sourcegraph Cody',
-    skillsDir: '.sourcegraph/skills',
-    globalSkillsDir: join(homedir(), '.sourcegraph/skills'),
-  },
-  {
-    name: 'droid',
-    displayName: 'Droid (Factory.ai)',
-    skillsDir: '.factory/skills',
-    globalSkillsDir: join(homedir(), '.factory/skills'),
-  },
-]
+export const AGENT_CONFIGS: AgentScanConfig[] = Object.values(getAgentMetadata(homedir())).map((agent) => ({
+  name: agent.name,
+  displayName: agent.displayName,
+  company: agent.company,
+  skillsDir: agent.skillsDir,
+  globalSkillsDir: agent.globalSkillsDir,
+}))
 
 interface ScopeCheck {
   scope: 'local' | 'global'
@@ -270,7 +178,7 @@ export class InstalledSkillsScanner {
    * Checks if the agent's configuration directory exists locally or globally.
    *
    * @param workspaceRoot - Workspace path used for local agent detection, or `null`.
-   * @returns Detected agents with id and display name.
+   * @returns Detected agents with id, display name, and company.
    */
   async getAvailableAgents(workspaceRoot: string | null): Promise<AvailableAgent[]> {
     const results: AvailableAgent[] = []
@@ -293,6 +201,7 @@ export class InstalledSkillsScanner {
         results.push({
           agent: config.name,
           displayName: config.displayName,
+          company: config.company,
         })
       }
     }

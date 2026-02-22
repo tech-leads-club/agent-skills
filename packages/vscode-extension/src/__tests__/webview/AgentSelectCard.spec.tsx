@@ -6,7 +6,7 @@ import { AgentSelectCard } from '../../webview/components/AgentSelectCard'
 const { axe, toHaveNoViolations } = jestAxe
 expect.extend(toHaveNoViolations)
 
-const agent = { agent: 'cursor', displayName: 'Cursor' }
+const agent = { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' }
 
 describe('AgentSelectCard', () => {
   it('renders name and company only', () => {
