@@ -338,263 +338,105 @@ describe('SidebarProvider', () => {
     })
   })
 
-  // TESTS FOR QUICK PICK FLOW
+  // TESTS FOR WEBVIEW MESSAGE FLOW
 
-  it('should show quick pick with available agents (no "All" option)', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([
-      { agent: 'cursor', displayName: 'Cursor' },
-      { agent: 'claude-code', displayName: 'Claude Code' },
-    ])
-    showQuickPickMock.mockResolvedValue(null) // User cancels
-
+  it('should treat legacy requestAgentPick messages as unknown', async () => {
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
+    const message = {
       type: 'requestAgentPick',
       payload: { skillName: 'test-skill', action: 'add' },
-    }
+    } as unknown as WebviewMessage
 
     await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const quickPickCall = showQuickPickMock.mock.calls[0]
-    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
-
-    // Should NOT contain "All" option
-    expect(items.find((i) => i.agentId === '__all__')).toBeUndefined()
-    // Should contain both agents
-    expect(items).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ label: 'Cursor', agentId: 'cursor' }),
-        expect.objectContaining({ label: 'Claude Code', agentId: 'claude-code' }),
-      ]),
-    )
-    expect(quickPickCall[1]).toEqual(
-      expect.objectContaining({
-        canPickMany: true,
-        title: expect.stringContaining('test-skill'),
-      }),
-    )
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 
-  it('should send null agents when agent pick is cancelled', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
-    showQuickPickMock.mockResolvedValue(null)
-
+  it('should treat legacy requestScopePick messages as unknown', async () => {
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
-    }
+    const message = {
+      type: 'requestScopePick',
+      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor'] },
+    } as unknown as WebviewMessage
 
     await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'agentPickResult',
-      payload: { skillName: 'test-skill', action: 'add', agents: null },
-    })
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 
-  it('should exclude fully saturated agents from ADD pick', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([
-      { agent: 'cursor', displayName: 'Cursor' },
-      { agent: 'claude-code', displayName: 'Claude Code' },
-    ])
-    // cursor is fully installed (local + global), claude-code is not
-    reconciler.getInstalledSkills.mockResolvedValue({
-      'test-skill': {
-        local: true,
-        global: true,
-        agents: [
-          { agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false },
-          {
-            agent: 'claude-code',
-            displayName: 'Claude Code',
-            local: false,
-            global: false,
-            corrupted: false,
-          },
-        ],
-      },
-    })
-    showQuickPickMock.mockResolvedValue(null) // User cancels
-
+  it('should handle executeBatch install message', async () => {
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
+      type: 'executeBatch',
+      payload: { action: 'install', skills: ['test-skill'], agents: ['cursor'], scope: 'local' },
     }
 
     await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const quickPickCall = showQuickPickMock.mock.calls[0]
-    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
-
-    // cursor should be excluded (fully saturated)
-    expect(items.find((i) => i.agentId === 'cursor')).toBeUndefined()
-    // claude-code should be included
-    expect(items).toEqual(
-      expect.arrayContaining([expect.objectContaining({ label: 'Claude Code', agentId: 'claude-code' })]),
-    )
-  })
-
-  it('should only show installed agents in REMOVE pick', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([
-      { agent: 'cursor', displayName: 'Cursor' },
-      { agent: 'claude-code', displayName: 'Claude Code' },
-      { agent: 'opencode', displayName: 'OpenCode' },
-    ])
-    // Only opencode has the skill installed
-    reconciler.getInstalledSkills.mockResolvedValue({
-      'test-skill': {
-        local: true,
-        global: false,
-        agents: [
-          {
-            agent: 'opencode',
-            displayName: 'OpenCode',
-            local: true,
-            global: false,
-            corrupted: false,
-          },
-        ],
-      },
-    })
-    showQuickPickMock.mockResolvedValue(null) // User cancels
-
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'remove' },
-    }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
-
-    const quickPickCall = showQuickPickMock.mock.calls[0]
-    const items = quickPickCall[0] as Array<{ label: string; agentId: string }>
-
-    // Only opencode should be in the list
-    expect(items).toHaveLength(1)
-    expect(items[0]).toEqual(expect.objectContaining({ label: 'OpenCode', agentId: 'opencode' }))
-  })
-
-  it('should only show "Locally" scope when skill is only installed locally for REMOVE', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'opencode', displayName: 'OpenCode' }])
-    reconciler.getInstalledSkills.mockResolvedValue({
-      'test-skill': {
-        local: true,
-        global: false,
-        agents: [
-          {
-            agent: 'opencode',
-            displayName: 'OpenCode',
-            local: true,
-            global: false,
-            corrupted: false,
-          },
-        ],
-      },
-    })
-    // User selects opencode for removal
-    showQuickPickMock.mockResolvedValueOnce([{ label: 'OpenCode', agentId: 'opencode' }]) // agent pick
-    showWarningMessageMock.mockResolvedValue('Remove')
-
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'remove' },
-    }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    // Scope pick should NOT have been shown (auto-selected since only 1 option)
-    // showQuickPick called once for agent pick only
-    expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(1)
-
-    // Should still call remove with local scope
-    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'local', ['opencode'])
-  })
-
-  it('should chain to scope pick after agent selection', async () => {
-    showWarningMessageMock.mockResolvedValue('Install')
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
-    reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
-    showQuickPickMock
-      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
-      .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
-
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
-    }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    // Should have called showQuickPick twice (agent + scope)
-    expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(2)
-
-    // Should install the skill
     expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'])
   })
 
-  it('should handle "all" scope by installing both local and global', async () => {
-    showWarningMessageMock.mockResolvedValue('Install')
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
-    reconciler.getInstalledSkills.mockResolvedValue({}) // not installed
-    showQuickPickMock
-      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
-      .mockResolvedValueOnce({ label: 'All', scopeId: 'all' }) // scope pick
-
+  it('should handle executeBatch remove message', async () => {
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
+      type: 'executeBatch',
+      payload: { action: 'remove', skills: ['test-skill'], agents: ['cursor'], scope: 'global' },
     }
 
     await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
+    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'global', ['cursor'])
   })
 
-  it('should confirm removal before executing remove action', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
-    reconciler.getInstalledSkills.mockResolvedValue({
-      'test-skill': {
-        local: true,
-        global: true,
-        agents: [
-          {
-            agent: 'cursor',
-            displayName: 'Cursor',
-            local: true,
-            global: true,
-            corrupted: false,
-          },
-        ],
+  it('should post batchCompleted when final batched operation finishes', async () => {
+    provider.resolveWebviewView(webviewView)
+
+    const eventHandler = (orchestrator.onOperationEvent as jest.Mock).mock.calls[0][0] as (
+      event: Parameters<NonNullable<InstallationOrchestrator['onOperationEvent']>>[0] extends (e: infer E) => void
+        ? E
+        : never,
+    ) => void
+
+    eventHandler({
+      type: 'started',
+      operationId: 'op-1',
+      operation: 'install',
+      skillName: 'test-skill',
+      metadata: {
+        batchId: 'batch-1',
+        batchSize: 1,
+        skillNames: ['test-skill'],
+        scope: 'local',
+        agents: ['cursor'],
       },
     })
-    showQuickPickMock
-      .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }]) // agent pick
-      .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' }) // scope pick
-    showWarningMessageMock.mockResolvedValue('Remove')
 
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'remove' },
-    }
+    eventHandler({
+      type: 'completed',
+      operationId: 'op-1',
+      operation: 'install',
+      skillName: 'test-skill',
+      success: true,
+      metadata: {
+        batchId: 'batch-1',
+        batchSize: 1,
+        skillNames: ['test-skill'],
+        scope: 'local',
+        agents: ['cursor'],
+      },
+    })
 
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(vscode.window.showWarningMessage).toHaveBeenCalled()
-    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'])
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'batchCompleted',
+      payload: {
+        batchId: 'batch-1',
+        success: true,
+        failedSkills: undefined,
+        errorMessage: undefined,
+      },
+    })
   })
 
   it('should handle installSkill message with multiple agents', async () => {
@@ -621,38 +463,6 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
 
     expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
-  })
-
-  it('should show info message when all agents are saturated for ADD', async () => {
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'cursor', displayName: 'Cursor' }])
-    reconciler.getInstalledSkills.mockResolvedValue({
-      'test-skill': {
-        local: true,
-        global: true,
-        agents: [
-          {
-            agent: 'cursor',
-            displayName: 'Cursor',
-            local: true,
-            global: true,
-            corrupted: false,
-          },
-        ],
-      },
-    })
-
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
-    }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
-
-    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('already installed'))
-    // Should NOT show the quick pick
-    expect(vscode.window.showQuickPick).not.toHaveBeenCalled()
   })
 
   describe('Command palette flows', () => {

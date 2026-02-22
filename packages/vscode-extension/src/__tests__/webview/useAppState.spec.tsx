@@ -1,5 +1,11 @@
 import { act, renderHook } from '@testing-library/react'
-import { useAppState } from '../../webview/hooks/useAppState'
+
+let useAppState: typeof import('../../webview/hooks/useAppState').useAppState
+
+beforeAll(async () => {
+  const hookModule = await import('../../webview/hooks/useAppState')
+  useAppState = hookModule.useAppState
+})
 
 describe('useAppState', () => {
   it('returns initial navigation and selection state', () => {

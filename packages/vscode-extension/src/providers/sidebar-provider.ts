@@ -41,6 +41,13 @@ interface ConfirmationSummary {
   confirmLabel: 'Install' | 'Remove' | 'Update' | 'Repair'
 }
 
+interface BatchProgressState {
+  action: 'install' | 'remove'
+  remaining: number
+  total: number
+  failedSkills: string[]
+}
+
 /**
  * Manages the sidebar Webview life cycle, message routing, and registry synchronization.
  */
@@ -49,6 +56,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private webviewView?: vscode.WebviewView
   private policy?: ScopePolicyEvaluation
+  private readonly batchProgress = new Map<string, BatchProgressState>()
 
   /**
    * Creates a sidebar provider and wires orchestrator/reconciler event forwarding to the webview.
@@ -79,6 +87,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     // Subscribe to orchestrator events
     this.orchestrator.onOperationEvent((event) => {
       if (event.type === 'started') {
+        if (event.metadata && !this.batchProgress.has(event.metadata.batchId)) {
+          this.batchProgress.set(event.metadata.batchId, {
+            action: event.operation === 'remove' ? 'remove' : 'install',
+            remaining: event.metadata.batchSize,
+            total: event.metadata.batchSize,
+            failedSkills: [],
+          })
+        }
+
         this.postMessage({
           type: 'operationStarted',
           payload: {
@@ -110,6 +127,46 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             metadata: event.metadata,
           },
         })
+
+        const batchId = event.metadata?.batchId
+        if (batchId) {
+          const state = this.batchProgress.get(batchId)
+          if (state) {
+            state.remaining -= 1
+            if (!event.success) {
+              state.failedSkills.push(event.skillName)
+            }
+
+            if (state.remaining <= 0) {
+              const success = state.failedSkills.length === 0
+              const verb = state.action === 'install' ? 'installed' : 'removed'
+              const errorMessage = success
+                ? undefined
+                : `Failed to ${state.action} skills: ${state.failedSkills.join(', ')}`
+
+              void this.postMessage({
+                type: 'batchCompleted',
+                payload: {
+                  batchId,
+                  success,
+                  failedSkills: state.failedSkills.length > 0 ? state.failedSkills : undefined,
+                  errorMessage,
+                },
+              })
+
+              if (success) {
+                void vscode.window.showInformationMessage(
+                  `Successfully ${verb} ${state.total} skill${state.total === 1 ? '' : 's'}.`,
+                )
+              } else {
+                void vscode.window.showErrorMessage(errorMessage ?? 'Batch operation failed.')
+              }
+
+              this.batchProgress.delete(batchId)
+            }
+          }
+        }
+
         // Reconcile installed state after operation completes to refresh UI
         void this.reconciler.reconcile()
       }
@@ -208,16 +265,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return (message, webview) => this.handleWebviewDidMount(message, webview)
       case 'requestRefresh':
         return (_, webview) => this.handleRefreshRequest(webview)
-      case 'requestAgentPick':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'requestAgentPick' }>
-          return this.handleAgentPick(typed.payload.skillName, typed.payload.action)
-        }
-      case 'requestScopePick':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'requestScopePick' }>
-          return this.handleScopePick(typed.payload.skillName, typed.payload.action, typed.payload.agents)
-        }
       case 'installSkill':
         return (message) => {
           const typed = message as Extract<WebviewMessage, { type: 'installSkill' }>
@@ -227,6 +274,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return (message) => {
           const typed = message as Extract<WebviewMessage, { type: 'removeSkill' }>
           return this.handleRemoveSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
+        }
+      case 'executeBatch':
+        return (message) => {
+          const typed = message as Extract<WebviewMessage, { type: 'executeBatch' }>
+          return this.handleExecuteBatch(
+            typed.payload.action,
+            typed.payload.skills,
+            typed.payload.agents,
+            typed.payload.scope,
+          )
         }
       case 'updateSkill':
         return (message) => {
@@ -356,6 +413,39 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const confirmed = await this.confirmLifecycleAction(selection, agentNames)
     if (!confirmed) return
     await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scope, agents))
+  }
+
+  /**
+   * Enqueues a batch install/remove action initiated by webview page flow.
+   *
+   * @param action - Batch action to execute.
+   * @param skills - Selected skill identifiers.
+   * @param agents - Selected agent identifiers.
+   * @param scope - Selected execution scope.
+   * @returns A promise that resolves when enqueueing completes.
+   */
+  private async handleExecuteBatch(
+    action: 'install' | 'remove' | 'update' | 'repair',
+    skills: string[],
+    agents: string[],
+    scope: 'local' | 'global',
+  ): Promise<void> {
+    if (skills.length === 0 || agents.length === 0) {
+      vscode.window.showErrorMessage('Select at least one skill and one agent before proceeding.')
+      return
+    }
+
+    if (action === 'install') {
+      await this.runQueueAction('install', () => this.orchestrator.installMany(skills, scope, agents))
+      return
+    }
+
+    if (action === 'remove') {
+      await this.runQueueAction('remove', () => this.orchestrator.removeMany(skills, scope, agents))
+      return
+    }
+
+    this.logger.warn(`Unsupported executeBatch action: ${action}`)
   }
 
   /**

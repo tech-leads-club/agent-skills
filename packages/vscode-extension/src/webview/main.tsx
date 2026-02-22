@@ -253,6 +253,13 @@ function App() {
 
   return (
     <div className="app">
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {currentView === 'home'
+          ? 'Home page'
+          : currentView === 'selectSkills'
+            ? `${currentAction === 'install' ? 'Install' : 'Uninstall'} select skills page`
+            : `${currentAction === 'install' ? 'Install' : 'Uninstall'} select agents page`}
+      </div>
       <header className="app-header">{offlineBanner}</header>
       {renderCurrentView()}
       {isLifecycleBlocked && (
