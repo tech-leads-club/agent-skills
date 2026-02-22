@@ -143,6 +143,11 @@ body {
   background-color: var(--vscode-list-hoverBackground);
 }
 
+.home-action-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .home-action-button--install {
   --home-action-accent-color: var(
     --vscode-testing-iconPassed,

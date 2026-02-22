@@ -23,6 +23,30 @@ function isInstalledForScope(installed: InstalledSkillsMap[string], scope: Lifec
   return scope === 'local' ? installed.local : installed.global
 }
 
+function hasUpdatesForScope(
+  skills: SkillRegistry['skills'],
+  installedSkills: InstalledSkillsMap,
+  scope: LifecycleScope,
+): boolean {
+  return skills.some((skill) => {
+    const installed = installedSkills[skill.name]
+    if (!installed || !isInstalledForScope(installed, scope)) return false
+
+    return installed.contentHash !== skill.contentHash
+  })
+}
+
+function hasCorruptedInstallationsForScope(installedSkills: InstalledSkillsMap, scope: LifecycleScope): boolean {
+  return Object.values(installedSkills).some((installed) => {
+    if (!installed || !isInstalledForScope(installed, scope)) return false
+
+    return installed.agents.some((agent) => {
+      const installedInScope = scope === 'local' ? agent.local : agent.global
+      return installedInScope && agent.corrupted
+    })
+  })
+}
+
 /**
  * Home page action hub for install/uninstall/update/repair flows.
  *
@@ -49,6 +73,8 @@ export function HomePage({
   const allInstalled =
     skills.length > 0 && skills.every((skill) => isInstalledForScope(installedSkills[skill.name], scope))
   const noneInstalled = skills.every((skill) => !isInstalledForScope(installedSkills[skill.name], scope))
+  const hasUpdatesAvailable = hasUpdatesForScope(skills, installedSkills, scope)
+  const hasRepairableSkills = hasCorruptedInstallationsForScope(installedSkills, scope)
   const lifecycleBlocked = (policy?.effectiveScopes.length ?? 0) === 0
   const lifecycleBlockedMessage = `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
 
@@ -76,6 +102,10 @@ export function HomePage({
   } else if (lifecycleBlocked) {
     maintenanceDisabledReason = lifecycleBlockedMessage
   }
+
+  const updateDisabledReason = maintenanceDisabledReason ?? (hasUpdatesAvailable ? null : 'No updates are available')
+  const repairDisabledReason =
+    maintenanceDisabledReason ?? (hasRepairableSkills ? null : 'No corrupted skills are available to repair')
 
   const scopeDisabled = !isTrusted || !hasWorkspace
   let scopeDisabledReason: string | undefined
@@ -121,8 +151,8 @@ export function HomePage({
         <button
           className="home-action-button home-action-button--update"
           onClick={onUpdate}
-          disabled={maintenanceDisabledReason !== null}
-          title={maintenanceDisabledReason ?? undefined}
+          disabled={updateDisabledReason !== null}
+          title={updateDisabledReason ?? undefined}
         >
           <span className="home-action-icon codicon codicon-refresh" aria-hidden="true" />
           <span className="home-action-copy">
@@ -134,8 +164,8 @@ export function HomePage({
         <button
           className="home-action-button home-action-button--repair"
           onClick={onRepair}
-          disabled={maintenanceDisabledReason !== null}
-          title={maintenanceDisabledReason ?? undefined}
+          disabled={repairDisabledReason !== null}
+          title={repairDisabledReason ?? undefined}
         >
           <span className="home-action-icon codicon codicon-wrench" aria-hidden="true" />
           <span className="home-action-copy">

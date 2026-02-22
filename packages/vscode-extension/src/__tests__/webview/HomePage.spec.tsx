@@ -135,6 +135,116 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: /^repair/i })).toBeDisabled()
   })
 
+  it('disables update when no updates are available', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: true,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false }],
+            contentHash: 'abc',
+          },
+        }}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const update = screen.getByRole('button', { name: /^update/i })
+    expect(update).toBeDisabled()
+    expect(update).toHaveAttribute('title', 'No updates are available')
+  })
+
+  it('enables update when an installed skill hash differs', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: false,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+            contentHash: 'outdated-hash',
+          },
+        }}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /^update/i })).toBeEnabled()
+  })
+
+  it('disables repair when no corrupted installation exists', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: false,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+          },
+        }}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    const repair = screen.getByRole('button', { name: /^repair/i })
+    expect(repair).toBeDisabled()
+    expect(repair).toHaveAttribute('title', 'No corrupted skills are available to repair')
+  })
+
+  it('enables repair when the selected scope has corruption', () => {
+    render(
+      <HomePage
+        registry={registry}
+        installedSkills={{
+          accessibility: {
+            local: true,
+            global: false,
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: true }],
+          },
+        }}
+        policy={{ allowedScopes: 'all', effectiveScopes: ['local', 'global'] }}
+        isTrusted={true}
+        hasWorkspace={true}
+        scope="local"
+        isProcessing={false}
+        onNavigate={jest.fn()}
+        onScopeChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onRepair={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /^repair/i })).toBeEnabled()
+  })
+
   it('locks scope selector to global when workspace is untrusted', () => {
     render(
       <HomePage
