@@ -641,6 +641,15 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.primary-footer-button:hover:not(:disabled),
+.primary-footer-button:focus-visible {
+  border-color: var(--vscode-focusBorder);
+  background-color: var(--vscode-button-hoverBackground, var(--vscode-list-hoverBackground));
 }
 
 .primary-footer-button--install {
