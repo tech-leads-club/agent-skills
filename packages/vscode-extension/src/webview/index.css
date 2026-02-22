@@ -402,6 +402,8 @@ body {
   padding: 10px 12px 80px;
   display: grid;
   gap: 10px;
+  grid-auto-rows: max-content;
+  align-content: start;
 }
 
 .skill-select-card,
