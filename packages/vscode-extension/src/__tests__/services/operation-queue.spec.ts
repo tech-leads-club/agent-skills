@@ -22,14 +22,21 @@ jest.unstable_mockModule('../../services/cli-spawner', () => ({
 
 jest.unstable_mockModule('../../services/error-classifier', () => ({
   classifyError: jest.fn((stderr: string, code: number | null, signal: NodeJS.Signals | null) => ({
-    category:
-      signal === 'SIGTERM'
-        ? 'cancelled'
-        : code === 0
-          ? undefined
-          : stderr.includes('EPERM')
-            ? 'file-locked'
-            : 'cli-error',
+    category: (() => {
+      if (signal === 'SIGTERM') {
+        return 'cancelled'
+      }
+
+      if (code === 0) {
+        return undefined
+      }
+
+      if (stderr.includes('EPERM')) {
+        return 'file-locked'
+      }
+
+      return 'cli-error'
+    })(),
     retryable: stderr.includes('EPERM'),
     message: stderr || 'Error',
   })),

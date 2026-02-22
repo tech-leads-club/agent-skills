@@ -29,6 +29,12 @@ export function SearchBar({
     onChange('')
   }
 
+  let resultAnnouncement = ''
+  if (value) {
+    const pluralSuffix = resultCount === 1 ? '' : 's'
+    resultAnnouncement = `${resultCount} ${resultLabel}${pluralSuffix} found`
+  }
+
   return (
     <div className="search-bar">
       <div className="search-input-wrapper">
@@ -48,7 +54,7 @@ export function SearchBar({
       </div>
       {/* Screen reader announcement for result count */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {value ? `${resultCount} ${resultLabel}${resultCount === 1 ? '' : 's'} found` : ''}
+        {resultAnnouncement}
       </div>
     </div>
   )

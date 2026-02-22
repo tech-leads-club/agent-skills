@@ -48,36 +48,40 @@ export function HomePage({
     skills.length > 0 && skills.every((skill) => isInstalledForScope(installedSkills[skill.name], scope))
   const noneInstalled = skills.every((skill) => !isInstalledForScope(installedSkills[skill.name], scope))
   const lifecycleBlocked = (policy?.effectiveScopes.length ?? 0) === 0
+  const lifecycleBlockedMessage = `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
 
-  const installDisabledReason = isProcessing
-    ? 'Operation in progress'
-    : lifecycleBlocked
-      ? `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
-      : allInstalled
-        ? 'All skills are already installed'
-        : null
+  let installDisabledReason: string | null = null
+  if (isProcessing) {
+    installDisabledReason = 'Operation in progress'
+  } else if (lifecycleBlocked) {
+    installDisabledReason = lifecycleBlockedMessage
+  } else if (allInstalled) {
+    installDisabledReason = 'All skills are already installed'
+  }
 
-  const uninstallDisabledReason = isProcessing
-    ? 'Operation in progress'
-    : lifecycleBlocked
-      ? `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
-      : noneInstalled
-        ? 'No skills are installed'
-        : null
+  let uninstallDisabledReason: string | null = null
+  if (isProcessing) {
+    uninstallDisabledReason = 'Operation in progress'
+  } else if (lifecycleBlocked) {
+    uninstallDisabledReason = lifecycleBlockedMessage
+  } else if (noneInstalled) {
+    uninstallDisabledReason = 'No skills are installed'
+  }
 
-  const maintenanceDisabledReason =
-    isProcessing || lifecycleBlocked
-      ? isProcessing
-        ? 'Operation in progress'
-        : `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
-      : null
+  let maintenanceDisabledReason: string | null = null
+  if (isProcessing) {
+    maintenanceDisabledReason = 'Operation in progress'
+  } else if (lifecycleBlocked) {
+    maintenanceDisabledReason = lifecycleBlockedMessage
+  }
 
   const scopeDisabled = !isTrusted || !hasWorkspace
-  const scopeDisabledReason = !isTrusted
-    ? 'Local scope is unavailable in Restricted Mode'
-    : !hasWorkspace
-      ? 'Local scope requires an open workspace'
-      : undefined
+  let scopeDisabledReason: string | undefined
+  if (!isTrusted) {
+    scopeDisabledReason = 'Local scope is unavailable in Restricted Mode'
+  } else if (!hasWorkspace) {
+    scopeDisabledReason = 'Local scope requires an open workspace'
+  }
 
   return (
     <section className="home-page" aria-label="Home page">

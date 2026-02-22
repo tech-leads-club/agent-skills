@@ -775,11 +775,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     const unionAgents = Array.from(new Set([...localAgents, ...globalAgents]))
     const unionSkills = Array.from(new Set([...localSkills, ...globalSkills]))
+    const selectionScope = this.resolveSelectionScope(hasLocalTargets, hasGlobalTargets)
     const selection: LifecycleBatchSelection = {
       action: 'repair',
       skills: unionSkills,
       agents: unionAgents,
-      scope: hasLocalTargets && hasGlobalTargets ? 'all' : hasGlobalTargets ? 'global' : 'local',
+      scope: selectionScope,
       source: 'command-palette',
     }
     const agentNames = this.getAgentDisplayNames(unionAgents, await this.reconciler.getAvailableAgents())
@@ -912,9 +913,46 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       this.logger.error(`Failed to enqueue ${action}: ${msg}`)
-      const userFacing = action === 'install' ? 'installation' : action === 'remove' ? 'removal' : action
+      const userFacing = this.getQueueActionNoun(action)
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
     }
+  }
+
+  /**
+   * Maps queue action ids to user-facing nouns.
+   *
+   * @param action - Queue action identifier.
+   * @returns User-facing action noun used in error messages.
+   */
+  private getQueueActionNoun(action: 'install' | 'remove' | 'update' | 'repair'): string {
+    if (action === 'install') {
+      return 'installation'
+    }
+
+    if (action === 'remove') {
+      return 'removal'
+    }
+
+    return action
+  }
+
+  /**
+   * Resolves batch selection scope from local/global target availability.
+   *
+   * @param hasLocalTargets - Whether local targets are available.
+   * @param hasGlobalTargets - Whether global targets are available.
+   * @returns Scope hint for the repair batch selection.
+   */
+  private resolveSelectionScope(hasLocalTargets: boolean, hasGlobalTargets: boolean): 'all' | 'global' | 'local' {
+    if (hasLocalTargets && hasGlobalTargets) {
+      return 'all'
+    }
+
+    if (hasGlobalTargets) {
+      return 'global'
+    }
+
+    return 'local'
   }
 
   /**
