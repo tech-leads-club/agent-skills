@@ -83,10 +83,12 @@ export function SelectAgentsPage({
 
   const searchableAgents = useMemo(
     () =>
-      candidateAgents.map((agent) => ({
-        ...agent,
-        company: agent.company || 'Unknown',
-      })),
+      candidateAgents
+        .map((agent) => ({
+          ...agent,
+          company: agent.company || 'Unknown',
+        }))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
     [candidateAgents],
   )
 
