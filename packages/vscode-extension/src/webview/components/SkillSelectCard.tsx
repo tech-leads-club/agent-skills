@@ -22,22 +22,28 @@ export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: S
     <label className={`skill-select-card ${isSelected ? 'skill-select-card--selected' : ''}`} htmlFor={inputId}>
       <div className="skill-select-card-header">
         <p>{skill.name}</p>
-        <span className="skill-select-card-category">{categoryName}</span>
+        <div className="skill-select-card-header-end">
+          <span className="skill-select-card-category" data-category={skill.category}>
+            {categoryName}
+          </span>
+          <input
+            id={inputId}
+            className="skill-select-card-checkbox"
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggle}
+            aria-label={selectLabel}
+            aria-describedby={descriptionId}
+          />
+        </div>
       </div>
       <p id={descriptionId} className="skill-select-card-description" title={skill.description}>
         {skill.description}
       </p>
       <div className="skill-select-card-meta">
-        <span>{skill.author ?? 'Unknown author'}</span>
-        <span>{skill.version ? `v${skill.version}` : 'no version'}</span>
-        <input
-          id={inputId}
-          type="checkbox"
-          checked={isSelected}
-          onChange={onToggle}
-          aria-label={selectLabel}
-          aria-describedby={descriptionId}
-        />
+        <span className="skill-select-card-meta-author">{skill.author ?? 'Unknown author'}</span>
+        <span className="skill-select-card-meta-divider" aria-hidden="true" />
+        <span className="skill-select-card-meta-version">{skill.version ? `v${skill.version}` : 'no version'}</span>
       </div>
     </label>
   )

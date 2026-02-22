@@ -437,12 +437,63 @@ body {
 }
 
 .skill-select-card-header,
-.skill-select-card-meta,
 .agent-select-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.skill-select-card-header {
+  align-items: flex-start;
+}
+
+.skill-select-card-header-end {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.skill-select-card-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  border: 1px solid var(--vscode-checkbox-border, var(--vscode-panel-border));
+  border-radius: 6px;
+  background-color: var(--vscode-checkbox-background, transparent);
+  transition:
+    border-color 120ms ease-out,
+    background-color 120ms ease-out;
+}
+
+.skill-select-card-checkbox::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease-out;
+  box-shadow: inset 1em 1em var(--vscode-checkbox-foreground, var(--vscode-button-foreground));
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.skill-select-card-checkbox:checked {
+  border-color: var(--vscode-checkbox-selectBorder, var(--vscode-focusBorder));
+  background-color: var(--vscode-checkbox-selectBackground, var(--vscode-focusBorder));
+}
+
+.skill-select-card-checkbox:checked::before {
+  transform: scale(1);
+}
+
+.skill-select-card-checkbox:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
 }
 
 .skill-select-card-header p,
@@ -451,12 +502,64 @@ body {
   font-size: 14px;
 }
 
+.skill-select-card-header p {
+  min-width: 0;
+}
+
 .skill-select-card-category {
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 999px;
   background-color: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
+  color: var(--skill-category-color, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='architecture'] {
+  --skill-category-color: var(--vscode-terminal-ansiMagenta, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='cloud'] {
+  --skill-category-color: var(--vscode-terminal-ansiBlue, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='creation'] {
+  --skill-category-color: var(--vscode-terminal-ansiCyan, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='design'] {
+  --skill-category-color: var(--vscode-terminal-ansiBrightMagenta, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='development'] {
+  --skill-category-color: var(--vscode-terminal-ansiBrightBlue, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='monitoring'] {
+  --skill-category-color: var(--vscode-terminal-ansiBrightCyan, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='performance'] {
+  --skill-category-color: var(--vscode-terminal-ansiYellow, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='quality'] {
+  --skill-category-color: var(--vscode-terminal-ansiGreen, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='security'] {
+  --skill-category-color: var(--vscode-terminal-ansiRed, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='tooling'] {
+  --skill-category-color: var(--vscode-terminal-ansiBrightYellow, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='web-automation'] {
+  --skill-category-color: var(--vscode-terminal-ansiBrightGreen, var(--vscode-textLink-foreground));
+}
+
+.skill-select-card-category[data-category='uncategorized'] {
+  --skill-category-color: var(--vscode-terminal-ansiWhite, var(--vscode-textLink-foreground));
 }
 
 .skill-select-card-description,
@@ -487,8 +590,33 @@ body {
 }
 
 .skill-select-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  border-top: 1px solid var(--vscode-panel-border);
+  padding-top: 6px;
   font-size: 11px;
   color: var(--vscode-descriptionForeground);
+}
+
+.skill-select-card-meta-author {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-select-card-meta-divider {
+  width: 1px;
+  height: 11px;
+  background-color: var(--vscode-panel-border);
+  flex-shrink: 0;
+}
+
+.skill-select-card-meta-version {
+  white-space: nowrap;
 }
 
 .select-page-footer {
