@@ -1,7 +1,6 @@
 ---
 name: run-nx-generator
 description: Run Nx generators with prioritization for workspace-plugin generators. Use this when generating code, scaffolding new features, or automating repetitive tasks in the monorepo.
-allowed-tools: Bash, Read, Glob, Grep, mcp__nx-mcp__nx_generators, mcp__nx-mcp__nx_generator_schema
 ---
 
 # Run Nx Generator
