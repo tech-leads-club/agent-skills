@@ -52,3 +52,9 @@ export interface SkillInfo {
   path: string
   category?: string
 }
+
+export interface DeprecatedEntry {
+  name: string
+  message: string
+  alternatives?: string[]
+}
