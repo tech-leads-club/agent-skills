@@ -3,6 +3,8 @@ import type { LifecycleScope, ViewRoute, WebviewAction } from '../../shared/type
 
 /**
  * Target collection for bulk selection toggles.
+ *
+ * @internal
  */
 type SelectionTarget = 'skills' | 'agents'
 
@@ -10,6 +12,11 @@ type SelectionTarget = 'skills' | 'agents'
  * Holds navigation state and user selections for the webview flow.
  *
  * @returns Current route/action/scope state and navigation/selection helpers.
+ *
+ * @example
+ * ```tsx
+ * const { currentView, goToSkills } = useAppState();
+ * ```
  */
 export function useAppState() {
   const [currentView, setCurrentView] = useState<ViewRoute>('home')

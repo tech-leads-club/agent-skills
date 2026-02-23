@@ -33,6 +33,11 @@ export class LoggingService implements vscode.Disposable {
    *
    * @param message - Log message.
    * @returns Nothing.
+   *
+   * @example
+   * ```typescript
+   * logger.info('Starting registry sync');
+   * ```
    */
   info(message: string): void {
     this.outputChannel.info(message)
@@ -54,6 +59,15 @@ export class LoggingService implements vscode.Disposable {
    * @param message - Log message.
    * @param error - Optional unknown error value containing stack details.
    * @returns Nothing.
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   await doSomething();
+   * } catch (error) {
+   *   logger.error('Failed to do something', error);
+   * }
+   * ```
    */
   error(message: string, error?: unknown): void {
     this.outputChannel.error(message)

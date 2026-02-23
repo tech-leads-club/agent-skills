@@ -13,11 +13,17 @@ import type { OperationType } from '../../shared/types'
  * Tracks the state of a running lifecycle operation.
  */
 export interface OperationState {
+  /** The unique identifier of the operation. */
   operationId: string
+  /** The type of operation being performed. */
   operation: OperationType
+  /** The name of the skill being targeted. */
   skillName: string
+  /** The latest status message from the extension host. */
   message: string
+  /** The progress percentage increment, if applicable. */
   increment?: number
+  /** Whether the operation is awaiting user input (e.g., QuickPick). */
   pending?: boolean
 }
 
@@ -26,6 +32,11 @@ export interface OperationState {
  * Listens for 'operationStarted', 'operationProgress', and 'operationCompleted'.
  *
  * @returns Operation state map plus helpers for status lookup and pending markers.
+ *
+ * @example
+ * ```tsx
+ * const { operations, markPending, clearPending } = useOperations();
+ * ```
  */
 export function useOperations() {
   const [operations, setOperations] = useState<Map<string, OperationState>>(new Map())
@@ -37,6 +48,11 @@ export function useOperations() {
    * @param skillName - Skill currently awaiting picker completion.
    * @param action - Pending user action requested for the skill.
    * @returns Nothing.
+   *
+   * @example
+   * ```typescript
+   * markPending('my-skill', 'add');
+   * ```
    */
   const markPending = useCallback((skillName: string, action: 'add' | 'remove' | 'repair') => {
     setOperations((prev) => {
@@ -71,6 +87,11 @@ export function useOperations() {
    *
    * @param skillName - Skill whose pending state should be removed.
    * @returns Nothing.
+   *
+   * @example
+   * ```typescript
+   * clearPending('my-skill');
+   * ```
    */
   const clearPending = useCallback((skillName: string) => {
     setOperations((prev) => {

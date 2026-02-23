@@ -19,6 +19,13 @@ import { AllowedScopesSetting } from './shared/types'
  * Wires service dependencies, providers, commands, and diagnostics.
  *
  * @param context - Extension lifecycle context used to register disposables and access metadata.
+ *
+ * @example
+ * ```typescript
+ * export function activate(context: vscode.ExtensionContext) {
+ *   // setup extension
+ * }
+ * ```
  */
 export function activate(context: vscode.ExtensionContext): void {
   const outputChannel = vscode.window.createOutputChannel('Agent Skills', { log: true })
@@ -167,5 +174,12 @@ export function activate(context: vscode.ExtensionContext): void {
 
 /**
  * Clean-up hook used by VS Code when the extension is deactivated.
+ *
+ * @example
+ * ```typescript
+ * export function deactivate() {
+ *   // cleanup
+ * }
+ * ```
  */
 export function deactivate(): void {}

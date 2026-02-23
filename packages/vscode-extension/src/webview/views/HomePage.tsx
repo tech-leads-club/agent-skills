@@ -13,18 +13,31 @@ import { ScopeSelector } from '../components/ScopeSelector'
  * Props for the HomePage component.
  */
 export interface HomePageProps {
+  /** The skill registry instance or null if unavailable. */
   registry: SkillRegistry | null
+  /** Map of currently installed skills. */
   installedSkills: InstalledSkillsMap
+  /** Array of all available agents. */
   allAgents?: AvailableAgent[]
+  /** The current scope policy state or null if unavailable. */
   policy: ScopePolicyStatePayload | null
+  /** Whether the workspace is trusted to allow local scope actions. */
   isTrusted: boolean
+  /** Whether a workspace is currently open. */
   hasWorkspace: boolean
+  /** The currently selected target scope for lifecycle actions. */
   scope: LifecycleScope
+  /** Whether a background operation is currently running. */
   isProcessing: boolean
+  /** The specific operation currently being processed, if any. */
   processingAction?: 'update' | 'repair' | null
+  /** Callback to navigate to a specific webview action flow. */
   onNavigate: (action: WebviewAction) => void
+  /** Callback when the target scope changes. */
   onScopeChange: (scope: LifecycleScope) => void
+  /** Callback to trigger an update of all outdated skills. */
   onUpdate: () => void
+  /** Callback to trigger a repair of all corrupted skills. */
   onRepair: () => void
 }
 
@@ -34,6 +47,11 @@ export interface HomePageProps {
  * @param installed - Installation metadata for a specific skill.
  * @param scope - The target scope to check.
  * @returns True if installed in the specified scope.
+ *
+ * @example
+ * ```typescript
+ * const isInstalled = isInstalledForScope(installedSkills['my-skill'], 'local');
+ * ```
  */
 function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
   if (!installed) return false
@@ -47,6 +65,15 @@ function isInstalledForScope(installed: InstalledSkillsMap[string], scope: Lifec
  * @param allAgents - List of agents to verify against.
  * @param scope - The target scope to check.
  * @returns True if installed on all agents in the specific scope.
+ *
+ * @example
+ * ```typescript
+ * const isInstalledOnAll = isInstalledForAllAgents(
+ *   installedSkills['my-skill'],
+ *   availableAgents,
+ *   'global'
+ * );
+ * ```
  */
 function isInstalledForAllAgents(
   installed: InstalledSkillsMap[string],
@@ -69,6 +96,14 @@ function isInstalledForAllAgents(
  * @param installedSkills - Map of installed skills.
  * @param scope - The target scope to check.
  * @returns True if any skill has an update.
+ *
+ * @example
+ * ```typescript
+ * const hasUpdates = hasUpdatesForScope(registry.skills, installedSkills, 'local');
+ * if (hasUpdates) {
+ *   showUpdateBadge();
+ * }
+ * ```
  */
 function hasUpdatesForScope(
   skills: SkillRegistry['skills'],
@@ -91,6 +126,11 @@ function hasUpdatesForScope(
  * @param installedSkills - Map of installed skills.
  * @param scope - The target scope to check.
  * @returns True if any corrupted installations exist.
+ *
+ * @example
+ * ```typescript
+ * const needsRepair = hasCorruptedInstallationsForScope(installedSkills, 'global');
+ * ```
  */
 function hasCorruptedInstallationsForScope(installedSkills: InstalledSkillsMap, scope: LifecycleScope): boolean {
   return Object.values(installedSkills).some((installed) => {
@@ -108,6 +148,24 @@ function hasCorruptedInstallationsForScope(installedSkills: InstalledSkillsMap, 
  *
  * @param props - Home page state and action callbacks.
  * @returns Home view with action cards and scope controls when permitted.
+ *
+ * @see {@link HomePageProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <HomePage
+ *   registry={registry}
+ *   installedSkills={installedSkills}
+ *   isTrusted={true}
+ *   hasWorkspace={true}
+ *   scope="local"
+ *   isProcessing={false}
+ *   onNavigate={(action) => setView(action)}
+ *   onScopeChange={(scope) => setScope(scope)}
+ *   onUpdate={() => startUpdate()}
+ *   onRepair={() => startRepair()}
+ * />
+ * ```
  */
 export function HomePage({
   registry,

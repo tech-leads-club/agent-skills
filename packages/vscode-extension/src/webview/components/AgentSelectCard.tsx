@@ -4,17 +4,33 @@ import type { AvailableAgent } from '../../shared/types'
  * Props for the AgentSelectCard component.
  */
 export interface AgentSelectCardProps {
+  /** The agent data to display. */
   agent: AvailableAgent
+  /** The agent's company affiliation. */
   company: string
+  /** Whether the agent is currently checked/selected. */
   isSelected: boolean
+  /** Callback fired when the selection state is toggled. */
   onToggle: () => void
 }
 
 /**
  * Card row used on Select Agents page.
  *
- * @param props - Agent metadata and selection state handlers.
+ * @param props - Component props containing agent metadata and selection state handlers.
  * @returns Selectable agent card with checkbox.
+ *
+ * @see {@link AgentSelectCardProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <AgentSelectCard
+ *   agent={myAgent}
+ *   company="Acme Corp"
+ *   isSelected={true}
+ *   onToggle={() => handleToggle(myAgent.agent)}
+ * />
+ * ```
  */
 export function AgentSelectCard({ agent, company, isSelected, onToggle }: AgentSelectCardProps) {
   const inputId = `agent-select-${agent.agent}`

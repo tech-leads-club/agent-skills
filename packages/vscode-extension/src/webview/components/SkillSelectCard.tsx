@@ -4,17 +4,33 @@ import type { Skill } from '../../shared/types'
  * Props for the SkillSelectCard component.
  */
 export interface SkillSelectCardProps {
+  /** The skill data to display. */
   skill: Skill
+  /** The localized display name of the skill's category. */
   categoryName: string
+  /** Whether the skill is currently checked/selected. */
   isSelected: boolean
+  /** Callback fired when the selection state is toggled. */
   onToggle: () => void
 }
 
 /**
  * Card row used on Select Skills page.
  *
- * @param props - Skill metadata and selection state handlers.
+ * @param props - Component props containing skill metadata and selection state handlers.
  * @returns Selectable skill card with checkbox.
+ *
+ * @see {@link SkillSelectCardProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <SkillSelectCard
+ *   skill={mySkill}
+ *   categoryName="Utilities"
+ *   isSelected={true}
+ *   onToggle={() => handleToggle(mySkill.name)}
+ * />
+ * ```
  */
 export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: SkillSelectCardProps) {
   const inputId = `skill-select-${skill.name}`

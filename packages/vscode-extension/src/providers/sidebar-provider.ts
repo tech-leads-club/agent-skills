@@ -189,6 +189,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * Updates the effective scope policy used for lifecycle actions.
    *
    * @param policy - Evaluated policy state.
+   *
+   * @example
+   * ```typescript
+   * sidebarProvider.updatePolicy(policy);
+   * ```
    */
   public updatePolicy(policy: ScopePolicyEvaluation): void {
     this.policy = policy
@@ -207,6 +212,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    *
    * @param webviewView - Webview container provided by VS Code for this view contribution.
    * @returns Nothing. Side effects include HTML initialization and event subscriptions.
+   *
+   * @example
+   * ```typescript
+   * context.subscriptions.push(
+   *   vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
+   * );
+   * ```
    */
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.logger.info('Resolving sidebar webview')

@@ -76,6 +76,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * @param scope - Local, global, or all.
    * @param agents - Agent identifiers.
    * @param source - UI or command-palette trigger point.
+   *
+   * @example
+   * ```typescript
+   * await orchestrator.installMany(['my-skill'], 'local', ['agent1'], 'command-palette');
+   * ```
    */
   async installMany(
     skills: string[],
@@ -103,6 +108,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * @param scope - Local, global, or all.
    * @param agents - Agent identifiers.
    * @param source - UI or command-palette trigger point.
+   *
+   * @example
+   * ```typescript
+   * await orchestrator.removeMany(['my-skill'], 'global', ['agent1']);
+   * ```
    */
   async removeMany(
     skills: string[],
@@ -128,6 +138,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
    *
    * @param skills - 'all' or specific skill identifiers.
    * @param source - UI or command-palette trigger point.
+   *
+   * @example
+   * ```typescript
+   * await orchestrator.updateMany('all');
+   * await orchestrator.updateMany(['skill-1', 'skill-2']);
+   * ```
    */
   async updateMany(skills: string[] | 'all', source: 'card' | 'command-palette' = 'card'): Promise<void> {
     if (!this.checkHealth()) return
@@ -151,6 +167,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * @param scope - Local, global, or all.
    * @param agents - Agent identifiers.
    * @param source - UI or command-palette trigger point.
+   *
+   * @example
+   * ```typescript
+   * await orchestrator.repairMany(['my-skill'], 'local', ['agent1']);
+   * ```
    */
   async repairMany(
     skills: string[],

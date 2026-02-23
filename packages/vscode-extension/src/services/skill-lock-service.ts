@@ -33,6 +33,13 @@ export class SkillLockService {
    * Reads all installed skill hashes from the lockfile.
    *
    * @returns A map of skill name to installed content hash (if known).
+   *
+   * @example
+   * ```typescript
+   * const lockService = new SkillLockService(logger);
+   * const hashes = await lockService.getInstalledHashes();
+   * console.log(hashes['my-skill']);
+   * ```
    */
   async getInstalledHashes(): Promise<Record<string, string | undefined>> {
     const lockfilePath = this.getLockfilePath()
@@ -60,6 +67,11 @@ export class SkillLockService {
    *
    * @param skillName - Skill identifier to resolve.
    * @returns Installed content hash, or `undefined` when missing.
+   *
+   * @example
+   * ```typescript
+   * const hash = await lockService.getInstalledHash('my-skill');
+   * ```
    */
   async getInstalledHash(skillName: string): Promise<string | undefined> {
     const hashes = await this.getInstalledHashes()

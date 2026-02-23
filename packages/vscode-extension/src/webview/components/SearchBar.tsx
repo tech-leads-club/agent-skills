@@ -2,11 +2,17 @@
  * Props for the top-level search input in the sidebar.
  */
 export interface SearchBarProps {
+  /** The current search query string. */
   value: string
+  /** Callback fired when the search query changes. */
   onChange: (query: string) => void
+  /** The number of results found for the current query. */
   resultCount: number
+  /** Placeholder text for the input field. @defaultValue 'Search skills...' */
   placeholder?: string
+  /** ARIA label for the input field. @defaultValue 'Search skills' */
   ariaLabel?: string
+  /** Label for screen reader result count announcements. @defaultValue 'skill' */
   resultLabel?: string
 }
 
@@ -14,8 +20,20 @@ export interface SearchBarProps {
  * Sticky search input for filtering skills by keyword.
  * Uses VS Code native input styling and includes screen reader announcements.
  *
- * @param props - Search value, change callback, and visible result count.
+ * @param props - Component props.
  * @returns Rendered search input with clear action and SR announcement.
+ *
+ * @see {@link SearchBarProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <SearchBar
+ *   value={searchQuery}
+ *   onChange={(query) => setQuery(query)}
+ *   resultCount={12}
+ *   placeholder="Search skills..."
+ * />
+ * ```
  */
 export function SearchBar({
   value,

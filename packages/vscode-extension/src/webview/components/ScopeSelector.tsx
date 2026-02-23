@@ -31,6 +31,13 @@ interface PersistedWebviewState {
  *
  * @param scope - Unknown value to check.
  * @returns True if value is a valid LifecycleScope.
+ *
+ * @example
+ * ```typescript
+ * if (isLifecycleScope(value)) {
+ *   console.log('Valid scope:', value);
+ * }
+ * ```
  */
 function isLifecycleScope(scope: unknown): scope is LifecycleScope {
   return scope === 'local' || scope === 'global'
@@ -66,18 +73,35 @@ function persistSelectedScope(selectedScope: LifecycleScope): void {
  * Props for the ScopeSelector component.
  */
 export interface ScopeSelectorProps {
+  /** The currently selected target scope. */
   value: LifecycleScope
+  /** Callback fired when a new scope is chosen. */
   onChange: (scope: LifecycleScope) => void
+  /** The policy-constrained allowed scopes setting. @defaultValue 'all' */
   allowedScopes?: AllowedScopesSetting
+  /** Whether the selector is disabled. @defaultValue false */
   disabled?: boolean
+  /** The reason the selector is disabled, shown as a tooltip. */
   disabledReason?: string
 }
 
 /**
  * Scope dropdown used to switch between local and global install contexts.
  *
- * @param props - Current scope, policy-constrained options, and disabled metadata.
+ * @param props - Component props containing current scope, policy-constrained options, and disabled metadata.
  * @returns Scope selector control anchored to the home page footer, or null when policy disallows all scopes.
+ *
+ * @see {@link ScopeSelectorProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <ScopeSelector
+ *   value="local"
+ *   onChange={(scope) => setScope(scope)}
+ *   allowedScopes="all"
+ *   disabled={false}
+ * />
+ * ```
  */
 export function ScopeSelector({
   value,

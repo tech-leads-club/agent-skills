@@ -60,6 +60,12 @@ export class SkillRegistryService implements vscode.Disposable {
    * Get registry data synchronously for consumers that only care about the payload.
    *
    * @returns A promise resolving to registry data.
+   *
+   * @example
+   * ```typescript
+   * const registry = await registryService.getRegistry();
+   * console.log(registry.skills.length);
+   * ```
    */
   public async getRegistry(): Promise<SkillRegistry> {
     return (await this.loadRegistryInternal(false)).data
@@ -69,6 +75,11 @@ export class SkillRegistryService implements vscode.Disposable {
    * Force-fetch fresh registry data, bypassing cache TTL.
    *
    * @returns A promise resolving to freshly loaded registry data.
+   *
+   * @example
+   * ```typescript
+   * const freshRegistry = await registryService.refresh();
+   * ```
    */
   public async refresh(): Promise<SkillRegistry> {
     return (await this.loadRegistryInternal(true)).data
@@ -79,6 +90,11 @@ export class SkillRegistryService implements vscode.Disposable {
    *
    * @param forceRefresh - When true, bypasses cache TTL.
    * @returns A promise resolving to registry data and cache metadata.
+   *
+   * @example
+   * ```typescript
+   * const { data, fromCache, offline } = await registryService.getRegistryWithMetadata();
+   * ```
    */
   public async getRegistryWithMetadata(forceRefresh = false): Promise<RegistryResult> {
     return this.loadRegistryInternal(forceRefresh)

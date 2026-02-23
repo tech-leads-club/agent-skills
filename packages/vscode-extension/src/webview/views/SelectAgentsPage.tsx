@@ -9,18 +9,31 @@ import { SelectionMenu } from '../components/SelectionMenu'
  * Props for the SelectAgentsPage component.
  */
 export interface SelectAgentsPageProps {
+  /** The webview action being performed (e.g., 'install' or 'uninstall'). */
   action: WebviewAction
+  /** Array of all available target agents. */
   availableAgents: AvailableAgent[]
+  /** Map of currently installed skills across the system. */
   installedSkills: InstalledSkillsMap
+  /** Names of the skills selected in the previous step. */
   selectedSkills: string[]
+  /** IDs of the agents currently selected. */
   selectedAgents: string[]
+  /** The install/uninstall scope (local or global). */
   scope: LifecycleScope
+  /** Whether a background operation is currently running. */
   isProcessing: boolean
+  /** Callback to toggle an agent's selection state. */
   onToggleAgent: (agentId: string) => void
+  /** Callback to replace the entire agent selection. */
   onSelectAll: (agents: string[]) => void
+  /** Callback to clear all agent selections. */
   onClear: () => void
+  /** Callback to navigate back to the previous step. */
   onBack: () => void
+  /** Callback to cancel the operation fully. */
   onCancel?: () => void
+  /** Callback to proceed to the next step. */
   onProceed: () => void
 }
 
@@ -32,6 +45,11 @@ export interface SelectAgentsPageProps {
  * @param agentId - ID of the agent to check.
  * @param scope - The requested scope.
  * @returns True if installed.
+ *
+ * @example
+ * ```typescript
+ * const isInstalled = isSkillInstalledOnAgent(installedSkills, 'my-skill', 'agent1', 'global');
+ * ```
  */
 function isSkillInstalledOnAgent(
   installedSkills: InstalledSkillsMap,
@@ -53,6 +71,26 @@ function isSkillInstalledOnAgent(
  *
  * @param props - Selection context and callbacks for agent selection flow.
  * @returns Agents selection view.
+ *
+ * @see {@link SelectAgentsPageProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <SelectAgentsPage
+ *   action="install"
+ *   availableAgents={allAgents}
+ *   installedSkills={installedSkills}
+ *   selectedSkills={['my-skill']}
+ *   selectedAgents={['agent1']}
+ *   scope="local"
+ *   isProcessing={false}
+ *   onToggleAgent={(agentId) => toggleAgent(agentId)}
+ *   onSelectAll={(agents) => selectAllAgents(agents)}
+ *   onClear={() => clearAgentSelection()}
+ *   onBack={() => goBack()}
+ *   onProceed={() => executeBatch()}
+ * />
+ * ```
  */
 export function SelectAgentsPage({
   action,

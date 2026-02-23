@@ -1,10 +1,25 @@
 /**
+ * Props for the RestrictedModeBanner component.
+ */
+export interface RestrictedModeBannerProps {
+  /** Visibility flag for the restricted-mode notice. */
+  visible: boolean
+}
+
+/**
  * Provides a banner warning when the workspace is in restricted (untrusted) mode.
  *
- * @param props - Visibility flag for the restricted-mode notice.
+ * @param props - Component props.
  * @returns Banner element when visible, otherwise `null`.
+ *
+ * @see {@link RestrictedModeBannerProps} for available props.
+ *
+ * @example
+ * ```tsx
+ * <RestrictedModeBanner visible={!isTrusted} />
+ * ```
  */
-export function RestrictedModeBanner({ visible }: { visible: boolean }) {
+export function RestrictedModeBanner({ visible }: RestrictedModeBannerProps) {
   if (!visible) return null
 
   return (

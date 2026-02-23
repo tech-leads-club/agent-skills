@@ -14,6 +14,8 @@ import { SelectSkillsPage } from './views/SelectSkillsPage'
 
 /**
  * Application connection status.
+ *
+ * @internal
  */
 type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
 
@@ -21,6 +23,15 @@ type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
  * Renders the loading state shown while registry data is being fetched.
  *
  * @returns Loading UI for the skills view.
+ *
+ * @internal
+ *
+ * @example
+ * ```tsx
+ * if (status === 'loading') {
+ *   return <LoadingState />;
+ * }
+ * ```
  */
 function LoadingState() {
   return (
@@ -36,6 +47,15 @@ function LoadingState() {
  *
  * @param props - Error message and retry callback.
  * @returns Error UI for failed registry loading.
+ *
+ * @internal
+ *
+ * @example
+ * ```tsx
+ * if (status === 'error') {
+ *   return <ErrorState message="Failed to load" onRetry={handleRetry} />;
+ * }
+ * ```
  */
 function ErrorState({ message, onRetry }: { message: string | null; onRetry: () => void }) {
   return (
@@ -52,6 +72,15 @@ function ErrorState({ message, onRetry }: { message: string | null; onRetry: () 
  * Renders the empty state shown when no registry payload is available.
  *
  * @returns Empty-state UI for missing registry data.
+ *
+ * @internal
+ *
+ * @example
+ * ```tsx
+ * if (status === 'ready' && !registry) {
+ *   return <NoRegistryState />;
+ * }
+ * ```
  */
 function NoRegistryState() {
   return (
@@ -67,6 +96,12 @@ function NoRegistryState() {
  * @param policy - The validated scope constraints.
  * @param currentScope - The currently chosen scope.
  * @returns The new best-effort scope, or null if ok.
+ *
+ * @example
+ * ```typescript
+ * const newScope = getFallbackScope(policy, 'local');
+ * if (newScope) setScope(newScope);
+ * ```
  */
 function getFallbackScope(policy: ScopePolicyStatePayload | null, currentScope: LifecycleScope): LifecycleScope | null {
   if (!policy || policy.effectiveScopes.length === 0) {
@@ -84,6 +119,14 @@ function getFallbackScope(policy: ScopePolicyStatePayload | null, currentScope: 
  * Root webview application component.
  *
  * @returns Sidebar app UI with state-driven content.
+ *
+ * @internal
+ *
+ * @example
+ * ```tsx
+ * const root = createRoot(document.getElementById('root')!);
+ * root.render(<App />);
+ * ```
  */
 function App() {
   const [registry, setRegistry] = useState<SkillRegistry | null>(null)

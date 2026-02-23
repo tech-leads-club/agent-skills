@@ -10,6 +10,16 @@ export class ScopePolicyService {
    *
    * @param input - Configuration and environment state.
    * @returns The evaluated policy result including effective scopes and blocked reasons.
+   *
+   * @example
+   * ```typescript
+   * const policy = new ScopePolicyService().evaluate({
+   *   allowedScopes: 'all',
+   *   isWorkspaceTrusted: true,
+   *   hasWorkspaceFolder: true,
+   * });
+   * console.log(policy.effectiveScopes); // ['local', 'global']
+   * ```
    */
   public evaluate(input: {
     allowedScopes: AllowedScopesSetting
