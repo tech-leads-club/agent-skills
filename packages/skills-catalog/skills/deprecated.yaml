@@ -1,0 +1,26 @@
+# Deprecated skills
+#
+# Skills listed here have been removed from the catalog.
+# The CLI auto-detects orphaned skills (installed but no longer in registry),
+# but entries here enrich the warning with a message and suggested alternatives.
+#
+# Format:
+#   - name: skill-name
+#     message: Human-readable reason for deprecation
+#     alternatives:          # optional — omit if no replacement exists
+#       - replacement-skill
+
+- name: react-native-skills
+  message: Use react-native-expert instead
+  alternatives:
+    - react-native-expert
+
+- name: cursor-skill-creator
+  message: Use skill-architect instead
+  alternatives:
+    - skill-architect
+
+- name: skill-creator
+  message: Use skill-architect instead
+  alternatives:
+    - skill-architect
