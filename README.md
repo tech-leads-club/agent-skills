@@ -259,9 +259,13 @@ This repository is a collection of curated skills intended to benefit the commun
 
 If you are the author of any content included here and would like it **removed** or **updated**, please [open an issue](https://github.com/tech-leads-club/agent-skills/issues/new) or contact the maintainers.
 
-## 📄 License
+## 📄 License and Attribution
 
-MIT © [Tech Leads Club](https://github.com/tech-leads-club)
+- **Software Engine:** The application source code (CLI, scripts, tools) is licensed under the **[MIT License](LICENSE)**.
+- **Tech Leads Club Skills:** Unless otherwise stated, all skill files (`SKILL.md`) authored by the repository maintainers are licensed under the **[Creative Commons Attribution 4.0 International License (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/)**.
+- **Third-Party Skills:** Some skills included in this catalog are created by the community or original authors. These skills retain their original licenses and copyrights. Please check the individual `SKILL.md` files for specific licensing and author attribution.
+
+_If you use our skills catalog, you **must** provide attribution to Tech Leads Club, regardless of how it is used._
 
 ## ⭐ Star History
 
