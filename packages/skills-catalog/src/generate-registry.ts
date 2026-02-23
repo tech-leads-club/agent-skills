@@ -3,6 +3,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import YAML from 'yaml'
 
 import {
   CATEGORY_FOLDER_PATTERN,
@@ -13,6 +14,7 @@ import {
   SKILL_NAME_SLUG_PATTERN,
   toSlug,
   type CategoryMetadata,
+  type DeprecatedEntry,
   type SkillMetadata,
   type SkillsRegistry,
 } from './utils'
@@ -22,6 +24,7 @@ const __dirname = dirname(__filename)
 
 const SKILLS_DIR = join(__dirname, '..', 'skills')
 const OUTPUT_FILE = join(__dirname, '..', 'skills-registry.json')
+const DEPRECATED_FILE = join(SKILLS_DIR, 'deprecated.yaml')
 
 function isCategoryFolder(name: string): boolean {
   return CATEGORY_FOLDER_PATTERN.test(name)
@@ -93,9 +96,31 @@ function scanSkillsInCategory(categoryPath: string, categoryId: string): SkillMe
   return skills
 }
 
+function loadDeprecatedSkills(): DeprecatedEntry[] {
+  if (!existsSync(DEPRECATED_FILE)) return []
+
+  try {
+    const content = readFileSync(DEPRECATED_FILE, 'utf-8')
+    const parsed = YAML.parse(content)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed
+      .filter((entry: unknown) => entry && typeof entry === 'object' && 'name' in entry && 'message' in entry)
+      .map((entry: { name: string; message: string; alternatives?: string[] }) => ({
+        name: entry.name,
+        message: entry.message,
+        ...(entry.alternatives?.length ? { alternatives: entry.alternatives } : {}),
+      }))
+  } catch {
+    console.warn(`⚠️  Failed to parse ${DEPRECATED_FILE}, skipping deprecated entries`)
+    return []
+  }
+}
+
 function generateRegistry(): SkillsRegistry {
   const skills: SkillMetadata[] = []
   const categories = loadCategoryMetadata()
+  const deprecated = loadDeprecatedSkills()
 
   const entries = readdirSync(SKILLS_DIR, { withFileTypes: true })
 
@@ -137,6 +162,7 @@ function generateRegistry(): SkillsRegistry {
     version: '1.0.0',
     categories,
     skills: skills.sort((a, b) => a.name.localeCompare(b.name)),
+    ...(deprecated.length > 0 ? { deprecated } : {}),
   }
 }
 
@@ -155,4 +181,5 @@ writeFileSync(OUTPUT_FILE, JSON.stringify(registry, null, 2))
 console.log(`✅ Generated skills-registry.json`)
 console.log(`   📦 ${registry.skills.length} skills`)
 console.log(`   📁 ${Object.keys(registry.categories).length} categories`)
+if (registry.deprecated?.length) console.log(`   ⚠️  ${registry.deprecated.length} deprecated`)
 console.log(`   📍 ${OUTPUT_FILE}`)
