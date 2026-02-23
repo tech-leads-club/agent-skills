@@ -3,6 +3,7 @@ import Spinner from 'ink-spinner'
 import { useAtomValue } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
 
+import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
 import { installedSkillsAtom } from '../atoms/installedSkills'
 import { Header } from '../components/Header'
 import { InstallResults } from '../components/InstallResults'
@@ -11,7 +12,7 @@ import { useInstaller } from '../hooks/useInstaller'
 import { useSkills } from '../hooks/useSkills'
 import { getUpdatableSkills } from '../services/registry'
 import { colors, symbols } from '../theme'
-import type { AgentType, SkillInfo } from '../types'
+import type { AgentType, DeprecatedEntry, SkillInfo } from '../types'
 import { AgentSelector } from './AgentSelector'
 
 export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentType[]; onExit: () => void }) {
@@ -23,6 +24,7 @@ export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentT
   const [updatableSkills, setUpdatableSkills] = useState<SkillInfo[]>([])
   const { install, progress, results, installing } = useInstaller()
   const installedSkills = useAtomValue(installedSkillsAtom)
+  const deprecatedMap = useAtomValue(deprecatedSkillsAtom)
   const { skills, loading: loadingSkills } = useSkills()
 
   const activeAgents = selectedAgents || internalAgents
@@ -37,6 +39,21 @@ export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentT
       return agents.some((a: AgentType) => activeAgents.includes(a))
     })
   }, [installedSkills, skills, loadingSkills, activeAgents])
+
+  const deprecatedInstalled = useMemo(() => {
+    if (loadingSkills || !(deprecatedMap instanceof Map) || deprecatedMap.size === 0) return []
+    const installedNames = new Set(Object.keys(installedSkills))
+    const registryNames = new Set(skills.map((s) => s.name))
+
+    const result: { name: string; entry?: DeprecatedEntry }[] = []
+
+    for (const name of installedNames) {
+      if (deprecatedMap.has(name)) result.push({ name, entry: deprecatedMap.get(name) })
+      else if (!registryNames.has(name)) result.push({ name })
+    }
+
+    return result
+  }, [installedSkills, skills, loadingSkills, deprecatedMap])
 
   useEffect(() => {
     if (installedList.length === 0) {
@@ -149,6 +166,40 @@ export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentT
         <Box borderStyle="round" borderColor={colors.success} paddingX={2} paddingY={1}>
           <Text color={colors.success}>{symbols.check} All installed skills are up to date!</Text>
         </Box>
+
+        {deprecatedInstalled.length > 0 && (
+          <Box
+            flexDirection="column"
+            marginTop={1}
+            borderStyle="round"
+            borderColor={colors.warning}
+            paddingX={2}
+            paddingY={1}
+          >
+            <Box marginBottom={1}>
+              <Text color={colors.warning} bold>
+                {symbols.warning} {deprecatedInstalled.length} deprecated skill
+                {deprecatedInstalled.length > 1 ? 's' : ''} detected:
+              </Text>
+            </Box>
+            {deprecatedInstalled.map((d) => (
+              <Box key={d.name} flexDirection="column" paddingX={1} marginBottom={1}>
+                <Text color={colors.warning}>
+                  {symbols.arrow} {d.name}
+                </Text>
+                {d.entry?.message && <Text color={colors.textDim}> {d.entry.message}</Text>}
+                {!d.entry && <Text color={colors.textDim}> No longer available in the registry</Text>}
+                {d.entry?.alternatives && d.entry.alternatives.length > 0 && (
+                  <Text color={colors.textDim}>
+                    {'  '}Try: agent-skills install --skill {d.entry.alternatives.join(', ')}
+                  </Text>
+                )}
+              </Box>
+            ))}
+            <Text color={colors.textMuted}>Run: agent-skills remove --skill {'<name>'} to clean up</Text>
+          </Box>
+        )}
+
         <Box marginTop={1} borderStyle="round" borderColor={colors.border} paddingX={1}>
           <Text>
             <Text color={colors.warning} bold>
