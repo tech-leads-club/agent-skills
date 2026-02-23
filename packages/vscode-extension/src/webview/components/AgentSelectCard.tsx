@@ -1,5 +1,8 @@
 import type { AvailableAgent } from '../../shared/types'
 
+/**
+ * Props for the AgentSelectCard component.
+ */
 export interface AgentSelectCardProps {
   agent: AvailableAgent
   company: string

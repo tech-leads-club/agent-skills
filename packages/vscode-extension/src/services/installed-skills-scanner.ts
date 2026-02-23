@@ -28,11 +28,17 @@ export const AGENT_CONFIGS: AgentScanConfig[] = Object.values(getAgentMetadata(h
   globalSkillsDir: agent.globalSkillsDir,
 }))
 
+/**
+ * Defines a specific scope and path to check for an installed skill.
+ */
 interface ScopeCheck {
   scope: 'local' | 'global'
   path: string
 }
 
+/**
+ * Options used to filter the scan execution based on local/global presence.
+ */
 export interface ScanOptions {
   includeLocal: boolean
   includeGlobal: boolean
@@ -184,13 +190,9 @@ export class InstalledSkillsScanner {
     const results: AvailableAgent[] = []
 
     for (const config of AGENT_CONFIGS) {
-      // Check global existence (parent of globalSkillsDir)
-      // e.g. ~/.cursor/skills -> ~/.cursor
       const globalDir = join(config.globalSkillsDir, '..')
       const globalExists = await this.checkExists(globalDir)
 
-      // Check local existence (parent of skillsDir)
-      // e.g. .cursor/skills -> .cursor
       let localExists = false
       if (workspaceRoot) {
         const localDir = join(workspaceRoot, config.skillsDir, '..')

@@ -189,6 +189,8 @@ export class CliHealthChecker implements vscode.Disposable {
 
   /**
    * Picks a valid working directory for CLI health checks.
+   *
+   * @returns The resolved working directory path.
    */
   private getHealthCheckCwd(): string {
     const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath

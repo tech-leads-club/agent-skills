@@ -12,10 +12,16 @@ import type { LoggingService } from './logging-service'
 import type { JobResult, OperationQueue, QueuedJob } from './operation-queue'
 import type { PostInstallVerifier } from './post-install-verifier'
 
+/**
+ * Handler function type for operation events.
+ */
 export interface OperationEventHandler {
   (event: OperationEvent): void
 }
 
+/**
+ * Represents an event containing the state of a CLI batch or single operation.
+ */
 export interface OperationEvent {
   operationId: string
   operation: OperationType
@@ -27,6 +33,9 @@ export interface OperationEvent {
   metadata?: OperationBatchMetadata
 }
 
+/**
+ * Service that orchestrates complex CLI operations and verifies post-install state.
+ */
 export class InstallationOrchestrator implements vscode.Disposable {
   private eventHandlers: OperationEventHandler[] = []
   private activeOperations = new Map<string, vscode.CancellationTokenSource>()
@@ -34,6 +43,13 @@ export class InstallationOrchestrator implements vscode.Disposable {
   private cliHealthy = true
   private readonly capabilities = getCliCapabilities()
 
+  /**
+   * Creates an InstallationOrchestrator.
+   *
+   * @param queue - Backend operation queue.
+   * @param verifier - Verifier to run after installations.
+   * @param logger - Telemetry logger instance.
+   */
   constructor(
     private readonly queue: OperationQueue,
     private readonly verifier: PostInstallVerifier,
@@ -44,10 +60,23 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.queue.onJobProgress((job, message) => this.handleJobProgress(job, message))
   }
 
+  /**
+   * Sets the CLI healthy state which restricts execution if false.
+   *
+   * @param healthy - True if the CLI is ready.
+   */
   setCliHealthy(healthy: boolean): void {
     this.cliHealthy = healthy
   }
 
+  /**
+   * Executes a batch install operation for multiple skills.
+   *
+   * @param skills - Target skills.
+   * @param scope - Local, global, or all.
+   * @param agents - Agent identifiers.
+   * @param source - UI or command-palette trigger point.
+   */
   async installMany(
     skills: string[],
     scope: 'local' | 'global' | 'all',
@@ -67,6 +96,14 @@ export class InstallationOrchestrator implements vscode.Disposable {
     await this.executePlan(planBatch(selection, this.capabilities))
   }
 
+  /**
+   * Executes a batch remove operation for multiple skills.
+   *
+   * @param skills - Target skills.
+   * @param scope - Local, global, or all.
+   * @param agents - Agent identifiers.
+   * @param source - UI or command-palette trigger point.
+   */
   async removeMany(
     skills: string[],
     scope: 'local' | 'global' | 'all',
@@ -86,6 +123,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     await this.executePlan(planBatch(selection, this.capabilities))
   }
 
+  /**
+   * Executes a batch update operation for all or specific skills.
+   *
+   * @param skills - 'all' or specific skill identifiers.
+   * @param source - UI or command-palette trigger point.
+   */
   async updateMany(skills: string[] | 'all', source: 'card' | 'command-palette' = 'card'): Promise<void> {
     if (!this.checkHealth()) return
 
@@ -101,6 +144,14 @@ export class InstallationOrchestrator implements vscode.Disposable {
     await this.executePlan(planBatch(selection, this.capabilities))
   }
 
+  /**
+   * Executes a batch repair operation for multiple skills.
+   *
+   * @param skills - Target skills.
+   * @param scope - Local, global, or all.
+   * @param agents - Agent identifiers.
+   * @param source - UI or command-palette trigger point.
+   */
   async repairMany(
     skills: string[],
     scope: 'local' | 'global' | 'all',
@@ -120,22 +171,39 @@ export class InstallationOrchestrator implements vscode.Disposable {
     await this.executePlan(planBatch(selection, this.capabilities))
   }
 
+  /**
+   * Helper to install a single skill.
+   */
   async install(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     await this.installMany([skillName], scope, agents)
   }
 
+  /**
+   * Helper to remove a single skill.
+   */
   async remove(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     await this.removeMany([skillName], scope, agents)
   }
 
+  /**
+   * Helper to update a single skill.
+   */
   async update(skillName: string): Promise<void> {
     await this.updateMany([skillName])
   }
 
+  /**
+   * Helper to repair a single skill.
+   */
   async repair(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
     await this.repairMany([skillName], scope, agents)
   }
 
+  /**
+   * Cancels an active or pending operation by its identifier.
+   *
+   * @param operationId - The unique id of the operation.
+   */
   cancel(operationId: string): void {
     this.logger.info(`[${operationId}] Cancelling operation`)
     const cancelled = this.queue.cancel(operationId)
@@ -148,16 +216,27 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Subscribes a handler to operation lifecycle events.
+   *
+   * @param handler - Function invoked on operation events.
+   */
   onOperationEvent(handler: OperationEventHandler): void {
     this.eventHandlers.push(handler)
   }
 
+  /**
+   * Cleans up all resources and cancels active operations.
+   */
   dispose(): void {
     this.queue.dispose()
     this.activeOperations.forEach((tokenSource) => tokenSource.dispose())
     this.activeOperations.clear()
   }
 
+  /**
+   * Checks if the CLI is ready for use, showing a warning otherwise.
+   */
   private checkHealth(): boolean {
     if (!this.cliHealthy) {
       void vscode.window.showErrorMessage(
@@ -169,6 +248,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     return true
   }
 
+  /**
+   * Enqueues all invocations defined within a CLI invocation plan.
+   *
+   * @param plan - The evaluated invocation plan.
+   */
   private async executePlan(plan: CliInvocationPlan): Promise<void> {
     for (const invocation of plan.invocations) {
       const operationId = randomUUID()
@@ -195,6 +279,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Handles the start of an enqueued job.
+   *
+   * @param job - The actively running job.
+   */
   private handleJobStarted(job: QueuedJob): void {
     this.logger.info(`[${job.operationId}] Job started: ${job.operation} ${job.skillName}`)
     this.emitEvent({
@@ -207,6 +296,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.showProgress(job)
   }
 
+  /**
+   * Dispatches progress updates to listeners.
+   *
+   * @param job - Job emitting the update.
+   * @param message - Status text.
+   */
   private handleJobProgress(job: QueuedJob, message: string): void {
     this.emitEvent({
       operationId: job.operationId,
@@ -218,6 +313,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     })
   }
 
+  /**
+   * Processes the completion or failure of a job execution.
+   *
+   * @param result - Outcome of the completed job.
+   */
   private async handleJobCompleted(result: JobResult): Promise<void> {
     if (result.status === 'error') {
       const errorMessage = result.errorMessage ?? 'Unknown error'
@@ -243,6 +343,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     await this.handleCompletionNotification(result)
   }
 
+  /**
+   * Initializes a VS Code progress notification for the job.
+   *
+   * @param job - The target job.
+   */
   private showProgress(job: QueuedJob): void {
     const tokenSource = new vscode.CancellationTokenSource()
     this.activeOperations.set(job.operationId, tokenSource)
@@ -267,6 +372,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     )
   }
 
+  /**
+   * Cleans up the active operation state and resolves progress.
+   *
+   * @param operationId - The target operation identifier.
+   */
   private cleanupActiveOperation(operationId: string): void {
     const tokenSource = this.activeOperations.get(operationId)
     if (tokenSource) {
@@ -276,6 +386,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.resolveProgress(operationId)
   }
 
+  /**
+   * Resolves the progress notification for a given operation.
+   *
+   * @param operationId - The target operation identifier.
+   */
   private resolveProgress(operationId: string): void {
     const resolver = this.progressResolvers.get(operationId)
     if (resolver) {
@@ -284,6 +399,11 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Displays completion notifications and triggers post-install validation.
+   *
+   * @param result - Outcome of the completed job.
+   */
   private async handleCompletionNotification(result: JobResult): Promise<void> {
     if (result.status === 'completed') {
       if ((result.operation === 'install' || result.operation === 'repair') && result.metadata) {
@@ -306,6 +426,13 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Verifies that the skill artifacts are correctly placed post-installation.
+   *
+   * @param result - Outcome of the job.
+   * @param metadata - Batch metadata containing scope and targets.
+   * @returns `true` if verification passes, `false` otherwise.
+   */
   private async verifyInstallation(result: JobResult, metadata: OperationBatchMetadata): Promise<boolean> {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || null
     const scope: 'local' | 'global' = metadata.scope === 'local' ? 'local' : 'global'
@@ -332,10 +459,21 @@ export class InstallationOrchestrator implements vscode.Disposable {
     return false
   }
 
+  /**
+   * Emits an operation event to all registered handlers.
+   *
+   * @param event - The event to emit.
+   */
   private emitEvent(event: OperationEvent): void {
     this.eventHandlers.forEach((handler) => handler(event))
   }
 
+  /**
+   * Resolves the working directory for an operation based on its target scope.
+   *
+   * @param scope - The installation scope hint.
+   * @returns Absolute path to use as the working directory.
+   */
   private getCwd(scope: LifecycleScopeHint): string {
     if (scope === 'local') {
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
@@ -352,6 +490,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.env.HOME || process.env.USERPROFILE || '~'
   }
 
+  /**
+   * Gets the localized progress message for an operation type.
+   *
+   * @param operation - The operation type.
+   * @returns Progress message string.
+   */
   private getProgressMessage(operation: OperationType): string {
     switch (operation) {
       case 'install':
@@ -365,6 +509,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Gets the localized completion message for an operation type.
+   *
+   * @param operation - The operation type.
+   * @returns Completion message string.
+   */
   private getCompletionMessage(operation: OperationType): string {
     switch (operation) {
       case 'install':
@@ -378,6 +528,13 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Gets the localized failure message for an operation type.
+   *
+   * @param operation - The operation type.
+   * @param error - The underlying error detail.
+   * @returns Failure message string.
+   */
   private getFailureMessage(operation: OperationType, error: string): string {
     switch (operation) {
       case 'install':
@@ -391,6 +548,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
     }
   }
 
+  /**
+   * Gets the localized cancellation message for an operation type.
+   *
+   * @param operation - The operation type.
+   * @returns Cancellation message string.
+   */
   private getCancelledMessage(operation: OperationType): string {
     switch (operation) {
       case 'install':

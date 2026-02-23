@@ -5,6 +5,9 @@ import { AgentSelectCard } from '../components/AgentSelectCard'
 import { SearchBar } from '../components/SearchBar'
 import { SelectionMenu } from '../components/SelectionMenu'
 
+/**
+ * Props for the SelectAgentsPage component.
+ */
 export interface SelectAgentsPageProps {
   action: WebviewAction
   availableAgents: AvailableAgent[]
@@ -21,6 +24,15 @@ export interface SelectAgentsPageProps {
   onProceed: () => void
 }
 
+/**
+ * Checks if a skill is installed on a specific agent.
+ *
+ * @param installedSkills - Map of all installed skills.
+ * @param skillName - Name of the skill to check.
+ * @param agentId - ID of the agent to check.
+ * @param scope - The requested scope.
+ * @returns True if installed.
+ */
 function isSkillInstalledOnAgent(
   installedSkills: InstalledSkillsMap,
   skillName: string,

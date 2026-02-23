@@ -18,11 +18,11 @@ export interface Category {
 export interface Skill {
   name: string
   description: string
-  category: string // Key into SkillRegistry.categories
+  category: string
   path: string
   files: string[]
-  author?: string // Optional
-  version?: string // Optional
+  author?: string
+  version?: string
   contentHash: string
 }
 
@@ -47,23 +47,23 @@ export type InstalledSkillsMap = Record<string, InstalledSkillInfo | null>
  * Tracks installation across multiple agents and scopes.
  */
 export interface InstalledSkillInfo {
-  local: boolean // true if installed in the current workspace (any agent)
-  global: boolean // true if installed in the global home directory (any agent)
-  agents: AgentInstallInfo[] // Per-agent installation details
-  contentHash?: string // From lockfile, used for update detection
-  installedAt?: string // ISO timestamp
-  updatedAt?: string // ISO timestamp
+  local: boolean
+  global: boolean
+  agents: AgentInstallInfo[]
+  contentHash?: string
+  installedAt?: string
+  updatedAt?: string
 }
 
 /**
  * Per-agent installation details with scope granularity.
  */
 export interface AgentInstallInfo {
-  agent: string // AgentType identifier (e.g., 'cursor', 'claude-code')
-  displayName: string // Human-readable name (e.g., 'Cursor', 'Claude Code')
-  local: boolean // installed in this agent's local skillsDir
-  global: boolean // installed in this agent's globalSkillsDir
-  corrupted: boolean // NEW: true if dir exists but SKILL.md missing
+  agent: string
+  displayName: string
+  local: boolean
+  global: boolean
+  corrupted: boolean
 }
 
 /**
@@ -105,12 +105,11 @@ export type CliHealthStatus =
  */
 export interface ErrorInfo {
   category: ErrorCategory
-  message: string // User-friendly message
-  retryable: boolean // Whether the operation should be retried
+  message: string
+  retryable: boolean
   action?: {
-    // Optional action button
-    label: string // Button label (e.g., "Install CLI")
-    command: string // Command to run
+    label: string
+    command: string
   }
 }
 
@@ -118,15 +117,15 @@ export interface ErrorInfo {
  * Known error categories for classification.
  */
 export type ErrorCategory =
-  | 'cancelled' // SIGTERM — user cancelled
-  | 'terminated' // SIGKILL — unexpected kill
-  | 'file-locked' // EPERM/EBUSY — Windows file locking
-  | 'npx-missing' // npx not in PATH
-  | 'disk-full' // ENOSPC
-  | 'permission-denied' // EACCES
-  | 'cli-missing' // MODULE_NOT_FOUND
-  | 'cli-error' // Generic non-zero exit
-  | 'unknown' // Unclassified error
+  | 'cancelled'
+  | 'terminated'
+  | 'file-locked'
+  | 'npx-missing'
+  | 'disk-full'
+  | 'permission-denied'
+  | 'cli-missing'
+  | 'cli-error'
+  | 'unknown'
 
 /**
  * Result of post-install verification.

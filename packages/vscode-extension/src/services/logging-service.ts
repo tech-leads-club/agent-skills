@@ -1,10 +1,16 @@
 import * as vscode from 'vscode'
 
+/**
+ * Contextual information extracted from an error object.
+ */
 type ErrorContext = {
   summary: string
   stackTrace?: string
 }
 
+/**
+ * Fallback representation of an error object.
+ */
 type ErrorLike = {
   name?: unknown
   message?: unknown
@@ -84,6 +90,12 @@ export class LoggingService implements vscode.Disposable {
     this.outputChannel.dispose()
   }
 
+  /**
+   * Evaluates and extracts a structured error context from an unknown value.
+   *
+   * @param error - Unknown error value.
+   * @returns Context outlining the error.
+   */
   private getErrorContext(error: unknown): ErrorContext {
     if (error instanceof Error) {
       return {
@@ -106,6 +118,13 @@ export class LoggingService implements vscode.Disposable {
     }
   }
 
+  /**
+   * Safely formats an error's name and message payload.
+   *
+   * @param name - The error name.
+   * @param message - The error message.
+   * @returns A string summary of both components.
+   */
   private formatNameAndMessage(name: string, message: string): string {
     const normalizedName = name.trim()
     const normalizedMessage = message.trim()
@@ -121,6 +140,12 @@ export class LoggingService implements vscode.Disposable {
     return `${normalizedName}: ${normalizedMessage}`
   }
 
+  /**
+   * Determines if a given value resembles an Error instance.
+   *
+   * @param value - Unknown value to check.
+   * @returns True if the value matches the footprint of an error.
+   */
   private isErrorLike(value: unknown): value is ErrorLike {
     if (typeof value !== 'object' || value === null) {
       return false
@@ -132,6 +157,12 @@ export class LoggingService implements vscode.Disposable {
     )
   }
 
+  /**
+   * Stringifies a primitive or fallback object error efficiently.
+   *
+   * @param value - Value to stringify.
+   * @returns Safely stringified representation of the value.
+   */
   private stringifyValue(value: unknown): string {
     if (typeof value === 'string') {
       return value

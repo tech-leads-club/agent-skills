@@ -11,6 +11,9 @@ import { SearchBar } from '../components/SearchBar'
 import { SelectionMenu } from '../components/SelectionMenu'
 import { SkillSelectCard } from '../components/SkillSelectCard'
 
+/**
+ * Props for the SelectSkillsPage component.
+ */
 export interface SelectSkillsPageProps {
   action: WebviewAction
   registry: SkillRegistry
@@ -26,17 +29,35 @@ export interface SelectSkillsPageProps {
   onNext: () => void
 }
 
+/**
+ * Searchable wrapper for skills.
+ */
 interface SearchableSkillEntry {
   skill: SkillRegistry['skills'][number]
   categoryName: string
   authorName: string
 }
 
+/**
+ * Checks if a skill is installed in the given scope.
+ *
+ * @param installed - Installation info for a skill.
+ * @param scope - Scope to check.
+ * @returns True if installed.
+ */
 function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
   if (!installed) return false
   return scope === 'local' ? installed.local : installed.global
 }
 
+/**
+ * Checks if a skill is installed across all provided agents in the given scope.
+ *
+ * @param installed - Installation info for a skill.
+ * @param allAgents - List of all agents to check.
+ * @param scope - Scope to check.
+ * @returns True if installed.
+ */
 function isInstalledForAllAgents(
   installed: InstalledSkillsMap[string],
   allAgents: AvailableAgent[],

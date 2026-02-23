@@ -3,10 +3,16 @@ import os from 'node:os'
 import path from 'node:path'
 import { LoggingService } from './logging-service'
 
+/**
+ * Information for a single installed skill inside the lockfile.
+ */
 interface LockfileSkillEntry {
   contentHash?: string
 }
 
+/**
+ * Representation of the lockfile object.
+ */
 interface SkillLockfile {
   skills?: Record<string, LockfileSkillEntry>
 }

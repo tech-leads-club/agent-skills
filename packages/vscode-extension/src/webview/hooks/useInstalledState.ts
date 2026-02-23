@@ -11,7 +11,6 @@ export function useInstalledState() {
   const [installedSkills, setInstalledSkills] = useState<InstalledSkillsMap>({})
 
   useEffect(() => {
-    // Handler for incoming messages
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
       if (message.type === 'reconcileState') {
@@ -20,10 +19,8 @@ export function useInstalledState() {
       }
     }
 
-    // Add listener
     window.addEventListener('message', handleMessage)
 
-    // Cleanup
     return () => {
       window.removeEventListener('message', handleMessage)
     }

@@ -1,6 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
 
+/**
+ * Target collection for bulk selection toggles.
+ */
 type SelectionTarget = 'skills' | 'agents'
 
 /**

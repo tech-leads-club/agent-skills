@@ -15,7 +15,7 @@ import type {
  */
 export type WebviewMessage =
   | { type: 'webviewDidMount' }
-  | { type: 'requestRefresh' } // User clicked Retry/Refresh button
+  | { type: 'requestRefresh' }
   | { type: 'installSkill'; payload: InstallSkillPayload }
   | { type: 'removeSkill'; payload: RemoveSkillPayload }
   | { type: 'executeBatch'; payload: ExecuteBatchPayload }
@@ -31,7 +31,7 @@ export type WebviewMessage =
  */
 export type ExtensionMessage =
   | { type: 'initialize'; payload: InitializePayload }
-  | { type: 'registryUpdate'; payload: RegistryUpdatePayload } // Registry state push
+  | { type: 'registryUpdate'; payload: RegistryUpdatePayload }
   | { type: 'operationStarted'; payload: OperationStartedPayload }
   | { type: 'operationProgress'; payload: OperationProgressPayload }
   | { type: 'operationCompleted'; payload: OperationCompletedPayload }
@@ -58,8 +58,8 @@ export interface InitializePayload {
 export interface RegistryUpdatePayload {
   status: 'loading' | 'ready' | 'error' | 'offline'
   registry: SkillRegistry | null
-  errorMessage?: string // Present when status is 'error'
-  fromCache?: boolean // True if data is from cache (stale or offline)
+  errorMessage?: string
+  fromCache?: boolean
 }
 
 /**
@@ -67,7 +67,7 @@ export interface RegistryUpdatePayload {
  */
 export interface InstallSkillPayload {
   skillName: string
-  agents: string[] // Selected agent identifiers (supports multi-select)
+  agents: string[]
   scope: 'local' | 'global' | 'all'
 }
 
@@ -76,7 +76,7 @@ export interface InstallSkillPayload {
  */
 export interface RemoveSkillPayload {
   skillName: string
-  agents: string[] // Selected agent identifiers (supports multi-select)
+  agents: string[]
   scope: 'local' | 'global' | 'all'
 }
 
@@ -120,7 +120,7 @@ export interface OperationStartedPayload {
 export interface OperationProgressPayload {
   operationId: string
   message: string
-  increment?: number // Optional progress percentage increment
+  increment?: number
   metadata?: OperationBatchMetadata
 }
 
@@ -170,7 +170,7 @@ export interface RequestAgentPickPayload {
 export interface RequestScopePickPayload {
   skillName: string
   action: 'add' | 'remove'
-  agents: string[] // Previously selected agents
+  agents: string[]
 }
 
 /**
@@ -179,7 +179,7 @@ export interface RequestScopePickPayload {
 export interface AgentPickResultPayload {
   skillName: string
   action: 'add' | 'remove'
-  agents: string[] | null // null if user cancelled
+  agents: string[] | null
 }
 
 /**
@@ -189,7 +189,7 @@ export interface ScopePickResultPayload {
   skillName: string
   action: 'add' | 'remove'
   agents: string[]
-  scope: 'local' | 'global' | 'all' | null // null if user cancelled
+  scope: 'local' | 'global' | 'all' | null
 }
 
 /**

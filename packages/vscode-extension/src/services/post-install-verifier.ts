@@ -39,10 +39,11 @@ export class PostInstallVerifier {
 
   /**
    * Verifies installation of a skill across specified agents and scope.
-   * @param skillName - Name of the skill
-   * @param agents - List of agent identifiers (e.g. ['cursor', 'vscode'])
-   * @param scope - Installation scope
-   * @param workspaceRoot - Root of the workspace (required for local scope)
+   *
+   * @param skillName - Name of the skill.
+   * @param agents - List of agent identifiers (e.g. ['cursor', 'vscode']).
+   * @param scope - Installation scope.
+   * @param workspaceRoot - Root of the workspace (required for local scope).
    * @returns Verification result describing missing/corrupted targets.
    */
   async verify(
@@ -73,7 +74,6 @@ export class PostInstallVerifier {
 
       try {
         await access(expectedPath)
-        // File exists, verification passed for this agent
       } catch (error: unknown) {
         if (isErrnoException(error) && error.code === 'ENOENT') {
           corrupted.push({

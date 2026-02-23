@@ -19,15 +19,12 @@ import { AllowedScopesSetting } from './shared/types'
  * Wires service dependencies, providers, commands, and diagnostics.
  *
  * @param context - Extension lifecycle context used to register disposables and access metadata.
- * @returns Nothing. Activation side effects are performed through VS Code registrations.
  */
 export function activate(context: vscode.ExtensionContext): void {
-  // ① Core services
   const outputChannel = vscode.window.createOutputChannel('Agent Skills', { log: true })
   const logger = new LoggingService(outputChannel)
   context.subscriptions.push(logger)
 
-  // ② Domain services
   const registryService = new SkillRegistryService(context, logger)
   const cliSpawner = new CliSpawner(logger)
   const operationQueue = new OperationQueue(cliSpawner)
@@ -38,10 +35,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const skillLockService = new SkillLockService(logger)
   const healthChecker = new CliHealthChecker(cliSpawner, logger)
 
-  // Register disposables
   context.subscriptions.push(registryService, cliSpawner, operationQueue, orchestrator, reconciler, healthChecker)
 
-  // ③ Providers
   const sidebarProvider = new SidebarProvider(
     context,
     logger,
@@ -52,9 +47,12 @@ export function activate(context: vscode.ExtensionContext): void {
   )
   context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider))
 
-  // Policy Service
   const scopePolicyService = new ScopePolicyService()
 
+  /**
+   * Evaluates the current scope policies based on workspace configuration,
+   * trust state, and loaded instances, updating policy states for features.
+   */
   const updatePolicy = () => {
     const config = vscode.workspace.getConfiguration('agentSkills')
     const allowedScopes = config.get<AllowedScopesSetting>('scopes.allowedScopes') || 'all'
@@ -71,10 +69,8 @@ export function activate(context: vscode.ExtensionContext): void {
     sidebarProvider.updatePolicy(policy)
   }
 
-  // Initial update
   updatePolicy()
 
-  // Watch for configuration changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('agentSkills.scopes.allowedScopes')) {
@@ -83,18 +79,14 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   )
 
-  // Watch for trust/workspace changes (affect policy evaluation)
   context.subscriptions.push(
     vscode.workspace.onDidGrantWorkspaceTrust(() => updatePolicy()),
     vscode.workspace.onDidChangeWorkspaceFolders(() => updatePolicy()),
   )
 
-  // ④ Start reconciliation
   reconciler.start()
 
-  // ⑤ CLI health check (non-blocking)
   void healthChecker.check().then((status) => {
-    // Determine healthy state
     const isHealthy = status.status === 'ok' || status.status === 'outdated'
     orchestrator.setCliHealthy(isHealthy)
 
@@ -123,7 +115,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   })
 
-  // ⑥ Commands
   context.subscriptions.push(
     vscode.commands.registerCommand('agentSkills.refresh', async () => {
       logger.info('Refresh command invoked')
@@ -145,6 +136,12 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   )
 
+  /**
+   * Helper to register a command palette action bridging the UI and extension core.
+   *
+   * @param commandId - Unique identifier of the command.
+   * @param handler - Asynchronous function invoked when the command is called.
+   */
   const registerPaletteCommand = (
     commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update' | 'agentSkills.repair',
     handler: () => Promise<void>,
@@ -162,7 +159,6 @@ export function activate(context: vscode.ExtensionContext): void {
   registerPaletteCommand('agentSkills.update', () => sidebarProvider.runCommandPaletteUpdate())
   registerPaletteCommand('agentSkills.repair', () => sidebarProvider.runCommandPaletteRepair())
 
-  // ⑦ Diagnostics (P3)
   const extensionVersion = context.extension?.packageJSON?.version ?? 'unknown'
   logger.info(`Agent Skills v${extensionVersion} activated`)
   logger.info(`VS Code ${vscode.version} | Platform: ${process.platform}`)
@@ -171,9 +167,5 @@ export function activate(context: vscode.ExtensionContext): void {
 
 /**
  * Clean-up hook used by VS Code when the extension is deactivated.
- *
- * @returns Nothing. Cleanup is handled by disposal of registered subscriptions.
  */
-export function deactivate(): void {
-  // All cleanup handled by context.subscriptions disposal
-}
+export function deactivate(): void {}

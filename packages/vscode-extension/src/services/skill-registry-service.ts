@@ -7,7 +7,7 @@ import type { LoggingService } from './logging-service'
  */
 interface RegistryCacheEntry {
   data: SkillRegistry
-  timestamp: number // Date.now() from last successful fetch
+  timestamp: number
 }
 
 /**
@@ -32,11 +32,17 @@ export interface RegistryResult {
  * Implements stale-while-revalidate UX for the marketplace view.
  */
 export class SkillRegistryService implements vscode.Disposable {
+  /** URL for the skills registry JSON file on CDN. */
   private static readonly CDN_URL =
     'https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@main/packages/skills-catalog/skills-registry.json'
-  private static readonly CACHE_KEY = 'agentSkills.registryCache'
-  private static readonly TTL = 3_600_000 // 1 hour in milliseconds
 
+  /** Key used to store the registry cache in VS Code global state. */
+  private static readonly CACHE_KEY = 'agentSkills.registryCache'
+
+  /** Time-to-live for the registry cache in milliseconds. */
+  private static readonly TTL = 3_600_000
+
+  /** Promise resolving to an in-progress registry fetch, used for deduplication. */
   private inFlightFetch: Promise<CdnFetchResult> | null = null
 
   /**

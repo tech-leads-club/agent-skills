@@ -1,5 +1,8 @@
 import type { Skill } from '../../shared/types'
 
+/**
+ * Props for the SkillSelectCard component.
+ */
 export interface SkillSelectCardProps {
   skill: Skill
   categoryName: string

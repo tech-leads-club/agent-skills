@@ -1,3 +1,6 @@
+/**
+ * Props for the SelectionMenu component.
+ */
 export interface SelectionMenuProps {
   selectedCount: number
   allSelected: boolean

@@ -1,5 +1,8 @@
 import type { ExtensionMessage, WebviewMessage } from '../../shared/messages'
 
+/**
+ * The API exposed by the VS Code webview environment.
+ */
 interface VsCodeApi {
   postMessage(msg: unknown): void
   getState<T>(): T | undefined
@@ -8,8 +11,9 @@ interface VsCodeApi {
 
 declare function acquireVsCodeApi(): VsCodeApi
 
-// acquireVsCodeApi() can only be called ONCE per Webview session.
-// This module-level variable ensures singleton behavior.
+/**
+ * A singleton instance of the VS Code API to ensure it is only acquired once.
+ */
 const vscodeApi: VsCodeApi = (
   typeof acquireVsCodeApi === 'function'
     ? acquireVsCodeApi()

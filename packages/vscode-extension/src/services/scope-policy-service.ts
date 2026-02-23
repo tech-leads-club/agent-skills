@@ -23,32 +23,24 @@ export class ScopePolicyService {
       none: [],
     }
 
-    // 1. Environment Constraints
-    // trusted + workspace -> {local, global}
-    // untrusted OR no workspace -> {global}
     const environmentScopes: LifecycleScope[] =
       input.isWorkspaceTrusted && input.hasWorkspaceFolder ? ['local', 'global'] : ['global']
 
-    // 2. Policy Constraints
     const policyScopes = policyMapper[input.allowedScopes]
 
-    // 3. Effective Scopes (Intersection)
     const effectiveScopes = environmentScopes.filter((scope) => policyScopes.includes(scope))
 
-    // 4. Blocked Reason
     let blockedReason: BlockedReason | undefined
 
     if (effectiveScopes.length === 0) {
       if (input.allowedScopes === 'none') {
         blockedReason = 'policy-none'
       } else if (input.allowedScopes === 'local') {
-        // Local was requested but not available in environment
         if (!input.isWorkspaceTrusted) {
           blockedReason = 'workspace-untrusted'
         } else if (!input.hasWorkspaceFolder) {
           blockedReason = 'workspace-missing'
         } else {
-          // Fallback, though logically unreachable if logic above holds
           blockedReason = 'local-disallowed-by-environment'
         }
       }

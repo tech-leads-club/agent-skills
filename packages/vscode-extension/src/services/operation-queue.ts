@@ -40,8 +40,8 @@ export interface QueuedJob {
   operationId: string
   operation: OperationType
   skillName: string
-  args: string[] // CLI arguments for this job
-  cwd: string // Working directory
+  args: string[]
+  cwd: string
   metadata?: OperationBatchMetadata
 }
 
@@ -111,14 +111,11 @@ export class OperationQueue {
    * @returns true if the job was found and cancelled
    */
   cancel(operationId: string): boolean {
-    // Check if in-flight
     if (this.activeJob && this.activeJob.job.operationId === operationId) {
       this.activeJob.process.kill()
-      // The completion handler will emit 'cancelled' status
       return true
     }
 
-    // Check if queued
     const index = this.queue.findIndex((j) => j.operationId === operationId)
     if (index !== -1) {
       const [job] = this.queue.splice(index, 1)
@@ -205,7 +202,6 @@ export class OperationQueue {
    * @returns A promise that resolves when the job reaches a terminal state.
    */
   private async executeJob(job: QueuedJob): Promise<void> {
-    // Emit job started
     this.jobStartedHandlers.forEach((handler) => handler(job))
 
     try {
@@ -220,7 +216,6 @@ export class OperationQueue {
 
       this.jobCompletedHandlers.forEach((handler) => handler(result))
     } catch (error: unknown) {
-      // Handle final failure
       let status: 'error' | 'cancelled' = 'error'
       let errorMessage: string | undefined = toErrorMessage(error)
 
@@ -262,7 +257,6 @@ export class OperationQueue {
       process.onComplete().then((result) => {
         this.activeJob = null
 
-        // Classify the result
         const errorInfo = classifyError(result.stderr, result.exitCode, result.signal)
 
         if (result.exitCode === 0) {
@@ -280,7 +274,6 @@ export class OperationQueue {
             ...(normalizedStderr.length > 0 ? { stack: normalizedStderr } : {}),
           }
 
-          // Reject with ErrorInfo to trigger retry logic if applicable
           reject(errorWithTrace)
         }
       })

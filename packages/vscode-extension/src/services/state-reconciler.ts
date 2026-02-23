@@ -39,7 +39,6 @@ export class StateReconciler implements vscode.Disposable {
    */
   start(): void {
     this.logger.info('Starting state reconciliation')
-    // Initial reconciliation
     void this.reconcile()
   }
 
@@ -55,6 +54,9 @@ export class StateReconciler implements vscode.Disposable {
     this.scheduleReconciliation()
   }
 
+  /**
+   * Evaluates policy to determine if local watchers should be active.
+   */
   private refreshLocalWatchers(): void {
     const allowLocal = this.policy?.effectiveScopes.includes('local') ?? false
     if (allowLocal) {
@@ -64,6 +66,9 @@ export class StateReconciler implements vscode.Disposable {
     }
   }
 
+  /**
+   * Disposes of all local filesystem watchers.
+   */
   private disposeLocalWatchers(): void {
     if (this.watchers.length > 0) {
       this.logger.debug(`Disposing ${this.watchers.length} local FileSystemWatchers`)
@@ -73,13 +78,15 @@ export class StateReconciler implements vscode.Disposable {
     }
   }
 
+  /**
+   * Evaluates policy to determine if the global window focus watcher should be active.
+   */
   private refreshGlobalWatcher(): void {
     const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? false
 
     if (allowGlobal) {
       if (!this.globalFocusSubscription) {
         this.logger.debug('Enabling global focus watcher')
-        // Subscribe to window focus events (catches global directory changes)
         this.globalFocusSubscription = vscode.window.onDidChangeWindowState((state) => {
           if (state.focused) {
             this.logger.debug('Window focused, triggering reconciliation')
@@ -106,7 +113,6 @@ export class StateReconciler implements vscode.Disposable {
 
     try {
       const registry = await this.registryService.getRegistry()
-      // Only scan local if workspace is trusted
       const workspaceRoot = vscode.workspace.isTrusted
         ? (vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null)
         : null
@@ -116,7 +122,6 @@ export class StateReconciler implements vscode.Disposable {
 
       const newState = await this.scanner.scan(registry.skills, workspaceRoot, { includeLocal, includeGlobal })
 
-      // Compare with previous state
       if (this.hasStateChanged(newState)) {
         this.logger.info('Installed state changed, emitting update')
         this.previousState = newState
@@ -203,7 +208,6 @@ export class StateReconciler implements vscode.Disposable {
       return
     }
 
-    // Watch patterns for all agent skill directories
     const patterns = [
       '**/.cursor/skills/**',
       '**/.claude/skills/**',

@@ -2,6 +2,9 @@ import { randomUUID } from 'node:crypto'
 
 import type { LifecycleBatchSelection, LifecycleScopeHint, OperationType } from '../shared/types'
 
+/**
+ * Expresses the capabilities of the CLI version currently installed.
+ */
 export interface CliCapabilities {
   installVariadicSkills: boolean
   removeVariadicSkills: boolean
@@ -10,6 +13,9 @@ export interface CliCapabilities {
   repairViaInstallForce: boolean
 }
 
+/**
+ * Represents a single planned CLI invocation.
+ */
 export interface PlannedInvocation {
   operation: OperationType
   args: string[]
@@ -18,6 +24,9 @@ export interface PlannedInvocation {
   skillNames: string[]
 }
 
+/**
+ * Represents a sequence of CLI invocations to fulfill a batch operation.
+ */
 export interface CliInvocationPlan {
   batchId: string
   mode: 'native-batch' | 'emulated-batch'
@@ -33,10 +42,21 @@ const DEFAULT_CAPABILITIES: CliCapabilities = {
   repairViaInstallForce: true,
 }
 
+/**
+ * Returns the CLI capabilities currently available.
+ *
+ * @returns An object defining supported CLI features.
+ */
 export function getCliCapabilities(): CliCapabilities {
   return DEFAULT_CAPABILITIES
 }
 
+/**
+ * Normalizes a scope hint into a list of specific scopes.
+ *
+ * @param scope - The requested scope hint.
+ * @returns An array of concrete scopes to target.
+ */
 function buildScopeList(scope: LifecycleScopeHint): LifecycleScopeHint[] {
   if (scope === 'all') {
     return ['local', 'global']
@@ -44,16 +64,37 @@ function buildScopeList(scope: LifecycleScopeHint): LifecycleScopeHint[] {
   return [scope]
 }
 
+/**
+ * Appends skill name arguments to a command base.
+ *
+ * @param commonArgs - The base command arguments.
+ * @param skills - The skill names to append.
+ * @returns The new argument array including skills.
+ */
 function buildSkillArgs(commonArgs: string[], skills: string[]): string[] {
   if (skills.length === 0) return commonArgs
   return [...commonArgs, '-s', ...skills]
 }
 
+/**
+ * Appends agent id arguments to a command base.
+ *
+ * @param commonArgs - The base command arguments.
+ * @param agents - The agent ids to append.
+ * @returns The new argument array including agents.
+ */
 function buildAgentArgs(commonArgs: string[], agents?: string[]): string[] {
   if (!agents?.length) return commonArgs
   return [...commonArgs, '-a', ...agents]
 }
 
+/**
+ * Plans a sequence of CLI invocations to fulfill a batch selection.
+ *
+ * @param selection - The batch operation details.
+ * @param capabilities - The CLI capabilities available.
+ * @returns The planned sequence of CLI invocations.
+ */
 export function planBatch(
   selection: LifecycleBatchSelection,
   capabilities: CliCapabilities = getCliCapabilities(),

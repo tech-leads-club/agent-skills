@@ -12,6 +12,9 @@ import { HomePage } from './views/HomePage'
 import { SelectAgentsPage } from './views/SelectAgentsPage'
 import { SelectSkillsPage } from './views/SelectSkillsPage'
 
+/**
+ * Application connection status.
+ */
 type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
 
 /**
@@ -58,6 +61,13 @@ function NoRegistryState() {
   )
 }
 
+/**
+ * Calculates a fallback scope if the currently selected one becomes disallowed.
+ *
+ * @param policy - The validated scope constraints.
+ * @param currentScope - The currently chosen scope.
+ * @returns The new best-effort scope, or null if ok.
+ */
 function getFallbackScope(policy: ScopePolicyStatePayload | null, currentScope: LifecycleScope): LifecycleScope | null {
   if (!policy || policy.effectiveScopes.length === 0) {
     return null

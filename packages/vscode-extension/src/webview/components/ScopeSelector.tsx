@@ -16,6 +16,9 @@ const SCOPE_LABELS: Readonly<Record<LifecycleScope, string>> = {
 
 const SCOPE_SELECTOR_STATE_KEY = 'scopeSelectorState'
 
+/**
+ * Structure of the state persisted to VS Code's webview API.
+ */
 interface PersistedWebviewState {
   [SCOPE_SELECTOR_STATE_KEY]?: {
     selectedScope: LifecycleScope
@@ -23,16 +26,32 @@ interface PersistedWebviewState {
   [key: string]: unknown
 }
 
+/**
+ * Type guard for LifecycleScope.
+ *
+ * @param scope - Unknown value to check.
+ * @returns True if value is a valid LifecycleScope.
+ */
 function isLifecycleScope(scope: unknown): scope is LifecycleScope {
   return scope === 'local' || scope === 'global'
 }
 
+/**
+ * Reads the previously selected scope from persisted state.
+ *
+ * @returns The persisted scope or null if none/invalid.
+ */
 function readPersistedScope(): LifecycleScope | null {
   const persistedState = getState<PersistedWebviewState>()
   const persistedScope = persistedState?.[SCOPE_SELECTOR_STATE_KEY]?.selectedScope
   return isLifecycleScope(persistedScope) ? persistedScope : null
 }
 
+/**
+ * Saves the selected scope to persisted state.
+ *
+ * @param selectedScope - The scope to persist.
+ */
 function persistSelectedScope(selectedScope: LifecycleScope): void {
   const persistedState = getState<PersistedWebviewState>() ?? {}
   setState<PersistedWebviewState>({
@@ -43,6 +62,9 @@ function persistSelectedScope(selectedScope: LifecycleScope): void {
   })
 }
 
+/**
+ * Props for the ScopeSelector component.
+ */
 export interface ScopeSelectorProps {
   value: LifecycleScope
   onChange: (scope: LifecycleScope) => void

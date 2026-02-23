@@ -17,14 +17,23 @@ import type {
   SkillRegistry,
 } from '../shared/types'
 
+/**
+ * QuickPick item representing an agent.
+ */
 interface AgentQuickPickItem extends vscode.QuickPickItem {
   agentId: string
 }
 
+/**
+ * QuickPick item representing an installation scope.
+ */
 interface ScopeQuickPickItem extends vscode.QuickPickItem {
   scopeId: 'local' | 'global' | 'all'
 }
 
+/**
+ * QuickPick item representing a skill in the registry.
+ */
 interface SkillQuickPickItem extends vscode.QuickPickItem {
   skillName: string
   categoryId: string
@@ -32,8 +41,14 @@ interface SkillQuickPickItem extends vscode.QuickPickItem {
   localHash?: string
 }
 
+/**
+ * Modes defining which skills can be selected for an action.
+ */
 type SkillSelectionMode = 'add' | 'remove' | 'update' | 'repair'
 
+/**
+ * Summary required for the user to confirm a lifecycle action.
+ */
 interface ConfirmationSummary {
   title: string
   message: string
@@ -41,6 +56,9 @@ interface ConfirmationSummary {
   confirmLabel: 'Install' | 'Remove' | 'Update' | 'Repair'
 }
 
+/**
+ * State of a batch operation in progress.
+ */
 interface BatchProgressState {
   action: 'install' | 'remove'
   remaining: number
@@ -76,12 +94,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly reconciler: StateReconciler,
     private readonly skillLockService: SkillLockService,
   ) {
-    // Subscribe to state changes and push to webview
     this.reconciler.onStateChanged((installedSkills) => {
       void this.postReconciledState(installedSkills)
     })
 
-    // Subscribe to orchestrator events
     this.orchestrator.onOperationEvent((event) => {
       if (event.type === 'started') {
         if (event.metadata && !this.batchProgress.has(event.metadata.batchId)) {
@@ -109,7 +125,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             operationId: event.operationId,
             message: event.message || '',
             metadata: event.metadata,
-            increment: undefined, // CLI doesn't support % yet
+            increment: undefined,
           },
         })
       } else if (event.type === 'completed') {
@@ -164,7 +180,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
         }
 
-        // Reconcile installed state after operation completes to refresh UI
         void this.reconcileAndPostInstalledState()
       }
     })
@@ -204,13 +219,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this.getHtmlForWebview(webviewView.webview)
 
-    // Wire message handler
     const messageDisposable = webviewView.webview.onDidReceiveMessage((message: WebviewMessage) =>
       this.handleMessage(message, webviewView.webview),
     )
     this.context.subscriptions.push(messageDisposable)
 
-    // Listen for trust change
     const trustDisposable = vscode.workspace.onDidGrantWorkspaceTrust(() => {
       this.postMessage({
         type: 'trustState',
@@ -1037,7 +1050,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       const installed = this.findAgentInstall(installedInfo, agent.agent)
 
       if (action === 'add') {
-        // Check if fully installed relative to policy
         const fullyInstalledLocal = allowLocal ? installed?.local : true
         const fullyInstalledGlobal = allowGlobal ? installed?.global : true
 
@@ -1403,15 +1415,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       case 'update': {
         if (!installedInfo || !skill.contentHash) return false
 
-        // Enforce policy: if only local is allowed, don't update if skill is only global
         if (!allowLocal && installedInfo.local && !installedInfo.global) return false
         if (!allowGlobal && installedInfo.global && !installedInfo.local) return false
 
-        // If strict policy: if local-only, but skill is global, can we update?
-        // Requirement: "If local only: Update/Repair only local installs."
-        // If skill has GLOBAL install, and we are LOCAL ONLY, we probably shouldn't show it for update
-        // unless update is scoped (which it isn't, based on orchestrator).
-        // Assuming strict filtering:
         if (!allowLocal && installedInfo.local) return false
         if (!allowGlobal && installedInfo.global) return false
 
@@ -1420,7 +1426,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
       case 'repair': {
         if (!installedInfo) return false
-        // Filter by policy
         const hasLocalCorruption = installedInfo.agents.some((a) => a.local && a.corrupted)
         const hasGlobalCorruption = installedInfo.agents.some((a) => a.global && a.corrupted)
 
@@ -1895,7 +1900,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves once status messages are posted.
    */
   private async loadAndPushRegistry(webview: vscode.Webview, forceRefresh = false): Promise<void> {
-    // Send loading status
     await this.postMessage({
       type: 'registryUpdate',
       payload: { status: 'loading', registry: null },
@@ -1954,6 +1958,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return result === summary.confirmLabel
   }
 
+  /**
+   * Formats the confirmation summary used to prompt the user.
+   *
+   * @param selection - The selected skills, agents, and scope.
+   * @param agentNames - Target agent display names.
+   * @returns Configured confirmation summary payload.
+   */
   private formatConfirmationSummary(selection: LifecycleBatchSelection, agentNames: string[]): ConfirmationSummary {
     const actionLabel = this.getActionDisplayName(selection.action)
     const scopeLabel = this.getScopeLabel(selection.scope)
@@ -1961,11 +1972,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const subject = skillCount > 0 ? `${skillCount} skill(s)` : 'All installed skills'
     const agentLabel = agentNames.length > 0 ? agentNames.join(', ') : 'Managed by the CLI'
     const messageParts = [`${actionLabel} ${subject}`, `Scope: ${scopeLabel}`]
-    if (selection.action !== 'update') {
-      messageParts.push(`Agents: ${agentLabel}`)
-    } else {
-      messageParts.push(`Agents: ${agentLabel}`)
-    }
+    messageParts.push(`Agents: ${agentLabel}`)
+
     const detail = skillCount > 0 ? selection.skills.join(', ') : undefined
     return {
       title: `${actionLabel} ${subject}`,
@@ -1975,6 +1983,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Retrieves a human-readable label for a scope hint.
+   *
+   * @param scope - Lifecycle scope hint.
+   * @returns Formatted scope label string.
+   */
   private getScopeLabel(scope: LifecycleScopeHint): string {
     switch (scope) {
       case 'local':
@@ -1988,6 +2002,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Maps an action name to a capitalised display name.
+   *
+   * @param action - Action identifier verb.
+   * @returns Capitalised noun or verb describing the action.
+   */
   private getActionDisplayName(action: LifecycleBatchSelection['action']): string {
     switch (action) {
       case 'install':
@@ -2001,6 +2021,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  /**
+   * Casts action name to the exact label requested by the confirmation dialog.
+   *
+   * @param action - Action to be parsed.
+   * @returns Strictly typed confirming string label.
+   */
   private getConfirmLabel(action: LifecycleBatchSelection['action']): ConfirmationSummary['confirmLabel'] {
     return this.getActionDisplayName(action) as ConfirmationSummary['confirmLabel']
   }

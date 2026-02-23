@@ -55,16 +55,16 @@ export class CliSpawner implements vscode.Disposable {
 
   /**
    * Spawns a CLI process with the given arguments.
-   * @param args CLI arguments (e.g., ['install', '-s', 'seo', '-a', 'cursor'])
-   * @param options Spawn options (cwd, operationId)
-   * @returns A CliProcess handle for output streaming and lifecycle control
+   *
+   * @param args - CLI arguments (e.g., ['install', '-s', 'seo', '-a', 'cursor']).
+   * @param options - Spawn options (cwd, operationId).
+   * @returns A CliProcess handle for output streaming and lifecycle control.
    */
   spawn(args: string[], options: SpawnOptions): CliProcess {
     this.logger.debug(
       `[${options.operationId}] Spawn requested: command=npx agent-skills args="${args.join(' ')}" cwd="${options.cwd}" platform=${process.platform}`,
     )
 
-    // Security: Validate skill name if present
     const skillNameIndex = args.indexOf('-s')
     if (skillNameIndex !== -1 && skillNameIndex + 1 < args.length) {
       const skillName = args[skillNameIndex + 1]
@@ -88,7 +88,7 @@ export class CliSpawner implements vscode.Disposable {
       childProcess = spawn(command, ['agent-skills', ...args], {
         cwd: options.cwd,
         shell: useShell,
-        stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr
+        stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,
       })
     } catch (error: unknown) {
@@ -116,7 +116,6 @@ export class CliSpawner implements vscode.Disposable {
     const outputHandlers: Array<(line: string) => void> = []
     let stderrBuffer = ''
 
-    // Line-by-line buffering for stdout
     let stdoutBuffer = ''
     childProcess.stdout?.on('data', (chunk: Buffer) => {
       stdoutBuffer += chunk.toString()
@@ -132,14 +131,12 @@ export class CliSpawner implements vscode.Disposable {
       }
     })
 
-    // Collect stderr for error reporting
     childProcess.stderr?.on('data', (chunk: Buffer) => {
       const text = chunk.toString()
       stderrBuffer += text
       this.logger.debug(`[${options.operationId}] stderr: ${this.stripAnsi(text)}`)
     })
 
-    // Promise that resolves when process exits
     const completionPromise = new Promise<CliResult>((resolve) => {
       let resolved = false
       const resolveCompletion = (result: CliResult) => {
@@ -151,7 +148,6 @@ export class CliSpawner implements vscode.Disposable {
       childProcess.on('close', (exitCode, signal) => {
         if (resolved) return
 
-        // Flush remaining stdout buffer
         if (stdoutBuffer.trim()) {
           const stripped = this.stripAnsi(stdoutBuffer)
           this.logger.debug(`[${options.operationId}] stdout (final): ${stripped}`)

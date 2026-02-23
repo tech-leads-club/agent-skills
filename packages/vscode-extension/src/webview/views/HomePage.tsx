@@ -9,6 +9,9 @@ import type {
 import { RestrictedModeBanner } from '../components/RestrictedModeBanner'
 import { ScopeSelector } from '../components/ScopeSelector'
 
+/**
+ * Props for the HomePage component.
+ */
 export interface HomePageProps {
   registry: SkillRegistry | null
   installedSkills: InstalledSkillsMap
@@ -25,11 +28,26 @@ export interface HomePageProps {
   onRepair: () => void
 }
 
+/**
+ * Checks if a skill is installed in the given scope for *any* agent.
+ *
+ * @param installed - Installation metadata for a specific skill.
+ * @param scope - The target scope to check.
+ * @returns True if installed in the specified scope.
+ */
 function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
   if (!installed) return false
   return scope === 'local' ? installed.local : installed.global
 }
 
+/**
+ * Checks if a skill is installed across all provided agents for the given scope.
+ *
+ * @param installed - Installation metadata for a specific skill.
+ * @param allAgents - List of agents to verify against.
+ * @param scope - The target scope to check.
+ * @returns True if installed on all agents in the specific scope.
+ */
 function isInstalledForAllAgents(
   installed: InstalledSkillsMap[string],
   allAgents: AvailableAgent[],
@@ -44,6 +62,14 @@ function isInstalledForAllAgents(
   })
 }
 
+/**
+ * Checks if there are any available updates for skills installed in the specified scope.
+ *
+ * @param skills - Array of skills from the registry.
+ * @param installedSkills - Map of installed skills.
+ * @param scope - The target scope to check.
+ * @returns True if any skill has an update.
+ */
 function hasUpdatesForScope(
   skills: SkillRegistry['skills'],
   installedSkills: InstalledSkillsMap,
@@ -59,6 +85,13 @@ function hasUpdatesForScope(
   })
 }
 
+/**
+ * Checks if there are any corrupted installations in the specified scope.
+ *
+ * @param installedSkills - Map of installed skills.
+ * @param scope - The target scope to check.
+ * @returns True if any corrupted installations exist.
+ */
 function hasCorruptedInstallationsForScope(installedSkills: InstalledSkillsMap, scope: LifecycleScope): boolean {
   return Object.values(installedSkills).some((installed) => {
     if (!installed || !isInstalledForScope(installed, scope)) return false

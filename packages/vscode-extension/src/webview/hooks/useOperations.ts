@@ -16,9 +16,9 @@ export interface OperationState {
   operationId: string
   operation: OperationType
   skillName: string
-  message: string // Progress message
-  increment?: number // Optional progress %
-  pending?: boolean // True when awaiting QuickPick selection
+  message: string
+  increment?: number
+  pending?: boolean
 }
 
 /**
@@ -56,7 +56,7 @@ export function useOperations() {
       }
 
       next.set(skillName, {
-        operationId: '', // No real operation yet
+        operationId: '',
         operation,
         skillName,
         message: 'Selecting...',
@@ -75,7 +75,6 @@ export function useOperations() {
   const clearPending = useCallback((skillName: string) => {
     setOperations((prev) => {
       const current = prev.get(skillName)
-      // Only clear if still in pending state (not yet replaced by a real operation)
       if (current?.pending) {
         const next = new Map(prev)
         next.delete(skillName)
@@ -86,7 +85,6 @@ export function useOperations() {
   }, [])
 
   useEffect(() => {
-    // Handler for incoming messages
     const handleMessage = (event: MessageEvent) => {
       const message = event.data as ExtensionMessage
 
@@ -105,8 +103,6 @@ export function useOperations() {
       } else if (message.type === 'operationProgress') {
         const payload = message.payload as OperationProgressPayload
         setOperations((prev) => {
-          // Find operation by ID (value), not key (skillName)
-          // Since we track by skillName for UI lookups, we iterate
           let skillName: string | undefined
           for (const [key, state] of prev.entries()) {
             if (state.operationId === payload.operationId) {
@@ -137,7 +133,6 @@ export function useOperations() {
       } else if (message.type === 'agentPickResult') {
         const payload = message.payload as AgentPickResultPayload
         if (payload.agents === null) {
-          // User cancelled agent pick → clear pending state
           setOperations((prev) => {
             const current = prev.get(payload.skillName)
             if (current?.pending) {
@@ -151,7 +146,6 @@ export function useOperations() {
       } else if (message.type === 'scopePickResult') {
         const payload = message.payload as ScopePickResultPayload
         if (payload.scope === null) {
-          // User cancelled scope pick → clear pending state
           setOperations((prev) => {
             const current = prev.get(payload.skillName)
             if (current?.pending) {
@@ -162,14 +156,11 @@ export function useOperations() {
             return prev
           })
         }
-        // If scope is selected, the pending state will be replaced by operationStarted
       }
     }
 
-    // Add listener
     window.addEventListener('message', handleMessage)
 
-    // Cleanup
     return () => {
       window.removeEventListener('message', handleMessage)
     }
