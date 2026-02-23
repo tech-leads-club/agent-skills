@@ -3,7 +3,6 @@ import Spinner from 'ink-spinner'
 import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 
-import { installedSkillsAtom } from '../atoms/installedSkills'
 import { Header } from '../components/Header'
 import { MultiSelectPrompt } from '../components/MultiSelectPrompt'
 import { SelectPrompt } from '../components/SelectPrompt'
@@ -12,10 +11,15 @@ import { colors, symbols } from '../theme'
 import type { AgentType } from '../types'
 import { AgentSelector } from './AgentSelector'
 
+import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
+import { installedSkillsAtom } from '../atoms/installedSkills'
+
 export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: AgentType[]; onExit: () => void }) {
   const [internalAgents, setInternalAgents] = useState<AgentType[]>(selectedAgents || [])
-  const installedSkills = useAtomValue(installedSkillsAtom)
   const { removeMultiple, progress, results } = useRemover()
+
+  const installedSkills = useAtomValue(installedSkillsAtom)
+  const deprecatedMap = useAtomValue(deprecatedSkillsAtom)
 
   const [step, setStep] = useState<'agent-select' | 'select' | 'confirm' | 'removing' | 'done'>(
     selectedAgents ? 'select' : 'agent-select',
@@ -36,12 +40,13 @@ export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: Agen
   const skillNames = useMemo(() => Object.keys(filteredSkills), [filteredSkills])
 
   const selectItems = useMemo(() => {
-    return skillNames.map((name) => ({
-      label: name,
-      value: name,
-      hint: `${filteredSkills[name].length} agents: ${filteredSkills[name].join(', ')}`,
-    }))
-  }, [skillNames, filteredSkills])
+    return skillNames.map((name) => {
+      const isDeprecated = deprecatedMap instanceof Map && deprecatedMap.has(name)
+      const agentHint = `${filteredSkills[name].length} agents: ${filteredSkills[name].join(', ')}`
+      const hint = isDeprecated ? `${agentHint} ⚠ deprecated` : agentHint
+      return { label: name, value: name, hint }
+    })
+  }, [skillNames, filteredSkills, deprecatedMap])
 
   useInput((_, key) => {
     if (step === 'done' && (key.return || key.escape)) onExit()
