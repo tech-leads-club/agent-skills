@@ -13,6 +13,10 @@
       "name": "Skill & Agent Creation",
       "description": "Skills for creating new skills and subagents"
     },
+    "decision-making": {
+      "name": "Decision Making",
+      "description": "Skills for critical thinking, structured dissent, and decision quality"
+    },
     "design": {
       "name": "Design",
       "description": "Skills for UI/UX design and design systems"
@@ -20,6 +24,10 @@
     "development": {
       "name": "Development",
       "description": "Skills for software development workflows"
+    },
+    "learning": {
+      "name": "Learning & Growth",
+      "description": "Skills for deliberate learning, skill development, and knowledge retention during AI-assisted work"
     },
     "monitoring": {
       "name": "Monitoring",
@@ -80,7 +88,9 @@
         "scripts/security_review.py",
         "scripts/well_architected_review.py"
       ],
-      "contentHash": "ae13aed5247978ad0b05d4020aad4fa5b43f33fdee1463bcb417443142cb7b74"
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "101e65c966f9388e816d4a3465dd5525b36f21063e69a8df3431a263b97f0bba"
     },
     {
       "name": "best-practices",
@@ -425,6 +435,20 @@
       "contentHash": "2784a4cc3205752c76ba936211ffd33a4f2acac9943a90513dda6280feda82c9"
     },
     {
+      "name": "codenavi",
+      "description": "Your pathfinder for navigating unknown codebases. Investigates with precision, implements surgically, and never assumes — if it doesn't know, it says so. Maintains a .notebook/ knowledge base that grows  across sessions, turning every discovery into lasting intelligence. Summons available skills, MCPs, and docs when the mission demands. Use for bug fixes, features, refactoring, flow investigation, or any development task in unfamiliar territory. Triggers on 'fix this', 'implement this', 'how does this work', 'investigate this flow', 'help me with this code'. Do NOT use for greenfield scaffolding, CI/CD, or infrastructure provisioning.",
+      "category": "development",
+      "path": "(development)/codenavi",
+      "files": [
+        "SKILL.md",
+        "references/coding-principles.md",
+        "references/notebook-spec.md"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "ef536dc88fb5f3c047b396cf62a0a6b287e8c915e73fdd42023249b44ad4b527"
+    },
+    {
       "name": "coding-guidelines",
       "description": "Apply when writing, modifying, or reviewing code. Behavioral guidelines to reduce common LLM coding mistakes. Triggers on implementation tasks, code changes, refactoring, bug fixes, or feature development.",
       "category": "development",
@@ -505,16 +529,6 @@
         "SKILL.md"
       ],
       "contentHash": "71a9f203b5a96c2a551fd8b0e0fbee979f7fd335a128a56e65002442a3416b32"
-    },
-    {
-      "name": "cursor-skill-creator",
-      "description": "Creates Cursor-specific AI agent skills with SKILL.md format. Use when creating skills for Cursor editor specifically, following Cursor's patterns and directories (.cursor/skills/). Triggers on \"cursor skill\", \"create cursor skill\".",
-      "category": "creation",
-      "path": "(creation)/cursor-skill-creator",
-      "files": [
-        "SKILL.md"
-      ],
-      "contentHash": "baab6a3de2bf32d09abf28423fce5135b0ae269dd7c609863c60626fe5c8f502"
     },
     {
       "name": "cursor-subagent-creator",
@@ -627,6 +641,21 @@
       "contentHash": "0c2760ab7ff1668a020d7555e374bd1a388878ba56f585753f5f7dcf433e02b5"
     },
     {
+      "name": "frontend-blueprint",
+      "description": "AI frontend specialist and design consultant that guides users through a structured discovery process before generating any code. Collects visual references, design tokens, typography, icons, layout preferences, and brand guidelines to ensure the final output matches the user's vision with high fidelity. Use when the user asks to build, design, create, or improve any frontend interface — websites, landing pages, dashboards, components, apps, emails, forms, modals, or any UI element. Also triggers on \"build me a UI\", \"design a page\", \"create a component\", \"improve this layout\", \"make this look better\", \"frontend\", \"interface\", \"redesign\", or when the user provides mockups, screenshots, or design references. Do NOT use for backend logic, API design, database schemas, or non-visual code tasks.",
+      "category": "architecture",
+      "path": "(architecture)/frontend-blueprint",
+      "files": [
+        "SKILL.md",
+        "references/collection-guide.md",
+        "references/design-principles.md",
+        "references/stitch-integration.md"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "c79c5acbf69e88e1b0c848e64afb671f33091e32b6dcb1b2e6f9c78213a10ec3"
+    },
+    {
       "name": "gh-address-comments",
       "description": "Help address review/issue comments on the open GitHub PR for the current branch using gh CLI; verify gh auth first and prompt the user to authenticate if not logged in.",
       "category": "development",
@@ -664,6 +693,56 @@
         "SKILL.md"
       ],
       "contentHash": "4f9482b652c88273ebd71dbfa8ae70274c260ce927b164aa06edb1de2952c727"
+    },
+    {
+      "name": "learning-opportunities",
+      "description": "Facilitates deliberate skill development during AI-assisted coding. Offers interactive learning exercises after architectural work (new files, schema changes, refactors). Use when completing features, making design decisions, or when user asks to understand code better. Triggers on \"learning exercise\", \"help me understand\", \"teach me\", \"why does this work\", or after creating new files/modules. Do not trigger during urgent debugging, quick fixes, or when user says \"just ship it\".",
+      "category": "learning",
+      "path": "(learning)/learning-opportunities",
+      "files": [
+        "SKILL.md",
+        "references/PRINCIPLES.md"
+      ],
+      "author": "Chris Hicks",
+      "version": "1.1.0",
+      "contentHash": "004b40dfe7f69e8addbc66eeb375e8edde9ed1dd5cd99a5bd39084eb797c24eb"
+    },
+    {
+      "name": "legacy-migration-planner",
+      "description": "Use when planning legacy system migrations, codebase modernization, monolith decomposition, microservices consolidation, cross-language rewrites, or framework upgrades. Invoke for strangler fig pattern, incremental migration strategy, or refactoring roadmaps.",
+      "category": "architecture",
+      "path": "(architecture)/legacy-migration-planner",
+      "files": [
+        "SKILL.md",
+        "references/assessment-framework.md",
+        "references/frontend-backend-strategies.md",
+        "references/plan-phase.md",
+        "references/research-phase.md",
+        "references/strangler-fig-patterns.md",
+        "references/testing-safety-nets.md"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "3a804e99768bf9a6971abab75e804a687f5477677bc33a7bff542591874422b0"
+    },
+    {
+      "name": "nestjs-modular-monolith",
+      "description": "Specialist in designing and implementing scalable modular monolith architectures using NestJS with DDD, Clean Architecture, and CQRS patterns. Use when building modular monolith backends, designing bounded contexts, creating domain modules, implementing event-driven module communication, or when user mentions \"modular monolith\", \"bounded contexts\", \"module boundaries\", \"DDD\", \"CQRS\", \"clean architecture NestJS\", or \"monolith to microservices\". Do NOT use for simple CRUD APIs, frontend work, or general NestJS questions without architectural context.",
+      "category": "development",
+      "path": "(development)/nestjs-modular-monolith",
+      "files": [
+        "SKILL.md",
+        "references/architecture-patterns.md",
+        "references/authentication.md",
+        "references/module-communication.md",
+        "references/stack-configuration.md",
+        "references/state-isolation.md",
+        "references/testing-patterns.md",
+        "scripts/validate-isolation.sh"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "0bf9fee4b6a151866c38204557b13452feefb315b7d982a36c79125bcc3d076a"
     },
     {
       "name": "netlify-deploy",
@@ -870,56 +949,21 @@
       "contentHash": "2b93a24df3e90c7ac3751c0bafcccca6bd9518df00cd34475369e61370e5630d"
     },
     {
-      "name": "react-native-skills",
-      "description": "React Native and Expo best practices for building performant mobile apps. Use",
+      "name": "react-native-expert",
+      "description": "Senior React Native and Expo engineer for building production-ready cross-platform mobile apps. Use when building React Native components, implementing navigation with Expo Router, optimizing list and scroll performance, working with animations via Reanimated, handling platform-specific code (iOS/Android), integrating native modules, or structuring Expo projects. Triggers on React Native, Expo, mobile app, iOS app, Android app, cross-platform, native module, FlatList, FlashList, LegendList, Reanimated, Expo Router, mobile performance, app store. Do NOT use for Flutter, web-only React, or backend Node.js tasks.",
       "category": "development",
-      "path": "(development)/react-native-skills",
+      "path": "(development)/react-native-expert",
       "files": [
-        "AGENTS.md",
-        "README.md",
         "SKILL.md",
-        "rules/_sections.md",
-        "rules/_template.md",
-        "rules/animation-derived-value.md",
-        "rules/animation-gesture-detector-press.md",
-        "rules/animation-gpu-properties.md",
-        "rules/design-system-compound-components.md",
-        "rules/fonts-config-plugin.md",
-        "rules/imports-design-system-folder.md",
-        "rules/js-hoist-intl.md",
-        "rules/list-performance-callbacks.md",
-        "rules/list-performance-function-references.md",
-        "rules/list-performance-images.md",
-        "rules/list-performance-inline-objects.md",
-        "rules/list-performance-item-expensive.md",
-        "rules/list-performance-item-memo.md",
-        "rules/list-performance-item-types.md",
-        "rules/list-performance-virtualize.md",
-        "rules/monorepo-native-deps-in-app.md",
-        "rules/monorepo-single-dependency-versions.md",
-        "rules/navigation-native-navigators.md",
-        "rules/react-compiler-destructure-functions.md",
-        "rules/react-compiler-reanimated-shared-values.md",
-        "rules/react-state-dispatcher.md",
-        "rules/react-state-fallback.md",
-        "rules/react-state-minimize.md",
-        "rules/rendering-no-falsy-and.md",
-        "rules/rendering-text-in-text-component.md",
-        "rules/scroll-position-no-state.md",
-        "rules/state-ground-truth.md",
-        "rules/ui-expo-image.md",
-        "rules/ui-image-gallery.md",
-        "rules/ui-measure-views.md",
-        "rules/ui-menus.md",
-        "rules/ui-native-modals.md",
-        "rules/ui-pressable.md",
-        "rules/ui-safe-area-scroll.md",
-        "rules/ui-scrollview-content-inset.md",
-        "rules/ui-styling.md"
+        "references/expo-router.md",
+        "references/performance-rules.md",
+        "references/platform-handling.md",
+        "references/project-structure.md",
+        "references/storage-patterns.md"
       ],
-      "author": "vercel",
+      "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "33bbf1cdf655f24e7cfc6ecbe7035976b6df3a866858f50c2931c8b858a38aaf"
+      "contentHash": "9da108258c0a93cd04b57d94a5a7788e6c37c704ca4322ca9b6bedce8e3ff683"
     },
     {
       "name": "render-deploy",
@@ -952,7 +996,7 @@
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "f9d3cfc28d1e880f083b29bc37b79147dca838e91330c0286b6620798be2a1c4"
+      "contentHash": "e781996f246735c48f52b0fd21c86901a5916a6dee2432db80a236976d903c61"
     },
     {
       "name": "security-best-practices",
@@ -1058,14 +1102,20 @@
       "contentHash": "1732419cd1dfc1096790931db29f5bd665d54d27f9ebb80238cb8abb92ab986a"
     },
     {
-      "name": "skill-creator",
-      "description": "Guide for creating effective AI agent skills. Use when users want to create a new skill (or update an existing skill) that extends an AI agent's capabilities with specialized knowledge, workflows, or tool integrations. Works with any agent that supports the SKILL.md format (Claude Code, Cursor, Roo, Cline, Windsurf, etc.). Triggers on \"create skill\", \"new skill\", \"package knowledge\", \"skill for\".",
+      "name": "skill-architect",
+      "description": "Expert guide for designing and building high-quality skills from scratch through structured conversation. Use whenever someone wants to create a new skill, build a skill, design a skill, or asks for help making Agents do something consistently. Also use when someone says \"turn this into a skill\", \"I want to automate this workflow\", \"how do I teach my Agent to do X\", or mentions creating SKILL.md files. Covers standalone skills and MCP-enhanced workflows.",
       "category": "creation",
-      "path": "(creation)/skill-creator",
+      "path": "(creation)/skill-architect",
       "files": [
-        "SKILL.md"
+        "SKILL.md",
+        "references/examples.md",
+        "references/patterns.md",
+        "references/quality-checklist.md",
+        "scripts/validate_skill.py"
       ],
-      "contentHash": "5630765536263e907d31eec2d2c99d2ed87100add353e14b3bc269d0e1eb2d51"
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "124572815e436ce117594d7fd204454a271377b94d3a9e49286a6bae025af2cf"
     },
     {
       "name": "subagent-creator",
@@ -1087,6 +1137,25 @@
         "SKILL.md"
       ],
       "contentHash": "e76734fb9240df31760a2bbeb80afbd70e43a5d4fa3b9fb9c23c6c1a4a7862bf"
+    },
+    {
+      "name": "the-fool",
+      "description": "Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing.",
+      "category": "decision-making",
+      "path": "(decision-making)/the-fool",
+      "files": [
+        "SKILL.md",
+        "references/cognitive-bias-inventory.md",
+        "references/dialectic-synthesis.md",
+        "references/evidence-audit.md",
+        "references/mode-selection-guide.md",
+        "references/pre-mortem-analysis.md",
+        "references/red-team-adversarial.md",
+        "references/socratic-questioning.md"
+      ],
+      "author": "https://github.com/Jeffallan",
+      "version": "2.0.0",
+      "contentHash": "c6aa96132782df3a90f24b9a95df4c60fbac408e38016c889783bf09145e5538"
     },
     {
       "name": "tlc-spec-driven",
@@ -1112,7 +1181,7 @@
       ],
       "author": "github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "1879205e8a56503b2093a9e5fa4fad0253431aca753cdde7e32762ca39469a0b"
+      "contentHash": "6023642bbb0bc5b160bcb73a727c9198787200f023ad92adec30a3fe13c89e02"
     },
     {
       "name": "vercel-deploy",
@@ -1153,6 +1222,29 @@
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "522ef3fd0af98e5d538a32408e768c0bcbd540f29eccb36ee0ed38d9142b4f57"
+    }
+  ],
+  "deprecated": [
+    {
+      "name": "react-native-skills",
+      "message": "Use react-native-expert instead",
+      "alternatives": [
+        "react-native-expert"
+      ]
+    },
+    {
+      "name": "cursor-skill-creator",
+      "message": "Use skill-architect instead",
+      "alternatives": [
+        "skill-architect"
+      ]
+    },
+    {
+      "name": "skill-creator",
+      "message": "Use skill-architect instead",
+      "alternatives": [
+        "skill-architect"
+      ]
     }
   ]
 }
