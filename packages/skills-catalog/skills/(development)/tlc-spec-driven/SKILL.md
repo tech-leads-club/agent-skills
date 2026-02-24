@@ -1,9 +1,10 @@
 ---
 name: tlc-spec-driven
 description: Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on "initialize project", "map codebase", "specify feature", "design", "tasks", "implement", "pause work", "resume work".
+license: CC-BY-4.0
 metadata:
   author: github.com/felipfr
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # Tech Lead's Club - Spec-Driven Development
