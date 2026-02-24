@@ -26,7 +26,7 @@ If you are asked to make a web app which will include both a frontend and backen
 
 If no relevant information is available in the skill's references directory, use the following fallback strategy in order:
 
-1. **Context7 MCP** — If the `resolve-library-id` and `get-library-docs` tools are available (Context7 MCP), use them to fetch up-to-date official documentation for the language and framework. Call `resolve-library-id` with the framework name (e.g. `spring-security`, `java spring`) and then `get-library-docs` with `topic: security` to retrieve relevant security guidance.
+1. **Context7 MCP** — If the `resolve-library-id` and `get-library-docs` tools are available (Context7 MCP), use them to fetch up-to-date official documentation for the language and framework. Call `resolve-library-id` with the framework/library name or search terms (e.g. `spring-security`, `java spring`) and then `get-library-docs` with `topic: security` to retrieve relevant security guidance.
 
 2. **Generic search tools** — If a web search tool is available in the current context (e.g. a Brave Search, Tavily, or similar MCP tool), use it to search for security best practices for the identified language and framework. Prefer authoritative sources such as the official framework documentation, OWASP, or CVE databases.
 
