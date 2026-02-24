@@ -9,6 +9,14 @@ entries:
   # DESIGN CATEGORY
   # Skills for design implementation and Figma integration
   # ============================================================================
+  - skill: frontend-blueprint
+    code: W011
+    reason: >
+      Google Stitch (stitch.withgoogle.com) is a trusted integration for UI prototyping.
+      Ingesting screenshots and HTML from Stitch is the intended functionality of this skill.
+    allowedBy: felipefr
+    allowedAt: '2026-02-23'
+
   - skill: figma-implement-design
     code: W011
     reason: >
@@ -59,6 +67,14 @@ entries:
   # ARCHITECTURE CATEGORY
   # Skills for system design, domain analysis, and diagram generation
   # ============================================================================
+  - skill: legacy-migration-planner
+    code: W011
+    reason: >
+      The skill's explicit methodology requires researching current technologies via Context7
+      and web search to prevent relying on outdated training data. Fetching documentation
+      is a core requirement for migration planning.
+    allowedBy: felipefr
+    allowedAt: '2026-02-23'
 
   - skill: excalidraw-diagram-generator
     code: W011
@@ -137,6 +153,15 @@ entries:
   # DEVELOPMENT CATEGORY
   # Skills for GitHub integration, PR management, and development workflows
   # ============================================================================
+
+  - skill: codenavi
+    code: W011
+    reason: >
+      The skill's core purpose is to investigate code and documentation using Context7
+      and web searches. Fetching third-party documentation is intentional and required
+      to avoid assumptions during development.
+    allowedBy: felipefr
+    allowedAt: '2026-02-23'
 
   - skill: gh-address-comments
     code: W011
