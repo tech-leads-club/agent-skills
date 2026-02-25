@@ -31,6 +31,10 @@
     "name": "Monitoring",
     "description": "Skills for observability, logging, and system monitoring"
   },
+  "(operations)": {
+    "name": "Operations & Supply Chain",
+    "description": "Skills for logistics, manufacturing, retail, and energy operations"
+  },
   "(performance)": {
     "name": "Performance",
     "description": "Skills for web performance optimization, audits, and monitoring"
