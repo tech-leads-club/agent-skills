@@ -1,17 +1,18 @@
 import type { FastMCP } from 'fastmcp'
 
 import type { Indexes, SkillEntry } from './types'
-import { buildPromptDescription, buildPromptName } from './utils'
 
 export function registerPrompts(server: FastMCP, getIndexes: () => Indexes): void {
-  registerDiscoveryPrompt(server)
-  registerSkillPrompts(server, getIndexes)
+  registerCatalogPrompt(server)
+  registerDiscoveryAliasPrompt(server)
+  registerUsePrompt(server, getIndexes)
+  registerHelpPrompt(server)
 }
 
-function registerDiscoveryPrompt(server: FastMCP): void {
+function registerCatalogPrompt(server: FastMCP): void {
   server.addPrompt({
-    name: 'find-skill',
-    description: "Search for the best skill to accomplish a task. Use when you don't know which skill you need.",
+    name: 'skills',
+    description: 'Find the best skill in the catalog for a task.',
     arguments: [
       {
         name: 'task',
@@ -20,17 +21,73 @@ function registerDiscoveryPrompt(server: FastMCP): void {
         required: true,
       },
     ],
-    load: async (args) => ({
+    load: async (args) => buildCatalogPromptMessages(args?.task),
+  })
+}
+
+function registerDiscoveryAliasPrompt(server: FastMCP): void {
+  server.addPrompt({
+    name: 'find-skill',
+    description: 'Alias for /skills.',
+    arguments: [
+      {
+        name: 'task',
+        description:
+          'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")',
+        required: true,
+      },
+    ],
+    load: async (args) => buildCatalogPromptMessages(args?.task),
+  })
+}
+
+function registerUsePrompt(server: FastMCP, getIndexes: () => Indexes): void {
+  server.addPrompt({
+    name: 'use',
+    description: 'Load and apply a specific skill by exact name.',
+    arguments: [
+      {
+        name: 'name',
+        description: 'Exact skill name (for example: docs-writer)',
+        required: true,
+      },
+      {
+        name: 'context',
+        description: 'Optional — describe what specifically you need help with',
+        required: false,
+      },
+    ],
+    load: async (args) => {
+      const skillName = args?.name?.trim()
+      const skill = skillName ? getIndexes().map.get(skillName) : undefined
+
+      if (!skill) return buildUsePromptNotFoundMessages(skillName)
+      return buildSkillPromptMessages(skill, args?.context)
+    },
+  })
+}
+
+function registerHelpPrompt(server: FastMCP): void {
+  server.addPrompt({
+    name: 'skills-help',
+    description: 'Show examples for using the agent-skills catalog prompts.',
+    load: async () => ({
       messages: [
         {
           role: 'user',
           content: {
             type: 'text',
             text:
-              `Call search_skills with a concise intent phrase describing: ${args?.task ?? ''}\n` +
-              `Review the results — pick the best match by score (highest) and category (most relevant).\n` +
-              `Prefer results with match_quality "exact" or "strong".\n` +
-              `Then call read_skill to load the selected skill and follow its instructions.`,
+              `Use /skills when you want the best match from the catalog.\n` +
+              `Examples:\n` +
+              `- /skills task:"refactor a large React component"\n` +
+              `- /skills task:"review accessibility issues in my UI"\n` +
+              `- /skills task:"plan migration from monolith to modular architecture"\n\n` +
+              `Use /use when you already know the skill name.\n` +
+              `Examples:\n` +
+              `- /use name:"docs-writer" context:"write a README for this package"\n` +
+              `- /use name:"react-best-practices" context:"improve Next.js page performance"\n\n` +
+              `If unsure, start with /skills.`,
           },
         },
       ],
@@ -38,21 +95,19 @@ function registerDiscoveryPrompt(server: FastMCP): void {
   })
 }
 
-function registerSkillPrompts(server: FastMCP, getIndexes: () => Indexes): void {
-  const skills = getIndexes().map
+export function buildCatalogPromptMessages(
+  task?: string,
+): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+  const taskText = task?.trim() ?? ''
+  const instructions = [
+    `Call search_skills with a concise intent phrase describing: ${taskText}`,
+    `Review the results and compare score and match_quality.`,
+    `If top result is strong enough, call read_skill with its name and apply it.`,
+    `If results are weak or ambiguous, present up to 3 best matches and ask the user to choose.`,
+  ]
 
-  for (const skill of skills.values()) {
-    const promptName = buildPromptName(skill.name)
-    const description = buildPromptDescription(skill.description)
-
-    server.addPrompt({
-      name: promptName,
-      description,
-      arguments: [
-        { name: 'context', description: 'Optional — describe what specifically you need help with', required: false },
-      ],
-      load: async (args) => buildSkillPromptMessages(skill, args?.context),
-    })
+  return {
+    messages: [{ role: 'user', content: { type: 'text', text: instructions.join('\n') } }],
   }
 }
 
@@ -69,5 +124,25 @@ export function buildSkillPromptMessages(
 
   return {
     messages: [{ role: 'user', content: { type: 'text', text: instructions.join('\n') } }],
+  }
+}
+
+export function buildUsePromptNotFoundMessages(
+  skillName?: string,
+): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+  const requested = skillName && skillName.length > 0 ? skillName : '(empty)'
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text:
+            `Skill "${requested}" was not found in the catalog.\n` +
+            `Call search_skills with a concise intent phrase to find the correct name,\n` +
+            `then call read_skill with the selected result.`,
+        },
+      },
+    ],
   }
 }
