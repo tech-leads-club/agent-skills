@@ -42,6 +42,10 @@
       "skills-catalog": {
         "projects": ["@tech-leads-club/skills-catalog"],
         "releaseTagPattern": "skills-catalog-v{version}"
+      },
+      "mcp": {
+        "projects": ["@tech-leads-club/agent-skills-mcp"],
+        "releaseTagPattern": "mcp-v{version}"
       }
     },
     "git": {
