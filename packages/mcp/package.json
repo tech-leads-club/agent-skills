@@ -27,11 +27,12 @@
   "engines": {
     "node": ">=24"
   },
+  "files": ["main.js", "README.md"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start:dev": "nx build mcp --configuration=development && npx @modelcontextprotocol/inspector node ../../dist/packages/mcp/main.js"
+    "start:dev": "nx build @tech-leads-club/agent-skills-mcp --configuration=development && npx @modelcontextprotocol/inspector node ../../dist/packages/mcp/main.js"
   },
   "dependencies": {
     "fastmcp": "^3.33.0",
