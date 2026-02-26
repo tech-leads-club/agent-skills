@@ -1,0 +1,45 @@
+{
+  "name": "@tech-leads-club/agent-skills-mcp",
+  "version": "0.0.1",
+  "description": "The official MCP for agent-skills. Curated catalog, progressive disclosure flow: Search → load canonical SKILL.md → fetch only validated references. Safe, lean, zero config.",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "homepage": "https://github.com/tech-leads-club/agent-skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tech-leads-club/agent-skills.git",
+    "directory": "packages/mcp"
+  },
+  "keywords": [
+    "mcp",
+    "agent-skills",
+    "skills",
+    "catalog",
+    "claude",
+    "cursor",
+    "ai",
+    "agents"
+  ],
+  "type": "module",
+  "bin": {
+    "agent-skills-mcp": "./main.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start:dev": "nx build mcp --configuration=development && npx @modelcontextprotocol/inspector node ../../dist/packages/mcp/main.js"
+  },
+  "dependencies": {
+    "fastmcp": "^3.33.0",
+    "fuse.js": "^7.1.0",
+    "ky": "^1.14.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@jest/globals": "30.2.0"
+  }
+}
