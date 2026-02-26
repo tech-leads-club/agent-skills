@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  In an ecosystem where <a href="https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf">over 13% of marketplace skills contain critical vulnerabilities</a>, 
+  In an ecosystem where <a href="https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf">over 13% of marketplace skills contain critical vulnerabilities</a>,
   <b>Agent Skills</b> stands apart as a hardened library of <b>verified</b>, <b>tested</b>, and <b>safe</b> capabilities.
   Extend <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, and more with absolute confidence.
 </p>
@@ -48,13 +48,10 @@
 - [🌟 Featured Skills](#-featured-skills)
 - [🚀 Quick Start](#-quick-start)
 - [⚡ How It Works](#-how-it-works)
-- [🛠 For Contributors](#-for-contributors)
-- [📁 Project Structure](#-project-structure)
-- [📝 Skill Structure](#-skill-structure)
-- [🔒 Security Scan](#-security-scan)
-- [🔄 Release Process](#-release-process)
+- [🔌 MCP Server](#-mcp-server)
 - [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [🛡️ Content & Authorship](#️-content--authorship)
+- [📄 License and Attribution](#-license-and-attribution)
 
 ## ✨ What are Skills?
 
@@ -71,28 +68,9 @@ packages/skills-catalog/skills/
 
 ## 🛡️ Security & Trust
 
-Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library.
+Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library: 100% open source (no binaries), static analysis in CI/CD, immutable integrity via lockfiles and content hashing, and human-curated prompts. The CLI uses defense-in-depth (sanitization, path isolation, symlink guards, atomic lockfile, audit trail); every skill is scanned with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) before publishing.
 
-### Vulnerability Mitigation
-
-We directly address the threats identified in the [Snyk 2026 Agent Threat Report](https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf):
-
-| Threat                   | Public Marketplaces                                         | Agent Skills Guarantee                                                                                          |
-| :----------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| **Malicious Payloads**   | Obfuscated code, binaries, or "black box" instructions      | **100% Open Source**: No binaries, fully readable text/code. Every line is auditable.                           |
-| **Credential Theft**     | Skills silently exfiltrating env vars to remote servers     | **Static Analysis**: CI/CD pipeline blocks skills with suspicious network calls or secret access.               |
-| **Supply Chain Attacks** | Authors pushing malicious updates to existing skills        | **Immutable Integrity**: Lockfiles and content-hashing ensure code never changes without your explicit upgrade. |
-| **Prompt Injection**     | Hidden instructions to hijack agent behavior ("jailbreaks") | **Human Curation**: Every prompt is manually code-reviewed by maintainers for safety boundaries.                |
-
-### CLI Defense-in-Depth
-
-The installer itself implements strict technical controls:
-
-- **Filesystem Isolation**: Recursive path traversal protection preventing access outside target directories.
-- **Input Sanitization**: Strict validation of skill names and paths to neutralize injection vectors.
-- **Symlink Guard**: Safe handling of symbolic links to prevent aliasing attacks.
-- **Integrity Verification**: Lockfile-based validation ensuring reproducible and authorized skill management.
-- **Automated Auditing**: All skills undergo continuous security scanning with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan).
+→ **Full threat model, implementation details, and vulnerability reporting:** [SECURITY.md](SECURITY.md)
 
 ## 🤖 Supported Agents
 
@@ -133,8 +111,6 @@ A glimpse of what's available in our growing catalog:
 <p align="center">
   <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
 </p>
-
----
 
 ## 🚀 Quick Start
 
@@ -248,6 +224,34 @@ Downloaded skills are cached in `~/.cache/agent-skills/` for offline use.
 # Clear the cache
 rm -rf ~/.cache/agent-skills
 ```
+
+## 🔌 MCP Server
+
+`@tech-leads-club/agent-skills-mcp` is an MCP server that exposes the skills catalog directly to AI agents via **progressive disclosure** — search first, then fetch only what's needed.
+
+| Tool                | Purpose                              |
+| :------------------ | :----------------------------------- |
+| `list_skills`       | Browse all skills by category        |
+| `search_skills`     | Find skills by intent (fuzzy search) |
+| `read_skill`        | Load a skill's main instructions     |
+| `fetch_skill_files` | Fetch specific reference files       |
+
+`list_skills` should be called only when the user explicitly asks to browse/list the catalog.
+
+**Quick install** (works with any MCP-compatible client):
+
+```json
+{
+  "mcpServers": {
+    "agent-skills": {
+      "command": "npx",
+      "args": ["-y", "@tech-leads-club/agent-skills-mcp"]
+    }
+  }
+}
+```
+
+→ Full setup for all clients (Cursor, Claude Code, VS Code, etc.), caching, and error reference: **[packages/mcp/README.md](packages/mcp/README.md)**
 
 ## 🤝 Contributing
 
