@@ -32,7 +32,8 @@
     "release:beta:dry": "nx release --preid beta --dry-run",
     "release:dry": "nx release --dry-run",
     "scan": "npx nx run @tech-leads-club/skills-catalog:security-scan",
-    "start:dev": "npm run dev --workspace=@tech-leads-club/agent-skills",
+    "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
+    "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
   },
   "repository": {
@@ -56,6 +57,7 @@
   ],
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@modelcontextprotocol/inspector": "^0.21.0",
     "@nx/devkit": "^22.5.2",
     "@nx/esbuild": "^22.5.2",
     "@nx/eslint": "^22.5.2",
@@ -63,10 +65,11 @@
     "@nx/jest": "22.5.2",
     "@nx/js": "^22.5.2",
     "@nx/next": "^22.5.2",
+    "@nx/node": "^22.5.2",
     "@nx/plugin": "^22.5.2",
     "@swc-node/register": "^1.11.1",
-    "@swc/core": "1.15.11",
-    "@swc/helpers": "~0.5.18",
+    "@swc/core": "1.15.13",
+    "@swc/helpers": "~0.5.19",
     "@types/jest": "^30.0.0",
     "@types/node": "^24",
     "cross-env": "^10.1.0",
@@ -89,7 +92,7 @@
     "tslib": "^2.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript-eslint": "^8.56.1",
     "yaml": "^2.8.2"
   },
   "nx": {
