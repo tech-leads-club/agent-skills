@@ -21,7 +21,7 @@
     "build": "nx run-many -t build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "g": "nx g @tech-leads-club/skill-plugin:skill",
+    "generate:skill": "nx g @tech-leads-club/skill-plugin:skill",
     "generate:data": "nx run-many -t generate-data --output-style=stream",
     "generate:registry": "nx run @tech-leads-club/skills-catalog:generate-registry",
     "lint": "eslint .",
@@ -32,6 +32,7 @@
     "release:beta:dry": "nx release --preid beta --dry-run",
     "release:dry": "nx release --dry-run",
     "scan": "npx nx run @tech-leads-club/skills-catalog:security-scan",
+    "validate": "npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills",
     "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
