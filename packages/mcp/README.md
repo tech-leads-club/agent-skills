@@ -93,23 +93,41 @@ Full registry JSON (`application/json`). MCP clients that support Resources can 
 
 MCP prompts are surfaced as **slash commands** (`/`) in compatible clients (Claude Desktop, Cursor, VS Code + Copilot, Claude Code). They give users instant access to skills without typing tool names.
 
-#### `/find-skill` — Discovery
+#### `/skills` — Main entrypoint
 
-Search for the best skill when you don't know which one you need. Guides the agent through `search_skills` → `read_skill` → apply.
+The easiest way to use the catalog. Give your task in natural language and the prompt guides the agent through `search_skills` → `read_skill` → apply.
 
 | Argument | Required | Description                                                           |
 | :------- | :------- | :-------------------------------------------------------------------- |
 | `task`   | Yes      | What you are trying to accomplish (e.g. "optimize React performance") |
 
-#### `/<name>` — Direct Skill Access
+Examples:
 
-One prompt per skill in the catalog (e.g. `/docs-writer`, `/react-composition-patterns`). Selecting one instructs the agent to call `read_skill` directly — no search step needed.
+- `/skills task:"refactor a large React component"`
+- `/skills task:"review accessibility issues in my UI"`
+- `/skills task:"plan migration from monolith to modular architecture"`
 
-| Argument  | Required | Description                          |
-| :-------- | :------- | :----------------------------------- |
-| `context` | No       | What specifically you need help with |
+#### `/use` — Direct skill shortcut
 
-**How it works:** On startup, the MCP server reads the registry and registers one prompt per skill. Each prompt's description is a concise summary extracted from the skill's full description (text before "Use when…" or the first sentence, capped at 160 chars).
+Use when you already know the exact skill name and want a direct shortcut.
+
+| Argument  | Required | Description                            |
+| :-------- | :------- | :------------------------------------- |
+| `name`    | Yes      | Exact skill name (e.g. `docs-writer`) |
+| `context` | No       | What specifically you need help with   |
+
+Examples:
+
+- `/use name:"docs-writer" context:"write a README for this package"`
+- `/use name:"react-best-practices" context:"improve Next.js page performance"`
+
+#### `/skills-help` — Quick usage examples
+
+Shows quick examples and when to use `/skills` vs `/use`.
+
+#### `/find-skill` — Compatibility alias
+
+Alias for `/skills` with the same `task` argument.
 
 ---
 
