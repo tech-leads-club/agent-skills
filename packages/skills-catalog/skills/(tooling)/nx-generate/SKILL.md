@@ -1,6 +1,6 @@
 ---
 name: nx-generate
-description: Generate code using nx generators. USE WHEN scaffolding code or transforming existing code - for example creating libraries or applications, or anything else that is boilerplate code or automates repetitive tasks. ALWAYS use this first when generating code with Nx instead of calling MCP tools or running nx generate immediately.
+description: Generate code using Nx generators — scaffold projects, libraries, features, or run workspace-specific generators with proper discovery, validation, and verification. Use when user says "create a new library", "scaffold a component", "generate code with Nx", "run a generator", "nx generate", or any code scaffolding task in a monorepo. Prefers local workspace-plugin generators over external plugins. Do NOT use for running build/test/lint tasks (use nx-run-tasks) or workspace configuration (use nx-workspace).
 ---
 
 # Run Nx Generator

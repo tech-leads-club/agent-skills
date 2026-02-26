@@ -1,6 +1,6 @@
 ---
 name: confluence-assistant
-description: Expert in Confluence operations using Atlassian MCP - automatically detects workspace Confluence configuration or prompts for site details. Use for searching, creating, updating pages, managing spaces, and adding comments with proper Markdown formatting.
+description: Manage Confluence pages via Atlassian MCP — search, create, update, and comment with proper Markdown formatting. Auto-detects workspace configuration. Use when user says "update Confluence", "create a Confluence page", "find that page in Confluence", "search Confluence", or "add a comment on Confluence". Do NOT use for Jira operations (use jira-assistant).
 ---
 
 # ConfluenceAssistant

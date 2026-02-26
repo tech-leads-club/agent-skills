@@ -1,5 +1,5 @@
 ---
-description: Expert in Jira operations using Atlassian MCP - automatically detects workspace Jira configuration or prompts for project details. Use for searching, creating, updating issues, managing status transitions, and handling tasks.
+description: Manage Jira issues via Atlassian MCP — search, create, update, transition status, and handle sprint tasks. Auto-detects workspace configuration. Use when user says "create a Jira ticket", "update my sprint", "check Jira status", "transition this issue", "search Jira", or "move ticket to done". Do NOT use for Confluence pages (use confluence-assistant).
 name: jira-assistant
 ---
 
