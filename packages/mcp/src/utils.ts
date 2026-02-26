@@ -36,30 +36,3 @@ export function extractTriggers(description: string): string {
 
   return triggers.join(' ')
 }
-
-// Prompt Utilities
-
-/** Max description length for prompt listings (clients may truncate further). */
-const PROMPT_DESCRIPTION_MAX_LENGTH = 160
-
-/** Builds a concise, user-facing description from the full skill description. */
-export function buildPromptDescription(description: string): string {
-  const useWhenIdx = description.indexOf('Use when')
-  let short: string
-
-  if (useWhenIdx > 0) {
-    short = description.slice(0, useWhenIdx).trim()
-  } else {
-    const dotIdx = description.indexOf('.')
-    short = dotIdx >= 0 ? description.slice(0, dotIdx + 1).trim() : description.trim()
-  }
-
-  if (short.length > PROMPT_DESCRIPTION_MAX_LENGTH) {
-    return short.slice(0, PROMPT_DESCRIPTION_MAX_LENGTH - 1) + '…'
-  }
-  return short
-}
-
-export function buildPromptName(skillName: string): string {
-  return skillName
-}
