@@ -61,7 +61,7 @@
   "skills": [
     {
       "name": "accessibility",
-      "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\".",
+      "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\". Do NOT use for SEO (use seo), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-accessibility",
       "files": [
@@ -70,11 +70,11 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "04f7951c52ad4925edb53a13b285398933c0249df1c77d5498592bf47b519ae7"
+      "contentHash": "706129400c8c91a9264582940b36007116faffcaf27bb0780bdab87337b4f881"
     },
     {
       "name": "aws-advisor",
-      "description": "Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for accurate, documentation-backed answers. Use when user asks about AWS architecture, security, service selection, migrations, troubleshooting, or learning AWS. Triggers on AWS, Lambda, S3, EC2, ECS, EKS, DynamoDB, RDS, CloudFormation, CDK, Terraform, Serverless, SAM, IAM, VPC, API Gateway, or any AWS service.",
+      "description": "Expert AWS Cloud Advisor for architecture design, security review, and implementation guidance. Leverages AWS MCP tools for accurate, documentation-backed answers. Use when user asks about AWS architecture, security, service selection, migrations, troubleshooting, or learning AWS. Triggers on AWS, Lambda, S3, EC2, ECS, EKS, DynamoDB, RDS, CloudFormation, CDK, Terraform, Serverless, SAM, IAM, VPC, API Gateway, or any AWS service. Do NOT use for non-AWS cloud providers or general infrastructure without AWS context.",
       "category": "cloud",
       "path": "(cloud)/aws-advisor",
       "files": [
@@ -90,11 +90,11 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "101e65c966f9388e816d4a3465dd5525b36f21063e69a8df3431a263b97f0bba"
+      "contentHash": "959d64baef88617c3cd3273250de4eef5e0954d627a2c01708b23fd0f6e0f050"
     },
     {
       "name": "best-practices",
-      "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when asked to \"apply best practices\", \"security audit\", \"modernize code\", \"code quality review\", or \"check for vulnerabilities\".",
+      "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when asked to \"apply best practices\", \"security audit\", \"modernize code\", \"code quality review\", or \"check for vulnerabilities\". Do NOT use for accessibility (use web-accessibility), SEO (use seo), performance (use core-web-vitals), or comprehensive multi-area audits (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-best-practices",
       "files": [
@@ -102,21 +102,21 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "397e1833b5a71830f875b57926aafe6b450e76a4407282506e5d74766411c991"
+      "contentHash": "2abba650ba22a819e67f8c2fb09d0f5f33a24d66d945ee2ef824751bc97151ce"
     },
     {
       "name": "chrome-devtools",
-      "description": "'Expert-level browser automation, debugging, and performance analysis using Chrome DevTools MCP. Use for interacting with web pages, capturing screenshots, analyzing network traffic, and profiling performance.'",
+      "description": "Browser debugging, performance profiling, and automation via Chrome DevTools MCP. Use when user says \"debug this page\", \"take a screenshot\", \"check network requests\", \"profile performance\", \"inspect console errors\", or \"analyze page load\". Do NOT use for full E2E test suites (use playwright-skill) or non-browser debugging.",
       "category": "tooling",
       "path": "(tooling)/chrome-devtools",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "670b3a219e694480e6e19cfd5ac3c49f2ec1462a9fefd86a866b411320a6bd84"
+      "contentHash": "249d0fb724d83a9dc1b81f5812b894d471b36e6e629407cd43f9b8135fe4630a"
     },
     {
       "name": "cloudflare-deploy",
-      "description": "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.",
+      "description": "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare. Do NOT use for deploying to Vercel, Netlify, or Render (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/cloudflare-deploy",
       "files": [
@@ -432,11 +432,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "2784a4cc3205752c76ba936211ffd33a4f2acac9943a90513dda6280feda82c9"
+      "contentHash": "f51f33e059b64bfb145de75c5b85da8d4fdd91dd2f846557183a98f51b0f87ea"
     },
     {
       "name": "codenavi",
-      "description": "Your pathfinder for navigating unknown codebases. Investigates with precision, implements surgically, and never assumes — if it doesn't know, it says so. Maintains a .notebook/ knowledge base that grows  across sessions, turning every discovery into lasting intelligence. Summons available skills, MCPs, and docs when the mission demands. Use for bug fixes, features, refactoring, flow investigation, or any development task in unfamiliar territory. Triggers on 'fix this', 'implement this', 'how does this work', 'investigate this flow', 'help me with this code'. Do NOT use for greenfield scaffolding, CI/CD, or infrastructure provisioning.",
+      "description": "Your pathfinder for navigating unknown codebases. Investigates with precision, implements surgically, and never assumes — if it doesn't know, it says so. Maintains a .notebook/ knowledge base that grows across sessions, turning every discovery into lasting intelligence. Summons available skills, MCPs, and docs when the mission demands. Use when fixing bugs, implementing features, refactoring, investigating flows, or any development task in unfamiliar territory. Triggers on \"fix this\", \"implement this\", \"how does this work\", \"investigate this flow\", \"help me with this code\". Do NOT use for greenfield scaffolding, CI/CD, or infrastructure provisioning.",
       "category": "development",
       "path": "(development)/codenavi",
       "files": [
@@ -446,11 +446,11 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "ef536dc88fb5f3c047b396cf62a0a6b287e8c915e73fdd42023249b44ad4b527"
+      "contentHash": "23ac05b7f2d8df8311129d41432eba248bdcf14e9ace3f17c581976f7d888ada"
     },
     {
       "name": "coding-guidelines",
-      "description": "Apply when writing, modifying, or reviewing code. Behavioral guidelines to reduce common LLM coding mistakes. Triggers on implementation tasks, code changes, refactoring, bug fixes, or feature development.",
+      "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, modifying, or reviewing code — implementation tasks, code changes, refactoring, bug fixes, or feature development. Do NOT use for architecture design, documentation, or non-code tasks.",
       "category": "development",
       "path": "(development)/coding-guidelines",
       "files": [
@@ -458,11 +458,11 @@
       ],
       "author": "ale",
       "version": "1.0.0",
-      "contentHash": "7d98273930ef3622d6d5339403860722a26e5de91fdcf9d96738618aedd82c10"
+      "contentHash": "28a414c715d3c41aae28a25e2f109813ec3f246f76b5567c1e7d6a128cd289ff"
     },
     {
       "name": "component-common-domain-detection",
-      "description": "Identifies duplicate domain functionality across components and suggests consolidation opportunities. Use when finding common domain logic, detecting duplicate functionality, analyzing shared classes, planning component consolidation, or when the user asks about common components, duplicate code, or domain consolidation.",
+      "description": "Finds duplicate business logic spread across multiple components and suggests consolidation. Use when asking \"where is this logic duplicated?\", \"find common code between services\", \"what can be consolidated?\", \"detect shared domain logic\", or analyzing component overlap before refactoring. Do NOT use for code-level duplication detection (use linters) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/component-common-domain-detection",
       "files": [
@@ -470,11 +470,11 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "0664f9d93e4d5069fbde8c90e2fc93950c56e1acecfd107a81d5bd3a65b7a223"
+      "contentHash": "58c72d63eaf387cf11ae36b223ff80478ba861f53265e42a3c4fbcb3bc739208"
     },
     {
       "name": "component-flattening-analysis",
-      "description": "Identifies and fixes component hierarchy issues by detecting orphaned classes in root namespaces and ensuring components exist only as leaf nodes. Use when analyzing component structure, finding orphaned classes, flattening component hierarchies, removing component nesting, or when the user asks about component flattening, orphaned classes, or component structure cleanup.",
+      "description": "Detects misplaced classes and fixes component hierarchy problems — finds code that should belong inside a component but sits at the root level. Use when asking \"clean up component structure\", \"find orphaned classes\", \"fix module hierarchy\", \"flatten nested components\", or analyzing why namespaces have misplaced code. Do NOT use for dependency analysis (use coupling-analysis) or domain grouping (use domain-identification-grouping).",
       "category": "architecture",
       "path": "(architecture)/component-flattening-analysis",
       "files": [
@@ -482,11 +482,11 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "52fb78457467190be4f64e9841094d03fb33cb308dd23eb0c5b1e7a3aa32fab4"
+      "contentHash": "085696b944897a2d8c96efb6e0a3faab00f910a62a49a45c3293c32458962411"
     },
     {
       "name": "component-identification-sizing",
-      "description": "Identifies architectural components in codebases and calculates size metrics for decomposition planning. Use when analyzing codebase structure, planning monolithic decomposition, identifying oversized components, calculating component statistics, or when the user asks about component analysis, codebase sizing, or architectural decomposition.",
+      "description": "Maps architectural components in a codebase and measures their size to identify what should be extracted first. Use when asking \"how big is each module?\", \"what components do I have?\", \"which service is too large?\", \"analyze codebase structure\", \"size my monolith\", or planning where to start decomposing. Do NOT use for runtime performance sizing or infrastructure capacity planning.",
       "category": "architecture",
       "path": "(architecture)/component-identification-sizing",
       "files": [
@@ -494,22 +494,22 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "2e00e675e5b15812396b37fc3f68d254b5d9153f0c5353a29be22795bb0aa620"
+      "contentHash": "8ec5eb90e86cc84a346f15f50c86960d8f4ba6876f6fe27d687a1ba43a2448a0"
     },
     {
       "name": "confluence-assistant",
-      "description": "Expert in Confluence operations using Atlassian MCP - automatically detects workspace Confluence configuration or prompts for site details. Use for searching, creating, updating pages, managing spaces, and adding comments with proper Markdown formatting.",
+      "description": "Manage Confluence pages via Atlassian MCP — search, create, update, and comment with proper Markdown formatting. Auto-detects workspace configuration. Use when user says \"update Confluence\", \"create a Confluence page\", \"find that page in Confluence\", \"search Confluence\", or \"add a comment on Confluence\". Do NOT use for Jira operations (use jira-assistant).",
       "category": "development",
       "path": "(development)/confluence-assistant",
       "files": [
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "3377c27e43b93432d51ba5d95eeffc07694da72c76cb6119357084446839c7d9"
+      "contentHash": "0c4c6993acb33dfc9bf925e18db0d762dceadbf36ab6bda4290475e4f97fad70"
     },
     {
       "name": "core-web-vitals",
-      "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\".",
+      "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\". Focuses specifically on the three Core Web Vitals metrics. Do NOT use for general web performance (use perf-web-optimization), Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).",
       "category": "performance",
       "path": "(performance)/core-web-vitals",
       "files": [
@@ -518,31 +518,31 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "2c95db336a888573d034d5db4e94a6d80267a0f1e466875d9e8076967498f4fa"
+      "contentHash": "3a67190e1dea1f2573d4fbb17071bbdac5ff4fd087d8cb5271094851c2acd559"
     },
     {
       "name": "coupling-analysis",
-      "description": "Analyzes coupling in a codebase following the three-dimensional model from \"Balancing Coupling in Software Design\" (Vlad Khononov). Use when evaluating architectural quality, identifying problematic dependencies, understanding integration strength between modules, or getting recommendations to improve modularity.",
+      "description": "Analyzes coupling between modules using the three-dimensional model (strength, distance, volatility) from \"Balancing Coupling in Software Design\". Use when asking \"are these modules too coupled?\", \"show me dependencies\", \"analyze integration quality\", \"which modules should I decouple?\", \"coupling report\", or evaluating architectural health. Do NOT use for domain boundary analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/coupling-analysis",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "71a9f203b5a96c2a551fd8b0e0fbee979f7fd335a128a56e65002442a3416b32"
+      "contentHash": "a33a142a73ac2e6b8db300acb3d13dba5077e225cbfad7599b0ac431290ab5c7"
     },
     {
       "name": "cursor-subagent-creator",
-      "description": "Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows. Use when creating subagents for Cursor editor specifically, following Cursor's patterns and directories (.cursor/agents/). Triggers on \"cursor subagent\", \"cursor agent\".",
+      "description": "Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows. Use when creating subagents for Cursor editor specifically, following Cursor's patterns and directories (.cursor/agents/). Triggers on \"cursor subagent\", \"cursor agent\". Do NOT use for generic subagent creation outside Cursor (use subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/cursor-subagent-creator",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "d08832128b46649832ffd3848dd06179bfef1c617352c77a5b8572ee0f5a826c"
+      "contentHash": "658a170d783a694e638814bed35a738184795da2d0f0b36489cac94a478cd8d7"
     },
     {
       "name": "decomposition-planning-roadmap",
-      "description": "Creates structured decomposition plans and roadmaps for migrating monolithic applications. Use when planning decomposition, creating migration roadmaps, prioritizing decomposition work, tracking decomposition progress, or when the user asks about decomposition planning, migration strategy, or architectural roadmap.",
+      "description": "Creates step-by-step decomposition plans and migration roadmaps for breaking apart monolithic applications. Use when asking \"what order should I extract services?\", \"plan my migration\", \"create a decomposition roadmap\", \"prioritize what to split\", \"monolith to microservices strategy\", or tracking decomposition progress. Do NOT use for domain analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/decomposition-planning-roadmap",
       "files": [
@@ -550,22 +550,22 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "5a4d66a618e67099e0ffd18bc090e9892620876efdd644c90cc3d0c83d1662a5"
+      "contentHash": "8de88d993b2556a6b38c26fd79c863f06bf7746faf87c0c9fd1b9a198a49e1ac"
     },
     {
       "name": "docs-writer",
-      "description": "Use this skill for writing, reviewing, and editing documentation (`/docs` directory or any .md file).",
+      "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
       "category": "development",
       "path": "(development)/docs-writer",
       "files": [
         "SKILL.md",
         "references/style-guide.md"
       ],
-      "contentHash": "f8327ca0ba45f57625f26ed23d8d013717640b68379f027a59f6337f489960f0"
+      "contentHash": "c49827c59d2e27d313731dfd36314cfde0e8dbf15be0e8f813d2f8b751546b0c"
     },
     {
       "name": "domain-analysis",
-      "description": "Identifies subdomains and suggests bounded contexts in any codebase following DDD Strategic Design. Use when analyzing domain boundaries, identifying business subdomains, assessing domain cohesion, mapping bounded contexts, or when the user asks about DDD strategic design, domain analysis, or subdomain classification.",
+      "description": "Maps business domains and suggests service boundaries in any codebase using DDD Strategic Design. Use when asking \"what are the domains in this codebase?\", \"where should I draw service boundaries?\", \"identify bounded contexts\", \"classify subdomains\", \"DDD analysis\", or analyzing domain cohesion. Do NOT use for grouping existing components into domains (use domain-identification-grouping) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-analysis",
       "files": [
@@ -574,11 +574,11 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "f6599c3326d844615e13464a77c28e28f63787b1eeef1eb1cf8cd8615473c884"
+      "contentHash": "5914beeaf1aa1fe57cd95cf0afb60ee1cccc58eedaddd123a43cad32d6a70077"
     },
     {
       "name": "domain-identification-grouping",
-      "description": "Groups components into logical domains for service-based architecture. Use when creating component domains, grouping components by business functionality, planning domain services, analyzing component relationships, or when the user asks about domain grouping, component domains, or domain identification.",
+      "description": "Groups existing components into logical business domains to plan service-based architecture. Use when asking \"which components belong together?\", \"group these into services\", \"organize by domain\", \"component-to-domain mapping\", or planning service extraction from an existing codebase. Do NOT use for identifying new domains from scratch (use domain-analysis) or analyzing coupling (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-identification-grouping",
       "files": [
@@ -586,11 +586,11 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "61d58b48277065dc4f2990ede13e37e9814234859506b14c2370c88ee04b4a35"
+      "contentHash": "ac3c94d9910a75aa6a61f7866507d16a3c646ff17e86b79667d1a19c6fa6c659"
     },
     {
       "name": "excalidraw-diagram-generator",
-      "description": "'Generate Excalidraw diagrams from natural language descriptions. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", or \"generate an Excalidraw file\". Supports flowcharts, relationship diagrams, mind maps, and system architecture diagrams. Outputs .excalidraw JSON files that can be opened directly in Excalidraw.'",
+      "description": "'Generate Excalidraw diagrams from natural language descriptions. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", or \"generate an Excalidraw file\". Supports flowcharts, relationship diagrams, mind maps, and system architecture diagrams. Outputs .excalidraw JSON files that can be opened directly in Excalidraw. Do NOT use for code architecture analysis (use the architecture skills) or non-visual documentation (use docs-writer).'",
       "category": "architecture",
       "path": "(architecture)/excalidraw-diagram-generator",
       "files": [
@@ -610,11 +610,11 @@
         "templates/relationship-template.excalidraw",
         "templates/sequence-diagram-template.excalidraw"
       ],
-      "contentHash": "30b5f2d67d1bbb6073ba3f38a9ba656089a35fb9729cdff31b8fb2c7738a2bf0"
+      "contentHash": "0e75ef3d03d540c16b5ad435428a46f23f0382e8c02cdf6b768008d73a0b8114"
     },
     {
       "name": "figma",
-      "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.",
+      "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Use when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting. Covers general Figma data fetching and exploration. Do NOT use when the goal is specifically pixel-perfect code implementation from a Figma design (use figma-implement-design instead).",
       "category": "design",
       "path": "(design)/figma",
       "files": [
@@ -625,11 +625,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "8a62d54f9173fceb6a46801c719a0361991b7ebb05e9acff2500b567f6a7897f"
+      "contentHash": "5da2000639e7aee302556408a161168b8955758da0da3305842e14a93a40a7b7"
     },
     {
       "name": "figma-implement-design",
-      "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Trigger when the user provides Figma URLs or node IDs, or asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection.",
+      "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Use when the user provides Figma URLs or node IDs and asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection. Do NOT use for general Figma data fetching, variable exploration, or MCP troubleshooting (use figma instead).",
       "category": "design",
       "path": "(design)/figma-implement-design",
       "files": [
@@ -638,7 +638,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "0c2760ab7ff1668a020d7555e374bd1a388878ba56f585753f5f7dcf433e02b5"
+      "contentHash": "6177778eac45026cf58d1f86447fa730e39389e54a99df2c5f35cd6905371b1d"
     },
     {
       "name": "frontend-blueprint",
@@ -657,7 +657,7 @@
     },
     {
       "name": "gh-address-comments",
-      "description": "Help address review/issue comments on the open GitHub PR for the current branch using gh CLI; verify gh auth first and prompt the user to authenticate if not logged in.",
+      "description": "Address review and issue comments on the open GitHub PR for the current branch using gh CLI. Use when user says \"address PR comments\", \"fix review feedback\", \"respond to PR review\", or \"handle PR comments\". Verifies gh auth first and prompts to authenticate if not logged in. Do NOT use for creating PRs, CI debugging (use gh-fix-ci), or general Git operations.",
       "category": "development",
       "path": "(development)/gh-address-comments",
       "files": [
@@ -667,11 +667,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "844e7f23cee13dce2b2b9ca1428f659beb0c1360ef887a2a89210dadd4cb4c98"
+      "contentHash": "a1808fb136b7118a7bdac65415e9a40a7982953f8b3339c97087fc0807865d88"
     },
     {
       "name": "gh-fix-ci",
-      "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.",
+      "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions. Uses `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treats external providers (for example Buildkite) as out of scope and reports only the details URL. Do NOT use for addressing PR review comments (use gh-address-comments) or general CI outside GitHub Actions.",
       "category": "tooling",
       "path": "(tooling)/gh-fix-ci",
       "files": [
@@ -681,22 +681,22 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "14e76c819f7ea8dd94e14f537bbbcf6ea6716e706289b811b1862cf38fea8a2c"
+      "contentHash": "f032610bcbf7f7a7b6b13d20de360608c10328b7a9e507610323e843d613f1f4"
     },
     {
       "name": "jira-assistant",
-      "description": "Expert in Jira operations using Atlassian MCP - automatically detects workspace Jira configuration or prompts for project details. Use for searching, creating, updating issues, managing status transitions, and handling tasks.",
+      "description": "Manage Jira issues via Atlassian MCP — search, create, update, transition status, and handle sprint tasks. Auto-detects workspace configuration. Use when user says \"create a Jira ticket\", \"update my sprint\", \"check Jira status\", \"transition this issue\", \"search Jira\", or \"move ticket to done\". Do NOT use for Confluence pages (use confluence-assistant).",
       "category": "development",
       "path": "(development)/jira-assistant",
       "files": [
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "4f9482b652c88273ebd71dbfa8ae70274c260ce927b164aa06edb1de2952c727"
+      "contentHash": "fa63880889d2206548e33489a0ac1aa849c4e6ab879ea769c2715521a8231c8a"
     },
     {
       "name": "learning-opportunities",
-      "description": "Facilitates deliberate skill development during AI-assisted coding. Offers interactive learning exercises after architectural work (new files, schema changes, refactors). Use when completing features, making design decisions, or when user asks to understand code better. Triggers on \"learning exercise\", \"help me understand\", \"teach me\", \"why does this work\", or after creating new files/modules. Do not trigger during urgent debugging, quick fixes, or when user says \"just ship it\".",
+      "description": "Facilitates deliberate skill development during AI-assisted coding. Offers interactive learning exercises after architectural work (new files, schema changes, refactors). Use when completing features, making design decisions, or when user asks to understand code better. Triggers on \"learning exercise\", \"help me understand\", \"teach me\", \"why does this work\", or after creating new files/modules. Do NOT use for urgent debugging, quick fixes, or when user says \"just ship it\".",
       "category": "learning",
       "path": "(learning)/learning-opportunities",
       "files": [
@@ -705,11 +705,11 @@
       ],
       "author": "Chris Hicks",
       "version": "1.1.0",
-      "contentHash": "004b40dfe7f69e8addbc66eeb375e8edde9ed1dd5cd99a5bd39084eb797c24eb"
+      "contentHash": "47c4d62eebf29a61477c1b611c6ae360b028e1e23e09df1f6a33b5ff32b020f7"
     },
     {
       "name": "legacy-migration-planner",
-      "description": "Use when planning legacy system migrations, codebase modernization, monolith decomposition, microservices consolidation, cross-language rewrites, or framework upgrades. Invoke for strangler fig pattern, incremental migration strategy, or refactoring roadmaps.",
+      "description": "Use when planning legacy system migrations, codebase modernization, monolith decomposition, microservices consolidation, cross-language rewrites, or framework upgrades. Invoke for strangler fig pattern, incremental migration strategy, or refactoring roadmaps. Do NOT use for domain analysis (use domain-analysis), component sizing (use component-identification-sizing), or step-by-step decomposition plans (use decomposition-planning-roadmap).",
       "category": "architecture",
       "path": "(architecture)/legacy-migration-planner",
       "files": [
@@ -723,7 +723,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "3a804e99768bf9a6971abab75e804a687f5477677bc33a7bff542591874422b0"
+      "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
     },
     {
       "name": "nestjs-modular-monolith",
@@ -746,7 +746,7 @@
     },
     {
       "name": "netlify-deploy",
-      "description": "Deploy web projects to Netlify using the Netlify CLI (`npx netlify`). Use when the user asks to deploy, host, publish, or link a site/repo on Netlify, including preview and production deploys.",
+      "description": "Deploy web projects to Netlify using the Netlify CLI (`npx netlify`). Use when the user asks to deploy, host, publish, or link a site/repo on Netlify, including preview and production deploys. Do NOT use for deploying to Vercel, Cloudflare, or Render (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/netlify-deploy",
       "files": [
@@ -758,41 +758,41 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "af3257da70b1534922398cb78449ff785e1c13b57715de0f5e378b3a76685257"
+      "contentHash": "a85452537b4a35077d259ed06661d16fb026d252e4b952b2fe82f2a006f39a15"
     },
     {
       "name": "nx-ci-monitor",
-      "description": "Monitor Nx Cloud CI pipeline and handle self-healing fixes automatically. Checks for Nx Cloud connection before starting.",
+      "description": "Monitor Nx Cloud CI pipeline status and handle self-healing fixes automatically. Use when user says \"watch CI\", \"monitor pipeline\", \"check CI status\", \"fix CI failures\", or \"self-heal CI\". Requires Nx Cloud connection. Do NOT use for local task execution (use nx-run-tasks) or general CI debugging outside Nx Cloud.",
       "category": "tooling",
       "path": "(tooling)/nx-ci-monitor",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "c2c12b329cb665a9934927453d991453652fb739119944659a267a793e8413ff"
+      "contentHash": "ddb5bf9bd2a5ca0eac8fa01632a19569baed922201b2cc501975edd77697f75c"
     },
     {
       "name": "nx-generate",
-      "description": "Generate code using nx generators. USE WHEN scaffolding code or transforming existing code - for example creating libraries or applications, or anything else that is boilerplate code or automates repetitive tasks. ALWAYS use this first when generating code with Nx instead of calling MCP tools or running nx generate immediately.",
+      "description": "Generate code using Nx generators — scaffold projects, libraries, features, or run workspace-specific generators with proper discovery, validation, and verification. Use when user says \"create a new library\", \"scaffold a component\", \"generate code with Nx\", \"run a generator\", \"nx generate\", or any code scaffolding task in a monorepo. Prefers local workspace-plugin generators over external plugins. Do NOT use for running build/test/lint tasks (use nx-run-tasks) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-generate",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "fb7c13f96e57d43d9a9b672a24e7486075a76d920301811d5f41f89d3fcce10b"
+      "contentHash": "b975e1a0caa6cc9922ba941e0746a2f141c708e41c8bbddb395d40e3efecf2a0"
     },
     {
       "name": "nx-run-tasks",
-      "description": "Helps with running tasks in an Nx workspace. USE WHEN the user wants to execute build, test, lint, serve, or run any other tasks defined in the workspace.",
+      "description": "Execute build, test, lint, serve, and other tasks in an Nx workspace using single runs, run-many, and affected commands. Use when user says \"run tests\", \"build my app\", \"lint affected\", \"serve the project\", \"run all tasks\", or \"nx affected\". Do NOT use for code generation (use nx-generate) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-run-tasks",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "e42dec15f588268887d88d606187b0fab9cbb3f90fd4ce41d66d2faffc9295c4"
+      "contentHash": "3c4d49d795b02e6a4a82606891a7da4773c3bc1ef883c1b980ac17596883397f"
     },
     {
       "name": "nx-workspace",
-      "description": "Configure, explore, and optimize Nx monorepo workspaces. Use when setting up Nx, exploring workspace structure, configuring project boundaries, running tasks, analyzing affected projects, optimizing build caching, or implementing CI/CD with affected commands. Keywords - nx, monorepo, workspace, projects, targets, affected, build, lint, test.",
+      "description": "Configure, explore, and optimize Nx monorepo workspaces. Use when setting up Nx, exploring workspace structure, configuring project boundaries, analyzing affected projects, optimizing build caching, or implementing CI/CD with affected commands. Keywords — nx, monorepo, workspace, projects, targets, affected. Do NOT use for running tasks (use nx-run-tasks) or code generation with generators (use nx-generate).",
       "category": "tooling",
       "path": "(tooling)/nx-workspace",
       "files": [
@@ -802,31 +802,31 @@
         "reference/commands.md",
         "reference/configuration.md"
       ],
-      "contentHash": "12f90fa9b5dc549d41a04f5063db1b03c032614d1b1751c9a1c88edc0567ff5a"
+      "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
     },
     {
       "name": "perf-astro",
-      "description": "\"Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Triggers on: astro performance, astro lighthouse, astro optimization, astro-critters.\"",
+      "description": "'Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Use when optimizing Astro site performance, improving Astro Lighthouse scores, or configuring astro-critters. Do NOT use for non-Astro sites (use perf-web-optimization or core-web-vitals) or running Lighthouse audits (use perf-lighthouse).'",
       "category": "performance",
       "path": "(performance)/perf-astro",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "287f1c9f65e36ddc35cd19190a38d1353290d73d13e312bd27f6909c3f4f4e4c"
+      "contentHash": "11b50b27564085d9bff6d558bd4e9f31e5bce3c9a82af4c7203d9a4cd1ff43e4"
     },
     {
       "name": "perf-lighthouse",
-      "description": "\"Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget.\"",
+      "description": "'Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, and set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget. Do NOT use for fixing specific performance issues (use perf-web-optimization or core-web-vitals) or Astro-specific optimization (use perf-astro).'",
       "category": "performance",
       "path": "(performance)/perf-lighthouse",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "81a156dd3e7801e53f64eb0586ea9ba1fec9b403c82d570439665af7a71bab49"
+      "contentHash": "2ef96cebc94fda975a7bba9e37511bff65739c91e61b950be0bd3048b8c9760d"
     },
     {
       "name": "perf-web-optimization",
-      "description": "\"Optimize web performance: Core Web Vitals (LCP, CLS, INP), bundle size, images, caching. Use when site is slow, optimizing for Lighthouse scores, reducing bundle size, fixing layout shifts, or improving Time to Interactive. Triggers on: web performance, Core Web Vitals, LCP, CLS, INP, FID, bundle size, page speed, slow site.\"",
+      "description": "'Optimize web performance: bundle size, images, caching, lazy loading, and overall page speed. Use when site is slow, reducing bundle size, fixing layout shifts, improving Time to Interactive, or optimizing for Lighthouse scores. Triggers on: web performance, bundle size, page speed, slow site, lazy loading. Do NOT use for Core Web Vitals-specific fixes (use core-web-vitals), running Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).'",
       "category": "performance",
       "path": "(performance)/perf-web-optimization",
       "files": [
@@ -835,11 +835,11 @@
         "references/core-web-vitals.md",
         "references/image-optimization.md"
       ],
-      "contentHash": "85a00348a0480144b110866c63b9689172ee07613e4190c34f8ed09de1681085"
+      "contentHash": "864bb35d6ec7e7755181886b57709b76d8b5da5181a6d8480cd412dd772f1ffb"
     },
     {
       "name": "playwright-skill",
-      "description": "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login flows, check links, automate any browser task. Use when user wants to test websites, automate browser interactions, validate web functionality, or perform any browser-based testing.",
+      "description": "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login flows, check links, automate any browser task. Use when user wants to test websites, automate browser interactions, validate web functionality, or perform any browser-based testing. Do NOT use for quick page debugging or network inspection (use chrome-devtools instead).",
       "category": "web-automation",
       "path": "(web-automation)/playwright-skill",
       "files": [
@@ -849,11 +849,11 @@
         "package.json",
         "run.js"
       ],
-      "contentHash": "aabce31e848ffb6c0f6769d9ba5ee0bd41341f17d4c2ce1cabaec4ad10748bab"
+      "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
     },
     {
       "name": "react-best-practices",
-      "description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering. Use when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements. Do NOT use for component API architecture or composition patterns (use react-composition-patterns instead).",
       "category": "quality",
       "path": "(quality)/react-best-practices",
       "files": [
@@ -922,11 +922,11 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "078a4a2ea3c5d32f79ef3ab3366630f25c70e10479445aa82fc2c5a89cc9aa59"
+      "contentHash": "e96f99e13dc2acc75efc1793aee08fe244802a97a4e190af38bd5a871a5c9636"
     },
     {
       "name": "react-composition-patterns",
-      "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture. Includes React 19 API changes.",
+      "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture. Includes React 19 API changes. Do NOT use for React/Next.js performance optimization (use react-best-practices instead).",
       "category": "architecture",
       "path": "(architecture)/react-composition-patterns",
       "files": [
@@ -946,7 +946,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "2b93a24df3e90c7ac3751c0bafcccca6bd9518df00cd34475369e61370e5630d"
+      "contentHash": "171c6a35a0a74a6b37facf2a6e3883a02f53e3f2d429e6aa5834412c65d38dc7"
     },
     {
       "name": "react-native-expert",
@@ -967,7 +967,7 @@
     },
     {
       "name": "render-deploy",
-      "description": "Deploy applications to Render by analyzing codebases, generating render.yaml Blueprints, and providing Dashboard deeplinks. Use when the user wants to deploy, host, publish, or set up their application on Render's cloud platform.",
+      "description": "Deploy applications to Render by analyzing codebases, generating render.yaml Blueprints, and providing Dashboard deeplinks. Use when the user wants to deploy, host, publish, or set up their application on Render's cloud platform. Do NOT use for deploying to Vercel, Netlify, or Cloudflare (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/render-deploy",
       "files": [
@@ -986,21 +986,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "9def463262f85c71e3d66f1580e5d13d96c9434b7a287b24f7cc6aece686d839"
-    },
-    {
-      "name": "run-nx-generator",
-      "description": "Run Nx generators with prioritization for workspace-plugin generators. Use this when generating code, scaffolding new features, or automating repetitive tasks in the monorepo.",
-      "category": "tooling",
-      "path": "(tooling)/run-nx-generator",
-      "files": [
-        "SKILL.md"
-      ],
-      "contentHash": "e781996f246735c48f52b0fd21c86901a5916a6dee2432db80a236976d903c61"
+      "contentHash": "b2d22a5612b4b1871c4d33765f8ee875ffc7eb3604cc9f2faabb1ff3c0c527ea"
     },
     {
       "name": "security-best-practices",
-      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.",
+      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Use when the user explicitly requests security best practices guidance, a security review or report, or secure-by-default coding help. Supports Python, JavaScript/TypeScript, and Go. Do NOT use for general code review, debugging, threat modeling (use security-threat-model), or non-security tasks.",
       "category": "security",
       "path": "(security)/security-best-practices",
       "files": [
@@ -1019,11 +1009,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "e75a7e845663b8d7b072860acc5d5ebb44dddb4ea7622a77c055c3fbae15aa06"
+      "contentHash": "6fec09f7e43bb297ad6097e13469e85aa5b5d671a839b4f7e7871ef8eaa76c4e"
     },
     {
       "name": "security-ownership-map",
-      "description": "'Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Trigger only when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do not trigger for general maintainer lists or non-security ownership questions.'",
+      "description": "'Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Use when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do NOT use for general maintainer lists, non-security ownership questions, or threat modeling (use security-threat-model).'",
       "category": "security",
       "path": "(security)/security-ownership-map",
       "files": [
@@ -1037,11 +1027,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "9c5677c78669351aa10cba9cf82841288f2ae8c211d8ab7dc07d8d4355827898"
+      "contentHash": "d6231f21029bc14fc776dbef909f631a6b39d7d1b46b11b25dbfe51c51dd7141"
     },
     {
       "name": "security-threat-model",
-      "description": "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work.",
+      "description": "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Use when the user asks to threat model a codebase or path, enumerate threats or abuse paths, or perform AppSec threat modeling. Do NOT use for general architecture summaries, code review, security best practices (use security-best-practices), or non-security design work.",
       "category": "security",
       "path": "(security)/security-threat-model",
       "files": [
@@ -1052,11 +1042,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "7a2a20834aa6fa16a7701ce13272e54142c82ca09441ffb39d6f16ce3a4aff6e"
+      "contentHash": "9f4cf3c7971c6d84a4657c2c0c395a4c7febbac5a2361950922fc150fcef9599"
     },
     {
       "name": "sentry",
-      "description": "Use when the user asks to inspect Sentry issues or events, summarize recent production errors, or pull basic Sentry health data via the Sentry API; perform read-only queries with the bundled script and require `SENTRY_AUTH_TOKEN`.",
+      "description": "Inspect Sentry issues, summarize production errors, and pull health data via the Sentry API (read-only). Use when user says \"check Sentry\", \"what errors in production?\", \"summarize Sentry issues\", \"recent crashes\", or \"production error report\". Requires SENTRY_AUTH_TOKEN. Do NOT use for setting up Sentry SDK, configuring alerts, or non-Sentry error monitoring.",
       "category": "monitoring",
       "path": "(monitoring)/sentry",
       "files": [
@@ -1066,11 +1056,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "2ab7cd79b46399e4f634f543efad911ce34d25a90c6c645df0148e2fad175886"
+      "contentHash": "aa0e533aff9a319b0aef86ad3e543f61b812bf159c27fc9ebb1c7ad97d5db937"
     },
     {
       "name": "seo",
-      "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\".",
+      "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\". Do NOT use for accessibility (use web-accessibility), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/seo",
       "files": [
@@ -1078,11 +1068,11 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "7b124e46a34303039b08aefe1c60aac89f05aee348c2c8522e69533fd7a6f62e"
+      "contentHash": "fc9897a3923b5e23e00545ac67f4c8c2b6903113bd5f046cda259c98a0f3cd40"
     },
     {
       "name": "shopify-developer",
-      "description": "Complete Shopify development reference for Liquid templating, theme development (OS 2.0), GraphQL Admin API, Storefront API, custom app development, Shopify Functions, Hydrogen, performance optimisation, and debugging. Use when working with .liquid files, creating theme sections and blocks, writing GraphQL queries or mutations for Shopify, building Shopify apps with CLI and Polaris, implementing cart operations via Ajax API, optimising Core Web Vitals for Shopify stores, debugging Liquid or API errors, configuring settings_schema.json, accessing Shopify objects (product, collection, cart, customer), using Liquid filters, creating app extensions, working with webhooks, migrating from Scripts to Functions, or building headless storefronts with Hydrogen and React Router 7. Covers API version 2026-01.",
+      "description": "Complete Shopify development reference covering Liquid templating, OS 2.0 themes, GraphQL APIs, Hydrogen, Functions, and performance optimization (API v2026-01). Use when working with .liquid files, building Shopify themes or apps, writing GraphQL queries for Shopify, debugging Liquid errors, creating app extensions, migrating from Scripts to Functions, or building headless storefronts. Triggers on \"Shopify\", \"Liquid template\", \"Hydrogen\", \"Storefront API\", \"theme development\", \"Shopify Functions\", \"Polaris\". Do NOT use for non-Shopify e-commerce platforms.",
       "category": "development",
       "path": "(development)/shopify-developer",
       "files": [
@@ -1099,11 +1089,11 @@
         "references/performance.md",
         "references/theme-development.md"
       ],
-      "contentHash": "1732419cd1dfc1096790931db29f5bd665d54d27f9ebb80238cb8abb92ab986a"
+      "contentHash": "10dd4806c0061bb9e89914557f6aec6badcef893e601293711ba3e8993527e9f"
     },
     {
       "name": "skill-architect",
-      "description": "Expert guide for designing and building high-quality skills from scratch through structured conversation. Use whenever someone wants to create a new skill, build a skill, design a skill, or asks for help making Agents do something consistently. Also use when someone says \"turn this into a skill\", \"I want to automate this workflow\", \"how do I teach my Agent to do X\", or mentions creating SKILL.md files. Covers standalone skills and MCP-enhanced workflows.",
+      "description": "Expert guide for designing and building high-quality skills from scratch through structured conversation. Use when someone wants to create a new skill, build a skill, design a skill, or asks for help making Agents do something consistently. Also use when someone says \"turn this into a skill\", \"I want to automate this workflow\", \"how do I teach my Agent to do X\", or mentions creating SKILL.md files. Covers standalone skills and MCP-enhanced workflows. Do NOT use for creating subagents (use subagent-creator) or technical design documents (use create-technical-design-doc).",
       "category": "creation",
       "path": "(creation)/skill-architect",
       "files": [
@@ -1115,32 +1105,32 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "124572815e436ce117594d7fd204454a271377b94d3a9e49286a6bae025af2cf"
+      "contentHash": "9ba97395e817d35bdcd780ac03c5eca2bd7c6fea55a47610e2c60edac3afca2b"
     },
     {
       "name": "subagent-creator",
-      "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\".",
+      "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\". Do NOT use for Cursor-specific subagents (use cursor-subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/subagent-creator",
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "14a6caeabcd011164e802611692fa7098030de47ad23e9b7caef85209deda201"
+      "contentHash": "bef6b5a9f23b3186af259c1041c2561e9af15fa94810009d72d775bb217aa3ca"
     },
     {
       "name": "technical-design-doc-creator",
-      "description": "Creates comprehensive Technical Design Documents (TDD) following industry standards with mandatory sections, optional sections, and interactive gathering of missing information.",
+      "description": "Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to \"write a design doc\", \"create a TDD\", \"technical spec\", \"architecture document\", \"RFC\", \"design proposal\", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).",
       "category": "creation",
       "path": "(creation)/create-technical-design-doc",
       "files": [
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "e76734fb9240df31760a2bbeb80afbd70e43a5d4fa3b9fb9c23c6c1a4a7862bf"
+      "contentHash": "d05974df076f695f96b4e4c263ad19f2aaffe8ee6248c1b07a634dd9ed0ea51e"
     },
     {
       "name": "the-fool",
-      "description": "Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing.",
+      "description": "Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing. Do NOT use for building plans, making decisions, or generating solutions — this skill only challenges and critiques.",
       "category": "decision-making",
       "path": "(decision-making)/the-fool",
       "files": [
@@ -1155,11 +1145,11 @@
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
-      "contentHash": "c6aa96132782df3a90f24b9a95df4c60fbac408e38016c889783bf09145e5538"
+      "contentHash": "b761f983e21e00173ac42760f478095a3e8c733862c20d9f711d10d962f407cc"
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\".",
+      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use the architecture skills) or technical design documents (use create-technical-design-doc).",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1181,11 +1171,11 @@
       ],
       "author": "github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "6023642bbb0bc5b160bcb73a727c9198787200f023ad92adec30a3fe13c89e02"
+      "contentHash": "f869d9d91ad0ba14085d084d56d6b9e17a714b3c1f61a37a3c806ed91d0795e8"
     },
     {
       "name": "vercel-deploy",
-      "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\".",
+      "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\". Do NOT use for deploying to Netlify, Cloudflare, or Render (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/vercel-deploy",
       "files": [
@@ -1195,11 +1185,11 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "8628bf69eb47fd1f243c6dac0060390dead25d1fa7063fd8225bde4cbca5294c"
+      "contentHash": "53985dad8a6cf5571b8eb796668502f2e82f0574ab15d31609486de8317f0ec5"
     },
     {
       "name": "web-design-guidelines",
-      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\". Focuses on visual design and interaction patterns. Do NOT use for performance audits (use core-web-vitals), SEO (use seo), or comprehensive site audits (use web-quality-audit).",
       "category": "design",
       "path": "(design)/web-design-guidelines",
       "files": [
@@ -1208,11 +1198,11 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "c13084a3dad5e597c3a7322b42971b3f9a1d5b180e69a3a7e548942ce6fffddc"
+      "contentHash": "213a23fff251b12ddfec648bda148bf10704ef6617e162eb9329cc83963dd138"
     },
     {
       "name": "web-quality-audit",
-      "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices. Use when asked to \"audit my site\", \"review web quality\", \"run lighthouse audit\", \"check page quality\", or \"optimize my website\".",
+      "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices in a single review. Use when asked to \"audit my site\", \"review web quality\", \"run lighthouse audit\", \"check page quality\", or \"optimize my website\" across multiple areas at once. Orchestrates specialized skills for depth. Do NOT use for single-area audits — prefer core-web-vitals, web-accessibility, seo, or web-best-practices for focused work.",
       "category": "quality",
       "path": "(quality)/web-quality-audit",
       "files": [
@@ -1221,7 +1211,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "522ef3fd0af98e5d538a32408e768c0bcbd540f29eccb36ee0ed38d9142b4f57"
+      "contentHash": "8af5bd3453984bdcef903709b6ef0606b12ae1badb6dd5b5b382b930d2594d7c"
     }
   ],
   "deprecated": [
@@ -1244,6 +1234,13 @@
       "message": "Use skill-architect instead",
       "alternatives": [
         "skill-architect"
+      ]
+    },
+    {
+      "name": "run-nx-generator",
+      "message": "Use nx-generate instead",
+      "alternatives": [
+        "nx-generate"
       ]
     }
   ]
