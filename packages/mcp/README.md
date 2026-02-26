@@ -101,9 +101,9 @@ Search for the best skill when you don't know which one you need. Guides the age
 | :------- | :------- | :-------------------------------------------------------------------- |
 | `task`   | Yes      | What you are trying to accomplish (e.g. "optimize React performance") |
 
-#### `/skill-<name>` — Direct Skill Access
+#### `/<name>` — Direct Skill Access
 
-One prompt per skill in the catalog (e.g. `/skill-docs-writer`, `/skill-react-composition-patterns`). Selecting one instructs the agent to call `read_skill` directly — no search step needed.
+One prompt per skill in the catalog (e.g. `/docs-writer`, `/react-composition-patterns`). Selecting one instructs the agent to call `read_skill` directly — no search step needed.
 
 | Argument  | Required | Description                          |
 | :-------- | :------- | :----------------------------------- |
