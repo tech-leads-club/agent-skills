@@ -1,0 +1,11 @@
+{
+  "name": "tech-leads-club",
+  "owner": "tech-leads-club",
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./packages/mcp",
+      "description": "The official MCP for agent-skills. Curated catalog, progressive disclosure flow: Search → load canonical SKILL.md → fetch only validated references. Safe, lean, zero config."
+    }
+  ]
+}
