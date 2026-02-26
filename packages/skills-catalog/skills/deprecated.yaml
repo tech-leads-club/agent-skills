@@ -24,3 +24,8 @@
   message: Use skill-architect instead
   alternatives:
     - skill-architect
+
+- name: run-nx-generator
+  message: Use nx-generate instead
+  alternatives:
+    - nx-generate
