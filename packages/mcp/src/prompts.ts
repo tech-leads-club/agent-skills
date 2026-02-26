@@ -27,7 +27,7 @@ function registerDiscoveryPrompt(server: FastMCP): void {
           content: {
             type: 'text',
             text:
-              `Call search_skills with a concise intent phrase describing: ${args.task}\n` +
+              `Call search_skills with a concise intent phrase describing: ${args?.task ?? ''}\n` +
               `Review the results — pick the best match by score (highest) and category (most relevant).\n` +
               `Prefer results with match_quality "exact" or "strong".\n` +
               `Then call read_skill to load the selected skill and follow its instructions.`,
@@ -51,7 +51,7 @@ function registerSkillPrompts(server: FastMCP, getIndexes: () => Indexes): void 
       arguments: [
         { name: 'context', description: 'Optional — describe what specifically you need help with', required: false },
       ],
-      load: async (args) => buildSkillPromptMessages(skill, args.context),
+      load: async (args) => buildSkillPromptMessages(skill, args?.context),
     })
   }
 }
