@@ -42,9 +42,6 @@ export function extractTriggers(description: string): string {
 /** Max description length for prompt listings (clients may truncate further). */
 const PROMPT_DESCRIPTION_MAX_LENGTH = 160
 
-/** Prefix for individual skill prompts. Clients show these as `/skill-<name>`. */
-const SKILL_PROMPT_PREFIX = 'skill'
-
 /** Builds a concise, user-facing description from the full skill description. */
 export function buildPromptDescription(description: string): string {
   const useWhenIdx = description.indexOf('Use when')
@@ -64,5 +61,5 @@ export function buildPromptDescription(description: string): string {
 }
 
 export function buildPromptName(skillName: string): string {
-  return `${SKILL_PROMPT_PREFIX}-${skillName}`
+  return skillName
 }
