@@ -144,13 +144,46 @@ def validate_skill(skill_path: str) -> dict:
         has_xml = "<" in desc_str or ">" in desc_str
         add_check("description_no_xml", not has_xml, "No XML brackets in description" if not has_xml else "XML angle brackets found in description (forbidden)")
 
-        # Trigger phrase heuristic
+        # Trigger phrase check
         trigger_keywords = ["use when", "use for", "use this", "trigger", "ask for", "asks to", "says", "mentions"]
         has_triggers = any(kw in desc_str.lower() for kw in trigger_keywords)
         add_check(
             "description_has_triggers",
             has_triggers,
-            "Description includes trigger guidance" if has_triggers else "Description may be missing trigger phrases (add 'Use when...' guidance)",
+            "Description includes trigger guidance" if has_triggers else "Missing trigger phrases — add 'Use when...' guidance (mandatory per CONTRIBUTING.md)",
+        )
+
+        # Negative scope check
+        negative_keywords = ["do not use", "don't use", "not for", "not intended for"]
+        has_negative_scope = any(kw in desc_str.lower() for kw in negative_keywords)
+        add_check(
+            "description_has_negative_scope",
+            has_negative_scope,
+            "Description includes negative scope" if has_negative_scope else "Missing negative scope — add 'Do NOT use for...' guidance (mandatory per CONTRIBUTING.md)",
+        )
+
+    # --- Check 7b: metadata field ---
+    metadata = fm.get("metadata")
+    if not metadata or not isinstance(metadata, dict):
+        add_check("metadata_present", False, "Missing 'metadata' field in frontmatter (expected metadata.version and metadata.author)", severity="warning")
+    else:
+        add_check("metadata_present", True, "metadata field present")
+
+        meta_version = metadata.get("version")
+        has_version = bool(meta_version)
+        add_check(
+            "metadata_version",
+            has_version,
+            f"metadata.version: {meta_version}" if has_version else "Missing metadata.version",
+            severity="warning",
+        )
+
+        meta_author = metadata.get("author")
+        has_author = bool(meta_author)
+        add_check(
+            "metadata_author",
+            has_author,
+            f"metadata.author: {meta_author}" if has_author else "Missing metadata.author",
             severity="warning",
         )
 
@@ -234,8 +267,6 @@ if __name__ == "__main__":
     results = validate_skill(path)
     print_report(results)
 
-    # Also output JSON for programmatic use
     print("--- JSON Report ---")
     print(json.dumps(results, indent=2))
-
     sys.exit(0 if results["failed"] == 0 else 1)
