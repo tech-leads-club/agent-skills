@@ -1,0 +1,74 @@
+{
+  "name": "mcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/mcp/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/packages/mcp",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "packages/mcp/src/main.ts",
+        "tsConfig": "packages/mcp/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "README.md",
+            "input": "packages/mcp",
+            "output": "."
+          }
+        ],
+        "esbuildOptions": {
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/mcp"
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "mcp:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "mcp:build:development"
+        },
+        "production": {
+          "buildTarget": "mcp:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/mcp/jest.config.ts"
+      },
+      "env": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
+      }
+    }
+  }
+}
