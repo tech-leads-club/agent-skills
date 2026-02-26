@@ -1,20 +1,222 @@
 #!/usr/bin/env python3
 """
-Validates a skill folder against all structural requirements from the
-Complete Guide to Building Skills for AI Agents.
+Validate a skill folder against Skill Architect requirements.
 
 Usage:
     python scripts/validate_skill.py <path-to-skill-folder>
+    python scripts/validate_skill.py <path-to-skill-folder> --format json
+    python scripts/validate_skill.py <path-to-skill-folder> --json-out /tmp/skill-report.json
 
-Returns exit code 0 if all checks pass, 1 if any fail.
-Outputs a JSON report to stdout.
+Exit codes:
+    0 = pass (warnings allowed)
+    1 = fail (at least one error)
+
+Token-efficient workflow:
+    Run once with --json-out, then reuse the saved JSON for feedback/review
+    without re-running validation.
 """
 
+import argparse
 import json
 import os
 import re
 import sys
-import yaml
+from typing import Any
+
+try:
+    import yaml  # type: ignore[reportMissingImports]
+except ImportError:
+    yaml = None
+
+
+class FrontmatterParseError(ValueError):
+    """Raised when frontmatter parsing fails."""
+
+
+def _parse_scalar(raw: str) -> Any:
+    """Parse a scalar YAML-like value using stdlib-only rules."""
+    value = raw.strip()
+    if value == "":
+        return ""
+
+    if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+        return value[1:-1]
+
+    lower = value.lower()
+    if lower == "true":
+        return True
+    if lower == "false":
+        return False
+    if lower in {"null", "none", "~"}:
+        return None
+    if re.fullmatch(r"-?\d+", value):
+        return int(value)
+    if re.fullmatch(r"-?\d+\.\d+", value):
+        return float(value)
+    return value
+
+
+def _collect_block_scalar(lines: list[str], start_idx: int, min_indent: int, folded: bool) -> tuple[str, int]:
+    """Collect YAML block scalar lines (| or >) from start_idx."""
+    block_lines: list[str] = []
+    i = start_idx
+
+    while i < len(lines):
+        line = lines[i]
+        if line.strip() == "":
+            block_lines.append("")
+            i += 1
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        if indent < min_indent:
+            break
+
+        block_lines.append(line[min_indent:])
+        i += 1
+
+    if not folded:
+        return ("\n".join(block_lines)).rstrip(), i
+
+    # Fold style (>) joins non-empty lines with spaces.
+    paragraphs: list[str] = []
+    current: list[str] = []
+    for line in block_lines:
+        if line == "":
+            if current:
+                paragraphs.append(" ".join(current))
+                current = []
+            paragraphs.append("")
+            continue
+        current.append(line.strip())
+    if current:
+        paragraphs.append(" ".join(current))
+
+    return ("\n".join(paragraphs)).rstrip(), i
+
+
+def _parse_frontmatter_stdlib(frontmatter_raw: str) -> dict[str, Any]:
+    """
+    Parse a conservative subset of YAML frontmatter with stdlib only.
+
+    Supported subset:
+    - top-level `key: value`
+    - one-level nested mapping:
+      key:
+        child: value
+    - quoted/unquoted scalars
+    - block scalars (`|`, `>`, and chomping variants)
+    """
+    lines = frontmatter_raw.splitlines()
+    data: dict[str, Any] = {}
+    i = 0
+
+    top_key_pattern = re.compile(r"^([A-Za-z0-9_-]+)\s*:\s*(.*)$")
+    nested_key_pattern = re.compile(r"^([A-Za-z0-9_-]+)\s*:\s*(.*)$")
+    block_markers = {"|", ">", "|-", ">-"}
+
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        if stripped == "" or stripped.startswith("#"):
+            i += 1
+            continue
+
+        if line.startswith(" "):
+            raise FrontmatterParseError(f"Unexpected indentation at top level near line {i + 1}: {line}")
+
+        top_match = top_key_pattern.match(line)
+        if not top_match:
+            raise FrontmatterParseError(f"Invalid top-level entry near line {i + 1}: {line}")
+
+        key, raw_value = top_match.group(1), top_match.group(2).strip()
+
+        if raw_value in block_markers:
+            folded = raw_value.startswith(">")
+            parsed_block, next_idx = _collect_block_scalar(lines, i + 1, min_indent=2, folded=folded)
+            data[key] = parsed_block
+            i = next_idx
+            continue
+
+        if raw_value != "":
+            if raw_value.startswith("- "):
+                raise FrontmatterParseError(
+                    f"List syntax is not supported by fallback parser near line {i + 1}. Install PyYAML for full support."
+                )
+            data[key] = _parse_scalar(raw_value)
+            i += 1
+            continue
+
+        # raw_value == "" -> nested mapping or empty value
+        j = i + 1
+        while j < len(lines):
+            candidate = lines[j]
+            if candidate.strip() == "" or candidate.strip().startswith("#"):
+                j += 1
+                continue
+            if not candidate.startswith("  "):
+                break
+            j += 1
+
+        nested_lines = lines[i + 1 : j]
+        if not any(nl.strip() and not nl.strip().startswith("#") for nl in nested_lines):
+            data[key] = ""
+            i = j
+            continue
+
+        nested_data: dict[str, Any] = {}
+        k = i + 1
+        while k < j:
+            nested_line = lines[k]
+            nested_stripped = nested_line.strip()
+            if nested_stripped == "" or nested_stripped.startswith("#"):
+                k += 1
+                continue
+            if not nested_line.startswith("  "):
+                raise FrontmatterParseError(f"Invalid nested indentation near line {k + 1}: {nested_line}")
+
+            nested_content = nested_line[2:]
+            if nested_content.startswith(" "):
+                raise FrontmatterParseError(
+                    f"Deep nesting is not supported by fallback parser near line {k + 1}. Install PyYAML for full support."
+                )
+            if nested_content.startswith("- "):
+                raise FrontmatterParseError(
+                    f"List syntax is not supported by fallback parser near line {k + 1}. Install PyYAML for full support."
+                )
+
+            nested_match = nested_key_pattern.match(nested_content)
+            if not nested_match:
+                raise FrontmatterParseError(f"Invalid nested mapping near line {k + 1}: {nested_line}")
+
+            child_key, child_raw = nested_match.group(1), nested_match.group(2).strip()
+            if child_raw in block_markers:
+                folded = child_raw.startswith(">")
+                child_block, next_k = _collect_block_scalar(lines, k + 1, min_indent=4, folded=folded)
+                nested_data[child_key] = child_block
+                k = next_k
+                continue
+            nested_data[child_key] = _parse_scalar(child_raw)
+            k += 1
+
+        data[key] = nested_data
+        i = j
+
+    return data
+
+
+def parse_frontmatter(frontmatter_raw: str) -> tuple[dict[str, Any], str]:
+    """Parse frontmatter using PyYAML when available, fallback to stdlib parser."""
+    if yaml is not None:
+        parsed = yaml.safe_load(frontmatter_raw)
+        if not isinstance(parsed, dict):
+            raise FrontmatterParseError("Frontmatter is not a YAML mapping")
+        return parsed, "pyyaml"
+
+    parsed = _parse_frontmatter_stdlib(frontmatter_raw)
+    if not isinstance(parsed, dict):
+        raise FrontmatterParseError("Frontmatter is not a mapping")
+    return parsed, "stdlib"
 
 
 def validate_skill(skill_path: str) -> dict:
@@ -25,6 +227,8 @@ def validate_skill(skill_path: str) -> dict:
         "passed": 0,
         "failed": 0,
         "warnings": 0,
+        "parser_mode": "unknown",
+        "next_steps": [],
     }
 
     def add_check(name: str, passed: bool, message: str, severity: str = "error"):
@@ -96,10 +300,16 @@ def validate_skill(skill_path: str) -> dict:
     fm_raw = fm_match.group(1)
 
     try:
-        fm = yaml.safe_load(fm_raw)
-        if not isinstance(fm, dict):
-            raise ValueError("Frontmatter is not a YAML mapping")
-        add_check("frontmatter_valid_yaml", True, "Frontmatter is valid YAML")
+        fm, parser_mode = parse_frontmatter(fm_raw)
+        results["parser_mode"] = parser_mode
+        if parser_mode == "pyyaml":
+            add_check("frontmatter_valid_yaml", True, "Frontmatter is valid YAML (parsed with PyYAML)")
+        else:
+            add_check(
+                "frontmatter_valid_yaml",
+                True,
+                "Frontmatter parsed with stdlib fallback parser (install PyYAML for full YAML support)",
+            )
     except Exception as e:
         add_check("frontmatter_valid_yaml", False, f"YAML parse error: {e}")
         results["summary"] = "FAIL — YAML parse error"
@@ -238,17 +448,27 @@ def validate_skill(skill_path: str) -> dict:
     else:
         results["summary"] = f"FAIL — {results['failed']} errors, {results['warnings']} warnings"
 
+    if results["failed"] > 0:
+        results["next_steps"] = [
+            f"Fix check '{check['name']}': {check['message']}"
+            for check in results["checks"]
+            if (not check["passed"] and check["severity"] == "error")
+        ]
+
     return results
 
 
-def print_report(results: dict):
-    """Print a human-readable report."""
+def print_report(results: dict, verbose: bool = False):
+    """Print a compact human-readable report."""
     print(f"\n{'=' * 60}")
     print(f"  Skill Validation Report")
     print(f"  Path: {results['path']}")
+    print(f"  Parser: {results.get('parser_mode', 'unknown')}")
     print(f"{'=' * 60}\n")
 
     for check in results["checks"]:
+        if check["passed"] and not verbose:
+            continue
         icon = "✅" if check["passed"] else ("⚠️" if check["severity"] == "warning" else "❌")
         print(f"  {icon} {check['name']}: {check['message']}")
 
@@ -257,16 +477,63 @@ def print_report(results: dict):
     print(f"  Passed: {results['passed']} | Failed: {results['failed']} | Warnings: {results['warnings']}")
     print(f"{'─' * 60}\n")
 
+    if results.get("next_steps"):
+        print("  Next steps:")
+        for i, step in enumerate(results["next_steps"], start=1):
+            print(f"    {i}. {step}")
+        print()
+
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <path-to-skill-folder>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Validate a skill folder",
+        epilog="Tip: use --json-out FILE to save full results and avoid re-running for later feedback.",
+    )
+    parser.add_argument("path", help="Path to the skill folder")
+    parser.add_argument(
+        "--format",
+        choices=["human", "json", "both"],
+        default="human",
+        help="Output format (default: human)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Include passed checks in human output",
+    )
+    parser.add_argument(
+        "--pretty-json",
+        action="store_true",
+        help="Pretty-print JSON (default is compact JSON)",
+    )
+    parser.add_argument(
+        "--json-out",
+        help="Write JSON report to a file (compact by default)",
+    )
+    args = parser.parse_args()
 
-    path = sys.argv[1]
-    results = validate_skill(path)
-    print_report(results)
+    results = validate_skill(args.path)
 
-    print("--- JSON Report ---")
-    print(json.dumps(results, indent=2))
+    if args.format in {"human", "both"}:
+        print_report(results, verbose=args.verbose)
+        if not args.json_out:
+            print("  Tip: add --json-out FILE to reuse this report without re-running.\n")
+
+    if args.format in {"json", "both"}:
+        if args.format == "both":
+            print("--- JSON Report ---")
+        indent = 2 if args.pretty_json else None
+        separators = None if args.pretty_json else (",", ":")
+        report_json = json.dumps(results, indent=indent, separators=separators)
+        print(report_json)
+
+    if args.json_out:
+        indent = 2 if args.pretty_json else None
+        separators = None if args.pretty_json else (",", ":")
+        report_json = json.dumps(results, indent=indent, separators=separators)
+        with open(args.json_out, "w", encoding="utf-8") as out_file:
+            out_file.write(report_json)
+        if args.format in {"human", "both"}:
+            print(f"  JSON report saved to: {args.json_out}")
+
     sys.exit(0 if results["failed"] == 0 else 1)
