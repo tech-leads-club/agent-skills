@@ -1,55 +1,13 @@
-import { buildSkillPromptMessages, registerPrompts } from '../prompts'
+import { buildCatalogPromptMessages, buildSkillPromptMessages, buildUsePromptNotFoundMessages, registerPrompts } from '../prompts'
 import type { SkillEntry } from '../types'
-import { buildPromptDescription, buildPromptName } from '../utils'
 
-describe('buildPromptName', () => {
-  it('uses the skill name directly', () => {
-    expect(buildPromptName('docs-writer')).toBe('docs-writer')
-  })
-
-  it('handles single-word skill names', () => {
-    expect(buildPromptName('sentry')).toBe('sentry')
-  })
-
-  it('handles long kebab-case names', () => {
-    expect(buildPromptName('react-composition-patterns')).toBe('react-composition-patterns')
-  })
-})
-
-describe('buildPromptDescription', () => {
-  it('returns text before "Use when" clause', () => {
-    const desc =
-      'React composition patterns that scale. Use when refactoring components with boolean prop proliferation.'
-    expect(buildPromptDescription(desc)).toBe('React composition patterns that scale.')
-  })
-
-  it('returns the first sentence when no "Use when" clause exists', () => {
-    const desc = 'Expert AWS Cloud Advisor for architecture design. Leverages AWS MCP tools.'
-    expect(buildPromptDescription(desc)).toBe('Expert AWS Cloud Advisor for architecture design.')
-  })
-
-  it('returns the full description when it is a single sentence without "Use when"', () => {
-    const desc = 'A very simple skill'
-    expect(buildPromptDescription(desc)).toBe('A very simple skill')
-  })
-
-  it('truncates descriptions longer than 160 characters', () => {
-    const desc = 'A'.repeat(200)
-    const result = buildPromptDescription(desc)
-    expect(result.length).toBe(160)
-    expect(result.endsWith('…')).toBe(true)
-  })
-
-  it('does NOT truncate descriptions at exactly 160 characters', () => {
-    const desc = 'B'.repeat(160)
-    const result = buildPromptDescription(desc)
-    expect(result.length).toBe(160)
-    expect(result.endsWith('…')).toBe(false)
-  })
-
-  it('trims whitespace around the extracted description', () => {
-    const desc = '  Trim me.  Use when doing stuff.'
-    expect(buildPromptDescription(desc)).toBe('Trim me.')
+describe('buildCatalogPromptMessages', () => {
+  it('returns search-first instructions for catalog discovery', () => {
+    const result = buildCatalogPromptMessages('refactor a large React component')
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0].content.text).toContain('search_skills')
+    expect(result.messages[0].content.text).toContain('read_skill')
+    expect(result.messages[0].content.text).toContain('refactor a large React component')
   })
 })
 
@@ -89,11 +47,22 @@ describe('buildSkillPromptMessages', () => {
   })
 })
 
+describe('buildUsePromptNotFoundMessages', () => {
+  it('returns fallback instructions when skill name does not exist', () => {
+    const result = buildUsePromptNotFoundMessages('missing-skill')
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0].content.text).toContain('"missing-skill"')
+    expect(result.messages[0].content.text).toContain('search_skills')
+  })
+})
+
 describe('registerPrompts', () => {
-  it('handles missing args when loading a skill prompt', async () => {
-    const promptDefs: Array<{ name: string; load: (args?: { context?: string }) => Promise<unknown> }> = []
+  it('registers simple entrypoint prompts and handles missing args', async () => {
+    const promptDefs: Array<{ name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> }> = []
     const server = {
-      addPrompt: (prompt: { name: string; load: (args?: { context?: string }) => Promise<unknown> }) => {
+      addPrompt: (
+        prompt: { name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> },
+      ) => {
         promptDefs.push(prompt)
       },
     }
@@ -109,11 +78,14 @@ describe('registerPrompts', () => {
 
     registerPrompts(server as never, () => ({ fuse: {} as never, map: new Map([[skill.name, skill]]) }))
 
-    const prompt = promptDefs.find((entry) => entry.name === 'component-flattening-analysis')
-    expect(prompt).toBeDefined()
+    expect(promptDefs.map((entry) => entry.name)).toEqual(expect.arrayContaining(['skills', 'find-skill', 'use', 'skills-help']))
 
-    await expect(prompt?.load(undefined)).resolves.toEqual(
+    const usePrompt = promptDefs.find((entry) => entry.name === 'use')
+    expect(usePrompt).toBeDefined()
+    await expect(usePrompt?.load({ name: skill.name, context: undefined })).resolves.toEqual(
       buildSkillPromptMessages(skill),
     )
+
+    await expect(usePrompt?.load(undefined)).resolves.toEqual(buildUsePromptNotFoundMessages(undefined))
   })
 })
