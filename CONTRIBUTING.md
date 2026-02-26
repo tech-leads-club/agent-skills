@@ -24,7 +24,8 @@ npm run build
 | ---------------------------------- | ---------------------------------- |
 | `npm run start:dev:cli`            | Run CLI locally (interactive mode) |
 | `npm run start:dev:mcp`            | Build MCP and open Inspector       |
-| `npm run g <name>`                 | Generate a new skill               |
+| `npm run generate:skill <name>`    | Generate a new skill               |
+| `npm run validate`                 | Validate all skills                |
 | `npm run build`                    | Build all packages                 |
 | `npm run test`                     | Run all tests                      |
 | `npm run lint`                     | Lint codebase                      |
