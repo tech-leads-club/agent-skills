@@ -13,7 +13,8 @@ This file provides guidance to AI Coding Agents when working with code in this r
 npm ci && npm run build
 
 # Development
-npm run start:dev              # Run CLI interactively (tsx, no build needed)
+npm run start:dev:cli          # Run CLI interactively (tsx, no build needed)
+npm run start:dev:mcp          # Build MCP and open Inspector
 SKILLS_CDN_REF=main npm run dev -- install  # Test CLI against local registry
 
 # Build & Test
@@ -74,6 +75,16 @@ skills/(category)/{skill-name}/
 ```
 
 Always use the Nx generator (`nx g @tech-leads-club/skill-plugin:skill`) to create skills. Keep `SKILL.md` under 500 lines; offload reference material to `references/`.
+
+### Skill Quality Standards
+
+**When creating a new skill or modifying an existing one, you MUST use the `skill-architect` skill** to ensure it follows best practices. If the `skill-architect` skill is not installed, follow these mandatory description rules:
+
+- **Structure**: `[What it does] + [Use when ...] + [Do NOT use for ...]`
+- **"Use when"** is mandatory — include actual phrases users would say
+- **"Do NOT use for"** is mandatory — add negative triggers to prevent overlap with similar skills
+- **Under 1024 characters** — no XML angle brackets (`< >`)
+- **User perspective** — write trigger phrases as things the user would actually say, not internal jargon
 
 ## Release
 
