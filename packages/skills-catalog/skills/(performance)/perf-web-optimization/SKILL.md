@@ -123,12 +123,7 @@ Cache-Control: private, max-age=0, must-revalidate
 
 ## Measurement
 
-```bash
-# Quick audit
-npx lighthouse https://site.com --preset=perf --form-factor=mobile
-```
-
-For running audits, reading reports, and setting budgets, see **perf-lighthouse**.
+For running audits, reading reports, and setting budgets, use the **perf-lighthouse** skill.
 
 ## Checklist
 
