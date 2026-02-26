@@ -1,0 +1,19 @@
+{
+  "name": "tech-leads-club",
+  "owner": { "name": "Tech Leads Club" },
+  "metadata": { "description": "Official Tech Leads Club plugins for Claude Code" },
+  "plugins": [
+    {
+      "name": "agent-skills-mcp",
+      "source": "./packages/mcp",
+      "description": "The official MCP for agent-skills. Curated catalog, progressive disclosure flow: Search → load canonical SKILL.md → fetch only validated references. Safe, lean, zero config.",
+      "version": "0.0.1",
+      "author": { "name": "Tech Leads Club" },
+      "homepage": "https://github.com/tech-leads-club/agent-skills",
+      "repository": "https://github.com/tech-leads-club/agent-skills",
+      "license": "MIT",
+      "keywords": ["mcp", "skills", "agents", "catalog"],
+      "category": "productivity"
+    }
+  ]
+}
