@@ -3,16 +3,16 @@ import type { SkillEntry } from '../types'
 import { buildPromptDescription, buildPromptName } from '../utils'
 
 describe('buildPromptName', () => {
-  it('prefixes the skill name with "skill-"', () => {
-    expect(buildPromptName('docs-writer')).toBe('skill-docs-writer')
+  it('uses the skill name directly', () => {
+    expect(buildPromptName('docs-writer')).toBe('docs-writer')
   })
 
   it('handles single-word skill names', () => {
-    expect(buildPromptName('sentry')).toBe('skill-sentry')
+    expect(buildPromptName('sentry')).toBe('sentry')
   })
 
   it('handles long kebab-case names', () => {
-    expect(buildPromptName('react-composition-patterns')).toBe('skill-react-composition-patterns')
+    expect(buildPromptName('react-composition-patterns')).toBe('react-composition-patterns')
   })
 })
 
@@ -109,7 +109,7 @@ describe('registerPrompts', () => {
 
     registerPrompts(server as never, () => ({ fuse: {} as never, map: new Map([[skill.name, skill]]) }))
 
-    const prompt = promptDefs.find((entry) => entry.name === 'skill-component-flattening-analysis')
+    const prompt = promptDefs.find((entry) => entry.name === 'component-flattening-analysis')
     expect(prompt).toBeDefined()
 
     await expect(prompt?.load(undefined)).resolves.toEqual(
