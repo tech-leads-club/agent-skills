@@ -22,7 +22,8 @@ npm run build
 
 | Command                            | Description                        |
 | ---------------------------------- | ---------------------------------- |
-| `npm run start:dev`                | Run CLI locally (interactive mode) |
+| `npm run start:dev:cli`            | Run CLI locally (interactive mode) |
+| `npm run start:dev:mcp`            | Build MCP and open Inspector       |
 | `npm run g <name>`                 | Generate a new skill               |
 | `npm run build`                    | Build all packages                 |
 | `npm run test`                     | Run all tests                      |
@@ -33,6 +34,8 @@ npm run build
 | `nx run marketplace:generate-data` | Update marketplace skills data     |
 
 ## ⭐ Creating a New Skill
+
+> **Important**: When creating a new skill or adding an external skill to the catalog, you **must** use the **`skill-architect`** skill to guide the process and ensure the skill follows our quality standards. If you're an AI agent, load the `skill-architect` skill before proceeding. If contributing manually, review the [Description Quality Standards](#description-quality-standards) below.
 
 ```bash
 # With category (recommended)
@@ -49,6 +52,8 @@ nx g @tech-leads-club/skill-plugin:skill my-skill \
 The generator creates:
 
 - `packages/skills-catalog/skills/(development)/my-skill/SKILL.md`
+
+After generating the scaffold, refine the `SKILL.md` content (especially the `description` field) following the quality standards below.
 
 ## 📁 Project Structure
 
@@ -87,7 +92,7 @@ packages/skills-catalog/skills/
 ```markdown
 ---
 name: my-skill
-description: What this skill does. Use when user says "trigger phrase".
+description: What this skill does in one sentence. Use when user says "trigger phrase", "another trigger", or "third trigger". Do NOT use for things handled by other-skill.
 metadata:
   version: 1.0.0
   author: github.com/username
@@ -123,6 +128,40 @@ Brief description.
 - **Write specific descriptions** — include trigger phrases
 - **Assume the agent is smart** — only add what it doesn't already know
 - **Prefer scripts over inline code** — reduces context window usage
+- **Use the `skill-architect` skill** — for creating new skills or validating existing ones
+
+### Description Quality Standards
+
+Every skill description **must** follow this structure:
+
+```
+[What it does] + [Use when ...] + [Do NOT use for ...]
+```
+
+**Mandatory rules:**
+
+| Rule                                                | Example                                                   |
+| --------------------------------------------------- | --------------------------------------------------------- |
+| Include `Use when` with user-facing trigger phrases | `Use when user says "deploy my app", "push this live"`    |
+| Include `Do NOT use for` with negative triggers     | `Do NOT use for Netlify deployments (use netlify-deploy)` |
+| Under 1024 characters                               | Keep it concise but complete                              |
+| No XML angle brackets (`< >`) in YAML               | Use standard quotes instead                               |
+| User perspective, not internal jargon               | "fix my build" not "remediate CI pipeline failures"       |
+
+**Good example:**
+
+```yaml
+description: Deploy applications to Vercel. Use when the user requests "deploy my app",
+  "push this live", or "create a preview deployment". Do NOT use for deploying to
+  Netlify, Cloudflare, or Render (use their respective skills).
+```
+
+**Bad example:**
+
+```yaml
+# ❌ Missing triggers and negative scope
+description: Helps with deployments.
+```
 
 ## 🔒 Security Scan
 
