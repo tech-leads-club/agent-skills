@@ -202,18 +202,18 @@ The registry is fetched from [jsDelivr CDN](https://cdn.jsdelivr.net/gh/tech-lea
 From the **repo root**:
 
 ```bash
-npm run build              # Build all (or: npx nx build mcp)
-npx nx lint mcp
-npx nx test mcp
+npm run build              # Build all (or: npx nx build @tech-leads-club/agent-skills-mcp)
+npx nx lint @tech-leads-club/agent-skills-mcp
+npx nx test @tech-leads-club/agent-skills-mcp
 npm run start:dev:mcp      # Build MCP and open Inspector
 ```
 
 From **packages/mcp**:
 
 ```bash
-npx nx build mcp
-npx nx lint mcp
-npx nx test mcp
+npx nx build @tech-leads-club/agent-skills-mcp
+npx nx lint @tech-leads-club/agent-skills-mcp
+npx nx test @tech-leads-club/agent-skills-mcp
 npm run start:dev          # Build + Inspector (uses ../../dist/packages/mcp)
 ```
 
