@@ -1,4 +1,4 @@
-import { buildSkillPromptMessages } from '../prompts'
+import { buildSkillPromptMessages, registerPrompts } from '../prompts'
 import type { SkillEntry } from '../types'
 import { buildPromptDescription, buildPromptName } from '../utils'
 
@@ -86,5 +86,34 @@ describe('buildSkillPromptMessages', () => {
   it('does NOT include "Apply" line when context is empty string', () => {
     const result = buildSkillPromptMessages(skill, '')
     expect(result.messages[0].content.text).not.toContain('Apply the skill to accomplish')
+  })
+})
+
+describe('registerPrompts', () => {
+  it('handles missing args when loading a skill prompt', async () => {
+    const promptDefs: Array<{ name: string; load: (args?: { context?: string }) => Promise<unknown> }> = []
+    const server = {
+      addPrompt: (prompt: { name: string; load: (args?: { context?: string }) => Promise<unknown> }) => {
+        promptDefs.push(prompt)
+      },
+    }
+
+    const skill: SkillEntry = {
+      name: 'component-flattening-analysis',
+      description: 'Analyze component flattening opportunities.',
+      category: 'frontend',
+      path: 'skills/component-flattening-analysis',
+      files: ['SKILL.md'],
+      contentHash: 'def456',
+    }
+
+    registerPrompts(server as never, () => ({ fuse: {} as never, map: new Map([[skill.name, skill]]) }))
+
+    const prompt = promptDefs.find((entry) => entry.name === 'skill-component-flattening-analysis')
+    expect(prompt).toBeDefined()
+
+    await expect(prompt?.load(undefined)).resolves.toEqual(
+      buildSkillPromptMessages(skill),
+    )
   })
 })
