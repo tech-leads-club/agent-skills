@@ -156,6 +156,15 @@ entries:
     allowedBy: felipefr
     allowedAt: '2026-02-17'
 
+  - skill: nx-ci-monitor
+    code: W011
+    reason: >
+      Monitoring Nx Cloud CI pipeline status via the ci-watcher subagent is the core
+      functionality. Polling Nx Cloud is intentional and required; analogous to gh-fix-ci
+      (GitHub CI) which is already allowlisted.
+    allowedBy: felipefr
+    allowedAt: '2026-02-26'
+
   # ============================================================================
   # WEB-AUTOMATION CATEGORY
   # Skills for web testing and browser automation
@@ -259,6 +268,14 @@ entries:
       and requires explicit user approval.
     allowedBy: felipefr
     allowedAt: '2026-02-22'
+
+  - skill: netlify-deploy
+    code: W011
+    reason: >
+      Running the official Netlify CLI is the core purpose of this deployment skill.
+      Third-party content exposure (Netlify tooling) is inherent to the intended functionality.
+    allowedBy: felipefr
+    allowedAt: '2026-02-26'
 
   - skill: netlify-deploy
     code: W012
