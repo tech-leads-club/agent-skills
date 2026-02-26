@@ -1,7 +1,7 @@
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { VerifyResult } from '../shared/types'
-import { AGENT_CONFIGS } from './installed-skills-scanner'
+import { findAgentPathConfig } from './agent-paths'
 import type { LoggingService } from './logging-service'
 
 /**
@@ -55,7 +55,7 @@ export class PostInstallVerifier {
     const corrupted: VerifyResult['corrupted'] = []
 
     for (const agentName of agents) {
-      const config = AGENT_CONFIGS.find((c) => c.name === agentName)
+      const config = findAgentPathConfig(agentName)
       if (!config) {
         this.logger.warn(`Unknown agent '${agentName}' in verification. Skipping.`)
         continue
@@ -67,7 +67,7 @@ export class PostInstallVerifier {
           this.logger.warn(`Skipping local verification for '${agentName}': no workspace root.`)
           continue
         }
-        expectedPath = join(workspaceRoot, config.skillsDir, skillName, 'SKILL.md')
+        expectedPath = join(workspaceRoot, config.localSkillsDir, skillName, 'SKILL.md')
       } else {
         expectedPath = join(config.globalSkillsDir, skillName, 'SKILL.md')
       }

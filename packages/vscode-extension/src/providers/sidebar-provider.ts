@@ -1,6 +1,9 @@
 import * as vscode from 'vscode'
+import { CommandPaletteFlowService } from '../services/command-palette-flow-service'
 import type { InstallationOrchestrator } from '../services/installation-orchestrator'
 import { LoggingService } from '../services/logging-service'
+import { MessageRouter } from '../services/message-router'
+import { ScopeSelectionService, type ScopeQuickPickItem } from '../services/scope-selection-service'
 import { SkillLockService } from '../services/skill-lock-service'
 import { SkillRegistryService, type RegistryResult } from '../services/skill-registry-service'
 import type { StateReconciler } from '../services/state-reconciler'
@@ -22,13 +25,6 @@ import type {
  */
 interface AgentQuickPickItem extends vscode.QuickPickItem {
   agentId: string
-}
-
-/**
- * QuickPick item representing an installation scope.
- */
-interface ScopeQuickPickItem extends vscode.QuickPickItem {
-  scopeId: 'local' | 'global' | 'all'
 }
 
 /**
@@ -75,6 +71,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private webviewView?: vscode.WebviewView
   private policy?: ScopePolicyEvaluation
   private readonly batchProgress = new Map<string, BatchProgressState>()
+  private readonly scopeSelectionService = new ScopeSelectionService()
+  private readonly messageRouter: MessageRouter
+  private readonly commandPaletteFlowService: CommandPaletteFlowService
 
   /**
    * Creates a sidebar provider and wires orchestrator/reconciler event forwarding to the webview.
@@ -94,6 +93,39 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly reconciler: StateReconciler,
     private readonly skillLockService: SkillLockService,
   ) {
+    this.messageRouter = new MessageRouter(this.logger, {
+      handleWebviewDidMount: (message, webview) => this.handleWebviewDidMount(message, webview),
+      handleRefreshRequest: (webview) => this.handleRefreshRequest(webview),
+      handleInstallSkill: (skillName, scope, agents) => this.handleInstallSkill(skillName, scope, agents),
+      handleRemoveSkill: (skillName, scope, agents) => this.handleRemoveSkill(skillName, scope, agents),
+      handleExecuteBatch: (action, skills, agents, scope) => this.handleExecuteBatch(action, skills, agents, scope),
+      handleUpdateSkill: (skillName) => this.handleUpdateSkill(skillName),
+      handleRepairSkill: (skillName, scope, agents) => this.handleRepairSkill(skillName, scope, agents),
+      handleCancelOperation: (operationId) => this.handleCancelOperation(operationId),
+    })
+
+    this.commandPaletteFlowService = new CommandPaletteFlowService(this.orchestrator, {
+      getPolicy: () => this.policy,
+      checkPolicyBlocking: () => this.checkPolicyBlocking(),
+      loadRegistryForCommand: () => this.loadRegistryForCommand(),
+      getInstalledSkills: () => this.reconciler.getInstalledSkills(),
+      getInstalledHashes: () => this.skillLockService.getInstalledHashes(),
+      getAvailableAgents: () => this.reconciler.getAvailableAgents(),
+      pickSkills: (mode, registry, installedSkills, availableAgents, installedHashes) =>
+        this.pickSkills(mode, registry, installedSkills, availableAgents, installedHashes),
+      pickAgentsForSkills: (action, skillNames, availableAgents, installedSkills) =>
+        this.pickAgentsForSkills(action, skillNames, availableAgents, installedSkills),
+      pickScopeForSkills: (action, skillNames, agents, installedSkills, hasWorkspace, isTrusted) =>
+        this.pickScopeForSkills(action, skillNames, agents, installedSkills, hasWorkspace, isTrusted),
+      doesSkillNeedActionForScope: (skillName, agents, installedSkills, scopeId, action) =>
+        this.doesSkillNeedActionForScope(skillName, agents, installedSkills, scopeId, action),
+      getAgentDisplayNames: (agentIds, availableAgents) => this.getAgentDisplayNames(agentIds, availableAgents),
+      confirmLifecycleAction: (selection, agentNames) => this.confirmLifecycleAction(selection, agentNames),
+      resolveSelectionScope: (hasLocalTargets, hasGlobalTargets) =>
+        this.resolveSelectionScope(hasLocalTargets, hasGlobalTargets),
+      runQueueAction: (action, work) => this.runQueueAction(action, work),
+    })
+
     this.reconciler.onStateChanged((installedSkills) => {
       void this.postReconciledState(installedSkills)
     })
@@ -232,7 +264,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this.getHtmlForWebview(webviewView.webview)
 
     const messageDisposable = webviewView.webview.onDidReceiveMessage((message: WebviewMessage) =>
-      this.handleMessage(message, webviewView.webview),
+      this.messageRouter.route(message, webviewView.webview),
     )
     this.context.subscriptions.push(messageDisposable)
 
@@ -320,76 +352,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     return merged
-  }
-
-  /**
-   * Dispatches an incoming webview message to its typed handler.
-   *
-   * @param message - Raw message received from the webview runtime.
-   * @param webview - Webview instance that emitted the message.
-   * @returns A promise that resolves when message handling completes.
-   */
-  private async handleMessage(message: WebviewMessage, webview: vscode.Webview): Promise<void> {
-    const handler = this.getMessageHandler(message.type)
-    if (!handler) {
-      this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
-      return
-    }
-    await handler(message, webview)
-  }
-
-  /**
-   * Resolves a handler function for a given message type.
-   *
-   * @param type - Discriminant from {@link WebviewMessage}.
-   * @returns An async handler when supported; otherwise `undefined`.
-   */
-  private getMessageHandler(
-    type: WebviewMessage['type'],
-  ): ((message: WebviewMessage, webview: vscode.Webview) => Promise<void>) | undefined {
-    switch (type) {
-      case 'webviewDidMount':
-        return (message, webview) => this.handleWebviewDidMount(message, webview)
-      case 'requestRefresh':
-        return (_, webview) => this.handleRefreshRequest(webview)
-      case 'installSkill':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'installSkill' }>
-          return this.handleInstallSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
-        }
-      case 'removeSkill':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'removeSkill' }>
-          return this.handleRemoveSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
-        }
-      case 'executeBatch':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'executeBatch' }>
-          return this.handleExecuteBatch(
-            typed.payload.action,
-            typed.payload.skills,
-            typed.payload.agents,
-            typed.payload.scope,
-          )
-        }
-      case 'updateSkill':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'updateSkill' }>
-          return this.handleUpdateSkill(typed.payload.skillName)
-        }
-      case 'repairSkill':
-        return (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'repairSkill' }>
-          return this.handleRepairSkill(typed.payload.skillName, typed.payload.scope, typed.payload.agents)
-        }
-      case 'cancelOperation':
-        return async (message) => {
-          const typed = message as Extract<WebviewMessage, { type: 'cancelOperation' }>
-          this.handleCancelOperation(typed.payload.operationId)
-        }
-      default:
-        return undefined
-    }
   }
 
   /**
@@ -613,79 +575,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteAdd(): Promise<void> {
-    if (this.checkPolicyBlocking()) return
-
-    const availableAgents = await this.reconciler.getAvailableAgents()
-    if (availableAgents.length === 0) {
-      vscode.window.showInformationMessage('No agent hosts detected on this system.')
-      return
-    }
-
-    const registry = await this.loadRegistryForCommand()
-    if (!registry) return
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const selectedSkills = await this.pickSkills('add', registry, installedSkills, availableAgents)
-    if (!selectedSkills || selectedSkills.length === 0) return
-
-    const selectedAgents = await this.pickAgentsForSkills('add', selectedSkills, availableAgents, installedSkills)
-    if (!selectedAgents || selectedAgents.length === 0) return
-
-    const hasWorkspace = !!vscode.workspace.workspaceFolders?.length
-    const scopeItem = await this.pickScopeForSkills(
-      'add',
-      selectedSkills,
-      selectedAgents,
-      installedSkills,
-      hasWorkspace,
-      vscode.workspace.isTrusted,
-    )
-    if (!scopeItem) return
-
-    const pendingSkills: string[] = []
-    const skipped: string[] = []
-    for (const skillName of selectedSkills) {
-      const needsInstall = this.doesSkillNeedActionForScope(
-        skillName,
-        selectedAgents,
-        installedSkills,
-        scopeItem.scopeId,
-        'add',
-      )
-      if (!needsInstall) {
-        skipped.push(skillName)
-        continue
-      }
-      pendingSkills.push(skillName)
-    }
-
-    if (pendingSkills.length === 0) {
-      vscode.window.showInformationMessage(
-        `Skipped ${skipped.length} skill(s) because they are already installed in the selected scope.`,
-      )
-      return
-    }
-
-    const agentNames = this.getAgentDisplayNames(selectedAgents, availableAgents)
-    const selection: LifecycleBatchSelection = {
-      action: 'install',
-      skills: pendingSkills,
-      agents: selectedAgents,
-      scope: scopeItem.scopeId,
-      source: 'command-palette',
-    }
-
-    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
-    if (!confirmed) return
-
-    await this.runQueueAction('install', () =>
-      this.orchestrator.installMany(pendingSkills, scopeItem.scopeId, selectedAgents, 'command-palette'),
-    )
-
-    if (skipped.length > 0) {
-      vscode.window.showInformationMessage(
-        `Skipped ${skipped.length} skill(s) because they are already installed in the selected scope.`,
-      )
-    }
+    await this.commandPaletteFlowService.runAddFlow()
   }
 
   /**
@@ -694,79 +584,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteRemove(): Promise<void> {
-    if (this.checkPolicyBlocking()) return
-
-    const availableAgents = await this.reconciler.getAvailableAgents()
-    if (availableAgents.length === 0) {
-      vscode.window.showInformationMessage('No agent hosts detected on this system.')
-      return
-    }
-
-    const registry = await this.loadRegistryForCommand()
-    if (!registry) return
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const selectedSkills = await this.pickSkills('remove', registry, installedSkills, availableAgents)
-    if (!selectedSkills || selectedSkills.length === 0) return
-
-    const selectedAgents = await this.pickAgentsForSkills('remove', selectedSkills, availableAgents, installedSkills)
-    if (!selectedAgents || selectedAgents.length === 0) return
-
-    const hasWorkspace = !!vscode.workspace.workspaceFolders?.length
-    const scopeItem = await this.pickScopeForSkills(
-      'remove',
-      selectedSkills,
-      selectedAgents,
-      installedSkills,
-      hasWorkspace,
-      vscode.workspace.isTrusted,
-    )
-    if (!scopeItem) return
-
-    const pendingSkills: string[] = []
-    const skipped: string[] = []
-    for (const skillName of selectedSkills) {
-      const needsRemoval = this.doesSkillNeedActionForScope(
-        skillName,
-        selectedAgents,
-        installedSkills,
-        scopeItem.scopeId,
-        'remove',
-      )
-      if (!needsRemoval) {
-        skipped.push(skillName)
-        continue
-      }
-      pendingSkills.push(skillName)
-    }
-
-    if (pendingSkills.length === 0) {
-      vscode.window.showInformationMessage(
-        `Skipped ${skipped.length} skill(s) because they are no longer installed in the selected scope.`,
-      )
-      return
-    }
-
-    const agentNames = this.getAgentDisplayNames(selectedAgents, availableAgents)
-    const selection: LifecycleBatchSelection = {
-      action: 'remove',
-      skills: pendingSkills,
-      agents: selectedAgents,
-      scope: scopeItem.scopeId,
-      source: 'command-palette',
-    }
-
-    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
-    if (!confirmed) return
-
-    await this.runQueueAction('remove', () =>
-      this.orchestrator.removeMany(pendingSkills, scopeItem.scopeId, selectedAgents, 'command-palette'),
-    )
-
-    if (skipped.length > 0) {
-      vscode.window.showInformationMessage(
-        `Skipped ${skipped.length} skill(s) because they are no longer installed in the selected scope.`,
-      )
-    }
+    await this.commandPaletteFlowService.runRemoveFlow()
   }
 
   /**
@@ -775,26 +593,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteUpdate(): Promise<void> {
-    if (this.checkPolicyBlocking()) return
-
-    const registry = await this.loadRegistryForCommand()
-    if (!registry) return
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const installedHashes = await this.skillLockService.getInstalledHashes()
-    const selectedSkills = await this.pickSkills('update', registry, installedSkills, undefined, installedHashes)
-    if (!selectedSkills || selectedSkills.length === 0) return
-
-    const selection: LifecycleBatchSelection = {
-      action: 'update',
-      skills: selectedSkills,
-      agents: [],
-      scope: 'auto',
-      source: 'command-palette',
-    }
-    const confirmed = await this.confirmLifecycleAction(selection, [])
-    if (!confirmed) return
-
-    await this.runQueueAction('update', () => this.orchestrator.updateMany(selectedSkills, 'command-palette'))
+    await this.commandPaletteFlowService.runUpdateFlow()
   }
 
   /**
@@ -803,95 +602,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when the flow completes or is cancelled.
    */
   async runCommandPaletteRepair(): Promise<void> {
-    if (this.checkPolicyBlocking()) return
-
-    const registry = await this.loadRegistryForCommand()
-    if (!registry) return
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const selectedSkills = await this.pickSkills('repair', registry, installedSkills)
-    if (!selectedSkills || selectedSkills.length === 0) return
-
-    const allowLocal = this.policy?.effectiveScopes.includes('local') ?? true
-    const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? true
-    const localSkills = new Set<string>()
-    const globalSkills = new Set<string>()
-    const localAgents = new Set<string>()
-    const globalAgents = new Set<string>()
-    const skipped: string[] = []
-
-    for (const skillName of selectedSkills) {
-      const installedInfo = installedSkills[skillName]
-      if (!installedInfo) {
-        skipped.push(skillName)
-        continue
-      }
-
-      const localCorruptedAgents = installedInfo.agents
-        .filter((agent) => agent.local && agent.corrupted)
-        .map((agent) => agent.agent)
-      const globalCorruptedAgents = installedInfo.agents
-        .filter((agent) => agent.global && agent.corrupted)
-        .map((agent) => agent.agent)
-
-      let added = false
-      if (allowLocal && localCorruptedAgents.length > 0) {
-        localSkills.add(skillName)
-        localCorruptedAgents.forEach((agentId) => localAgents.add(agentId))
-        added = true
-      }
-      if (allowGlobal && globalCorruptedAgents.length > 0) {
-        globalSkills.add(skillName)
-        globalCorruptedAgents.forEach((agentId) => globalAgents.add(agentId))
-        added = true
-      }
-
-      if (!added) {
-        skipped.push(skillName)
-      }
-    }
-
-    const hasLocalTargets = allowLocal && localSkills.size > 0 && localAgents.size > 0
-    const hasGlobalTargets = allowGlobal && globalSkills.size > 0 && globalAgents.size > 0
-
-    if (!hasLocalTargets && !hasGlobalTargets) {
-      vscode.window.showInformationMessage('Skipped selected skills with no eligible installations to repair.')
-      return
-    }
-
-    const unionAgents = Array.from(new Set([...localAgents, ...globalAgents]))
-    const unionSkills = Array.from(new Set([...localSkills, ...globalSkills]))
-    const selectionScope = this.resolveSelectionScope(hasLocalTargets, hasGlobalTargets)
-    const selection: LifecycleBatchSelection = {
-      action: 'repair',
-      skills: unionSkills,
-      agents: unionAgents,
-      scope: selectionScope,
-      source: 'command-palette',
-    }
-    const agentNames = this.getAgentDisplayNames(unionAgents, await this.reconciler.getAvailableAgents())
-    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
-    if (!confirmed) return
-
-    await this.runQueueAction('repair', async () => {
-      const tasks: Promise<void>[] = []
-      if (hasLocalTargets) {
-        tasks.push(
-          this.orchestrator.repairMany(Array.from(localSkills), 'local', Array.from(localAgents), 'command-palette'),
-        )
-      }
-      if (hasGlobalTargets) {
-        tasks.push(
-          this.orchestrator.repairMany(Array.from(globalSkills), 'global', Array.from(globalAgents), 'command-palette'),
-        )
-      }
-      await Promise.all(tasks)
-    })
-
-    if (skipped.length > 0) {
-      vscode.window.showInformationMessage(
-        `Skipped ${skipped.length} skill(s) with no remaining installations to repair.`,
-      )
-    }
+    await this.commandPaletteFlowService.runRepairFlow()
   }
 
   /**
@@ -1145,39 +856,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     hasWorkspace: boolean,
     isTrusted: boolean,
   ): ScopeQuickPickItem[] {
-    const scopeItems: ScopeQuickPickItem[] = []
-
     const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
-    const allowLocal = effectiveScopes.includes('local')
-    const allowGlobal = effectiveScopes.includes('global')
-
-    if (action === 'add') {
-      const canAddLocal = allowLocal && this.canAddLocal(hasWorkspace, isTrusted, agents, installedInfo)
-      const canAddGlobal = allowGlobal && this.canAddGlobal(agents, installedInfo)
-      if (canAddLocal) {
-        scopeItems.push({ label: 'Locally', description: 'Install in the current workspace', scopeId: 'local' })
-      }
-      if (canAddGlobal) {
-        scopeItems.push({ label: 'Globally', description: 'Install in the home directory', scopeId: 'global' })
-      }
-      if (canAddLocal && canAddGlobal) {
-        scopeItems.push({ label: 'All', description: 'Install both locally and globally', scopeId: 'all' })
-      }
-    } else {
-      const canRemoveLocal = allowLocal && this.canRemoveLocal(hasWorkspace, isTrusted, agents, installedInfo)
-      const canRemoveGlobal = allowGlobal && this.canRemoveGlobal(agents, installedInfo)
-      if (canRemoveLocal) {
-        scopeItems.push({ label: 'Locally', description: 'Remove from the current workspace', scopeId: 'local' })
-      }
-      if (canRemoveGlobal) {
-        scopeItems.push({ label: 'Globally', description: 'Remove from the home directory', scopeId: 'global' })
-      }
-      if (canRemoveLocal && canRemoveGlobal) {
-        scopeItems.push({ label: 'All', description: 'Remove from both local and global', scopeId: 'all' })
-      }
-    }
-
-    return scopeItems
+    return this.scopeSelectionService.buildScopeItemsForSkill({
+      action,
+      agents,
+      installedInfo,
+      hasWorkspace,
+      isTrusted,
+      effectiveScopes,
+    })
   }
 
   /**
@@ -1651,41 +1338,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     hasWorkspace: boolean,
     isTrusted: boolean,
   ): ScopeQuickPickItem[] {
-    const scopeItems: ScopeQuickPickItem[] = []
-
     const effectiveScopes = this.policy?.effectiveScopes ?? ['local', 'global']
-    const allowLocal = effectiveScopes.includes('local')
-    const allowGlobal = effectiveScopes.includes('global')
-
-    if (action === 'add') {
-      const canLocal =
-        allowLocal && this.canAddLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
-      const canGlobal = allowGlobal && this.canAddGlobalForSkills(skillNames, agents, installedSkills)
-      if (canLocal) {
-        scopeItems.push({ label: 'Locally', description: 'Install in the current workspace', scopeId: 'local' })
-      }
-      if (canGlobal) {
-        scopeItems.push({ label: 'Globally', description: 'Install in the home directory', scopeId: 'global' })
-      }
-      if (canLocal && canGlobal) {
-        scopeItems.push({ label: 'All', description: 'Install both locally and globally', scopeId: 'all' })
-      }
-    } else {
-      const canLocal =
-        allowLocal && this.canRemoveLocalForSkills(skillNames, agents, installedSkills, hasWorkspace, isTrusted)
-      const canGlobal = allowGlobal && this.canRemoveGlobalForSkills(skillNames, agents, installedSkills)
-      if (canLocal) {
-        scopeItems.push({ label: 'Locally', description: 'Remove from the current workspace', scopeId: 'local' })
-      }
-      if (canGlobal) {
-        scopeItems.push({ label: 'Globally', description: 'Remove from the home directory', scopeId: 'global' })
-      }
-      if (canLocal && canGlobal) {
-        scopeItems.push({ label: 'All', description: 'Remove from both local and global', scopeId: 'all' })
-      }
-    }
-
-    return scopeItems
+    return this.scopeSelectionService.buildScopeItemsForSkills({
+      action,
+      skillNames,
+      agents,
+      installedSkills,
+      hasWorkspace,
+      isTrusted,
+      effectiveScopes,
+    })
   }
 
   /**

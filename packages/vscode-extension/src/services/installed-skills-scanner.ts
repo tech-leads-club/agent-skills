@@ -1,15 +1,13 @@
-import { getAgentMetadata } from '@tech-leads-club/core'
 import { access } from 'node:fs/promises'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo, InstalledSkillsMap, Skill } from '../shared/types'
+import { getAgentPathConfigs } from './agent-paths'
 import type { LoggingService } from './logging-service'
 
 /**
- * Agent configuration for skill directory scanning.
- * Sourced from the shared core agent metadata.
+ * Internal alias used by scanner path-check helpers.
  */
-export interface AgentScanConfig {
+interface AgentScanConfig {
   name: string
   displayName: string
   company: string
@@ -18,13 +16,13 @@ export interface AgentScanConfig {
 }
 
 /**
- * All agent configurations (local + global paths) referenced during scanning.
+ * All agent configurations (local + global paths) referenced during scans.
  */
-export const AGENT_CONFIGS: AgentScanConfig[] = Object.values(getAgentMetadata(homedir())).map((agent) => ({
-  name: agent.name,
+const AGENT_CONFIGS: AgentScanConfig[] = getAgentPathConfigs().map((agent) => ({
+  name: agent.agent,
   displayName: agent.displayName,
   company: agent.company,
-  skillsDir: agent.skillsDir,
+  skillsDir: agent.localSkillsDir,
   globalSkillsDir: agent.globalSkillsDir,
 }))
 

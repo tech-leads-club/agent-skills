@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import type { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation } from '../shared/types'
+import { getLocalWatcherPatterns } from './agent-paths'
 import type { InstalledSkillsScanner } from './installed-skills-scanner'
 import type { LoggingService } from './logging-service'
 import type { SkillRegistryService } from './skill-registry-service'
@@ -208,26 +209,7 @@ export class StateReconciler implements vscode.Disposable {
       return
     }
 
-    const patterns = [
-      '**/.cursor/skills/**',
-      '**/.claude/skills/**',
-      '**/.github/skills/**',
-      '**/.windsurf/skills/**',
-      '**/.cline/skills/**',
-      '**/.aider/skills/**',
-      '**/.codex/skills/**',
-      '**/.gemini/skills/**',
-      '**/.agent/skills/**', // Antigravity
-      '**/.roo/skills/**',
-      '**/.kilocode/skills/**',
-      '**/.trae/skills/**',
-      '**/.amazonq/skills/**',
-      '**/.augment/skills/**',
-      '**/.tabnine/skills/**',
-      '**/.opencode/skills/**',
-      '**/.sourcegraph/skills/**',
-      '**/.factory/skills/**', // Droid
-    ]
+    const patterns = getLocalWatcherPatterns()
 
     for (const pattern of patterns) {
       const watcher = vscode.workspace.createFileSystemWatcher(pattern)
