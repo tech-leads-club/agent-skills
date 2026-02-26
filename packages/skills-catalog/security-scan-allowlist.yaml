@@ -107,6 +107,34 @@ entries:
     allowedAt: '2026-02-22'
 
   # ============================================================================
+  # QUALITY CATEGORY
+  # Skills for code quality, accessibility, and web standards
+  # ============================================================================
+
+  - skill: web-accessibility
+    code: W011
+    reason: >
+      Running accessibility audits (Lighthouse, axe-core) against URLs is part of the
+      testing workflow for WCAG compliance. This is functionally identical to perf-lighthouse
+      which is already allowlisted. In practice, audits target the user's own site.
+    allowedBy: felipefr
+    allowedAt: '2026-02-26'
+
+  # ============================================================================
+  # MONITORING CATEGORY
+  # Skills for application monitoring and observability
+  # ============================================================================
+
+  - skill: sentry
+    code: W011
+    reason: >
+      Reading issues and events from the Sentry API is the core functionality of this skill.
+      The skill already includes protective measures: PII redaction, no raw stack traces,
+      and no token echoing. Analogous to gh-fix-ci (reads CI logs) which is already allowlisted.
+    allowedBy: felipefr
+    allowedAt: '2026-02-26'
+
+  # ============================================================================
   # TOOLING CATEGORY
   # Skills for browser automation, DevTools, and development tooling
   # ============================================================================
@@ -162,6 +190,15 @@ entries:
       to avoid assumptions during development.
     allowedBy: felipefr
     allowedAt: '2026-02-23'
+
+  - skill: confluence-assistant
+    code: W011
+    reason: >
+      Fetching and managing Confluence pages via Atlassian MCP is the core functionality
+      of this skill. Third-party content exposure is inherent to any Confluence integration,
+      similar to figma-implement-design (Figma MCP) which is already allowlisted.
+    allowedBy: felipefr
+    allowedAt: '2026-02-26'
 
   - skill: gh-address-comments
     code: W011
