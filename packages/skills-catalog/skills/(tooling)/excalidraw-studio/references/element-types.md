@@ -6,14 +6,14 @@ For the JSON properties and format, see `excalidraw-schema.md`.
 
 ## Element Type Overview
 
-| Type        | Shape | Primary Use                            | Text via `label` | Binding         |
-| ----------- | ----- | -------------------------------------- | ---------------- | --------------- |
-| `rectangle` | □     | Boxes, containers, process steps       | ✅ Yes           | Arrows can bind |
-| `ellipse`   | ○     | Start/end, states, emphasis            | ✅ Yes           | Arrows can bind |
-| `diamond`   | ◇     | Decision points, conditions            | ✅ Yes           | Arrows can bind |
-| `arrow`     | →     | Directional flow, relationships        | ✅ Yes           | Binds to shapes |
-| `line`      | —     | Non-directional connections, dividers  | ❌               | Binds to shapes |
-| `text`      | A     | Standalone labels, titles, annotations | —                | Not bindable    |
+| Type        | Shape | Primary Use                            | Text binding        | Arrow binding   |
+| ----------- | ----- | -------------------------------------- | ------------------- | --------------- |
+| `rectangle` | □     | Boxes, containers, process steps       | via `boundElements` | Arrows can bind |
+| `ellipse`   | ○     | Start/end, states, emphasis            | via `boundElements` | Arrows can bind |
+| `diamond`   | ◇     | Decision points, conditions            | via `boundElements` | Arrows can bind |
+| `arrow`     | →     | Directional flow, relationships        | via `boundElements` | Binds to shapes |
+| `line`      | —     | Non-directional connections, dividers  | ❌                   | Binds to shapes |
+| `text`      | A     | Standalone labels, titles, annotations | —                   | Not bindable    |
 
 ## Shapes — Rectangle, Ellipse, Diamond
 
@@ -27,45 +27,64 @@ For the JSON properties and format, see `excalidraw-schema.md`.
 
 ### Text in shapes
 
-Always use the `label` property:
+**NEVER use `label: { text: "..." }` shorthand** — it is not supported in the `.excalidraw` file format. Always create a separate `text` element and link it via `containerId` and `boundElements`.
+
+```json
+[
+  {
+    "id": "step-1",
+    "type": "rectangle",
+    "x": 100,
+    "y": 100,
+    "width": 200,
+    "height": 80,
+    "backgroundColor": "#a5d8ff",
+    "fillStyle": "solid",
+    "strokeColor": "#1971c2",
+    "strokeWidth": 2,
+    "roundness": { "type": 3 },
+    "boundElements": [
+      { "type": "text", "id": "text-step-1" }
+    ]
+  },
+  {
+    "id": "text-step-1",
+    "type": "text",
+    "x": 130,
+    "y": 128,
+    "width": 140,
+    "height": 24,
+    "text": "Process Input",
+    "originalText": "Process Input",
+    "fontSize": 20,
+    "fontFamily": 5,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "containerId": "step-1",
+    "lineHeight": 1.25,
+    "strokeColor": "#1e1e1e",
+    "backgroundColor": "transparent",
+    "autoResize": true,
+    "roundness": null
+  }
+]
+```
+
+**Multi-line text:** Use `\n` in the `text` and `originalText` fields:
 
 ```json
 {
-  "type": "rectangle",
-  "x": 100,
-  "y": 100,
-  "width": 200,
-  "height": 80,
-  "backgroundColor": "#a5d8ff",
-  "fillStyle": "solid",
-  "strokeWidth": 2,
-  "roundness": { "type": 3 },
-  "label": {
-    "text": "Process Input",
-    "fontSize": 20,
-    "fontFamily": 5
-  }
+  "text": "User\nAuthentication\nService",
+  "originalText": "User\nAuthentication\nService"
 }
 ```
 
-**Styled label options:**
+**Text element positioning inside a container at (x, y, w, h):**
 
-```json
-"label": {
-  "text": "Important Step",
-  "fontSize": 22,
-  "fontFamily": 5,
-  "strokeColor": "#1971c2",
-  "textAlign": "center",
-  "verticalAlign": "middle"
-}
-```
-
-**Multi-line text:** Use `\n` for line breaks:
-
-```json
-"label": { "text": "User\nAuthentication\nService" }
-```
+- `text.x = container.x + 20`
+- `text.y = container.y + (container.height / 2) - (fontSize / 2)`
+- `text.width = container.width - 40`
+- `text.height = fontSize * 1.25`
 
 ### Size guidelines
 
@@ -104,71 +123,99 @@ Always use the `label` property:
   "type": "arrow",
   "x": 300,
   "y": 140,
+  "width": 200,
+  "height": 0,
   "points": [
     [0, 0],
     [200, 0]
   ],
   "strokeWidth": 2,
-  "roundness": { "type": 2 }
+  "roundness": { "type": 2 },
+  "lastCommittedPoint": null,
+  "startArrowhead": null,
+  "endArrowhead": "arrow"
 }
 ```
 
 ### Arrow with label
 
+Arrow labels also require `boundElements` on the arrow + a separate text element with `containerId`. **Never use `label: { text: "..." }` on arrows.**
+
 ```json
-{
-  "id": "flow-1",
-  "type": "arrow",
-  "x": 300,
-  "y": 140,
-  "points": [
-    [0, 0],
-    [200, 0]
-  ],
-  "label": {
+[
+  {
+    "id": "flow-1",
+    "type": "arrow",
+    "x": 300,
+    "y": 140,
+    "width": 200,
+    "height": 0,
+    "points": [[0, 0], [200, 0]],
+    "strokeWidth": 2,
+    "roundness": { "type": 2 },
+    "lastCommittedPoint": null,
+    "startArrowhead": null,
+    "endArrowhead": "arrow",
+    "boundElements": [
+      { "type": "text", "id": "text-flow-1" }
+    ]
+  },
+  {
+    "id": "text-flow-1",
+    "type": "text",
+    "x": 360,
+    "y": 122,
+    "width": 80,
+    "height": 18,
     "text": "HTTP/JSON",
+    "originalText": "HTTP/JSON",
     "fontSize": 14,
-    "fontFamily": 5
+    "fontFamily": 5,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "containerId": "flow-1",
+    "lineHeight": 1.25,
+    "strokeColor": "#1e1e1e",
+    "backgroundColor": "transparent",
+    "autoResize": true,
+    "roundness": null
   }
-}
+]
 ```
 
 ### Bound arrow (connects to shapes)
 
-```json
-{
-  "id": "flow-1",
-  "type": "arrow",
-  "x": 300,
-  "y": 140,
-  "points": [
-    [0, 0],
-    [200, 0]
-  ],
-  "start": { "id": "shape-source" },
-  "end": { "id": "shape-target" }
-}
-```
-
-### Arrow with inline shape creation
-
-Creates the connected shapes automatically:
+Use `startBinding`/`endBinding` — **never `start`/`end`**. Connected shapes must list the arrow in their `boundElements`.
 
 ```json
-{
-  "type": "arrow",
-  "x": 100,
-  "y": 100,
-  "start": {
+[
+  {
+    "id": "source-box",
     "type": "rectangle",
-    "label": { "text": "Client" }
+    "boundElements": [
+      { "type": "text", "id": "text-source" },
+      { "type": "arrow", "id": "flow-1" }
+    ]
   },
-  "end": {
+  {
+    "id": "target-box",
     "type": "rectangle",
-    "label": { "text": "Server" }
+    "boundElements": [
+      { "type": "text", "id": "text-target" },
+      { "type": "arrow", "id": "flow-1" }
+    ]
   },
-  "label": { "text": "request" }
-}
+  {
+    "id": "flow-1",
+    "type": "arrow",
+    "points": [[0, 0], [200, 0]],
+    "startBinding": { "elementId": "source-box", "focus": 0, "gap": 1 },
+    "endBinding": { "elementId": "target-box", "focus": 0, "gap": 1 },
+    "lastCommittedPoint": null,
+    "startArrowhead": null,
+    "endArrowhead": "arrow"
+  }
+]
 ```
 
 ### Arrow styles for semantic meaning
@@ -212,18 +259,25 @@ Non-directional connections with no arrowhead:
 
 ## Standalone Text
 
-For titles, headers, annotations not inside a shape:
+For titles, headers, annotations not inside a shape. Set `containerId: null`:
 
 ```json
 {
+  "id": "title-1",
   "type": "text",
   "x": 100,
   "y": 40,
+  "width": 300,
+  "height": 35,
   "text": "System Architecture Overview",
+  "originalText": "System Architecture Overview",
   "fontSize": 28,
   "fontFamily": 5,
   "textAlign": "center",
-  "strokeColor": "#1e1e1e"
+  "strokeColor": "#1e1e1e",
+  "containerId": null,
+  "lineHeight": 1.25,
+  "roundness": null
 }
 ```
 
@@ -231,6 +285,100 @@ For titles, headers, annotations not inside a shape:
 
 - Width ≈ `text.length × fontSize × 0.6`
 - Height ≈ `fontSize × 1.2 × numberOfLines`
+
+## Background Zones (Visual Grouping)
+
+Background zones are large semi-transparent rectangles placed **behind** other elements to visually group them into regions. They are a key technique for professional architecture diagrams.
+
+**Key properties for a zone:**
+
+- `opacity: 35` — semi-transparent so elements behind/in front remain visible
+- `strokeStyle: "dashed"` — clearly marks it as a boundary, not a shape
+- `roughness: 0` — clean edges for background zones
+- `fillStyle: "solid"` — needed for the opacity to show color
+
+Zones must be declared **first** in the `elements` array so they render behind everything else.
+
+```json
+[
+  {
+    "id": "zone-backend",
+    "type": "rectangle",
+    "x": 300,
+    "y": 140,
+    "width": 480,
+    "height": 320,
+    "strokeColor": "#1971c2",
+    "backgroundColor": "#dbe4ff",
+    "fillStyle": "solid",
+    "strokeWidth": 1,
+    "strokeStyle": "dashed",
+    "roughness": 0,
+    "opacity": 35,
+    "roundness": { "type": 3 },
+    "boundElements": []
+  }
+]
+```
+
+Add a standalone text label near the top-left corner of the zone:
+
+```json
+{
+  "id": "label-zone-backend",
+  "type": "text",
+  "x": 320,
+  "y": 148,
+  "width": 120,
+  "height": 20,
+  "text": "Backend Services",
+  "originalText": "Backend Services",
+  "fontSize": 14,
+  "fontFamily": 5,
+  "strokeColor": "#1971c2",
+  "containerId": null,
+  "lineHeight": 1.25,
+  "roundness": null
+}
+```
+
+**Element order with zones:** zones → shapes → arrows → text elements
+
+**Zone color recommendations:**
+
+| Zone purpose    | backgroundColor | strokeColor |
+| --------------- | --------------- | ----------- |
+| Services/Logic  | `#dbe4ff`       | `#4c6ef5`   |
+| Data layer      | `#d3f9d8`       | `#2f9e44`   |
+| External/Users  | `#fff9db`       | `#f08c00`   |
+| Messaging/Events| `#f3d9fa`       | `#ae3ec9`   |
+| Infrastructure  | `#e3fafc`       | `#0c8599`   |
+
+## Visual Modes
+
+Choose the diagram's visual mode upfront and apply it consistently to all elements.
+
+### Sketch Mode (default — recommended for most diagrams)
+
+Hand-drawn aesthetic, matches Excalidraw's signature look:
+
+- `roughness: 1` on all shapes and arrows
+- `fontFamily: 5` (Excalifont) for all text
+- `strokeWidth: 2` for shapes, `strokeWidth: 2` for arrows
+
+Best for: informal diagrams, brainstorming, process docs, most use cases.
+
+### Clean Mode (for formal/technical diagrams)
+
+Precise, polished, presentation-ready:
+
+- `roughness: 0` on all shapes and arrows
+- `fontFamily: 2` (Helvetica) for body text, `fontFamily: 5` for titles
+- `strokeWidth: 1.5-2` for shapes
+
+Best for: executive presentations, client-facing docs, technical specifications.
+
+**Mixed mode:** Use `roughness: 0` for background zones and `roughness: 1` for shapes — zones feel like structure, shapes feel like content.
 
 ## Diagram Type Recipes
 
@@ -242,50 +390,54 @@ For titles, headers, annotations not inside a shape:
                                                 [Step rect]
 ```
 
-- Start/End: `ellipse` with light green/red
-- Steps: `rectangle` with light blue
-- Decisions: `diamond` with amber/yellow
+- Start/End: `ellipse` with light green/red (`#b2f2bb`/`#ffc9c9`), `roundness: null`
+- Steps: `rectangle` with light blue (`#a5d8ff`)
+- Decisions: `diamond` with amber (`#ffec99`)
 - Flow: solid arrows, labeled at decision branches ("Yes"/"No")
 
 ### Architecture Diagram
 
+Use **background zones** to show layers (see Background Zones section):
+
 ```
-┌─────────────────────────────────────┐
-│  [Client rect]  →  [API rect]  →  [DB rect]  │
-│                     ↓                           │
-│                [Queue rect]  →  [Worker rect]   │
-└─────────────────────────────────────┘
+[zone: Infrastructure]
+  [zone: Backend Services]
+    [API Gateway rect] → [Order Service rect] → [Orders DB ellipse]
+                              ↓
+                        [Event Bus rect] → [Worker rect]
+  [zone: Data/Consumers]
 ```
 
-- Components: `rectangle` with varied colors by layer (blue = frontend, green = backend, amber = data)
+- Components: `rectangle` with varied colors by layer
 - Connections: solid arrows with protocol labels ("REST", "gRPC", "SQL")
-- Boundaries: large rectangles with dashed stroke and `fillStyle: "hachure"` at low opacity
+- Zone boundaries: semi-transparent dashed rectangles with `opacity: 35`
 
 ### ER Diagram
 
-- Entities: `rectangle` with entity name as label
-- Attributes: smaller `rectangle` or listed in multi-line label
+- Entities: `rectangle` with entity name (bold, larger font)
+- Attributes: listed in multi-line text inside the entity box
 - Relationships: `diamond` with relationship name
-- Cardinality: text labels on arrows ("1", "N", "0..1")
+- Cardinality: standalone text labels near arrows ("1", "N", "0..1")
 
 ### Sequence Diagram
 
 - Actors: `rectangle` at top with actor name
-- Lifelines: `line` (vertical, dashed)
+- Lifelines: `line` (vertical, dashed, `strokeStyle: "dashed"`)
 - Messages: `arrow` (horizontal, solid = sync, dashed = async)
 - Return: `arrow` (dashed, reverse direction)
-- Activation: thin `rectangle` on lifeline
+- Activation: thin `rectangle` on lifeline, no fill
 
 ### Mind Map
 
-- Center: large `ellipse` with main topic (bright color)
-- Branches: `rectangle` connected via arrows from center
+- Center: large `ellipse` with main topic (bright color, `roughness: 1`)
+- Branches: `rectangle` connected via diagonal arrows from center
 - Sub-topics: smaller `rectangle` connected from branches
-- Use different colors per branch for visual grouping
+- Use different colors per branch for visual grouping (one color family per branch)
 
 ### Class Diagram
 
-- Classes: `rectangle` with multi-line label:
+- Classes: `rectangle` with multi-line text:
+
   ```
   ClassName
   ─────────
@@ -295,23 +447,24 @@ For titles, headers, annotations not inside a shape:
   +method(): Return
   -method(arg): Return
   ```
+
 - Inheritance: solid arrow with label "extends"
 - Implementation: dashed arrow with label "implements"
-- Association: solid line
+- Association: solid line (no arrowhead)
 
 ### Swimlane
 
-- Lanes: tall `rectangle` with `fillStyle: "hachure"`, low opacity
-- Lane headers: `text` at top of each lane
+- Lanes: tall `rectangle` with `fillStyle: "hachure"`, `opacity: 40`, `roughness: 0`
+- Lane headers: standalone `text` at top of each lane
 - Activities: `rectangle` inside lanes
 - Handoffs: arrows crossing lane boundaries
 
 ### Data Flow Diagram (DFD)
 
-- External entities: `rectangle` (bold stroke)
+- External entities: `rectangle` (bold stroke `strokeWidth: 3`)
 - Processes: `ellipse` with process number and name
-- Data stores: `rectangle` with open side (use two horizontal lines)
-- Data flows: labeled arrows (always show data name)
+- Data stores: `rectangle` with open side (use two horizontal lines via `line` elements)
+- Data flows: labeled arrows (always show data name on arrow)
 - Direction: left-to-right or top-left to bottom-right
 
 ## Design Principles for Elegant Diagrams
@@ -332,16 +485,20 @@ For titles, headers, annotations not inside a shape:
 
 8. **Matching stroke to fill** — Use the deeper shade from the palette as stroke color for the corresponding fill. This creates depth and definition.
 
+9. **Background zones over borders** — For grouping related elements, prefer semi-transparent background zones over explicit border rectangles. Zones feel spatial; borders feel like containers.
+
+10. **Choose visual mode upfront** — Decide Sketch or Clean mode before generating elements. Never mix `roughness: 0` and `roughness: 1` on same-level shapes (zones and shapes can differ intentionally).
+
 ## Summary
 
-| When you need...               | Use this element                                              |
-| ------------------------------ | ------------------------------------------------------------- |
-| Process box, entity, component | `rectangle` with `label`                                      |
-| Decision point                 | `diamond` with question as `label`                            |
-| Start/End terminal             | `ellipse` with `label`                                        |
-| Flow direction                 | `arrow` (optionally with `label` and `start`/`end` bindings)  |
-| Title/Header                   | `text` (large font, standalone)                               |
-| Annotation                     | `text` (small font, positioned near target)                   |
-| Non-directional connection     | `line`                                                        |
-| Section divider                | `line` (horizontal, dashed)                                   |
-| Boundary/region                | `rectangle` (large, dashed stroke, hachure fill, low opacity) |
+| When you need...               | Use this element                                                              |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| Process box, entity, component | `rectangle` with `boundElements` + separate text element                      |
+| Decision point                 | `diamond` with `boundElements` + separate text element                        |
+| Start/End terminal             | `ellipse` with `boundElements` + separate text element (`roundness: null`)    |
+| Flow direction                 | `arrow` with `startBinding`/`endBinding`, label via `boundElements` if needed |
+| Title/Header                   | `text` (large font, `containerId: null`)                                      |
+| Annotation                     | `text` (small font, `containerId: null`, positioned near target)              |
+| Non-directional connection     | `line`                                                                        |
+| Section divider                | `line` (horizontal, dashed)                                                   |
+| Visual grouping region         | `rectangle` (large, `opacity: 35`, `strokeStyle: "dashed"`, `roughness: 0`)  |
