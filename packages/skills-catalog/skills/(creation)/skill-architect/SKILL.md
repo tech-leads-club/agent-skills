@@ -184,11 +184,10 @@ them, so the agent doesn't load everything upfront.
 ```yaml
 ---
 name: kebab-case-name # Must match folder name
-description: > # The description you drafted in 2.3
-  [What + When + Not-when]
-license: MIT # Optional, for open-source
-metadata: # Optional
-  author: [name]
+description: [What + When + Not-when, all on this single line]
+license: CC-BY-4.0
+metadata:
+  author: [ask the user if unknown]
   version: 1.0.0
 ---
 ```
@@ -199,6 +198,8 @@ metadata: # Optional
 - name: never use "claude" or "anthropic" (reserved)
 - description: under 1024 characters
 - description: no XML angle brackets (< >)
+- description: must be a single inline line — do NOT use YAML multiline operators (`>`, `|`, `>-`). Write `description: Your text here` all on one line.
+- license: always `CC-BY-4.0`
 - Delimiters: exactly `---` on their own lines
 
 ### 3.2 — Write the Instructions
