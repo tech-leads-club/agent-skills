@@ -589,14 +589,15 @@
       "contentHash": "ac3c94d9910a75aa6a61f7866507d16a3c646ff17e86b79667d1a19c6fa6c659"
     },
     {
-      "name": "excalidraw-diagram-generator",
-      "description": "'Generate Excalidraw diagrams from natural language descriptions. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", or \"generate an Excalidraw file\". Supports flowcharts, relationship diagrams, mind maps, and system architecture diagrams. Outputs .excalidraw JSON files that can be opened directly in Excalidraw. Do NOT use for code architecture analysis (use the architecture skills) or non-visual documentation (use docs-writer).'",
-      "category": "architecture",
-      "path": "(architecture)/excalidraw-diagram-generator",
+      "name": "excalidraw-studio",
+      "description": "Generate Excalidraw diagrams from natural language descriptions. Outputs .excalidraw JSON files openable in Excalidraw. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", \"generate an Excalidraw file\", \"draw an ER diagram\", \"create a sequence diagram\", or \"make a class diagram\". Supports flowcharts, relationship diagrams, mind maps, architecture, DFD, swimlane, class, sequence, and ER diagrams. Can use icon libraries (AWS, GCP, etc.) when set up. Do NOT use for code architecture analysis (use the architecture skills), Mermaid diagram rendering (use mermaid-studio), or non-visual documentation (use docs-writer).",
+      "category": "tooling",
+      "path": "(tooling)/excalidraw-studio",
       "files": [
         "SKILL.md",
         "references/element-types.md",
         "references/excalidraw-schema.md",
+        "references/icon-libraries.md",
         "scripts/README.md",
         "scripts/add-arrow.py",
         "scripts/add-icon-to-diagram.py",
@@ -610,7 +611,9 @@
         "templates/relationship-template.excalidraw",
         "templates/sequence-diagram-template.excalidraw"
       ],
-      "contentHash": "0e75ef3d03d540c16b5ad435428a46f23f0382e8c02cdf6b768008d73a0b8114"
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "35f4f1b5b3a8fa3f13aaf8840d20d94e6323c301a90482c8348aa12b0a2e56a7"
     },
     {
       "name": "figma",
@@ -724,6 +727,30 @@
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
       "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
+    },
+    {
+      "name": "mermaid-studio",
+      "description": "Expert Mermaid diagram creation, validation, and rendering with dual-engine output (SVG/PNG/ASCII). Supports all 20+ diagram types including C4 architecture, AWS architecture-beta with service icons, flowcharts, sequence, ERD, state, class, mindmap, timeline, git graph, sankey, and more. Features code-to-diagram analysis, batch rendering, 15+ themes, and syntax validation. Use when users ask to create diagrams, visualize architecture, render mermaid files, generate ASCII diagrams, document system flows, model databases, draw AWS infrastructure, analyze code structure, or anything involving \"mermaid\", \"diagram\", \"flowchart\", \"architecture diagram\", \"sequence diagram\", \"ERD\", \"C4\", \"ASCII diagram\". Do NOT use for non-Mermaid image generation, data plotting with chart libraries, or general documentation writing.",
+      "category": "tooling",
+      "path": "(tooling)/mermaid-studio",
+      "files": [
+        "SKILL.md",
+        "assets/puppeteer-config.json",
+        "references/aws-architecture.md",
+        "references/c4-architecture.md",
+        "references/code-to-diagram.md",
+        "references/diagram-types.md",
+        "references/themes.md",
+        "references/troubleshooting.md",
+        "scripts/batch.mjs",
+        "scripts/render-ascii.mjs",
+        "scripts/render.mjs",
+        "scripts/setup.sh",
+        "scripts/validate.mjs"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "f3b64a568592e3cc25482c65330508a0a5d552cbdae1f1f6c142991a8543f6d9"
     },
     {
       "name": "nestjs-modular-monolith",
@@ -1105,7 +1132,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "f093bf00254a47fc231047d01f4eb5b90f58f7f8fa6f2c372effbd3810368198"
+      "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
     },
     {
       "name": "subagent-creator",
@@ -1149,7 +1176,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Project and feature planning with 4 phases - Specify, Design, Tasks, Implement+Validate. Creates atomic tasks with verification criteria and maintains persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification, (5) Tracking decisions/blockers across sessions, (6) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"design\", \"tasks\", \"implement\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use the architecture skills) or technical design documents (use create-technical-design-doc).",
+      "description": "Project and feature planning with 4 adaptive phases - Specify, Design, Tasks, Execute. Auto-sizes depth based on complexity. Creates atomic tasks with verification criteria, atomic git commits, requirement traceability, and persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification and atomic commits, (5) Quick ad-hoc tasks (bug fixes, config changes), (6) Tracking decisions/blockers/deferred ideas across sessions, (7) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"quick fix\", \"quick task\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use the architecture skills) or technical design documents (use create-technical-design-doc).",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1158,10 +1185,13 @@
         "references/brownfield-mapping.md",
         "references/code-analysis.md",
         "references/coding-principles.md",
+        "references/concerns.md",
         "references/context-limits.md",
         "references/design.md",
+        "references/discuss.md",
         "references/implement.md",
         "references/project-init.md",
+        "references/quick-mode.md",
         "references/roadmap.md",
         "references/session-handoff.md",
         "references/specify.md",
@@ -1169,9 +1199,9 @@
         "references/tasks.md",
         "references/validate.md"
       ],
-      "author": "github.com/felipfr",
-      "version": "1.0.0",
-      "contentHash": "f869d9d91ad0ba14085d084d56d6b9e17a714b3c1f61a37a3c806ed91d0795e8"
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "2.0.0",
+      "contentHash": "2df0fe9bc82866211c573b8d62a077498473d9c18ff44365d5c9a7a444d83f3c"
     },
     {
       "name": "vercel-deploy",
@@ -1241,6 +1271,13 @@
       "message": "Use nx-generate instead",
       "alternatives": [
         "nx-generate"
+      ]
+    },
+    {
+      "name": "excalidraw-diagram-generator",
+      "message": "Use excalidraw-studio instead",
+      "alternatives": [
+        "excalidraw-studio"
       ]
     }
   ]
