@@ -1,6 +1,8 @@
-# Phase 3: Tasks
+# Tasks
 
 **Goal**: Break into GRANULAR, ATOMIC tasks. Clear dependencies. Right tools. Parallel execution plan.
+
+**Skip this phase when:** There are ≤3 obvious steps. In that case, tasks are implicit — go straight to Execute and list them inline in your implementation plan.
 
 ## Why Granular Tasks?
 
@@ -116,6 +118,7 @@ T8 → T9
 **Where**: `src/path/to/file.ts`
 **Depends on**: None
 **Reuses**: `src/existing/BaseInterface.ts`
+**Requirement**: [FEAT]-01
 
 **Tools**:
 
@@ -187,6 +190,8 @@ T8 → T9
 - [ ] Feature works per acceptance criteria
 - [ ] Integration test passes
 
+**Commit**: `feat([scope]): [description]`
+
 ---
 
 ## Parallel Execution Map
@@ -233,11 +238,13 @@ Before approving tasks, verify they are granular enough:
 
 ## Tips
 
-- **[P] = Parallel OK** - Mark tasks that can run simultaneously
-- **Reuses = Token saver** - Always reference existing code
-- **Tools per task** - MCPs and Skills prevent wrong approaches
-- **Dependencies are gates** - Clear what blocks what
-- **Done when = Testable** - If you can't verify it, rewrite it
+- **[P] = Parallel OK** — Mark tasks that can run simultaneously
+- **Reuses = Token saver** — Always reference existing code
+- **Tools per task** — MCPs and Skills prevent wrong approaches
+- **Dependencies are gates** — Clear what blocks what
+- **Done when = Testable** — If you can't verify it, rewrite it
+- **Requirement ID = Traceable** — Every task traces back to a spec requirement
+- **One commit per task** — Plan the commit message format in advance
 
 ---
 

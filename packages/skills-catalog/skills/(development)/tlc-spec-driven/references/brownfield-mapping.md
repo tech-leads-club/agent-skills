@@ -6,6 +6,8 @@
 
 ## Process
 
+Before starting, check if the `codenavi` skill is available for code exploration (see Skill Integrations in SKILL.md). If available, prefer it for all discovery and navigation tasks below.
+
 **High-level approach:**
 
 1. Explore directory structure systematically
@@ -13,6 +15,7 @@
 3. Extract patterns from representative code samples
 4. Document observed conventions and architectures
 5. Catalog external integrations
+6. Identify concerns: tech debt, known bugs, security risks, performance bottlenecks, fragile areas
 
 **Analysis depth:**
 
@@ -20,7 +23,7 @@
 - Focus on consistency and patterns, not exhaustive coverage
 - Extract actual examples, not assumptions
 
-## Output: 6 Files in .specs/codebase/
+## Output: 7 Files in .specs/codebase/
 
 ---
 
@@ -401,8 +404,26 @@ Examples: [actual constant names]
 
 ---
 
+### 7. CONCERNS.md
+
+**Purpose:** Surface actionable warnings about the codebase — tech debt, known bugs, security gaps, performance bottlenecks, fragile areas, scaling limits, risky dependencies, missing features, and test coverage gaps.
+
+**Size limit:** 5,000 tokens (~3,000 words)
+
+See [concerns.md](concerns.md) for the full template, guidelines, and examples.
+
+**Instructions:**
+
+- Document only concerns backed by evidence (file paths, measurements, reproduction steps)
+- Include fix approaches, not just problems
+- Omit sections with no findings
+- Prioritize by risk/impact
+- Use professional, solution-oriented tone
+
+---
+
 ## Total Context Budget
 
-**Combined:** ~14,000 tokens (7% of context window)
+**Combined:** ~19,000 tokens (10% of context window)
 **Acceptable for:** Brownfield projects requiring codebase understanding
 **Loading strategy:** Load relevant docs on-demand based on task
