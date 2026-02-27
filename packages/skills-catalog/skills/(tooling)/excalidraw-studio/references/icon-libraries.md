@@ -104,7 +104,7 @@ mkdir -p skills/excalidraw-studio/libraries/<library-name>
 
 ### Step 2: Download library
 
-- Visit: https://libraries.excalidraw.com/
+- Visit: <https://libraries.excalidraw.com/>
 - Search for the desired icon set (e.g., "AWS Architecture Icons")
 - Click download to get the `.excalidrawlib` file
 - Place it in the directory from Step 1
@@ -151,7 +151,7 @@ Only use this if Python scripts are unavailable. This approach is token-expensiv
 
 ## Supported Libraries
 
-This workflow works with any valid `.excalidrawlib` file from https://libraries.excalidraw.com/. Common categories:
+This workflow works with any valid `.excalidrawlib` file from <https://libraries.excalidraw.com/>. Common categories:
 
 - Cloud service icons (AWS, GCP, Azure)
 - Kubernetes / infrastructure icons
