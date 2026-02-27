@@ -50,6 +50,7 @@ export function RemoveWizard({ selectedAgents, onExit }: { selectedAgents?: Agen
 
   useInput((_, key) => {
     if (step === 'done' && (key.return || key.escape)) onExit()
+    if (skillNames.length === 0 && key.escape) onExit()
   })
 
   if (step === 'agent-select') {
