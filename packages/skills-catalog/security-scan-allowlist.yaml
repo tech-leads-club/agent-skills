@@ -2,7 +2,7 @@
 # This file contains approved exceptions for security warnings in skills.
 # Each entry documents why a specific warning is acceptable for a given skill.
 
-version: '1.0.0'
+version: "1.0.0"
 
 entries:
   # ============================================================================
@@ -15,7 +15,7 @@ entries:
       Google Stitch (stitch.withgoogle.com) is a trusted integration for UI prototyping.
       Ingesting screenshots and HTML from Stitch is the intended functionality of this skill.
     allowedBy: felipefr
-    allowedAt: '2026-02-23'
+    allowedAt: "2026-02-23"
 
   - skill: figma-implement-design
     code: W011
@@ -23,7 +23,7 @@ entries:
       Figma MCP server (mcp.figma.com) is a trusted first-party integration for design
       implementation. Ingesting Figma design data is the core purpose of this skill.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: figma-implement-design
     code: W012
@@ -31,7 +31,7 @@ entries:
       Figma MCP server (mcp.figma.com) is a trusted first-party integration. The external
       URL is the official Figma MCP endpoint required for the skill to function.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: figma
     code: W011
@@ -39,7 +39,7 @@ entries:
       Figma MCP server (mcp.figma.com) is a trusted first-party integration for design
       implementation. Ingesting Figma design data is the core purpose of this skill.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: figma
     code: W012
@@ -47,7 +47,7 @@ entries:
       Figma MCP server (mcp.figma.com) is a trusted first-party integration. The external
       URL is the official Figma MCP endpoint required for the skill to function.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   # ============================================================================
   # CLOUD CATEGORY (AWS)
@@ -61,7 +61,7 @@ entries:
       AWS documentation. The "Search Before Answer" workflow using aws___search_documentation
       and aws___read_documentation tools is the core functionality of this skill.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   # ============================================================================
   # ARCHITECTURE CATEGORY
@@ -74,16 +74,7 @@ entries:
       and web search to prevent relying on outdated training data. Fetching documentation
       is a core requirement for migration planning.
     allowedBy: felipefr
-    allowedAt: '2026-02-23'
-
-  - skill: excalidraw-diagram-generator
-    code: W011
-    reason: >
-      Loading Excalidraw libraries from libraries.excalidraw.com is the core functionality
-      of this skill. The public library repository is necessary for diagram generation with
-      standard icon sets.
-    allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-23"
 
   # ============================================================================
   # PERFORMANCE CATEGORY
@@ -96,7 +87,7 @@ entries:
       Running Lighthouse audits against arbitrary URLs is the intended purpose of this
       performance analysis skill. Third-party content exposure is inherent to the functionality.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: perf-lighthouse
     code: W012
@@ -104,7 +95,7 @@ entries:
       The skill provides a standard GitHub Actions workflow example using the official 
       treosh/lighthouse-ci-action. The workflow example relies on trusted external code.
     allowedBy: felipefr
-    allowedAt: '2026-02-22'
+    allowedAt: "2026-02-22"
 
   # ============================================================================
   # QUALITY CATEGORY
@@ -118,7 +109,7 @@ entries:
       testing workflow for WCAG compliance. This is functionally identical to perf-lighthouse
       which is already allowlisted. In practice, audits target the user's own site.
     allowedBy: felipefr
-    allowedAt: '2026-02-26'
+    allowedAt: "2026-02-26"
 
   # ============================================================================
   # MONITORING CATEGORY
@@ -132,7 +123,7 @@ entries:
       The skill already includes protective measures: PII redaction, no raw stack traces,
       and no token echoing. Analogous to gh-fix-ci (reads CI logs) which is already allowlisted.
     allowedBy: felipefr
-    allowedAt: '2026-02-26'
+    allowedAt: "2026-02-26"
 
   # ============================================================================
   # TOOLING CATEGORY
@@ -146,7 +137,7 @@ entries:
       Security warnings have been added to the documentation to instruct the LLM about
       handling untrusted content.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: gh-fix-ci
     code: W011
@@ -154,7 +145,7 @@ entries:
       Reading GitHub Actions logs and PR checks is the core functionality of this skill.
       Processing CI/CD output from GitHub is the intended purpose.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: nx-ci-monitor
     code: W011
@@ -163,7 +154,16 @@ entries:
       functionality. Polling Nx Cloud is intentional and required; analogous to gh-fix-ci
       (GitHub CI) which is already allowlisted.
     allowedBy: felipefr
-    allowedAt: '2026-02-26'
+    allowedAt: "2026-02-26"
+
+  - skill: excalidraw-studio
+    code: W011
+    reason: >
+      Loading Excalidraw libraries from libraries.excalidraw.com is the core functionality
+      of this skill. The public library repository is necessary for diagram generation with
+      standard icon sets.
+    allowedBy: felipefr
+    allowedAt: "2026-02-17"
 
   # ============================================================================
   # WEB-AUTOMATION CATEGORY
@@ -176,7 +176,7 @@ entries:
       Web page testing and automation against arbitrary URLs is the core functionality.
       Security warnings have been added to instruct the LLM about handling untrusted content.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: playwright-skill
     code: W012
@@ -184,12 +184,21 @@ entries:
       Installing Playwright and browser binaries from the official npm registry at runtime 
       (via npm install or npx) is required for the browser automation skill to function locally.
     allowedBy: felipefr
-    allowedAt: '2026-02-22'
+    allowedAt: "2026-02-22"
 
   # ============================================================================
   # DEVELOPMENT CATEGORY
   # Skills for GitHub integration, PR management, and development workflows
   # ============================================================================
+
+  - skill: tlc-spec-driven
+    code: W011
+    reason: >
+      The skill's methodology explicitly requires web search and external documentation review
+      to verify and update specifications. Ingesting untrusted public content is intentional
+      and documented as part of the Knowledge Verification Chain.
+    allowedBy: felipefr
+    allowedAt: "2026-02-27"
 
   - skill: codenavi
     code: W011
@@ -198,7 +207,7 @@ entries:
       and web searches. Fetching third-party documentation is intentional and required
       to avoid assumptions during development.
     allowedBy: felipefr
-    allowedAt: '2026-02-23'
+    allowedAt: "2026-02-23"
 
   - skill: confluence-assistant
     code: W011
@@ -207,7 +216,7 @@ entries:
       of this skill. Third-party content exposure is inherent to any Confluence integration,
       similar to figma-implement-design (Figma MCP) which is already allowlisted.
     allowedBy: felipefr
-    allowedAt: '2026-02-26'
+    allowedAt: "2026-02-26"
 
   - skill: gh-address-comments
     code: W011
@@ -215,7 +224,7 @@ entries:
       Reading and addressing GitHub PR comments is the core functionality of this skill.
       The skill is designed to process user-generated content from GitHub.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: shopify-developer
     code: W011
@@ -224,7 +233,7 @@ entries:
       the development workflow examples. This is necessary for demonstrating Shopify theme
       development patterns.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   # ============================================================================
   # SECURITY CATEGORY
@@ -237,7 +246,7 @@ entries:
       Analyzing Git commit history and repository metadata is the core functionality of
       this skill. Processing repository data is necessary for ownership mapping.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   # ============================================================================
   # CLOUD CATEGORY
@@ -249,7 +258,7 @@ entries:
       Analyzing Git repositories from GitHub/GitLab/Bitbucket is required for deployment.
       The skill needs to read repository content to generate deployment configurations.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: cloudflare-deploy
     code: W011
@@ -257,7 +266,7 @@ entries:
       Deploying Email Workers that process incoming emails is a core product feature of Cloudflare.
       The skill documents how to use this feature. Processing external emails is inherent to the service.
     allowedBy: felipefr
-    allowedAt: '2026-02-22'
+    allowedAt: "2026-02-22"
 
   - skill: cloudflare-deploy
     code: W013
@@ -267,7 +276,7 @@ entries:
       the default sandbox blocks outbound requests. It is necessary for deployment operations
       and requires explicit user approval.
     allowedBy: felipefr
-    allowedAt: '2026-02-22'
+    allowedAt: "2026-02-22"
 
   - skill: netlify-deploy
     code: W011
@@ -275,7 +284,7 @@ entries:
       Running the official Netlify CLI is the core purpose of this deployment skill.
       Third-party content exposure (Netlify tooling) is inherent to the intended functionality.
     allowedBy: felipefr
-    allowedAt: '2026-02-26'
+    allowedAt: "2026-02-26"
 
   - skill: netlify-deploy
     code: W012
@@ -283,7 +292,7 @@ entries:
       Running the official Netlify CLI via `npx netlify` is the standard, documented way to 
       deploy to Netlify. The npm registry is a trusted package source.
     allowedBy: felipefr
-    allowedAt: '2026-02-22'
+    allowedAt: "2026-02-22"
 
   - skill: render-deploy
     code: W012
@@ -291,7 +300,7 @@ entries:
       Render MCP server (mcp.render.com) is a trusted first-party integration. The external
       URL is the official Render MCP endpoint required for deployment operations.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: render-deploy
     code: W013
@@ -302,7 +311,7 @@ entries:
       blocks outbound requests. This is necessary for deployment operations and requires
       explicit user approval.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
 
   - skill: vercel-deploy
     code: W013
@@ -313,4 +322,4 @@ entries:
       blocks outbound requests. This is necessary for deployment operations and requires
       explicit user approval.
     allowedBy: felipefr
-    allowedAt: '2026-02-17'
+    allowedAt: "2026-02-17"
