@@ -1,6 +1,6 @@
 {
   "name": "@tech-leads-club/skills-catalog",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Skills catalog registry for agent-skills CLI (CDN distribution)",
   "author": "Tech Leads Club",
   "license": "MIT",

@@ -1,3 +1,13 @@
+## 1.4.1 (2026-02-27)
+
+### 🩹 Fixes
+
+- handle exit condition in RemoveWizard when no skills are selected ([ca428104c](https://github.com/tech-leads-club/agent-skills/commit/ca428104c))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 1.4.0 (2026-02-26)
 
 This was a version bump only for @tech-leads-club/agent-skills to align it with other projects, there were no code changes.

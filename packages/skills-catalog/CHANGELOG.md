@@ -1,3 +1,22 @@
+## 0.10.0 (2026-02-27)
+
+### 🚀 Features
+
+- rename excalidraw-diagram-generator to excalidraw-studio, update description and category, and add new references and author information ([893b5b3dc](https://github.com/tech-leads-club/agent-skills/commit/893b5b3dc))
+- add excalidraw-studio skill ([519119f50](https://github.com/tech-leads-club/agent-skills/commit/519119f50))
+- add mermaid-studio skill ([0560aead8](https://github.com/tech-leads-club/agent-skills/commit/0560aead8))
+- update TLC Spec-Driven README with version bump, refined project phases, and enhanced documentation ([31316664b](https://github.com/tech-leads-club/agent-skills/commit/31316664b))
+- add new reference for codebase concerns, gray area discussions, and quick mode tasks ([847a8bd4a](https://github.com/tech-leads-club/agent-skills/commit/847a8bd4a))
+- enhance tlc-spec-driven skill with updated phases, auto-sizing principles, and new context management features ([baa8c0e4f](https://github.com/tech-leads-club/agent-skills/commit/baa8c0e4f))
+
+### 📖 Documentation
+
+- update SKILL.md to streamline description format and license information ([278a2fd70](https://github.com/tech-leads-club/agent-skills/commit/278a2fd70))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.9.0 (2026-02-26)
 
 ### 🚀 Features
