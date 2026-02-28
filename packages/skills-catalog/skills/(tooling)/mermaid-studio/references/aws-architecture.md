@@ -4,9 +4,23 @@ Load this file when the user requests cloud architecture diagrams, AWS infrastru
 
 ## Overview
 
-Mermaid's `architecture-beta` diagram type enables cloud architecture visualization with icons representing services. Combined with custom icon packs (like AWS), it produces professional infrastructure diagrams.
+Mermaid's `architecture-beta` diagram type enables cloud architecture visualization with icons representing services. Combined with Iconify icon packs, it produces professional infrastructure diagrams with real AWS service icons.
 
-**Important:** `architecture-beta` requires Mermaid v11+. Some markdown renderers (GitHub, GitLab) may not render these yet. For universal compatibility, consider using C4 diagrams with descriptive labels instead.
+**CRITICAL LIMITATION — The "Arrow Distance" Bug:**
+Because `architecture-beta` is built on a rigid grid system without edge routing algorithms, diagrams with more than 6-8 nodes or complex crossing relationships will suffer from **massive, unreadable distances** between nodes and arrows crossing over boxes.
+
+**The Golden Rule for AWS Diagrams:**
+
+- **Simple (< 8 nodes, linear flow):** Use `architecture-beta` with `--icons logos`.
+- **Complex (> 8 nodes, microservices, multiple tiers):** You MUST use **Option A: C4 Container Diagram**. C4 uses the `dagre` layout engine which perfectly spaces nodes and routes arrows beautifully.
+
+**Important — Icon Rendering:**
+
+- `architecture-beta` requires Mermaid v11+
+- Icons from Iconify packs (`logos:aws-*`) require icon pack registration at render time — they do NOT work in static markdown renderers (GitHub, GitLab)
+- When rendering with the render script, use `--icons logos` to auto-register icon packs
+- For environments without icon pack support, the built-in icons (`cloud`, `database`, `disk`, `server`, `internet`) work everywhere as a fallback
+- For universal compatibility, consider using C4 diagrams with descriptive labels as an alternative
 
 ## Basic Syntax
 
@@ -43,104 +57,136 @@ api:R --> L:lambda        %% api's right connects to lambda's left
 lambda:B --> T:db          %% lambda's bottom connects to db's top
 ```
 
-### Built-in Icons
+### Edge Types
 
-Available without any icon pack:
+```
+serviceA:R --> L:serviceB     %% Solid arrow (default)
+serviceA:R -- L:serviceB      %% Solid line (no arrow)
+```
+
+## Icon Options
+
+### Option 1: Iconify Icons (Best Visual Quality)
+
+Mermaid supports 200,000+ icons from iconify.design via `registerIconPacks()`. The `logos` pack provides the best AWS icons. To render with these icons, use `--icons logos` with the render script.
+
+**Format:** `logos:aws-{service-name}`
+
+### Option 2: Built-in Icons (Universal Compatibility)
+
+Available everywhere without any registration. Use these when targeting markdown renderers or when icon packs aren't available:
 `cloud`, `database`, `disk`, `internet`, `server`
 
-## Icon Packs
+## AWS Service Icons Catalog (Iconify `logos` Pack)
 
-### Using Iconify Icons
+### Compute
 
-Mermaid supports 200,000+ icons from iconify.design. Common technology icons:
+| Service    | Icon name (logos)             | Built-in fallback |
+| ---------- | ----------------------------- | ----------------- |
+| Lambda     | `logos:aws-lambda`            | `server`          |
+| EC2        | `logos:aws-ec2`               | `server`          |
+| ECS        | `logos:aws-ecs`               | `server`          |
+| Fargate    | `logos:aws-fargate`           | `server`          |
+| Elastic BK | `logos:aws-elastic-beanstalk` | `server`          |
 
-```
-%% Format: iconPack:icon-name
-service node(logos:nodejs-icon)[Node.js]
-service react(logos:react)[React]
-service docker(logos:docker-icon)[Docker]
-service k8s(logos:kubernetes)[Kubernetes]
-service postgres(logos:postgresql)[PostgreSQL]
-service redis(logos:redis)[Redis]
-service nginx(logos:nginx)[Nginx]
-service graphql(logos:graphql)[GraphQL]
-```
+### Storage
 
-**Note:** Iconify icons require the icon pack to be registered in the rendering environment. They do NOT work in static markdown renderers.
+| Service | Icon name (logos)   | Built-in fallback |
+| ------- | ------------------- | ----------------- |
+| S3      | `logos:aws-s3`      | `disk`            |
+| EBS     | `logos:aws-ebs`     | `disk`            |
+| EFS     | `logos:aws-efs`     | `disk`            |
+| Glacier | `logos:aws-glacier` | `disk`            |
 
-### AWS Icon Pack
+### Database
 
-The `aws-mermaid-icons` project provides 855+ AWS service icons in iconifyJSON format. Two variants exist:
+| Service     | Icon name (logos)       | Built-in fallback |
+| ----------- | ----------------------- | ----------------- |
+| RDS         | `logos:aws-rds`         | `database`        |
+| DynamoDB    | `logos:aws-dynamodb`    | `database`        |
+| ElastiCache | `logos:aws-elasticache` | `database`        |
+| Aurora      | `logos:aws-aurora`      | `database`        |
+| Redshift    | `logos:aws-redshift`    | `database`        |
+| DocumentDB  | `logos:aws-documentdb`  | `database`        |
 
-1. **Standard** — transparent backgrounds, colored glyphs
-2. **Background** — colored tiles, white glyphs (classic AWS style)
+### Networking
 
-**Registration (in rendering code):**
+| Service     | Icon name (logos)                  | Built-in fallback |
+| ----------- | ---------------------------------- | ----------------- |
+| API Gateway | `logos:aws-api-gateway`            | `server`          |
+| CloudFront  | `logos:aws-cloudfront`             | `internet`        |
+| Route 53    | `logos:aws-route53`                | `internet`        |
+| ELB/ALB     | `logos:aws-elastic-load-balancing` | `server`          |
+| VPC         | `logos:aws-vpc`                    | `cloud`           |
 
-```javascript
-import mermaid from 'mermaid'
+### Messaging
 
-mermaid.registerIconPacks([
-  {
-    name: 'aws',
-    loader: () =>
-      fetch('https://raw.githubusercontent.com/harmalh/aws-mermaid-icons/main/iconify-json/aws-icons.json').then(
-        (res) => res.json(),
-      ),
-  },
-])
-```
+| Service     | Icon name (logos)       | Built-in fallback |
+| ----------- | ----------------------- | ----------------- |
+| SQS         | `logos:aws-sqs`         | `server`          |
+| SNS         | `logos:aws-sns`         | `server`          |
+| EventBridge | `logos:aws-eventbridge` | `server`          |
+| Kinesis     | `logos:aws-kinesis`     | `server`          |
 
-**AWS icon naming conventions:**
+### Integration & Orchestration
 
-- AWS services: `aws:aws-{service}` (e.g., `aws:aws-lambda`, `aws:aws-glue`)
-- Amazon services: `aws:amazon-{service}` (e.g., `aws:amazon-rds`, `aws:amazon-s3`)
-- Resources: `aws:{resource}` (e.g., `aws:amazon-eventbridge-topic`)
+| Service        | Icon name (logos)          | Built-in fallback |
+| -------------- | -------------------------- | ----------------- |
+| Step Functions | `logos:aws-step-functions` | `server`          |
+| AppSync        | `logos:aws-app-sync`       | `server`          |
 
-### Common AWS Service Icons
+### Monitoring & Security
 
-| Service         | Icon name                                | Category       |
-| --------------- | ---------------------------------------- | -------------- |
-| Lambda          | `aws:aws-lambda`                         | Compute        |
-| EC2             | `aws:aws-ec2`                            | Compute        |
-| ECS             | `aws:amazon-ecs`                         | Compute        |
-| Fargate         | `aws:aws-fargate`                        | Compute        |
-| S3              | `aws:amazon-simple-storage-service`      | Storage        |
-| EBS             | `aws:amazon-elastic-block-store`         | Storage        |
-| EFS             | `aws:amazon-efs`                         | Storage        |
-| RDS             | `aws:amazon-rds`                         | Database       |
-| DynamoDB        | `aws:amazon-dynamodb`                    | Database       |
-| ElastiCache     | `aws:amazon-elasticache`                 | Database       |
-| Aurora          | `aws:amazon-aurora`                      | Database       |
-| API Gateway     | `aws:amazon-api-gateway`                 | Networking     |
-| CloudFront      | `aws:amazon-cloudfront`                  | Networking     |
-| Route 53        | `aws:amazon-route-53`                    | Networking     |
-| ELB/ALB         | `aws:elastic-load-balancing`             | Networking     |
-| VPC             | `aws:amazon-virtual-private-cloud`       | Networking     |
-| SQS             | `aws:amazon-sqs`                         | Messaging      |
-| SNS             | `aws:amazon-sns`                         | Messaging      |
-| EventBridge     | `aws:amazon-eventbridge`                 | Messaging      |
-| Kinesis         | `aws:amazon-kinesis`                     | Messaging      |
-| Step Functions  | `aws:aws-step-functions`                 | Integration    |
-| CloudWatch      | `aws:amazon-cloudwatch`                  | Monitoring     |
-| X-Ray           | `aws:aws-x-ray`                          | Monitoring     |
-| IAM             | `aws:aws-identity-and-access-management` | Security       |
-| Cognito         | `aws:amazon-cognito`                     | Security       |
-| KMS             | `aws:aws-key-management-service`         | Security       |
-| WAF             | `aws:aws-waf`                            | Security       |
-| CodePipeline    | `aws:aws-codepipeline`                   | DevOps         |
-| CodeBuild       | `aws:aws-codebuild`                      | DevOps         |
-| CodeDeploy      | `aws:aws-codedeploy`                     | DevOps         |
-| ECR             | `aws:amazon-elastic-container-registry`  | Containers     |
-| SageMaker       | `aws:amazon-sagemaker`                   | ML/AI          |
-| Bedrock         | `aws:amazon-bedrock`                     | ML/AI          |
-| CloudFormation  | `aws:aws-cloudformation`                 | Infrastructure |
-| Secrets Manager | `aws:aws-secrets-manager`                | Security       |
-| Parameter Store | `aws:aws-systems-manager`                | Management     |
+| Service    | Icon name (logos)      | Built-in fallback |
+| ---------- | ---------------------- | ----------------- |
+| CloudWatch | `logos:aws-cloudwatch` | `server`          |
+| IAM        | `logos:aws-iam`        | `server`          |
+| Cognito    | `logos:aws-cognito`    | `server`          |
+| WAF        | `logos:aws-waf`        | `server`          |
+
+### DevOps & CI/CD
+
+| Service      | Icon name (logos)        | Built-in fallback |
+| ------------ | ------------------------ | ----------------- |
+| CodePipeline | `logos:aws-codepipeline` | `server`          |
+| CodeBuild    | `logos:aws-codebuild`    | `server`          |
+| CodeDeploy   | `logos:aws-codedeploy`   | `server`          |
+| ECR          | `logos:aws-ecr`          | `server`          |
+
+### ML/AI
+
+| Service   | Icon name (logos)     | Built-in fallback |
+| --------- | --------------------- | ----------------- |
+| SageMaker | `logos:aws-sagemaker` | `server`          |
+
+**Note:** Not all AWS services have icons in the `logos` pack. If a specific icon is not available, use the closest category-appropriate built-in icon as fallback. You can verify icon availability at https://icon-sets.iconify.design/?q=aws.
 
 ## Architecture Patterns
 
 ### Pattern 1: Three-Tier Web Application
+
+**With Iconify Icons (best quality — requires `--icons logos`):**
+
+```mermaid
+architecture-beta
+    group vpc(logos:aws-vpc)[VPC]
+    group publicSubnet(cloud)[Public Subnet] in vpc
+    group privateSubnet(cloud)[Private Subnet] in vpc
+    group dataSubnet(database)[Data Subnet] in vpc
+
+    service cdn(logos:aws-cloudfront)[CloudFront]
+    service alb(logos:aws-elastic-load-balancing)[ALB] in publicSubnet
+    service ecs(logos:aws-ecs)[ECS Fargate] in privateSubnet
+    service rds(logos:aws-aurora)[Aurora PostgreSQL] in dataSubnet
+    service cache(logos:aws-elasticache)[ElastiCache Redis] in dataSubnet
+
+    cdn:R --> L:alb
+    alb:R --> L:ecs
+    ecs:R --> L:rds
+    ecs:B --> T:cache
+```
+
+**With Built-in Icons (universal compatibility):**
 
 ```mermaid
 architecture-beta
@@ -166,53 +212,21 @@ architecture-beta
 ```mermaid
 architecture-beta
     group api(cloud)[API Layer]
-    group compute(cloud)[Compute]
     group storage(cloud)[Storage]
 
-    service gw(server)[API Gateway] in api
-    service auth(server)[Cognito] in api
-    service fn1(server)[Lambda: Orders] in compute
-    service fn2(server)[Lambda: Products] in compute
-    service dynamo(database)[DynamoDB] in storage
-    service s3(disk)[S3] in storage
+    service gw(logos:aws-api-gateway)[API Gateway] in api
+    service auth(logos:aws-cognito)[Cognito] in api
+    service fn(logos:aws-lambda)[Lambda] in api
+    service dynamo(logos:aws-dynamodb)[DynamoDB] in storage
+    service s3(logos:aws-s3)[S3] in storage
 
+    gw:R --> L:fn
     gw:B --> T:auth
-    gw:R --> L:fn1
-    gw:R --> L:fn2
-    fn1:R --> L:dynamo
-    fn2:R --> L:s3
+    fn:R --> L:dynamo
+    fn:B --> T:s3
 ```
 
-### Pattern 3: Event-Driven Microservices
-
-```mermaid
-architecture-beta
-    group ingest(cloud)[Ingestion]
-    group processing(cloud)[Processing]
-    group storage(cloud)[Storage]
-    group notify(cloud)[Notification]
-
-    service apigw(server)[API Gateway] in ingest
-    service eventBridge(server)[EventBridge] in ingest
-    service orderFn(server)[Order Lambda] in processing
-    service paymentFn(server)[Payment Lambda] in processing
-    service inventoryFn(server)[Inventory Lambda] in processing
-    service dynamo(database)[DynamoDB] in storage
-    service sqs(server)[SQS Dead Letter] in notify
-    service sns(server)[SNS] in notify
-
-    apigw:R --> L:eventBridge
-    eventBridge:R --> L:orderFn
-    eventBridge:R --> L:paymentFn
-    eventBridge:R --> L:inventoryFn
-    orderFn:R --> L:dynamo
-    paymentFn:R --> L:dynamo
-    inventoryFn:R --> L:dynamo
-    orderFn:B --> T:sqs
-    paymentFn:B --> T:sns
-```
-
-### Pattern 4: Data Pipeline
+### Pattern 3: Data Pipeline
 
 ```mermaid
 architecture-beta
@@ -220,13 +234,13 @@ architecture-beta
     group pipeline(cloud)[Pipeline]
     group analytics(cloud)[Analytics]
 
-    service s3raw(disk)[S3 Raw Data] in sources
-    service kinesis(server)[Kinesis Stream] in sources
-    service glue(server)[Glue ETL] in pipeline
-    service stepFn(server)[Step Functions] in pipeline
-    service s3processed(disk)[S3 Processed] in pipeline
-    service athena(server)[Athena] in analytics
-    service quicksight(server)[QuickSight] in analytics
+    service s3raw(logos:aws-s3)[S3 Raw Data] in sources
+    service kinesis(logos:aws-kinesis)[Kinesis Stream] in sources
+    service glue(logos:aws-glue)[Glue ETL] in pipeline
+    service stepFn(logos:aws-step-functions)[Step Functions] in pipeline
+    service s3processed(logos:aws-s3)[S3 Processed] in pipeline
+    service athena(logos:aws-athena)[Athena] in analytics
+    service quicksight(logos:aws-quicksight)[QuickSight] in analytics
 
     s3raw:R --> L:glue
     kinesis:R --> L:glue
@@ -236,7 +250,7 @@ architecture-beta
     athena:R --> L:quicksight
 ```
 
-### Pattern 5: CI/CD Pipeline
+### Pattern 4: CI/CD Pipeline
 
 ```mermaid
 architecture-beta
@@ -245,13 +259,13 @@ architecture-beta
     group deploy(cloud)[Deploy]
     group runtime(cloud)[Runtime]
 
-    service repo(server)[CodeCommit] in source
-    service pipeline(server)[CodePipeline] in build
-    service codebuild(server)[CodeBuild] in build
-    service ecr(server)[ECR] in build
-    service codedeploy(server)[CodeDeploy] in deploy
-    service ecs(server)[ECS Fargate] in runtime
-    service cw(server)[CloudWatch] in runtime
+    service repo(logos:aws-codecommit)[CodeCommit] in source
+    service pipeline(logos:aws-codepipeline)[CodePipeline] in build
+    service codebuild(logos:aws-codebuild)[CodeBuild] in build
+    service ecr(logos:aws-ecr)[ECR] in build
+    service codedeploy(logos:aws-codedeploy)[CodeDeploy] in deploy
+    service ecs(logos:aws-ecs)[ECS Fargate] in runtime
+    service cw(logos:aws-cloudwatch)[CloudWatch] in runtime
 
     repo:R --> L:pipeline
     pipeline:R --> L:codebuild
@@ -261,9 +275,53 @@ architecture-beta
     ecs:B --> T:cw
 ```
 
+## Rendering with Icon Packs
+
+### Using the Render Script
+
+To render architecture-beta diagrams with proper AWS icons:
+
+```bash
+node $SKILL_DIR/scripts/render.mjs \
+  --input diagram.mmd \
+  --output diagram.svg \
+  --format svg \
+  --icons logos
+```
+
+The `--icons logos` flag tells the render script to register the Iconify `logos` pack which includes all `logos:aws-*` icons. The render script uses a Puppeteer-based pipeline for icon-enabled rendering.
+
+### Multiple Icon Packs
+
+You can register multiple packs:
+
+```bash
+node $SKILL_DIR/scripts/render.mjs \
+  --input diagram.mmd \
+  --output diagram.svg \
+  --icons logos,fa
+```
+
+Available packs: `logos` (AWS + tech logos), `fa` (Font Awesome icons).
+
+### How Icon Registration Works
+
+The render script generates an HTML page with Mermaid loaded, registers icon packs via `mermaid.registerIconPacks()`, renders the diagram, and captures the SVG output. This is equivalent to:
+
+```javascript
+import mermaid from 'mermaid'
+
+mermaid.registerIconPacks([
+  {
+    name: 'logos',
+    loader: () => fetch('https://unpkg.com/@iconify-json/logos/icons.json').then((res) => res.json()),
+  },
+])
+```
+
 ## Fallback Strategy
 
-When `architecture-beta` is not supported by the rendering environment, use these alternatives:
+When `architecture-beta` is not supported by the rendering environment OR icons don't render, use these alternatives:
 
 ### Option A: C4 Container Diagram (Best Alternative)
 
@@ -283,11 +341,26 @@ C4Container
     Rel(gw, fn, "Invokes", "Event")
     Rel(fn, db, "Reads/writes", "SDK")
     Rel(fn, s3, "Stores files", "SDK")
+
+    UpdateRelStyle(gw, auth, $textColor="#475569", $lineColor="#94a3b8")
+    UpdateRelStyle(gw, fn, $textColor="#475569", $lineColor="#94a3b8")
+    UpdateRelStyle(fn, db, $textColor="#475569", $lineColor="#94a3b8")
+    UpdateRelStyle(fn, s3, $textColor="#475569", $lineColor="#94a3b8")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
-### Option B: Flowchart with AWS Labels
+### Option B: Flowchart with AWS Labels and Professional Styling
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#FF9900', 'primaryTextColor': '#232F3E',
+  'primaryBorderColor': '#c47600', 'lineColor': '#94a3b8',
+  'secondaryColor': '#527FFF', 'tertiaryColor': '#DD344C',
+  'background': '#ffffff', 'mainBkg': '#FFF8F0',
+  'nodeBorder': '#c47600', 'clusterBkg': '#FFF8F0',
+  'clusterBorder': '#d4a574', 'edgeLabelBackground': '#ffffff'
+}}}%%
 flowchart LR
     subgraph AWS["AWS Cloud"]
         subgraph VPC
@@ -313,8 +386,10 @@ flowchart LR
 
 1. **Group by boundary** — VPC, subnet, region, account
 2. **Left-to-right flow** — request path should read naturally
-3. **Label connections** — protocol and purpose
-4. **One diagram per concern** — networking, compute, data, separately
+3. **Limit to 12 services max** — split complex architectures into multiple focused diagrams
+4. **Show only one concern per diagram** — networking, compute, data, separately
 5. **Include external systems** — show what connects from outside
 6. **Security boundaries** — show public vs private subnets
-7. **Use built-in icons as fallback** — `cloud`, `database`, `disk`, `server`, `internet` work everywhere without icon packs
+7. **Use Iconify icons when rendering** — `logos:aws-*` for best visual quality
+8. **Use built-in icons for docs** — `cloud`, `database`, `disk`, `server`, `internet` for markdown compatibility
+9. **Always provide both versions** — one with Iconify icons for rendered output, one with built-in for inline markdown
