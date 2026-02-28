@@ -13,7 +13,7 @@
         "referenceFiles": [
           "WCAG.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -31,7 +31,7 @@
           "decision-trees.md",
           "mcp-guide.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -45,7 +45,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -59,7 +59,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -381,7 +381,7 @@
           "gotchas.md",
           "patterns.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -398,7 +398,7 @@
           "coding-principles.md",
           "notebook-spec.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -412,7 +412,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -426,7 +426,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -440,7 +440,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -454,7 +454,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -468,7 +468,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -484,7 +484,7 @@
         "referenceFiles": [
           "LCP.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -498,7 +498,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -512,7 +512,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -526,7 +526,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -542,7 +542,7 @@
         "referenceFiles": [
           "style-guide.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -556,7 +556,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -570,7 +570,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -588,7 +588,7 @@
           "excalidraw-schema.md",
           "icon-libraries.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -605,7 +605,7 @@
           "figma-mcp-config.md",
           "figma-tools-and-prompts.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -619,7 +619,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -637,7 +637,7 @@
           "design-principles.md",
           "stitch-integration.md"
         ],
-        "lastModified": "2026-02-25"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -651,7 +651,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -665,7 +665,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -679,7 +679,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -695,7 +695,7 @@
         "referenceFiles": [
           "PRINCIPLES.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -716,7 +716,7 @@
           "strangler-fig-patterns.md",
           "testing-safety-nets.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -758,7 +758,7 @@
           "state-isolation.md",
           "testing-patterns.md"
         ],
-        "lastModified": "2026-02-25"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -776,7 +776,7 @@
           "deployment-patterns.md",
           "netlify-toml.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -790,7 +790,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -804,7 +804,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -818,7 +818,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -832,7 +832,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -846,7 +846,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -860,7 +860,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -878,7 +878,7 @@
           "core-web-vitals.md",
           "image-optimization.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -892,7 +892,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -906,7 +906,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -920,7 +920,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -940,7 +940,7 @@
           "project-structure.md",
           "storage-patterns.md"
         ],
-        "lastModified": "2026-02-25"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -965,7 +965,7 @@
           "service-types.md",
           "troubleshooting-basics.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -990,7 +990,7 @@
           "python-fastapi-web-server-security.md",
           "python-flask-web-server-security.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1006,7 +1006,7 @@
         "referenceFiles": [
           "neo4j-import.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1023,7 +1023,7 @@
           "prompt-template.md",
           "security-controls-and-assets.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1037,7 +1037,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1051,7 +1051,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1077,7 +1077,7 @@
           "performance.md",
           "theme-development.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1095,7 +1095,7 @@
           "patterns.md",
           "quality-checklist.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1109,7 +1109,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1123,7 +1123,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1145,7 +1145,7 @@
           "red-team-adversarial.md",
           "socratic-questioning.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1176,7 +1176,7 @@
           "tasks.md",
           "validate.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1190,7 +1190,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1206,7 +1206,7 @@
         "referenceFiles": [
           "guideline.md"
         ],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -1220,7 +1220,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-26"
+        "lastModified": "2026-02-28"
       }
     }
   ],
