@@ -43,6 +43,10 @@ echo ""
 echo "--- Installing mermaid (for validation) ---"
 npm install --save mermaid 2>&1 | tail -3
 
+echo ""
+echo "--- Installing puppeteer (for icon-enabled rendering) ---"
+npm install --save puppeteer 2>&1 | tail -3
+
 # Create puppeteer config for headless rendering
 cat > "$INSTALL_DIR/puppeteer-config.json" << 'PCONF'
 {
