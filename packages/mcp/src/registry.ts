@@ -22,7 +22,7 @@ const RegistrySchema = z.object({
   version: z.string(),
   categories: z.record(z.string(), z.object({ name: z.string(), description: z.string() })),
   skills: z.array(SkillEntrySchema),
-  deprecated: z.array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) })),
+  deprecated: z.array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) })).optional(),
 })
 
 let cache: RegistryCache | null = null
@@ -51,7 +51,8 @@ export async function getRegistry(): Promise<Registry> {
 
       if (response.status === 200) {
         const etag = response.headers.get('etag') ?? undefined
-        const data = RegistrySchema.parse(await response.json())
+        const raw = RegistrySchema.parse(await response.json())
+        const data: Registry = { ...raw, deprecated: raw.deprecated ?? [] }
         process.stderr.write('[registry] 200 — updated cache with new data\n')
         cache = { data, etag, fetchedAt: now }
         return cache.data
@@ -70,7 +71,8 @@ export async function getRegistry(): Promise<Registry> {
   const response = await ky.get(REGISTRY_URL, { retry: { limit: 3 }, throwHttpErrors: false })
   if (response.status !== 200) throw new Error(`[registry] cold start fetch failed with status ${response.status}`)
   const etag = response.headers.get('etag') ?? undefined
-  const data = RegistrySchema.parse(await response.json())
+  const raw = RegistrySchema.parse(await response.json())
+  const data: Registry = { ...raw, deprecated: raw.deprecated ?? [] }
   cache = { data, etag, fetchedAt: now }
   process.stderr.write('[registry] cold start fetch complete\n')
   return cache.data
