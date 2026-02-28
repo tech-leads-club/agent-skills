@@ -13,7 +13,7 @@
         "referenceFiles": [
           "WCAG.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -31,7 +31,7 @@
           "decision-trees.md",
           "mcp-guide.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -45,7 +45,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -59,7 +59,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -381,7 +381,7 @@
           "gotchas.md",
           "patterns.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -398,7 +398,7 @@
           "coding-principles.md",
           "notebook-spec.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -412,7 +412,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -426,7 +426,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -440,7 +440,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -454,7 +454,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -468,7 +468,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -484,7 +484,7 @@
         "referenceFiles": [
           "LCP.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -498,7 +498,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -512,7 +512,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -526,7 +526,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -542,7 +542,7 @@
         "referenceFiles": [
           "style-guide.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -556,7 +556,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -570,7 +570,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -579,7 +579,7 @@
       "description": "Generate Excalidraw diagrams from natural language descriptions. Outputs .excalidraw JSON files openable in Excalidraw. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", \"generate an Excalidraw file\", \"draw an ER diagram\", \"create a sequence diagram\", or \"make a class diagram\". Supports flowcharts, relationship diagrams, mind maps, architecture, DFD, swimlane, class, sequence, and ER diagrams. Can use icon libraries (AWS, GCP, etc.) when set up. Do NOT use for code architecture analysis (use the architecture skills), Mermaid diagram rendering (use mermaid-studio), or non-visual documentation (use docs-writer).",
       "category": "tooling",
       "path": "skills/(tooling)/excalidraw-studio/SKILL.md",
-      "content": "# Excalidraw Studio\n\nGenerate Excalidraw-format diagrams from natural language descriptions. Outputs `.excalidraw` JSON files that can be opened directly in Excalidraw (web, VS Code extension, or Obsidian plugin).\n\n## Workflow\n\n```\nUNDERSTAND → CHOOSE TYPE → EXTRACT → GENERATE → SAVE\n```\n\n### Step 1: Understand the Request\n\nAnalyze the user's description to determine:\n\n1. **Diagram type** — Use the decision matrix below\n2. **Key elements** — Entities, steps, concepts, actors\n3. **Relationships** — Flow direction, connections, hierarchy\n4. **Complexity** — Number of elements (target: under 20 for clarity)\n\n### Step 2: Choose the Diagram Type\n\n| User Intent                | Diagram Type         | Keywords                                      |\n| -------------------------- | -------------------- | --------------------------------------------- |\n| Process flow, steps        | **Flowchart**        | \"workflow\", \"process\", \"steps\"                |\n| Connections, dependencies  | **Relationship**     | \"relationship\", \"connections\", \"dependencies\" |\n| Concept hierarchy          | **Mind Map**         | \"mind map\", \"concepts\", \"breakdown\"           |\n| System design              | **Architecture**     | \"architecture\", \"system\", \"components\"        |\n| Data movement              | **Data Flow (DFD)**  | \"data flow\", \"data processing\"                |\n| Cross-functional processes | **Swimlane**         | \"business process\", \"swimlane\", \"actors\"      |\n| Object-oriented design     | **Class Diagram**    | \"class\", \"inheritance\", \"OOP\"                 |\n| Interaction sequences      | **Sequence Diagram** | \"sequence\", \"interaction\", \"messages\"         |\n| Database design            | **ER Diagram**       | \"database\", \"entity\", \"data model\"            |\n\n### Step 3: Extract Structured Information\n\nExtract the key components based on diagram type. For each type, identify:\n\n- **Nodes/entities** — What are the boxes/shapes?\n- **Connections** — What connects to what, and with what label?\n- **Hierarchy** — What contains what, what comes before what?\n- **Decision points** — Where does the flow branch?\n\nFor detailed extraction guidelines per diagram type, read `references/element-types.md`.\n\n### Step 4: Generate the Excalidraw JSON\n\n**CRITICAL: Read `references/excalidraw-schema.md` before generating your first diagram.** It contains the correct element format, text container model, and binding system.\n\nKey rules for generation:\n\n1. **Text inside shapes** — Use the `label` property, NOT inline `text`:\n\n   ```json\n   {\n     \"type\": \"rectangle\",\n     \"x\": 100,\n     \"y\": 100,\n     \"width\": 200,\n     \"height\": 80,\n     \"label\": { \"text\": \"My Step\" }\n   }\n   ```\n\n2. **Arrow labels** — Arrows support labels directly:\n\n   ```json\n   {\n     \"type\": \"arrow\",\n     \"x\": 100,\n     \"y\": 150,\n     \"points\": [\n       [0, 0],\n       [200, 0]\n     ],\n     \"label\": { \"text\": \"sends data\" }\n   }\n   ```\n\n3. **Arrow bindings** — Connect arrows to shapes so they move together:\n\n   ```json\n   {\n     \"type\": \"arrow\",\n     \"start\": { \"id\": \"shape-1\" },\n     \"end\": { \"id\": \"shape-2\" }\n   }\n   ```\n\n4. **Positioning** — Use grid-aligned coordinates (multiples of 20px when `gridSize: 20`). Leave 200-300px horizontal gap, 100-150px vertical gap between elements.\n\n5. **Unique IDs** — Every element must have a unique `id`. Use descriptive IDs like `\"step-1\"`, `\"decision-valid\"`, `\"arrow-1-to-2\"`.\n\n6. **Colors** — Use a consistent palette:\n\n   | Role | Color | Hex |\n   |------|-------|-----|\n   | Primary entities | Light blue | `#a5d8ff` |\n   | Process steps | Light green | `#b2f2bb` |\n   | Important/Central | Yellow | `#ffd43b` |\n   | Warnings/Errors | Light red | `#ffc9c9` |\n   | Secondary | Cyan | `#96f2d7` |\n   | Default stroke | Dark | `#1e1e1e` |\n\n### Step 5: Save and Present\n\n1. Save as `<descriptive-name>.excalidraw`\n2. Provide a summary:\n\n   ```\n   Created: user-workflow.excalidraw\n   Type: Flowchart\n   Elements: 7 shapes, 6 arrows, 1 title\n   Total: 14 elements\n\n   To view:\n   1. Visit https://excalidraw.com → Open → drag and drop the file\n   2. Or use the Excalidraw VS Code extension\n   3. Or open in Obsidian with the Excalidraw plugin\n   ```\n\n## Templates\n\nPre-built templates are available in `templates/` for quick starting points. Use these when the diagram type matches — they provide correct structure and styling:\n\n| Template         | File                                                   |\n| ---------------- | ------------------------------------------------------ |\n| Flowchart        | `templates/flowchart-template.excalidraw`              |\n| Relationship     | `templates/relationship-template.excalidraw`           |\n| Mind Map         | `templates/mindmap-template.excalidraw`                |\n| Data Flow (DFD)  | `templates/data-flow-diagram-template.excalidraw`      |\n| Swimlane         | `templates/business-flow-swimlane-template.excalidraw` |\n| Class Diagram    | `templates/class-diagram-template.excalidraw`          |\n| Sequence Diagram | `templates/sequence-diagram-template.excalidraw`       |\n| ER Diagram       | `templates/er-diagram-template.excalidraw`             |\n\nRead a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.\n\n## Icon Libraries\n\nFor professional architecture diagrams with service icons (AWS, GCP, Azure, etc.), icon libraries can be set up. Read `references/icon-libraries.md` when:\n\n- User requests an AWS/cloud architecture diagram\n- User mentions wanting specific service icons\n- You need to check if icon libraries are available\n\n## Best Practices\n\n### Element Count\n\n| Diagram Type          | Recommended | Maximum |\n| --------------------- | ----------- | ------- |\n| Flowchart steps       | 3-10        | 15      |\n| Relationship entities | 3-8         | 12      |\n| Mind map branches     | 4-6         | 8       |\n| Sub-topics per branch | 2-4         | 6       |\n\nIf the user's request exceeds maximum, suggest breaking into multiple diagrams:\n\n> \"Your request includes 15 components. For clarity, I recommend: (1) High-level architecture diagram with 6 main components, (2) Detailed sub-diagrams for each subsystem. Want me to start with the high-level view?\"\n\n### Layout\n\n- **Flow direction**: Left-to-right for processes, top-to-bottom for hierarchies\n- **Spacing**: 200-300px horizontal, 100-150px vertical between elements\n- **Grid alignment**: Position on multiples of 20px for clean alignment\n- **Margins**: Minimum 50px from canvas edge\n- **Text sizing**: 28-36px titles, 18-22px labels, 14-16px annotations\n- **Font**: Use `fontFamily: 5` (Excalifont) for hand-drawn consistency. Fallback to `1` (Virgil) if 5 is not supported.\n\n### Common Mistakes to Avoid\n\n- ❌ Putting `text` property directly on shapes instead of using `label: { text: \"...\" }`\n- ❌ Creating separate text elements for arrow labels instead of using `label` on the arrow\n- ❌ Floating arrows without bindings (won't move with shapes)\n- ❌ Overlapping elements (increase spacing)\n- ❌ Inconsistent color usage (define palette upfront)\n- ❌ Too many elements on one diagram (break into sub-diagrams)\n\n## Validation Checklist\n\nBefore delivering the diagram, verify:\n\n- [ ] All elements have unique IDs\n- [ ] Shapes with text use `label: { text: \"...\" }` format\n- [ ] Arrows use `start`/`end` bindings when connecting shapes\n- [ ] Coordinates prevent overlapping (check spacing)\n- [ ] Text is readable (font size 16+)\n- [ ] Colors follow consistent scheme\n- [ ] File is valid JSON\n- [ ] Element count is reasonable (<20 for clarity)\n\n## Troubleshooting\n\n| Issue                         | Solution                                                |\n| ----------------------------- | ------------------------------------------------------- |\n| Text not showing in shapes    | Use `label: { text: \"...\" }` not inline `text` property |\n| Arrows don't move with shapes | Add `start`/`end` bindings with element IDs             |\n| Elements overlap              | Increase spacing between coordinates                    |\n| Text doesn't fit              | Increase shape width or reduce font size                |\n| Too many elements             | Break into multiple diagrams                            |\n| Colors look inconsistent      | Define color palette upfront, apply consistently        |\n\n## Limitations\n\n- Complex curves are simplified to straight/basic curved lines\n- Hand-drawn roughness is set to default (1)\n- No embedded images in auto-generation (use icon libraries for service icons)\n- Maximum recommended: 20 elements per diagram for clarity\n- No automatic collision detection — use spacing guidelines",
+      "content": "# Excalidraw Studio\n\nGenerate Excalidraw-format diagrams from natural language descriptions. Outputs `.excalidraw` JSON files that can be opened directly in Excalidraw (web, VS Code extension, or Obsidian plugin).\n\n## Workflow\n\n```\nUNDERSTAND → CHOOSE TYPE → EXTRACT → GENERATE → SAVE\n```\n\n### Step 1: Understand the Request\n\nAnalyze the user's description to determine:\n\n1. **Diagram type** — Use the decision matrix below\n2. **Key elements** — Entities, steps, concepts, actors\n3. **Relationships** — Flow direction, connections, hierarchy\n4. **Complexity** — Number of elements (target: under 20 for clarity)\n\n### Step 2: Choose the Diagram Type and Visual Mode\n\n**Diagram type:**\n\n| User Intent                | Diagram Type         | Keywords                                      |\n| -------------------------- | -------------------- | --------------------------------------------- |\n| Process flow, steps        | **Flowchart**        | \"workflow\", \"process\", \"steps\"                |\n| Connections, dependencies  | **Relationship**     | \"relationship\", \"connections\", \"dependencies\" |\n| Concept hierarchy          | **Mind Map**         | \"mind map\", \"concepts\", \"breakdown\"           |\n| System design              | **Architecture**     | \"architecture\", \"system\", \"components\"        |\n| Data movement              | **Data Flow (DFD)**  | \"data flow\", \"data processing\"                |\n| Cross-functional processes | **Swimlane**         | \"business process\", \"swimlane\", \"actors\"      |\n| Object-oriented design     | **Class Diagram**    | \"class\", \"inheritance\", \"OOP\"                 |\n| Interaction sequences      | **Sequence Diagram** | \"sequence\", \"interaction\", \"messages\"         |\n| Database design            | **ER Diagram**       | \"database\", \"entity\", \"data model\"            |\n\n**Visual mode** — decide upfront and apply consistently to all elements:\n\n| Mode       | `roughness` | `fontFamily` | When to use                                          |\n| ---------- | ----------- | ------------ | ---------------------------------------------------- |\n| **Sketch** | `1`         | `5`          | Default — informal, approachable, Excalidraw-native  |\n| **Clean**  | `0`         | `2`          | Executive presentations, formal specs                |\n| **Mixed**  | zones: `0`, shapes: `1` | `5` | Architecture diagrams (structural zones + sketchy shapes) |\n\n### Step 3: Extract Structured Information\n\nExtract the key components based on diagram type. For each type, identify:\n\n- **Nodes/entities** — What are the boxes/shapes?\n- **Connections** — What connects to what, and with what label?\n- **Hierarchy** — What contains what, what comes before what?\n- **Decision points** — Where does the flow branch?\n\nFor detailed extraction guidelines per diagram type, read `references/element-types.md`.\n\n### Step 4: Generate the Excalidraw JSON\n\n**CRITICAL: Read `references/excalidraw-schema.md` before generating your first diagram.** It contains the correct element format, text container model, and binding system.\n\nKey rules for generation:\n\n1. **Text inside shapes** — Use `boundElements` on the shape and a separate text element with `containerId`. Never use a `label` shorthand:\n\n   ```json\n   [\n     {\n       \"id\": \"step-1\",\n       \"type\": \"rectangle\",\n       \"x\": 100, \"y\": 100, \"width\": 200, \"height\": 80,\n       \"boundElements\": [{ \"type\": \"text\", \"id\": \"text-step-1\" }]\n     },\n     {\n       \"id\": \"text-step-1\",\n       \"type\": \"text\",\n       \"x\": 130, \"y\": 128, \"width\": 140, \"height\": 24,\n       \"text\": \"My Step\", \"originalText\": \"My Step\",\n       \"fontSize\": 20, \"fontFamily\": 5,\n       \"textAlign\": \"center\", \"verticalAlign\": \"middle\",\n       \"containerId\": \"step-1\", \"lineHeight\": 1.25, \"roundness\": null\n     }\n   ]\n   ```\n\n2. **Arrow labels** — Also use `boundElements` + separate text element with `containerId`. Never use a `label` shorthand on arrows:\n\n   ```json\n   [\n     {\n       \"id\": \"arrow-1\",\n       \"type\": \"arrow\",\n       \"x\": 100, \"y\": 150,\n       \"points\": [[0, 0], [200, 0]],\n       \"boundElements\": [{ \"type\": \"text\", \"id\": \"text-arrow-1\" }]\n     },\n     {\n       \"id\": \"text-arrow-1\",\n       \"type\": \"text\",\n       \"x\": 160, \"y\": 132, \"width\": 80, \"height\": 18,\n       \"text\": \"sends data\", \"originalText\": \"sends data\",\n       \"fontSize\": 14, \"fontFamily\": 5,\n       \"textAlign\": \"center\", \"verticalAlign\": \"middle\",\n       \"containerId\": \"arrow-1\", \"lineHeight\": 1.25, \"roundness\": null\n     }\n   ]\n   ```\n\n3. **Arrow bindings** — Use `startBinding`/`endBinding` (not `start`/`end`). Connected shapes must list the arrow in their `boundElements`:\n\n   ```json\n   {\n     \"id\": \"shape-1\",\n     \"boundElements\": [\n       { \"type\": \"text\", \"id\": \"text-shape-1\" },\n       { \"type\": \"arrow\", \"id\": \"arrow-1\" }\n     ]\n   }\n   ```\n   ```json\n   {\n     \"id\": \"arrow-1\",\n     \"type\": \"arrow\",\n     \"startBinding\": { \"elementId\": \"shape-1\", \"focus\": 0, \"gap\": 1 },\n     \"endBinding\": { \"elementId\": \"shape-2\", \"focus\": 0, \"gap\": 1 }\n   }\n   ```\n\n4. **Element order for z-index** — Always declare shapes first, arrows second, text elements last. This guarantees text renders on top and is never obscured by arrows or other shapes.\n\n5. **Positioning** — Use grid-aligned coordinates (multiples of 20px when `gridSize: 20`). Leave 200-300px horizontal gap, 100-150px vertical gap between elements.\n\n6. **Unique IDs** — Every element must have a unique `id`. Use descriptive IDs like `\"step-1\"`, `\"decision-valid\"`, `\"arrow-1-to-2\"`, `\"text-step-1\"`.\n\n7. **Colors** — Use a consistent palette:\n\n   | Role | Color | Hex |\n   |------|-------|-----|\n   | Primary entities | Light blue | `#a5d8ff` |\n   | Process steps | Light green | `#b2f2bb` |\n   | Important/Central | Yellow | `#ffd43b` |\n   | Warnings/Errors | Light red | `#ffc9c9` |\n   | Secondary | Cyan | `#96f2d7` |\n   | Default stroke | Dark | `#1e1e1e` |\n\n### Step 5: Save and Present\n\n1. Save as `<descriptive-name>.excalidraw`\n2. Provide a summary:\n\n   ```\n   Created: user-workflow.excalidraw\n   Type: Flowchart\n   Elements: 7 shapes, 6 arrows, 1 title\n   Total: 14 elements\n\n   To view:\n   1. Visit https://excalidraw.com → Open → drag and drop the file\n   2. Or use the Excalidraw VS Code extension\n   3. Or open in Obsidian with the Excalidraw plugin\n   ```\n\n## Templates\n\nPre-built templates are available in `assets/` for quick starting points. Use these when the diagram type matches — they provide correct structure and styling:\n\n| Template         | File                                                   |\n| ---------------- | ------------------------------------------------------ |\n| Flowchart        | `assets/flowchart-template.excalidraw`              |\n| Relationship     | `assets/relationship-template.excalidraw`           |\n| Mind Map         | `assets/mindmap-template.excalidraw`                |\n| Data Flow (DFD)  | `assets/data-flow-diagram-template.excalidraw`      |\n| Swimlane         | `assets/business-flow-swimlane-template.excalidraw` |\n| Class Diagram    | `assets/class-diagram-template.excalidraw`          |\n| Sequence Diagram | `assets/sequence-diagram-template.excalidraw`       |\n| ER Diagram       | `assets/er-diagram-template.excalidraw`             |\n\nRead a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.\n\n## Icon Libraries\n\nFor professional architecture diagrams with service icons (AWS, GCP, Azure, etc.), icon libraries can be set up. Read `references/icon-libraries.md` when:\n\n- User requests an AWS/cloud architecture diagram\n- User mentions wanting specific service icons\n- You need to check if icon libraries are available\n\n## Best Practices\n\n### Element Count\n\n| Diagram Type          | Recommended | Maximum |\n| --------------------- | ----------- | ------- |\n| Flowchart steps       | 3-10        | 15      |\n| Relationship entities | 3-8         | 12      |\n| Mind map branches     | 4-6         | 8       |\n| Sub-topics per branch | 2-4         | 6       |\n\nIf the user's request exceeds maximum, suggest breaking into multiple diagrams:\n\n> \"Your request includes 15 components. For clarity, I recommend: (1) High-level architecture diagram with 6 main components, (2) Detailed sub-diagrams for each subsystem. Want me to start with the high-level view?\"\n\n### Layout\n\n- **Flow direction**: Left-to-right for processes, top-to-bottom for hierarchies\n- **Spacing**: 200-300px horizontal, 100-150px vertical between elements\n- **Grid alignment**: Position on multiples of 20px for clean alignment\n- **Margins**: Minimum 50px from canvas edge\n- **Text sizing**: 28-36px titles, 18-22px labels, 14-16px annotations\n- **Font**: Use `fontFamily: 5` (Excalifont) for hand-drawn consistency. Fallback to `1` (Virgil) if 5 is not supported.\n- **Background zones**: For architecture diagrams, add semi-transparent dashed zone rectangles (`opacity: 35`, `strokeStyle: \"dashed\"`, `roughness: 0`) as the first elements in the array to create visual grouping regions. See `references/excalidraw-schema.md` → Background Zones.\n- **Element order**: zones first → shapes → arrows → text elements (ensures correct z-index and text always renders on top)\n\n### Common Mistakes to Avoid\n\n- ❌ Using `label: { text: \"...\" }` shorthand on shapes or arrows — not supported by the Excalidraw parser\n- ❌ Putting `text` directly on shape elements without `containerId`\n- ❌ Using `start`/`end` for arrow bindings — use `startBinding`/`endBinding` with `elementId`/`focus`/`gap`\n- ❌ Forgetting to add arrows to their connected shapes' `boundElements` arrays\n- ❌ Omitting `originalText`, `lineHeight`, `autoResize`, or `backgroundColor: \"transparent\"` from text elements inside containers\n- ❌ Omitting required base properties (`angle`, `strokeStyle`, `opacity`, `groupIds`, `frameId`, `index`, `isDeleted`, `seed`, `version`, `versionNonce`, `updated`, `link`, `locked`) — elements will not render\n- ❌ Missing `\"files\": {}` at the top level of the JSON\n- ❌ Using `roundness: { \"type\": 3 }` on ellipses — ellipses must use `roundness: null`\n- ❌ Missing `lastCommittedPoint`, `startArrowhead`, `endArrowhead` on arrows\n- ❌ Declaring text elements before arrows — text renders underneath and gets obscured\n- ❌ Floating arrows without bindings (won't move with shapes)\n- ❌ Overlapping elements (increase spacing)\n- ❌ Inconsistent color usage (define palette upfront)\n- ❌ Too many elements on one diagram (break into sub-diagrams)\n\n## Validation Checklist\n\nBefore delivering the diagram, verify:\n\n- [ ] All elements have unique IDs\n- [ ] Every element has ALL required base properties: `angle`, `strokeStyle`, `opacity`, `groupIds`, `frameId`, `index`, `isDeleted`, `link`, `locked`, `seed`, `version`, `versionNonce`, `updated`\n- [ ] `index` values are assigned in order (`\"a0\"`, `\"a1\"`, …) with text elements getting higher values than shapes/arrows\n- [ ] Top-level JSON includes `\"files\": {}`\n- [ ] Shapes with text use `boundElements` + separate text element with `containerId`\n- [ ] Text elements inside containers have `containerId`, `originalText`, `lineHeight: 1.25`, `autoResize: true`, `roundness: null`, `backgroundColor: \"transparent\"`\n- [ ] Arrows use `startBinding`/`endBinding` (with `elementId`, `focus`, `gap`) when connecting shapes, plus `lastCommittedPoint: null`, `startArrowhead: null`, `endArrowhead: \"arrow\"`\n- [ ] Connected shapes list the arrow in their `boundElements` arrays\n- [ ] Element order: shapes → arrows → text elements (text always on top)\n- [ ] Ellipses use `roundness: null` (not `{ \"type\": 3 }`)\n- [ ] Coordinates prevent overlapping (check spacing)\n- [ ] Text is readable (font size 16+)\n- [ ] Colors follow consistent scheme\n- [ ] File is valid JSON\n- [ ] Element count is reasonable (<20 for clarity)\n\n## Troubleshooting\n\n| Issue                         | Solution                                                                                      |\n| ----------------------------- | --------------------------------------------------------------------------------------------- |\n| Text not showing in shapes    | Use `boundElements` + separate text element with `containerId`, `originalText`, `lineHeight`  |\n| Text hidden behind arrows     | Move text elements to end of `elements` array (after all arrows)                             |\n| Arrows don't move with shapes | Use `startBinding`/`endBinding` with `elementId`, `focus: 0`, `gap: 1`                       |\n| Shape not moving with arrows  | Add the arrow to the shape's `boundElements` array                                            |\n| Elements overlap              | Increase spacing between coordinates                                                          |\n| Text doesn't fit              | Increase shape width or reduce font size                                                      |\n| Too many elements             | Break into multiple diagrams                                                                  |\n| Colors look inconsistent      | Define color palette upfront, apply consistently                                              |\n\n## Limitations\n\n- Complex curves are simplified to straight/basic curved lines\n- Hand-drawn roughness is set to default (1)\n- No embedded images in auto-generation (use icon libraries for service icons)\n- Maximum recommended: 20 elements per diagram for clarity\n- No automatic collision detection — use spacing guidelines",
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
@@ -605,7 +605,7 @@
           "figma-mcp-config.md",
           "figma-tools-and-prompts.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -619,7 +619,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -637,7 +637,7 @@
           "design-principles.md",
           "stitch-integration.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-25"
       }
     },
     {
@@ -651,7 +651,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -665,7 +665,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -679,7 +679,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -695,7 +695,7 @@
         "referenceFiles": [
           "PRINCIPLES.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -716,7 +716,7 @@
           "strangler-fig-patterns.md",
           "testing-safety-nets.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -725,7 +725,7 @@
       "description": "Expert Mermaid diagram creation, validation, and rendering with dual-engine output (SVG/PNG/ASCII). Supports all 20+ diagram types including C4 architecture, AWS architecture-beta with service icons, flowcharts, sequence, ERD, state, class, mindmap, timeline, git graph, sankey, and more. Features code-to-diagram analysis, batch rendering, 15+ themes, and syntax validation. Use when users ask to create diagrams, visualize architecture, render mermaid files, generate ASCII diagrams, document system flows, model databases, draw AWS infrastructure, analyze code structure, or anything involving \"mermaid\", \"diagram\", \"flowchart\", \"architecture diagram\", \"sequence diagram\", \"ERD\", \"C4\", \"ASCII diagram\". Do NOT use for non-Mermaid image generation, data plotting with chart libraries, or general documentation writing.",
       "category": "tooling",
       "path": "skills/(tooling)/mermaid-studio/SKILL.md",
-      "content": "# Mermaid Studio\n\nExpert-level Mermaid diagram creation, validation, and multi-format rendering. Creates diagrams from descriptions or code analysis, validates syntax, and renders to SVG, PNG, or ASCII with professional theming.\n\n## Modes of Operation\n\nThis skill operates in three modes based on user intent:\n\n| Mode       | Trigger                                           | What happens               |\n| ---------- | ------------------------------------------------- | -------------------------- |\n| **Create** | \"draw a diagram of...\", \"visualize my...\"         | Generates .mmd code only   |\n| **Render** | \"render this mermaid\", \"convert to SVG/PNG/ASCII\" | Renders existing .mmd      |\n| **Full**   | \"create and render...\", ambiguous requests        | Create → Validate → Render |\n\nDefault to **Full** mode when intent is unclear.\n\n## Step 1: Understand the Request\n\nBefore writing any Mermaid code, determine:\n\n1. **What to diagram** — system, flow, schema, architecture, code structure?\n2. **Which diagram type** — use the Decision Matrix below\n3. **Output format** — code only, SVG, PNG, or ASCII?\n4. **Theme preference** — ask only if rendering; default to `default` theme\n\n### Diagram Type Decision Matrix\n\n| User describes...                              | Diagram Type  | Syntax keyword       |\n| ---------------------------------------------- | ------------- | -------------------- |\n| Process, algorithm, decision tree, workflow    | Flowchart     | `flowchart TD/LR`    |\n| API calls, message passing, request/response   | Sequence      | `sequenceDiagram`    |\n| Database schema, table relationships           | ERD           | `erDiagram`          |\n| OOP classes, domain model, interfaces          | Class         | `classDiagram`       |\n| State machine, lifecycle, transitions          | State         | `stateDiagram-v2`    |\n| High-level system overview (C4 Level 1)        | C4 Context    | `C4Context`          |\n| Applications, databases, services (C4 Level 2) | C4 Container  | `C4Container`        |\n| Internal components (C4 Level 3)               | C4 Component  | `C4Component`        |\n| Request flows with numbered steps              | C4 Dynamic    | `C4Dynamic`          |\n| Infrastructure, cloud deployment               | C4 Deployment | `C4Deployment`       |\n| Cloud services with icons (AWS/GCP/Azure)      | Architecture  | `architecture-beta`  |\n| Project timeline, scheduling                   | Gantt         | `gantt`              |\n| Proportional data, percentages                 | Pie           | `pie`                |\n| Brainstorming, hierarchical ideas              | Mindmap       | `mindmap`            |\n| Historical events, chronology                  | Timeline      | `timeline`           |\n| Branching strategy, git history                | Git Graph     | `gitGraph`           |\n| Flow quantities, resource distribution         | Sankey        | `sankey-beta`        |\n| X/Y data visualization                         | XY Chart      | `xychart-beta`       |\n| Priority matrix, strategic positioning         | Quadrant      | `quadrantChart`      |\n| Layout control, grid positioning               | Block         | `block-beta`         |\n| Network packets, protocol headers              | Packet        | `packet-beta`        |\n| Task boards, kanban workflow                   | Kanban        | `kanban`             |\n| User experience, satisfaction scoring          | User Journey  | `journey`            |\n| System requirements traceability               | Requirement   | `requirementDiagram` |\n\nIf the user's description doesn't clearly map to one type, suggest 2-3 options with a brief rationale for each, then let them choose.\n\n### When to Load References\n\nLoad reference files ONLY when needed for the specific diagram type:\n\n- **C4 diagrams** → Read `references/c4-architecture.md` BEFORE writing code\n- **AWS/Cloud architecture** → Read `references/aws-architecture.md` BEFORE writing code\n- **Code-to-diagram** → Read `references/code-to-diagram.md` BEFORE analyzing\n- **Theming/styling** → Read `references/themes.md` when user requests custom themes\n- **Syntax errors** → Read `references/troubleshooting.md` when validation fails\n- **Any diagram type details** → Read `references/diagram-types.md` for comprehensive syntax\n\n## Step 2: Create the Diagram\n\n### 2.1 — Write Mermaid Code\n\nFollow these principles in order of priority:\n\n1. **Correctness first** — valid syntax that renders without errors\n2. **Clarity** — meaningful labels, logical flow direction, clear relationships\n3. **Simplicity** — under 20 nodes per diagram; split complex systems into multiple\n4. **Consistency** — uniform naming (camelCase for IDs, descriptive labels in brackets)\n\n### 2.2 — Structure Rules\n\n```\n%% Always include a descriptive comment at the top\n%% Diagram: [Purpose] | Author: [auto] | Date: [auto]\n[diagramType]\n    [content]\n```\n\n**Naming conventions:**\n\n- Node IDs: camelCase, descriptive (`orderService`, not `s1`)\n- Labels: natural language in brackets (`[Order Service]`)\n- Relationships: action verbs (`\"Sends order to\"`, `\"Reads from\"`)\n\n**Layout best practices:**\n\n- `TD` (top-down) for hierarchical flows and processes\n- `LR` (left-right) for timelines and sequential processes\n- `RL` for right-to-left reading contexts\n- Use `subgraph` to group related nodes; name subgraphs meaningfully\n- Add `direction` inside subgraphs when needed for different flow\n\n### 2.3 — Quick Reference Examples\n\n**Flowchart:**\n\n```mermaid\nflowchart TD\n    Start([Start]) --> Input[/User Input/]\n    Input --> Validate{Valid?}\n    Validate -->|Yes| Process[Process Data]\n    Validate -->|No| Error[Show Error]\n    Error --> Input\n    Process --> Save[(Save to DB)]\n    Save --> End([End])\n```\n\n**Sequence:**\n\n```mermaid\nsequenceDiagram\n    participant Client\n    participant API\n    participant DB\n\n    Client->>+API: POST /orders\n    API->>+DB: INSERT order\n    DB-->>-API: order_id\n    API-->>-Client: 201 Created\n```\n\n**ERD:**\n\n```mermaid\nerDiagram\n    USER ||--o{ ORDER : places\n    ORDER ||--|{ LINE_ITEM : contains\n    PRODUCT ||--o{ LINE_ITEM : includes\n\n    USER {\n        uuid id PK\n        string email UK\n        string name\n    }\n```\n\n**C4 Context:**\n\n```mermaid\nC4Context\n    title System Context - E-Commerce Platform\n\n    Person(customer, \"Customer\", \"Places orders online\")\n    System(platform, \"E-Commerce Platform\", \"Handles orders and payments\")\n    System_Ext(payment, \"Payment Gateway\", \"Processes transactions\")\n    System_Ext(email, \"Email Service\", \"Sends notifications\")\n\n    Rel(customer, platform, \"Uses\", \"HTTPS\")\n    Rel(platform, payment, \"Processes payments\", \"API\")\n    Rel(platform, email, \"Sends emails\", \"SMTP\")\n```\n\n**Architecture (AWS):**\n\n```mermaid\narchitecture-beta\n    group vpc(cloud)[VPC]\n\n    service api(server)[API Gateway] in vpc\n    service lambda(server)[Lambda] in vpc\n    service db(database)[DynamoDB] in vpc\n    service s3(disk)[S3 Bucket]\n\n    api:R --> L:lambda\n    lambda:R --> L:db\n    lambda:B --> T:s3\n```\n\nFor comprehensive syntax of ALL diagram types, read `references/diagram-types.md`.\n\n## Step 3: Validate\n\nBefore rendering, ALWAYS validate the Mermaid syntax:\n\n```bash\nnode $SKILL_DIR/scripts/validate.mjs <file.mmd>\n```\n\nIf validation fails:\n\n1. Read the error message carefully\n2. Consult `references/troubleshooting.md` for common fixes\n3. Fix the syntax and re-validate\n4. Maximum 3 fix attempts before asking the user for clarification\n\n## Step 4: Render\n\n### 4.1 — Setup (First Run Only)\n\n```bash\nbash $SKILL_DIR/scripts/setup.sh\n```\n\nThis auto-installs both rendering engines. Run once per environment.\n\n### 4.2 — Single Diagram Rendering\n\n**SVG (default — best quality):**\n\n```bash\nnode $SKILL_DIR/scripts/render.mjs \\\n  --input diagram.mmd \\\n  --output diagram.svg \\\n  --format svg \\\n  --theme default\n```\n\n**PNG (for documents and presentations):**\n\n```bash\nnode $SKILL_DIR/scripts/render.mjs \\\n  --input diagram.mmd \\\n  --output diagram.png \\\n  --format png \\\n  --theme default \\\n  --width 1200\n```\n\n**ASCII (for terminals and READMEs):**\n\n```bash\nnode $SKILL_DIR/scripts/render-ascii.mjs \\\n  --input diagram.mmd\n```\n\n### 4.3 — Batch Rendering\n\nFor multiple diagrams at once:\n\n```bash\nnode $SKILL_DIR/scripts/batch.mjs \\\n  --input-dir ./diagrams \\\n  --output-dir ./rendered \\\n  --format svg \\\n  --theme default \\\n  --workers 4\n```\n\n### 4.4 — Available Themes\n\n**beautiful-mermaid themes (15):**\n`tokyo-night` | `tokyo-night-storm` | `tokyo-night-light` | `dracula` | `nord` | `nord-light` | `catppuccin-mocha` | `catppuccin-latte` | `github-dark` | `github-light` | `solarized-dark` | `solarized-light` | `one-dark` | `zinc-dark` | `zinc-light`\n\n**mermaid-cli native themes (5):**\n`default` | `forest` | `dark` | `neutral` | `base`\n\n**Custom theme (via mermaid-cli):**\n\n```bash\nnode $SKILL_DIR/scripts/render.mjs \\\n  --input diagram.mmd \\\n  --output diagram.svg \\\n  --format svg \\\n  --theme base \\\n  --config '{\"theme\":\"base\",\"themeVariables\":{\"primaryColor\":\"#ff6b6b\",\"secondaryColor\":\"#4ecdc4\"}}'\n```\n\nFor the full theme catalog with previews, read `references/themes.md`.\n\n### 4.5 — Render Engine Selection\n\nThe render script uses dual-engine fallback:\n\n1. **Primary: @mermaid-js/mermaid-cli** — most stable, supports ALL diagram types, PNG/SVG/PDF output, custom configs\n2. **Fallback: beautiful-mermaid** — better visual themes, SVG + ASCII output, supports flowchart/sequence/state/class/ER\n\nIf the primary engine fails, the script automatically tries the fallback. ASCII rendering always uses beautiful-mermaid exclusively.\n\n## Step 5: Code-to-Diagram (When Requested)\n\nWhen the user asks to visualize existing code or architecture:\n\n1. Read `references/code-to-diagram.md` for the analysis methodology\n2. Analyze the codebase to identify the right diagram type:\n   - Module dependencies → Flowchart or Class diagram\n   - API routes and handlers → Sequence diagram\n   - Database models/schemas → ERD\n   - Service architecture → C4 Container or Architecture diagram\n   - State machines in code → State diagram\n3. Generate the .mmd file\n4. Validate and render as usual\n\n## Common Patterns\n\n### Error Handling Flow\n\n```mermaid\nflowchart TD\n    Request[Incoming Request] --> Validate{Valid?}\n    Validate -->|No| ValidationError[400 Bad Request]\n    Validate -->|Yes| Process[Process Request]\n    Process --> DBResult{DB Success?}\n    DBResult -->|No| DBError[500 Internal Error]\n    DBResult -->|Yes| Success[200 OK]\n    ValidationError & DBError --> Logger[Log Error]\n```\n\n### Microservice Communication\n\n```mermaid\nsequenceDiagram\n    participant GW as API Gateway\n    participant Auth as Auth Service\n    participant Order as Order Service\n    participant Queue as Message Queue\n    participant Notif as Notification Service\n\n    GW->>Auth: Verify token\n    Auth-->>GW: Token valid\n    GW->>Order: Create order\n    Order->>Queue: Publish OrderCreated\n    Queue-->>Notif: Consume event\n    Notif-->>Notif: Send email\n```\n\n### Authentication State Machine\n\n```mermaid\nstateDiagram-v2\n    [*] --> Anonymous\n    Anonymous --> Authenticating : Login attempt\n    Authenticating --> Authenticated : Credentials valid\n    Authenticating --> Failed : Credentials invalid\n    Failed --> Authenticating : Retry\n    Failed --> Locked : Max attempts reached\n    Authenticated --> Anonymous : Logout\n    Authenticated --> TokenRefresh : Token expiring\n    TokenRefresh --> Authenticated : Refresh success\n    TokenRefresh --> Anonymous : Refresh failed\n    Locked --> Anonymous : Timeout elapsed\n```\n\n## Troubleshooting Quick Reference\n\n| Symptom              | Likely Cause    | Fix                                                 |\n| -------------------- | --------------- | --------------------------------------------------- |\n| Diagram won't render | Syntax error    | Run validate.mjs, check brackets/quotes             |\n| Labels cut off       | Text too long   | Shorten labels or use line breaks `<br/>`           |\n| Layout looks wrong   | Wrong direction | Try different TD/LR/BT/RL                           |\n| Nodes overlap        | Too many nodes  | Split into subgraphs or multiple diagrams           |\n| `mmdc` not found     | Not installed   | Run `setup.sh`                                      |\n| Theme not applied    | Wrong engine    | beautiful-mermaid themes only work with that engine |\n\nFor comprehensive troubleshooting, read `references/troubleshooting.md`.\n\n## Output Conventions\n\n- Save .mmd source files alongside rendered outputs\n- Naming: `{purpose}-{type}.mmd` (e.g., `auth-flow-sequence.mmd`)\n- For batch: maintain input filename, change extension\n- Always provide both the .mmd source and rendered file to the user",
+      "content": "# Mermaid Studio\n\nExpert-level Mermaid diagram creation, validation, and multi-format rendering. Creates diagrams from descriptions or code analysis, validates syntax, and renders to SVG, PNG, or ASCII with professional theming.\n\n## Golden Rules — Elegant Diagrams by Default\n\nEvery diagram MUST follow these principles. They are not optional — they define the difference between a mediocre diagram and a gold-standard one.\n\n### Rule 1: Always Use an Init Directive for Professional Styling\n\n**NEVER** create a diagram without an `%%{init}` directive or frontmatter config. The default Mermaid theme produces harsh black lines and generic colors. Always apply a curated palette.\n\n**For general diagrams (flowchart, sequence, state, class, ERD):**\n\n```\n%%{init: {'theme': 'base', 'themeVariables': {\n  'primaryColor': '#4f46e5', 'primaryTextColor': '#ffffff',\n  'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',\n  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',\n  'background': '#ffffff', 'mainBkg': '#f8fafc',\n  'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',\n  'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',\n  'edgeLabelBackground': '#ffffff', 'textColor': '#334155'\n}}}%%\n```\n\n**⚠️ Font Warning:** Do NOT set `fontFamily` in theme variables. The Mermaid default font (`trebuchet ms, verdana, arial, sans-serif`) works everywhere. Setting `system-ui`, `Segoe UI`, or `-apple-system` will render as Times New Roman in headless Chromium (used by `mmdc`).\n\n**For C4 diagrams — see the dedicated C4 styling section below.**\n\n**For architecture-beta diagrams — see the dedicated AWS/Architecture section below.**\n\n### Rule 2: Soft Lines, Never Harsh Black\n\nThe single biggest visual improvement is using `lineColor: '#94a3b8'` (slate-400) instead of the default black. This creates a modern, breathable diagram. For dark themes, use `lineColor: '#64748b'` (slate-500).\n\n### Rule 3: Limit Density — Breathe\n\n- Maximum 15 nodes per diagram (not 20 — fewer is more elegant)\n- Use `subgraph` or boundaries to create whitespace and visual grouping\n- Prefer LR (left-right) for process flows — it reads more naturally\n- Use invisible links (`A ~~~ B`) to add spacing when the layout is cramped\n\n### Rule 4: Meaningful Labels and Consistent Style\n\n- Node IDs: camelCase (`orderService`, not `s1` or `os`)\n- Labels: short, clear natural language (`[Order Service]`)\n- Arrows: action verbs with protocol info (`\"Sends order via gRPC\"`)\n- Descriptions: one-line, role-focused (`\"Handles order lifecycle\"`)\n\n### Rule 5: Color Harmony Over Color Variety\n\nUse max 3-4 colors per diagram. Map colors to meaning:\n\n- **Blue tones** (#4f46e5, #3b82f6) → primary systems, internal services\n- **Green tones** (#10b981, #059669) → success states, data stores\n- **Amber tones** (#f59e0b, #d97706) → external systems, warnings\n- **Slate tones** (#64748b, #94a3b8) → lines, borders, secondary elements\n- **Red tones** (#ef4444) → errors ONLY, never as decoration\n\n## Modes of Operation\n\nThis skill operates in three modes based on user intent:\n\n| Mode       | Trigger                                           | What happens               |\n| ---------- | ------------------------------------------------- | -------------------------- |\n| **Create** | \"draw a diagram of...\", \"visualize my...\"         | Generates .mmd code only   |\n| **Render** | \"render this mermaid\", \"convert to SVG/PNG/ASCII\" | Renders existing .mmd      |\n| **Full**   | \"create and render...\", ambiguous requests        | Create → Validate → Render |\n\nDefault to **Full** mode when intent is unclear.\n\n## Step 1: Understand the Request\n\nBefore writing any Mermaid code, determine:\n\n1. **What to diagram** — system, flow, schema, architecture, code structure?\n2. **Which diagram type** — use the Decision Matrix below\n3. **Output format** — code only, SVG, PNG, or ASCII?\n4. **Theme preference** — ask only if rendering; default to `base` theme with curated palette\n\n### Diagram Type Decision Matrix\n\n| User describes...                              | Diagram Type  | Syntax keyword       |\n| ---------------------------------------------- | ------------- | -------------------- |\n| Process, algorithm, decision tree, workflow    | Flowchart     | `flowchart TD/LR`    |\n| API calls, message passing, request/response   | Sequence      | `sequenceDiagram`    |\n| Database schema, table relationships           | ERD           | `erDiagram`          |\n| OOP classes, domain model, interfaces          | Class         | `classDiagram`       |\n| State machine, lifecycle, transitions          | State         | `stateDiagram-v2`    |\n| High-level system overview (C4 Level 1)        | C4 Context    | `C4Context`          |\n| Applications, databases, services (C4 Level 2) | C4 Container  | `C4Container`        |\n| Internal components (C4 Level 3)               | C4 Component  | `C4Component`        |\n| Request flows with numbered steps              | C4 Dynamic    | `C4Dynamic`          |\n| Infrastructure, cloud deployment               | C4 Deployment | `C4Deployment`       |\n| Cloud services with icons (AWS/GCP/Azure)      | Architecture  | `architecture-beta`  |\n| Project timeline, scheduling                   | Gantt         | `gantt`              |\n| Proportional data, percentages                 | Pie           | `pie`                |\n| Brainstorming, hierarchical ideas              | Mindmap       | `mindmap`            |\n| Historical events, chronology                  | Timeline      | `timeline`           |\n| Branching strategy, git history                | Git Graph     | `gitGraph`           |\n| Flow quantities, resource distribution         | Sankey        | `sankey-beta`        |\n| X/Y data visualization                         | XY Chart      | `xychart-beta`       |\n| Priority matrix, strategic positioning         | Quadrant      | `quadrantChart`      |\n| Layout control, grid positioning               | Block         | `block-beta`         |\n| Network packets, protocol headers              | Packet        | `packet-beta`        |\n| Task boards, kanban workflow                   | Kanban        | `kanban`             |\n| User experience, satisfaction scoring          | User Journey  | `journey`            |\n| System requirements traceability               | Requirement   | `requirementDiagram` |\n\nIf the user's description doesn't clearly map to one type, suggest 2-3 options with a brief rationale for each, then let them choose.\n\n### When to Load References\n\nLoad reference files ONLY when needed for the specific diagram type:\n\n- **C4 diagrams** → Read `references/c4-architecture.md` BEFORE writing code\n- **AWS/Cloud architecture** → Read `references/aws-architecture.md` BEFORE writing code\n- **Code-to-diagram** → Read `references/code-to-diagram.md` BEFORE analyzing\n- **Theming/styling** → Read `references/themes.md` when user requests custom themes\n- **Syntax errors** → Read `references/troubleshooting.md` when validation fails\n- **Any diagram type details** → Read `references/diagram-types.md` for comprehensive syntax\n\n## Step 2: Create the Diagram\n\n### 2.1 — Write Mermaid Code\n\nFollow these principles in order of priority:\n\n1. **Elegance first** — every diagram must look professional with init directives and curated colors\n2. **Correctness** — valid syntax that renders without errors\n3. **Clarity** — meaningful labels, logical flow direction, clear relationships\n4. **Simplicity** — under 15 nodes per diagram; split complex systems into multiple\n5. **Consistency** — uniform naming (camelCase for IDs, descriptive labels in brackets)\n\n### 2.2 — Structure Rules\n\n```\n%% Diagram: [Purpose] | Author: [auto] | Date: [auto]\n%%{init: {'theme': 'base', 'themeVariables': { ... }}}%%\n[diagramType]\n    [content]\n```\n\n**CRITICAL:** The `%%{init}` directive MUST go on the very first non-comment line, BEFORE the diagram type declaration. Alternatively, use YAML frontmatter at the absolute start of the file.\n\n**Naming conventions:**\n\n- Node IDs: camelCase, descriptive (`orderService`, not `s1`)\n- Labels: natural language in brackets (`[Order Service]`)\n- Relationships: action verbs (`\"Sends order to\"`, `\"Reads from\"`)\n\n**Layout best practices:**\n\n- `TD` (top-down) for hierarchical flows and processes\n- `LR` (left-right) for timelines, pipelines, and sequential processes\n- `RL` for right-to-left reading contexts\n- Use `subgraph` to group related nodes; name subgraphs meaningfully\n- Add `direction` inside subgraphs when needed for different flow\n\n### 2.3 — Quick Reference Examples\n\n**Flowchart (with professional styling):**\n\n```mermaid\n%%{init: {'theme': 'base', 'themeVariables': {\n  'primaryColor': '#4f46e5', 'primaryTextColor': '#fff',\n  'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',\n  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',\n  'background': '#ffffff', 'mainBkg': '#f8fafc',\n  'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',\n  'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',\n  'edgeLabelBackground': '#ffffff'\n}}}%%\nflowchart TD\n    Start([Start]) --> Input[/User Input/]\n    Input --> Validate{Valid?}\n    Validate -->|Yes| Process[Process Data]\n    Validate -->|No| Error[Show Error]\n    Error --> Input\n    Process --> Save[(Save to DB)]\n    Save --> End([End])\n```\n\nFor sequence diagram and ERD styling examples, read `references/themes.md`.\n\n**C4 Context (with MANDATORY elegant styling):**\n\n```mermaid\nC4Context\n    title System Context — E-Commerce Platform\n\n    Person(customer, \"Customer\", \"Places orders online\")\n    System(platform, \"E-Commerce Platform\", \"Handles orders and payments\")\n    System_Ext(payment, \"Payment Gateway\", \"Processes transactions\")\n    System_Ext(email, \"Email Service\", \"Sends notifications\")\n\n    Rel(customer, platform, \"Uses\", \"HTTPS\")\n    Rel(platform, payment, \"Processes payments\", \"API\")\n    Rel(platform, email, \"Sends emails\", \"SMTP\")\n\n    UpdateRelStyle(customer, platform, $textColor=\"#475569\", $lineColor=\"#94a3b8\")\n    UpdateRelStyle(platform, payment, $textColor=\"#475569\", $lineColor=\"#94a3b8\")\n    UpdateRelStyle(platform, email, $textColor=\"#475569\", $lineColor=\"#94a3b8\")\n\n    UpdateLayoutConfig($c4ShapeInRow=\"3\", $c4BoundaryInRow=\"1\")\n```\n\n**Architecture (AWS with Iconify icons):**\n\n```mermaid\narchitecture-beta\n    group vpc(logos:aws-vpc)[VPC]\n\n    service api(logos:aws-api-gateway)[API Gateway] in vpc\n    service lambda(logos:aws-lambda)[Lambda] in vpc\n    service db(logos:aws-dynamodb)[DynamoDB] in vpc\n    service s3(logos:aws-s3)[S3 Bucket]\n\n    api:R --> L:lambda\n    lambda:R --> L:db\n    lambda:B --> T:s3\n```\n\n**IMPORTANT:** Architecture-beta diagrams with `logos:*` icons require icon pack registration. When rendering with the render script, use the `--icons logos` flag. If rendering in a markdown viewer that doesn't support icon packs, use the built-in icons (`cloud`, `database`, `disk`, `server`, `internet`) as fallback. Read `references/aws-architecture.md` for the complete icon catalog and rendering instructions.\n\nFor comprehensive syntax of ALL diagram types, read `references/diagram-types.md`.\n\n## C4 Diagrams — Mandatory Styling Guide\n\nC4 diagrams have **fixed element styling** (blue boxes for systems, gray for persons, etc.), but their **relationship lines default to harsh black** which creates visual noise. You MUST apply these styling rules:\n\n### The C4 Styling Pattern\n\nEvery C4 diagram MUST include these directives at the end:\n\n```\n    %% === MANDATORY STYLING ===\n    %% Apply soft line colors to ALL relationships\n    UpdateRelStyle(fromAlias, toAlias, $textColor=\"#475569\", $lineColor=\"#94a3b8\")\n    %% Repeat for each Rel() in the diagram\n\n    %% Optimize layout spacing\n    UpdateLayoutConfig($c4ShapeInRow=\"3\", $c4BoundaryInRow=\"1\")\n```\n\n### C4 Color Values Reference\n\n| Purpose           | Color     | Hex       | Notes                                    |\n| ----------------- | --------- | --------- | ---------------------------------------- |\n| Soft line color   | Slate-400 | `#94a3b8` | Replaces harsh default black             |\n| Line text color   | Slate-600 | `#475569` | Readable but not dominant                |\n| Accent line       | Blue-400  | `#60a5fa` | For highlighted or primary relationships |\n| Warning line      | Amber-500 | `#f59e0b` | For external/risky connections           |\n| Custom element bg | Emerald   | `#10b981` | For data stores or success highlights    |\n| Custom element bg | Indigo    | `#4f46e5` | For primary system emphasis              |\n\n### C4 Layout Tips\n\n**CRITICAL — Maximum 6 `Rel()` per diagram.** More than 6 relationships causes Dagre to route arrows through nodes, creating unreadable spaghetti. If your system needs more connections, split it into multiple focused diagrams.\n\n- Use `$c4ShapeInRow=\"3\"` for most diagrams (prevents horizontal crowding)\n- Use `$c4ShapeInRow=\"2\"` for diagrams with long labels\n- Use `$c4BoundaryInRow=\"1\"` always (stacks boundaries vertically for clarity)\n- Apply `$offsetY=\"-10\"` to `UpdateRelStyle` when labels overlap with elements\n- Prefer tree-shaped topologies (1 in, 1-2 out per node) over mesh topologies\n- Declare elements in flow order — the order of `Container()` declarations affects layout\n- Use directional `Rel_D`, `Rel_R`, etc. only as a last resort when auto-layout creates overlapping\n\nFor comprehensive C4 syntax, examples, and patterns, read `references/c4-architecture.md`.\n\n## Step 3: Validate\n\nBefore rendering, ALWAYS validate the Mermaid syntax:\n\n```bash\nnode $SKILL_DIR/scripts/validate.mjs <file.mmd>\n```\n\nIf validation fails:\n\n1. Read the error message carefully\n2. Consult `references/troubleshooting.md` for common fixes\n3. Fix the syntax and re-validate\n4. Maximum 3 fix attempts before asking the user for clarification\n\n## Step 4: Render\n\n### 4.1 — Setup (First Run Only)\n\n```bash\nbash $SKILL_DIR/scripts/setup.sh\n```\n\nThis auto-installs both rendering engines and icon pack dependencies. Run once per environment.\n\n### 4.2 — Single Diagram Rendering\n\n```bash\n# SVG (default — best quality)\nnode $SKILL_DIR/scripts/render.mjs -i diagram.mmd -o diagram.svg\n\n# PNG (for documents/presentations)\nnode $SKILL_DIR/scripts/render.mjs -i diagram.mmd -o diagram.png --width 1200\n\n# ASCII (for terminals/READMEs)\nnode $SKILL_DIR/scripts/render-ascii.mjs -i diagram.mmd\n\n# With icon packs (architecture-beta with AWS/tech icons)\nnode $SKILL_DIR/scripts/render.mjs -i diagram.mmd -o diagram.svg --icons logos,fa\n```\n\nThe `--icons` flag registers Iconify packs before rendering. Packs: `logos` (AWS/tech), `fa` (Font Awesome). Use `logos` for AWS.\n\n### 4.3 — Batch Rendering\n\nFor multiple diagrams at once:\n\n```bash\nnode $SKILL_DIR/scripts/batch.mjs \\\n  --input-dir ./diagrams \\\n  --output-dir ./rendered \\\n  --format svg \\\n  --theme default \\\n  --workers 4\n```\n\n### 4.4 — Available Themes\n\n**beautiful-mermaid (15):** `tokyo-night` | `tokyo-night-storm` | `tokyo-night-light` | `dracula` | `nord` | `nord-light` | `catppuccin-mocha` | `catppuccin-latte` | `github-dark` | `github-light` | `solarized-dark` | `solarized-light` | `one-dark` | `zinc-dark` | `zinc-light`\n\n**mermaid-cli native (5):** `default` | `forest` | `dark` | `neutral` | `base`\n\nCustom theme: `--theme base --config '{\"theme\":\"base\",\"themeVariables\":{\"primaryColor\":\"#4f46e5\",\"lineColor\":\"#94a3b8\"}}'`\n\nFor the full theme catalog, read `references/themes.md`. The render script auto-selects the best engine (mmdc primary, beautiful-mermaid fallback, Puppeteer for icon packs).\n\n## Step 5: Code-to-Diagram (When Requested)\n\nWhen the user asks to visualize existing code or architecture:\n\n1. Read `references/code-to-diagram.md` for the analysis methodology\n2. Analyze the codebase to identify the right diagram type:\n   - Module dependencies → Flowchart or Class diagram\n   - API routes and handlers → Sequence diagram\n   - Database models/schemas → ERD\n   - Service architecture → C4 Container or Architecture diagram\n   - State machines in code → State diagram\n3. Generate the .mmd file **with proper init directives** (Golden Rule 1)\n4. Validate and render as usual\n\n## Troubleshooting Quick Reference\n\n| Symptom               | Likely Cause       | Fix                                                    |\n| --------------------- | ------------------ | ------------------------------------------------------ |\n| Diagram won't render  | Syntax error       | Run validate.mjs, check brackets/quotes                |\n| Labels cut off        | Text too long      | Shorten labels or use line breaks `<br/>`              |\n| Layout looks wrong    | Wrong direction    | Try different TD/LR/BT/RL                              |\n| Nodes overlap         | Too many nodes     | Split into subgraphs or multiple diagrams              |\n| Lines too dark/thick  | No init directive  | Add `%%{init}` with `lineColor: '#94a3b8'`             |\n| C4 lines overlapping  | No styling applied | Add `UpdateRelStyle` with offsets to each Rel          |\n| AWS icons not showing | No icon pack       | Use `--icons logos` flag or fallback to built-in icons |\n| `mmdc` not found      | Not installed      | Run `setup.sh`                                         |\n| Theme not applied     | Wrong engine       | beautiful-mermaid themes only work with that engine    |\n\nFor comprehensive troubleshooting, read `references/troubleshooting.md`.\n\n## Output Conventions\n\n- Save .mmd source files alongside rendered outputs\n- Naming: `{purpose}-{type}.mmd` (e.g., `auth-flow-sequence.mmd`)\n- For batch: maintain input filename, change extension\n- Always provide both the .mmd source and rendered file to the user",
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
@@ -737,7 +737,7 @@
           "themes.md",
           "troubleshooting.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-28"
       }
     },
     {
@@ -758,7 +758,7 @@
           "state-isolation.md",
           "testing-patterns.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-25"
       }
     },
     {
@@ -776,7 +776,7 @@
           "deployment-patterns.md",
           "netlify-toml.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -790,7 +790,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -804,7 +804,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -818,7 +818,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -832,7 +832,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -846,7 +846,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -860,7 +860,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -878,7 +878,7 @@
           "core-web-vitals.md",
           "image-optimization.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -892,7 +892,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -906,7 +906,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -920,7 +920,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -940,7 +940,7 @@
           "project-structure.md",
           "storage-patterns.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-25"
       }
     },
     {
@@ -965,7 +965,7 @@
           "service-types.md",
           "troubleshooting-basics.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -990,7 +990,7 @@
           "python-fastapi-web-server-security.md",
           "python-flask-web-server-security.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1006,7 +1006,7 @@
         "referenceFiles": [
           "neo4j-import.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1023,7 +1023,7 @@
           "prompt-template.md",
           "security-controls-and-assets.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1037,7 +1037,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1051,7 +1051,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1077,7 +1077,7 @@
           "performance.md",
           "theme-development.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1109,7 +1109,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1123,7 +1123,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1145,7 +1145,7 @@
           "red-team-adversarial.md",
           "socratic-questioning.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1190,7 +1190,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1206,7 +1206,7 @@
         "referenceFiles": [
           "guideline.md"
         ],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     },
     {
@@ -1220,7 +1220,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-02-27"
+        "lastModified": "2026-02-26"
       }
     }
   ],

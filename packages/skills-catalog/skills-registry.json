@@ -595,25 +595,25 @@
       "path": "(tooling)/excalidraw-studio",
       "files": [
         "SKILL.md",
+        "assets/business-flow-swimlane-template.excalidraw",
+        "assets/class-diagram-template.excalidraw",
+        "assets/data-flow-diagram-template.excalidraw",
+        "assets/er-diagram-template.excalidraw",
+        "assets/flowchart-template.excalidraw",
+        "assets/mindmap-template.excalidraw",
+        "assets/relationship-template.excalidraw",
+        "assets/sequence-diagram-template.excalidraw",
         "references/element-types.md",
         "references/excalidraw-schema.md",
         "references/icon-libraries.md",
         "scripts/README.md",
         "scripts/add-arrow.py",
         "scripts/add-icon-to-diagram.py",
-        "scripts/split-excalidraw-library.py",
-        "templates/business-flow-swimlane-template.excalidraw",
-        "templates/class-diagram-template.excalidraw",
-        "templates/data-flow-diagram-template.excalidraw",
-        "templates/er-diagram-template.excalidraw",
-        "templates/flowchart-template.excalidraw",
-        "templates/mindmap-template.excalidraw",
-        "templates/relationship-template.excalidraw",
-        "templates/sequence-diagram-template.excalidraw"
+        "scripts/split-excalidraw-library.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "1.0.0",
-      "contentHash": "35f4f1b5b3a8fa3f13aaf8840d20d94e6323c301a90482c8348aa12b0a2e56a7"
+      "version": "1.0.1",
+      "contentHash": "2246025ff4fc3d69a733514d5a4e6fff580cb664d89746ce2666300aa0c8013a"
     },
     {
       "name": "figma",
@@ -749,8 +749,8 @@
         "scripts/validate.mjs"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "1.0.0",
-      "contentHash": "f3b64a568592e3cc25482c65330508a0a5d552cbdae1f1f6c142991a8543f6d9"
+      "version": "1.0.1",
+      "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
     },
     {
       "name": "nestjs-modular-monolith",
