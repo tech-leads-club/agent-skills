@@ -1,13 +1,14 @@
 /** Cache TTL for registry data (15 minutes). */
 export const CACHE_TTL_MS = 15 * 60 * 1000
 
-/** Base URL for skill files on jsDelivr CDN. */
-export const CDN_BASE =
-  'https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills/'
+/** Same CDN as CLI: jsDelivr serving the npm package. @latest so MCP always sees the same cache as CLI after publish. */
+const CDN_NPM_BASE = 'https://cdn.jsdelivr.net/npm/@tech-leads-club/skills-catalog@latest'
+
+/** Base URL for skill files (registry and skills from same npm package on jsDelivr). */
+export const CDN_BASE = `${CDN_NPM_BASE}/skills/`
 
 /** URL of the skills registry JSON. */
-export const REGISTRY_URL =
-  'https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills-registry.json'
+export const REGISTRY_URL = `${CDN_NPM_BASE}/skills-registry.json`
 
 /** Main skill instruction file name. */
 export const SKILL_MAIN_FILE = 'SKILL.md'
