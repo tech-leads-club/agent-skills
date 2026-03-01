@@ -1,3 +1,13 @@
+## 0.11.1 (2026-03-01)
+
+### 🩹 Fixes
+
+- **skills:** keep tlc-spec-driven description within 1024 chars ([7dc925c0d](https://github.com/tech-leads-club/agent-skills/commit/7dc925c0d))
+
+### ❤️ Thank You
+
+- Gabriel Goes @gabrielgoes
+
 ## 0.11.0 (2026-02-28)
 
 ### 🚀 Features
