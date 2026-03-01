@@ -24,7 +24,15 @@ If working on a web application which includes a frontend and a backend, make su
 
 If you are asked to make a web app which will include both a frontend and backend, but the frontend framework is not specified, also check out `javascript-general-web-frontend-security.md`. It is important that you understand how to secure both the frontend and backend.
 
-If no relevant information is available in the skill's references directory, think a little bit about what you know about the language, the framework, and all well known security best practices for it. If you are unsure you can try to search online for documentation on security best practices.
+If no relevant information is available in the skill's references directory, use the following fallback strategy in order:
+
+1. **Context7 MCP** — If the `resolve-library-id` and `get-library-docs` tools are available (Context7 MCP), use them to fetch up-to-date official documentation for the language and framework. Call `resolve-library-id` with the framework/library name or search terms (e.g. `spring-security`, `java spring`) and then `get-library-docs` with `topic: security` to retrieve relevant security guidance.
+
+2. **Generic search tools** — If a web search tool is available in the current context (e.g. a Brave Search, Tavily, or similar MCP tool), use it to search for security best practices for the identified language and framework. Prefer authoritative sources such as the official framework documentation, OWASP, or CVE databases.
+
+3. **Training knowledge** — If none of the above tools are available, reason from what you know about the language, framework, and well-known security best practices (OWASP, CWE Top 25, etc.).
+
+Regardless of which fallback was used, always disclose to the user which source of information was used for the analysis.
 
 From there it can operate in a few ways.
 
@@ -38,7 +46,11 @@ From there it can operate in a few ways.
 
 - If the language/framework is unclear, inspect the repo to determine it and list your evidence.
 - If matching guidance exists in `references/`, load only the relevant files and follow their instructions.
-- If no matching guidance exists, consider if you know any well known security best practices for the chosen language and or frameworks, but if asked to generate a report, let the user know that concrete guidance is not available (you can still generate the report or detect for sure critical vulnerabilities)
+- If no matching guidance exists, apply the fallback strategy in order:
+  1. Try **Context7 MCP** (`resolve-library-id` → `get-library-docs` with `topic: security`) if available.
+  2. Try any available **web search tool** (Brave Search MCP, Tavily MCP, `fetch_webpage`, etc.) if available.
+  3. Fall back to **training knowledge** about the language/framework and OWASP/CWE best practices.
+- If asked to generate a report and no references were found (even after exhausting the fallback strategy), clearly state which source of information was used and note that dedicated guidance is not available in the skill's `references/` directory. You can still generate the report and detect critical vulnerabilities.
 
 # Overrides
 
