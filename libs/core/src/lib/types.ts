@@ -37,12 +37,16 @@ export const AGENT_TYPES = [
 
 export type AgentType = (typeof AGENT_TYPES)[number]
 
-export interface AgentConfig {
-  name: string
+export interface AgentMetadata {
+  name: AgentType
   displayName: string
   description: string
+  company: string
   skillsDir: string
   globalSkillsDir: string
+}
+
+export interface AgentConfig extends AgentMetadata {
   detectInstalled: () => boolean
 }
 

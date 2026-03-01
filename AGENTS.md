@@ -99,7 +99,7 @@ nx g @tech-leads-club/skill-plugin:skill {name} --category={cat}  # Create new s
 
 ### Agent Configuration
 
-Canonical agent config is in `packages/cli/src/services/agents.ts`. Each of the 19 supported agents has `skillsDir` (project-local) and `globalSkillsDir` (home directory) paths. Agents are tiered: Tier 1 (Cursor, Claude Code, Copilot, Windsurf, Cline), Tier 2, Tier 3.
+Canonical agent metadata is in `libs/core/src/lib/agents.ts`. CLI detection logic remains in `packages/cli/src/services/agents.ts`. Each of the 19 supported agents has `skillsDir` (project-local) and `globalSkillsDir` (home directory) paths. Agents are tiered: Tier 1 (Cursor, Claude Code, Copilot, Windsurf, Cline), Tier 2, Tier 3.
 
 ## Code Conventions
 

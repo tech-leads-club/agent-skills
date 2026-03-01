@@ -1,0 +1,95 @@
+name: VS Code Extension Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/vscode-extension/**'
+      - '.github/release/vscode-extension/**'
+      - '.github/workflows/vscode-extension-release.yml'
+      - '.github/scripts/ensure-release-secrets.mjs'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+concurrency:
+  group: vscode-extension-release
+  cancel-in-progress: false
+
+jobs:
+  release-package:
+    name: Package extension release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Run semantic release (package)
+        run: npm run release:vscode:package || NX_NO_CLOUD=true npm run release:vscode:package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect VSIX artifact
+        run: |
+          mkdir -p artifacts
+          VSIX_FILE=$(ls packages/vscode-extension/*.vsix | head -n 1)
+          if [ -z "$VSIX_FILE" ]; then
+            echo "No VSIX artifact was produced"
+            exit 1
+          fi
+          cp "$VSIX_FILE" artifacts/vscode-extension.vsix
+
+      - name: Upload packaged VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: artifacts/vscode-extension.vsix
+          retention-days: 30
+
+  release-publish:
+    name: Publish extension to marketplaces
+    needs: release-package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Download packaged VSIX
+        uses: actions/download-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: artifacts
+
+      - name: Validate release secrets
+        run: node .github/scripts/ensure-release-secrets.mjs
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Run semantic release (publish)
+        run: npm run release:vscode:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

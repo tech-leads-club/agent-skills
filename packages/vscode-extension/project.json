@@ -1,0 +1,70 @@
+{
+  "name": "vscode-extension",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/vscode-extension/src",
+  "projectType": "application",
+  "tags": ["scope:vscode-extension"],
+  "targets": {
+    "build:webview": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist/webview"],
+      "inputs": ["production", "^production"],
+      "options": {
+        "command": "npx vite build",
+        "cwd": "packages/vscode-extension"
+      }
+    },
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "dependsOn": ["build:webview"],
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "inputs": ["production", "^production"],
+      "options": {
+        "deleteOutputPath": false,
+        "platform": "node",
+        "outputPath": "packages/vscode-extension/dist",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "packages/vscode-extension/src/extension.ts",
+        "tsConfig": "packages/vscode-extension/tsconfig.lib.json",
+        "assets": ["packages/vscode-extension/resources"],
+        "external": ["vscode"],
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": { ".js": ".js" },
+          "platform": "node"
+        }
+      },
+      "configurations": {
+        "development": { "minify": false },
+        "production": { "minify": true }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/vscode-extension/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^production"],
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "command": "eslint . --ignore-pattern .vscode-test",
+        "cwd": "packages/vscode-extension"
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "npx @vscode/vsce package --no-dependencies",
+        "cwd": "packages/vscode-extension"
+      }
+    }
+  }
+}

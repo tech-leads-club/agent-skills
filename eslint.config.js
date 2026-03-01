@@ -53,4 +53,10 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['packages/vscode-extension/package.json', '**/packages/vscode-extension/package.json'],
+    rules: {
+      '@nx/dependency-checks': 'off',
+    },
+  },
 ])
