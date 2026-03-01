@@ -1176,7 +1176,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Project and feature planning with 4 adaptive phases - Specify, Design, Tasks, Execute. Auto-sizes depth based on complexity. Creates atomic tasks with verification criteria, atomic git commits, requirement traceability, and persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification and atomic commits, (5) Quick ad-hoc tasks (bug fixes, config changes), (6) Tracking decisions/blockers/deferred ideas across sessions, (7) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"quick fix\", \"quick task\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use the architecture skills) or technical design documents (use create-technical-design-doc).",
+      "description": "Project and feature planning with 4 adaptive phases - Specify, Design, Tasks, Execute. Auto-sizes depth by complexity. Creates atomic tasks with verification criteria, atomic git commits, requirement traceability, and persistent memory across sessions. Stack-agnostic. Use when (1) Starting new projects (initialize vision, goals, roadmap), (2) Working with existing codebases (map stack, architecture, conventions), (3) Planning features (requirements, design, task breakdown), (4) Implementing with verification and atomic commits, (5) Quick ad-hoc tasks (bug fixes, config changes), (6) Tracking decisions/blockers/deferred ideas across sessions, (7) Pausing/resuming work. Triggers on \"initialize project\", \"map codebase\", \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"quick fix\", \"quick task\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use architecture skills) or technical design docs (use create-technical-design-doc).",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1201,7 +1201,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "2.0.0",
-      "contentHash": "2df0fe9bc82866211c573b8d62a077498473d9c18ff44365d5c9a7a444d83f3c"
+      "contentHash": "79d0e1b750dfc70820ac0152d9ca78927c398f669397e9cdb8bb812ceca2fbc6"
     },
     {
       "name": "vercel-deploy",
