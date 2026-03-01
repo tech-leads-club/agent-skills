@@ -167,6 +167,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
       - name: Security Scan
         id: security-scan
         uses: ./.github/actions/security-scan
