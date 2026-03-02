@@ -1,5 +1,12 @@
 import chalk from 'chalk'
-import { fetchRegistry, forceDownloadSkill, getUpdatableSkills, needsUpdate } from '../services/registry'
+import {
+  fetchRegistry,
+  forceDownloadSkill,
+  getDeprecatedMap,
+  getRemoteSkills,
+  getUpdatableSkills,
+  needsUpdate,
+} from '../services/registry'
 
 interface UpdateCliOptions {
   skill?: string
@@ -61,5 +68,40 @@ export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
         `✅ ${updated} updated, ${upToDate.length} already up to date${failed > 0 ? chalk.red(`, ${failed} failed`) : ''}`,
       ),
     )
+
+    // Check for deprecated/orphaned skills
+    const deprecatedMap = await getDeprecatedMap()
+    const remoteSkills = await getRemoteSkills()
+    const registryNames = new Set(remoteSkills.map((s) => s.name))
+
+    const deprecated = installedNames.filter((name) => deprecatedMap.has(name) || !registryNames.has(name))
+
+    if (deprecated.length > 0) {
+      console.log('')
+      console.log(chalk.yellow(`⚠  ${deprecated.length} deprecated skill${deprecated.length > 1 ? 's' : ''} detected:`))
+
+      const renderers: Record<
+        'withEntry' | 'noEntry',
+        (name: string, entry?: { message: string; alternatives?: string[] }) => void
+      > = {
+        withEntry: (name, entry) => {
+          console.log(chalk.yellow(`  › ${name} — ${entry!.message}`))
+          if (entry!.alternatives?.length) {
+            console.log(chalk.dim(`    Try: agent-skills install --skill ${entry!.alternatives.join(', ')}`))
+          }
+        },
+        noEntry: (name) => {
+          console.log(chalk.yellow(`  › ${name} — no longer available in the registry`))
+        },
+      }
+
+      deprecated.forEach((name) => {
+        const entry = deprecatedMap.get(name)
+        const rendererKey = entry ? 'withEntry' : 'noEntry'
+        renderers[rendererKey](name, entry)
+      })
+
+      console.log(chalk.dim(`  Run: agent-skills remove --skill <name> to clean up`))
+    }
   }
 }

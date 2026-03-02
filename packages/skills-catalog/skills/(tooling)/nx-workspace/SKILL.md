@@ -1,6 +1,6 @@
 ---
 name: nx-workspace
-description: Configure, explore, and optimize Nx monorepo workspaces. Use when setting up Nx, exploring workspace structure, configuring project boundaries, running tasks, analyzing affected projects, optimizing build caching, or implementing CI/CD with affected commands. Keywords - nx, monorepo, workspace, projects, targets, affected, build, lint, test.
+description: Configure, explore, and optimize Nx monorepo workspaces. Use when setting up Nx, exploring workspace structure, configuring project boundaries, analyzing affected projects, optimizing build caching, or implementing CI/CD with affected commands. Keywords — nx, monorepo, workspace, projects, targets, affected. Do NOT use for running tasks (use nx-run-tasks) or code generation with generators (use nx-generate).
 ---
 
 # Nx Workspace Management
@@ -74,12 +74,12 @@ workspace/
 
 ### Library Types
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| **feature** | Business logic, smart components | `feature-auth` |
-| **ui** | Presentational components | `ui-buttons` |
-| **data-access** | API calls, state management | `data-access-users` |
-| **util** | Pure functions, helpers | `util-formatting` |
+| Type            | Purpose                          | Example             |
+| --------------- | -------------------------------- | ------------------- |
+| **feature**     | Business logic, smart components | `feature-auth`      |
+| **ui**          | Presentational components        | `ui-buttons`        |
+| **data-access** | API calls, state management      | `data-access-users` |
+| **util**        | Pure functions, helpers          | `util-formatting`   |
 
 ## Detailed Resources
 

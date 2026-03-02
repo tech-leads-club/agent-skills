@@ -11,6 +11,10 @@
     "name": "Skill & Agent Creation",
     "description": "Skills for creating new skills and subagents"
   },
+  "(decision-making)": {
+    "name": "Decision Making",
+    "description": "Skills for critical thinking, structured dissent, and decision quality"
+  },
   "(design)": {
     "name": "Design",
     "description": "Skills for UI/UX design and design systems"
@@ -18,6 +22,10 @@
   "(development)": {
     "name": "Development",
     "description": "Skills for software development workflows"
+  },
+  "(learning)": {
+    "name": "Learning & Growth",
+    "description": "Skills for deliberate learning, skill development, and knowledge retention during AI-assisted work"
   },
   "(monitoring)": {
     "name": "Monitoring",

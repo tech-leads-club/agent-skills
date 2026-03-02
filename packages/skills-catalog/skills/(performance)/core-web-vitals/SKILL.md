@@ -1,6 +1,6 @@
 ---
 name: core-web-vitals
-description: Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to "improve Core Web Vitals", "fix LCP", "reduce CLS", "optimize INP", "page experience optimization", or "fix layout shifts".
+description: Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to "improve Core Web Vitals", "fix LCP", "reduce CLS", "optimize INP", "page experience optimization", or "fix layout shifts". Focuses specifically on the three Core Web Vitals metrics. Do NOT use for general web performance (use perf-web-optimization), Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).
 license: MIT
 metadata:
   author: web-quality-skills

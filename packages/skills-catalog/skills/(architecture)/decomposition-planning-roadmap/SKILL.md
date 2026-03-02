@@ -1,6 +1,6 @@
 ---
 name: decomposition-planning-roadmap
-description: Creates structured decomposition plans and roadmaps for migrating monolithic applications. Use when planning decomposition, creating migration roadmaps, prioritizing decomposition work, tracking decomposition progress, or when the user asks about decomposition planning, migration strategy, or architectural roadmap.
+description: Creates step-by-step decomposition plans and migration roadmaps for breaking apart monolithic applications. Use when asking "what order should I extract services?", "plan my migration", "create a decomposition roadmap", "prioritize what to split", "monolith to microservices strategy", or tracking decomposition progress. Do NOT use for domain analysis (use domain-analysis) or component sizing (use component-identification-sizing).
 ---
 
 # Decomposition Planning and Roadmap

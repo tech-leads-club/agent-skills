@@ -1,6 +1,6 @@
 ---
 name: perf-lighthouse
-description: "Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget."
+description: 'Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, and set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget. Do NOT use for fixing specific performance issues (use perf-web-optimization or core-web-vitals) or Astro-specific optimization (use perf-astro).'
 ---
 
 # Lighthouse Audits
@@ -48,9 +48,7 @@ Create `budget.json`:
       { "resourceType": "stylesheet", "budget": 50 },
       { "resourceType": "total", "budget": 500 }
     ],
-    "resourceCounts": [
-      { "resourceType": "third-party", "budget": 5 }
-    ],
+    "resourceCounts": [{ "resourceType": "third-party", "budget": 5 }],
     "timings": [
       { "metric": "interactive", "budget": 3000 },
       { "metric": "first-contentful-paint", "budget": 1500 },
@@ -69,11 +67,11 @@ lighthouse https://example.com --budget-path=./budget.json
 ## Node API
 
 ```javascript
-import lighthouse from 'lighthouse';
-import * as chromeLauncher from 'chrome-launcher';
+import lighthouse from 'lighthouse'
+import * as chromeLauncher from 'chrome-launcher'
 
 async function runAudit(url) {
-  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] })
 
   const result = await lighthouse(url, {
     port: chrome.port,
@@ -82,17 +80,17 @@ async function runAudit(url) {
     throttling: {
       cpuSlowdownMultiplier: 4,
     },
-  });
+  })
 
-  await chrome.kill();
+  await chrome.kill()
 
-  const { performance } = result.lhr.categories;
-  const { 'largest-contentful-paint': lcp } = result.lhr.audits;
+  const { performance } = result.lhr.categories
+  const { 'largest-contentful-paint': lcp } = result.lhr.audits
 
   return {
     score: Math.round(performance.score * 100),
     lcp: lcp.numericValue,
-  };
+  }
 }
 ```
 
@@ -164,7 +162,7 @@ module.exports = {
       target: 'temporary-public-storage', // or 'lhci' for self-hosted
     },
   },
-};
+}
 ```
 
 Run:
@@ -176,16 +174,16 @@ lhci autorun
 ## Parse JSON Report
 
 ```javascript
-import fs from 'fs';
+import fs from 'fs'
 
-const report = JSON.parse(fs.readFileSync('./report.json'));
+const report = JSON.parse(fs.readFileSync('./report.json'))
 
 // Overall scores (0-1, multiply by 100 for percentage)
 const scores = {
   performance: report.categories.performance.score,
   accessibility: report.categories.accessibility.score,
   seo: report.categories.seo.score,
-};
+}
 
 // Core Web Vitals
 const vitals = {
@@ -193,12 +191,12 @@ const vitals = {
   cls: report.audits['cumulative-layout-shift'].numericValue,
   fcp: report.audits['first-contentful-paint'].numericValue,
   tbt: report.audits['total-blocking-time'].numericValue,
-};
+}
 
 // Failed audits
 const failed = Object.values(report.audits)
-  .filter(a => a.score !== null && a.score < 0.9)
-  .map(a => ({ id: a.id, score: a.score, title: a.title }));
+  .filter((a) => a.score !== null && a.score < 0.9)
+  .map((a) => ({ id: a.id, score: a.score, title: a.title }))
 ```
 
 ## Compare Builds
@@ -217,25 +215,25 @@ node compare-reports.js baseline.json pr.json
 Simple comparison script:
 
 ```javascript
-const baseline = JSON.parse(fs.readFileSync(process.argv[2]));
-const pr = JSON.parse(fs.readFileSync(process.argv[3]));
+const baseline = JSON.parse(fs.readFileSync(process.argv[2]))
+const pr = JSON.parse(fs.readFileSync(process.argv[3]))
 
-const metrics = ['largest-contentful-paint', 'cumulative-layout-shift', 'total-blocking-time'];
+const metrics = ['largest-contentful-paint', 'cumulative-layout-shift', 'total-blocking-time']
 
-metrics.forEach(metric => {
-  const base = baseline.audits[metric].numericValue;
-  const current = pr.audits[metric].numericValue;
-  const diff = ((current - base) / base * 100).toFixed(1);
-  const emoji = current <= base ? '✅' : '❌';
-  console.log(`${emoji} ${metric}: ${diff}% (${base.toFixed(0)} → ${current.toFixed(0)})`);
-});
+metrics.forEach((metric) => {
+  const base = baseline.audits[metric].numericValue
+  const current = pr.audits[metric].numericValue
+  const diff = (((current - base) / base) * 100).toFixed(1)
+  const emoji = current <= base ? '✅' : '❌'
+  console.log(`${emoji} ${metric}: ${diff}% (${base.toFixed(0)} → ${current.toFixed(0)})`)
+})
 ```
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue               | Solution                                              |
+| ------------------- | ----------------------------------------------------- |
 | Inconsistent scores | Run multiple times (`--number-of-runs=3`), use median |
-| Chrome not found | Set `CHROME_PATH` env var |
-| Timeouts | Increase with `--max-wait-for-load=60000` |
-| Auth required | Use `--extra-headers` or puppeteer script |
+| Chrome not found    | Set `CHROME_PATH` env var                             |
+| Timeouts            | Increase with `--max-wait-for-load=60000`             |
+| Auth required       | Use `--extra-headers` or puppeteer script             |

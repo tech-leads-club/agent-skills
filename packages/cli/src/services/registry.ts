@@ -4,7 +4,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import packageJson from 'package-json'
 
-import type { CategoryInfo, SkillInfo } from '../types'
+import type { CategoryInfo, DeprecatedEntry, SkillInfo } from '../types'
 import {
   CACHE_BASE_DIR,
   CACHE_NAMESPACE,
@@ -46,6 +46,7 @@ export interface SkillsRegistry {
   baseUrl: string
   categories: Record<string, CategoryMetadata>
   skills: SkillMetadata[]
+  deprecated?: DeprecatedEntry[]
 }
 
 interface CachedRegistry {
@@ -328,6 +329,16 @@ export async function getRemoteCategories(): Promise<CategoryInfo[]> {
 export async function getSkillMetadata(skillName: string): Promise<SkillMetadata | null> {
   const registry = await fetchRegistry()
   return registry?.skills.find((s) => s.name === skillName) ?? null
+}
+
+export async function getDeprecatedSkills(): Promise<DeprecatedEntry[]> {
+  const registry = await fetchRegistry()
+  return registry?.deprecated ?? []
+}
+
+export async function getDeprecatedMap(): Promise<Map<string, DeprecatedEntry>> {
+  const deprecated = await getDeprecatedSkills()
+  return new Map(deprecated.map((d) => [d.name, d]))
 }
 
 export async function ensureSkillDownloaded(skillName: string): Promise<string | null> {

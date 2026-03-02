@@ -1,6 +1,51 @@
 # AGENTS.md
 
-This file provides guidance to AI Coding Agents when working with code in this repository.
+Guidance for AI Coding Agents when working with code in this repository.
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately — don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Verification Before Done
+
+- Never mark a task complete without proving it works
+- Run the full test suite before considering work done
+- Verify your changes against the existing behavior
+- Ask yourself: "Would a staff engineer approve this?"
+
+### 4. Demand Elegance (Balanced)
+
+- For nontrivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes — don't over-engineer
+- Challenge your own work before presenting it
+
+### 5. Autonomous Bug Fixing
+
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Run tests to identify the root cause
+- Zero context switching required from the user
+- Go fix failing tests without being told how
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Minimal code impact.
+- **No Laziness**: Find root causes. No temporary workarounds. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+
+---
 
 ## Repository
 
@@ -13,7 +58,8 @@ This file provides guidance to AI Coding Agents when working with code in this r
 npm ci && npm run build
 
 # Development
-npm run start:dev              # Run CLI interactively (tsx, no build needed)
+npm run start:dev:cli          # Run CLI interactively (tsx, no build needed)
+npm run start:dev:mcp          # Build MCP and open Inspector
 SKILLS_CDN_REF=main npm run dev -- install  # Test CLI against local registry
 
 # Build & Test
@@ -74,6 +120,16 @@ skills/(category)/{skill-name}/
 ```
 
 Always use the Nx generator (`nx g @tech-leads-club/skill-plugin:skill`) to create skills. Keep `SKILL.md` under 500 lines; offload reference material to `references/`.
+
+### Skill Quality Standards
+
+**When creating a new skill or modifying an existing one, you MUST use the `skill-architect` skill** to ensure it follows best practices. If the `skill-architect` skill is not installed, follow these mandatory description rules:
+
+- **Structure**: `[What it does] + [Use when ...] + [Do NOT use for ...]`
+- **"Use when"** is mandatory — include actual phrases users would say
+- **"Do NOT use for"** is mandatory — add negative triggers to prevent overlap with similar skills
+- **Under 1024 characters** — no XML angle brackets (`< >`)
+- **User perspective** — write trigger phrases as things the user would actually say, not internal jargon
 
 ## Release
 

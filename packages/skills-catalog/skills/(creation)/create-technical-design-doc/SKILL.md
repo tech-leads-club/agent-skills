@@ -1,5 +1,5 @@
 ---
-description: Creates comprehensive Technical Design Documents (TDD) following industry standards with mandatory sections, optional sections, and interactive gathering of missing information.
+description: Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to "write a design doc", "create a TDD", "technical spec", "architecture document", "RFC", "design proposal", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).
 name: technical-design-doc-creator
 ---
 

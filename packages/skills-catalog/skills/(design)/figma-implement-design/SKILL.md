@@ -1,6 +1,6 @@
 ---
 name: figma-implement-design
-description: Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Trigger when the user provides Figma URLs or node IDs, or asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection.
+description: Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Use when the user provides Figma URLs or node IDs and asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection. Do NOT use for general Figma data fetching, variable exploration, or MCP troubleshooting (use figma instead).
 metadata:
   author: github.com/openai/skills
   version: '1.0.0'

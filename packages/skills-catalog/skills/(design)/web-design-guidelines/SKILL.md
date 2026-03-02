@@ -1,9 +1,9 @@
 ---
 name: web-design-guidelines
-description: Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices".
+description: Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices". Focuses on visual design and interaction patterns. Do NOT use for performance audits (use core-web-vitals), SEO (use seo), or comprehensive site audits (use web-quality-audit).
 metadata:
   author: vercel
-  version: "1.0.0"
+  version: '1.0.0'
   argument-hint: <file-or-pattern>
 ---
 
@@ -27,6 +27,7 @@ All rules and output format instructions are in:
 ```
 
 The guidelines cover:
+
 - Accessibility (ARIA, semantic HTML, keyboard navigation)
 - Focus states and keyboard interaction
 - Forms (autocomplete, validation, labels)
@@ -45,6 +46,7 @@ The guidelines cover:
 ## Usage
 
 When a user provides a file or pattern argument:
+
 1. Read the guidelines from `references/guideline.md`
 2. Read the specified files
 3. Apply all rules from the guidelines
@@ -55,6 +57,7 @@ If no files specified, ask the user which files to review.
 ## Output Format
 
 Follow the format in the guidelines:
+
 - Group findings by file
 - Use `file:line` format (VS Code clickable)
 - Terse, high signal-to-noise

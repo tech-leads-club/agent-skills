@@ -1,6 +1,6 @@
 ---
 name: component-common-domain-detection
-description: Identifies duplicate domain functionality across components and suggests consolidation opportunities. Use when finding common domain logic, detecting duplicate functionality, analyzing shared classes, planning component consolidation, or when the user asks about common components, duplicate code, or domain consolidation.
+description: Finds duplicate business logic spread across multiple components and suggests consolidation. Use when asking "where is this logic duplicated?", "find common code between services", "what can be consolidated?", "detect shared domain logic", or analyzing component overlap before refactoring. Do NOT use for code-level duplication detection (use linters) or dependency analysis (use coupling-analysis).
 ---
 
 # Common Domain Component Detection

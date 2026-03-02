@@ -1,12 +1,16 @@
-# Phase 1: Specify
+# Specify
 
-**Goal**: Capture WHAT to build with testable requirements.
+**Goal**: Capture WHAT to build with testable, traceable requirements.
+
+If the feature has ambiguous gray areas (multiple valid approaches for user-facing behavior), the agent will automatically trigger the [discuss gray areas](discuss.md) process within this phase. For clear, well-defined features, it goes straight to the next phase.
 
 ## Process
 
 ### 1. Clarify Requirements
 
-Ask the user (2-3 questions to start):
+You are a thinking partner, not an interviewer. Start open — let the user dump their mental model. Follow the energy: whatever they emphasize, dig into that.
+
+Ask conversationally (not as a checklist):
 
 - "What problem are you solving?"
 - "Who is the user and what's their pain?"
@@ -16,6 +20,10 @@ If needed:
 
 - "What are the constraints (time, tech, resources)?"
 - "What is explicitly out of scope?"
+
+**Challenge vagueness.** Never accept fuzzy answers. "Good" means what? "Users" means who? "Simple" means how? Make the abstract concrete: "Walk me through using this." "What does that actually look like?"
+
+**Know when to stop.** When you understand what they're building, why, who it's for, and what done looks like — offer to proceed.
 
 ### 2. Capture User Stories with Priorities
 
@@ -47,8 +55,12 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 
 ## Out of Scope
 
-- [Explicitly NOT building: X]
-- [Explicitly NOT building: Y]
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature     | Reason         |
+| ----------- | -------------- |
+| [Feature X] | [Why excluded] |
+| [Feature Y] | [Why excluded] |
 
 ---
 
@@ -105,6 +117,24 @@ Use **WHEN/THEN/SHALL** format - it's precise and testable:
 
 ---
 
+## Requirement Traceability
+
+Each requirement gets a unique ID for tracking across design, tasks, and validation.
+
+| Requirement ID | Story       | Phase  | Status  |
+| -------------- | ----------- | ------ | ------- |
+| [FEAT]-01      | P1: [Story] | Design | Pending |
+| [FEAT]-02      | P1: [Story] | Design | Pending |
+| [FEAT]-03      | P2: [Story] | -      | Pending |
+
+**ID format:** `[CATEGORY]-[NUMBER]` (e.g., `AUTH-01`, `CART-03`, `NOTIF-02`)
+
+**Status values:** Pending → In Design → In Tasks → Implementing → Verified
+
+**Coverage:** X total, Y mapped to tasks, Z unmapped ⚠️
+
+---
+
 ## Success Criteria
 
 How we know the feature is successful:
@@ -117,7 +147,9 @@ How we know the feature is successful:
 
 ## Tips
 
-- **P1 = Vertical Slice** - A complete, demo-able feature, not just backend or frontend
-- **WHEN/THEN is code** - If you can't write it as a test, rewrite it
-- **Edge cases matter** - What breaks? What's empty? What's huge?
-- **Confirm before Design** - User must approve spec before moving on
+- **P1 = Vertical Slice** — A complete, demo-able feature, not just backend or frontend
+- **WHEN/THEN is code** — If you can't write it as a test, rewrite it
+- **Requirement IDs are mandatory** — Every story maps to trackable IDs
+- **Edge cases matter** — What breaks? What's empty? What's huge?
+- **Out of Scope prevents creep** — If it's not here, it doesn't get built
+- **Confirm before Discuss** — User must approve spec before moving to discuss phase

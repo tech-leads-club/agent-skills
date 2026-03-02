@@ -1,3 +1,107 @@
+## 0.11.1 (2026-03-01)
+
+### 🩹 Fixes
+
+- **skills:** keep tlc-spec-driven description within 1024 chars ([7dc925c0d](https://github.com/tech-leads-club/agent-skills/commit/7dc925c0d))
+
+### ❤️ Thank You
+
+- Gabriel Goes @gabrielgoes
+
+## 0.11.0 (2026-02-28)
+
+### 🚀 Features
+
+- update skills-registry ([2579819ed](https://github.com/tech-leads-club/agent-skills/commit/2579819ed))
+- enhance mermaid-studio renderer with icon pack support and improved Puppeteer integration ([bd82c4350](https://github.com/tech-leads-club/agent-skills/commit/bd82c4350))
+- add puppeteer installation for icon-enabled rendering in mermaid-studio setup ([7292cfc3e](https://github.com/tech-leads-club/agent-skills/commit/7292cfc3e))
+- add multiple new Excalidraw templates ([e71480f36](https://github.com/tech-leads-club/agent-skills/commit/e71480f36))
+
+### 📖 Documentation
+
+- update diagram-types.md with new default theme settings ([3e2cd864e](https://github.com/tech-leads-club/agent-skills/commit/3e2cd864e))
+- enhance themes.md with new AWS and Indigo-Emerald themes, update C4 diagram styling guidelines, and emphasize soft line usage ([e2bafec7e](https://github.com/tech-leads-club/agent-skills/commit/e2bafec7e))
+- expand troubleshooting.md with detailed fixes for common rendering issues in mermaid-studio ([5f11a7492](https://github.com/tech-leads-club/agent-skills/commit/5f11a7492))
+- enhance c4-architecture.md with mandatory rules for diagram creation, styling guidelines, and layout optimization tips ([7fb28e29e](https://github.com/tech-leads-club/agent-skills/commit/7fb28e29e))
+- enhance aws-architecture.md with critical limitations, golden rules for diagram complexity, and detailed icon options for improved clarity ([9354dae37](https://github.com/tech-leads-club/agent-skills/commit/9354dae37))
+- enhance SKILL.md with golden rules for elegant Mermaid diagrams and update version to 1.0.1 ([d2e06ac95](https://github.com/tech-leads-club/agent-skills/commit/d2e06ac95))
+- update SKILL.md to enhance diagram type selection with visual mode details ([c15c49d4b](https://github.com/tech-leads-club/agent-skills/commit/c15c49d4b))
+- update element-types.md to clarify text binding and arrow binding requirements for Excalidraw elements ([473015c66](https://github.com/tech-leads-club/agent-skills/commit/473015c66))
+- update excalidraw-schema.md to clarify required properties for elements ([a2fb50577](https://github.com/tech-leads-club/agent-skills/commit/a2fb50577))
+- update icon-libraries.md to use angle brackets for URLs ([6a34ad03c](https://github.com/tech-leads-club/agent-skills/commit/6a34ad03c))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 0.10.0 (2026-02-27)
+
+### 🚀 Features
+
+- rename excalidraw-diagram-generator to excalidraw-studio, update description and category, and add new references and author information ([893b5b3dc](https://github.com/tech-leads-club/agent-skills/commit/893b5b3dc))
+- add excalidraw-studio skill ([519119f50](https://github.com/tech-leads-club/agent-skills/commit/519119f50))
+- add mermaid-studio skill ([0560aead8](https://github.com/tech-leads-club/agent-skills/commit/0560aead8))
+- update TLC Spec-Driven README with version bump, refined project phases, and enhanced documentation ([31316664b](https://github.com/tech-leads-club/agent-skills/commit/31316664b))
+- add new reference for codebase concerns, gray area discussions, and quick mode tasks ([847a8bd4a](https://github.com/tech-leads-club/agent-skills/commit/847a8bd4a))
+- enhance tlc-spec-driven skill with updated phases, auto-sizing principles, and new context management features ([baa8c0e4f](https://github.com/tech-leads-club/agent-skills/commit/baa8c0e4f))
+
+### 📖 Documentation
+
+- update SKILL.md to streamline description format and license information ([278a2fd70](https://github.com/tech-leads-club/agent-skills/commit/278a2fd70))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 0.9.0 (2026-02-26)
+
+### 🚀 Features
+
+- add new skills to security scan allowlist for nx-ci-monitor and netlify-deploy ([7256e1bc2](https://github.com/tech-leads-club/agent-skills/commit/7256e1bc2))
+- enhance skill validation script with JSON output and improved frontmatter parsing ([18cd31e6a](https://github.com/tech-leads-club/agent-skills/commit/18cd31e6a))
+- enhance skill validation script ([f2555b265](https://github.com/tech-leads-club/agent-skills/commit/f2555b265))
+- expand security-scan-allowlist.yaml to include new skills ([138724517](https://github.com/tech-leads-club/agent-skills/commit/138724517))
+
+### 📖 Documentation
+
+- update SKILL.md to clarify usage restrictions for learning opportunities ([4dd81e2d7](https://github.com/tech-leads-club/agent-skills/commit/4dd81e2d7))
+- update SKILL.md to clarify usage of perf-lighthouse for audits ([e899fd33f](https://github.com/tech-leads-club/agent-skills/commit/e899fd33f))
+- enhance skill descriptions to clarify usage and limitations ([8dca4593d](https://github.com/tech-leads-club/agent-skills/commit/8dca4593d))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 0.8.0 (2026-02-25)
+
+### 🚀 Features
+
+- add new skills and deprecate outdated ones in skills registry ([ecb76350e](https://github.com/tech-leads-club/agent-skills/commit/ecb76350e))
+- add author metadata to aws-advisor skill documentation ([f20b6e92d](https://github.com/tech-leads-club/agent-skills/commit/f20b6e92d))
+- add reasons for security scan allowlist entries and new skills ([0a4382183](https://github.com/tech-leads-club/agent-skills/commit/0a4382183))
+- add nestjs-modular-monolith skill ([9b06c6f04](https://github.com/tech-leads-club/agent-skills/commit/9b06c6f04))
+- add codenavi skill ([aaff8f85d](https://github.com/tech-leads-club/agent-skills/commit/aaff8f85d))
+- add the-fool skill ([140df6100](https://github.com/tech-leads-club/agent-skills/commit/140df6100))
+- add skill-architect ([c72759890](https://github.com/tech-leads-club/agent-skills/commit/c72759890))
+- add react-native-expert skill ([cf5cee5a6](https://github.com/tech-leads-club/agent-skills/commit/cf5cee5a6))
+- add learning-opportunities skill and principles for effective learning ([512f6ae19](https://github.com/tech-leads-club/agent-skills/commit/512f6ae19))
+- add legacy-migration-planner skill ([c2d4f9b7c](https://github.com/tech-leads-club/agent-skills/commit/c2d4f9b7c))
+- add frontend-blueprint skill ([ac6989c38](https://github.com/tech-leads-club/agent-skills/commit/ac6989c38))
+- add new skills for decision-making and learning & growth categories ([3ed34244d](https://github.com/tech-leads-club/agent-skills/commit/3ed34244d))
+- add deprecated skills with messages and alternatives ([ebb2a2781](https://github.com/tech-leads-club/agent-skills/commit/ebb2a2781))
+- remove allowed-tools from run-nx-generator skill documentation ([9e06b350d](https://github.com/tech-leads-club/agent-skills/commit/9e06b350d))
+- add support for loading deprecated skills from YAML file ([884a1db51](https://github.com/tech-leads-club/agent-skills/commit/884a1db51))
+- add support for deprecated skills in skills registry ([446f0dbab](https://github.com/tech-leads-club/agent-skills/commit/446f0dbab))
+
+### 📖 Documentation
+
+- update description formatting for codenavi skill ([9a36836e1](https://github.com/tech-leads-club/agent-skills/commit/9a36836e1))
+- update license information in skill documentation ([cdc4a202e](https://github.com/tech-leads-club/agent-skills/commit/cdc4a202e))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 0.7.0 (2026-02-22)
 
 ### 🚀 Features

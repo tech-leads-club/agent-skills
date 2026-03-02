@@ -1,3 +1,4 @@
+import type { DeprecatedEntry } from '@tech-leads-club/core'
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -27,6 +28,7 @@ export interface SkillsRegistry {
   version: string
   categories: Record<string, CategoryMetadata>
   skills: SkillMetadata[]
+  deprecated?: DeprecatedEntry[]
 }
 
 export function parseSkillFrontmatter(content: string): {

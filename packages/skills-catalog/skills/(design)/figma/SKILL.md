@@ -1,6 +1,6 @@
 ---
 name: figma
-description: Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.
+description: Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Use when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting. Covers general Figma data fetching and exploration. Do NOT use when the goal is specifically pixel-perfect code implementation from a Figma design (use figma-implement-design instead).
 metadata:
   author: github.com/openai/skills
   version: '1.0.0'

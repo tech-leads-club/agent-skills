@@ -51,3 +51,5 @@ out
 .security-scan-cache.json
 .security-scan-results.json
 
+# Specs
+.specs

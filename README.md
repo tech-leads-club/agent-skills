@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  In an ecosystem where <a href="https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf">over 13% of marketplace skills contain critical vulnerabilities</a>, 
+  In an ecosystem where <a href="https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf">over 13% of marketplace skills contain critical vulnerabilities</a>,
   <b>Agent Skills</b> stands apart as a hardened library of <b>verified</b>, <b>tested</b>, and <b>safe</b> capabilities.
   Extend <b>Antigravity</b>, <b>Claude Code</b>, <b>Cursor</b>, and more with absolute confidence.
 </p>
@@ -48,13 +48,10 @@
 - [🌟 Featured Skills](#-featured-skills)
 - [🚀 Quick Start](#-quick-start)
 - [⚡ How It Works](#-how-it-works)
-- [🛠 For Contributors](#-for-contributors)
-- [📁 Project Structure](#-project-structure)
-- [📝 Skill Structure](#-skill-structure)
-- [🔒 Security Scan](#-security-scan)
-- [🔄 Release Process](#-release-process)
+- [🔌 MCP Server](#-mcp-server)
 - [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [🛡️ Content & Authorship](#️-content--authorship)
+- [📄 License and Attribution](#-license-and-attribution)
 
 ## ✨ What are Skills?
 
@@ -71,28 +68,9 @@ packages/skills-catalog/skills/
 
 ## 🛡️ Security & Trust
 
-Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library.
+Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library: 100% open source (no binaries), static analysis in CI/CD, immutable integrity via lockfiles and content hashing, and human-curated prompts. The CLI uses defense-in-depth (sanitization, path isolation, symlink guards, atomic lockfile, audit trail); every skill is scanned with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) before publishing.
 
-### Vulnerability Mitigation
-
-We directly address the threats identified in the [Snyk 2026 Agent Threat Report](https://github.com/snyk/agent-scan/blob/main/.github/reports/skills-report.pdf):
-
-| Threat                   | Public Marketplaces                                         | Agent Skills Guarantee                                                                                          |
-| :----------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| **Malicious Payloads**   | Obfuscated code, binaries, or "black box" instructions      | **100% Open Source**: No binaries, fully readable text/code. Every line is auditable.                           |
-| **Credential Theft**     | Skills silently exfiltrating env vars to remote servers     | **Static Analysis**: CI/CD pipeline blocks skills with suspicious network calls or secret access.               |
-| **Supply Chain Attacks** | Authors pushing malicious updates to existing skills        | **Immutable Integrity**: Lockfiles and content-hashing ensure code never changes without your explicit upgrade. |
-| **Prompt Injection**     | Hidden instructions to hijack agent behavior ("jailbreaks") | **Human Curation**: Every prompt is manually code-reviewed by maintainers for safety boundaries.                |
-
-### CLI Defense-in-Depth
-
-The installer itself implements strict technical controls:
-
-- **Filesystem Isolation**: Recursive path traversal protection preventing access outside target directories.
-- **Input Sanitization**: Strict validation of skill names and paths to neutralize injection vectors.
-- **Symlink Guard**: Safe handling of symbolic links to prevent aliasing attacks.
-- **Integrity Verification**: Lockfile-based validation ensuring reproducible and authorized skill management.
-- **Automated Auditing**: All skills undergo continuous security scanning with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan).
+→ **Full threat model, implementation details, and vulnerability reporting:** [SECURITY.md](SECURITY.md)
 
 ## 🤖 Supported Agents
 
@@ -133,8 +111,6 @@ A glimpse of what's available in our growing catalog:
 <p align="center">
   <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
 </p>
-
----
 
 ## 🚀 Quick Start
 
@@ -249,190 +225,37 @@ Downloaded skills are cached in `~/.cache/agent-skills/` for offline use.
 rm -rf ~/.cache/agent-skills
 ```
 
-## 🛠 For Contributors
+## 🔌 MCP Server
 
-### Prerequisites
+`@tech-leads-club/agent-skills-mcp` is an MCP server that exposes the skills catalog directly to AI agents via **progressive disclosure** — search first, then fetch only what's needed.
 
-- **Node.js** ≥ 22
-- **npm** (comes with Node.js)
+| Tool                | Purpose                              |
+| :------------------ | :----------------------------------- |
+| `list_skills`       | Browse all skills by category        |
+| `search_skills`     | Find skills by intent (fuzzy search) |
+| `read_skill`        | Load a skill's main instructions     |
+| `fetch_skill_files` | Fetch specific reference files       |
 
-### Setup
+`list_skills` should be called only when the user explicitly asks to browse/list the catalog.
 
-```bash
-git clone https://github.com/tech-leads-club/agent-skills.git
-cd agent-skills
-npm ci
-npm run build
-```
-
-### Development Commands
-
-| Command             | Description                        |
-| ------------------- | ---------------------------------- |
-| `npm run start:dev` | Run CLI locally (interactive mode) |
-| `npm run g <name>`  | Generate a new skill               |
-| `npm run build`     | Build all packages                 |
-| `npm run test`      | Run all tests                      |
-| `npm run lint`      | Lint codebase                      |
-| `npm run format`    | Format code with Prettier          |
-| `npm run scan`      | Run incremental security scan      |
-
-### Creating a New Skill
-
-```bash
-# With category (recommended)
-nx g @tech-leads-club/skill-plugin:skill my-skill --category=development
-
-# Full options
-nx g @tech-leads-club/skill-plugin:skill my-skill \
-  --description="What my skill does" \
-  --category=development \
-  --author="github.com/username" \
-  --skillVersion="1.0.0"
-```
-
-The generator creates:
-
-- `packages/skills-catalog/skills/(development)/my-skill/SKILL.md`
-
-## 📁 Project Structure
-
-```
-agent-skills/
-├── packages/
-│   ├── cli/                      # @tech-leads-club/agent-skills CLI
-│   └── skills-catalog/           # Skills collection
-│       └── skills/               # All skill definitions
-│           ├── (category-name)/  # Categorized skills
-│           └── _category.json    # Category metadata
-├── tools/
-│   └── skill-plugin/             # Nx skill generator
-├── skills-registry.json          # Auto-generated catalog
-├── .github/
-│   └── workflows/                # CI/CD pipelines
-└── nx.json                       # Nx configuration
-```
-
-## 📝 Skill Structure
-
-```
-packages/skills-catalog/skills/
-├── (category-name)/              # Category folder
-│   └── my-skill/                 # Skill folder
-│       ├── SKILL.md              # Required: main instructions
-│       ├── scripts/              # Optional: executable scripts
-│       ├── templates/            # Optional: file templates
-│       └── references/           # Optional: on-demand docs
-└── _category.json                # Category metadata
-```
-
-### SKILL.md Format
-
-```markdown
----
-name: my-skill
-description: What this skill does. Use when user says "trigger phrase".
-metadata:
-  version: 1.0.0
-  author: github.com/username
----
-
-# My Skill
-
-Brief description.
-
-## Process
-
-1. Step one
-2. Step two
-```
-
-### Category Metadata
-
-`_category.json`:
+**Quick install** (works with any MCP-compatible client):
 
 ```json
 {
-  "(development)": {
-    "name": "Development",
-    "description": "Skills for software development",
-    "priority": 1
+  "mcpServers": {
+    "agent-skills": {
+      "command": "npx",
+      "args": ["-y", "@tech-leads-club/agent-skills-mcp"]
+    }
   }
 }
 ```
 
-### Best Practices
-
-- **Keep SKILL.md under 500 lines** — use `references/` for detailed docs
-- **Write specific descriptions** — include trigger phrases
-- **Assume the agent is smart** — only add what it doesn't already know
-- **Prefer scripts over inline code** — reduces context window usage
-
-## 🔒 Security Scan
-
-Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
-
-```bash
-npm run scan              # Incremental (default)
-npm run scan -- --force   # Force full re-scan
-```
-
-### How it works
-
-Each skill has a SHA-256 content hash (computed from all its files). Results are cached in `.security-scan-cache.json` (gitignored). On the next run, skills whose hash hasn't changed skip re-scanning and load results from cache.
-
-```
-Content hash unchanged → load from cache (fast)
-Content hash changed   → re-scan with mcp-scan
-```
-
-### Handling false positives
-
-If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
-
-**`packages/skills-catalog/security-scan-allowlist.yaml`**
-
-```yaml
-version: '1.0.0'
-
-entries:
-  - skill: my-skill
-    code: W011
-    reason: >
-      Fetches from trusted first-party API — expected behavior.
-    allowedBy: github.com/username
-    allowedAt: '2026-01-01'
-    expiresAt: '2027-01-01' # Optional but recommended
-```
-
-- Match is by `skill + code` — no re-scan needed after adding an entry
-- `expiresAt` is optional but recommended — forces periodic review
-- Expired entries re-activate the finding automatically
-- Use YAML for better readability, comments, and cleaner diffs
-
-The allowlist is committed to the repo and reviewable in PRs.
-
-## 🔄 Release Process
-
-This project uses **Conventional Commits** for automated versioning:
-
-| Commit Prefix | Version Bump  | Example                      |
-| ------------- | ------------- | ---------------------------- |
-| `feat:`       | Minor (0.X.0) | `feat: add new skill`        |
-| `fix:`        | Patch (0.0.X) | `fix: correct symlink path`  |
-| `feat!:`      | Major (X.0.0) | `feat!: breaking API change` |
-| `docs:`       | No bump       | `docs: update README`        |
-| `chore:`      | No bump       | `chore: update deps`         |
-
-Releases are automated via GitHub Actions when merging to `main`.
+→ Full setup for all clients (Cursor, Claude Code, VS Code, etc.), caching, and error reference: **[packages/mcp/README.md](packages/mcp/README.md)**
 
 ## 🤝 Contributing
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feat/amazing-skill`)
-3. **Commit** with conventional commits (`git commit -m "feat: add amazing skill"`)
-4. **Push** to your fork (`git push origin feat/amazing-skill`)
-5. **Open** a Pull Request
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines on how to set up your local environment, create new skills, contribute to the marketplace, and follow our release processes.
 
 ## 🛡️ Content & Authorship
 
@@ -440,9 +263,13 @@ This repository is a collection of curated skills intended to benefit the commun
 
 If you are the author of any content included here and would like it **removed** or **updated**, please [open an issue](https://github.com/tech-leads-club/agent-skills/issues/new) or contact the maintainers.
 
-## 📄 License
+## 📄 License and Attribution
 
-MIT © [Tech Leads Club](https://github.com/tech-leads-club)
+- **Software Engine:** The application source code (CLI, scripts, tools) is licensed under the **[MIT License](LICENSE)**.
+- **Tech Leads Club Skills:** Unless otherwise stated, all skill files (`SKILL.md`) authored by the repository maintainers are licensed under the **[Creative Commons Attribution 4.0 International License (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/)**.
+- **Third-Party Skills:** Some skills included in this catalog are created by the community or original authors. These skills retain their original licenses and copyrights. Please check the individual `SKILL.md` files for specific licensing and author attribution.
+
+_If you use our skills catalog, you **must** provide attribution to Tech Leads Club, regardless of how it is used._
 
 ## ⭐ Star History
 

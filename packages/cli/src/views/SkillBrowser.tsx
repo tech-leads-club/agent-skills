@@ -2,8 +2,6 @@ import { Box, Text, useInput, useStdout } from 'ink'
 import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 
-import { installedSkillsAtom } from '../atoms/installedSkills'
-import { selectedAgentsAtom } from '../atoms/wizard'
 import { CategoryHeader, Header, SearchInput, SkillCard, SkillDetailPanel } from '../components'
 import { FooterBar } from '../components/FooterBar'
 import { KeyboardShortcutsOverlay, type ShortcutEntry } from '../components/KeyboardShortcutsOverlay'
@@ -12,6 +10,10 @@ import { groupSkillsByCategory } from '../services/categories'
 import { canShowDetailPanel } from '../services/terminal-dimensions'
 import { colors, symbols } from '../theme'
 import type { SkillInfo } from '../types'
+
+import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
+import { installedSkillsAtom } from '../atoms/installedSkills'
+import { selectedAgentsAtom } from '../atoms/wizard'
 
 interface SkillBrowserProps {
   onInstall?: (selectedSkills: SkillInfo[]) => void
@@ -52,8 +54,10 @@ const getShortcuts = (readOnly: boolean): ShortcutEntry[] => {
 export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = false }: SkillBrowserProps) => {
   const { skills: fetchedSkills, loading: fetching, error } = useSkills()
   const { stdout } = useStdout()
+
   const selectedAgents = useAtomValue(selectedAgentsAtom)
   const installedSkills = useAtomValue(installedSkillsAtom)
+  const deprecatedMap = useAtomValue(deprecatedSkillsAtom)
 
   const skills = overrideSkills || fetchedSkills
   const loading = overrideSkills ? false : fetching
@@ -344,7 +348,8 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
       selectedAgents.length > 0
         ? (installedSkills[item.skill.name]?.some((a) => selectedAgents.includes(a)) ?? false)
         : (installedSkills[item.skill.name]?.length ?? 0) > 0
-    const status = isInstalled ? 'installed' : null
+    const isDeprecated = deprecatedMap instanceof Map && deprecatedMap.has(item.skill.name)
+    const status = isDeprecated ? 'deprecated' : isInstalled ? 'installed' : null
 
     return (
       <SkillCard

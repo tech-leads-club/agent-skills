@@ -1,6 +1,6 @@
 ---
 name: domain-identification-grouping
-description: Groups components into logical domains for service-based architecture. Use when creating component domains, grouping components by business functionality, planning domain services, analyzing component relationships, or when the user asks about domain grouping, component domains, or domain identification.
+description: Groups existing components into logical business domains to plan service-based architecture. Use when asking "which components belong together?", "group these into services", "organize by domain", "component-to-domain mapping", or planning service extraction from an existing codebase. Do NOT use for identifying new domains from scratch (use domain-analysis) or analyzing coupling (use coupling-analysis).
 ---
 
 # Domain Identification and Grouping

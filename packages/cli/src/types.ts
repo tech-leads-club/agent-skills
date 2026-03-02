@@ -1,4 +1,11 @@
-import type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, SkillInfo } from '@tech-leads-club/core'
+import type {
+  AgentConfig,
+  AgentType,
+  CategoryInfo,
+  CategoryMetadata,
+  DeprecatedEntry,
+  SkillInfo,
+} from '@tech-leads-club/core'
 
 export interface InstallOptions {
   global: boolean
@@ -20,7 +27,7 @@ export interface InstallResult {
   symlinkFailed?: boolean
 }
 
-export type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, SkillInfo }
+export type { AgentConfig, AgentType, CategoryInfo, CategoryMetadata, DeprecatedEntry, SkillInfo }
 
 export type GroupedSkills = Map<CategoryInfo, SkillInfo[]>
 

@@ -48,6 +48,32 @@
 **Problem:** [What went wrong]
 **Solution:** [How it was resolved]
 **Prevents:** [What this knowledge prevents in future]
+
+---
+
+## Quick Tasks Completed
+
+| #   | Description              | Date   | Commit | Status  |
+| --- | ------------------------ | ------ | ------ | ------- |
+| 001 | [Quick task description] | [date] | [hash] | ✅ Done |
+
+---
+
+## Deferred Ideas
+
+Ideas captured during work that belong in future features or phases. Prevents scope creep while preserving good ideas.
+
+- [ ] [Idea description] — Captured during: [feature/phase]
+- [ ] [Idea description] — Captured during: [feature/phase]
+
+---
+
+## Todos
+
+Capture in-progress thoughts and action items that don't fit in active tasks.
+
+- [ ] [TODO: action item]
+- [ ] [TODO: action item]
 ```
 
 ## When to Update
@@ -57,6 +83,9 @@
 | Significant architectural choice | Add AD-[NNN]                           |
 | Implementation blocked           | Add B-[NNN]                            |
 | Important discovery/learning     | Add L-[NNN]                            |
+| Quick task completed             | Add row to Quick Tasks table           |
+| Scope creep captured             | Add to Deferred Ideas                  |
+| In-progress thought              | Add to Todos                           |
 | Session end                      | Update "Last Updated" + "Current Work" |
 
 ## Size Management (Hybrid Strategy)

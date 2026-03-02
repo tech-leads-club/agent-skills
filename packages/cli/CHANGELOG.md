@@ -1,3 +1,34 @@
+## 1.4.1 (2026-02-27)
+
+### 🩹 Fixes
+
+- handle exit condition in RemoveWizard when no skills are selected ([ca428104c](https://github.com/tech-leads-club/agent-skills/commit/ca428104c))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
+## 1.4.0 (2026-02-26)
+
+This was a version bump only for @tech-leads-club/agent-skills to align it with other projects, there were no code changes.
+
+## 1.3.0 (2026-02-25)
+
+### 🚀 Features
+
+- add handling for deprecated skills in update view ([d21f848b8](https://github.com/tech-leads-club/agent-skills/commit/d21f848b8))
+- integrate deprecated skills handling in SkillBrowser component ([e9762f15e](https://github.com/tech-leads-club/agent-skills/commit/e9762f15e))
+- enhance skill selection with deprecated status indication ([bfa4a8189](https://github.com/tech-leads-club/agent-skills/commit/bfa4a8189))
+- add support for deprecated skills in skills registry ([b0a965c9b](https://github.com/tech-leads-club/agent-skills/commit/b0a965c9b))
+- add deprecated status to StatusBadge component ([a2fb4d39c](https://github.com/tech-leads-club/agent-skills/commit/a2fb4d39c))
+- add support for detecting deprecated skills during update ([e8953db55](https://github.com/tech-leads-club/agent-skills/commit/e8953db55))
+- add atom for managing deprecated skills asynchronously ([5deb25d8a](https://github.com/tech-leads-club/agent-skills/commit/5deb25d8a))
+- add DeprecatedEntry type to types export ([d1f510cb7](https://github.com/tech-leads-club/agent-skills/commit/d1f510cb7))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues @felipfr
+
 ## 1.2.2 (2026-02-22)
 
 ### 🩹 Fixes

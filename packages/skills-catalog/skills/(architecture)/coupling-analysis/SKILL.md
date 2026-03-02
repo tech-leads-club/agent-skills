@@ -1,6 +1,6 @@
 ---
 name: coupling-analysis
-description: Analyzes coupling in a codebase following the three-dimensional model from "Balancing Coupling in Software Design" (Vlad Khononov). Use when evaluating architectural quality, identifying problematic dependencies, understanding integration strength between modules, or getting recommendations to improve modularity.
+description: Analyzes coupling between modules using the three-dimensional model (strength, distance, volatility) from "Balancing Coupling in Software Design". Use when asking "are these modules too coupled?", "show me dependencies", "analyze integration quality", "which modules should I decouple?", "coupling report", or evaluating architectural health. Do NOT use for domain boundary analysis (use domain-analysis) or component sizing (use component-identification-sizing).
 ---
 
 # Coupling Analysis Skill

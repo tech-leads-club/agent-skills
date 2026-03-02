@@ -1,6 +1,6 @@
 ---
 name: component-identification-sizing
-description: Identifies architectural components in codebases and calculates size metrics for decomposition planning. Use when analyzing codebase structure, planning monolithic decomposition, identifying oversized components, calculating component statistics, or when the user asks about component analysis, codebase sizing, or architectural decomposition.
+description: Maps architectural components in a codebase and measures their size to identify what should be extracted first. Use when asking "how big is each module?", "what components do I have?", "which service is too large?", "analyze codebase structure", "size my monolith", or planning where to start decomposing. Do NOT use for runtime performance sizing or infrastructure capacity planning.
 ---
 
 # Component Identification and Sizing

@@ -1,35 +1,10 @@
 name: 'Validate Skills'
-description: 'Validates skill structure and frontmatter'
+description: 'Validates skill structure, frontmatter, and description quality standards from CONTRIBUTING.md'
 
 runs:
   using: composite
   steps:
-    - name: Validate Skills Structure
+    - name: Validate All Skills
       shell: bash
       run: |
-        echo "🔍 Validating skills..."
-        failed=0
-
-        for skill in packages/skills-catalog/skills/*/*/; do
-          [ -d "$skill" ] || continue
-          
-          skill_name=$(basename "$skill")
-          category=$(basename "$(dirname "$skill")")
-
-          if [ ! -f "$skill/SKILL.md" ]; then
-            echo "❌ $category/$skill_name: Missing SKILL.md"
-            failed=1
-            continue
-          fi
-
-          if ! head -1 "$skill/SKILL.md" | grep -q "^---"; then
-            echo "❌ $category/$skill_name: Missing frontmatter (---) in SKILL.md"
-            failed=1
-            continue
-          fi
-
-          echo "✅ $category/$skill_name"
-        done
-
-        [ $failed -eq 0 ] || exit 1
-        echo "✅ All skills valid"
+        npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills
