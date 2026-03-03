@@ -48,6 +48,7 @@ export default defineConfig([
             '@jest/globals', // Used in tests only
             '@testing-library/react', // Used in tests only
             'fast-check', // Used in tests only
+            '@nx/next', // Used in Next.js apps
           ],
         },
       ],
