@@ -168,30 +168,20 @@ Key rules for generation:
 
 ## Templates
 
-Pre-built Excalidraw templates are available for reference in `references/templates/`, but **do not read these files** — they are large JSON files (10-32KB each) that would consume excessive tokens.
+Pre-built templates are available in `assets/` for quick starting points. Use these when the diagram type matches — they provide correct structure and styling:
 
 | Template         | File                                                   |
 | ---------------- | ------------------------------------------------------ |
-| Flowchart        | `assets/flowchart-template.json`                    |
-| Relationship     | `assets/relationship-template.json`                 |
-| Mind Map         | `assets/mindmap-template.json`                      |
-| Data Flow (DFD)  | `assets/data-flow-diagram-template.json`            |
-| Swimlane         | `assets/business-flow-swimlane-template.json`       |
-| Class Diagram    | `assets/class-diagram-template.json`                |
-| Sequence Diagram | `assets/sequence-diagram-template.json`             |
-| ER Diagram       | `assets/er-diagram-template.json`                   |
+| Flowchart        | `assets/flowchart-template.excalidraw`              |
+| Relationship     | `assets/relationship-template.excalidraw`           |
+| Mind Map         | `assets/mindmap-template.excalidraw`                |
+| Data Flow (DFD)  | `assets/data-flow-diagram-template.excalidraw`      |
+| Swimlane         | `assets/business-flow-swimlane-template.excalidraw` |
+| Class Diagram    | `assets/class-diagram-template.excalidraw`          |
+| Sequence Diagram | `assets/sequence-diagram-template.excalidraw`       |
+| ER Diagram       | `assets/er-diagram-template.excalidraw`             |
 
-**Available template types** (for reference only):
-- Flowchart
-- Relationship diagram  
-- Mind map
-- Data Flow (DFD)
-- Swimlane/Business process
-- Class diagram
-- Sequence diagram
-- ER diagram
-
-All templates follow the same structural patterns documented in the references — use the schema documentation to build diagrams, not the template files themselves.
+Read a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.
 
 ## Icon Libraries
 
