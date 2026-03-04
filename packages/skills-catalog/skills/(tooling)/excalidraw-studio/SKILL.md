@@ -168,20 +168,21 @@ Key rules for generation:
 
 ## Templates
 
-Pre-built templates are available in `assets/` for quick starting points. Use these when the diagram type matches — they provide correct structure and styling:
+Pre-built Excalidraw templates are available for reference in `references/templates/`, but **do not read these files** — they are large JSON files (10-32KB each) that would consume excessive tokens.
 
-| Template         | File                                                   |
-| ---------------- | ------------------------------------------------------ |
-| Flowchart        | `assets/flowchart-template.excalidraw`              |
-| Relationship     | `assets/relationship-template.excalidraw`           |
-| Mind Map         | `assets/mindmap-template.excalidraw`                |
-| Data Flow (DFD)  | `assets/data-flow-diagram-template.excalidraw`      |
-| Swimlane         | `assets/business-flow-swimlane-template.excalidraw` |
-| Class Diagram    | `assets/class-diagram-template.excalidraw`          |
-| Sequence Diagram | `assets/sequence-diagram-template.excalidraw`       |
-| ER Diagram       | `assets/er-diagram-template.excalidraw`             |
+Instead, follow the structure and best practices documented in `references/excalidraw-schema.md` and `references/element-types.md`. These references contain all the information needed to generate diagrams from scratch without reading the template files.
 
-Read a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.
+**Available template types** (for reference only):
+- Flowchart
+- Relationship diagram  
+- Mind map
+- Data Flow (DFD)
+- Swimlane/Business process
+- Class diagram
+- Sequence diagram
+- ER diagram
+
+All templates follow the same structural patterns documented in the references — use the schema documentation to build diagrams, not the template files themselves.
 
 ## Icon Libraries
 
