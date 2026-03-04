@@ -170,7 +170,16 @@ Key rules for generation:
 
 Pre-built Excalidraw templates are available for reference in `references/templates/`, but **do not read these files** — they are large JSON files (10-32KB each) that would consume excessive tokens.
 
-Instead, follow the structure and best practices documented in `references/excalidraw-schema.md` and `references/element-types.md`. These references contain all the information needed to generate diagrams from scratch without reading the template files.
+| Template         | File                                                   |
+| ---------------- | ------------------------------------------------------ |
+| Flowchart        | `assets/flowchart-template.json`                    |
+| Relationship     | `assets/relationship-template.json`                 |
+| Mind Map         | `assets/mindmap-template.json`                      |
+| Data Flow (DFD)  | `assets/data-flow-diagram-template.json`            |
+| Swimlane         | `assets/business-flow-swimlane-template.json`       |
+| Class Diagram    | `assets/class-diagram-template.json`                |
+| Sequence Diagram | `assets/sequence-diagram-template.json`             |
+| ER Diagram       | `assets/er-diagram-template.json`                   |
 
 **Available template types** (for reference only):
 - Flowchart
