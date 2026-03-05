@@ -65,10 +65,14 @@ jobs:
           artifact-name: security-scan-results-pr
 
       - name: Comment on PR if scan failed
-        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name == github.repository
         uses: ./.github/actions/security-scan-pr-comment
         with:
           github-token: ${{ steps.app-token.outputs.token || github.token }}
+
+      - name: Print Security Scan Results (for forks)
+        if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: ./.github/actions/security-scan-print-results
 
       - name: Fail if scan failed
         if: steps.security-scan.outputs.scan-outcome == 'failure'
