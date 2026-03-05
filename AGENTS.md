@@ -75,7 +75,7 @@ npm run format
 
 # Skills
 npm run generate:data          # Regenerate skills-registry.json + marketplace data
-npm run scan                   # Security scan (mcp-scan, incremental)
+npm run scan                   # Security scan (snyk-agent-scan, incremental)
 nx g @tech-leads-club/skill-plugin:skill {name} --category={cat}  # Create new skill
 ```
 

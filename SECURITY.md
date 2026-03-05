@@ -114,7 +114,7 @@ The log is **append-only** — entries are never overwritten. It is the forensic
 
 ## 🔍 Security Scanning
 
-Every skill in the catalog is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content has changed since the last run are re-scanned.
+Every skill in the catalog is scanned with [`snyk-agent-scan`](https://github.com/snyk/agent-scan) before publishing. The scan is **incremental** — only skills whose content has changed since the last run are re-scanned.
 
 ```bash
 npm run scan              # Incremental (default — only changed skills)
@@ -127,14 +127,14 @@ Each skill has a SHA-256 content hash computed from all its files. Results are c
 
 ```
 Content hash unchanged → load from cache (fast, no re-scan)
-Content hash changed   → re-scan with mcp-scan, update cache
+Content hash changed   → re-scan with snyk-agent-scan, update cache
 ```
 
 This makes the scan fast enough to run on every PR and release without slowing CI/CD.
 
 ### Handling False Positives
 
-If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist at `packages/skills-catalog/security-scan-allowlist.yaml`:
+If `snyk-agent-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist at `packages/skills-catalog/security-scan-allowlist.yaml`:
 
 ```yaml
 version: '1.0.0'
