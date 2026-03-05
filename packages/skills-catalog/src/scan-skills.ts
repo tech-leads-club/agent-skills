@@ -150,7 +150,7 @@ async function main() {
       // Check uvx availability and pre-heat the scanner installation
       try {
         process.stdout.write(chalk.cyan('⏳ Checking environment and updating mcp-scan tool...\n'))
-        execSync('uvx --refresh mcp-scan==0.3.39 --help', { stdio: 'ignore' })
+        execSync('uvx --refresh mcp-scan==0.1.17 --help', { stdio: 'ignore' })
         process.stdout.write(chalk.green('✓ mcp-scan is ready and updated.\n\n'))
       } catch {
         console.error(chalk.red("❌ 'uvx' not found. Install uv: https://docs.astral.sh/uv/"))
@@ -372,7 +372,7 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
     const chunks: Buffer[] = []
     const errChunks: Buffer[] = []
 
-    const proc = spawn('uvx', ['mcp-scan==0.3.39', '--skills', skill.dir, '--json'], { timeout: 120_000 })
+    const proc = spawn('uvx', ['mcp-scan==0.1.17', '--skills', skill.dir, '--json'], { timeout: 120_000 })
 
     proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
     proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk))
