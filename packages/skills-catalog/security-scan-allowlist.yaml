@@ -240,6 +240,17 @@ entries:
   # Skills for security analysis, threat modeling, and ownership mapping
   # ============================================================================
 
+  - skill: security-best-practices
+    code: W011
+    reason: >
+      The skill's fallback strategy explicitly instructs fetching up-to-date security
+      documentation via Context7 MCP (resolve-library-id / get-library-docs) and
+      generic web search tools (Brave Search, Tavily, etc.) when local references do
+      not cover the identified language or framework. Fetching external documentation
+      is intentional and documented as part of the fallback workflow.
+    allowedBy: alineavila
+    allowedAt: "2026-03-05"
+
   - skill: security-ownership-map
     code: W011
     reason: >
