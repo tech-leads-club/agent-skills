@@ -68,7 +68,7 @@ packages/skills-catalog/skills/
 
 ## 🛡️ Security & Trust
 
-Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library: 100% open source (no binaries), static analysis in CI/CD, immutable integrity via lockfiles and content hashing, and human-curated prompts. The CLI uses defense-in-depth (sanitization, path isolation, symlink guards, atomic lockfile, audit trail); every skill is scanned with [snyk-agent-scan](https://github.com/snyk/agent-scan) before publishing.
+Your environment's safety is our top priority. Unlike open marketplaces where **13.4% of skills contain critical issues**, `agent-skills` is a managed, hardened library: 100% open source (no binaries), static analysis in CI/CD, immutable integrity via lockfiles and content hashing, and human-curated prompts. The CLI uses defense-in-depth (sanitization, path isolation, symlink guards, atomic lockfile, audit trail); every skill is scanned with [mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) before publishing.
 
 → **Full threat model, implementation details, and vulnerability reporting:** [SECURITY.md](SECURITY.md)
 

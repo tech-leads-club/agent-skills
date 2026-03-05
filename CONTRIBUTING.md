@@ -166,7 +166,7 @@ description: Helps with deployments.
 
 ## 🔒 Security Scan
 
-Every skill is scanned with [`snyk-agent-scan`](https://github.com/snyk/agent-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) (pinned at `0.3.39`) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
 
 ```bash
 npm run scan              # Incremental (default)
@@ -179,12 +179,12 @@ Each skill has a SHA-256 content hash (computed from all its files). Results are
 
 ```
 Content hash unchanged → load from cache (fast)
-Content hash changed   → re-scan with snyk-agent-scan
+Content hash changed   → re-scan with mcp-scan
 ```
 
 ### Handling false positives
 
-If `snyk-agent-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
+If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
 
 **`packages/skills-catalog/security-scan-allowlist.yaml`**
 
