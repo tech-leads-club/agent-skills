@@ -95,7 +95,7 @@ export type AgentType = (typeof AGENT_TYPES)[number]
  */
 export interface AgentConfig {
   /** Internal agent identifier. */
-  name: string
+  name: AgentType
   /** User-facing agent name. */
   displayName: string
   /** Short description of the agent integration. */
