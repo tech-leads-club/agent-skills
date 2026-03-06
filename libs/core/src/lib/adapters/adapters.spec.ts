@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
