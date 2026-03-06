@@ -1,3 +1,5 @@
+import { join } from 'node:path'
+
 import {
   categoryIdToFolderName,
   extractCategoryId,
@@ -58,7 +60,7 @@ describe('category helpers', () => {
 
 describe('getCacheDir', () => {
   it('builds the relative cache directory path', () => {
-    expect(getCacheDir()).toBe('.cache/agent-skills')
+    expect(getCacheDir()).toBe(join('.cache', 'agent-skills'))
   })
 })
 
