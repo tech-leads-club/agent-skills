@@ -70,6 +70,10 @@ describe('stripFrontmatter', () => {
   it('returns the original content when frontmatter is incomplete', () => {
     expect(stripFrontmatter('---\ntitle: Demo')).toBe('---\ntitle: Demo')
   })
+
+  it('ignores delimiter text that appears inside frontmatter values', () => {
+    expect(stripFrontmatter('---\ntitle: Demo --- Draft\n---\n# Heading')).toBe('# Heading')
+  })
 })
 
 describe('parseMarkdown', () => {

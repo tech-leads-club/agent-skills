@@ -1,10 +1,6 @@
 import { join, normalize, resolve, sep } from 'node:path'
 
-import {
-  CACHE_BASE_DIR,
-  CACHE_NAMESPACE,
-  CATEGORY_FOLDER_PATTERN,
-} from './constants'
+import { CACHE_BASE_DIR, CACHE_NAMESPACE, CATEGORY_FOLDER_PATTERN } from './constants'
 import type { InlineSegment, MarkdownToken } from './types'
 
 /**
@@ -138,9 +134,25 @@ export function getCacheDir(): string {
  */
 export function stripFrontmatter(raw: string): string {
   if (!raw.startsWith('---')) return raw
-  const endIndex = raw.indexOf('---', 3)
-  if (endIndex === -1) return raw
-  return raw.slice(endIndex + 3).trimStart()
+
+  let offset = 0
+  while (offset < raw.length) {
+    const lineEnd = raw.indexOf('\n', offset)
+    const segmentEnd = lineEnd === -1 ? raw.length : lineEnd
+    const contentEnd = raw[segmentEnd - 1] === '\r' ? segmentEnd - 1 : segmentEnd
+    const line = raw.slice(offset, contentEnd)
+
+    if (offset === 0) {
+      if (line !== '---') return raw
+    } else if (line === '---') {
+      return raw.slice(lineEnd === -1 ? raw.length : lineEnd + 1).trimStart()
+    }
+
+    if (lineEnd === -1) return raw
+    offset = lineEnd + 1
+  }
+
+  return raw
 }
 
 /**
