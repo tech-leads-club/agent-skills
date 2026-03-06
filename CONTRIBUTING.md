@@ -166,7 +166,7 @@ description: Helps with deployments.
 
 ## 🔒 Security Scan
 
-Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) (pinned at `0.3.39`) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
 
 ```bash
 npm run scan              # Incremental (default)
