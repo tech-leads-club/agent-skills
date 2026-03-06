@@ -7,37 +7,28 @@ import type { EnvPort } from '../ports'
  */
 export class NodeEnvAdapter implements EnvPort {
   /**
-   * Returns the current working directory.
-   *
-   * @returns The current working directory path.
+   * @inheritdoc
    */
   public cwd(): string {
     return process.cwd()
   }
 
   /**
-   * Returns the current user's home directory.
-   *
-   * @returns The home directory path.
+   * @inheritdoc
    */
   public homedir(): string {
     return homedir()
   }
 
   /**
-   * Returns the current operating system platform identifier.
-   *
-   * @returns The platform identifier.
+   * @inheritdoc
    */
   public platform(): string {
     return platform()
   }
 
   /**
-   * Reads an environment variable.
-   *
-   * @param key - Environment variable name.
-   * @returns The variable value when present.
+   * @inheritdoc
    */
   public getEnv(key: string): string | undefined {
     return process.env[key]

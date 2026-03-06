@@ -7,11 +7,7 @@ import type { ShellPort } from '../ports'
  */
 export class NodeShellAdapter implements ShellPort {
   /**
-   * Executes a shell command synchronously.
-   *
-   * @param command - Shell command to execute.
-   * @param options - Optional command execution options.
-   * @returns The command output text.
+   * @inheritdoc
    */
   public exec(command: string, options?: { encoding?: string }): string {
     return execSync(command, {

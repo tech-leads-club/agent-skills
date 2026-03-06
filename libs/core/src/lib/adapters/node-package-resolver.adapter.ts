@@ -25,10 +25,7 @@ export class NodePackageResolverAdapter implements PackageResolverPort {
   }
 
   /**
-   * Resolves the latest published version of a package.
-   *
-   * @param packageName - Package name to resolve.
-   * @returns The latest version string.
+   * @inheritdoc
    */
   public async getLatestVersion(packageName: string): Promise<string> {
     const pkg = await this.resolvePackage(packageName, { version: 'latest' })

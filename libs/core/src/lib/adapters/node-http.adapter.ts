@@ -5,10 +5,7 @@ import type { HttpPort } from '../ports'
  */
 export class NodeHttpAdapter implements HttpPort {
   /**
-   * Performs an HTTP GET request.
-   *
-   * @param url - Absolute URL to request.
-   * @returns The HTTP response.
+   * @inheritdoc
    */
   public async get(
     url: string,
@@ -17,12 +14,7 @@ export class NodeHttpAdapter implements HttpPort {
   }
 
   /**
-   * Performs a GET request and retries using an optional fallback URL when the
-   * primary request fails.
-   *
-   * @param url - Primary absolute URL.
-   * @param fallbackUrl - Optional fallback absolute URL.
-   * @returns The first successful HTTP response.
+   * @inheritdoc
    */
   public async getWithFallback(
     url: string,
