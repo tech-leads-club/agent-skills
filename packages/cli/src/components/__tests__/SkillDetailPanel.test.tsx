@@ -6,7 +6,7 @@ jest.mock('../../services/category-colors', () => ({
   getColorForCategory: (id: string) => (id === 'web' ? '#3b82f6' : '#64748b'),
 }))
 
-jest.mock('../../services/markdown-parser', () => ({
+jest.mock('@tech-leads-club/core', () => ({
   parseMarkdown: (raw: string) => {
     const lines = raw
       .replace(/^---[\s\S]*?---\n*/m, '')
