@@ -18,4 +18,3 @@ export {
   type UpdateCache,
 } from './update-cache'
 export * from './update-check'
-export { parseInline, parseMarkdown, stripFrontmatter, type InlineSegment, type MarkdownToken } from '@tech-leads-club/core'
