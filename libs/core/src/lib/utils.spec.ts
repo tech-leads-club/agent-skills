@@ -19,6 +19,10 @@ describe('sanitizeName', () => {
     expect(sanitizeName('...')).toBe('unnamed-skill')
   })
 
+  it('trims surrounding whitespace', () => {
+    expect(sanitizeName(' my-skill ')).toBe('my-skill')
+  })
+
   it('limits the final value to 255 characters', () => {
     expect(sanitizeName('a'.repeat(300))).toHaveLength(255)
   })

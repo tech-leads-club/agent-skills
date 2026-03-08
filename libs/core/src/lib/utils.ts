@@ -35,7 +35,7 @@ export function sanitizeName(name: string): string {
   const sanitized = name
     .replace(/[/\\]/g, '')
     .replace(/[\0:*?"<>|]/g, '')
-    .replace(/^[.\\s]+|[.\\s]+$/g, '')
+    .replace(/^[.\s]+|[.\s]+$/g, '')
     .replace(/\.{2,}/g, '')
     .replace(/^\.+/, '')
 
