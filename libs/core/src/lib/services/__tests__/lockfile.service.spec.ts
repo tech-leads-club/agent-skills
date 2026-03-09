@@ -13,6 +13,7 @@ import type { SkillLockEntry, SkillLockFile } from '../../types'
 
 import {
   addSkillToLock,
+  getAllLockedSkills,
   getSkillFromLock,
   readSkillLock,
   removeSkillFromLock,
@@ -395,5 +396,43 @@ describe('getSkillFromLock', () => {
     const result = await getSkillFromLock('missing-skill', ports)
 
     expect(result).toBeNull()
+  })
+})
+
+describe('getAllLockedSkills', () => {
+  it('returns all persisted lock entries', async () => {
+    const { ports, existsSyncMock, readFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    const skills = {
+      accessibility: {
+        name: 'accessibility',
+        source: 'local',
+        installedAt: '2026-03-09T00:00:00.000Z',
+        updatedAt: '2026-03-09T00:00:00.000Z',
+      },
+      seo: {
+        name: 'seo',
+        source: 'registry',
+        installedAt: '2026-03-10T00:00:00.000Z',
+        updatedAt: '2026-03-10T00:00:00.000Z',
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills }))
+
+    const result = await getAllLockedSkills(ports)
+
+    expect(result).toEqual(skills)
+  })
+
+  it('returns an empty record when no skills are stored', async () => {
+    const { ports, existsSyncMock, readFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
+
+    const result = await getAllLockedSkills(ports)
+
+    expect(result).toEqual({})
   })
 })

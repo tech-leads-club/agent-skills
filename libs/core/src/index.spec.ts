@@ -1,14 +1,20 @@
 import {
+  addSkillToLock,
   AGENTS_DIR,
   AUDIT_LOG_FILE,
+  getAllLockedSkills,
+  getSkillFromLock,
   LOCK_FILE,
   MAX_CONCURRENT_DOWNLOADS,
   PACKAGE_NAME,
-  REGISTRY_CACHE_TTL_MS,
-  SKILLS_CATALOG_DIR,
   parseInline,
   parseMarkdown,
+  readSkillLock,
+  REGISTRY_CACHE_TTL_MS,
+  removeSkillFromLock,
   sanitizeName,
+  SKILLS_CATALOG_DIR,
+  writeSkillLock,
 } from './index'
 
 describe('core library', () => {
@@ -30,5 +36,14 @@ describe('core library', () => {
     expect(sanitizeName('../demo-skill')).toBe('demo-skill')
     expect(parseMarkdown('# Title')).toEqual([{ type: 'heading', level: 1, text: 'Title' }])
     expect(parseInline('`code`')).toEqual([{ text: 'code', code: true }])
+  })
+
+  it('exports the lockfile service functions', () => {
+    expect(readSkillLock).toBeDefined()
+    expect(writeSkillLock).toBeDefined()
+    expect(addSkillToLock).toBeDefined()
+    expect(removeSkillFromLock).toBeDefined()
+    expect(getSkillFromLock).toBeDefined()
+    expect(getAllLockedSkills).toBeDefined()
   })
 })

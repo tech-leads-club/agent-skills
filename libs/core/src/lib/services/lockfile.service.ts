@@ -229,3 +229,20 @@ export async function getSkillFromLock(
   const lock = await readSkillLock(ports, global)
   return lock.skills[skillName] ?? null
 }
+
+/**
+ * Returns all skill entries currently recorded in the shared lockfile.
+ *
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @param global - When `true`, reads from the global lockfile in the user's home directory.
+ * @returns A record keyed by skill name containing all persisted lock entries.
+ *
+ * @example
+ * ```ts
+ * const skills = await getAllLockedSkills(ports)
+ * ```
+ */
+export async function getAllLockedSkills(ports: CorePorts, global = false): Promise<Record<string, SkillLockEntry>> {
+  const lock = await readSkillLock(ports, global)
+  return lock.skills
+}
