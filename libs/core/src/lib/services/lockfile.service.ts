@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AGENTS_DIR, LOCK_FILE, LOCK_FILE_BACKUP } from '../constants'
 import type { CorePorts } from '../ports'
-import type { AgentType, SkillLockFile } from '../types'
+import type { AgentType, SkillLockEntry, SkillLockFile } from '../types'
 import { AGENT_TYPES } from '../types'
 
 import { findProjectRoot } from './project-root.service'
@@ -206,4 +206,26 @@ export async function removeSkillFromLock(skillName: string, ports: CorePorts, g
   delete lock.skills[skillName]
   await writeSkillLock(lock, ports, global)
   return true
+}
+
+/**
+ * Looks up a single skill entry in the shared lockfile.
+ *
+ * @param skillName - Canonical skill name to look up.
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @param global - When `true`, reads from the global lockfile in the user's home directory.
+ * @returns The matching lock entry or `null` when no entry exists.
+ *
+ * @example
+ * ```ts
+ * const entry = await getSkillFromLock('accessibility', ports)
+ * ```
+ */
+export async function getSkillFromLock(
+  skillName: string,
+  ports: CorePorts,
+  global = false,
+): Promise<SkillLockEntry | null> {
+  const lock = await readSkillLock(ports, global)
+  return lock.skills[skillName] ?? null
 }

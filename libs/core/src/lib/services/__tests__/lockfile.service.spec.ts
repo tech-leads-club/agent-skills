@@ -9,9 +9,15 @@ import type {
   PackageResolverPort,
   ShellPort,
 } from '../../ports'
-import type { SkillLockFile } from '../../types'
+import type { SkillLockEntry, SkillLockFile } from '../../types'
 
-import { addSkillToLock, readSkillLock, removeSkillFromLock, writeSkillLock } from '../lockfile.service'
+import {
+  addSkillToLock,
+  getSkillFromLock,
+  readSkillLock,
+  removeSkillFromLock,
+  writeSkillLock,
+} from '../lockfile.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -349,5 +355,45 @@ describe('removeSkillFromLock', () => {
 
     expect(removed).toBe(false)
     expect(writeFileMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('getSkillFromLock', () => {
+  it('returns the matching skill entry', async () => {
+    const { ports, existsSyncMock, readFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    const entry: SkillLockEntry = {
+      name: 'accessibility',
+      source: 'local',
+      installedAt: '2026-03-09T00:00:00.000Z',
+      updatedAt: '2026-03-09T00:00:00.000Z',
+      agents: ['cursor'],
+      method: 'copy',
+      global: false,
+    }
+
+    readFileMock.mockResolvedValue(
+      JSON.stringify({
+        version: 2,
+        skills: {
+          accessibility: entry,
+        },
+      }),
+    )
+
+    const result = await getSkillFromLock('accessibility', ports)
+
+    expect(result).toEqual(entry)
+  })
+
+  it('returns null when the skill is missing', async () => {
+    const { ports, existsSyncMock, readFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
+
+    const result = await getSkillFromLock('missing-skill', ports)
+
+    expect(result).toBeNull()
   })
 })
