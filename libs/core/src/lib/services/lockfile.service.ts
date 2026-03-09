@@ -140,3 +140,48 @@ export async function writeSkillLock(lock: SkillLockFile, ports: CorePorts, glob
     throw error
   }
 }
+
+/**
+ * Adds or updates a skill entry in the shared lockfile.
+ *
+ * @param skillName - Canonical skill name to persist.
+ * @param agents - Agents currently associated with the skill.
+ * @param options - Optional metadata persisted with the lock entry.
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @returns A promise that resolves when the lockfile update has been persisted.
+ *
+ * @example
+ * ```ts
+ * await addSkillToLock('accessibility', ['cursor'], { source: 'local' }, ports)
+ * ```
+ */
+export async function addSkillToLock(
+  skillName: string,
+  agents: AgentType[],
+  options: {
+    source?: string
+    contentHash?: string
+    method?: 'copy' | 'symlink'
+    global?: boolean
+    version?: string
+  } = {},
+  ports: CorePorts,
+): Promise<void> {
+  const lock = await readSkillLock(ports, options.global)
+  const now = new Date().toISOString()
+  const existingEntry = lock.skills[skillName]
+
+  lock.skills[skillName] = {
+    name: skillName,
+    source: options.source || 'local',
+    contentHash: options.contentHash ?? existingEntry?.contentHash,
+    installedAt: existingEntry?.installedAt ?? now,
+    updatedAt: now,
+    agents,
+    method: options.method || 'copy',
+    global: options.global ?? false,
+    version: options.version,
+  }
+
+  await writeSkillLock(lock, ports, options.global)
+}

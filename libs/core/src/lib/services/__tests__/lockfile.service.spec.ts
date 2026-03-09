@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import type {
   CorePorts,
@@ -11,7 +11,7 @@ import type {
 } from '../../ports'
 import type { SkillLockFile } from '../../types'
 
-import { readSkillLock, writeSkillLock } from '../lockfile.service'
+import { addSkillToLock, readSkillLock, writeSkillLock } from '../lockfile.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -72,6 +72,10 @@ const createPorts = (): TestPorts => {
     writeFileMock,
   }
 }
+
+afterEach(() => {
+  jest.useRealTimers()
+})
 
 describe('readSkillLock', () => {
   it('reads and parses a valid lockfile', async () => {
@@ -218,5 +222,89 @@ describe('writeSkillLock', () => {
     await expect(writeSkillLock({ version: 2, skills: {} }, ports)).rejects.toThrow('rename failed')
 
     expect(rmMock).toHaveBeenCalledWith('/workspace/project/.agents/.skill-lock.json.tmp', { force: true })
+  })
+})
+
+describe('addSkillToLock', () => {
+  it('creates a new skill entry with the expected fields', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    readFileMock.mockRejectedValue(new Error('missing'))
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+    jest.useFakeTimers().setSystemTime(new Date('2026-03-09T10:00:00.000Z'))
+
+    await addSkillToLock(
+      'accessibility',
+      ['cursor'],
+      {
+        source: 'registry',
+        contentHash: 'abc123',
+        method: 'symlink',
+        version: '1.2.3',
+      },
+      ports,
+    )
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(writtenLock.skills['accessibility']).toEqual({
+      name: 'accessibility',
+      source: 'registry',
+      contentHash: 'abc123',
+      installedAt: '2026-03-09T10:00:00.000Z',
+      updatedAt: '2026-03-09T10:00:00.000Z',
+      agents: ['cursor'],
+      method: 'symlink',
+      global: false,
+      version: '1.2.3',
+    })
+  })
+
+  it('updates an existing entry without duplicating it', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        accessibility: {
+          name: 'accessibility',
+          source: 'local',
+          contentHash: 'kept-hash',
+          installedAt: '2026-03-08T10:00:00.000Z',
+          updatedAt: '2026-03-08T10:00:00.000Z',
+          agents: ['cursor'],
+          method: 'copy',
+          global: false,
+          version: '1.0.0',
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+    jest.useFakeTimers().setSystemTime(new Date('2026-03-09T12:00:00.000Z'))
+
+    await addSkillToLock('accessibility', ['cursor', 'codex'], { source: 'local' }, ports)
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(Object.keys(writtenLock.skills)).toHaveLength(1)
+    expect(writtenLock.skills['accessibility']).toEqual({
+      name: 'accessibility',
+      source: 'local',
+      contentHash: 'kept-hash',
+      installedAt: '2026-03-08T10:00:00.000Z',
+      updatedAt: '2026-03-09T12:00:00.000Z',
+      agents: ['cursor', 'codex'],
+      method: 'copy',
+      global: false,
+    })
   })
 })
