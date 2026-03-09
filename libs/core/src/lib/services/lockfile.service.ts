@@ -1,8 +1,8 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import { z } from 'zod'
 
-import { AGENTS_DIR, LOCK_FILE } from '../constants'
+import { AGENTS_DIR, LOCK_FILE, LOCK_FILE_BACKUP } from '../constants'
 import type { CorePorts } from '../ports'
 import type { AgentType, SkillLockFile } from '../types'
 import { AGENT_TYPES } from '../types'
@@ -34,6 +34,12 @@ function getSkillLockPath(ports: CorePorts, global: boolean): string {
   if (global) return join(ports.env.homedir(), AGENTS_DIR, LOCK_FILE)
   const projectRoot = findProjectRoot(ports)
   return join(projectRoot, AGENTS_DIR, LOCK_FILE)
+}
+
+function getBackupPath(ports: CorePorts, global: boolean): string {
+  if (global) return join(ports.env.homedir(), AGENTS_DIR, LOCK_FILE_BACKUP)
+  const projectRoot = findProjectRoot(ports)
+  return join(projectRoot, AGENTS_DIR, LOCK_FILE_BACKUP)
 }
 
 function createEmptyLockFile(): SkillLockFile {
@@ -91,5 +97,46 @@ export async function readSkillLock(ports: CorePorts, global = false): Promise<S
     return migrateLockFile(parsed)
   } catch {
     return createEmptyLockFile()
+  }
+}
+
+/**
+ * Writes the shared skill lockfile using a temporary file and backup copy.
+ *
+ * @param lock - Lockfile payload to persist.
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @param global - When `true`, writes the global lockfile in the user's home directory.
+ * @returns A promise that resolves when the lockfile has been written atomically.
+ * @throws {unknown} Rethrows filesystem errors after attempting temp-file cleanup.
+ *
+ * @example
+ * ```ts
+ * await writeSkillLock(lock, ports)
+ * ```
+ */
+export async function writeSkillLock(lock: SkillLockFile, ports: CorePorts, global = false): Promise<void> {
+  const lockPath = getSkillLockPath(ports, global)
+  const backupPath = getBackupPath(ports, global)
+  const tempPath = `${lockPath}.tmp`
+
+  try {
+    try {
+      const existing = await ports.fs.readFile(lockPath, 'utf-8')
+      await ports.fs.writeFile(backupPath, existing, 'utf-8')
+    } catch {
+      // No existing file to back up.
+    }
+
+    await ports.fs.mkdir(dirname(lockPath), { recursive: true })
+    await ports.fs.writeFile(tempPath, JSON.stringify(lock, null, 2), 'utf-8')
+    await ports.fs.rename(tempPath, lockPath)
+  } catch (error) {
+    try {
+      await ports.fs.rm(tempPath, { force: true })
+    } catch {
+      // Ignore cleanup errors.
+    }
+
+    throw error
   }
 }
