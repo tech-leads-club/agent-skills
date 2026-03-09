@@ -11,7 +11,7 @@ import type {
 } from '../../ports'
 import type { SkillLockFile } from '../../types'
 
-import { addSkillToLock, readSkillLock, writeSkillLock } from '../lockfile.service'
+import { addSkillToLock, readSkillLock, removeSkillFromLock, writeSkillLock } from '../lockfile.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -306,5 +306,48 @@ describe('addSkillToLock', () => {
       method: 'copy',
       global: false,
     })
+  })
+})
+
+describe('removeSkillFromLock', () => {
+  it('removes an existing skill and returns true', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        accessibility: {
+          name: 'accessibility',
+          source: 'local',
+          installedAt: '2026-03-09T00:00:00.000Z',
+          updatedAt: '2026-03-09T00:00:00.000Z',
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+
+    const removed = await removeSkillFromLock('accessibility', ports)
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(removed).toBe(true)
+    expect(writtenLock.skills).toEqual({})
+  })
+
+  it('returns false when the skill is not present', async () => {
+    const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
+
+    const removed = await removeSkillFromLock('missing-skill', ports)
+
+    expect(removed).toBe(false)
+    expect(writeFileMock).not.toHaveBeenCalled()
   })
 })

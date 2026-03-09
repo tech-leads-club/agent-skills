@@ -185,3 +185,25 @@ export async function addSkillToLock(
 
   await writeSkillLock(lock, ports, options.global)
 }
+
+/**
+ * Removes a skill entry from the shared lockfile.
+ *
+ * @param skillName - Canonical skill name to remove.
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @param global - When `true`, targets the global lockfile in the user's home directory.
+ * @returns `true` when the skill existed and was removed; otherwise `false`.
+ *
+ * @example
+ * ```ts
+ * const removed = await removeSkillFromLock('accessibility', ports)
+ * ```
+ */
+export async function removeSkillFromLock(skillName: string, ports: CorePorts, global = false): Promise<boolean> {
+  const lock = await readSkillLock(ports, global)
+  if (!(skillName in lock.skills)) return false
+
+  delete lock.skills[skillName]
+  await writeSkillLock(lock, ports, global)
+  return true
+}
