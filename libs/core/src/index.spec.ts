@@ -3,6 +3,7 @@ import {
   AGENTS_DIR,
   AUDIT_LOG_FILE,
   getAllLockedSkills,
+  getAuditLogPath,
   getSkillFromLock,
   LOCK_FILE,
   MAX_CONCURRENT_DOWNLOADS,
@@ -45,5 +46,9 @@ describe('core library', () => {
     expect(removeSkillFromLock).toBeDefined()
     expect(getSkillFromLock).toBeDefined()
     expect(getAllLockedSkills).toBeDefined()
+  })
+
+  it('exports the audit log service functions', () => {
+    expect(getAuditLogPath).toBeDefined()
   })
 })
