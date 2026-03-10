@@ -107,7 +107,7 @@ A glimpse of what's available in our growing catalog:
 | **[playwright-skill](<packages/skills-catalog/skills/(web-automation)/playwright-skill>)**         | Automation  | Complete browser automation with Playwright. Test pages, fill forms, take screenshots, validate UX, and automate any browser task.                                                 |
 | **[figma](<packages/skills-catalog/skills/(design)/figma>)**                                       | Design      | Fetch design context from Figma and translate nodes into production code. Design-to-code implementation with MCP integration.                                                      |
 | **[security-best-practices](<packages/skills-catalog/skills/(security)/security-best-practices>)** | Security    | Language and framework-specific security reviews. Detect vulnerabilities, generate reports, and suggest secure-by-default fixes.                                                   |
-
+| **[TestDino Playwright Skill](https://github.com/testdino-hq/playwright-skill)** | Automation | Structured Playwright testing skill for AI agents covering end-to-end tests, page object models, CI/CD setup, Cypress or Selenium migration, and CLI automation. |
 <p align="center">
   <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
 </p>
