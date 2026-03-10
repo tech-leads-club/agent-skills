@@ -5,11 +5,13 @@ import {
   getAllLockedSkills,
   getAuditLogPath,
   getSkillFromLock,
+  logAudit,
   LOCK_FILE,
   MAX_CONCURRENT_DOWNLOADS,
   PACKAGE_NAME,
   parseInline,
   parseMarkdown,
+  readAuditLog,
   readSkillLock,
   REGISTRY_CACHE_TTL_MS,
   removeSkillFromLock,
@@ -50,5 +52,7 @@ describe('core library', () => {
 
   it('exports the audit log service functions', () => {
     expect(getAuditLogPath).toBeDefined()
+    expect(logAudit).toBeDefined()
+    expect(readAuditLog).toBeDefined()
   })
 })

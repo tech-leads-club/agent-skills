@@ -10,23 +10,26 @@ import type {
   ShellPort,
 } from '../../ports'
 
-import { getAuditLogPath, logAudit } from '../audit-log.service'
+import { getAuditLogPath, logAudit, readAuditLog } from '../audit-log.service'
 
 type TestPorts = {
   appendFileMock: jest.MockedFunction<(path: string, content: string, encoding: string) => Promise<void>>
   homedirMock: jest.MockedFunction<() => string>
   mkdirMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => Promise<void>>
   ports: CorePorts
+  readFileMock: jest.MockedFunction<(path: string, encoding: string) => Promise<string>>
 }
 
 const createPorts = (): TestPorts => {
   const appendFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
   const homedirMock = jest.fn(() => '/home/tester')
   const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
+  const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
 
   const fs = {
     appendFile: appendFileMock,
     mkdir: mkdirMock,
+    readFile: readFileMock,
   } as unknown as FileSystemPort
   const env = {
     cwd: jest.fn(() => '/workspace/project'),
@@ -44,7 +47,7 @@ const createPorts = (): TestPorts => {
     shell: {} as ShellPort,
   }
 
-  return { appendFileMock, homedirMock, mkdirMock, ports }
+  return { appendFileMock, homedirMock, mkdirMock, ports, readFileMock }
 }
 
 afterEach(() => {
@@ -107,4 +110,111 @@ describe('logAudit', () => {
     ).resolves.toBeUndefined()
   })
 
+})
+
+
+describe('readAuditLog', () => {
+  it('returns an empty array when the audit log file is missing', async () => {
+    const { ports, readFileMock } = createPorts()
+    readFileMock.mockRejectedValue(new Error('missing'))
+
+    await expect(readAuditLog(ports)).resolves.toEqual([])
+  })
+
+  it('returns parsed entries ordered from newest to oldest', async () => {
+    const { ports, readFileMock } = createPorts()
+    readFileMock.mockResolvedValue(
+      [
+        JSON.stringify({
+          action: 'install',
+          skillName: 'skill-1',
+          agents: ['Cursor'],
+          success: 1,
+          failed: 0,
+          timestamp: '2026-03-10T10:00:00.000Z',
+        }),
+        JSON.stringify({
+          action: 'remove',
+          skillName: 'skill-2',
+          agents: ['Claude Code'],
+          success: 1,
+          failed: 0,
+          timestamp: '2026-03-10T11:00:00.000Z',
+        }),
+      ].join('\n'),
+    )
+
+    await expect(readAuditLog(ports)).resolves.toEqual([
+      {
+        action: 'remove',
+        skillName: 'skill-2',
+        agents: ['Claude Code'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T11:00:00.000Z',
+      },
+      {
+        action: 'install',
+        skillName: 'skill-1',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T10:00:00.000Z',
+      },
+    ])
+  })
+
+  it('skips invalid and empty lines while respecting the limit', async () => {
+    const { ports, readFileMock } = createPorts()
+    readFileMock.mockResolvedValue(
+      [
+        JSON.stringify({
+          action: 'install',
+          skillName: 'skill-1',
+          agents: ['Cursor'],
+          success: 1,
+          failed: 0,
+          timestamp: '2026-03-10T10:00:00.000Z',
+        }),
+        '',
+        'invalid json line',
+        JSON.stringify({
+          action: 'update',
+          skillName: 'skill-2',
+          agents: ['Cursor'],
+          success: 1,
+          failed: 0,
+          timestamp: '2026-03-10T11:00:00.000Z',
+        }),
+        '',
+        JSON.stringify({
+          action: 'remove',
+          skillName: 'skill-3',
+          agents: ['Claude Code'],
+          success: 1,
+          failed: 0,
+          timestamp: '2026-03-10T12:00:00.000Z',
+        }),
+      ].join('\n'),
+    )
+
+    await expect(readAuditLog(ports, 2)).resolves.toEqual([
+      {
+        action: 'remove',
+        skillName: 'skill-3',
+        agents: ['Claude Code'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T12:00:00.000Z',
+      },
+      {
+        action: 'update',
+        skillName: 'skill-2',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T11:00:00.000Z',
+      },
+    ])
+  })
 })
