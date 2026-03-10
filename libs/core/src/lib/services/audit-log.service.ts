@@ -4,19 +4,25 @@ import { AUDIT_LOG_FILE, GLOBAL_CONFIG_DIR } from '../constants'
 import type { CorePorts } from '../ports'
 import type { AuditEntry } from '../types'
 
+function resolveBaseDir(ports: CorePorts, baseDir?: string): string {
+  return baseDir ?? ports.env.homedir()
+}
+
 /**
  * Resolves the shared audit log path in the user's global agent-skills directory.
  *
  * @param ports - Core ports that expose environment access.
+ * @param baseDir - Optional base directory override. Defaults to the current home directory.
  * @returns The absolute path to the shared audit log file.
  *
  * @example
  * ```ts
  * const auditLogPath = getAuditLogPath(ports)
+ * const testAuditLogPath = getAuditLogPath(ports, '/tmp/test-home')
  * ```
  */
-export function getAuditLogPath(ports: CorePorts): string {
-  return join(ports.env.homedir(), GLOBAL_CONFIG_DIR, AUDIT_LOG_FILE)
+export function getAuditLogPath(ports: CorePorts, baseDir?: string): string {
+  return join(resolveBaseDir(ports, baseDir), GLOBAL_CONFIG_DIR, AUDIT_LOG_FILE)
 }
 
 /**
@@ -27,6 +33,7 @@ export function getAuditLogPath(ports: CorePorts): string {
  *
  * @param entry - Audit payload to append.
  * @param ports - Core ports that expose filesystem and environment access.
+ * @param baseDir - Optional base directory override. Defaults to the current home directory.
  * @returns A promise that resolves when the write completes or is skipped after an error.
  *
  * @example
@@ -43,10 +50,11 @@ export function getAuditLogPath(ports: CorePorts): string {
  * )
  * ```
  */
-export async function logAudit(entry: AuditEntry, ports: CorePorts): Promise<void> {
+export async function logAudit(entry: AuditEntry, ports: CorePorts, baseDir?: string): Promise<void> {
   try {
-    const logPath = getAuditLogPath(ports)
-    const logDir = join(ports.env.homedir(), GLOBAL_CONFIG_DIR)
+    const resolvedBaseDir = resolveBaseDir(ports, baseDir)
+    const logPath = getAuditLogPath(ports, resolvedBaseDir)
+    const logDir = join(resolvedBaseDir, GLOBAL_CONFIG_DIR)
     const logLine = `${JSON.stringify({ ...entry, timestamp: new Date().toISOString() })}\n`
 
     await ports.fs.mkdir(logDir, { recursive: true })
@@ -56,22 +64,23 @@ export async function logAudit(entry: AuditEntry, ports: CorePorts): Promise<voi
   }
 }
 
-
 /**
  * Reads recent audit log entries from the shared JSON-lines audit log.
  *
  * @param ports - Core ports that expose filesystem and environment access.
  * @param limit - Optional maximum number of most-recent entries to return.
+ * @param baseDir - Optional base directory override. Defaults to the current home directory.
  * @returns A promise that resolves to parsed audit entries ordered from newest to oldest.
  *
  * @example
  * ```ts
  * const entries = await readAuditLog(ports, 10)
+ * const testEntries = await readAuditLog(ports, undefined, '/tmp/test-home')
  * ```
  */
-export async function readAuditLog(ports: CorePorts, limit?: number): Promise<AuditEntry[]> {
+export async function readAuditLog(ports: CorePorts, limit?: number, baseDir?: string): Promise<AuditEntry[]> {
   try {
-    const content = await ports.fs.readFile(getAuditLogPath(ports), 'utf-8')
+    const content = await ports.fs.readFile(getAuditLogPath(ports, baseDir), 'utf-8')
     const lines = content.trim().split('\n').filter(Boolean)
     const entries = lines
       .map((line) => {

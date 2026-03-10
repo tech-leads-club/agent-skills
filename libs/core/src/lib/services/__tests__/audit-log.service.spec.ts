@@ -63,6 +63,15 @@ describe('getAuditLogPath', () => {
     expect(result).toBe('/home/tester/.agent-skills/audit.log')
     expect(homedirMock).toHaveBeenCalledTimes(1)
   })
+
+  it('uses the provided baseDir when available', () => {
+    const { ports, homedirMock } = createPorts()
+
+    const result = getAuditLogPath(ports, '/tmp/custom-home')
+
+    expect(result).toBe('/tmp/custom-home/.agent-skills/audit.log')
+    expect(homedirMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('logAudit', () => {
@@ -91,6 +100,33 @@ describe('logAudit', () => {
     )
   })
 
+  it('uses the provided baseDir when available', async () => {
+    const { appendFileMock, homedirMock, mkdirMock, ports } = createPorts()
+    appendFileMock.mockResolvedValue(undefined)
+    mkdirMock.mockResolvedValue(undefined)
+    jest.useFakeTimers().setSystemTime(new Date('2026-03-10T10:00:00.000Z'))
+
+    await logAudit(
+      {
+        action: 'install',
+        skillName: 'test-skill',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+      },
+      ports,
+      '/tmp/custom-home',
+    )
+
+    expect(mkdirMock).toHaveBeenCalledWith('/tmp/custom-home/.agent-skills', { recursive: true })
+    expect(appendFileMock).toHaveBeenCalledWith(
+      '/tmp/custom-home/.agent-skills/audit.log',
+      '{"action":"install","skillName":"test-skill","agents":["Cursor"],"success":1,"failed":0,"timestamp":"2026-03-10T10:00:00.000Z"}\n',
+      'utf-8',
+    )
+    expect(homedirMock).not.toHaveBeenCalled()
+  })
+
   it('fails silently when the audit log cannot be written', async () => {
     const { appendFileMock, mkdirMock, ports } = createPorts()
     mkdirMock.mockResolvedValue(undefined)
@@ -109,9 +145,7 @@ describe('logAudit', () => {
       ),
     ).resolves.toBeUndefined()
   })
-
 })
-
 
 describe('readAuditLog', () => {
   it('returns an empty array when the audit log file is missing', async () => {
@@ -162,6 +196,34 @@ describe('readAuditLog', () => {
         timestamp: '2026-03-10T10:00:00.000Z',
       },
     ])
+  })
+
+  it('uses the provided baseDir when available', async () => {
+    const { homedirMock, ports, readFileMock } = createPorts()
+    readFileMock.mockResolvedValue(
+      JSON.stringify({
+        action: 'install',
+        skillName: 'skill-1',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T10:00:00.000Z',
+      }),
+    )
+
+    await expect(readAuditLog(ports, undefined, '/tmp/custom-home')).resolves.toEqual([
+      {
+        action: 'install',
+        skillName: 'skill-1',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T10:00:00.000Z',
+      },
+    ])
+
+    expect(readFileMock).toHaveBeenCalledWith('/tmp/custom-home/.agent-skills/audit.log', 'utf-8')
+    expect(homedirMock).not.toHaveBeenCalled()
   })
 
   it('skips invalid and empty lines while respecting the limit', async () => {
