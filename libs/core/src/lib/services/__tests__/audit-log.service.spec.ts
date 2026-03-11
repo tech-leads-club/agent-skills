@@ -81,16 +81,13 @@ describe('logAudit', () => {
     mkdirMock.mockResolvedValue(undefined)
     jest.useFakeTimers().setSystemTime(new Date('2026-03-10T10:00:00.000Z'))
 
-    await logAudit(
-      {
-        action: 'install',
-        skillName: 'test-skill',
-        agents: ['Cursor'],
-        success: 1,
-        failed: 0,
-      },
-      ports,
-    )
+    await logAudit(ports, {
+      action: 'install',
+      skillName: 'test-skill',
+      agents: ['Cursor'],
+      success: 1,
+      failed: 0,
+    })
 
     expect(mkdirMock).toHaveBeenCalledWith('/home/tester/.agent-skills', { recursive: true })
     expect(appendFileMock).toHaveBeenCalledWith(
@@ -107,6 +104,7 @@ describe('logAudit', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-03-10T10:00:00.000Z'))
 
     await logAudit(
+      ports,
       {
         action: 'install',
         skillName: 'test-skill',
@@ -114,7 +112,6 @@ describe('logAudit', () => {
         success: 1,
         failed: 0,
       },
-      ports,
       '/tmp/custom-home',
     )
 
@@ -133,16 +130,13 @@ describe('logAudit', () => {
     appendFileMock.mockRejectedValue(new Error('disk full'))
 
     await expect(
-      logAudit(
-        {
-          action: 'remove',
-          skillName: 'test-skill',
-          agents: ['Cursor'],
-          success: 0,
-          failed: 1,
-        },
-        ports,
-      ),
+      logAudit(ports, {
+        action: 'remove',
+        skillName: 'test-skill',
+        agents: ['Cursor'],
+        success: 0,
+        failed: 1,
+      }),
     ).resolves.toBeUndefined()
   })
 })

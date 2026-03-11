@@ -31,14 +31,15 @@ export function getAuditLogPath(ports: CorePorts, baseDir?: string): string {
  * The log write is intentionally best-effort: filesystem failures are ignored so
  * install, remove, and update flows do not fail because of audit logging.
  *
- * @param entry - Audit payload to append.
  * @param ports - Core ports that expose filesystem and environment access.
+ * @param entry - Audit payload to append.
  * @param baseDir - Optional base directory override. Defaults to the current home directory.
  * @returns A promise that resolves when the write completes or is skipped after an error.
  *
  * @example
  * ```ts
  * await logAudit(
+ *   ports,
  *   {
  *     action: 'install',
  *     skillName: 'accessibility',
@@ -46,11 +47,10 @@ export function getAuditLogPath(ports: CorePorts, baseDir?: string): string {
  *     success: 1,
  *     failed: 0,
  *   },
- *   ports,
  * )
  * ```
  */
-export async function logAudit(entry: AuditEntry, ports: CorePorts, baseDir?: string): Promise<void> {
+export async function logAudit(ports: CorePorts, entry: AuditEntry, baseDir?: string): Promise<void> {
   try {
     const resolvedBaseDir = resolveBaseDir(ports, baseDir)
     const logPath = getAuditLogPath(ports, resolvedBaseDir)
