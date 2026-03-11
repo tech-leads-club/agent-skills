@@ -103,18 +103,18 @@ export async function readSkillLock(ports: CorePorts, global = false): Promise<S
 /**
  * Writes the shared skill lockfile using a temporary file and backup copy.
  *
- * @param lock - Lockfile payload to persist.
  * @param ports - Core ports that expose filesystem and environment access.
+ * @param lock - Lockfile payload to persist.
  * @param global - When `true`, writes the global lockfile in the user's home directory.
  * @returns A promise that resolves when the lockfile has been written atomically.
  * @throws {unknown} Rethrows filesystem errors after attempting temp-file cleanup.
  *
  * @example
  * ```ts
- * await writeSkillLock(lock, ports)
+ * await writeSkillLock(ports, lock)
  * ```
  */
-export async function writeSkillLock(lock: SkillLockFile, ports: CorePorts, global = false): Promise<void> {
+export async function writeSkillLock(ports: CorePorts, lock: SkillLockFile, global = false): Promise<void> {
   const lockPath = getSkillLockPath(ports, global)
   const backupPath = getBackupPath(ports, global)
   const tempPath = `${lockPath}.tmp`
@@ -144,18 +144,19 @@ export async function writeSkillLock(lock: SkillLockFile, ports: CorePorts, glob
 /**
  * Adds or updates a skill entry in the shared lockfile.
  *
+ * @param ports - Core ports that expose filesystem and environment access.
  * @param skillName - Canonical skill name to persist.
  * @param agents - Agents currently associated with the skill.
  * @param options - Optional metadata persisted with the lock entry.
- * @param ports - Core ports that expose filesystem and environment access.
  * @returns A promise that resolves when the lockfile update has been persisted.
  *
  * @example
  * ```ts
- * await addSkillToLock('accessibility', ['cursor'], { source: 'local' }, ports)
+ * await addSkillToLock(ports, 'accessibility', ['cursor'], { source: 'local' })
  * ```
  */
 export async function addSkillToLock(
+  ports: CorePorts,
   skillName: string,
   agents: AgentType[],
   options: {
@@ -165,7 +166,6 @@ export async function addSkillToLock(
     global?: boolean
     version?: string
   } = {},
-  ports: CorePorts,
 ): Promise<void> {
   const lock = await readSkillLock(ports, options.global)
   const now = new Date().toISOString()
@@ -183,47 +183,47 @@ export async function addSkillToLock(
     version: options.version,
   }
 
-  await writeSkillLock(lock, ports, options.global)
+  await writeSkillLock(ports, lock, options.global)
 }
 
 /**
  * Removes a skill entry from the shared lockfile.
  *
- * @param skillName - Canonical skill name to remove.
  * @param ports - Core ports that expose filesystem and environment access.
+ * @param skillName - Canonical skill name to remove.
  * @param global - When `true`, targets the global lockfile in the user's home directory.
  * @returns `true` when the skill existed and was removed; otherwise `false`.
  *
  * @example
  * ```ts
- * const removed = await removeSkillFromLock('accessibility', ports)
+ * const removed = await removeSkillFromLock(ports, 'accessibility')
  * ```
  */
-export async function removeSkillFromLock(skillName: string, ports: CorePorts, global = false): Promise<boolean> {
+export async function removeSkillFromLock(ports: CorePorts, skillName: string, global = false): Promise<boolean> {
   const lock = await readSkillLock(ports, global)
   if (!(skillName in lock.skills)) return false
 
   delete lock.skills[skillName]
-  await writeSkillLock(lock, ports, global)
+  await writeSkillLock(ports, lock, global)
   return true
 }
 
 /**
  * Looks up a single skill entry in the shared lockfile.
  *
- * @param skillName - Canonical skill name to look up.
  * @param ports - Core ports that expose filesystem and environment access.
+ * @param skillName - Canonical skill name to look up.
  * @param global - When `true`, reads from the global lockfile in the user's home directory.
  * @returns The matching lock entry or `null` when no entry exists.
  *
  * @example
  * ```ts
- * const entry = await getSkillFromLock('accessibility', ports)
+ * const entry = await getSkillFromLock(ports, 'accessibility')
  * ```
  */
 export async function getSkillFromLock(
-  skillName: string,
   ports: CorePorts,
+  skillName: string,
   global = false,
 ): Promise<SkillLockEntry | null> {
   const lock = await readSkillLock(ports, global)
