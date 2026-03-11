@@ -172,14 +172,14 @@ Pre-built templates are available in `assets/` for quick starting points. Use th
 
 | Template         | File                                                   |
 | ---------------- | ------------------------------------------------------ |
-| Flowchart        | `assets/flowchart-template.excalidraw`              |
-| Relationship     | `assets/relationship-template.excalidraw`           |
-| Mind Map         | `assets/mindmap-template.excalidraw`                |
-| Data Flow (DFD)  | `assets/data-flow-diagram-template.excalidraw`      |
-| Swimlane         | `assets/business-flow-swimlane-template.excalidraw` |
-| Class Diagram    | `assets/class-diagram-template.excalidraw`          |
-| Sequence Diagram | `assets/sequence-diagram-template.excalidraw`       |
-| ER Diagram       | `assets/er-diagram-template.excalidraw`             |
+| Flowchart        | `assets/flowchart-template.json`                    |
+| Relationship     | `assets/relationship-template.json`                 |
+| Mind Map         | `assets/mindmap-template.json`                      |
+| Data Flow (DFD)  | `assets/data-flow-diagram-template.json`            |
+| Swimlane         | `assets/business-flow-swimlane-template.json`       |
+| Class Diagram    | `assets/class-diagram-template.json`                |
+| Sequence Diagram | `assets/sequence-diagram-template.json`             |
+| ER Diagram       | `assets/er-diagram-template.json`                   |
 
 Read a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.
 

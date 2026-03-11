@@ -1,3 +1,18 @@
+## 0.11.2 (2026-03-04)
+
+### 🩹 Fixes
+
+- update Excalidraw template file extensions from .excalidraw to .json ([08005f49b](https://github.com/tech-leads-club/agent-skills/commit/08005f49b))
+- change .excalidraw to .json ([8fc9e7383](https://github.com/tech-leads-club/agent-skills/commit/8fc9e7383))
+- update Excalidraw template file extensions to .excalidraw ([49771bd98](https://github.com/tech-leads-club/agent-skills/commit/49771bd98))
+- update template references and file extensions in SKILL.md ([ea36e72b1](https://github.com/tech-leads-club/agent-skills/commit/ea36e72b1))
+- rename template files from .excalidraw to .json ([584fe04e3](https://github.com/tech-leads-club/agent-skills/commit/584fe04e3))
+- excalidraw references ([bd9e62c5c](https://github.com/tech-leads-club/agent-skills/commit/bd9e62c5c))
+
+### ❤️ Thank You
+
+- may-santos
+
 ## 0.11.1 (2026-03-01)
 
 ### 🩹 Fixes
