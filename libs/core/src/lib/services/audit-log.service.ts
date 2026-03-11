@@ -93,7 +93,15 @@ export async function readAuditLog(ports: CorePorts, limit?: number, baseDir?: s
       .filter((entry): entry is AuditEntry => entry !== null)
       .reverse()
 
-    return limit ? entries.slice(0, limit) : entries
+    if (limit === undefined) {
+      return entries
+    }
+
+    if (limit <= 0) {
+      return []
+    }
+
+    return entries.slice(0, limit)
   } catch {
     return []
   }

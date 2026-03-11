@@ -273,4 +273,36 @@ describe('readAuditLog', () => {
       },
     ])
   })
+
+  it('returns an empty array when limit is 0', async () => {
+    const { ports, readFileMock } = createPorts()
+    readFileMock.mockResolvedValue(
+      JSON.stringify({
+        action: 'install',
+        skillName: 'skill-1',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T10:00:00.000Z',
+      }),
+    )
+
+    await expect(readAuditLog(ports, 0)).resolves.toEqual([])
+  })
+
+  it('returns an empty array when limit is negative', async () => {
+    const { ports, readFileMock } = createPorts()
+    readFileMock.mockResolvedValue(
+      JSON.stringify({
+        action: 'install',
+        skillName: 'skill-1',
+        agents: ['Cursor'],
+        success: 1,
+        failed: 0,
+        timestamp: '2026-03-10T10:00:00.000Z',
+      }),
+    )
+
+    await expect(readAuditLog(ports, -5)).resolves.toEqual([])
+  })
 })
