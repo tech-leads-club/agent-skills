@@ -13,7 +13,7 @@ This skill guides AI agents to create well-structured ADRs in three industry-sta
 The skill automatically:
 
 - Assigns the next sequential ADR number by scanning your `docs/adr/` directory
-- Detects your language (English, Portuguese, Spanish) and generates in that language
+- Detects your language and generates the ADR in that language (for example, English, Portuguese, Spanish)
 - Guides you with questions if context is missing
 - Enforces naming conventions (`001-kebab-case-title.md`)
 - Links superseded/superseding ADRs correctly
