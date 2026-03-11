@@ -7,6 +7,7 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "package-json": "^10.0.1",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zod": "^4.3.6"
   }
 }

@@ -1,18 +1,52 @@
-export type MarkdownToken =
-  | { type: 'heading'; level: 1 | 2 | 3; text: string }
-  | { type: 'paragraph'; text: string }
-  | { type: 'list-item'; text: string; indent: number }
-  | { type: 'code-block'; language: string; lines: string[] }
-  | { type: 'hr' }
-  | { type: 'blank' }
+import type { InlineSegment, MarkdownToken } from '../types'
 
-function stripFrontmatter(raw: string): string {
+/**
+ * Removes YAML frontmatter from the start of a markdown document when present.
+ *
+ * @param raw - Raw markdown string that may include frontmatter.
+ * @returns Markdown body without the leading frontmatter block.
+ * @throws {never} This helper does not throw exceptions.
+ *
+ * @example
+ * ```ts
+ * stripFrontmatter('---\ntitle: Example\n---\n# Heading') // '# Heading'
+ * ```
+ */
+export function stripFrontmatter(raw: string): string {
   if (!raw.startsWith('---')) return raw
-  const endIndex = raw.indexOf('---', 3)
-  if (endIndex === -1) return raw
-  return raw.slice(endIndex + 3).trimStart()
+
+  let offset = 0
+  while (offset < raw.length) {
+    const lineEnd = raw.indexOf('\n', offset)
+    const segmentEnd = lineEnd === -1 ? raw.length : lineEnd
+    const contentEnd = raw[segmentEnd - 1] === '\r' ? segmentEnd - 1 : segmentEnd
+    const line = raw.slice(offset, contentEnd)
+
+    if (offset === 0) {
+      if (line !== '---') return raw
+    } else if (line === '---') {
+      return raw.slice(lineEnd === -1 ? raw.length : lineEnd + 1).trimStart()
+    }
+
+    if (lineEnd === -1) return raw
+    offset = lineEnd + 1
+  }
+
+  return raw
 }
 
+/**
+ * Parses block-level markdown into a compact token set used by skill viewers.
+ *
+ * @param raw - Raw markdown input that may include blank lines and frontmatter.
+ * @returns Array of {@link MarkdownToken} objects describing the document structure.
+ * @throws {never} This parser only performs in-memory string analysis.
+ *
+ * @example
+ * ```ts
+ * parseMarkdown('# Title\n\nParagraph')
+ * ```
+ */
 export function parseMarkdown(raw: string): MarkdownToken[] {
   const body = stripFrontmatter(raw)
   const lines = body.split('\n')
@@ -26,10 +60,12 @@ export function parseMarkdown(raw: string): MarkdownToken[] {
       const language = line.slice(3).trim()
       const codeLines: string[] = []
       i++
+
       while (i < lines.length && !lines[i].startsWith('```')) {
         codeLines.push(lines[i])
         i++
       }
+
       tokens.push({ type: 'code-block', language, lines: codeLines })
       i++
       continue
@@ -59,7 +95,6 @@ export function parseMarkdown(raw: string): MarkdownToken[] {
     }
 
     const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.+)$/)
-
     if (listMatch) {
       const indent = Math.floor(listMatch[1].length / 2)
       tokens.push({ type: 'list-item', text: listMatch[3], indent })
@@ -74,13 +109,18 @@ export function parseMarkdown(raw: string): MarkdownToken[] {
   return tokens
 }
 
-export interface InlineSegment {
-  text: string
-  bold?: boolean
-  italic?: boolean
-  code?: boolean
-}
-
+/**
+ * Parses inline markdown formatting (bold, italic, code) into segments.
+ *
+ * @param text - Inline markdown string.
+ * @returns Ordered {@link InlineSegment} entries preserving raw text.
+ * @throws {never} Inline parsing never throws.
+ *
+ * @example
+ * ```ts
+ * parseInline('Use **bold** and `code`')
+ * ```
+ */
 export function parseInline(text: string): InlineSegment[] {
   const segments: InlineSegment[] = []
   const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g
