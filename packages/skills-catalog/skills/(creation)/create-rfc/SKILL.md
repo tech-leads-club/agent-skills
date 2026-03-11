@@ -1,6 +1,6 @@
 ---
 name: create-rfc
-description: Creates structured Request for Comments (RFC) documents for proposing and deciding on significant changes. Use when the user says "write an RFC", "create a proposal", "I need to propose a change", "draft an RFC", "document a decision", or needs stakeholder alignment before making a major technical or process decision. Do NOT use for TDDs/implementation docs (use create-technical-design-doc instead), README files, or general documentation.
+description: Creates structured Request for Comments (RFC) documents for proposing and deciding on significant changes. Use when the user says "write an RFC", "create a proposal", "I need to propose a change", "draft an RFC", "document a decision", or needs stakeholder alignment before making a major technical or process decision. Do NOT use for TDDs/implementation docs (use technical-design-doc-creator instead), README files, or general documentation.
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
@@ -23,7 +23,7 @@ Use this skill when:
 - User needs to compare options and record the chosen direction with rationale
 
 Do NOT use for:
-- Technical Design Documents focused on implementation (use `create-technical-design-doc`)
+- Technical Design Documents focused on implementation (use `technical-design-doc-creator`)
 - Simple meeting notes or summaries
 - README files or API documentation
 
@@ -133,8 +133,8 @@ After generating, offer:
 RFC Created: "[Title]"
 
 Sections included:
-- Mandatory: Background, Options, Action Items, Approvers
-- Recommended: Pros/Cons comparison, Cost estimate, Due date
+- Mandatory: Header & Metadata, Background, Assumptions, Decision Criteria, Options Considered, Action Items, Outcome
+- Recommended: Relevant Data, Pros/Cons comparison, Cost estimate, Resources
 
 Suggested next steps:
 - Share with Contributors for feedback
@@ -144,7 +144,7 @@ Suggested next steps:
 
 Would you like me to:
 1. Add more options to compare?
-2. Add a detailed implementation section?
+2. Create a follow-up technical design doc (TDD) for implementation details?
 3. Publish this to Confluence?
 ```
 
@@ -171,7 +171,7 @@ Would you like me to:
 
 ## Section Templates
 
-Read `references/section-templates.md` when generating an RFC document. It contains complete Markdown templates for all 8 sections with examples and "if missing" prompts for each field.
+Read `references/section-templates.md` when generating an RFC document. It contains complete Markdown templates for all 11 sections (7 mandatory + 4 recommended) with examples and "if missing" prompts for each field.
 
 ---
 

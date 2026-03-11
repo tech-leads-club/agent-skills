@@ -14,7 +14,7 @@ The skill automatically adapts to:
 
 - **RFC type**: Technical/Architecture, Process/Workflow, Product/Feature, Vendor Selection, Policy/Compliance
 - **Context provided**: If you give rich context, it generates immediately; if not, it asks targeted questions
-- **User's language**: Automatically generates the RFC in English, Portuguese, or Spanish based on your request
+- **User's language**: Automatically generates the RFC in the same language as your request (for example, English, Portuguese, or Spanish)
 
 ## RFC vs TDD — Which One Do You Need?
 
