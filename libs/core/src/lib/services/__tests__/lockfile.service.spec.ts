@@ -185,7 +185,7 @@ describe('writeSkillLock', () => {
       },
     }
 
-    await writeSkillLock(lock, ports)
+    await writeSkillLock(ports, lock)
 
     expect(mkdirMock).toHaveBeenCalledWith('/workspace/project/.agents', { recursive: true })
     expect(writeFileMock).toHaveBeenCalledWith(
@@ -207,7 +207,7 @@ describe('writeSkillLock', () => {
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
 
-    await writeSkillLock({ version: 2, skills: {} }, ports)
+    await writeSkillLock(ports, { version: 2, skills: {} })
 
     expect(writeFileMock).toHaveBeenNthCalledWith(
       1,
@@ -226,7 +226,7 @@ describe('writeSkillLock', () => {
     renameMock.mockRejectedValue(new Error('rename failed'))
     rmMock.mockResolvedValue(undefined)
 
-    await expect(writeSkillLock({ version: 2, skills: {} }, ports)).rejects.toThrow('rename failed')
+    await expect(writeSkillLock(ports, { version: 2, skills: {} })).rejects.toThrow('rename failed')
 
     expect(rmMock).toHaveBeenCalledWith('/workspace/project/.agents/.skill-lock.json.tmp', { force: true })
   })
@@ -242,17 +242,12 @@ describe('addSkillToLock', () => {
     renameMock.mockResolvedValue(undefined)
     jest.useFakeTimers().setSystemTime(new Date('2026-03-09T10:00:00.000Z'))
 
-    await addSkillToLock(
-      'accessibility',
-      ['cursor'],
-      {
-        source: 'registry',
-        contentHash: 'abc123',
-        method: 'symlink',
-        version: '1.2.3',
-      },
-      ports,
-    )
+    await addSkillToLock(ports, 'accessibility', ['cursor'], {
+      source: 'registry',
+      contentHash: 'abc123',
+      method: 'symlink',
+      version: '1.2.3',
+    })
 
     const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
     const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
@@ -297,7 +292,7 @@ describe('addSkillToLock', () => {
     readFileMock.mockResolvedValue(JSON.stringify(existingLock))
     jest.useFakeTimers().setSystemTime(new Date('2026-03-09T12:00:00.000Z'))
 
-    await addSkillToLock('accessibility', ['cursor', 'codex'], { source: 'local' }, ports)
+    await addSkillToLock(ports, 'accessibility', ['cursor', 'codex'], { source: 'local' })
 
     const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
     const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
@@ -338,7 +333,7 @@ describe('removeSkillFromLock', () => {
 
     readFileMock.mockResolvedValue(JSON.stringify(existingLock))
 
-    const removed = await removeSkillFromLock('accessibility', ports)
+    const removed = await removeSkillFromLock(ports, 'accessibility')
 
     const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
     const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
@@ -352,7 +347,7 @@ describe('removeSkillFromLock', () => {
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
-    const removed = await removeSkillFromLock('missing-skill', ports)
+    const removed = await removeSkillFromLock(ports, 'missing-skill')
 
     expect(removed).toBe(false)
     expect(writeFileMock).not.toHaveBeenCalled()
@@ -383,7 +378,7 @@ describe('getSkillFromLock', () => {
       }),
     )
 
-    const result = await getSkillFromLock('accessibility', ports)
+    const result = await getSkillFromLock(ports, 'accessibility')
 
     expect(result).toEqual(entry)
   })
@@ -393,7 +388,7 @@ describe('getSkillFromLock', () => {
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
-    const result = await getSkillFromLock('missing-skill', ports)
+    const result = await getSkillFromLock(ports, 'missing-skill')
 
     expect(result).toBeNull()
   })
