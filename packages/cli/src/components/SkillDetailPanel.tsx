@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useSkillContent } from '../hooks/useSkillContent'
 import { getColorForCategory } from '../services/category-colors'
-import { parseMarkdown, type MarkdownToken } from '../services/markdown-parser'
+import { parseMarkdown, type MarkdownToken } from '@tech-leads-club/core'
 import { colors, symbols } from '../theme'
 import type { SkillInfo } from '../types'
 
