@@ -11,7 +11,7 @@ import type {
   ShellPort,
 } from '../../ports'
 
-import { getAgentConfig, getAllAgentTypes } from '../agents.service'
+import { detectInstalledAgents, getAgentConfig, getAllAgentTypes } from '../agents.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -106,5 +106,47 @@ describe('agents service', () => {
     expect(config.detectInstalled()).toBe(false)
     expect(homedirMock).toHaveBeenCalled()
     expect(existsSyncMock).toHaveBeenCalledWith('/home/tester/.cursor')
+  })
+
+  it('returns an empty list when no supported agents are installed', () => {
+    const { ports } = createPorts()
+
+    expect(detectInstalledAgents(ports)).toEqual([])
+  })
+
+  it('detects only the agents whose install locations exist', () => {
+    const { ports, existsSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) => path === '/home/tester/.cursor' || path === '/workspace/project/.opencode',
+    )
+
+    expect(detectInstalledAgents(ports)).toEqual(['cursor', 'opencode'])
+  })
+
+  it('returns every supported agent when all install locations exist', () => {
+    const { ports, existsSyncMock } = createPorts()
+    existsSyncMock.mockReturnValue(true)
+
+    expect(detectInstalledAgents(ports)).toEqual([
+      'cursor',
+      'claude-code',
+      'github-copilot',
+      'windsurf',
+      'cline',
+      'aider',
+      'codex',
+      'gemini',
+      'antigravity',
+      'roo',
+      'kilocode',
+      'trae',
+      'kiro',
+      'amazon-q',
+      'augment',
+      'tabnine',
+      'opencode',
+      'sourcegraph',
+      'droid',
+    ])
   })
 })
