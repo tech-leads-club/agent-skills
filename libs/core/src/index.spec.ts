@@ -9,8 +9,10 @@ import {
   getAllAgentTypes,
   getAllLockedSkills,
   getAuditLogPath,
+  getCategories,
   getSkillFromLock,
   isCategoryFolder,
+  loadCategoryMetadata,
   LOCK_FILE,
   logAudit,
   MAX_CONCURRENT_DOWNLOADS,
@@ -72,5 +74,7 @@ describe('core library', () => {
     expect(extractCategoryId).toBeDefined()
     expect(isCategoryFolder).toBeDefined()
     expect(categoryIdToFolderName).toBeDefined()
+    expect(loadCategoryMetadata).toBeDefined()
+    expect(getCategories).toBeDefined()
   })
 })
