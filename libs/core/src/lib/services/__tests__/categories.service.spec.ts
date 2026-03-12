@@ -110,9 +110,20 @@ describe('loadCategoryMetadata', () => {
     expect(loadCategoryMetadata(ports)).toEqual(metadata)
   })
 
-  it('returns an empty object when metadata is missing or invalid', () => {
-    const { ports, existsSyncMock, readFileSyncMock } = createPorts()
+  it('returns an empty object when metadata is missing', () => {
+    const { ports, existsSyncMock } = createPorts()
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    expect(loadCategoryMetadata(ports)).toEqual({})
+  })
+
+  it('returns an empty object when metadata is invalid JSON', () => {
+    const { ports, existsSyncMock, readFileSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' ||
+        path === '/workspace/project/packages/skills-catalog/skills/_category.json',
+    )
     readFileSyncMock.mockImplementation(() => {
       throw new Error('invalid json')
     })
@@ -233,6 +244,27 @@ describe('groupSkillsByCategory', () => {
         ],
       ],
       [DEFAULT_CATEGORY, [{ name: 'delta' }]],
+    ])
+  })
+  it('adds unknown categories to the group when local categories exist', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' || path === '/workspace/project/packages/skills-catalog/skills',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    const grouped = groupSkillsByCategory(ports, [
+      { name: 'alpha', category: 'quality' },
+      { name: 'gamma', category: 'security' },
+    ])
+
+    expect(Array.from(grouped.entries())).toEqual([
+      [
+        { id: 'quality', name: 'Quality', description: undefined, priority: 0 },
+        [{ name: 'alpha', category: 'quality' }],
+      ],
+      [{ id: 'security', name: 'Security', priority: 999 }, [{ name: 'gamma', category: 'security' }]],
     ])
   })
 })
