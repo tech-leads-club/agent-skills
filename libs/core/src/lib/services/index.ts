@@ -1,3 +1,4 @@
+export * from './agents.service'
 export * from './audit-log.service'
 export * from './global-path.service'
 export * from './lockfile.service'
