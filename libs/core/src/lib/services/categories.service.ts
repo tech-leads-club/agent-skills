@@ -283,11 +283,10 @@ export function getSkillCategory(ports: CorePorts, skillName: string): CategoryI
  * })
  * ```
  */
-export function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadata): void {
+export async function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadata): Promise<void> {
   const metadataPath = join(getSkillsDir(ports), CATEGORY_METADATA_FILE)
   const content = JSON.stringify(metadata, null, 2)
-
-  void ports.fs.writeFile(metadataPath, `${content}\n`, 'utf-8')
+  await ports.fs.writeFile(metadataPath, content + '\n', 'utf-8')
 }
 
 /**
