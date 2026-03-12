@@ -2,6 +2,7 @@ import {
   addSkillToLock,
   AGENTS_DIR,
   AUDIT_LOG_FILE,
+  getAgentConfig,
   getAllAgentTypes,
   getAllLockedSkills,
   getAuditLogPath,
@@ -58,6 +59,7 @@ describe('core library', () => {
   })
 
   it('exports the agents service functions', () => {
+    expect(getAgentConfig).toBeDefined()
     expect(getAllAgentTypes).toBeDefined()
   })
 })
