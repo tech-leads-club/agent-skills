@@ -10,6 +10,7 @@ import {
   getAllLockedSkills,
   getAuditLogPath,
   getCategories,
+  getCategoryById,
   getSkillFromLock,
   isCategoryFolder,
   loadCategoryMetadata,
@@ -76,5 +77,6 @@ describe('core library', () => {
     expect(categoryIdToFolderName).toBeDefined()
     expect(loadCategoryMetadata).toBeDefined()
     expect(getCategories).toBeDefined()
+    expect(getCategoryById).toBeDefined()
   })
 })

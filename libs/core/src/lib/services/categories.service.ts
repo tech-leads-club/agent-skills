@@ -119,3 +119,19 @@ export function getCategories(ports: CorePorts): CategoryInfo[] {
   categories.sort((a, b) => a.name.localeCompare(b.name))
   return categories
 }
+
+/**
+ * Looks up a category by its identifier.
+ *
+ * @param ports - Core ports used to read the available categories.
+ * @param id - Category identifier to search for.
+ * @returns The matching category or `undefined` when it does not exist.
+ *
+ * @example
+ * ```ts
+ * const category = getCategoryById(ports, 'quality')
+ * ```
+ */
+export function getCategoryById(ports: CorePorts, id: string): CategoryInfo | undefined {
+  return getCategories(ports).find((category) => category.id === id)
+}

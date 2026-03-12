@@ -15,6 +15,7 @@ import {
   categoryIdToFolderName,
   extractCategoryId,
   getCategories,
+  getCategoryById,
   isCategoryFolder,
   loadCategoryMetadata,
 } from '../categories.service'
@@ -151,5 +152,24 @@ describe('getCategories', () => {
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
 
     expect(getCategories(ports)).toEqual([])
+  })
+})
+
+describe('getCategoryById', () => {
+  it('returns the matching category and undefined when missing', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' || path === '/workspace/project/packages/skills-catalog/skills',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    expect(getCategoryById(ports, 'quality')).toEqual({
+      id: 'quality',
+      name: 'Quality',
+      description: undefined,
+      priority: 0,
+    })
+    expect(getCategoryById(ports, 'missing')).toBeUndefined()
   })
 })
