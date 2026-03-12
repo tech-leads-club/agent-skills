@@ -219,3 +219,52 @@ export function groupSkillsByCategory<T extends { name: string; category?: strin
 
   return sortedGrouped
 }
+
+/**
+ * Resolves the category id for a skill folder in the local catalog.
+ *
+ * @param ports - Core ports used to inspect the local skills catalog.
+ * @param skillName - Skill folder name to search for.
+ * @returns The matching category id or the default uncategorized id.
+ *
+ * @example
+ * ```ts
+ * const categoryId = getSkillCategoryId(ports, 'accessibility')
+ * ```
+ */
+export function getSkillCategoryId(ports: CorePorts, skillName: string): string {
+  const skillsDir = getSkillsDir(ports)
+  if (!ports.fs.existsSync(skillsDir)) return DEFAULT_CATEGORY_ID
+
+  const entries = ports.fs.readdirSync(skillsDir, { withFileTypes: true })
+
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !isCategoryFolder(entry.name)) continue
+
+    const categoryId = extractCategoryId(entry.name)
+    if (!categoryId) continue
+
+    const categoryPath = join(skillsDir, entry.name)
+    const skillPath = join(categoryPath, skillName)
+    if (ports.fs.existsSync(join(skillPath, 'SKILL.md'))) return categoryId
+  }
+
+  return DEFAULT_CATEGORY_ID
+}
+
+/**
+ * Resolves the full category information for a skill.
+ *
+ * @param ports - Core ports used to inspect skills and categories.
+ * @param skillName - Skill folder name to search for.
+ * @returns The matching category or the default uncategorized category.
+ *
+ * @example
+ * ```ts
+ * const category = getSkillCategory(ports, 'accessibility')
+ * ```
+ */
+export function getSkillCategory(ports: CorePorts, skillName: string): CategoryInfo {
+  const categoryId = getSkillCategoryId(ports, skillName)
+  return getCategoryById(ports, categoryId) ?? DEFAULT_CATEGORY
+}

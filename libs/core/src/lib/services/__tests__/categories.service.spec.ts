@@ -17,6 +17,8 @@ import {
   extractCategoryId,
   getCategories,
   getCategoryById,
+  getSkillCategory,
+  getSkillCategoryId,
   groupSkillsByCategory,
   isCategoryFolder,
   loadCategoryMetadata,
@@ -226,5 +228,52 @@ describe('groupSkillsByCategory', () => {
       ],
       [DEFAULT_CATEGORY, [{ name: 'delta' }]],
     ])
+  })
+})
+
+describe('getSkillCategoryId', () => {
+  it('returns the category id for a skill found in a category folder', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' ||
+        path === '/workspace/project/packages/skills-catalog/skills' ||
+        path === '/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    expect(getSkillCategoryId(ports, 'accessibility')).toBe('quality')
+  })
+
+  it('falls back to the default category when the skill is not found', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' || path === '/workspace/project/packages/skills-catalog/skills',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    expect(getSkillCategoryId(ports, 'missing-skill')).toBe('uncategorized')
+  })
+})
+
+describe('getSkillCategory', () => {
+  it('returns the matching category or the default category', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' ||
+        path === '/workspace/project/packages/skills-catalog/skills' ||
+        path === '/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    expect(getSkillCategory(ports, 'accessibility')).toEqual({
+      id: 'quality',
+      name: 'Quality',
+      description: undefined,
+      priority: 0,
+    })
+    expect(getSkillCategory(ports, 'missing-skill')).toEqual(DEFAULT_CATEGORY)
   })
 })
