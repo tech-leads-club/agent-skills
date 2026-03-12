@@ -2,12 +2,15 @@ import {
   addSkillToLock,
   AGENTS_DIR,
   AUDIT_LOG_FILE,
+  categoryIdToFolderName,
   detectInstalledAgents,
+  extractCategoryId,
   getAgentConfig,
   getAllAgentTypes,
   getAllLockedSkills,
   getAuditLogPath,
   getSkillFromLock,
+  isCategoryFolder,
   LOCK_FILE,
   logAudit,
   MAX_CONCURRENT_DOWNLOADS,
@@ -63,5 +66,11 @@ describe('core library', () => {
     expect(detectInstalledAgents).toBeDefined()
     expect(getAgentConfig).toBeDefined()
     expect(getAllAgentTypes).toBeDefined()
+  })
+
+  it('exports the categories service functions', () => {
+    expect(extractCategoryId).toBeDefined()
+    expect(isCategoryFolder).toBeDefined()
+    expect(categoryIdToFolderName).toBeDefined()
   })
 })

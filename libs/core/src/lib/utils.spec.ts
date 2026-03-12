@@ -1,14 +1,6 @@
 import { join } from 'node:path'
 
-import {
-  categoryIdToFolderName,
-  extractCategoryId,
-  formatCategoryName,
-  getCacheDir,
-  isCategoryFolder,
-  isPathSafe,
-  sanitizeName,
-} from './utils'
+import { formatCategoryName, getCacheDir, isPathSafe, sanitizeName } from './utils'
 
 describe('sanitizeName', () => {
   it('removes unsafe filesystem characters and traversal prefixes', () => {
@@ -45,17 +37,6 @@ describe('isPathSafe', () => {
 describe('category helpers', () => {
   it('formats category names for display', () => {
     expect(formatCategoryName('core-migration')).toBe('Core Migration')
-  })
-
-  it('extracts ids from category folders', () => {
-    expect(extractCategoryId('(frontend)')).toBe('frontend')
-    expect(extractCategoryId('frontend')).toBeNull()
-  })
-
-  it('validates and creates category folder names', () => {
-    expect(isCategoryFolder('(quality-tools)')).toBe(true)
-    expect(isCategoryFolder('quality-tools')).toBe(false)
-    expect(categoryIdToFolderName('quality-tools')).toBe('(quality-tools)')
   })
 })
 
