@@ -247,6 +247,22 @@ export function getAgentConfig(type: AgentType, ports: CorePorts): AgentConfig {
   return getAgents(ports)[type]
 }
 
+/**
+ * Detects which supported agents are installed on the current system.
+ *
+ * @param ports - Core ports used to check filesystem presence.
+ * @returns The installed agent types.
+ * @example
+ * ```ts
+ * const installedAgents = detectInstalledAgents(ports)
+ * ```
+ */
+export function detectInstalledAgents(ports: CorePorts): AgentType[] {
+  return (Object.entries(getAgents(ports)) as [AgentType, AgentConfig][])
+    .filter(([, config]) => config.detectInstalled())
+    .map(([type]) => type)
+}
+
 const isExtensionInstalled = (ports: CorePorts, home: string, publisher: string, name: string): boolean => {
   const extensionsDirs = [
     join(home, '.vscode/extensions'),
