@@ -82,14 +82,14 @@ describe('agents service', () => {
   it('returns the full configuration for the requested agent type', () => {
     const { ports } = createPorts()
 
-    expect(getAgentConfig('cursor', ports)).toMatchObject({
+    expect(getAgentConfig(ports, 'cursor')).toMatchObject({
       name: 'cursor',
       displayName: 'Cursor',
       description: 'AI-first code editor built on VS Code',
       skillsDir: '.cursor/skills',
       globalSkillsDir: join('/home/tester', '.cursor/skills'),
     })
-    expect(getAgentConfig('opencode', ports)).toMatchObject({
+    expect(getAgentConfig(ports, 'opencode')).toMatchObject({
       name: 'opencode',
       displayName: 'OpenCode',
       description: 'Open-source AI coding terminal',
@@ -101,7 +101,7 @@ describe('agents service', () => {
   it('uses the injected home directory and filesystem ports for dynamic paths', () => {
     const { ports, homedirMock, existsSyncMock } = createPorts()
 
-    const config = getAgentConfig('cursor', ports)
+    const config = getAgentConfig(ports, 'cursor')
 
     expect(config.detectInstalled()).toBe(false)
     expect(homedirMock).toHaveBeenCalled()
