@@ -1,6 +1,12 @@
 import { join } from 'node:path'
 
-import { CATEGORY_FOLDER_PATTERN, CATEGORY_METADATA_FILE, SKILLS_CATALOG_DIR } from '../constants'
+import {
+  CATEGORY_FOLDER_PATTERN,
+  CATEGORY_METADATA_FILE,
+  DEFAULT_CATEGORY,
+  DEFAULT_CATEGORY_ID,
+  SKILLS_CATALOG_DIR,
+} from '../constants'
 import type { CorePorts } from '../ports'
 import type { CategoryInfo, CategoryMetadata } from '../types'
 import { formatCategoryName } from '../utils'
@@ -134,4 +140,82 @@ export function getCategories(ports: CorePorts): CategoryInfo[] {
  */
 export function getCategoryById(ports: CorePorts, id: string): CategoryInfo | undefined {
   return getCategories(ports).find((category) => category.id === id)
+}
+
+/**
+ * Groups skills by their category information.
+ *
+ * @typeParam T - Skill-like object that exposes a `name` and optional `category`.
+ * @param ports - Core ports used to read local categories when available.
+ * @param skills - Skills to group.
+ * @returns A map keyed by category info with alphabetically sorted skill lists.
+ *
+ * @example
+ * ```ts
+ * const grouped = groupSkillsByCategory(ports, [
+ *   { name: 'a11y', category: 'quality' },
+ *   { name: 'seo', category: 'quality' },
+ * ])
+ * ```
+ */
+export function groupSkillsByCategory<T extends { name: string; category?: string; description?: string }>(
+  ports: CorePorts,
+  skills: T[],
+): Map<CategoryInfo, T[]> {
+  let categories = getCategories(ports)
+
+  if (categories.length === 0) {
+    const categoryIds = new Set(skills.map((skill) => skill.category).filter(Boolean) as string[])
+    categories = Array.from(categoryIds).map((id, index) => ({
+      id,
+      name: formatCategoryName(id),
+      priority: index,
+    }))
+  }
+
+  const grouped = new Map<CategoryInfo, T[]>()
+
+  for (const category of categories) {
+    grouped.set(category, [])
+  }
+
+  grouped.set(DEFAULT_CATEGORY, [])
+
+  for (const skill of skills) {
+    const categoryId = skill.category ?? DEFAULT_CATEGORY_ID
+    let category = categories.find((candidate) => candidate.id === categoryId)
+
+    if (!category && categoryId !== DEFAULT_CATEGORY_ID) {
+      category = {
+        id: categoryId,
+        name: formatCategoryName(categoryId),
+        priority: 999,
+      }
+      categories.push(category)
+      grouped.set(category, [])
+    }
+
+    const targetCategory = category ?? DEFAULT_CATEGORY
+    const group = grouped.get(targetCategory) ?? []
+    group.push(skill)
+    grouped.set(targetCategory, group)
+  }
+
+  for (const [category, skillList] of grouped) {
+    if (skillList.length === 0) grouped.delete(category)
+  }
+
+  const sortedGrouped = new Map<CategoryInfo, T[]>()
+  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => a.name.localeCompare(b.name))
+
+  for (const category of sortedCategories) {
+    const categorySkills = grouped.get(category)
+
+    if (categorySkills) {
+      categorySkills.sort((a, b) => a.name.localeCompare(b.name))
+      sortedGrouped.set(category, categorySkills)
+    }
+  }
+
+  return sortedGrouped
 }

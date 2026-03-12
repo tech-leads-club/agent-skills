@@ -12,6 +12,7 @@ import {
   getCategories,
   getCategoryById,
   getSkillFromLock,
+  groupSkillsByCategory,
   isCategoryFolder,
   loadCategoryMetadata,
   LOCK_FILE,
@@ -78,5 +79,6 @@ describe('core library', () => {
     expect(loadCategoryMetadata).toBeDefined()
     expect(getCategories).toBeDefined()
     expect(getCategoryById).toBeDefined()
+    expect(groupSkillsByCategory).toBeDefined()
   })
 })

@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 
+import { DEFAULT_CATEGORY } from '../../constants'
 import type {
   CorePorts,
   EnvPort,
@@ -16,6 +17,7 @@ import {
   extractCategoryId,
   getCategories,
   getCategoryById,
+  groupSkillsByCategory,
   isCategoryFolder,
   loadCategoryMetadata,
 } from '../categories.service'
@@ -171,5 +173,58 @@ describe('getCategoryById', () => {
       priority: 0,
     })
     expect(getCategoryById(ports, 'missing')).toBeUndefined()
+  })
+})
+
+describe('groupSkillsByCategory', () => {
+  it('groups skills by existing local categories and sorts categories and skills', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' || path === '/workspace/project/packages/skills-catalog/skills',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)'), createDirEntry('(testing)')])
+
+    const grouped = groupSkillsByCategory(ports, [
+      { name: 'zebra', category: 'quality' },
+      { name: 'alpha', category: 'quality' },
+      { name: 'beta', category: 'testing' },
+    ])
+
+    expect(Array.from(grouped.entries())).toEqual([
+      [
+        { id: 'quality', name: 'Quality', description: undefined, priority: 0 },
+        [
+          { name: 'alpha', category: 'quality' },
+          { name: 'zebra', category: 'quality' },
+        ],
+      ],
+      [
+        { id: 'testing', name: 'Testing', description: undefined, priority: 1 },
+        [{ name: 'beta', category: 'testing' }],
+      ],
+    ])
+  })
+
+  it('builds categories from skill data and keeps unknown categories and defaults', () => {
+    const { ports, existsSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    const grouped = groupSkillsByCategory(ports, [
+      { name: 'gamma', category: 'security' },
+      { name: 'delta' },
+      { name: 'alpha', category: 'security' },
+    ])
+
+    expect(Array.from(grouped.entries())).toEqual([
+      [
+        { id: 'security', name: 'Security', priority: 0 },
+        [
+          { name: 'alpha', category: 'security' },
+          { name: 'gamma', category: 'security' },
+        ],
+      ],
+      [DEFAULT_CATEGORY, [{ name: 'delta' }]],
+    ])
   })
 })
