@@ -268,3 +268,40 @@ export function getSkillCategory(ports: CorePorts, skillName: string): CategoryI
   const categoryId = getSkillCategoryId(ports, skillName)
   return getCategoryById(ports, categoryId) ?? DEFAULT_CATEGORY
 }
+
+/**
+ * Persists category metadata overrides to the local skills catalog.
+ *
+ * @param ports - Core ports used to locate and write the catalog metadata file.
+ * @param metadata - Category metadata keyed by category folder name.
+ * @returns Nothing.
+ *
+ * @example
+ * ```ts
+ * saveCategoryMetadata(ports, {
+ *   '(quality)': { name: 'Quality' },
+ * })
+ * ```
+ */
+export function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadata): void {
+  const metadataPath = join(getSkillsDir(ports), CATEGORY_METADATA_FILE)
+  const content = JSON.stringify(metadata, null, 2)
+
+  void ports.fs.writeFile(metadataPath, `${content}\n`, 'utf-8')
+}
+
+/**
+ * Checks whether a category exists in the local catalog.
+ *
+ * @param ports - Core ports used to read the available categories.
+ * @param categoryId - Category identifier to look up.
+ * @returns `true` when the category exists.
+ *
+ * @example
+ * ```ts
+ * const exists = categoryExists(ports, 'quality')
+ * ```
+ */
+export function categoryExists(ports: CorePorts, categoryId: string): boolean {
+  return getCategories(ports).some((category) => category.id === categoryId)
+}

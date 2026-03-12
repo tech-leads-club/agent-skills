@@ -2,6 +2,7 @@ import {
   addSkillToLock,
   AGENTS_DIR,
   AUDIT_LOG_FILE,
+  categoryExists,
   categoryIdToFolderName,
   detectInstalledAgents,
   extractCategoryId,
@@ -28,6 +29,7 @@ import {
   REGISTRY_CACHE_TTL_MS,
   removeSkillFromLock,
   sanitizeName,
+  saveCategoryMetadata,
   SKILLS_CATALOG_DIR,
   writeSkillLock,
 } from './index'
@@ -84,5 +86,7 @@ describe('core library', () => {
     expect(groupSkillsByCategory).toBeDefined()
     expect(getSkillCategoryId).toBeDefined()
     expect(getSkillCategory).toBeDefined()
+    expect(saveCategoryMetadata).toBeDefined()
+    expect(categoryExists).toBeDefined()
   })
 })

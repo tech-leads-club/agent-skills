@@ -13,6 +13,7 @@ import type {
 import type { CategoryMetadata } from '../../types'
 
 import {
+  categoryExists,
   categoryIdToFolderName,
   extractCategoryId,
   getCategories,
@@ -22,6 +23,7 @@ import {
   groupSkillsByCategory,
   isCategoryFolder,
   loadCategoryMetadata,
+  saveCategoryMetadata,
 } from '../categories.service'
 
 type DirEntry = { name: string; isDirectory(): boolean }
@@ -31,6 +33,7 @@ type TestPorts = {
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
   readdirSyncMock: jest.MockedFunction<(path: string, options?: { withFileTypes: true }) => DirEntry[]>
+  writeFileMock: jest.MockedFunction<(path: string, content: string, encoding: string) => Promise<void>>
 }
 
 const createDirEntry = (name: string, isDirectory = true): DirEntry => ({
@@ -42,14 +45,17 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
   const readdirSyncMock = jest.fn<(path: string, options?: { withFileTypes: true }) => DirEntry[]>()
+  const writeFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
 
   existsSyncMock.mockReturnValue(false)
   readdirSyncMock.mockReturnValue([])
+  writeFileMock.mockResolvedValue(undefined)
 
   const fs = {
     existsSync: existsSyncMock,
     readFileSync: readFileSyncMock,
     readdirSync: readdirSyncMock,
+    writeFile: writeFileMock,
   } as unknown as FileSystemPort
 
   const env = {
@@ -68,7 +74,7 @@ const createPorts = (): TestPorts => {
     shell: {} as ShellPort,
   }
 
-  return { ports, existsSyncMock, readFileSyncMock, readdirSyncMock }
+  return { ports, existsSyncMock, readFileSyncMock, readdirSyncMock, writeFileMock }
 }
 
 describe('category helpers', () => {
@@ -275,5 +281,36 @@ describe('getSkillCategory', () => {
       priority: 0,
     })
     expect(getSkillCategory(ports, 'missing-skill')).toEqual(DEFAULT_CATEGORY)
+  })
+})
+
+describe('saveCategoryMetadata', () => {
+  it('serializes metadata and writes it to the catalog root', () => {
+    const { ports, existsSyncMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    saveCategoryMetadata(ports, {
+      '(quality)': { name: 'Quality', description: 'Quality skills', priority: 1 },
+    })
+
+    expect(writeFileMock).toHaveBeenCalledWith(
+      '/workspace/project/packages/skills-catalog/skills/_category.json',
+      '{\n  "(quality)": {\n    "name": "Quality",\n    "description": "Quality skills",\n    "priority": 1\n  }\n}\n',
+      'utf-8',
+    )
+  })
+})
+
+describe('categoryExists', () => {
+  it('returns whether the category exists', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/workspace/project/package.json' || path === '/workspace/project/packages/skills-catalog/skills',
+    )
+    readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
+
+    expect(categoryExists(ports, 'quality')).toBe(true)
+    expect(categoryExists(ports, 'security')).toBe(false)
   })
 })
