@@ -209,8 +209,8 @@ export function getAllAgentTypes(): AgentType[] {
 /**
  * Returns the full configuration for a supported agent type.
  *
- * @param type - The agent type to resolve.
  * @param ports - Core ports used to resolve environment-dependent paths and checks.
+ * @param type - The agent type to resolve.
  * @returns The full configuration for the requested agent type.
  * @example
  * ```ts
