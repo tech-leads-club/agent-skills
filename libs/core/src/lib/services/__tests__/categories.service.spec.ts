@@ -317,11 +317,11 @@ describe('getSkillCategory', () => {
 })
 
 describe('saveCategoryMetadata', () => {
-  it('serializes metadata and writes it to the catalog root', () => {
+  it('serializes metadata and writes it to the catalog root', async () => {
     const { ports, existsSyncMock, writeFileMock } = createPorts()
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
 
-    saveCategoryMetadata(ports, {
+    await saveCategoryMetadata(ports, {
       '(quality)': { name: 'Quality', description: 'Quality skills', priority: 1 },
     })
 
