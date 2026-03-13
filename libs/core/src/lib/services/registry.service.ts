@@ -134,6 +134,22 @@ function saveCachedSkillMeta(ports: CorePorts, skillName: string, meta: CachedSk
   }
 }
 
+function readCachedSkillMeta(ports: CorePorts, skillName: string): CachedSkillMeta | null {
+  try {
+    const metaPath = join(getResolvedSkillCachePath(ports, skillName), SKILL_META_FILE)
+    if (!ports.fs.existsSync(metaPath)) return null
+
+    const parsed = JSON.parse(ports.fs.readFileSync(metaPath, 'utf-8')) as CachedSkillMeta
+    if (parsed.contentHash) {
+      setCachedContentHash(skillName, parsed.contentHash)
+    }
+
+    return parsed
+  } catch {
+    return null
+  }
+}
+
 async function downloadSkillFile(
   ports: CorePorts,
   skill: SkillMetadata,
@@ -350,6 +366,60 @@ export async function getDeprecatedSkills(ports: CorePorts): Promise<DeprecatedE
 export async function getDeprecatedMap(ports: CorePorts): Promise<Map<string, DeprecatedEntry>> {
   const deprecated = await getDeprecatedSkills(ports)
   return new Map(deprecated.map((entry) => [entry.name, entry]))
+}
+
+/**
+ * Checks whether a cached skill differs from the current remote registry metadata.
+ *
+ * @param ports - Core ports used for cache inspection and registry lookup.
+ * @param skillName - Canonical skill name to compare.
+ * @returns `true` when the skill should be updated, otherwise `false`.
+ *
+ * @example
+ * ```ts
+ * const shouldUpdate = await needsUpdate(ports, 'accessibility')
+ * ```
+ */
+export async function needsUpdate(ports: CorePorts, skillName: string): Promise<boolean> {
+  if (!isSkillCachedInternal(ports, skillName)) return true
+
+  const metadata = await getSkillMetadata(ports, skillName)
+  if (!metadata?.contentHash) return false
+
+  const cached = readCachedSkillMeta(ports, skillName)
+  if (!cached?.contentHash) return true
+
+  return cached.contentHash !== metadata.contentHash
+}
+
+/**
+ * Splits skill names into update-required and up-to-date groups.
+ *
+ * @param ports - Core ports used to compare cached and remote skill metadata.
+ * @param names - Skill names to evaluate.
+ * @returns Skill names grouped by update status.
+ *
+ * @example
+ * ```ts
+ * const result = await getUpdatableSkills(ports, ['accessibility'])
+ * ```
+ */
+export async function getUpdatableSkills(
+  ports: CorePorts,
+  names: string[],
+): Promise<{ toUpdate: string[]; upToDate: string[] }> {
+  const toUpdate: string[] = []
+  const upToDate: string[] = []
+
+  for (const name of names) {
+    if (await needsUpdate(ports, name)) {
+      toUpdate.push(name)
+    } else {
+      upToDate.push(name)
+    }
+  }
+
+  return { toUpdate, upToDate }
 }
 
 /**

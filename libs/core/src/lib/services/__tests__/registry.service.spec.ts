@@ -22,6 +22,8 @@ import {
   getRemoteSkills,
   getSkillCachePath,
   getSkillMetadata,
+  getUpdatableSkills,
+  needsUpdate,
 } from '../registry.service'
 
 type TestPorts = {
@@ -389,6 +391,128 @@ describe('deprecated registry entries', () => {
     expect(deprecatedMap.get('legacy-accessibility')).toEqual({
       name: 'legacy-accessibility',
       message: 'Use accessibility instead',
+    })
+  })
+})
+
+describe('update detection', () => {
+  it('returns true when cached content hash differs from remote metadata hash', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
+
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/home/tester/.cache/agent-skills' ||
+        path === '/home/tester/.cache/agent-skills/skills' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+    )
+    readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
+
+    const shouldUpdate = await needsUpdate(ports, 'accessibility')
+
+    expect(shouldUpdate).toBe(true)
+  })
+
+  it('returns false when cached and remote hashes match', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
+
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/home/tester/.cache/agent-skills' ||
+        path === '/home/tester/.cache/agent-skills/skills' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+    )
+    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
+
+    const shouldUpdate = await needsUpdate(ports, 'accessibility')
+
+    expect(shouldUpdate).toBe(false)
+  })
+
+  it('returns false when skill metadata is missing in remote registry', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
+
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/home/tester/.cache/agent-skills' ||
+        path === '/home/tester/.cache/agent-skills/skills' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+    )
+    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ...registryFixture, skills: [] }),
+      text: async () => '',
+    })
+
+    const shouldUpdate = await needsUpdate(ports, 'accessibility')
+
+    expect(shouldUpdate).toBe(false)
+  })
+
+  it('returns grouped update status for a list of skills', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
+
+    existsSyncMock.mockImplementation((path) => {
+      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
+      if (path.endsWith('/alpha/SKILL.md') || path.endsWith('/beta/SKILL.md')) return true
+      if (path.endsWith('/alpha/.skill-meta.json') || path.endsWith('/beta/.skill-meta.json')) return true
+      return false
+    })
+
+    readFileSyncMock.mockImplementation((path) => {
+      if (path.endsWith('/alpha/.skill-meta.json')) return '{"contentHash":"old-alpha","downloadedAt":100}'
+      if (path.endsWith('/beta/.skill-meta.json')) return '{"contentHash":"hash-beta","downloadedAt":100}'
+      return ''
+    })
+
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...registryFixture,
+        skills: [
+          {
+            name: 'alpha',
+            description: 'alpha',
+            category: 'quality',
+            path: '(quality)/alpha',
+            files: ['SKILL.md'],
+            contentHash: 'hash-alpha',
+          },
+          {
+            name: 'beta',
+            description: 'beta',
+            category: 'quality',
+            path: '(quality)/beta',
+            files: ['SKILL.md'],
+            contentHash: 'hash-beta',
+          },
+        ],
+      }),
+      text: async () => '',
+    })
+
+    const result = await getUpdatableSkills(ports, ['alpha', 'beta'])
+
+    expect(result).toEqual({
+      toUpdate: ['alpha'],
+      upToDate: ['beta'],
     })
   })
 })
