@@ -36,7 +36,7 @@ type TestPorts = {
   ports: CorePorts
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
   mkdirMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => Promise<void>>
-  rmMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>
+  rmSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
   writeFileSyncMock: jest.MockedFunction<(path: string, content: string, encoding: string) => void>
   getWithFallbackMock: jest.MockedFunction<
@@ -54,7 +54,7 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
-  const rmMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>()
+  const rmSyncMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>()
   const writeFileSyncMock = jest.fn<(path: string, content: string, encoding: string) => void>()
   const getWithFallbackMock =
     jest.fn<
@@ -69,14 +69,13 @@ const createPorts = (): TestPorts => {
 
   existsSyncMock.mockReturnValue(false)
   mkdirMock.mockResolvedValue(undefined)
-  rmMock.mockResolvedValue(undefined)
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
   getLatestVersionMock.mockResolvedValue('9.9.9')
 
   const fs = {
     existsSync: existsSyncMock,
     mkdir: mkdirMock,
-    rm: rmMock,
+    rmSync: rmSyncMock,
     readFileSync: readFileSyncMock,
     writeFileSync: writeFileSyncMock,
   } as unknown as FileSystemPort
@@ -116,7 +115,7 @@ const createPorts = (): TestPorts => {
     ports,
     existsSyncMock,
     mkdirMock,
-    rmMock,
+    rmSyncMock,
     readFileSyncMock,
     writeFileSyncMock,
     getWithFallbackMock,
@@ -158,8 +157,28 @@ describe('registry cache path helpers', () => {
     expect(getCacheDir()).toBe('.cache/agent-skills')
   })
 
+  it('returns the absolute cache directory when ports are provided', () => {
+    const { ports } = createPorts()
+    expect(getCacheDir(ports)).toBe('/home/tester/.cache/agent-skills')
+  })
+
+  it('returns the absolute skill cache path when ports are provided', () => {
+    const { ports } = createPorts()
+    expect(getSkillCachePath('my-skill', ports)).toBe('/home/tester/.cache/agent-skills/skills/my-skill')
+  })
+
   it('returns undefined when no content hash was cached', () => {
     expect(getCachedContentHash('unknown-skill')).toBeUndefined()
+  })
+
+  it('reads cached content hash from metadata file when ports are provided', () => {
+    const { ports, existsSyncMock, readFileSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+    )
+    readFileSyncMock.mockReturnValue('{"contentHash":"disk-hash","downloadedAt":100}')
+
+    expect(getCachedContentHash('accessibility', ports)).toBe('disk-hash')
   })
 })
 
@@ -567,7 +586,7 @@ describe('cache management', () => {
   })
 
   it('forces redownload by clearing skill cache first', async () => {
-    const { ports, existsSyncMock, getWithFallbackMock, rmMock } = createPorts()
+    const { ports, existsSyncMock, getWithFallbackMock, rmSyncMock } = createPorts()
     existsSyncMock.mockImplementation((path) =>
       [
         '/home/tester/.cache/agent-skills',
@@ -585,27 +604,27 @@ describe('cache management', () => {
     const path = await forceDownloadSkill(ports, 'accessibility')
 
     expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
-    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
+    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
       recursive: true,
       force: true,
     })
   })
 
   it('clears global cache and registry cache paths', () => {
-    const { ports, rmMock } = createPorts()
+    const { ports, rmSyncMock } = createPorts()
 
     clearCache(ports)
     clearSkillCache(ports, 'accessibility')
     clearRegistryCache(ports)
 
-    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills', {
+    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills', {
       recursive: true,
       force: true,
     })
-    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
+    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
       recursive: true,
       force: true,
     })
-    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/registry.json', { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/registry.json', { force: true })
   })
 })

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import {
   appendFile,
   cp,
@@ -62,6 +62,13 @@ export class NodeFileSystemAdapter implements FileSystemPort {
    */
   public async rm(path: string, options?: { recursive?: boolean; force?: boolean }): Promise<void> {
     await rm(path, options)
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public rmSync(path: string, options?: { recursive?: boolean; force?: boolean }): void {
+    rmSync(path, options)
   }
 
   /**

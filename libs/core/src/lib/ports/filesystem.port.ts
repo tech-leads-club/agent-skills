@@ -59,6 +59,14 @@ export interface FileSystemPort {
   rm(path: string, options?: { recursive?: boolean; force?: boolean }): Promise<void>
 
   /**
+   * Removes a file system path synchronously.
+   *
+   * @param path - File or directory path to remove.
+   * @param options - Optional removal behavior.
+   */
+  rmSync(path: string, options?: { recursive?: boolean; force?: boolean }): void
+
+  /**
    * Renames or moves a file system path.
    *
    * @param oldPath - Existing file or directory path.
