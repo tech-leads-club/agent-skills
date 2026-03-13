@@ -11,7 +11,7 @@ import type {
 } from '../../ports'
 import type { SkillsRegistry } from '../../types'
 
-import { fetchRegistry, getCacheDir, getCachedContentHash, getSkillCachePath } from '../registry.service'
+import { downloadSkill, fetchRegistry, getCacheDir, getCachedContentHash, getSkillCachePath } from '../registry.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -206,6 +206,42 @@ describe('fetchRegistry', () => {
     const result = await fetchRegistry(ports)
 
     expect(result).toBeNull()
+    expect(loggerErrorMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('downloadSkill', () => {
+  it('downloads a skill and writes its files to the local cache', async () => {
+    const { ports, getWithFallbackMock, writeFileSyncMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+      text: async () => '# Skill content',
+    })
+
+    const cachedPath = await downloadSkill(ports, registryFixture.skills[0])
+
+    expect(cachedPath).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    expect(writeFileSyncMock).toHaveBeenCalledWith(
+      '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      '# Skill content',
+      'utf-8',
+    )
+  })
+
+  it('returns null when one of the skill files fails to download', async () => {
+    const { ports, getWithFallbackMock, loggerErrorMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+      text: async () => '',
+    })
+
+    const cachedPath = await downloadSkill(ports, registryFixture.skills[0])
+
+    expect(cachedPath).toBeNull()
     expect(loggerErrorMock).toHaveBeenCalledTimes(1)
   })
 })

@@ -3,13 +3,15 @@ import { join } from 'node:path'
 import {
   CACHE_BASE_DIR,
   CACHE_NAMESPACE,
+  MAX_CONCURRENT_DOWNLOADS,
   REGISTRY_CACHE_FILENAME,
   REGISTRY_CACHE_TTL_MS,
+  SKILL_META_FILE,
   SKILLS_CATALOG_PACKAGE,
   SKILLS_SUBDIR,
 } from '../constants'
 import type { CorePorts } from '../ports'
-import type { SkillsRegistry } from '../types'
+import type { SkillMetadata, SkillsRegistry } from '../types'
 
 const UNSAFE_PATH_PATTERNS = [/[/\\]/g, /\.\./g, /[<>:"|?*]/g] as const
 
@@ -19,6 +21,11 @@ let cachedCdnRef: string | null = null
 type CachedRegistry = {
   fetchedAt: number
   registry: SkillsRegistry
+}
+
+type CachedSkillMeta = {
+  contentHash: string
+  downloadedAt: number
 }
 
 function sanitizeName(name: string): string {
@@ -31,6 +38,10 @@ function getResolvedCacheDir(ports: CorePorts): string {
 
 function getRegistryCachePath(ports: CorePorts): string {
   return join(getResolvedCacheDir(ports), REGISTRY_CACHE_FILENAME)
+}
+
+function getResolvedSkillCachePath(ports: CorePorts, skillName: string): string {
+  return join(getResolvedCacheDir(ports), SKILLS_SUBDIR, sanitizeName(skillName))
 }
 
 async function ensureCacheDir(ports: CorePorts): Promise<void> {
@@ -99,6 +110,54 @@ function buildUrls(cdnRef: string): {
   }
 }
 
+function isPathSafe(basePath: string, targetPath: string): boolean {
+  const resolvedBase = join(basePath, '.')
+  const resolvedTarget = join(targetPath, '.')
+  return resolvedTarget.startsWith(resolvedBase)
+}
+
+function saveCachedSkillMeta(ports: CorePorts, skillName: string, meta: CachedSkillMeta): void {
+  try {
+    const metaPath = join(getResolvedSkillCachePath(ports, skillName), SKILL_META_FILE)
+    ports.fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf-8')
+    setCachedContentHash(skillName, meta.contentHash)
+  } catch {
+    // Non-critical metadata write failure.
+  }
+}
+
+async function downloadSkillFile(
+  ports: CorePorts,
+  skill: SkillMetadata,
+  file: string,
+  skillCachePath: string,
+): Promise<boolean> {
+  const filePath = join(skillCachePath, file)
+
+  if (!isPathSafe(skillCachePath, filePath)) {
+    ports.logger.error(`Security: Skipping suspicious file path: ${file}`)
+    return false
+  }
+
+  const parentDir = join(filePath, '..')
+  if (!ports.fs.existsSync(parentDir)) {
+    await ports.fs.mkdir(parentDir, { recursive: true })
+  }
+
+  const resolvedRef = await getResolvedCdnRef(ports)
+  const urls = buildUrls(resolvedRef)
+  const fileUrl = `${urls.skillsBase}/${skill.path}/${file}`
+  const fallbackUrl = `${urls.fallbackSkillsBase}/${skill.path}/${file}`
+  const response = await ports.http.getWithFallback(fileUrl, fallbackUrl)
+
+  if (!response.ok) {
+    throw new Error(`Failed to download ${file}: HTTP ${response.status}`)
+  }
+
+  ports.fs.writeFileSync(filePath, await response.text(), 'utf-8')
+  return true
+}
+
 /**
  * Fetches the remote skills registry using CDN fallback and local cache.
  *
@@ -135,6 +194,56 @@ export async function fetchRegistry(ports: CorePorts, forceRefresh = false): Pro
     if (cached) return cached.registry
 
     ports.logger.error(`Failed to fetch registry: ${error instanceof Error ? error.message : String(error)}`)
+    return null
+  }
+}
+
+/**
+ * Downloads a skill from the remote registry CDN into the local cache.
+ *
+ * @param ports - Core ports used for filesystem, HTTP, environment, package resolution, and logging.
+ * @param skill - Skill metadata that describes source path and files to download.
+ * @returns Absolute cache directory path on success, otherwise `null`.
+ *
+ * @example
+ * ```ts
+ * const cachedPath = await downloadSkill(ports, metadata)
+ * ```
+ */
+export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Promise<string | null> {
+  await ensureCacheDir(ports)
+  const skillCachePath = getResolvedSkillCachePath(ports, skill.name)
+
+  if (!ports.fs.existsSync(skillCachePath)) {
+    await ports.fs.mkdir(skillCachePath, { recursive: true })
+  }
+
+  try {
+    const files = [...skill.files]
+    let downloadedCount = 0
+
+    for (let index = 0; index < files.length; index += MAX_CONCURRENT_DOWNLOADS) {
+      const batch = files.slice(index, index + MAX_CONCURRENT_DOWNLOADS)
+      const results = await Promise.all(batch.map((file) => downloadSkillFile(ports, skill, file, skillCachePath)))
+      downloadedCount += results.filter(Boolean).length
+    }
+
+    if (downloadedCount < files.length) {
+      throw new Error(`Only ${downloadedCount}/${files.length} files downloaded successfully`)
+    }
+
+    if (skill.contentHash) {
+      saveCachedSkillMeta(ports, skill.name, {
+        contentHash: skill.contentHash,
+        downloadedAt: Date.now(),
+      })
+    }
+
+    return skillCachePath
+  } catch (error) {
+    ports.logger.error(
+      `Failed to download skill ${skill.name}: ${error instanceof Error ? error.message : String(error)}`,
+    )
     return null
   }
 }
