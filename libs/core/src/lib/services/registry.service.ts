@@ -11,7 +11,7 @@ import {
   SKILLS_SUBDIR,
 } from '../constants'
 import type { CorePorts } from '../ports'
-import type { SkillMetadata, SkillsRegistry } from '../types'
+import type { CategoryInfo, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
 
 const UNSAFE_PATH_PATTERNS = [/[/\\]/g, /\.\./g, /[<>:"|?*]/g] as const
 
@@ -42,6 +42,14 @@ function getRegistryCachePath(ports: CorePorts): string {
 
 function getResolvedSkillCachePath(ports: CorePorts, skillName: string): string {
   return join(getResolvedCacheDir(ports), SKILLS_SUBDIR, sanitizeName(skillName))
+}
+
+function isSkillCachedInternal(ports: CorePorts, skillName: string): boolean {
+  try {
+    return ports.fs.existsSync(join(getResolvedSkillCachePath(ports, skillName), 'SKILL.md'))
+  } catch {
+    return false
+  }
 }
 
 async function ensureCacheDir(ports: CorePorts): Promise<void> {
@@ -246,6 +254,53 @@ export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Pro
     )
     return null
   }
+}
+
+/**
+ * Lists all skills from the remote registry.
+ *
+ * @param ports - Core ports used to fetch the remote registry and inspect local cache state.
+ * @returns Skill descriptors from the registry, with local cache paths when available.
+ *
+ * @example
+ * ```ts
+ * const skills = await getRemoteSkills(ports)
+ * ```
+ */
+export async function getRemoteSkills(ports: CorePorts): Promise<SkillInfo[]> {
+  const registry = await fetchRegistry(ports)
+  if (!registry) return []
+
+  return registry.skills.map((skill) => ({
+    name: skill.name,
+    description: skill.description,
+    path: isSkillCachedInternal(ports, skill.name) ? getResolvedSkillCachePath(ports, skill.name) : '',
+    category: skill.category,
+  }))
+}
+
+/**
+ * Lists all categories from the remote registry.
+ *
+ * @param ports - Core ports used to fetch the remote registry.
+ * @returns Categories sorted alphabetically by display name.
+ *
+ * @example
+ * ```ts
+ * const categories = await getRemoteCategories(ports)
+ * ```
+ */
+export async function getRemoteCategories(ports: CorePorts): Promise<CategoryInfo[]> {
+  const registry = await fetchRegistry(ports)
+  if (!registry) return []
+
+  return Object.entries(registry.categories)
+    .map(([id, meta]) => ({
+      id,
+      name: meta.name,
+      description: meta.description,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name))
 }
 
 /**

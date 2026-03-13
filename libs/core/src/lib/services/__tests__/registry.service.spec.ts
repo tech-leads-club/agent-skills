@@ -11,7 +11,15 @@ import type {
 } from '../../ports'
 import type { SkillsRegistry } from '../../types'
 
-import { downloadSkill, fetchRegistry, getCacheDir, getCachedContentHash, getSkillCachePath } from '../registry.service'
+import {
+  downloadSkill,
+  fetchRegistry,
+  getCacheDir,
+  getCachedContentHash,
+  getRemoteCategories,
+  getRemoteSkills,
+  getSkillCachePath,
+} from '../registry.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -243,5 +251,55 @@ describe('downloadSkill', () => {
 
     expect(cachedPath).toBeNull()
     expect(loggerErrorMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('remote registry listing', () => {
+  it('returns remote skills and uses local cache path when a skill is cached', async () => {
+    const { ports, existsSyncMock, getWithFallbackMock } = createPorts()
+
+    existsSyncMock.mockImplementation(
+      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+    )
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
+
+    const skills = await getRemoteSkills(ports)
+
+    expect(skills).toEqual([
+      {
+        name: 'accessibility',
+        description: 'Improve accessibility',
+        path: '/home/tester/.cache/agent-skills/skills/accessibility',
+        category: 'quality',
+      },
+    ])
+  })
+
+  it('returns sorted remote categories from the registry payload', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...registryFixture,
+        categories: {
+          testing: { name: 'Testing' },
+          quality: { name: 'Quality', description: 'Quality skills' },
+        },
+      }),
+      text: async () => '',
+    })
+
+    const categories = await getRemoteCategories(ports)
+
+    expect(categories).toEqual([
+      { id: 'quality', name: 'Quality', description: 'Quality skills' },
+      { id: 'testing', name: 'Testing', description: undefined },
+    ])
   })
 })
