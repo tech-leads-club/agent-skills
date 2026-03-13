@@ -22,6 +22,15 @@ export interface FileSystemPort {
   writeFile(path: string, content: string, encoding: string): Promise<void>
 
   /**
+   * Writes a text file to disk synchronously, replacing any existing content.
+   *
+   * @param path - Absolute or relative file path to write.
+   * @param content - Text content to persist.
+   * @param encoding - Text encoding used to encode the file contents.
+   */
+  writeFileSync(path: string, content: string, encoding: string): void
+
+  /**
    * Appends text content to an existing file.
    *
    * @param path - Absolute or relative file path to append to.
@@ -130,8 +139,5 @@ export interface FileSystemPort {
    * @param options - Optional read behavior.
    * @returns The discovered directory entries.
    */
-  readdirSync(
-    path: string,
-    options?: { withFileTypes: true },
-  ): { name: string; isDirectory(): boolean }[]
+  readdirSync(path: string, options?: { withFileTypes: true }): { name: string; isDirectory(): boolean }[]
 }

@@ -33,7 +33,7 @@ type TestPorts = {
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
   readdirSyncMock: jest.MockedFunction<(path: string, options?: { withFileTypes: true }) => DirEntry[]>
-  writeFileMock: jest.MockedFunction<(path: string, content: string, encoding: string) => Promise<void>>
+  writeFileSyncMock: jest.MockedFunction<(path: string, content: string, encoding: string) => void>
 }
 
 const createDirEntry = (name: string, isDirectory = true): DirEntry => ({
@@ -45,17 +45,15 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
   const readdirSyncMock = jest.fn<(path: string, options?: { withFileTypes: true }) => DirEntry[]>()
-  const writeFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
+  const writeFileSyncMock = jest.fn<(path: string, content: string, encoding: string) => void>()
 
   existsSyncMock.mockReturnValue(false)
   readdirSyncMock.mockReturnValue([])
-  writeFileMock.mockResolvedValue(undefined)
-
   const fs = {
     existsSync: existsSyncMock,
     readFileSync: readFileSyncMock,
     readdirSync: readdirSyncMock,
-    writeFile: writeFileMock,
+    writeFileSync: writeFileSyncMock,
   } as unknown as FileSystemPort
 
   const env = {
@@ -74,7 +72,7 @@ const createPorts = (): TestPorts => {
     shell: {} as ShellPort,
   }
 
-  return { ports, existsSyncMock, readFileSyncMock, readdirSyncMock, writeFileMock }
+  return { ports, existsSyncMock, readFileSyncMock, readdirSyncMock, writeFileSyncMock }
 }
 
 describe('category helpers', () => {
@@ -317,15 +315,15 @@ describe('getSkillCategory', () => {
 })
 
 describe('saveCategoryMetadata', () => {
-  it('serializes metadata and writes it to the catalog root', async () => {
-    const { ports, existsSyncMock, writeFileMock } = createPorts()
+  it('serializes metadata and writes it to the catalog root', () => {
+    const { ports, existsSyncMock, writeFileSyncMock } = createPorts()
     existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
 
-    await saveCategoryMetadata(ports, {
+    saveCategoryMetadata(ports, {
       '(quality)': { name: 'Quality', description: 'Quality skills', priority: 1 },
     })
 
-    expect(writeFileMock).toHaveBeenCalledWith(
+    expect(writeFileSyncMock).toHaveBeenCalledWith(
       '/workspace/project/packages/skills-catalog/skills/_category.json',
       '{\n  "(quality)": {\n    "name": "Quality",\n    "description": "Quality skills",\n    "priority": 1\n  }\n}\n',
       'utf-8',
