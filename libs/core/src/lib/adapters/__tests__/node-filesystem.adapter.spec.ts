@@ -36,6 +36,20 @@ describe('NodeFileSystemAdapter', () => {
       await rm(tempDir, { recursive: true, force: true })
     }
   })
+
+  it('creates a directory synchronously', async () => {
+    const adapter = new NodeFileSystemAdapter()
+    const tempDir = await mkdtemp(join(tmpdir(), 'core-node-mkdir-sync-'))
+    const nestedDir = join(tempDir, 'sub', 'deep')
+
+    try {
+      adapter.mkdirSync(nestedDir, { recursive: true })
+
+      expect(adapter.existsSync(nestedDir)).toBe(true)
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('NodeFileSystemAdapter directory listing helpers', () => {

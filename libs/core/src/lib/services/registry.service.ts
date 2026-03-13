@@ -32,36 +32,28 @@ function sanitizeName(name: string): string {
   return UNSAFE_PATH_PATTERNS.reduce((result, pattern) => result.replace(pattern, ''), name).trim()
 }
 
-function getResolvedCacheDir(ports: CorePorts): string {
-  return getCacheDir(ports)
-}
-
 function getRegistryCachePath(ports: CorePorts): string {
-  return join(getResolvedCacheDir(ports), REGISTRY_CACHE_FILENAME)
-}
-
-function getResolvedSkillCachePath(ports: CorePorts, skillName: string): string {
-  return getSkillCachePath(skillName, ports)
+  return join(getCacheDir(ports), REGISTRY_CACHE_FILENAME)
 }
 
 function isSkillCachedInternal(ports: CorePorts, skillName: string): boolean {
   try {
-    return ports.fs.existsSync(join(getResolvedSkillCachePath(ports, skillName), 'SKILL.md'))
+    return ports.fs.existsSync(join(getSkillCachePath(ports, skillName), 'SKILL.md'))
   } catch {
     return false
   }
 }
 
-async function ensureCacheDir(ports: CorePorts): Promise<void> {
-  const cacheDir = getResolvedCacheDir(ports)
+function ensureCacheDir(ports: CorePorts): void {
+  const cacheDir = getCacheDir(ports)
   const skillsCacheDir = join(cacheDir, SKILLS_SUBDIR)
 
   if (!ports.fs.existsSync(cacheDir)) {
-    await ports.fs.mkdir(cacheDir, { recursive: true })
+    ports.fs.mkdirSync(cacheDir, { recursive: true })
   }
 
   if (!ports.fs.existsSync(skillsCacheDir)) {
-    await ports.fs.mkdir(skillsCacheDir, { recursive: true })
+    ports.fs.mkdirSync(skillsCacheDir, { recursive: true })
   }
 }
 
@@ -126,7 +118,7 @@ function isPathSafe(basePath: string, targetPath: string): boolean {
 
 function saveCachedSkillMeta(ports: CorePorts, skillName: string, meta: CachedSkillMeta): void {
   try {
-    const metaPath = join(getResolvedSkillCachePath(ports, skillName), SKILL_META_FILE)
+    const metaPath = join(getSkillCachePath(ports, skillName), SKILL_META_FILE)
     ports.fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf-8')
     setCachedContentHash(skillName, meta.contentHash)
   } catch {
@@ -136,7 +128,7 @@ function saveCachedSkillMeta(ports: CorePorts, skillName: string, meta: CachedSk
 
 function readCachedSkillMeta(ports: CorePorts, skillName: string): CachedSkillMeta | null {
   try {
-    const metaPath = join(getResolvedSkillCachePath(ports, skillName), SKILL_META_FILE)
+    const metaPath = join(getSkillCachePath(ports, skillName), SKILL_META_FILE)
     if (!ports.fs.existsSync(metaPath)) return null
 
     const parsed = JSON.parse(ports.fs.readFileSync(metaPath, 'utf-8')) as CachedSkillMeta
@@ -165,7 +157,7 @@ async function downloadSkillFile(
 
   const parentDir = join(filePath, '..')
   if (!ports.fs.existsSync(parentDir)) {
-    await ports.fs.mkdir(parentDir, { recursive: true })
+    ports.fs.mkdirSync(parentDir, { recursive: true })
   }
 
   const resolvedRef = await getResolvedCdnRef(ports)
@@ -195,7 +187,7 @@ async function downloadSkillFile(
  * ```
  */
 export async function fetchRegistry(ports: CorePorts, forceRefresh = false): Promise<SkillsRegistry | null> {
-  await ensureCacheDir(ports)
+  ensureCacheDir(ports)
   const resolvedRef = await getResolvedCdnRef(ports)
 
   if (!forceRefresh) {
@@ -235,11 +227,11 @@ export async function fetchRegistry(ports: CorePorts, forceRefresh = false): Pro
  * ```
  */
 export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Promise<string | null> {
-  await ensureCacheDir(ports)
-  const skillCachePath = getResolvedSkillCachePath(ports, skill.name)
+  ensureCacheDir(ports)
+  const skillCachePath = getSkillCachePath(ports, skill.name)
 
   if (!ports.fs.existsSync(skillCachePath)) {
-    await ports.fs.mkdir(skillCachePath, { recursive: true })
+    ports.fs.mkdirSync(skillCachePath, { recursive: true })
   }
 
   try {
@@ -290,7 +282,7 @@ export async function getRemoteSkills(ports: CorePorts): Promise<SkillInfo[]> {
   return registry.skills.map((skill) => ({
     name: skill.name,
     description: skill.description,
-    path: isSkillCachedInternal(ports, skill.name) ? getResolvedSkillCachePath(ports, skill.name) : '',
+    path: isSkillCachedInternal(ports, skill.name) ? getSkillCachePath(ports, skill.name) : '',
     category: skill.category,
   }))
 }
@@ -452,7 +444,7 @@ export function isSkillCached(ports: CorePorts, skillName: string): boolean {
  */
 export async function ensureSkillDownloaded(ports: CorePorts, skillName: string): Promise<string | null> {
   if (isSkillCached(ports, skillName)) {
-    return getResolvedSkillCachePath(ports, skillName)
+    return getSkillCachePath(ports, skillName)
   }
 
   const metadata = await getSkillMetadata(ports, skillName)
@@ -473,10 +465,9 @@ export async function ensureSkillDownloaded(ports: CorePorts, skillName: string)
  * ```
  */
 export function clearCache(ports: CorePorts): void {
-  const cacheDir = getResolvedCacheDir(ports)
   clearAllCachedContentHashes()
   try {
-    ports.fs.rmSync(cacheDir, { recursive: true, force: true })
+    ports.fs.rmSync(getCacheDir(ports), { recursive: true, force: true })
   } catch {
     // ignore
   }
@@ -497,7 +488,7 @@ export function clearCache(ports: CorePorts): void {
 export function clearSkillCache(ports: CorePorts, skillName: string): void {
   clearCachedContentHash(skillName)
   try {
-    ports.fs.rmSync(getResolvedSkillCachePath(ports, skillName), { recursive: true, force: true })
+    ports.fs.rmSync(getSkillCachePath(ports, skillName), { recursive: true, force: true })
   } catch {
     // ignore
   }
@@ -540,68 +531,56 @@ export async function forceDownloadSkill(ports: CorePorts, skillName: string): P
 }
 
 /**
- * Returns the base cache directory used by the registry service.
+ * Returns the absolute base cache directory used by the registry service.
  *
- * @param ports - Optional ports used to resolve the absolute cache directory from user home.
- * @returns Relative cache directory used to store registry and skill payloads.
+ * @param ports - Core ports used to resolve the user home directory.
+ * @returns Absolute cache directory path used to store registry and skill payloads.
  *
  * @example
  * ```ts
- * const cacheDir = getCacheDir()
- * // .cache/agent-skills
+ * const cacheDir = getCacheDir(ports)
+ * // /home/user/.cache/agent-skills
  * ```
  */
-export function getCacheDir(ports?: CorePorts): string {
-  if (ports) {
-    return join(ports.env.homedir(), CACHE_BASE_DIR, CACHE_NAMESPACE)
-  }
-
-  return join(CACHE_BASE_DIR, CACHE_NAMESPACE)
+export function getCacheDir(ports: CorePorts): string {
+  return join(ports.env.homedir(), CACHE_BASE_DIR, CACHE_NAMESPACE)
 }
 
 /**
- * Resolves the local cache path for a skill.
+ * Resolves the absolute local cache path for a skill.
  *
+ * @param ports - Core ports used to resolve the user home directory.
  * @param skillName - Canonical skill name.
- * @param ports - Optional ports used to resolve the absolute cache path from user home.
- * @returns Relative cache path for the skill directory.
+ * @returns Absolute cache path for the skill directory.
  * @throws {Error} Throws when the skill name is empty or unsafe after sanitization.
  *
  * @example
  * ```ts
- * const path = getSkillCachePath('accessibility')
- * // .cache/agent-skills/skills/accessibility
+ * const path = getSkillCachePath(ports, 'accessibility')
+ * // /home/user/.cache/agent-skills/skills/accessibility
  * ```
  */
-export function getSkillCachePath(skillName: string, ports?: CorePorts): string {
+export function getSkillCachePath(ports: CorePorts, skillName: string): string {
   const safeName = sanitizeName(skillName)
   if (!safeName) throw new Error('Invalid skill name')
 
-  if (ports) {
-    return join(getCacheDir(ports), SKILLS_SUBDIR, safeName)
-  }
-
-  return join(getCacheDir(), SKILLS_SUBDIR, safeName)
+  return join(getCacheDir(ports), SKILLS_SUBDIR, safeName)
 }
 
 /**
- * Returns the in-memory cached content hash for a previously downloaded skill.
+ * Returns the persisted content hash for a previously downloaded skill.
  *
+ * @param ports - Core ports used to read persisted cache metadata from disk.
  * @param skillName - Canonical skill name.
- * @param ports - Optional ports used to read persisted cache metadata from disk.
  * @returns The cached content hash when known; otherwise `undefined`.
  *
  * @example
  * ```ts
- * const hash = getCachedContentHash('accessibility')
+ * const hash = getCachedContentHash(ports, 'accessibility')
  * ```
  */
-export function getCachedContentHash(skillName: string, ports?: CorePorts): string | undefined {
-  if (ports) {
-    return readCachedSkillMeta(ports, skillName)?.contentHash
-  }
-
-  return cachedHashes.get(skillName)
+export function getCachedContentHash(ports: CorePorts, skillName: string): string | undefined {
+  return readCachedSkillMeta(ports, skillName)?.contentHash
 }
 
 export function setCachedContentHash(skillName: string, contentHash: string): void {

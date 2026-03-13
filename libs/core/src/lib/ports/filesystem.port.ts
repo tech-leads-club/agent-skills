@@ -50,6 +50,14 @@ export interface FileSystemPort {
   mkdir(path: string, options?: { recursive?: boolean }): Promise<void>
 
   /**
+   * Creates a directory synchronously.
+   *
+   * @param path - Directory path to create.
+   * @param options - Optional directory creation behavior.
+   */
+  mkdirSync(path: string, options?: { recursive?: boolean }): void
+
+  /**
    * Removes a file system path.
    *
    * @param path - File or directory path to remove.

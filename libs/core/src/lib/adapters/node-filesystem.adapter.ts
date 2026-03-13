@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import {
   appendFile,
   cp,
@@ -55,6 +55,13 @@ export class NodeFileSystemAdapter implements FileSystemPort {
    */
   public async mkdir(path: string, options?: { recursive?: boolean }): Promise<void> {
     await mkdir(path, options)
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public mkdirSync(path: string, options?: { recursive?: boolean }): void {
+    mkdirSync(path, options)
   }
 
   /**

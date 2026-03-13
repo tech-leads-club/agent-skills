@@ -35,7 +35,7 @@ import {
 type TestPorts = {
   ports: CorePorts
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
-  mkdirMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => Promise<void>>
+  mkdirSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => void>
   rmSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
   writeFileSyncMock: jest.MockedFunction<(path: string, content: string, encoding: string) => void>
@@ -52,7 +52,7 @@ type TestPorts = {
 
 const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
-  const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
+  const mkdirSyncMock = jest.fn<(path: string, options?: { recursive?: boolean }) => void>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
   const rmSyncMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>()
   const writeFileSyncMock = jest.fn<(path: string, content: string, encoding: string) => void>()
@@ -68,13 +68,13 @@ const createPorts = (): TestPorts => {
   const loggerErrorMock = jest.fn<(message: string) => void>()
 
   existsSyncMock.mockReturnValue(false)
-  mkdirMock.mockResolvedValue(undefined)
+  mkdirSyncMock.mockReturnValue(undefined)
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
   getLatestVersionMock.mockResolvedValue('9.9.9')
 
   const fs = {
     existsSync: existsSyncMock,
-    mkdir: mkdirMock,
+    mkdirSync: mkdirSyncMock,
     rmSync: rmSyncMock,
     readFileSync: readFileSyncMock,
     writeFileSync: writeFileSyncMock,
@@ -114,7 +114,7 @@ const createPorts = (): TestPorts => {
   return {
     ports,
     existsSyncMock,
-    mkdirMock,
+    mkdirSyncMock,
     rmSyncMock,
     readFileSyncMock,
     writeFileSyncMock,
@@ -149,36 +149,29 @@ beforeEach(() => {
 })
 
 describe('registry cache path helpers', () => {
-  it('returns the expected skill cache path format', () => {
-    expect(getSkillCachePath('my-skill')).toBe('.cache/agent-skills/skills/my-skill')
+  it('returns the absolute skill cache path', () => {
+    const { ports } = createPorts()
+    expect(getSkillCachePath(ports, 'my-skill')).toBe('/home/tester/.cache/agent-skills/skills/my-skill')
   })
 
-  it('returns the expected base cache directory', () => {
-    expect(getCacheDir()).toBe('.cache/agent-skills')
-  })
-
-  it('returns the absolute cache directory when ports are provided', () => {
+  it('returns the absolute base cache directory', () => {
     const { ports } = createPorts()
     expect(getCacheDir(ports)).toBe('/home/tester/.cache/agent-skills')
   })
 
-  it('returns the absolute skill cache path when ports are provided', () => {
-    const { ports } = createPorts()
-    expect(getSkillCachePath('my-skill', ports)).toBe('/home/tester/.cache/agent-skills/skills/my-skill')
-  })
-
-  it('returns undefined when no content hash was cached', () => {
-    expect(getCachedContentHash('unknown-skill')).toBeUndefined()
-  })
-
-  it('reads cached content hash from metadata file when ports are provided', () => {
+  it('reads cached content hash from metadata file', () => {
     const { ports, existsSyncMock, readFileSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
       (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
     )
     readFileSyncMock.mockReturnValue('{"contentHash":"disk-hash","downloadedAt":100}')
 
-    expect(getCachedContentHash('accessibility', ports)).toBe('disk-hash')
+    expect(getCachedContentHash(ports, 'accessibility')).toBe('disk-hash')
+  })
+
+  it('returns undefined when no metadata file exists', () => {
+    const { ports } = createPorts()
+    expect(getCachedContentHash(ports, 'unknown-skill')).toBeUndefined()
   })
 })
 
