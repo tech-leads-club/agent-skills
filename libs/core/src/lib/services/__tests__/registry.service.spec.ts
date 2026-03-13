@@ -19,6 +19,7 @@ import {
   getRemoteCategories,
   getRemoteSkills,
   getSkillCachePath,
+  getSkillMetadata,
 } from '../registry.service'
 
 type TestPorts = {
@@ -301,5 +302,35 @@ describe('remote registry listing', () => {
       { id: 'quality', name: 'Quality', description: 'Quality skills' },
       { id: 'testing', name: 'Testing', description: undefined },
     ])
+  })
+})
+
+describe('getSkillMetadata', () => {
+  it('returns metadata for an existing skill', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
+
+    const metadata = await getSkillMetadata(ports, 'accessibility')
+
+    expect(metadata).toEqual(registryFixture.skills[0])
+  })
+
+  it('returns null when the skill is not in the registry', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
+
+    const metadata = await getSkillMetadata(ports, 'non-existent-skill')
+
+    expect(metadata).toBeNull()
   })
 })

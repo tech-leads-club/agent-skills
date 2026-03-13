@@ -304,6 +304,23 @@ export async function getRemoteCategories(ports: CorePorts): Promise<CategoryInf
 }
 
 /**
+ * Looks up metadata for a single skill in the remote registry.
+ *
+ * @param ports - Core ports used to fetch the remote registry.
+ * @param name - Canonical skill name to search for.
+ * @returns Matching skill metadata when found; otherwise `null`.
+ *
+ * @example
+ * ```ts
+ * const metadata = await getSkillMetadata(ports, 'accessibility')
+ * ```
+ */
+export async function getSkillMetadata(ports: CorePorts, name: string): Promise<SkillMetadata | null> {
+  const registry = await fetchRegistry(ports)
+  return registry?.skills.find((skill) => skill.name === name) ?? null
+}
+
+/**
  * Returns the base cache directory used by the registry service.
  *
  * @returns Relative cache directory used to store registry and skill payloads.
