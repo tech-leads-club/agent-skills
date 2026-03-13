@@ -423,6 +423,111 @@ export async function getUpdatableSkills(
 }
 
 /**
+ * Checks whether a skill is available in the local cache.
+ *
+ * @param ports - Core ports used to inspect cache files.
+ * @param skillName - Canonical skill name.
+ * @returns `true` when `SKILL.md` exists in the cached skill directory.
+ *
+ * @example
+ * ```ts
+ * const cached = isSkillCached(ports, 'accessibility')
+ * ```
+ */
+export function isSkillCached(ports: CorePorts, skillName: string): boolean {
+  return isSkillCachedInternal(ports, skillName)
+}
+
+/**
+ * Ensures a skill exists in local cache, downloading it when needed.
+ *
+ * @param ports - Core ports used for cache checks, metadata lookup, and downloads.
+ * @param skillName - Canonical skill name.
+ * @returns Absolute cached skill directory path or `null` when metadata/download fails.
+ *
+ * @example
+ * ```ts
+ * const path = await ensureSkillDownloaded(ports, 'accessibility')
+ * ```
+ */
+export async function ensureSkillDownloaded(ports: CorePorts, skillName: string): Promise<string | null> {
+  if (isSkillCached(ports, skillName)) {
+    return getResolvedSkillCachePath(ports, skillName)
+  }
+
+  const metadata = await getSkillMetadata(ports, skillName)
+  if (!metadata) return null
+
+  return downloadSkill(ports, metadata)
+}
+
+/**
+ * Clears all registry cache content.
+ *
+ * @param ports - Core ports used to remove cache paths.
+ * @returns Nothing.
+ *
+ * @example
+ * ```ts
+ * clearCache(ports)
+ * ```
+ */
+export function clearCache(ports: CorePorts): void {
+  const cacheDir = getResolvedCacheDir(ports)
+  clearAllCachedContentHashes()
+  void ports.fs.rm(cacheDir, { recursive: true, force: true }).catch(() => undefined)
+}
+
+/**
+ * Clears cached files for a single skill.
+ *
+ * @param ports - Core ports used to remove cache paths.
+ * @param skillName - Canonical skill name.
+ * @returns Nothing.
+ *
+ * @example
+ * ```ts
+ * clearSkillCache(ports, 'accessibility')
+ * ```
+ */
+export function clearSkillCache(ports: CorePorts, skillName: string): void {
+  clearCachedContentHash(skillName)
+  void ports.fs.rm(getResolvedSkillCachePath(ports, skillName), { recursive: true, force: true }).catch(() => undefined)
+}
+
+/**
+ * Clears only the cached registry payload.
+ *
+ * @param ports - Core ports used to remove cache files.
+ * @returns Nothing.
+ *
+ * @example
+ * ```ts
+ * clearRegistryCache(ports)
+ * ```
+ */
+export function clearRegistryCache(ports: CorePorts): void {
+  void ports.fs.rm(getRegistryCachePath(ports), { force: true }).catch(() => undefined)
+}
+
+/**
+ * Forces a fresh download by clearing local cache for a skill first.
+ *
+ * @param ports - Core ports used to clear and redownload cache data.
+ * @param skillName - Canonical skill name.
+ * @returns Absolute cached skill directory path or `null`.
+ *
+ * @example
+ * ```ts
+ * const path = await forceDownloadSkill(ports, 'accessibility')
+ * ```
+ */
+export async function forceDownloadSkill(ports: CorePorts, skillName: string): Promise<string | null> {
+  clearSkillCache(ports, skillName)
+  return ensureSkillDownloaded(ports, skillName)
+}
+
+/**
  * Returns the base cache directory used by the registry service.
  *
  * @returns Relative cache directory used to store registry and skill payloads.
