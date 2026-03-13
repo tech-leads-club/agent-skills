@@ -5,6 +5,7 @@ describe('createNodeAdapters', () => {
     const adapters = createNodeAdapters()
 
     expect(typeof adapters.fs.readFile).toBe('function')
+    expect(typeof adapters.fs.writeFileSync).toBe('function')
     expect(typeof adapters.http.get).toBe('function')
     expect(typeof adapters.shell.exec).toBe('function')
     expect(typeof adapters.env.cwd).toBe('function')

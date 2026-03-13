@@ -20,6 +20,22 @@ describe('NodeFileSystemAdapter', () => {
       await rm(tempDir, { recursive: true, force: true })
     }
   })
+
+  it('writes file content synchronously in a real temporary directory', async () => {
+    const adapter = new NodeFileSystemAdapter()
+    const tempDir = await mkdtemp(join(tmpdir(), 'core-node-fs-sync-'))
+    const filePath = join(tempDir, 'sync.txt')
+
+    try {
+      adapter.writeFileSync(filePath, 'hello sync', 'utf-8')
+      const content = await readFile(filePath, 'utf-8')
+
+      expect(content).toBe('hello sync')
+      expect(adapter.existsSync(filePath)).toBe(true)
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('NodeFileSystemAdapter directory listing helpers', () => {

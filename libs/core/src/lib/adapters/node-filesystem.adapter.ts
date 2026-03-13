@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import {
   appendFile,
   cp,
@@ -34,6 +34,13 @@ export class NodeFileSystemAdapter implements FileSystemPort {
    */
   public async writeFile(path: string, content: string, encoding: string): Promise<void> {
     await writeFile(path, content, encoding as BufferEncoding)
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public writeFileSync(path: string, content: string, encoding: string): void {
+    writeFileSync(path, content, encoding as BufferEncoding)
   }
 
   /**
