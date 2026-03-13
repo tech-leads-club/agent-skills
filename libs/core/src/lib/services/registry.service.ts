@@ -11,7 +11,7 @@ import {
   SKILLS_SUBDIR,
 } from '../constants'
 import type { CorePorts } from '../ports'
-import type { CategoryInfo, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
+import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
 
 const UNSAFE_PATH_PATTERNS = [/[/\\]/g, /\.\./g, /[<>:"|?*]/g] as const
 
@@ -318,6 +318,38 @@ export async function getRemoteCategories(ports: CorePorts): Promise<CategoryInf
 export async function getSkillMetadata(ports: CorePorts, name: string): Promise<SkillMetadata | null> {
   const registry = await fetchRegistry(ports)
   return registry?.skills.find((skill) => skill.name === name) ?? null
+}
+
+/**
+ * Returns all deprecated skill entries published by the remote registry.
+ *
+ * @param ports - Core ports used to fetch the remote registry.
+ * @returns Deprecated skill entries or an empty list when none are defined.
+ *
+ * @example
+ * ```ts
+ * const deprecated = await getDeprecatedSkills(ports)
+ * ```
+ */
+export async function getDeprecatedSkills(ports: CorePorts): Promise<DeprecatedEntry[]> {
+  const registry = await fetchRegistry(ports)
+  return registry?.deprecated ?? []
+}
+
+/**
+ * Returns deprecated registry entries indexed by skill name.
+ *
+ * @param ports - Core ports used to fetch the remote registry.
+ * @returns A map keyed by deprecated skill name.
+ *
+ * @example
+ * ```ts
+ * const deprecatedMap = await getDeprecatedMap(ports)
+ * ```
+ */
+export async function getDeprecatedMap(ports: CorePorts): Promise<Map<string, DeprecatedEntry>> {
+  const deprecated = await getDeprecatedSkills(ports)
+  return new Map(deprecated.map((entry) => [entry.name, entry]))
 }
 
 /**

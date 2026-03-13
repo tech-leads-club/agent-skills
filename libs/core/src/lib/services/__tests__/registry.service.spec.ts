@@ -16,6 +16,8 @@ import {
   fetchRegistry,
   getCacheDir,
   getCachedContentHash,
+  getDeprecatedMap,
+  getDeprecatedSkills,
   getRemoteCategories,
   getRemoteSkills,
   getSkillCachePath,
@@ -332,5 +334,61 @@ describe('getSkillMetadata', () => {
     const metadata = await getSkillMetadata(ports, 'non-existent-skill')
 
     expect(metadata).toBeNull()
+  })
+})
+
+describe('deprecated registry entries', () => {
+  it('returns deprecated skills from registry payload', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...registryFixture,
+        deprecated: [
+          {
+            name: 'legacy-accessibility',
+            message: 'Use accessibility instead',
+            alternatives: ['accessibility'],
+          },
+        ],
+      }),
+      text: async () => '',
+    })
+
+    const deprecated = await getDeprecatedSkills(ports)
+
+    expect(deprecated).toEqual([
+      {
+        name: 'legacy-accessibility',
+        message: 'Use accessibility instead',
+        alternatives: ['accessibility'],
+      },
+    ])
+  })
+
+  it('returns a deprecated map keyed by skill name', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...registryFixture,
+        deprecated: [
+          {
+            name: 'legacy-accessibility',
+            message: 'Use accessibility instead',
+          },
+        ],
+      }),
+      text: async () => '',
+    })
+
+    const deprecatedMap = await getDeprecatedMap(ports)
+
+    expect(deprecatedMap.get('legacy-accessibility')).toEqual({
+      name: 'legacy-accessibility',
+      message: 'Use accessibility instead',
+    })
   })
 })
