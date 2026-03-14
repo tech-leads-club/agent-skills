@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { removeSkill } from '@tech-leads-club/core'
+import type { AgentType } from '@tech-leads-club/core'
 
-import { removeSkill } from '../services/installer'
-import type { AgentType } from '../types'
+import { ports } from '../ports'
 
 export interface RemoveResult {
   skill: string
@@ -22,7 +23,7 @@ export function useRemover() {
     setError(null)
 
     try {
-      const res = await removeSkill(skillName, agents, { global })
+      const res = await removeSkill(ports, skillName, agents, { global })
       setResults((prev) => [...prev, ...res])
       return res
     } catch (err: unknown) {
@@ -44,7 +45,7 @@ export function useRemover() {
       let completedOps = 0
       for (const item of skillsToRemove) {
         setProgress({ current: completedOps, total: totalOps, skill: item.name })
-        const res = await removeSkill(item.name, item.agents, {})
+        const res = await removeSkill(ports, item.name, item.agents, {})
         setResults((prev) => [...prev, ...res])
         completedOps += item.agents.length
       }

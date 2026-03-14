@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import { discoverSkillsAsync, groupSkillsByCategory } from '@tech-leads-club/core'
+import type { SkillInfo } from '@tech-leads-club/core'
 
-import { groupSkillsByCategory } from '../services/categories'
-import { discoverSkillsAsync } from '../services/skills-provider'
-import type { GroupedSkills, SkillInfo } from '../types'
+import { ports } from '../ports'
+import type { GroupedSkills } from '../types'
 
 export function useSkills() {
   const [skills, setSkills] = useState<SkillInfo[]>([])
@@ -15,11 +16,11 @@ export function useSkills() {
 
     const load = async () => {
       try {
-        const data = await discoverSkillsAsync()
+        const data = await discoverSkillsAsync(ports)
 
         if (mounted) {
           setSkills(data)
-          setGroupedSkills(groupSkillsByCategory(data))
+          setGroupedSkills(groupSkillsByCategory(ports, data))
         }
       } catch (err: unknown) {
         if (mounted) setError(err instanceof Error ? err.message : String(err))

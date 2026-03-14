@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { detectInstalledAgents, getAllAgentTypes } from '@tech-leads-club/core'
+import type { AgentType } from '@tech-leads-club/core'
 
-import { detectInstalledAgents, getAllAgentTypes } from '../services/agents'
-import type { AgentType } from '../types'
+import { ports } from '../ports'
 
 export function useAgents() {
   const [selectedAgents, setSelectedAgents] = useState<AgentType[]>([])
@@ -11,7 +12,7 @@ export function useAgents() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const detected = detectInstalledAgents()
+      const detected = detectInstalledAgents(ports)
       setInstalledAgents(detected)
       setSelectedAgents(detected)
       setLoading(false)

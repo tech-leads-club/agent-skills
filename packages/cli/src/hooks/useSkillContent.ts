@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { useEffect, useState } from 'react'
+import { ensureSkillDownloaded, getSkillCachePath, getSkillMetadata, type SkillMetadata } from '@tech-leads-club/core'
 
-import { ensureSkillDownloaded, getSkillCachePath, getSkillMetadata, type SkillMetadata } from '../services/registry'
+import { ports } from '../ports'
 
 export interface SkillContent {
   metadata: SkillMetadata | null
@@ -33,14 +34,14 @@ export function useSkillContent(skillName: string | null): SkillContent {
     const load = async () => {
       try {
         const [meta, cachePath] = await Promise.all([
-          getSkillMetadata(skillName).catch(() => null),
-          ensureSkillDownloaded(skillName).catch(() => null),
+          getSkillMetadata(ports, skillName).catch(() => null),
+          ensureSkillDownloaded(ports, skillName).catch(() => null),
         ])
 
         if (!mounted) return
         if (meta) setMetadata(meta)
 
-        const resolvedPath = cachePath ?? getSkillCachePath(skillName)
+        const resolvedPath = cachePath ?? getSkillCachePath(ports, skillName)
 
         try {
           const skillMd = readFileSync(join(resolvedPath, 'SKILL.md'), 'utf-8')

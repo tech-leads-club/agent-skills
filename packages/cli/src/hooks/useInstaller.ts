@@ -1,8 +1,8 @@
 import { useState } from 'react'
+import { getSkillWithPath, installSkills } from '@tech-leads-club/core'
+import type { InstallOptions, InstallResult, SkillInfo } from '@tech-leads-club/core'
 
-import { installSkills } from '../services/installer'
-import { getSkillWithPath } from '../services/skills-provider'
-import type { InstallOptions, InstallResult, SkillInfo } from '../types'
+import { ports } from '../ports'
 
 export function useInstaller() {
   const [progress, setProgress] = useState({ current: 0, total: 0, skill: '' })
@@ -17,14 +17,14 @@ export function useInstaller() {
 
     const resolvedSkills: SkillInfo[] = []
     for (const skill of skills) {
-      const resolved = skill.path ? skill : await getSkillWithPath(skill.name)
+      const resolved = skill.path ? skill : await getSkillWithPath(ports, skill.name)
       if (resolved) resolvedSkills.push(resolved)
     }
 
     setProgress({ current: 0, total: resolvedSkills.length * options.agents.length, skill: 'Installing...' })
 
     try {
-      const res = await installSkills(resolvedSkills, options)
+      const res = await installSkills(ports, resolvedSkills, options)
       setResults(res)
       return res
     } catch (err: unknown) {
