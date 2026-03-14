@@ -4,18 +4,22 @@ import {
   AUDIT_LOG_FILE,
   categoryExists,
   categoryIdToFolderName,
+  createNodeAdapters,
   detectInstalledAgents,
+  detectMode,
   extractCategoryId,
   getAgentConfig,
   getAllAgentTypes,
   getAllLockedSkills,
   getAuditLogPath,
+  getCacheDir,
   getCategories,
   getCategoryById,
   getSkillCategory,
   getSkillCategoryId,
   getSkillFromLock,
   groupSkillsByCategory,
+  installSkills,
   isCategoryFolder,
   loadCategoryMetadata,
   LOCK_FILE,
@@ -32,7 +36,13 @@ import {
   saveCategoryMetadata,
   SKILLS_CATALOG_DIR,
   writeSkillLock,
+  type AgentType,
+  type CorePorts,
+  type InstallOptions,
+  type PathsPort,
 } from './index'
+
+import * as core from './index'
 
 describe('core library', () => {
   it('exports the catalog path constants', () => {
@@ -53,6 +63,34 @@ describe('core library', () => {
     expect(sanitizeName('../demo-skill')).toBe('demo-skill')
     expect(parseMarkdown('# Title')).toEqual([{ type: 'heading', level: 1, text: 'Title' }])
     expect(parseInline('`code`')).toEqual([{ text: 'code', code: true }])
+  })
+
+  it('exports representative root APIs across modules', () => {
+    expect(createNodeAdapters).toBeDefined()
+    expect(installSkills).toBeDefined()
+    expect(detectMode).toBeDefined()
+    expect(getCacheDir).toBeDefined()
+  })
+
+  it('does not leak internal helpers through the root barrel', () => {
+    expect('buildUrls' in core).toBe(false)
+    expect('createSymlink' in core).toBe(false)
+  })
+
+  it('exports representative types and ports at compile time', () => {
+    const agent: AgentType = 'cursor'
+    const options: InstallOptions = {
+      agents: [agent],
+      global: false,
+      method: 'copy',
+      skills: [],
+    }
+    const ports = {} as CorePorts
+    const pathPort = ports.paths as PathsPort
+
+    expect(agent).toBe('cursor')
+    expect(options.method).toBe('copy')
+    expect(pathPort).toBeUndefined()
   })
 
   it('exports the lockfile service functions', () => {
