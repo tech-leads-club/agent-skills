@@ -15,7 +15,6 @@ import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillMetadata, SkillsReg
 
 const UNSAFE_PATH_PATTERNS = [/[/\\]/g, /\.\./g, /[<>:"|?*]/g] as const
 
-const cachedHashes = new Map<string, string>()
 let cachedCdnRef: string | null = null
 
 type CachedRegistry = {
@@ -120,7 +119,6 @@ function saveCachedSkillMeta(ports: CorePorts, skillName: string, meta: CachedSk
   try {
     const metaPath = join(getSkillCachePath(ports, skillName), SKILL_META_FILE)
     ports.fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf-8')
-    setCachedContentHash(skillName, meta.contentHash)
   } catch {
     // Non-critical metadata write failure.
   }
@@ -131,12 +129,7 @@ function readCachedSkillMeta(ports: CorePorts, skillName: string): CachedSkillMe
     const metaPath = join(getSkillCachePath(ports, skillName), SKILL_META_FILE)
     if (!ports.fs.existsSync(metaPath)) return null
 
-    const parsed = JSON.parse(ports.fs.readFileSync(metaPath, 'utf-8')) as CachedSkillMeta
-    if (parsed.contentHash) {
-      setCachedContentHash(skillName, parsed.contentHash)
-    }
-
-    return parsed
+    return JSON.parse(ports.fs.readFileSync(metaPath, 'utf-8')) as CachedSkillMeta
   } catch {
     return null
   }
@@ -465,7 +458,6 @@ export async function ensureSkillDownloaded(ports: CorePorts, skillName: string)
  * ```
  */
 export function clearCache(ports: CorePorts): void {
-  clearAllCachedContentHashes()
   try {
     ports.fs.rmSync(getCacheDir(ports), { recursive: true, force: true })
   } catch {
@@ -486,7 +478,6 @@ export function clearCache(ports: CorePorts): void {
  * ```
  */
 export function clearSkillCache(ports: CorePorts, skillName: string): void {
-  clearCachedContentHash(skillName)
   try {
     ports.fs.rmSync(getSkillCachePath(ports, skillName), { recursive: true, force: true })
   } catch {
@@ -581,16 +572,4 @@ export function getSkillCachePath(ports: CorePorts, skillName: string): string {
  */
 export function getCachedContentHash(ports: CorePorts, skillName: string): string | undefined {
   return readCachedSkillMeta(ports, skillName)?.contentHash
-}
-
-export function setCachedContentHash(skillName: string, contentHash: string): void {
-  cachedHashes.set(skillName, contentHash)
-}
-
-export function clearCachedContentHash(skillName: string): void {
-  cachedHashes.delete(skillName)
-}
-
-export function clearAllCachedContentHashes(): void {
-  cachedHashes.clear()
 }
