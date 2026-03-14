@@ -166,10 +166,10 @@ description: Helps with deployments.
 
 ## 🔒 Security Scan
 
-Every skill is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
+Every skill is scanned with [Snyk Agent Scan](https://github.com/snyk/agent-scan) before publishing. The scan is **incremental** — only skills whose content changed since the last run are re-scanned.
 
 ```bash
-npm run scan              # Incremental (default)
+npm run scan              # Incremental (default); requires SNYK_TOKEN
 npm run scan -- --force   # Force full re-scan
 ```
 
@@ -179,12 +179,21 @@ Each skill has a SHA-256 content hash (computed from all its files). Results are
 
 ```
 Content hash unchanged → load from cache (fast)
-Content hash changed   → re-scan with mcp-scan
+Content hash changed   → re-scan with snyk-agent-scan
 ```
+
+### When CI fails on Security Scan
+
+1. **Open the run** → In the "CI Checks" job you’ll see a step **"Print scan failure summary"** (and/or **"Security Scan"**) with Critical/High counts and affected skills + codes (e.g. `frontend-design: W011`).
+2. **Same-repo PRs** → A bot comment on the PR lists the same findings and links to the run.
+3. **Fix it:**
+   - **Real issue** → Adjust the skill (remove or restrict the flagged behavior).
+   - **False positive** → Add an entry to `packages/skills-catalog/security-scan-allowlist.yaml` (see below). Match by `skill` + `code`; add a short `reason` and `allowedBy`/`allowedAt`.
+4. **Run locally** (optional): `SNYK_TOKEN=<your-token> npm run scan` to confirm before pushing. PRs from forks don’t run the scan in CI (no secrets); use Merge Queue or run the scan locally.
 
 ### Handling false positives
 
-If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
+If the scanner flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist:
 
 **`packages/skills-catalog/security-scan-allowlist.yaml`**
 
