@@ -150,3 +150,63 @@ export async function discoverSkillsAsync(ports: CorePorts): Promise<SkillInfo[]
   const localDir = getLocalSkillsDirectory(ports)
   return localDir ? discoverLocalSkills(ports, localDir) : getRemoteSkills(ports)
 }
+
+function loadLocalCategoryMetadata(ports: CorePorts, skillsDir: string): Record<string, { name?: string; description?: string }> {
+  const metadataPath = join(skillsDir, CATEGORY_METADATA_FILE)
+  if (!ports.fs.existsSync(metadataPath)) return {}
+
+  try {
+    return JSON.parse(ports.fs.readFileSync(metadataPath, 'utf-8'))
+  } catch {
+    return {}
+  }
+}
+
+function discoverLocalCategories(ports: CorePorts, skillsDir: string): CategoryInfo[] {
+  if (!ports.fs.existsSync(skillsDir)) return []
+  const metadata = loadLocalCategoryMetadata(ports, skillsDir)
+
+  return ports.fs
+    .readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && isCategoryFolder(entry.name))
+    .reduce<CategoryInfo[]>((acc, entry, _) => {
+      const categoryId = extractCategoryId(entry.name)
+      if (!categoryId) return acc
+      const meta = metadata[entry.name] ?? {}
+      acc.push({ id: categoryId, name: meta.name ?? formatCategoryName(categoryId), description: meta.description })
+      return acc
+    }, [])
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * Discovers skill categories from the local catalog synchronously.
+ *
+ * @param ports - Core ports used to read local filesystem entries.
+ * @returns Categories found in the local catalog, or an empty array in remote mode.
+ *
+ * @example
+ * ```ts
+ * const categories = discoverCategories(ports)
+ * ```
+ */
+export function discoverCategories(ports: CorePorts): CategoryInfo[] {
+  const localDir = getLocalSkillsDirectory(ports)
+  return localDir ? discoverLocalCategories(ports, localDir) : []
+}
+
+/**
+ * Discovers skill categories from local catalog or remote registry.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @returns Categories from the local catalog in local mode, or from the remote registry in remote mode.
+ *
+ * @example
+ * ```ts
+ * const categories = await discoverCategoriesAsync(ports)
+ * ```
+ */
+export async function discoverCategoriesAsync(ports: CorePorts): Promise<CategoryInfo[]> {
+  const localDir = getLocalSkillsDirectory(ports)
+  return localDir ? discoverLocalCategories(ports, localDir) : getRemoteCategories(ports)
+}

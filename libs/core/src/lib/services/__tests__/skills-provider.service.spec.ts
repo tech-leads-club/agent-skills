@@ -10,7 +10,7 @@ import type {
   ShellPort,
 } from '../../ports'
 
-import { detectMode, discoverSkills, discoverSkillsAsync, getSkillsDirectory } from '../skills-provider.service'
+import { detectMode, discoverCategories, discoverCategoriesAsync, discoverSkills, discoverSkillsAsync, getSkillsDirectory } from '../skills-provider.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -229,5 +229,74 @@ describe('discoverSkillsAsync', () => {
     const skills = await discoverSkillsAsync(ports)
 
     expect(skills).toEqual([])
+  })
+})
+
+describe('discoverCategories', () => {
+  it('returns categories from the local catalog when in local mode', () => {
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((p) => {
+      const path = p as string
+      return path.endsWith('packages/skills-catalog/skills') || path.endsWith('_category.json')
+    })
+    readdirSyncMock.mockImplementation((p) => {
+      const path = p as string
+      if (path.endsWith('packages/skills-catalog/skills')) {
+        return [{ name: '(quality)', isDirectory: () => true }]
+      }
+      return []
+    })
+    readFileSyncMock.mockReturnValue('{"(quality)":{"name":"Quality","description":"Quality skills"}}')
+
+    const categories = discoverCategories(ports)
+
+    expect(categories).toHaveLength(1)
+    expect(categories[0]).toMatchObject({ id: 'quality', name: 'Quality', description: 'Quality skills' })
+  })
+
+  it('returns empty array when in remote mode', () => {
+    const { ports } = createPorts()
+
+    expect(discoverCategories(ports)).toEqual([])
+  })
+})
+
+describe('discoverCategoriesAsync', () => {
+  it('returns local categories in local mode', async () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((p) => {
+      const path = p as string
+      return path.endsWith('packages/skills-catalog/skills')
+    })
+    readdirSyncMock.mockReturnValue([{ name: '(devops)', isDirectory: () => true }])
+
+    const categories = await discoverCategoriesAsync(ports)
+
+    expect(categories).toHaveLength(1)
+    expect(categories[0].id).toBe('devops')
+  })
+
+  it('fetches remote categories when in remote mode', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    const remoteRegistry = {
+      version: 'main',
+      generatedAt: '2026-03-14T00:00:00.000Z',
+      baseUrl: 'https://cdn.jsdelivr.net',
+      categories: {
+        quality: { name: 'Quality', description: 'Quality skills' },
+      },
+      skills: [],
+    }
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => remoteRegistry,
+      text: async () => JSON.stringify(remoteRegistry),
+    })
+
+    const categories = await discoverCategoriesAsync(ports)
+
+    expect(categories).toHaveLength(1)
+    expect(categories[0]).toMatchObject({ id: 'quality', name: 'Quality' })
   })
 })
