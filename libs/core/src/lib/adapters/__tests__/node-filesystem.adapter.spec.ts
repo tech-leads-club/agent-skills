@@ -50,6 +50,42 @@ describe('NodeFileSystemAdapter', () => {
       await rm(tempDir, { recursive: true, force: true })
     }
   })
+
+  it('removes a file synchronously', async () => {
+    const adapter = new NodeFileSystemAdapter()
+    const tempDir = await mkdtemp(join(tmpdir(), 'core-node-rm-file-'))
+    const filePath = join(tempDir, 'removable.txt')
+
+    try {
+      adapter.writeFileSync(filePath, 'bye', 'utf-8')
+      expect(adapter.existsSync(filePath)).toBe(true)
+
+      adapter.rmSync(filePath, { force: true })
+
+      expect(adapter.existsSync(filePath)).toBe(false)
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('removes a directory recursively with rmSync', async () => {
+    const adapter = new NodeFileSystemAdapter()
+    const tempDir = await mkdtemp(join(tmpdir(), 'core-node-rm-dir-'))
+    const nestedDir = join(tempDir, 'sub')
+    const nestedFile = join(nestedDir, 'file.txt')
+
+    try {
+      adapter.mkdirSync(nestedDir, { recursive: true })
+      adapter.writeFileSync(nestedFile, 'content', 'utf-8')
+      expect(adapter.existsSync(nestedFile)).toBe(true)
+
+      adapter.rmSync(nestedDir, { recursive: true, force: true })
+
+      expect(adapter.existsSync(nestedDir)).toBe(false)
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('NodeFileSystemAdapter directory listing helpers', () => {
