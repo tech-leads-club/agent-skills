@@ -1,8 +1,8 @@
 import chalk from 'chalk'
+import { ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
+import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
 
-import { installSkills } from '../services/installer'
-import { ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills } from '../services/registry'
-import type { AgentType, InstallOptions, SkillInfo } from '../types'
+import { ports } from '../ports'
 
 interface InstallCliOptions {
   skill?: string[]
@@ -13,7 +13,7 @@ interface InstallCliOptions {
 }
 
 async function downloadSkills(skillNames: string[], forceDownload: boolean): Promise<SkillInfo[]> {
-  const allSkills = await getRemoteSkills()
+  const allSkills = await getRemoteSkills(ports)
   const selectedSkills: SkillInfo[] = []
 
   for (const skillName of skillNames) {
@@ -23,7 +23,7 @@ async function downloadSkills(skillNames: string[], forceDownload: boolean): Pro
       continue
     }
 
-    const path = forceDownload ? await forceDownloadSkill(skillName) : await ensureSkillDownloaded(skillName)
+    const path = forceDownload ? await forceDownloadSkill(ports, skillName) : await ensureSkillDownloaded(ports, skillName)
     if (path) {
       selectedSkills.push({ ...skill, path })
     } else {
@@ -84,7 +84,7 @@ export async function runCliInstall(options: InstallCliOptions): Promise<void> {
     global: options.global || false,
   }
 
-  const results = await installSkills(skills, installOptions)
+  const results = await installSkills(ports, skills, installOptions)
   showInstallResults(results)
 
   if (results.some((r) => !r.success)) {

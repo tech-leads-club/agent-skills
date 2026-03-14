@@ -1,8 +1,9 @@
 import { render } from 'ink'
 import React from 'react'
+import { getAuditLogPath, readAuditLog } from '@tech-leads-club/core'
 
 import { AuditLogViewer } from '../components/AuditLogViewer'
-import { getAuditLogPath, readAuditLog } from '../services/audit-log'
+import { ports } from '../ports'
 
 interface AuditOptions {
   limit?: string
@@ -11,11 +12,11 @@ interface AuditOptions {
 
 export async function runCliAudit(options: AuditOptions) {
   if (options.path) {
-    console.log(getAuditLogPath())
+    console.log(getAuditLogPath(ports))
     return
   }
 
   const limit = options.limit ? parseInt(options.limit, 10) : 10
-  const entries = await readAuditLog(limit)
+  const entries = await readAuditLog(ports, limit)
   render(React.createElement(AuditLogViewer, { entries, limit }))
 }

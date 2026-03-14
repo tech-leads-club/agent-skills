@@ -1,6 +1,7 @@
 import chalk from 'chalk'
+import { clearCache, clearRegistryCache, getCacheDir } from '@tech-leads-club/core'
 
-import { clearCache, clearRegistryCache, getCacheDir } from '../services/registry'
+import { ports } from '../ports'
 
 interface CacheCliOptions {
   clear?: boolean
@@ -10,19 +11,19 @@ interface CacheCliOptions {
 
 export function runCliCache(options: CacheCliOptions): void {
   if (options.clear) {
-    clearCache()
+    clearCache(ports)
     console.log(chalk.green('✅ Cache cleared'))
   } else if (options.clearRegistry) {
-    clearRegistryCache()
+    clearRegistryCache(ports)
     console.log(chalk.green('✅ Registry cache cleared'))
   } else if (options.path) {
-    console.log(getCacheDir())
+    console.log(getCacheDir(ports))
   } else {
     console.log(chalk.bold('Cache management:'))
     console.log(`  ${chalk.blue('--clear')}           Clear all cached skills and registry`)
     console.log(`  ${chalk.blue('--clear-registry')}  Clear only the registry cache`)
     console.log(`  ${chalk.blue('--path')}            Show cache directory path`)
     console.log()
-    console.log(chalk.dim(`Cache location: ${getCacheDir()}`))
+    console.log(chalk.dim(`Cache location: ${getCacheDir(ports)}`))
   }
 }

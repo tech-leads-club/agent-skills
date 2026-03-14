@@ -6,7 +6,10 @@ import {
   getRemoteSkills,
   getUpdatableSkills,
   needsUpdate,
-} from '../services/registry'
+  readSkillLock,
+} from '@tech-leads-club/core'
+
+import { ports } from '../ports'
 
 interface UpdateCliOptions {
   skill?: string
@@ -14,17 +17,17 @@ interface UpdateCliOptions {
 
 export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
   console.log(chalk.blue('⏳ Fetching latest registry...'))
-  await fetchRegistry(true)
+  await fetchRegistry(ports, true)
 
   if (options.skill) {
-    const outdated = await needsUpdate(options.skill)
+    const outdated = await needsUpdate(ports, options.skill)
     if (!outdated) {
       console.log(chalk.green(`✅ ${options.skill} is already up to date`))
       return
     }
 
     console.log(chalk.blue(`⏳ Updating ${options.skill}...`))
-    const path = await forceDownloadSkill(options.skill)
+    const path = await forceDownloadSkill(ports, options.skill)
 
     if (path) {
       console.log(chalk.green(`✅ Updated ${options.skill}`))
@@ -33,8 +36,7 @@ export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
       process.exit(1)
     }
   } else {
-    const { readSkillLock } = await import('../services/lockfile')
-    const lock = await readSkillLock()
+    const lock = await readSkillLock(ports)
     const installedNames = Object.keys(lock.skills)
 
     if (installedNames.length === 0) {
@@ -42,7 +44,7 @@ export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
       return
     }
 
-    const { toUpdate, upToDate } = await getUpdatableSkills(installedNames)
+    const { toUpdate, upToDate } = await getUpdatableSkills(ports, installedNames)
 
     if (toUpdate.length === 0) {
       console.log(chalk.green(`✅ All ${upToDate.length} installed skills are up to date`))
@@ -54,7 +56,7 @@ export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
     let failed = 0
 
     for (const name of toUpdate) {
-      const path = await forceDownloadSkill(name)
+      const path = await forceDownloadSkill(ports, name)
       if (path) {
         updated++
       } else {
@@ -70,8 +72,8 @@ export async function runCliUpdate(options: UpdateCliOptions): Promise<void> {
     )
 
     // Check for deprecated/orphaned skills
-    const deprecatedMap = await getDeprecatedMap()
-    const remoteSkills = await getRemoteSkills()
+    const deprecatedMap = await getDeprecatedMap(ports)
+    const remoteSkills = await getRemoteSkills(ports)
     const registryNames = new Set(remoteSkills.map((s) => s.name))
 
     const deprecated = installedNames.filter((name) => deprecatedMap.has(name) || !registryNames.has(name))

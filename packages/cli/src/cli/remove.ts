@@ -1,7 +1,8 @@
 import chalk from 'chalk'
+import { removeSkill } from '@tech-leads-club/core'
+import type { AgentType } from '@tech-leads-club/core'
 
-import { removeSkill } from '../services/installer'
-import type { AgentType } from '../types'
+import { ports } from '../ports'
 
 interface RemoveCliOptions {
   skill?: string[]
@@ -33,7 +34,7 @@ export async function runCliRemove(options: RemoveCliOptions): Promise<void> {
   let hasLockfileError = false
 
   for (const skillName of skillNames) {
-    const results = await removeSkill(skillName, agents, {
+    const results = await removeSkill(ports, skillName, agents, {
       global: options.global,
       force: options.force,
     })
