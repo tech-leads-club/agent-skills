@@ -121,7 +121,7 @@ const installHandlers: Record<InstallMode, (ports: CorePorts, ctx: InstallContex
   },
 
   'symlink-local': async (ports, ctx) => {
-    const canonicalDir = join(ctx.projectRoot, CANONICAL_SKILLS_DIR, ctx.safeSkillName)
+    const canonicalDir = join(ctx.projectRoot, CANONICAL_SKILLS_PATH, ctx.safeSkillName)
     await copySkillDirectory(ports, ctx.skill.path, canonicalDir)
 
     if (await createSymlink(ports, canonicalDir, ctx.skillTargetPath)) {

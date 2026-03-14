@@ -240,11 +240,11 @@ describe('installSkills', () => {
       createInstallOptions({ method: 'symlink', skills: ['my-skill'] }),
     )
 
-    expect(cpMock).toHaveBeenCalledWith('/tmp/catalog/my-skill', '/workspace/project/skills/my-skill', {
+    expect(cpMock).toHaveBeenCalledWith('/tmp/catalog/my-skill', '/workspace/project/.agents/skills/my-skill', {
       recursive: true,
     })
     expect(symlinkMock).toHaveBeenCalledWith(
-      '../../skills/my-skill',
+      '../../.agents/skills/my-skill',
       '/workspace/project/.cursor/skills/my-skill',
       undefined,
     )
