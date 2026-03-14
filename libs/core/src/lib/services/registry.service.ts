@@ -12,8 +12,7 @@ import {
 } from '../constants'
 import type { CorePorts } from '../ports'
 import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
-
-const UNSAFE_PATH_PATTERNS = [/[/\\]/g, /\.\./g, /[<>:"|?*]/g] as const
+import { sanitizeName } from '../utils'
 
 let cachedCdnRef: string | null = null
 
@@ -27,9 +26,6 @@ type CachedSkillMeta = {
   downloadedAt: number
 }
 
-function sanitizeName(name: string): string {
-  return UNSAFE_PATH_PATTERNS.reduce((result, pattern) => result.replace(pattern, ''), name).trim()
-}
 
 function getRegistryCachePath(ports: CorePorts): string {
   return join(getCacheDir(ports), REGISTRY_CACHE_FILENAME)
