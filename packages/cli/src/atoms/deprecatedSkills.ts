@@ -1,11 +1,12 @@
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
+import { getDeprecatedMap } from '@tech-leads-club/core'
+import type { DeprecatedEntry } from '@tech-leads-club/core'
 
-import { getDeprecatedMap } from '../services/registry'
-import type { DeprecatedEntry } from '../types'
+import { ports } from '../ports'
 
 const deprecatedSkillsAsyncAtom = atom(async (): Promise<Map<string, DeprecatedEntry>> => {
-  return getDeprecatedMap()
+  return getDeprecatedMap(ports)
 })
 
 export const deprecatedSkillsAtom = unwrap(deprecatedSkillsAsyncAtom, (prev) => prev ?? new Map())

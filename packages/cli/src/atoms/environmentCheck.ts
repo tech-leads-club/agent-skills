@@ -1,7 +1,8 @@
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
+import { isGloballyInstalled } from '@tech-leads-club/core'
 
-import { isGloballyInstalled } from '../services/global-path'
+import { ports } from '../ports'
 import { getCachedUpdate, setCachedUpdate } from '../services/update-cache'
 import { checkForUpdates, getCurrentVersion } from '../services/update-check'
 import { UPDATE_CHECK_TIMEOUT_MS } from '../utils/constants'
@@ -37,7 +38,7 @@ const runCheck = async (): Promise<EnvironmentCheckState> => {
 
   const [updateAvailable, isGlobal] = await Promise.all([
     resolveUpdateAvailable(currentVersion).catch(() => null),
-    Promise.resolve(isGloballyInstalled()).catch(() => false),
+    Promise.resolve(isGloballyInstalled(ports)).catch(() => false),
   ])
 
   return { updateAvailable, currentVersion, isGlobal: isGlobal as boolean, isLoading: false }
