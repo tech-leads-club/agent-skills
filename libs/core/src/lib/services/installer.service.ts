@@ -3,6 +3,7 @@ import { join, normalize, relative, resolve, sep } from 'node:path'
 import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../constants'
 import type { CorePorts } from '../ports'
 import type { AgentType, InstallOptions, InstallResult, RemoveOptions, RemoveResult, SkillInfo } from '../types'
+import { isPathSafe, sanitizeName } from '../utils'
 
 import { getAgentConfig } from './agents.service'
 import { logAudit } from './audit-log.service'
@@ -21,23 +22,6 @@ interface InstallContext {
   safeSkillName: string
   skillTargetPath: string
   projectRoot: string
-}
-
-const sanitizeName = (name: string): string => {
-  const sanitized = name
-    .replace(/[/\\]/g, '')
-    .replace(/[\0:*?"<>|]/g, '')
-    .replace(/^[.\s]+|[.\s]+$/g, '')
-    .replace(/\.{2,}/g, '')
-    .replace(/^\.+/, '')
-
-  return (sanitized || 'unnamed-skill').substring(0, 255)
-}
-
-const isPathSafe = (basePath: string, targetPath: string): boolean => {
-  const normalizedBase = normalize(resolve(basePath))
-  const normalizedTarget = normalize(resolve(targetPath))
-  return normalizedTarget.startsWith(normalizedBase + sep) || normalizedTarget === normalizedBase
 }
 
 const createSymlink = async (ports: CorePorts, target: string, linkPath: string): Promise<boolean> => {
