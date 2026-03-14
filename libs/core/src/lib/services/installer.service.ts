@@ -2,12 +2,12 @@ import { join, relative, resolve } from 'node:path'
 
 import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../constants'
 import type { CorePorts } from '../ports'
-import type { AgentType, InstallOptions, InstallResult, SkillInfo } from '../types'
+import type { AgentType, InstallOptions, InstallResult, RemoveOptions, RemoveResult, SkillInfo } from '../types'
 import { isPathSafe, sanitizeName } from '../utils'
 
 import { getAgentConfig } from './agents.service'
 import { logAudit } from './audit-log.service'
-import { addSkillToLock } from './lockfile.service'
+import { addSkillToLock, getSkillFromLock, removeSkillFromLock } from './lockfile.service'
 import { findProjectRoot } from './project-root.service'
 import { getCachedContentHash } from './registry.service'
 
@@ -226,6 +226,21 @@ async function copySkillDirectory(ports: CorePorts, src: string, dest: string): 
   await ports.fs.cp(src, dest, { recursive: true })
 }
 
+async function validateSymlinkTarget(ports: CorePorts, linkPath: string, baseDir: string): Promise<boolean> {
+  try {
+    const stats = await ports.fs.lstat(linkPath)
+    if (stats.isSymbolicLink()) {
+      const target = await ports.fs.readlink(linkPath)
+      const resolvedTarget = resolve(join(linkPath, '..'), target)
+      return isPathSafe(baseDir, resolvedTarget)
+    }
+
+    return true
+  } catch {
+    return true
+  }
+}
+
 function getInstallMode(method: 'symlink' | 'copy', global: boolean): InstallMode {
   return `${method}-${global ? 'global' : 'local'}` as InstallMode
 }
@@ -388,6 +403,128 @@ export async function installSkills(
       success: result.success,
       error: result.error,
       path: result.path,
+    })),
+  })
+
+  return results
+}
+
+/**
+ * Removes a skill from the requested agent directories.
+ *
+ * The orchestration mirrors the CLI installer by checking the lockfile first,
+ * removing the canonical path, cleaning local/global agent paths, updating the
+ * lockfile when any removal succeeds, and appending a best-effort audit entry.
+ *
+ * @param ports - Core ports used for filesystem, environment, and dependent service access.
+ * @param skillName - Canonical skill name to remove.
+ * @param agents - Agents to remove the skill from.
+ * @param options - Removal options controlling scope and force behavior.
+ * @returns One removal result per requested agent.
+ *
+ * @example
+ * ```ts
+ * const results = await removeSkill(ports, 'accessibility', ['cursor'])
+ * ```
+ */
+export async function removeSkill(
+  ports: CorePorts,
+  skillName: string,
+  agents: AgentType[],
+  options: RemoveOptions = {},
+): Promise<RemoveResult[]> {
+  const safeSkillName = sanitizeName(skillName)
+  const projectRoot = findProjectRoot(ports)
+  let lockEntry = await getSkillFromLock(ports, skillName, true)
+
+  if (!lockEntry) {
+    lockEntry = await getSkillFromLock(ports, skillName, false)
+  }
+
+  if (!lockEntry && !options.force) {
+    return agents.map((agent) => ({
+      skill: skillName,
+      agent: getAgentConfig(ports, agent).displayName,
+      success: false,
+      error: 'Skill not found in lockfile',
+    }))
+  }
+
+  const canonicalPath = getCanonicalPath(skillName, {
+    global: options.global ?? false,
+    method: 'copy',
+    agents: [],
+    skills: [],
+    projectRoot,
+    homeDir: ports.env.homedir(),
+  })
+  await ports.fs.rm(canonicalPath, { recursive: true, force: true }).catch(() => {})
+
+  const results = await Promise.all(
+    agents.map(async (agent) => {
+      const config = getAgentConfig(ports, agent)
+      const localPath = join(projectRoot, config.skillsDir, safeSkillName)
+      const globalPath = join(config.globalSkillsDir, safeSkillName)
+
+      const pathsToTry =
+        options.global === undefined ? [localPath, globalPath] : options.global ? [globalPath] : [localPath]
+
+      let removed = false
+      let lastError: string | undefined
+
+      for (const path of pathsToTry) {
+        const baseDir = path.startsWith(config.globalSkillsDir)
+          ? config.globalSkillsDir
+          : join(projectRoot, config.skillsDir)
+
+        if (!isPathSafe(baseDir, path)) {
+          lastError = 'Security: Invalid removal path'
+          continue
+        }
+
+        if (!(await validateSymlinkTarget(ports, path, baseDir))) {
+          lastError = 'Security: Symlink points outside allowed directory'
+          continue
+        }
+
+        try {
+          await ports.fs.lstat(path)
+          await ports.fs.rm(path, { recursive: true, force: true })
+          removed = true
+        } catch (error) {
+          const typedError = error as { code?: string; message?: string }
+          if (typedError.code !== 'ENOENT' && !lastError) {
+            lastError = error instanceof Error ? error.message : String(error)
+          }
+        }
+      }
+
+      return {
+        skill: skillName,
+        agent: config.displayName,
+        success: removed,
+        error: removed ? undefined : lastError || 'Skill not found',
+      }
+    }),
+  )
+
+  if (results.some((result) => result.success)) {
+    await removeSkillFromLock(ports, skillName, true).catch(() => {})
+    await removeSkillFromLock(ports, skillName, false).catch(() => {})
+  }
+
+  await logAudit(ports, {
+    action: 'remove',
+    skillName,
+    agents: agents.map((agent) => getAgentConfig(ports, agent).displayName),
+    success: results.filter((result) => result.success).length,
+    failed: results.filter((result) => !result.success).length,
+    forced: options.force,
+    details: results.map((result) => ({
+      skill: result.skill,
+      agent: result.agent,
+      success: result.success,
+      error: result.error,
     })),
   })
 
