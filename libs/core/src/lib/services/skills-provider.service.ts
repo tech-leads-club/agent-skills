@@ -1,21 +1,21 @@
 import { join } from 'node:path'
 
-import {
-  CATEGORY_FOLDER_PATTERN,
-  CATEGORY_METADATA_FILE,
-  DEFAULT_CATEGORY_ID,
-  SKILLS_CATALOG_DIR,
-} from '../constants'
+import { CATEGORY_FOLDER_PATTERN, CATEGORY_METADATA_FILE, DEFAULT_CATEGORY_ID } from '../constants'
 import type { CorePorts } from '../ports'
 import type { CategoryInfo, SkillInfo, SkillsMode } from '../types'
 import { formatCategoryName } from '../utils'
 
-import { findProjectRoot } from './project-root.service'
 import { ensureSkillDownloaded, getRemoteCategories, getRemoteSkills, getSkillMetadata } from './registry.service'
 
+interface ModeCache {
+  mode: SkillsMode | null
+  localDir: string | null
+}
+
+const cache: ModeCache = { mode: null, localDir: null }
+
 function getLocalSkillsDirectory(ports: CorePorts): string | null {
-  const path = join(findProjectRoot(ports), SKILLS_CATALOG_DIR)
-  return ports.fs.existsSync(path) ? path : null
+  return ports.paths.getLocalSkillsDirectory()
 }
 
 /**
@@ -33,8 +33,17 @@ function getLocalSkillsDirectory(ports: CorePorts): string | null {
  * ```
  */
 export function detectMode(ports: CorePorts): SkillsMode {
+  if (cache.mode) return cache.mode
   const localDir = getLocalSkillsDirectory(ports)
-  return localDir ? 'local' : 'remote'
+
+  if (localDir) {
+    cache.localDir = localDir
+    cache.mode = 'local'
+    return 'local'
+  }
+
+  cache.mode = 'remote'
+  return 'remote'
 }
 
 /**
@@ -51,9 +60,13 @@ export function detectMode(ports: CorePorts): SkillsMode {
  * ```
  */
 export function getSkillsDirectory(ports: CorePorts): string {
-  const localDir = getLocalSkillsDirectory(ports)
-  if (localDir) return localDir
+  const mode = detectMode(ports)
+  if (mode === 'local' && cache.localDir) return cache.localDir
   throw new Error('Skills directory not found. Use remote mode or install skills locally.')
+}
+
+function isLocalMode(ports: CorePorts): boolean {
+  return detectMode(ports) === 'local' && cache.localDir !== null
 }
 
 function isCategoryFolder(folderName: string): boolean {
@@ -114,7 +127,6 @@ function discoverLocalSkills(ports: CorePorts, skillsDir: string): SkillInfo[] {
     })
 }
 
-
 /**
  * Discovers skills from the local skills catalog synchronously.
  *
@@ -128,8 +140,7 @@ function discoverLocalSkills(ports: CorePorts, skillsDir: string): SkillInfo[] {
  * ```
  */
 export function discoverSkills(ports: CorePorts): SkillInfo[] {
-  const localDir = getLocalSkillsDirectory(ports)
-  return localDir ? discoverLocalSkills(ports, localDir) : []
+  return isLocalMode(ports) ? discoverLocalSkills(ports, cache.localDir!) : []
 }
 
 /**
@@ -144,11 +155,13 @@ export function discoverSkills(ports: CorePorts): SkillInfo[] {
  * ```
  */
 export async function discoverSkillsAsync(ports: CorePorts): Promise<SkillInfo[]> {
-  const localDir = getLocalSkillsDirectory(ports)
-  return localDir ? discoverLocalSkills(ports, localDir) : getRemoteSkills(ports)
+  return isLocalMode(ports) ? discoverLocalSkills(ports, cache.localDir!) : getRemoteSkills(ports)
 }
 
-function loadLocalCategoryMetadata(ports: CorePorts, skillsDir: string): Record<string, { name?: string; description?: string }> {
+function loadLocalCategoryMetadata(
+  ports: CorePorts,
+  skillsDir: string,
+): Record<string, { name?: string; description?: string }> {
   const metadataPath = join(skillsDir, CATEGORY_METADATA_FILE)
   if (!ports.fs.existsSync(metadataPath)) return {}
 
@@ -188,8 +201,7 @@ function discoverLocalCategories(ports: CorePorts, skillsDir: string): CategoryI
  * ```
  */
 export function discoverCategories(ports: CorePorts): CategoryInfo[] {
-  const localDir = getLocalSkillsDirectory(ports)
-  return localDir ? discoverLocalCategories(ports, localDir) : []
+  return isLocalMode(ports) ? discoverLocalCategories(ports, cache.localDir!) : []
 }
 
 /**
@@ -204,8 +216,7 @@ export function discoverCategories(ports: CorePorts): CategoryInfo[] {
  * ```
  */
 export async function discoverCategoriesAsync(ports: CorePorts): Promise<CategoryInfo[]> {
-  const localDir = getLocalSkillsDirectory(ports)
-  return localDir ? discoverLocalCategories(ports, localDir) : getRemoteCategories(ports)
+  return isLocalMode(ports) ? discoverLocalCategories(ports, cache.localDir!) : getRemoteCategories(ports)
 }
 
 /**
@@ -254,8 +265,7 @@ export async function getSkillByNameAsync(ports: CorePorts, name: string): Promi
  * ```
  */
 export async function ensureSkillAvailable(ports: CorePorts, skillName: string): Promise<string | null> {
-  const localDir = getLocalSkillsDirectory(ports)
-  if (localDir) return getSkillByName(ports, skillName)?.path ?? null
+  if (isLocalMode(ports)) return getSkillByName(ports, skillName)?.path ?? null
   return ensureSkillDownloaded(ports, skillName)
 }
 
@@ -272,8 +282,7 @@ export async function ensureSkillAvailable(ports: CorePorts, skillName: string):
  * ```
  */
 export async function getSkillWithPath(ports: CorePorts, skillName: string): Promise<SkillInfo | null> {
-  const localDir = getLocalSkillsDirectory(ports)
-  if (localDir) return getSkillByName(ports, skillName) ?? null
+  if (isLocalMode(ports)) return getSkillByName(ports, skillName) ?? null
   const metadata = await getSkillMetadata(ports, skillName)
   if (!metadata) return null
   const localPath = await ensureSkillDownloaded(ports, skillName)

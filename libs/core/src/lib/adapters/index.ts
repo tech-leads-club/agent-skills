@@ -5,6 +5,7 @@ import { NodeFileSystemAdapter } from './node-filesystem.adapter'
 import { NodeHttpAdapter } from './node-http.adapter'
 import { NodeLoggerAdapter } from './node-logger.adapter'
 import { NodePackageResolverAdapter } from './node-package-resolver.adapter'
+import { NodePathsAdapter } from './node-paths.adapter'
 import { NodeShellAdapter } from './node-shell.adapter'
 
 export * from './node-env.adapter'
@@ -12,6 +13,7 @@ export * from './node-filesystem.adapter'
 export * from './node-http.adapter'
 export * from './node-logger.adapter'
 export * from './node-package-resolver.adapter'
+export * from './node-paths.adapter'
 export * from './node-shell.adapter'
 
 /**
@@ -25,6 +27,7 @@ export * from './node-shell.adapter'
  *
  * const ports = createNodeAdapters()
  * const cwd = ports.env.cwd()
+ * const localDir = ports.paths.getLocalSkillsDirectory()
  * ```
  */
 export function createNodeAdapters(): CorePorts {
@@ -35,5 +38,6 @@ export function createNodeAdapters(): CorePorts {
     env: new NodeEnvAdapter(),
     logger: new NodeLoggerAdapter(),
     packageResolver: new NodePackageResolverAdapter(),
+    paths: new NodePathsAdapter(),
   }
 }

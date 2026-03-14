@@ -7,6 +7,7 @@ import type {
   HttpPort,
   LoggerPort,
   PackageResolverPort,
+  PathsPort,
   ShellPort,
 } from '../../ports'
 import type { SkillsRegistry } from '../../types'
@@ -108,6 +109,11 @@ const createPorts = (): TestPorts => {
     env,
     logger,
     packageResolver,
+    paths: {
+      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
+      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getLocalSkillsDirectory: jest.fn(() => null),
+    } as unknown as PathsPort,
     shell: {} as ShellPort,
   }
 
@@ -257,7 +263,9 @@ describe('fetchRegistry', () => {
     getWithFallbackMock.mockResolvedValue({
       ok: false,
       status: 503,
-      json: async () => { throw new Error('Service Unavailable') },
+      json: async () => {
+        throw new Error('Service Unavailable')
+      },
       text: async () => 'Service Unavailable',
     })
 

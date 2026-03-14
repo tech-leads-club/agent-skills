@@ -11,5 +11,6 @@ describe('createNodeAdapters', () => {
     expect(typeof adapters.env.cwd).toBe('function')
     expect(typeof adapters.logger.info).toBe('function')
     expect(typeof adapters.packageResolver.getLatestVersion).toBe('function')
+    expect(typeof adapters.paths.getLocalSkillsDirectory).toBe('function')
   })
 })

@@ -7,10 +7,9 @@ import type {
   HttpPort,
   LoggerPort,
   PackageResolverPort,
+  PathsPort,
   ShellPort,
 } from '../../ports'
-
-import { detectMode, discoverCategories, discoverCategoriesAsync, discoverSkills, discoverSkillsAsync, ensureSkillAvailable, getSkillByName, getSkillByNameAsync, getSkillsDirectory, getSkillWithPath } from '../skills-provider.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -25,20 +24,22 @@ type TestPorts = {
       fallbackUrl?: string,
     ) => Promise<{ ok: boolean; status: number; json(): Promise<unknown>; text(): Promise<string> }>
   >
+  getLocalSkillsDirectoryMock: jest.MockedFunction<() => string | null>
 }
 
 const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
-  const readdirSyncMock = jest.fn<
-    (path: string, options?: { withFileTypes?: boolean }) => { name: string; isDirectory: () => boolean }[]
-  >()
+  const readdirSyncMock =
+    jest.fn<(path: string, options?: { withFileTypes?: boolean }) => { name: string; isDirectory: () => boolean }[]>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
-  const getWithFallbackMock = jest.fn<
-    (
-      url: string,
-      fallbackUrl?: string,
-    ) => Promise<{ ok: boolean; status: number; json(): Promise<unknown>; text(): Promise<string> }>
-  >()
+  const getWithFallbackMock =
+    jest.fn<
+      (
+        url: string,
+        fallbackUrl?: string,
+      ) => Promise<{ ok: boolean; status: number; json(): Promise<unknown>; text(): Promise<string> }>
+    >()
+  const getLocalSkillsDirectoryMock = jest.fn<() => string | null>().mockReturnValue(null)
 
   existsSyncMock.mockReturnValue(false)
   readdirSyncMock.mockReturnValue([])
@@ -63,6 +64,12 @@ const createPorts = (): TestPorts => {
     getWithFallback: getWithFallbackMock,
   } as unknown as HttpPort
 
+  const paths = {
+    getWorkspaceRoot: jest.fn(() => '/workspace/project'),
+    getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+    getLocalSkillsDirectory: getLocalSkillsDirectoryMock,
+  } as unknown as PathsPort
+
   const ports: CorePorts = {
     fs,
     http,
@@ -77,36 +84,53 @@ const createPorts = (): TestPorts => {
     packageResolver: {
       getLatestVersion: jest.fn<(pkg: string) => Promise<string>>().mockResolvedValue('latest'),
     } as unknown as PackageResolverPort,
+    paths,
   }
 
-  return { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getWithFallbackMock }
+  return { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getWithFallbackMock, getLocalSkillsDirectoryMock }
 }
 
-beforeEach(() => {
+let skillsProvider: typeof import('../skills-provider.service')
+
+beforeEach(async () => {
+  jest.resetModules()
   jest.clearAllMocks()
+  skillsProvider = await import('../skills-provider.service')
 })
 
 describe('detectMode', () => {
   it('returns local when skills catalog directory exists', () => {
-    const { ports, existsSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((p) => p.endsWith('packages/skills-catalog/skills'))
+    const { ports, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
 
-    expect(detectMode(ports)).toBe('local')
+    expect(skillsProvider.detectMode(ports)).toBe('local')
   })
 
   it('returns remote when skills catalog directory does not exist', () => {
     const { ports } = createPorts()
 
-    expect(detectMode(ports)).toBe('remote')
+    expect(skillsProvider.detectMode(ports)).toBe('remote')
+  })
+
+  it('caches the detected mode and local directory', () => {
+    const { ports, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock
+      .mockReturnValueOnce('/workspace/project/packages/skills-catalog/skills')
+      .mockReturnValueOnce(null)
+
+    expect(skillsProvider.detectMode(ports)).toBe('local')
+    expect(skillsProvider.detectMode(ports)).toBe('local')
+    expect(skillsProvider.getSkillsDirectory(ports)).toBe('/workspace/project/packages/skills-catalog/skills')
+    expect(getLocalSkillsDirectoryMock).toHaveBeenCalledTimes(1)
   })
 })
 
 describe('getSkillsDirectory', () => {
   it('returns the local catalog path when in local mode', () => {
-    const { ports, existsSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((p) => p.endsWith('packages/skills-catalog/skills'))
+    const { ports, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
 
-    const dir = getSkillsDirectory(ports)
+    const dir = skillsProvider.getSkillsDirectory(ports)
 
     expect(dir).toContain('packages/skills-catalog/skills')
   })
@@ -114,13 +138,14 @@ describe('getSkillsDirectory', () => {
   it('throws when in remote mode', () => {
     const { ports } = createPorts()
 
-    expect(() => getSkillsDirectory(ports)).toThrow('Skills directory not found')
+    expect(() => skillsProvider.getSkillsDirectory(ports)).toThrow('Skills directory not found')
   })
 })
 
 describe('discoverSkills', () => {
   it('returns skills from the local catalog when skills exist', () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
@@ -137,7 +162,7 @@ describe('discoverSkills', () => {
     })
     readFileSyncMock.mockReturnValue('---\nname: accessibility\ndescription: Audit web accessibility\n---\n# Body')
 
-    const skills = discoverSkills(ports)
+    const skills = skillsProvider.discoverSkills(ports)
 
     expect(skills).toHaveLength(1)
     expect(skills[0]).toMatchObject({
@@ -151,29 +176,30 @@ describe('discoverSkills', () => {
   it('returns an empty array when in remote mode (no local catalog)', () => {
     const { ports } = createPorts()
 
-    expect(discoverSkills(ports)).toEqual([])
+    expect(skillsProvider.discoverSkills(ports)).toEqual([])
   })
 
   it('skips skill directories without a valid SKILL.md', () => {
-    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return path.endsWith('packages/skills-catalog/skills')
     })
     readdirSyncMock.mockReturnValue([{ name: 'broken-skill', isDirectory: () => true }])
 
-    expect(discoverSkills(ports)).toEqual([])
+    expect(skillsProvider.discoverSkills(ports)).toEqual([])
   })
 })
 
 describe('discoverSkillsAsync', () => {
   it('returns local skills when in local mode', async () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
-        path.endsWith('packages/skills-catalog/skills') ||
-        path.endsWith('packages/skills-catalog/skills/seo/SKILL.md')
+        path.endsWith('packages/skills-catalog/skills') || path.endsWith('packages/skills-catalog/skills/seo/SKILL.md')
       )
     })
     readdirSyncMock.mockImplementation((p) => {
@@ -185,7 +211,7 @@ describe('discoverSkillsAsync', () => {
     })
     readFileSyncMock.mockReturnValue('---\nname: seo\ndescription: SEO optimization\n---\n# Body')
 
-    const skills = await discoverSkillsAsync(ports)
+    const skills = await skillsProvider.discoverSkillsAsync(ports)
 
     expect(skills).toHaveLength(1)
     expect(skills[0].name).toBe('seo')
@@ -216,7 +242,7 @@ describe('discoverSkillsAsync', () => {
       text: async () => JSON.stringify(remoteRegistry),
     })
 
-    const skills = await discoverSkillsAsync(ports)
+    const skills = await skillsProvider.discoverSkillsAsync(ports)
 
     expect(skills).toHaveLength(1)
     expect(skills[0].name).toBe('accessibility')
@@ -226,7 +252,7 @@ describe('discoverSkillsAsync', () => {
     const { ports, getWithFallbackMock } = createPorts()
     getWithFallbackMock.mockRejectedValue(new Error('network error'))
 
-    const skills = await discoverSkillsAsync(ports)
+    const skills = await skillsProvider.discoverSkillsAsync(ports)
 
     expect(skills).toEqual([])
   })
@@ -234,7 +260,8 @@ describe('discoverSkillsAsync', () => {
 
 describe('discoverCategories', () => {
   it('returns categories from the local catalog when in local mode', () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return path.endsWith('packages/skills-catalog/skills') || path.endsWith('_category.json')
@@ -248,7 +275,7 @@ describe('discoverCategories', () => {
     })
     readFileSyncMock.mockReturnValue('{"(quality)":{"name":"Quality","description":"Quality skills"}}')
 
-    const categories = discoverCategories(ports)
+    const categories = skillsProvider.discoverCategories(ports)
 
     expect(categories).toHaveLength(1)
     expect(categories[0]).toMatchObject({ id: 'quality', name: 'Quality', description: 'Quality skills' })
@@ -257,20 +284,21 @@ describe('discoverCategories', () => {
   it('returns empty array when in remote mode', () => {
     const { ports } = createPorts()
 
-    expect(discoverCategories(ports)).toEqual([])
+    expect(skillsProvider.discoverCategories(ports)).toEqual([])
   })
 })
 
 describe('discoverCategoriesAsync', () => {
   it('returns local categories in local mode', async () => {
-    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return path.endsWith('packages/skills-catalog/skills')
     })
     readdirSyncMock.mockReturnValue([{ name: '(devops)', isDirectory: () => true }])
 
-    const categories = await discoverCategoriesAsync(ports)
+    const categories = await skillsProvider.discoverCategoriesAsync(ports)
 
     expect(categories).toHaveLength(1)
     expect(categories[0].id).toBe('devops')
@@ -294,7 +322,7 @@ describe('discoverCategoriesAsync', () => {
       text: async () => JSON.stringify(remoteRegistry),
     })
 
-    const categories = await discoverCategoriesAsync(ports)
+    const categories = await skillsProvider.discoverCategoriesAsync(ports)
 
     expect(categories).toHaveLength(1)
     expect(categories[0]).toMatchObject({ id: 'quality', name: 'Quality' })
@@ -303,7 +331,8 @@ describe('discoverCategoriesAsync', () => {
 
 describe('getSkillByName', () => {
   it('returns the skill when found in local catalog', () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
@@ -314,35 +343,36 @@ describe('getSkillByName', () => {
     readdirSyncMock.mockReturnValue([{ name: 'accessibility', isDirectory: () => true }])
     readFileSyncMock.mockReturnValue('---\nname: accessibility\ndescription: Audit web accessibility\n---\n')
 
-    const skill = getSkillByName(ports, 'accessibility')
+    const skill = skillsProvider.getSkillByName(ports, 'accessibility')
 
     expect(skill).toBeDefined()
     expect(skill?.name).toBe('accessibility')
   })
 
   it('returns undefined when skill is not found', () => {
-    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => (p as string).endsWith('packages/skills-catalog/skills'))
     readdirSyncMock.mockReturnValue([])
 
-    expect(getSkillByName(ports, 'nonexistent')).toBeUndefined()
+    expect(skillsProvider.getSkillByName(ports, 'nonexistent')).toBeUndefined()
   })
 })
 
 describe('getSkillByNameAsync', () => {
   it('returns the skill when found in local catalog', async () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
-        path.endsWith('packages/skills-catalog/skills') ||
-        path.endsWith('packages/skills-catalog/skills/seo/SKILL.md')
+        path.endsWith('packages/skills-catalog/skills') || path.endsWith('packages/skills-catalog/skills/seo/SKILL.md')
       )
     })
     readdirSyncMock.mockReturnValue([{ name: 'seo', isDirectory: () => true }])
     readFileSyncMock.mockReturnValue('---\nname: seo\ndescription: SEO optimization\n---\n')
 
-    const skill = await getSkillByNameAsync(ports, 'seo')
+    const skill = await skillsProvider.getSkillByNameAsync(ports, 'seo')
 
     expect(skill?.name).toBe('seo')
   })
@@ -356,13 +386,14 @@ describe('getSkillByNameAsync', () => {
       text: async () => '',
     })
 
-    expect(await getSkillByNameAsync(ports, 'nonexistent')).toBeUndefined()
+    expect(await skillsProvider.getSkillByNameAsync(ports, 'nonexistent')).toBeUndefined()
   })
 })
 
 describe('ensureSkillAvailable', () => {
   it('returns local path when skill exists in local mode', async () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
@@ -373,7 +404,7 @@ describe('ensureSkillAvailable', () => {
     readdirSyncMock.mockReturnValue([{ name: 'accessibility', isDirectory: () => true }])
     readFileSyncMock.mockReturnValue('---\nname: accessibility\ndescription: Audit web accessibility\n---\n')
 
-    const path = await ensureSkillAvailable(ports, 'accessibility')
+    const path = await skillsProvider.ensureSkillAvailable(ports, 'accessibility')
 
     expect(path).toContain('accessibility')
   })
@@ -387,7 +418,7 @@ describe('ensureSkillAvailable', () => {
       text: async () => '',
     })
 
-    const path = await ensureSkillAvailable(ports, 'nonexistent')
+    const path = await skillsProvider.ensureSkillAvailable(ports, 'nonexistent')
 
     expect(path).toBeNull()
   })
@@ -395,7 +426,8 @@ describe('ensureSkillAvailable', () => {
 
 describe('getSkillWithPath', () => {
   it('returns skill with path when found in local mode', async () => {
-    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getLocalSkillsDirectoryMock } = createPorts()
+    getLocalSkillsDirectoryMock.mockReturnValue('/workspace/project/packages/skills-catalog/skills')
     existsSyncMock.mockImplementation((p) => {
       const path = p as string
       return (
@@ -406,7 +438,7 @@ describe('getSkillWithPath', () => {
     readdirSyncMock.mockReturnValue([{ name: 'accessibility', isDirectory: () => true }])
     readFileSyncMock.mockReturnValue('---\nname: accessibility\ndescription: Audit web accessibility\n---\n')
 
-    const skill = await getSkillWithPath(ports, 'accessibility')
+    const skill = await skillsProvider.getSkillWithPath(ports, 'accessibility')
 
     expect(skill).not.toBeNull()
     expect(skill?.name).toBe('accessibility')
@@ -422,7 +454,7 @@ describe('getSkillWithPath', () => {
       text: async () => '',
     })
 
-    const skill = await getSkillWithPath(ports, 'nonexistent')
+    const skill = await skillsProvider.getSkillWithPath(ports, 'nonexistent')
 
     expect(skill).toBeNull()
   })

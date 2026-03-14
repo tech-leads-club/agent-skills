@@ -7,6 +7,7 @@ import type {
   HttpPort,
   LoggerPort,
   PackageResolverPort,
+  PathsPort,
   ShellPort,
 } from '../../ports'
 
@@ -36,6 +37,11 @@ const createPorts = (): TestPorts => {
     http: {} as HttpPort,
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
+    paths: {
+      getWorkspaceRoot: jest.fn(() => '/home/user/project'),
+      getSkillsCatalogPath: jest.fn(() => '/home/user/project/packages/skills-catalog/skills'),
+      getLocalSkillsDirectory: jest.fn(() => null),
+    } as unknown as PathsPort,
     shell: {} as ShellPort,
   }
 

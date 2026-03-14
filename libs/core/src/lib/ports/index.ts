@@ -3,6 +3,7 @@ export * from './filesystem.port'
 export * from './http.port'
 export * from './logger.port'
 export * from './package-resolver.port'
+export * from './paths.port'
 export * from './shell.port'
 
 import type { EnvPort } from './env.port'
@@ -10,6 +11,7 @@ import type { FileSystemPort } from './filesystem.port'
 import type { HttpPort } from './http.port'
 import type { LoggerPort } from './logger.port'
 import type { PackageResolverPort } from './package-resolver.port'
+import type { PathsPort } from './paths.port'
 import type { ShellPort } from './shell.port'
 
 /**
@@ -24,6 +26,7 @@ import type { ShellPort } from './shell.port'
  *   env,
  *   logger,
  *   packageResolver,
+ *   paths,
  * }
  * ```
  */
@@ -40,4 +43,6 @@ export interface CorePorts {
   logger: LoggerPort
   /** Package resolver adapter used by core services. */
   packageResolver: PackageResolverPort
+  /** Path resolver adapter used by core services. */
+  paths: PathsPort
 }
