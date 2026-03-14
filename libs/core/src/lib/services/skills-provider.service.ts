@@ -12,7 +12,27 @@ interface ModeCache {
   localDir: string | null
 }
 
-const cache: ModeCache = { mode: null, localDir: null }
+const cache = new Map<string, ModeCache>()
+
+function getCacheKey(ports: CorePorts): string {
+  try {
+    const root = ports.paths.getWorkspaceRoot()
+    if (root) return root
+  } catch {
+    // ignore to allow fallback
+  }
+  return '__default__'
+}
+
+function getCacheEntry(ports: CorePorts): ModeCache {
+  const key = getCacheKey(ports)
+  let entry = cache.get(key)
+  if (!entry) {
+    entry = { mode: null, localDir: null }
+    cache.set(key, entry)
+  }
+  return entry
+}
 
 function getLocalSkillsDirectory(ports: CorePorts): string | null {
   return ports.paths.getLocalSkillsDirectory()
@@ -33,16 +53,17 @@ function getLocalSkillsDirectory(ports: CorePorts): string | null {
  * ```
  */
 export function detectMode(ports: CorePorts): SkillsMode {
-  if (cache.mode) return cache.mode
+  const entry = getCacheEntry(ports)
+  if (entry.mode) return entry.mode
   const localDir = getLocalSkillsDirectory(ports)
 
   if (localDir) {
-    cache.localDir = localDir
-    cache.mode = 'local'
+    entry.localDir = localDir
+    entry.mode = 'local'
     return 'local'
   }
 
-  cache.mode = 'remote'
+  entry.mode = 'remote'
   return 'remote'
 }
 
@@ -61,12 +82,14 @@ export function detectMode(ports: CorePorts): SkillsMode {
  */
 export function getSkillsDirectory(ports: CorePorts): string {
   const mode = detectMode(ports)
-  if (mode === 'local' && cache.localDir) return cache.localDir
+  const entry = getCacheEntry(ports)
+  if (mode === 'local' && entry.localDir) return entry.localDir
   throw new Error('Skills directory not found. Use remote mode or install skills locally.')
 }
 
 function isLocalMode(ports: CorePorts): boolean {
-  return detectMode(ports) === 'local' && cache.localDir !== null
+  const entry = getCacheEntry(ports)
+  return detectMode(ports) === 'local' && entry.localDir !== null
 }
 
 function isCategoryFolder(folderName: string): boolean {
@@ -140,7 +163,8 @@ function discoverLocalSkills(ports: CorePorts, skillsDir: string): SkillInfo[] {
  * ```
  */
 export function discoverSkills(ports: CorePorts): SkillInfo[] {
-  return isLocalMode(ports) ? discoverLocalSkills(ports, cache.localDir!) : []
+  const entry = getCacheEntry(ports)
+  return isLocalMode(ports) ? discoverLocalSkills(ports, entry.localDir!) : []
 }
 
 /**
@@ -155,7 +179,8 @@ export function discoverSkills(ports: CorePorts): SkillInfo[] {
  * ```
  */
 export async function discoverSkillsAsync(ports: CorePorts): Promise<SkillInfo[]> {
-  return isLocalMode(ports) ? discoverLocalSkills(ports, cache.localDir!) : getRemoteSkills(ports)
+  const entry = getCacheEntry(ports)
+  return isLocalMode(ports) ? discoverLocalSkills(ports, entry.localDir!) : getRemoteSkills(ports)
 }
 
 function loadLocalCategoryMetadata(
@@ -201,7 +226,8 @@ function discoverLocalCategories(ports: CorePorts, skillsDir: string): CategoryI
  * ```
  */
 export function discoverCategories(ports: CorePorts): CategoryInfo[] {
-  return isLocalMode(ports) ? discoverLocalCategories(ports, cache.localDir!) : []
+  const entry = getCacheEntry(ports)
+  return isLocalMode(ports) ? discoverLocalCategories(ports, entry.localDir!) : []
 }
 
 /**
@@ -216,7 +242,8 @@ export function discoverCategories(ports: CorePorts): CategoryInfo[] {
  * ```
  */
 export async function discoverCategoriesAsync(ports: CorePorts): Promise<CategoryInfo[]> {
-  return isLocalMode(ports) ? discoverLocalCategories(ports, cache.localDir!) : getRemoteCategories(ports)
+  const entry = getCacheEntry(ports)
+  return isLocalMode(ports) ? discoverLocalCategories(ports, entry.localDir!) : getRemoteCategories(ports)
 }
 
 /**
