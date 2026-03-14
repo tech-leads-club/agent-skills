@@ -241,6 +241,33 @@ describe('fetchRegistry', () => {
     expect(result).toBeNull()
     expect(loggerErrorMock).toHaveBeenCalledTimes(1)
   })
+
+  it('returns cached fallback when http resolves with ok:false and cache is available', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
+    const staleRegistry = { ...registryFixture, version: 'cached' }
+    const fetchedAt = Date.now() - 60_000 * 60 // expired TTL to force remote fetch
+
+    existsSyncMock.mockImplementation(
+      (path) =>
+        path === '/home/tester/.cache/agent-skills' ||
+        path === '/home/tester/.cache/agent-skills/skills' ||
+        path === '/home/tester/.cache/agent-skills/registry.json',
+    )
+    readFileSyncMock.mockReturnValue(JSON.stringify({ fetchedAt, registry: staleRegistry }))
+    getWithFallbackMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: async () => { throw new Error('Service Unavailable') },
+      text: async () => 'Service Unavailable',
+    })
+
+    // The service delegates ok-checking to the HttpPort adapter contract.
+    // When json() throws (as it does on non-2xx with a proper adapter),
+    // the catch block returns the stale cached registry.
+    const result = await fetchRegistry(ports)
+
+    expect(result).toEqual(staleRegistry)
+  })
 })
 
 describe('downloadSkill', () => {
