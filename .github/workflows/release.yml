@@ -64,6 +64,8 @@ jobs:
         id: security-scan
         if: github.event.pull_request.head.repo.full_name == github.repository
         uses: ./.github/actions/security-scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           artifact-name: security-scan-results-pr
 
@@ -129,6 +131,8 @@ jobs:
       - name: Security Scan
         id: security-scan
         uses: ./.github/actions/security-scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           artifact-name: security-scan-results-merge-queue
 
@@ -244,6 +248,8 @@ jobs:
       - name: Security Scan
         id: security-scan
         uses: ./.github/actions/security-scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           artifact-name: security-scan-results
           retention-days: '30'
