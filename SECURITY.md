@@ -114,11 +114,12 @@ The log is **append-only** — entries are never overwritten. It is the forensic
 
 ## 🔍 Security Scanning
 
-Every skill in the catalog is scanned with [`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan) before publishing. The scan is **incremental** — only skills whose content has changed since the last run are re-scanned.
+Every skill in the catalog is scanned with [**Snyk Agent Scan**](https://github.com/snyk/agent-scan) (formerly `mcp-scan`) before publishing. The scan is **incremental** — only skills whose content has changed since the last run are re-scanned. The scanner requires a `SNYK_TOKEN` environment variable (see [Security scan setup](docs/security-scan.md) for CI and fork PR behavior).
 
 ```bash
-npm run scan              # Incremental (default — only changed skills)
-npm run scan -- --force   # Force full re-scan of all skills
+export SNYK_TOKEN=your-token   # Required; get it from https://app.snyk.io/account
+npm run scan                   # Incremental (default — only changed skills)
+npm run scan -- --force        # Force full re-scan of all skills
 ```
 
 ### How It Works
@@ -127,14 +128,14 @@ Each skill has a SHA-256 content hash computed from all its files. Results are c
 
 ```
 Content hash unchanged → load from cache (fast, no re-scan)
-Content hash changed   → re-scan with mcp-scan, update cache
+Content hash changed   → re-scan with snyk-agent-scan, update cache
 ```
 
 This makes the scan fast enough to run on every PR and release without slowing CI/CD.
 
 ### Handling False Positives
 
-If `mcp-scan` flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist at `packages/skills-catalog/security-scan-allowlist.yaml`:
+If the scanner flags a finding that is intentional (e.g. a first-party MCP server integration), add it to the allowlist at `packages/skills-catalog/security-scan-allowlist.yaml`:
 
 ```yaml
 version: '1.0.0'
@@ -159,7 +160,7 @@ entries:
 
 ### Security Scan in CI/CD
 
-The scan must pass before any release. The release pipeline (`release.yml`) runs `npm run scan` as a required step. A failed scan blocks the release.
+The scan must pass before any release. The release pipeline (`release.yml`) runs `npm run scan` as a required step when the run has access to secrets (same-repo PRs and push to `main`). **PRs from forks do not run the scan** in the normal PR workflow (GitHub does not expose repository secrets to fork workflows). To **block merge until the scan passes** for all PRs (including forks), use [GitHub Merge Queue](docs/security-scan.md#blocking-merge-for-fork-prs-merge-queue) and require the "Security Scan (merge queue)" status check. See [Security scan setup](docs/security-scan.md) for details. A failed scan blocks the release when the scan runs.
 
 ## 🔌 MCP Server Security
 
