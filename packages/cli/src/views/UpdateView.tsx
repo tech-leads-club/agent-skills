@@ -2,6 +2,8 @@ import { Box, Text, useInput } from 'ink'
 import Spinner from 'ink-spinner'
 import { useAtomValue } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
+import { getUpdatableSkills } from '@tech-leads-club/core'
+import type { AgentType, DeprecatedEntry, SkillInfo } from '@tech-leads-club/core'
 
 import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
 import { installedSkillsAtom } from '../atoms/installedSkills'
@@ -10,9 +12,8 @@ import { InstallResults } from '../components/InstallResults'
 import { MultiSelectPrompt } from '../components/MultiSelectPrompt'
 import { useInstaller } from '../hooks/useInstaller'
 import { useSkills } from '../hooks/useSkills'
-import { getUpdatableSkills } from '../services/registry'
+import { ports } from '../ports'
 import { colors, symbols } from '../theme'
-import type { AgentType, DeprecatedEntry, SkillInfo } from '../types'
 import { AgentSelector } from './AgentSelector'
 
 export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentType[]; onExit: () => void }) {
@@ -65,7 +66,7 @@ export function UpdateView({ selectedAgents, onExit }: { selectedAgents?: AgentT
     setCheckingUpdates(true)
     const checkUpdates = async () => {
       const installedNames = installedList.map((s) => s.name)
-      const { toUpdate } = await getUpdatableSkills(installedNames)
+      const { toUpdate } = await getUpdatableSkills(ports, installedNames)
       const skillsToUpdate = installedList.filter((s) => toUpdate.includes(s.name))
       setUpdatableSkills(skillsToUpdate)
       setCheckingUpdates(false)

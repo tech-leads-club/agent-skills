@@ -2,14 +2,16 @@ import { Box, Text, useInput, useStdout } from 'ink'
 import Spinner from 'ink-spinner'
 import { useState } from 'react'
 
+import { getAgentConfig } from '@tech-leads-club/core'
+import type { AgentType } from '@tech-leads-club/core'
+
 import { FooterBar } from '../components/FooterBar'
 import { Header } from '../components/Header'
 import { KeyboardShortcutsOverlay, type ShortcutEntry } from '../components/KeyboardShortcutsOverlay'
 import { MultiSelectPrompt } from '../components/MultiSelectPrompt'
 import { useAgents } from '../hooks/useAgents'
-import { getAgentConfig } from '../services/agents'
+import { ports } from '../ports'
 import { colors, symbols } from '../theme'
-import type { AgentType } from '../types'
 
 interface AgentSelectorProps {
   onSelect: (agents: AgentType[]) => void
@@ -38,7 +40,7 @@ export function AgentSelector({ onSelect, onBack }: AgentSelectorProps) {
   })
 
   const items = allAgents.map((agent) => {
-    const config = getAgentConfig(agent)
+    const config = getAgentConfig(ports, agent)
     const isDetected = installedAgents.includes(agent)
     return { label: config.displayName, value: agent, hint: isDetected ? `${symbols.check} detected` : undefined }
   })

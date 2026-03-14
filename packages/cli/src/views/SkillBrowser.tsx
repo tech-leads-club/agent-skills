@@ -1,15 +1,16 @@
 import { Box, Text, useInput, useStdout } from 'ink'
 import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
+import { groupSkillsByCategory } from '@tech-leads-club/core'
+import type { SkillInfo } from '@tech-leads-club/core'
 
 import { CategoryHeader, Header, SearchInput, SkillCard, SkillDetailPanel } from '../components'
 import { FooterBar } from '../components/FooterBar'
 import { KeyboardShortcutsOverlay, type ShortcutEntry } from '../components/KeyboardShortcutsOverlay'
 import { useFilter, useSkills } from '../hooks'
-import { groupSkillsByCategory } from '../services/categories'
 import { canShowDetailPanel } from '../services/terminal-dimensions'
 import { colors, symbols } from '../theme'
-import type { SkillInfo } from '../types'
+import { ports } from '../ports'
 
 import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
 import { installedSkillsAtom } from '../atoms/installedSkills'
@@ -84,7 +85,7 @@ export const SkillBrowser = ({ onInstall, onExit, overrideSkills, readOnly = fal
   const contentAreaHeight = Math.max(10, terminalRows - 17)
   const isSearchExpanded = query.trim().length > 0
 
-  const groupedMap = useMemo(() => groupSkillsByCategory(filtered), [filtered])
+  const groupedMap = useMemo(() => groupSkillsByCategory(ports, filtered), [filtered])
 
   useMemo(() => {
     if (query) setShowSearch(true)
