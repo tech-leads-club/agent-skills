@@ -435,6 +435,43 @@ export async function listInstalledSkills(ports: CorePorts, agent: AgentType, gl
 }
 
 /**
+ * Checks whether a skill is installed for a specific agent and scope.
+ *
+ * @param ports - Core ports used for filesystem, environment, and dependent service access.
+ * @param skillName - Canonical skill name to check.
+ * @param agent - Agent whose install location should be inspected.
+ * @param options - Optional scope override for global installs.
+ * @returns `true` when the installed skill path exists; otherwise `false`.
+ *
+ * @example
+ * ```ts
+ * const installed = await isSkillInstalled(ports, 'accessibility', 'cursor')
+ * ```
+ */
+export async function isSkillInstalled(
+  ports: CorePorts,
+  skillName: string,
+  agent: AgentType,
+  options: { global?: boolean } = {},
+): Promise<boolean> {
+  const config = getAgentConfig(ports, agent)
+  const safeSkillName = sanitizeName(skillName)
+  const targetBase = options.global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
+  const skillDir = join(targetBase, safeSkillName)
+
+  if (!isPathSafe(targetBase, skillDir)) {
+    return false
+  }
+
+  try {
+    await ports.fs.lstat(skillDir)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * Removes a skill from the requested agent directories.
  *
  * The orchestration mirrors the CLI installer by checking the lockfile first,
