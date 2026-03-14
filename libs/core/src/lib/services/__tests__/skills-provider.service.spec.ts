@@ -10,7 +10,7 @@ import type {
   ShellPort,
 } from '../../ports'
 
-import { detectMode, getSkillsDirectory } from '../skills-provider.service'
+import { detectMode, discoverSkills, getSkillsDirectory } from '../skills-provider.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -93,5 +93,53 @@ describe('getSkillsDirectory', () => {
     const { ports } = createPorts()
 
     expect(() => getSkillsDirectory(ports)).toThrow('Skills directory not found')
+  })
+})
+
+describe('discoverSkills', () => {
+  it('returns skills from the local catalog when skills exist', () => {
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((p) => {
+      const path = p as string
+      return (
+        path.endsWith('packages/skills-catalog/skills') ||
+        path.endsWith('packages/skills-catalog/skills/accessibility/SKILL.md')
+      )
+    })
+    readdirSyncMock.mockImplementation((p) => {
+      const path = p as string
+      if (path.endsWith('packages/skills-catalog/skills')) {
+        return [{ name: 'accessibility', isDirectory: () => true }]
+      }
+      return []
+    })
+    readFileSyncMock.mockReturnValue('---\nname: accessibility\ndescription: Audit web accessibility\n---\n# Body')
+
+    const skills = discoverSkills(ports)
+
+    expect(skills).toHaveLength(1)
+    expect(skills[0]).toMatchObject({
+      name: 'accessibility',
+      description: 'Audit web accessibility',
+      category: 'uncategorized',
+    })
+    expect(skills[0].path).toContain('accessibility')
+  })
+
+  it('returns an empty array when in remote mode (no local catalog)', () => {
+    const { ports } = createPorts()
+
+    expect(discoverSkills(ports)).toEqual([])
+  })
+
+  it('skips skill directories without a valid SKILL.md', () => {
+    const { ports, existsSyncMock, readdirSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((p) => {
+      const path = p as string
+      return path.endsWith('packages/skills-catalog/skills')
+    })
+    readdirSyncMock.mockReturnValue([{ name: 'broken-skill', isDirectory: () => true }])
+
+    expect(discoverSkills(ports)).toEqual([])
   })
 })
