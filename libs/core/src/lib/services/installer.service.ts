@@ -1,12 +1,12 @@
-import { join, relative, resolve } from 'node:path'
+import { join, normalize, relative, resolve, sep } from 'node:path'
 
 import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../constants'
 import type { CorePorts } from '../ports'
 import type { AgentType, InstallOptions, InstallResult, RemoveOptions, RemoveResult, SkillInfo } from '../types'
-import { isPathSafe, sanitizeName } from '../utils'
 
 import { getAgentConfig } from './agents.service'
 import { logAudit } from './audit-log.service'
+import { isGloballyInstalled } from './global-path.service'
 import { addSkillToLock, getSkillFromLock, removeSkillFromLock } from './lockfile.service'
 import { findProjectRoot } from './project-root.service'
 import { getCachedContentHash } from './registry.service'
@@ -23,174 +23,24 @@ interface InstallContext {
   projectRoot: string
 }
 
-const AGENT_SKILLS_DIRS: Record<AgentType, string> = {
-  cursor: '.cursor/skills',
-  'claude-code': '.claude/skills',
-  'github-copilot': '.github/skills',
-  windsurf: '.windsurf/skills',
-  cline: '.cline/skills',
-  aider: '.aider/skills',
-  codex: '.codex/skills',
-  gemini: '.gemini/skills',
-  antigravity: '.agent/skills',
-  roo: '.roo/skills',
-  kilocode: '.kilocode/skills',
-  trae: '.trae/skills',
-  kiro: '.kiro/skills',
-  'amazon-q': '.amazonq/skills',
-  augment: '.augment/skills',
-  tabnine: '.tabnine/skills',
-  opencode: '.opencode/skills',
-  sourcegraph: '.sourcegraph/skills',
-  droid: '.factory/skills',
+const sanitizeName = (name: string): string => {
+  const sanitized = name
+    .replace(/[/\\]/g, '')
+    .replace(/[\0:*?"<>|]/g, '')
+    .replace(/^[.\s]+|[.\s]+$/g, '')
+    .replace(/\.{2,}/g, '')
+    .replace(/^\.+/, '')
+
+  return (sanitized || 'unnamed-skill').substring(0, 255)
 }
 
-function getGlobalSkillsDir(agent: AgentType, homeDir: string): string {
-  switch (agent) {
-    case 'cursor':
-      return join(homeDir, '.cursor/skills')
-    case 'claude-code':
-      return join(homeDir, '.claude/skills')
-    case 'github-copilot':
-      return join(homeDir, '.copilot/skills')
-    case 'windsurf':
-      return join(homeDir, '.codeium/windsurf/skills')
-    case 'cline':
-      return join(homeDir, '.cline/skills')
-    case 'aider':
-      return join(homeDir, '.aider/skills')
-    case 'codex':
-      return join(homeDir, '.codex/skills')
-    case 'gemini':
-      return join(homeDir, '.gemini/skills')
-    case 'antigravity':
-      return join(homeDir, '.gemini/antigravity/skills')
-    case 'roo':
-      return join(homeDir, '.roo/skills')
-    case 'kilocode':
-      return join(homeDir, '.kilocode/skills')
-    case 'trae':
-      return join(homeDir, '.trae/skills')
-    case 'kiro':
-      return join(homeDir, '.kiro/skills')
-    case 'amazon-q':
-      return join(homeDir, '.amazonq/skills')
-    case 'augment':
-      return join(homeDir, '.augment/skills')
-    case 'tabnine':
-      return join(homeDir, '.tabnine/skills')
-    case 'opencode':
-      return join(homeDir, '.config/opencode/skills')
-    case 'sourcegraph':
-      return join(homeDir, '.sourcegraph/skills')
-    case 'droid':
-      return join(homeDir, '.factory/skills')
-  }
+const isPathSafe = (basePath: string, targetPath: string): boolean => {
+  const normalizedBase = normalize(resolve(basePath))
+  const normalizedTarget = normalize(resolve(targetPath))
+  return normalizedTarget.startsWith(normalizedBase + sep) || normalizedTarget === normalizedBase
 }
 
-function getInstallBase(agent: AgentType, options: InstallOptions): string {
-  if (options.global) {
-    if (!options.homeDir) {
-      throw new Error('homeDir is required to resolve global install paths')
-    }
-
-    return getGlobalSkillsDir(agent, options.homeDir)
-  }
-
-  if (!options.projectRoot) {
-    throw new Error('projectRoot is required to resolve local install paths')
-  }
-
-  return join(options.projectRoot, AGENT_SKILLS_DIRS[agent])
-}
-
-function getCanonicalBase(options: InstallOptions): string {
-  if (options.global) {
-    if (!options.homeDir) {
-      throw new Error('homeDir is required to resolve global canonical paths')
-    }
-
-    return options.homeDir
-  }
-
-  if (!options.projectRoot) {
-    throw new Error('projectRoot is required to resolve local canonical paths')
-  }
-
-  return options.projectRoot
-}
-
-/**
- * Resolves the expected installation path for a skill and agent.
- *
- * This helper stays pure by requiring the path context to be provided in
- * `options`, instead of reading environment state directly.
- *
- * @param skillName - Canonical skill name to resolve.
- * @param agent - Agent that will receive the installed skill.
- * @param options - Install options containing the path context required for resolution.
- * @returns The absolute install path for the sanitized skill name.
- * @throws {Error} Throws when the resolved path escapes the allowed install base.
- *
- * @example
- * ```ts
- * const path = getInstallPath('accessibility', 'cursor', {
- *   global: false,
- *   method: 'copy',
- *   agents: ['cursor'],
- *   skills: ['accessibility'],
- *   projectRoot: '/workspace/project',
- * })
- * ```
- */
-export function getInstallPath(skillName: string, agent: AgentType, options: InstallOptions): string {
-  const safeSkillName = sanitizeName(skillName)
-  const targetBase = getInstallBase(agent, options)
-  const installPath = join(targetBase, safeSkillName)
-
-  if (!isPathSafe(targetBase, installPath)) {
-    throw new Error('Invalid skill name: potential path traversal detected')
-  }
-
-  return installPath
-}
-
-/**
- * Resolves the canonical source path for a skill.
- *
- * This helper stays pure by requiring the path context to be provided in
- * `options`, instead of reading environment state directly.
- *
- * @param skillName - Canonical skill name to resolve.
- * @param options - Install options containing the path context required for resolution.
- * @returns The absolute canonical path for the sanitized skill name.
- * @throws {Error} Throws when the resolved path escapes the allowed canonical base.
- *
- * @example
- * ```ts
- * const path = getCanonicalPath('accessibility', {
- *   global: false,
- *   method: 'copy',
- *   agents: ['cursor'],
- *   skills: ['accessibility'],
- *   projectRoot: '/workspace/project',
- * })
- * ```
- */
-export function getCanonicalPath(skillName: string, options: InstallOptions): string {
-  const safeSkillName = sanitizeName(skillName)
-  const baseDir = getCanonicalBase(options)
-  const canonicalBase = join(baseDir, CANONICAL_SKILLS_PATH)
-  const canonicalPath = join(canonicalBase, safeSkillName)
-
-  if (!isPathSafe(canonicalBase, canonicalPath)) {
-    throw new Error('Invalid skill name: potential path traversal detected')
-  }
-
-  return canonicalPath
-}
-
-async function createSymlink(ports: CorePorts, target: string, linkPath: string): Promise<boolean> {
+const createSymlink = async (ports: CorePorts, target: string, linkPath: string): Promise<boolean> => {
   try {
     await cleanExistingPath(ports, linkPath, target)
     await ports.fs.mkdir(join(linkPath, '..'), { recursive: true })
@@ -203,7 +53,7 @@ async function createSymlink(ports: CorePorts, target: string, linkPath: string)
   }
 }
 
-async function cleanExistingPath(ports: CorePorts, linkPath: string, target: string): Promise<void> {
+const cleanExistingPath = async (ports: CorePorts, linkPath: string, target: string): Promise<void> => {
   try {
     const stats = await ports.fs.lstat(linkPath)
     if (stats.isSymbolicLink()) {
@@ -213,20 +63,12 @@ async function cleanExistingPath(ports: CorePorts, linkPath: string, target: str
     } else {
       await ports.fs.rm(linkPath, { recursive: true })
     }
-  } catch (error) {
-    if ((error as { code?: string })?.code === 'ELOOP') {
-      await ports.fs.rm(linkPath, { force: true }).catch(() => {})
-    }
+  } catch (err: unknown) {
+    if ((err as { code?: string })?.code === 'ELOOP') await ports.fs.rm(linkPath, { force: true }).catch(() => {})
   }
 }
 
-async function copySkillDirectory(ports: CorePorts, src: string, dest: string): Promise<void> {
-  await ports.fs.rm(dest, { recursive: true, force: true })
-  await ports.fs.mkdir(join(dest, '..'), { recursive: true })
-  await ports.fs.cp(src, dest, { recursive: true })
-}
-
-async function validateSymlinkTarget(ports: CorePorts, linkPath: string, baseDir: string): Promise<boolean> {
+const validateSymlinkTarget = async (ports: CorePorts, linkPath: string, baseDir: string): Promise<boolean> => {
   try {
     const stats = await ports.fs.lstat(linkPath)
     if (stats.isSymbolicLink()) {
@@ -234,52 +76,50 @@ async function validateSymlinkTarget(ports: CorePorts, linkPath: string, baseDir
       const resolvedTarget = resolve(join(linkPath, '..'), target)
       return isPathSafe(baseDir, resolvedTarget)
     }
-
     return true
   } catch {
     return true
   }
 }
 
-function getInstallMode(method: 'symlink' | 'copy', global: boolean): InstallMode {
-  return `${method}-${global ? 'global' : 'local'}` as InstallMode
+const copySkillDirectory = async (ports: CorePorts, src: string, dest: string): Promise<void> => {
+  await ports.fs.rm(dest, { recursive: true, force: true })
+  await ports.fs.mkdir(join(dest, '..'), { recursive: true })
+  await ports.fs.cp(src, dest, { recursive: true })
 }
 
-function createSuccessResult(
+const getInstallMode = (method: 'symlink' | 'copy', global: boolean): InstallMode =>
+  `${method}-${global ? 'global' : 'local'}` as InstallMode
+
+const createSuccessResult = (
   ctx: InstallContext,
   method: 'symlink' | 'copy',
   extras: Partial<InstallResult> = {},
-): InstallResult {
-  return {
-    agent: ctx.config.displayName,
-    skill: ctx.skill.name,
-    path: ctx.skillTargetPath,
-    method,
-    success: true,
-    ...extras,
-  }
-}
+): InstallResult => ({
+  agent: ctx.config.displayName,
+  skill: ctx.skill.name,
+  path: ctx.skillTargetPath,
+  method,
+  success: true,
+  ...extras,
+})
 
-function createErrorResult(ctx: InstallContext, method: 'symlink' | 'copy', error: unknown): InstallResult {
-  return {
-    agent: ctx.config.displayName,
-    skill: ctx.skill.name,
-    path: ctx.skillTargetPath,
-    method,
-    success: false,
-    error: error instanceof Error ? error.message : String(error),
-  }
-}
+const createErrorResult = (ctx: InstallContext, method: 'symlink' | 'copy', error: unknown): InstallResult => ({
+  agent: ctx.config.displayName,
+  skill: ctx.skill.name,
+  path: ctx.skillTargetPath,
+  method,
+  success: false,
+  error: error instanceof Error ? error.message : String(error),
+})
 
 const installHandlers: Record<InstallMode, (ports: CorePorts, ctx: InstallContext) => Promise<InstallResult>> = {
   'symlink-global': async (ports, ctx) => {
-    if (await createSymlink(ports, ctx.skill.path, ctx.skillTargetPath)) {
-      return createSuccessResult(ctx, 'symlink')
-    }
-
+    if (await createSymlink(ports, ctx.skill.path, ctx.skillTargetPath)) return createSuccessResult(ctx, 'symlink')
     await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
     return createSuccessResult(ctx, 'copy', { symlinkFailed: true })
   },
+
   'symlink-local': async (ports, ctx) => {
     const canonicalDir = join(ctx.projectRoot, CANONICAL_SKILLS_DIR, ctx.safeSkillName)
     await copySkillDirectory(ports, ctx.skill.path, canonicalDir)
@@ -291,24 +131,31 @@ const installHandlers: Record<InstallMode, (ports: CorePorts, ctx: InstallContex
     await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
     return createSuccessResult(ctx, 'copy', { symlinkFailed: true })
   },
+
   'copy-global': async (ports, ctx) => {
     await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
     return createSuccessResult(ctx, 'copy')
   },
+
   'copy-local': async (ports, ctx) => {
     await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
     return createSuccessResult(ctx, 'copy')
   },
 }
 
-function validatePath(targetDir: string, skillTargetPath: string, projectRoot: string, global: boolean): string | null {
+const validatePath = (
+  targetDir: string,
+  skillTargetPath: string,
+  projectRoot: string,
+  global: boolean,
+): string | null => {
   if (global) return null
   if (isPathSafe(targetDir, skillTargetPath)) return null
   if (isPathSafe(projectRoot, skillTargetPath)) return null
   return 'Security: Invalid skill destination path'
 }
 
-async function installSkillForAgent(
+const installSkillForAgent = async (
   ports: CorePorts,
   skill: SkillInfo,
   agent: AgentType,
@@ -316,7 +163,7 @@ async function installSkillForAgent(
   method: 'symlink' | 'copy',
   projectRoot: string,
   global: boolean,
-): Promise<InstallResult> {
+): Promise<InstallResult> => {
   const config = getAgentConfig(ports, agent)
   const safeSkillName = sanitizeName(skill.name)
   const skillTargetPath = join(targetDir, safeSkillName)
@@ -333,34 +180,11 @@ async function installSkillForAgent(
   }
 }
 
-/**
- * Installs one or more skills into the requested agent directories.
- *
- * The orchestration remains faithful to the CLI installer: it resolves the
- * project root, installs per agent, updates the lockfile for successful
- * installs, and appends a best-effort audit entry when the batch finishes.
- *
- * @param ports - Core ports used for filesystem, environment, and dependent service access.
- * @param skills - Skills to install.
- * @param options - Installation options that control scope, method, and target agents.
- * @returns One install result per processed skill and agent pair.
- * @throws {Error} Propagates unexpected downstream errors that escape per-skill handling.
- *
- * @example
- * ```ts
- * const results = await installSkills(ports, [skill], {
- *   global: false,
- *   method: 'copy',
- *   agents: ['cursor'],
- *   skills: ['accessibility'],
- * })
- * ```
- */
-export async function installSkills(
+export const installSkills = async (
   ports: CorePorts,
   skills: SkillInfo[],
   options: InstallOptions,
-): Promise<InstallResult[]> {
+): Promise<InstallResult[]> => {
   const projectRoot = findProjectRoot(ports)
   const results: InstallResult[] = []
 
@@ -379,7 +203,6 @@ export async function installSkills(
         options.global,
       )
       results.push(result)
-
       if (result.success) {
         await addSkillToLock(ports, skill.name, [agent], {
           source: 'local',
@@ -393,75 +216,45 @@ export async function installSkills(
 
   await logAudit(ports, {
     action: 'install',
-    skillName: skills.map((skill) => skill.name).join(', '),
-    agents: options.agents.map((agent) => getAgentConfig(ports, agent).displayName),
-    success: results.filter((result) => result.success).length,
-    failed: results.filter((result) => !result.success).length,
-    details: results.map((result) => ({
-      skill: result.skill,
-      agent: result.agent,
-      success: result.success,
-      error: result.error,
-      path: result.path,
+    skillName: skills.map((s) => s.name).join(', '),
+    agents: options.agents.map((a) => getAgentConfig(ports, a).displayName),
+    success: results.filter((r) => r.success).length,
+    failed: results.filter((r) => !r.success).length,
+    details: results.map((r) => ({
+      skill: r.skill,
+      agent: r.agent,
+      success: r.success,
+      error: r.error,
+      path: r.path,
     })),
   })
 
   return results
 }
 
-/**
- * Lists installed skills for a single agent and scope.
- *
- * @param ports - Core ports used for filesystem, environment, and dependent service access.
- * @param agent - Agent whose installed skills should be listed.
- * @param global - When `true`, reads the global skills directory; otherwise reads the project-local directory.
- * @returns Installed skill directory names, or an empty array when the target directory is unavailable.
- *
- * @example
- * ```ts
- * const installed = await listInstalledSkills(ports, 'cursor', false)
- * ```
- */
-export async function listInstalledSkills(ports: CorePorts, agent: AgentType, global: boolean): Promise<string[]> {
+export const listInstalledSkills = async (ports: CorePorts, agent: AgentType, global: boolean): Promise<string[]> => {
   const config = getAgentConfig(ports, agent)
   const targetDir = global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
 
   try {
     const entries = await ports.fs.readdir(targetDir, { withFileTypes: true })
-    return entries.filter((entry) => entry.isDirectory() || entry.isSymbolicLink?.()).map((entry) => entry.name)
+    return entries.filter((e) => e.isDirectory() || e.isSymbolicLink?.()).map((e) => e.name)
   } catch {
     return []
   }
 }
 
-/**
- * Checks whether a skill is installed for a specific agent and scope.
- *
- * @param ports - Core ports used for filesystem, environment, and dependent service access.
- * @param skillName - Canonical skill name to check.
- * @param agent - Agent whose install location should be inspected.
- * @param options - Optional scope override for global installs.
- * @returns `true` when the installed skill path exists; otherwise `false`.
- *
- * @example
- * ```ts
- * const installed = await isSkillInstalled(ports, 'accessibility', 'cursor')
- * ```
- */
-export async function isSkillInstalled(
+export const isSkillInstalled = async (
   ports: CorePorts,
   skillName: string,
   agent: AgentType,
   options: { global?: boolean } = {},
-): Promise<boolean> {
+): Promise<boolean> => {
   const config = getAgentConfig(ports, agent)
   const safeSkillName = sanitizeName(skillName)
   const targetBase = options.global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
   const skillDir = join(targetBase, safeSkillName)
-
-  if (!isPathSafe(targetBase, skillDir)) {
-    return false
-  }
+  if (!isPathSafe(targetBase, skillDir)) return false
 
   try {
     await ports.fs.lstat(skillDir)
@@ -471,37 +264,46 @@ export async function isSkillInstalled(
   }
 }
 
-/**
- * Removes a skill from the requested agent directories.
- *
- * The orchestration mirrors the CLI installer by checking the lockfile first,
- * removing the canonical path, cleaning local/global agent paths, updating the
- * lockfile when any removal succeeds, and appending a best-effort audit entry.
- *
- * @param ports - Core ports used for filesystem, environment, and dependent service access.
- * @param skillName - Canonical skill name to remove.
- * @param agents - Agents to remove the skill from.
- * @param options - Removal options controlling scope and force behavior.
- * @returns One removal result per requested agent.
- *
- * @example
- * ```ts
- * const results = await removeSkill(ports, 'accessibility', ['cursor'])
- * ```
- */
-export async function removeSkill(
+export const getInstallPath = (
+  ports: CorePorts,
+  skillName: string,
+  agent: AgentType,
+  options: { global?: boolean } = {},
+): string => {
+  const config = getAgentConfig(ports, agent)
+  const safeSkillName = sanitizeName(skillName)
+  const targetBase = options.global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
+  const installPath = join(targetBase, safeSkillName)
+
+  if (!isPathSafe(targetBase, installPath)) {
+    throw new Error('Invalid skill name: potential path traversal detected')
+  }
+
+  return installPath
+}
+
+export const getCanonicalPath = (ports: CorePorts, skillName: string, options: { global?: boolean } = {}): string => {
+  const safeSkillName = sanitizeName(skillName)
+  const baseDir = options.global ? ports.env.homedir() : findProjectRoot(ports)
+  const canonicalPath = join(baseDir, CANONICAL_SKILLS_PATH, safeSkillName)
+
+  if (!isPathSafe(join(baseDir, CANONICAL_SKILLS_PATH), canonicalPath)) {
+    throw new Error('Invalid skill name: potential path traversal detected')
+  }
+
+  return canonicalPath
+}
+
+export const removeSkill = async (
   ports: CorePorts,
   skillName: string,
   agents: AgentType[],
   options: RemoveOptions = {},
-): Promise<RemoveResult[]> {
+): Promise<RemoveResult[]> => {
   const safeSkillName = sanitizeName(skillName)
   const projectRoot = findProjectRoot(ports)
   let lockEntry = await getSkillFromLock(ports, skillName, true)
-
-  if (!lockEntry) {
-    lockEntry = await getSkillFromLock(ports, skillName, false)
-  }
+  if (!lockEntry) lockEntry = await getSkillFromLock(ports, skillName, false)
 
   if (!lockEntry && !options.force) {
     return agents.map((agent) => ({
@@ -512,14 +314,7 @@ export async function removeSkill(
     }))
   }
 
-  const canonicalPath = getCanonicalPath(skillName, {
-    global: options.global ?? false,
-    method: 'copy',
-    agents: [],
-    skills: [],
-    projectRoot,
-    homeDir: ports.env.homedir(),
-  })
+  const canonicalPath = getCanonicalPath(ports, skillName, options)
   await ports.fs.rm(canonicalPath, { recursive: true, force: true }).catch(() => {})
 
   const results = await Promise.all(
@@ -554,10 +349,8 @@ export async function removeSkill(
           await ports.fs.rm(path, { recursive: true, force: true })
           removed = true
         } catch (error) {
-          const typedError = error as { code?: string; message?: string }
-          if (typedError.code !== 'ENOENT' && !lastError) {
-            lastError = error instanceof Error ? error.message : String(error)
-          }
+          const err = error as { code?: string; message?: string }
+          if (err.code !== 'ENOENT' && !lastError) lastError = error instanceof Error ? error.message : String(error)
         }
       }
 
@@ -570,7 +363,7 @@ export async function removeSkill(
     }),
   )
 
-  if (results.some((result) => result.success)) {
+  if (results.some((r) => r.success)) {
     await removeSkillFromLock(ports, skillName, true).catch(() => {})
     await removeSkillFromLock(ports, skillName, false).catch(() => {})
   }
@@ -578,17 +371,19 @@ export async function removeSkill(
   await logAudit(ports, {
     action: 'remove',
     skillName,
-    agents: agents.map((agent) => getAgentConfig(ports, agent).displayName),
-    success: results.filter((result) => result.success).length,
-    failed: results.filter((result) => !result.success).length,
+    agents: agents.map((a) => getAgentConfig(ports, a).displayName),
+    success: results.filter((r) => r.success).length,
+    failed: results.filter((r) => !r.success).length,
     forced: options.force,
-    details: results.map((result) => ({
-      skill: result.skill,
-      agent: result.agent,
-      success: result.success,
-      error: result.error,
+    details: results.map((r) => ({
+      skill: r.skill,
+      agent: r.agent,
+      success: r.success,
+      error: r.error,
     })),
   })
 
   return results
 }
+
+export { isGloballyInstalled }

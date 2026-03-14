@@ -46,8 +46,6 @@ const createInstallOptions = (overrides: Partial<InstallOptions> = {}): InstallO
   method: 'copy',
   agents: ['cursor'],
   skills: ['my-skill'],
-  projectRoot: '/workspace/project',
-  homeDir: '/home/tester',
   ...overrides,
 })
 
@@ -147,13 +145,15 @@ const createPorts = (): TestPorts => {
 
 describe('installer service path helpers', () => {
   it('returns the expected local install path for an agent', () => {
-    expect(getInstallPath('my-skill', 'cursor', createInstallOptions())).toBe(
-      '/workspace/project/.cursor/skills/my-skill',
-    )
+    const { ports } = createPorts()
+
+    expect(getInstallPath(ports, 'my-skill', 'cursor')).toBe('/workspace/project/.cursor/skills/my-skill')
   })
 
   it('returns the expected canonical local path', () => {
-    expect(getCanonicalPath('my-skill', createInstallOptions())).toBe('/workspace/project/.agents/skills/my-skill')
+    const { ports } = createPorts()
+
+    expect(getCanonicalPath(ports, 'my-skill')).toBe('/workspace/project/.agents/skills/my-skill')
   })
 })
 
