@@ -83,6 +83,20 @@ jobs:
         if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name != github.repository
         uses: ./.github/actions/security-scan-print-results
 
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+            "
+          fi
       - name: Fail if scan failed
         if: steps.security-scan.outputs.scan-outcome == 'failure'
         run: exit 1
@@ -118,6 +132,20 @@ jobs:
         with:
           artifact-name: security-scan-results-merge-queue
 
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+            "
+          fi
       - name: Fail job if scan failed
         if: steps.security-scan.outputs.scan-outcome == 'failure'
         run: exit 1
@@ -224,6 +252,20 @@ jobs:
         if: steps.security-scan.outputs.scan-outcome == 'failure'
         uses: ./.github/actions/security-scan-notify
 
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+            "
+          fi
       - name: Fail job if scan failed
         if: steps.security-scan.outputs.scan-outcome == 'failure'
         run: exit 1
