@@ -1,20 +1,12 @@
 import { join } from 'node:path'
 
-import {
-  CATEGORY_FOLDER_PATTERN,
-  CATEGORY_METADATA_FILE,
-  DEFAULT_CATEGORY,
-  DEFAULT_CATEGORY_ID,
-  SKILLS_CATALOG_DIR,
-} from '../constants'
+import { CATEGORY_FOLDER_PATTERN, CATEGORY_METADATA_FILE, DEFAULT_CATEGORY, DEFAULT_CATEGORY_ID } from '../constants'
 import type { CorePorts } from '../ports'
 import type { CategoryInfo, CategoryMetadata } from '../types'
 import { formatCategoryName } from '../utils'
 
-import { findProjectRoot } from './project-root.service'
-
 function getSkillsDir(ports: CorePorts): string {
-  return join(findProjectRoot(ports), SKILLS_CATALOG_DIR)
+  return ports.paths.getSkillsCatalogPath()
 }
 
 /**
@@ -75,7 +67,8 @@ export function categoryIdToFolderName(categoryId: string): string {
  * ```
  */
 export function loadCategoryMetadata(ports: CorePorts): CategoryMetadata {
-  const metadataPath = join(getSkillsDir(ports), CATEGORY_METADATA_FILE)
+  const skillsDir = getSkillsDir(ports)
+  const metadataPath = join(skillsDir, CATEGORY_METADATA_FILE)
   if (!ports.fs.existsSync(metadataPath)) return {}
 
   try {
@@ -84,6 +77,27 @@ export function loadCategoryMetadata(ports: CorePorts): CategoryMetadata {
   } catch {
     return {}
   }
+}
+
+/**
+ * Persists category metadata overrides to the local skills catalog.
+ *
+ * @param ports - Core ports used to locate and write the catalog metadata file.
+ * @param metadata - Category metadata keyed by category folder name.
+ * @returns Nothing.
+ *
+ * @example
+ * ```ts
+ * saveCategoryMetadata(ports, {
+ *   '(quality)': { name: 'Quality' },
+ * })
+ * ```
+ */
+export function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadata): void {
+  const skillsDir = getSkillsDir(ports)
+  const metadataPath = join(skillsDir, CATEGORY_METADATA_FILE)
+  const content = JSON.stringify(metadata, null, 2)
+  ports.fs.writeFileSync(metadataPath, content + '\n', 'utf-8')
 }
 
 /**
@@ -143,84 +157,6 @@ export function getCategoryById(ports: CorePorts, id: string): CategoryInfo | un
 }
 
 /**
- * Groups skills by their category information.
- *
- * @typeParam T - Skill-like object that exposes a `name` and optional `category`.
- * @param ports - Core ports used to read local categories when available.
- * @param skills - Skills to group.
- * @returns A map keyed by category info with alphabetically sorted skill lists.
- *
- * @example
- * ```ts
- * const grouped = groupSkillsByCategory(ports, [
- *   { name: 'a11y', category: 'quality' },
- *   { name: 'seo', category: 'quality' },
- * ])
- * ```
- */
-export function groupSkillsByCategory<T extends { name: string; category?: string; description?: string }>(
-  ports: CorePorts,
-  skills: T[],
-): Map<CategoryInfo, T[]> {
-  let categories = getCategories(ports)
-
-  if (categories.length === 0) {
-    const categoryIds = new Set(skills.map((skill) => skill.category).filter(Boolean) as string[])
-    categories = Array.from(categoryIds).map((id, index) => ({
-      id,
-      name: formatCategoryName(id),
-      priority: index,
-    }))
-  }
-
-  const grouped = new Map<CategoryInfo, T[]>()
-
-  for (const category of categories) {
-    grouped.set(category, [])
-  }
-
-  grouped.set(DEFAULT_CATEGORY, [])
-
-  for (const skill of skills) {
-    const categoryId = skill.category ?? DEFAULT_CATEGORY_ID
-    let category = categories.find((candidate) => candidate.id === categoryId)
-
-    if (!category && categoryId !== DEFAULT_CATEGORY_ID) {
-      category = {
-        id: categoryId,
-        name: formatCategoryName(categoryId),
-        priority: 999,
-      }
-      categories.push(category)
-      grouped.set(category, [])
-    }
-
-    const targetCategory = category ?? DEFAULT_CATEGORY
-    const group = grouped.get(targetCategory) ?? []
-    group.push(skill)
-    grouped.set(targetCategory, group)
-  }
-
-  for (const [category, skillList] of grouped) {
-    if (skillList.length === 0) grouped.delete(category)
-  }
-
-  const sortedGrouped = new Map<CategoryInfo, T[]>()
-  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => a.name.localeCompare(b.name))
-
-  for (const category of sortedCategories) {
-    const categorySkills = grouped.get(category)
-
-    if (categorySkills) {
-      categorySkills.sort((a, b) => a.name.localeCompare(b.name))
-      sortedGrouped.set(category, categorySkills)
-    }
-  }
-
-  return sortedGrouped
-}
-
-/**
  * Resolves the category id for a skill folder in the local catalog.
  *
  * @param ports - Core ports used to inspect the local skills catalog.
@@ -270,26 +206,6 @@ export function getSkillCategory(ports: CorePorts, skillName: string): CategoryI
 }
 
 /**
- * Persists category metadata overrides to the local skills catalog.
- *
- * @param ports - Core ports used to locate and write the catalog metadata file.
- * @param metadata - Category metadata keyed by category folder name.
- * @returns Nothing.
- *
- * @example
- * ```ts
- * saveCategoryMetadata(ports, {
- *   '(quality)': { name: 'Quality' },
- * })
- * ```
- */
-export function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadata): void {
-  const metadataPath = join(getSkillsDir(ports), CATEGORY_METADATA_FILE)
-  const content = JSON.stringify(metadata, null, 2)
-  ports.fs.writeFileSync(metadataPath, content + '\n', 'utf-8')
-}
-
-/**
  * Checks whether a category exists in the local catalog.
  *
  * @param ports - Core ports used to read the available categories.
@@ -303,4 +219,85 @@ export function saveCategoryMetadata(ports: CorePorts, metadata: CategoryMetadat
  */
 export function categoryExists(ports: CorePorts, categoryId: string): boolean {
   return getCategories(ports).some((category) => category.id === categoryId)
+}
+
+/**
+ * Groups skills by their category information.
+ *
+ * @typeParam T - Skill-like object that exposes a `name` and optional `category`.
+ * @param ports - Core ports used to read local categories when available.
+ * @param skills - Skills to group.
+ * @returns A map keyed by category info with alphabetically sorted skill lists.
+ *
+ * @example
+ * ```ts
+ * const grouped = groupSkillsByCategory(ports, [
+ *   { name: 'a11y', category: 'quality' },
+ *   { name: 'seo', category: 'quality' },
+ * ])
+ * ```
+ */
+export function groupSkillsByCategory<T extends { name: string; category?: string; description?: string }>(
+  ports: CorePorts,
+  skills: T[],
+): Map<CategoryInfo, T[]> {
+  // Try to get local categories, fall back to building from skills
+  let categories = getCategories(ports)
+
+  // If no local categories, build from skills data
+  if (categories.length === 0) {
+    const categoryIds = new Set(skills.map((skill) => skill.category).filter(Boolean) as string[])
+    categories = Array.from(categoryIds).map((id, index) => ({
+      id,
+      name: formatCategoryName(id),
+      priority: index,
+    }))
+  }
+
+  const grouped = new Map<CategoryInfo, T[]>()
+
+  for (const category of categories) {
+    grouped.set(category, [])
+  }
+
+  grouped.set(DEFAULT_CATEGORY, [])
+
+  for (const skill of skills) {
+    const categoryId = skill.category ?? DEFAULT_CATEGORY_ID
+    let category = categories.find((candidate) => candidate.id === categoryId)
+
+    // If category not found, create it dynamically
+    if (!category && categoryId !== DEFAULT_CATEGORY_ID) {
+      category = {
+        id: categoryId,
+        name: formatCategoryName(categoryId),
+        priority: 999,
+      }
+      categories.push(category)
+      grouped.set(category, [])
+    }
+
+    const targetCategory = category ?? DEFAULT_CATEGORY
+    const group = grouped.get(targetCategory) ?? []
+    group.push(skill)
+    grouped.set(targetCategory, group)
+  }
+
+  for (const [category, skillList] of grouped) {
+    if (skillList.length === 0) grouped.delete(category)
+  }
+
+  const sortedGrouped = new Map<CategoryInfo, T[]>()
+  const sortedCategories = Array.from(grouped.keys()).sort((a, b) => a.name.localeCompare(b.name))
+
+  for (const category of sortedCategories) {
+    const categorySkills = grouped.get(category)
+
+    if (categorySkills) {
+      categorySkills.sort((a, b) => a.name.localeCompare(b.name))
+      sortedGrouped.set(category, categorySkills)
+    }
+  }
+
+  return sortedGrouped
 }
