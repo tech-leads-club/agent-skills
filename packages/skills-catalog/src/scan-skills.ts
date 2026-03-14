@@ -187,6 +187,20 @@ async function main() {
         process.exit(1)
       }
 
+      if (!process.env['SNYK_TOKEN']?.trim()) {
+        console.error(chalk.red('❌ SNYK_TOKEN is not set. snyk-agent-scan requires it for scanning.'))
+        console.error(chalk.gray('   Set it in CI secrets or run: SNYK_TOKEN=<your-token> npm run scan'))
+        const failureReport: ScanReport = {
+          skills: [],
+          summary: { critical: 1, high: 0, medium: 0, low: 0, allowlisted: 0 },
+          scannedAt: new Date().toISOString(),
+          scanned: 0,
+          cached: 0,
+        }
+        writeFileSync(OUTPUT_FILE, JSON.stringify(failureReport, null, 2))
+        process.exit(1)
+      }
+
       const activeScanning = new Set<string>()
       let doneCount = 0
       const issueLogs: string[] = []
@@ -401,7 +415,10 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
     const chunks: Buffer[] = []
     const errChunks: Buffer[] = []
 
-    const proc = spawn('uvx', ['snyk-agent-scan@latest', '--skills', skill.dir, '--json'], { timeout: 120_000 })
+    const proc = spawn('uvx', ['snyk-agent-scan@latest', '--skills', skill.dir, '--json'], {
+      timeout: 120_000,
+      env: process.env, // ensure SNYK_TOKEN is passed to the child
+    })
 
     proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
     proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk))
@@ -417,10 +434,11 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
           .join('\n')
 
         if (!output || code !== 0) {
+          const errSnippet = stderr.trim().slice(0, 500) || 'No output (check SNYK_TOKEN and network)'
           return resolve([
             {
               code: 'SCANNER_PROCESS_FAILED',
-              message: `snyk-agent-scan execution failed (code ${code}): ${stderr.slice(0, 250) || 'No output'}`,
+              message: `snyk-agent-scan execution failed (code ${code}): ${errSnippet}`,
               reference: [0, null],
               extra_data: {
                 risk_score: 10,
