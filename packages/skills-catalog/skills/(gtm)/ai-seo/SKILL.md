@@ -71,8 +71,9 @@ NEED: Raw data for custom workflows
 
 **DataForSEO MCP setup:**
 ```bash
+# Use env var or secret manager for credentials; never paste real keys into prompts or code.
 claude mcp add dataforseo --transport sse \
-  --header "Authorization: Basic <base64_credentials>" \
+  --header "Authorization: Basic $DATAFORSEO_BASE64_CREDENTIALS" \
   https://mcp.dataforseo.com/sse
 ```
 
