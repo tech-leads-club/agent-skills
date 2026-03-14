@@ -323,3 +323,81 @@ entries:
       explicit user approval.
     allowedBy: felipefr
     allowedAt: "2026-02-17"
+
+  # ============================================================================
+  # GTM CATEGORY
+  # Skills for go-to-market strategy; third-party data and URLs are intentional
+  # ============================================================================
+
+  - skill: ai-seo
+    code: W007
+    reason: >
+      DataForSEO MCP setup uses a placeholder (YOUR_BASE64_CREDENTIALS). The skill instructs
+      using env vars / secret manager; no real credentials are shown. Documentation of
+      required header format is necessary for the integration.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: ai-seo
+    code: W011
+    reason: >
+      SEO workflows require fetching SERP data, GSC analytics, and competitor keywords via
+      DataForSEO/GSC/Semrush MCP. Third-party content exposure is the core functionality.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: ai-seo
+    code: W012
+    reason: >
+      GSC MCP setup references the official community repo github.com/AminForou/mcp-gsc for
+      Google Search Console integration. Cloning trusted setup repos is documented practice.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: content-to-pipeline
+    code: W011
+    reason: >
+      Distribution reverse engineering and content-to-revenue workflows require analyzing
+      competitor content (Viral Findr, Taplio, etc.). Third-party content is intentional.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: gtm-engineering
+    code: W011
+    reason: >
+      GTM automation and agent workflows require integrating external data (CRM, enrichment,
+      intent providers). Third-party content exposure is inherent to the skill's purpose.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: lead-enrichment
+    code: W011
+    reason: >
+      Waterfall enrichment and Clay/Apollo workflows require fetching external provider
+      data. Third-party content exposure is the core functionality of the skill.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: positioning-icp
+    code: W011
+    reason: >
+      ICP definition and positioning require analyzing competitor and market data. Fetching
+      external enrichment and research is intentional methodology.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: solo-founder-gtm
+    code: W011
+    reason: >
+      Solo founder GTM playbook references AI agent workflows that ingest prospect and
+      market data. Third-party content is part of the intended workflow design.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: video-outreach
+    code: W011
+    reason: >
+      "Made This For You" framework requires researching prospect website and content.
+      Pulling their website and external references is the documented workflow.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
