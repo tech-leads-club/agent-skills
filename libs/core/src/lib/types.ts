@@ -159,6 +159,10 @@ export interface InstallOptions {
   forceUpdate?: boolean
   /** Whether the operation is part of an update flow. */
   isUpdate?: boolean
+  /** Optional project root used by pure path helpers. */
+  projectRoot?: string
+  /** Optional home directory used by pure global path helpers. */
+  homeDir?: string
 }
 
 /**
