@@ -354,6 +354,22 @@ entries:
     allowedBy: felipefr
     allowedAt: "2026-03-13"
 
+  - skill: ai-cold-outreach
+    code: W011
+    reason: >
+      Cold outreach workflows require researching prospects and ingesting open/public
+      third-party content (LinkedIn, company sites) for personalization. Intentional.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
+  - skill: ai-sdr
+    code: W011
+    reason: >
+      AI SDR workflows (personalization layer, research) require fetching prospect and
+      account data from external sources. Third-party content is core to the skill.
+    allowedBy: felipefr
+    allowedAt: "2026-03-13"
+
   - skill: content-to-pipeline
     code: W011
     reason: >
