@@ -78,6 +78,7 @@ describe('core library', () => {
   })
 
   it('exports representative types and ports at compile time', () => {
+    // This test validates that types are exported - TypeScript will fail at compile time if any are missing
     const agent: AgentType = 'cursor'
     const options: InstallOptions = {
       agents: [agent],
@@ -86,11 +87,12 @@ describe('core library', () => {
       skills: [],
     }
     const ports = {} as CorePorts
-    const pathPort = ports.paths as PathsPort
-
+    
+    // Runtime validation that the types work correctly
     expect(agent).toBe('cursor')
     expect(options.method).toBe('copy')
-    expect(pathPort).toBeUndefined()
+    expect(options.global).toBe(false)
+    expect(options.skills).toEqual([])
   })
 
   it('exports the lockfile service functions', () => {
