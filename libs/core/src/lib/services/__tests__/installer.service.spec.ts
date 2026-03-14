@@ -12,15 +12,17 @@ import type {
 } from '../../ports'
 import type { InstallOptions, SkillInfo } from '../../types'
 
-import { getCanonicalPath, getInstallPath, installSkills } from '../installer.service'
+import { getCanonicalPath, getInstallPath, installSkills, removeSkill } from '../installer.service'
 
 type TestPorts = {
   ports: CorePorts
   appendFileMock: jest.MockedFunction<(path: string, content: string, encoding: string) => Promise<void>>
   cpMock: jest.MockedFunction<(src: string, dest: string, options?: { recursive?: boolean }) => Promise<void>>
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
+  lstatMock: jest.MockedFunction<(path: string) => Promise<{ isDirectory(): boolean; isSymbolicLink(): boolean }>>
   mkdirMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => Promise<void>>
   readFileMock: jest.MockedFunction<(path: string, encoding: string) => Promise<string>>
+  readlinkMock: jest.MockedFunction<(linkPath: string) => Promise<string>>
   renameMock: jest.MockedFunction<(oldPath: string, newPath: string) => Promise<void>>
   rmMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>
   writeFileMock: jest.MockedFunction<(path: string, content: string, encoding: string) => Promise<void>>
@@ -40,8 +42,10 @@ const createPorts = (): TestPorts => {
   const appendFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
   const cpMock = jest.fn<(src: string, dest: string, options?: { recursive?: boolean }) => Promise<void>>()
   const existsSyncMock = jest.fn<(path: string) => boolean>()
+  const lstatMock = jest.fn<(path: string) => Promise<{ isDirectory(): boolean; isSymbolicLink(): boolean }>>()
   const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
   const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
+  const readlinkMock = jest.fn<(linkPath: string) => Promise<string>>()
   const renameMock = jest.fn<(oldPath: string, newPath: string) => Promise<void>>()
   const rmMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>()
   const writeFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
@@ -49,8 +53,14 @@ const createPorts = (): TestPorts => {
   appendFileMock.mockResolvedValue(undefined)
   cpMock.mockResolvedValue(undefined)
   existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+  lstatMock.mockImplementation(async () => {
+    const error = new Error('missing') as Error & { code?: string }
+    error.code = 'ENOENT'
+    throw error
+  })
   mkdirMock.mockResolvedValue(undefined)
   readFileMock.mockRejectedValue(new Error('missing'))
+  readlinkMock.mockResolvedValue('')
   renameMock.mockResolvedValue(undefined)
   rmMock.mockResolvedValue(undefined)
   writeFileMock.mockResolvedValue(undefined)
@@ -59,17 +69,13 @@ const createPorts = (): TestPorts => {
     appendFile: appendFileMock,
     cp: cpMock,
     existsSync: existsSyncMock,
-    lstat: jest.fn(async () => {
-      const error = new Error('missing') as Error & { code?: string }
-      error.code = 'ENOENT'
-      throw error
-    }),
+    lstat: lstatMock,
     mkdir: mkdirMock,
     readFile: readFileMock,
     readFileSync: jest.fn(() => ''),
     readdir: jest.fn(async () => []),
     readdirSync: jest.fn(() => []),
-    readlink: jest.fn(async () => ''),
+    readlink: readlinkMock,
     rename: renameMock,
     rm: rmMock,
     symlink: jest.fn(async () => undefined),
@@ -107,8 +113,10 @@ const createPorts = (): TestPorts => {
     appendFileMock,
     cpMock,
     existsSyncMock,
+    lstatMock,
     mkdirMock,
     readFileMock,
+    readlinkMock,
     renameMock,
     rmMock,
     writeFileMock,
@@ -299,5 +307,107 @@ describe('installSkills', () => {
 
     expect(results).toEqual([])
     expect(cpMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('removeSkill', () => {
+  it('removes an installed skill and returns a successful result', async () => {
+    const { ports, lstatMock, readFileMock, rmMock } = createPorts()
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        version: 2,
+        skills: {
+          'my-skill': {
+            name: 'my-skill',
+            source: 'local',
+            installedAt: '2026-03-14T00:00:00.000Z',
+            updatedAt: '2026-03-14T00:00:00.000Z',
+            agents: ['cursor'],
+            method: 'copy',
+            global: false,
+          },
+        },
+      }),
+    )
+    lstatMock.mockResolvedValue({
+      isDirectory: () => true,
+      isSymbolicLink: () => false,
+    })
+
+    const results = await removeSkill(ports, 'my-skill', ['cursor'])
+
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/my-skill', { recursive: true, force: true })
+    expect(results).toEqual([
+      {
+        skill: 'my-skill',
+        agent: 'Cursor',
+        success: true,
+      },
+    ])
+  })
+
+  it('returns a not-found result when the skill is absent from the lockfile', async () => {
+    const { ports, rmMock } = createPorts()
+
+    const results = await removeSkill(ports, 'missing-skill', ['cursor'])
+
+    expect(results).toEqual([
+      {
+        skill: 'missing-skill',
+        agent: 'Cursor',
+        success: false,
+        error: 'Skill not found in lockfile',
+      },
+    ])
+    expect(rmMock).not.toHaveBeenCalled()
+  })
+
+  it('removes the skill for multiple agents', async () => {
+    const { ports, lstatMock, readFileMock, rmMock } = createPorts()
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        version: 2,
+        skills: {
+          'shared-skill': {
+            name: 'shared-skill',
+            source: 'local',
+            installedAt: '2026-03-14T00:00:00.000Z',
+            updatedAt: '2026-03-14T00:00:00.000Z',
+            agents: ['cursor', 'codex'],
+            method: 'copy',
+            global: false,
+          },
+        },
+      }),
+    )
+    lstatMock.mockResolvedValue({
+      isDirectory: () => true,
+      isSymbolicLink: () => false,
+    })
+
+    const results = await removeSkill(ports, 'shared-skill', ['cursor', 'codex'])
+
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/shared-skill', {
+      recursive: true,
+      force: true,
+    })
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.codex/skills/shared-skill', {
+      recursive: true,
+      force: true,
+    })
+    expect(results).toEqual([
+      {
+        skill: 'shared-skill',
+        agent: 'Cursor',
+        success: true,
+      },
+      {
+        skill: 'shared-skill',
+        agent: 'OpenAI Codex',
+        success: true,
+      },
+    ])
   })
 })
