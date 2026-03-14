@@ -147,11 +147,11 @@ async function main() {
         chalk.cyan(`🚀 Scanning ${toScan.length} skills (parallel: ${Math.min(PARALLEL_JOBS, toScan.length)})...`),
       )
 
-      // Check uvx availability and pre-heat the scanner installation
+      // Check uvx availability and pre-heat the scanner installation (snyk-agent-scan; formerly mcp-scan)
       try {
-        process.stdout.write(chalk.cyan('⏳ Checking environment and updating mcp-scan tool...\n'))
-        execSync('uvx --refresh mcp-scan@latest --help', { stdio: 'ignore' })
-        process.stdout.write(chalk.green('✓ mcp-scan is ready and updated.\n\n'))
+        process.stdout.write(chalk.cyan('⏳ Checking environment and updating snyk-agent-scan tool...\n'))
+        execSync('uvx --refresh snyk-agent-scan@latest --help', { stdio: 'ignore' })
+        process.stdout.write(chalk.green('✓ snyk-agent-scan is ready and updated.\n\n'))
       } catch {
         console.error(chalk.red("❌ 'uvx' not found. Install uv: https://docs.astral.sh/uv/"))
         // Generate a failure report instead of just exiting
@@ -372,7 +372,7 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
     const chunks: Buffer[] = []
     const errChunks: Buffer[] = []
 
-    const proc = spawn('uvx', ['mcp-scan@latest', '--skills', skill.dir, '--json'], { timeout: 120_000 })
+    const proc = spawn('uvx', ['snyk-agent-scan@latest', '--skills', skill.dir, '--json'], { timeout: 120_000 })
 
     proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
     proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk))
@@ -391,7 +391,7 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
           return resolve([
             {
               code: 'SCANNER_PROCESS_FAILED',
-              message: `mcp-scan execution failed (code ${code}): ${stderr.slice(0, 250) || 'No output'}`,
+              message: `snyk-agent-scan execution failed (code ${code}): ${stderr.slice(0, 250) || 'No output'}`,
               reference: [0, null],
               extra_data: {
                 risk_score: 10,
@@ -412,7 +412,7 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
           return resolve([
             {
               code: 'SCANNER_MISSING_OUTPUT',
-              message: `mcp-scan returned empty JSON for ${skill.name}`,
+              message: `snyk-agent-scan returned empty JSON for ${skill.name}`,
               reference: [0, null],
               extra_data: {
                 risk_score: 10,
@@ -429,15 +429,15 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
         const result = data[firstKey]!
         const issues: ScanIssue[] = []
 
-        // Catch internal mcp-scan errors
+        // Catch internal snyk-agent-scan errors
         if (result.error && result.error.is_failure !== false) {
           issues.push({
             code: 'SCANNER_INTERNAL_ERROR',
-            message: `mcp-scan error: ${result.error.message || result.error.category || 'Unknown error'}`,
+            message: `snyk-agent-scan error: ${result.error.message || result.error.category || 'Unknown error'}`,
             reference: [0, null],
             extra_data: {
               risk_score: 10,
-              reason: 'mcp-scan encountered an error while scanning',
+              reason: 'snyk-agent-scan encountered an error while scanning',
               thought_process: JSON.stringify(result.error.traceback || ''),
               severity: 'critical',
             },
@@ -477,7 +477,7 @@ async function scanSkill(skill: SkillInfo): Promise<ScanIssue[]> {
       resolve([
         {
           code: 'SCANNER_SPAWN_ERROR',
-          message: `Failed to spawn mcp-scan: ${err.message}`,
+          message: `Failed to spawn snyk-agent-scan: ${err.message}`,
           reference: [0, null],
           extra_data: { risk_score: 10, reason: 'Tool execution failed', thought_process: '', severity: 'critical' },
           skill: skill.name,
