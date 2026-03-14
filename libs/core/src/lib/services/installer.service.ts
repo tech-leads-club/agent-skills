@@ -1,10 +1,27 @@
-import { join } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 
 import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../constants'
-import type { AgentType, InstallOptions } from '../types'
+import type { CorePorts } from '../ports'
+import type { AgentType, InstallOptions, InstallResult, SkillInfo } from '../types'
 import { isPathSafe, sanitizeName } from '../utils'
 
+import { getAgentConfig } from './agents.service'
+import { logAudit } from './audit-log.service'
+import { addSkillToLock } from './lockfile.service'
+import { findProjectRoot } from './project-root.service'
+import { getCachedContentHash } from './registry.service'
+
 const CANONICAL_SKILLS_PATH = join(AGENTS_DIR, CANONICAL_SKILLS_DIR)
+
+type InstallMode = 'symlink-global' | 'symlink-local' | 'copy-global' | 'copy-local'
+
+interface InstallContext {
+  skill: SkillInfo
+  config: ReturnType<typeof getAgentConfig>
+  safeSkillName: string
+  skillTargetPath: string
+  projectRoot: string
+}
 
 const AGENT_SKILLS_DIRS: Record<AgentType, string> = {
   cursor: '.cursor/skills',
@@ -171,4 +188,208 @@ export function getCanonicalPath(skillName: string, options: InstallOptions): st
   }
 
   return canonicalPath
+}
+
+async function createSymlink(ports: CorePorts, target: string, linkPath: string): Promise<boolean> {
+  try {
+    await cleanExistingPath(ports, linkPath, target)
+    await ports.fs.mkdir(join(linkPath, '..'), { recursive: true })
+    const relativePath = relative(join(linkPath, '..'), target)
+    const type = ports.env.platform() === 'win32' ? 'junction' : undefined
+    await ports.fs.symlink(relativePath, linkPath, type)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function cleanExistingPath(ports: CorePorts, linkPath: string, target: string): Promise<void> {
+  try {
+    const stats = await ports.fs.lstat(linkPath)
+    if (stats.isSymbolicLink()) {
+      const existingTarget = await ports.fs.readlink(linkPath)
+      if (resolve(existingTarget) === resolve(target)) return
+      await ports.fs.rm(linkPath)
+    } else {
+      await ports.fs.rm(linkPath, { recursive: true })
+    }
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'ELOOP') {
+      await ports.fs.rm(linkPath, { force: true }).catch(() => {})
+    }
+  }
+}
+
+async function copySkillDirectory(ports: CorePorts, src: string, dest: string): Promise<void> {
+  await ports.fs.rm(dest, { recursive: true, force: true })
+  await ports.fs.mkdir(join(dest, '..'), { recursive: true })
+  await ports.fs.cp(src, dest, { recursive: true })
+}
+
+function getInstallMode(method: 'symlink' | 'copy', global: boolean): InstallMode {
+  return `${method}-${global ? 'global' : 'local'}` as InstallMode
+}
+
+function createSuccessResult(
+  ctx: InstallContext,
+  method: 'symlink' | 'copy',
+  extras: Partial<InstallResult> = {},
+): InstallResult {
+  return {
+    agent: ctx.config.displayName,
+    skill: ctx.skill.name,
+    path: ctx.skillTargetPath,
+    method,
+    success: true,
+    ...extras,
+  }
+}
+
+function createErrorResult(ctx: InstallContext, method: 'symlink' | 'copy', error: unknown): InstallResult {
+  return {
+    agent: ctx.config.displayName,
+    skill: ctx.skill.name,
+    path: ctx.skillTargetPath,
+    method,
+    success: false,
+    error: error instanceof Error ? error.message : String(error),
+  }
+}
+
+const installHandlers: Record<InstallMode, (ports: CorePorts, ctx: InstallContext) => Promise<InstallResult>> = {
+  'symlink-global': async (ports, ctx) => {
+    if (await createSymlink(ports, ctx.skill.path, ctx.skillTargetPath)) {
+      return createSuccessResult(ctx, 'symlink')
+    }
+
+    await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
+    return createSuccessResult(ctx, 'copy', { symlinkFailed: true })
+  },
+  'symlink-local': async (ports, ctx) => {
+    const canonicalDir = join(ctx.projectRoot, CANONICAL_SKILLS_DIR, ctx.safeSkillName)
+    await copySkillDirectory(ports, ctx.skill.path, canonicalDir)
+
+    if (await createSymlink(ports, canonicalDir, ctx.skillTargetPath)) {
+      return createSuccessResult(ctx, 'symlink', { usedGlobalSymlink: false })
+    }
+
+    await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
+    return createSuccessResult(ctx, 'copy', { symlinkFailed: true })
+  },
+  'copy-global': async (ports, ctx) => {
+    await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
+    return createSuccessResult(ctx, 'copy')
+  },
+  'copy-local': async (ports, ctx) => {
+    await copySkillDirectory(ports, ctx.skill.path, ctx.skillTargetPath)
+    return createSuccessResult(ctx, 'copy')
+  },
+}
+
+function validatePath(targetDir: string, skillTargetPath: string, projectRoot: string, global: boolean): string | null {
+  if (global) return null
+  if (isPathSafe(targetDir, skillTargetPath)) return null
+  if (isPathSafe(projectRoot, skillTargetPath)) return null
+  return 'Security: Invalid skill destination path'
+}
+
+async function installSkillForAgent(
+  ports: CorePorts,
+  skill: SkillInfo,
+  agent: AgentType,
+  targetDir: string,
+  method: 'symlink' | 'copy',
+  projectRoot: string,
+  global: boolean,
+): Promise<InstallResult> {
+  const config = getAgentConfig(ports, agent)
+  const safeSkillName = sanitizeName(skill.name)
+  const skillTargetPath = join(targetDir, safeSkillName)
+  const ctx: InstallContext = { skill, config, safeSkillName, skillTargetPath, projectRoot }
+  const validationError = validatePath(targetDir, skillTargetPath, projectRoot, global)
+
+  if (validationError) return createErrorResult(ctx, method, validationError)
+
+  try {
+    const mode = getInstallMode(method, global)
+    return await installHandlers[mode](ports, ctx)
+  } catch (error) {
+    return createErrorResult(ctx, method, error)
+  }
+}
+
+/**
+ * Installs one or more skills into the requested agent directories.
+ *
+ * The orchestration remains faithful to the CLI installer: it resolves the
+ * project root, installs per agent, updates the lockfile for successful
+ * installs, and appends a best-effort audit entry when the batch finishes.
+ *
+ * @param ports - Core ports used for filesystem, environment, and dependent service access.
+ * @param skills - Skills to install.
+ * @param options - Installation options that control scope, method, and target agents.
+ * @returns One install result per processed skill and agent pair.
+ * @throws {Error} Propagates unexpected downstream errors that escape per-skill handling.
+ *
+ * @example
+ * ```ts
+ * const results = await installSkills(ports, [skill], {
+ *   global: false,
+ *   method: 'copy',
+ *   agents: ['cursor'],
+ *   skills: ['accessibility'],
+ * })
+ * ```
+ */
+export async function installSkills(
+  ports: CorePorts,
+  skills: SkillInfo[],
+  options: InstallOptions,
+): Promise<InstallResult[]> {
+  const projectRoot = findProjectRoot(ports)
+  const results: InstallResult[] = []
+
+  for (const agent of options.agents) {
+    const config = getAgentConfig(ports, agent)
+    const targetDir = options.global ? config.globalSkillsDir : join(projectRoot, config.skillsDir)
+
+    for (const skill of skills) {
+      const result = await installSkillForAgent(
+        ports,
+        skill,
+        agent,
+        targetDir,
+        options.method,
+        projectRoot,
+        options.global,
+      )
+      results.push(result)
+
+      if (result.success) {
+        await addSkillToLock(ports, skill.name, [agent], {
+          source: 'local',
+          contentHash: getCachedContentHash(ports, skill.name),
+          method: options.method,
+          global: options.global,
+        })
+      }
+    }
+  }
+
+  await logAudit(ports, {
+    action: 'install',
+    skillName: skills.map((skill) => skill.name).join(', '),
+    agents: options.agents.map((agent) => getAgentConfig(ports, agent).displayName),
+    success: results.filter((result) => result.success).length,
+    failed: results.filter((result) => !result.success).length,
+    details: results.map((result) => ({
+      skill: result.skill,
+      agent: result.agent,
+      success: result.success,
+      error: result.error,
+      path: result.path,
+    })),
+  })
+
+  return results
 }
