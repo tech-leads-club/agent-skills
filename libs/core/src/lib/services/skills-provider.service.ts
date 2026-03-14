@@ -114,9 +114,6 @@ function discoverLocalSkills(ports: CorePorts, skillsDir: string): SkillInfo[] {
     })
 }
 
-function isLocalMode(ports: CorePorts): boolean {
-  return getLocalSkillsDirectory(ports) !== null
-}
 
 /**
  * Discovers skills from the local skills catalog synchronously.
@@ -209,4 +206,77 @@ export function discoverCategories(ports: CorePorts): CategoryInfo[] {
 export async function discoverCategoriesAsync(ports: CorePorts): Promise<CategoryInfo[]> {
   const localDir = getLocalSkillsDirectory(ports)
   return localDir ? discoverLocalCategories(ports, localDir) : getRemoteCategories(ports)
+}
+
+/**
+ * Looks up a skill by name from the local catalog synchronously.
+ *
+ * @param ports - Core ports used to read local filesystem entries.
+ * @param name - The skill name to find.
+ * @returns The matching `SkillInfo` or `undefined` when not found.
+ *
+ * @example
+ * ```ts
+ * const skill = getSkillByName(ports, 'accessibility')
+ * ```
+ */
+export function getSkillByName(ports: CorePorts, name: string): SkillInfo | undefined {
+  return discoverSkills(ports).find((s) => s.name === name)
+}
+
+/**
+ * Looks up a skill by name from the local catalog or remote registry asynchronously.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @param name - The skill name to find.
+ * @returns The matching `SkillInfo` or `undefined` when not found.
+ *
+ * @example
+ * ```ts
+ * const skill = await getSkillByNameAsync(ports, 'accessibility')
+ * ```
+ */
+export async function getSkillByNameAsync(ports: CorePorts, name: string): Promise<SkillInfo | undefined> {
+  const skills = await discoverSkillsAsync(ports)
+  return skills.find((s) => s.name === name)
+}
+
+/**
+ * Ensures a skill is locally available, downloading it from the registry when needed.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @param skillName - The skill name to ensure is available.
+ * @returns The absolute local path to the skill, or `null` when unavailable.
+ *
+ * @example
+ * ```ts
+ * const path = await ensureSkillAvailable(ports, 'accessibility')
+ * ```
+ */
+export async function ensureSkillAvailable(ports: CorePorts, skillName: string): Promise<string | null> {
+  const localDir = getLocalSkillsDirectory(ports)
+  if (localDir) return getSkillByName(ports, skillName)?.path ?? null
+  return ensureSkillDownloaded(ports, skillName)
+}
+
+/**
+ * Returns skill information including the resolved local path.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @param skillName - The skill name to retrieve with path.
+ * @returns The `SkillInfo` with a resolved local path, or `null` when unavailable.
+ *
+ * @example
+ * ```ts
+ * const skill = await getSkillWithPath(ports, 'accessibility')
+ * ```
+ */
+export async function getSkillWithPath(ports: CorePorts, skillName: string): Promise<SkillInfo | null> {
+  const localDir = getLocalSkillsDirectory(ports)
+  if (localDir) return getSkillByName(ports, skillName) ?? null
+  const metadata = await getSkillMetadata(ports, skillName)
+  if (!metadata) return null
+  const localPath = await ensureSkillDownloaded(ports, skillName)
+  if (!localPath) return null
+  return { name: metadata.name, description: metadata.description, path: localPath, category: metadata.category }
 }
