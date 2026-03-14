@@ -21,6 +21,10 @@
       "name": "Design",
       "description": "Skills for UI/UX design and design systems"
     },
+    "gtm": {
+      "name": "Go-to-Market",
+      "description": "Skills for GTM, pricing, outbound, inbound, paid, retention, and GTM operations"
+    },
     "development": {
       "name": "Development",
       "description": "Skills for software development workflows"
@@ -71,6 +75,72 @@
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "706129400c8c91a9264582940b36007116faffcaf27bb0780bdab87337b4f881"
+    },
+    {
+      "name": "ai-cold-outreach",
+      "description": "\"When the user wants to build an AI-powered outreach system, write cold emails, improve deliverability, or scale personalized outreach. Also use when the user mentions 'cold email,' 'cold outreach,' 'outreach automation,' 'Instantly,' 'Smartlead,' 'Clay,' 'email sequences,' 'deliverability,' 'personalization at scale,' 'reply rate,' or 'outreach stack.' This skill covers the complete AI cold outreach system from signal detection through conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/ai-cold-outreach",
+      "files": [
+        "SKILL.md",
+        "references/benchmarks-deliverability-tactics.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "7a2ca1d3f443357b96f22ffce9fb6d5e19134bb5d723ea55ca939873b3777c12"
+    },
+    {
+      "name": "ai-pricing",
+      "description": "\"When the user wants to price an AI product, choose a charge metric, design pricing tiers, or optimize margins. Also use when the user mentions 'AI pricing,' 'usage-based pricing,' 'consumption pricing,' 'outcome pricing,' 'BYOK,' 'bring your own key,' 'per-seat pricing,' 'pricing tiers,' 'AI margins,' 'cost per token,' or 'pricing model.' This skill covers pricing strategy, packaging, and margin management for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/ai-pricing",
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "642a42cf94b8061aad642d84363bb4f60712af858c093bed6f2ec6135a3e7937"
+    },
+    {
+      "name": "ai-sdr",
+      "description": "\"When the user wants to deploy AI sales development reps, automate sales qualification, build signal-to-action routing, or design AI agent architecture for sales. Also use when the user mentions 'AI SDR,' 'AI sales agent,' 'automated qualification,' 'signal routing,' 'sales automation,' '11x,' 'Artisan,' 'AiSDR,' 'AI BDR,' or 'autonomous sales.' This skill covers AI SDR deployment, qualification automation, and agent architecture for sales development. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/ai-sdr",
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "3f36a4b65cb1fc97722341b9fb1849fcecf320be8a1d8892028fa45663719786"
+    },
+    {
+      "name": "ai-seo",
+      "description": "\"When the user wants to build programmatic SEO with AI, create competitor alternative pages, optimize for AI Overviews, or scale content production. Also use when the user mentions 'SEO,' 'programmatic SEO,' 'AI content,' 'competitor alternative pages,' 'AI Overviews,' 'search optimization,' 'DataForSEO,' 'content at scale,' 'keyword strategy,' or 'organic traffic.' This skill covers AI-powered SEO strategy from keyword research through programmatic page generation. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/ai-seo",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "3cff81cc15423861508bf28c2f74e75b6a008da4da41978f91754e58c976e969"
+    },
+    {
+      "name": "ai-ugc-ads",
+      "description": "\"When the user wants to create UGC ad campaigns, recruit UGC creators, generate AI UGC content, or scale with user-generated content. Also use when the user mentions 'UGC,' 'user-generated content,' 'creator ads,' 'Spark Ads,' 'whitelisting,' 'AI UGC,' 'Arcads,' 'Creatify,' 'creator brief,' or 'UGC testing.' This skill covers the UGC growth framework from creator recruitment through AI-powered scaling. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/ai-ugc-ads",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "92f981122d6add656bd10cae4404fa94a79db93f3cad2cd978ef12a4eea51b83"
     },
     {
       "name": "aws-advisor",
@@ -509,6 +579,20 @@
       "contentHash": "b9f019173a7d864db1d0a9eca13ee920d294806ea4c5cabfb626ccaedbaaeae7"
     },
     {
+      "name": "content-to-pipeline",
+      "description": "\"When the user wants to turn content into revenue, build a content-led GTM motion, reverse engineer distribution, or repurpose content across platforms. Also use when the user mentions 'content marketing,' 'content-led growth,' 'content to pipeline,' 'distribution,' 'content repurposing,' 'content strategy,' 'thought leadership,' 'newsletter,' 'content flywheel,' 'organic growth.' This skill covers content-to-revenue systems from creation through pipeline attribution. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/content-to-pipeline",
+      "files": [
+        "SKILL.md",
+        "references/podcast-community-cadence.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "925f769a4c601ea7fac8cab4d3ee00f799921eb0600427d18f458eb35db2e2ed"
+    },
+    {
       "name": "core-web-vitals",
       "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\". Focuses specifically on the three Core Web Vitals metrics. Do NOT use for general web performance (use perf-web-optimization), Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).",
       "category": "performance",
@@ -644,6 +728,18 @@
       "contentHash": "08f4964859a421cccfc52314f2e5b3484b1163ecf558ccdbb6746127229b9399"
     },
     {
+      "name": "expansion-retention",
+      "description": "\"When the user wants to reduce churn, build expansion revenue, automate customer success, or optimize net revenue retention. Also use when the user mentions 'churn,' 'retention,' 'expansion revenue,' 'upsell,' 'NRR,' 'net revenue retention,' 'customer success,' 'land and expand,' 'closed-lost,' or 'renewal.' This skill covers expansion and retention systems from usage triggers through automated customer success. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/expansion-retention",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "e5420a123058969e8e5014d74120daf7a1c598e1fb44e6d152c6b60a71a81e95"
+    },
+    {
       "name": "figma",
       "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Use when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting. Covers general Figma data fetching and exploration. Do NOT use when the goal is specifically pixel-perfect code implementation from a Figma design (use figma-implement-design instead).",
       "category": "design",
@@ -687,6 +783,25 @@
       "contentHash": "c79c5acbf69e88e1b0c848e64afb671f33091e32b6dcb1b2e6f9c78213a10ec3"
     },
     {
+      "name": "frontend-design",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications. Generates creative, polished code that avoids generic AI aesthetics. Do NOT use for design review or audit (use web-design-guidelines or web-quality-audit).",
+      "category": "design",
+      "path": "(design)/frontend-design",
+      "files": [
+        "SKILL.md",
+        "references/color-and-contrast.md",
+        "references/interaction-design.md",
+        "references/motion-design.md",
+        "references/responsive-design.md",
+        "references/spatial-design.md",
+        "references/typography.md",
+        "references/ux-writing.md"
+      ],
+      "author": "Impeccable (Paul Bakaus), based on Anthropic frontend-design",
+      "version": "1.0.0",
+      "contentHash": "d9b00d80b5c53a4edc968792f681e9fd901ddfdf52332fbb0a90fff79c3edaa9"
+    },
+    {
       "name": "gh-address-comments",
       "description": "Address review and issue comments on the open GitHub PR for the current branch using gh CLI. Use when user says \"address PR comments\", \"fix review feedback\", \"respond to PR review\", or \"handle PR comments\". Verifies gh auth first and prompts to authenticate if not logged in. Do NOT use for creating PRs, CI debugging (use gh-fix-ci), or general Git operations.",
       "category": "development",
@@ -715,6 +830,32 @@
       "contentHash": "f032610bcbf7f7a7b6b13d20de360608c10328b7a9e507610323e843d613f1f4"
     },
     {
+      "name": "gtm-engineering",
+      "description": "\"When the user wants to build GTM automation with code, design workflow architectures, use AI agents for GTM tasks, or implement the 'architecture over tools' principle. Also use when the user mentions 'GTM engineering,' 'GTM automation,' 'n8n,' 'Make,' 'Zapier,' 'workflow automation,' 'Clay API,' 'instruction stacks,' 'AI agents for GTM,' or 'revenue automation.' This skill covers technical GTM infrastructure from workflow design through agent orchestration. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/gtm-engineering",
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "b2cfbea2da9f2a52527f6c41f128df2dba76c33df90692357a5533c06b78223f"
+    },
+    {
+      "name": "gtm-metrics",
+      "description": "\"When the user wants to define GTM metrics, build a metrics dashboard, measure pipeline efficiency, or track AI product performance. Also use when the user mentions 'GTM metrics,' 'revenue latency,' 'pipeline metrics,' 'TTFV,' 'time-to-first-value,' 'data health,' 'attribution,' 'conversion rate,' 'CAC,' 'LTV,' 'NRR,' 'GTM dashboard,' 'magic number,' 'pipeline velocity,' or 'funnel metrics.' This skill covers GTM measurement from metric selection through dashboard design, including AI-specific cost metrics, attribution models, and weekly review cadences. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/gtm-metrics",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "9f2afa96826b0456cf79f05b43ab4470fd6802990e301bb898c2cbaa6f01cf5c"
+    },
+    {
       "name": "jira-assistant",
       "description": "Manage Jira issues via Atlassian MCP — search, create, update, transition status, and handle sprint tasks. Auto-detects workspace configuration. Use when user says \"create a Jira ticket\", \"update my sprint\", \"check Jira status\", \"transition this issue\", \"search Jira\", or \"move ticket to done\". Do NOT use for Confluence pages (use confluence-assistant).",
       "category": "development",
@@ -724,6 +865,19 @@
         "SKILL.md"
       ],
       "contentHash": "fa63880889d2206548e33489a0ac1aa849c4e6ab879ea769c2715521a8231c8a"
+    },
+    {
+      "name": "lead-enrichment",
+      "description": "\"When the user wants to build data enrichment workflows, score leads against ICP, set up Clay waterfalls, or improve contact data quality. Also use when the user mentions 'enrichment,' 'data enrichment,' 'Clay,' 'waterfall enrichment,' 'ICP scoring,' 'lead scoring,' 'intent data,' 'contact verification,' 'Apollo,' 'ZoomInfo,' or 'data quality.' This skill covers lead enrichment waterfalls, ICP scoring frameworks, and contact verification systems. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/lead-enrichment",
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "c062dadf96d7a1500457c222b95baff7f5aade66486044be360a13268b251940"
     },
     {
       "name": "learning-opportunities",
@@ -779,6 +933,20 @@
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
       "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
+    },
+    {
+      "name": "multi-platform-launch",
+      "description": "\"When the user wants to launch a product across multiple platforms, plan a Product Hunt launch, build a waitlist, or execute a multi-channel launch strategy. Also use when the user mentions 'product launch,' 'Product Hunt,' 'launch strategy,' 'waitlist,' 'beta launch,' 'BetaList,' 'Hacker News,' 'launch day,' 'AppSumo,' 'multi-channel launch.' This skill covers multi-platform launch execution from pre-launch through post-launch optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/multi-platform-launch",
+      "files": [
+        "SKILL.md",
+        "references/directories-timing-mistakes.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "22552e0a3fde93c57715295f52b31d0695ad78d10512e5793ea93c7b138c79ee"
     },
     {
       "name": "nestjs-modular-monolith",
@@ -860,6 +1028,33 @@
       "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
     },
     {
+      "name": "paid-creative-ai",
+      "description": "\"When the user wants to create AI-generated ad creative, test performance creative, manage creative fatigue, or optimize paid media with AI tools. Also use when the user mentions 'ad creative,' 'performance creative,' 'creative testing,' 'creative fatigue,' 'Meta ads,' 'Google ads,' 'TikTok ads,' 'AI ads,' 'ad budget,' 'ROAS,' 'Advantage+,' or 'Performance Max.' This skill covers AI-powered paid creative from generation through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/paid-creative-ai",
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "89328ab72ff4336917031a217f43bd19b133a7d17202bf70d8d8d7f59d69ce29"
+    },
+    {
+      "name": "partner-affiliate",
+      "description": "\"When the user wants to build a partner program, launch an affiliate program, design integration partnerships, or create distribution partnerships. Also use when the user mentions 'partnerships,' 'affiliate program,' 'referral program,' 'partner ecosystem,' 'integration partner,' 'reseller,' 'co-marketing,' 'PartnerStack,' or 'revenue share.' This skill covers partner and affiliate program design from recruitment through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/partner-affiliate",
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "3ff5e89d89da30e46eef1d6fa4379aa1b41c30be16e2ca761a5581267c41561e"
+    },
+    {
       "name": "perf-astro",
       "description": "'Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Use when optimizing Astro site performance, improving Astro Lighthouse scores, or configuring astro-critters. Do NOT use for non-Astro sites (use perf-web-optimization or core-web-vitals) or running Lighthouse audits (use perf-lighthouse).'",
       "category": "performance",
@@ -905,6 +1100,19 @@
         "run.js"
       ],
       "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
+    },
+    {
+      "name": "positioning-icp",
+      "description": "\"When the user wants to define their ideal customer profile, position an AI product, build messaging architecture, or validate product-market fit. Also use when the user mentions 'ICP,' 'ideal customer profile,' 'positioning,' 'PMF,' 'product-market fit,' 'messaging,' 'buyer persona,' 'enrichment signals,' 'market positioning,' or 'competitive positioning.' This skill covers market positioning, ICP definition, messaging architecture, and PMF validation for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/positioning-icp",
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "3b940bcd8ad2035177bffb04e34d52fe038f669a2d466e8d67e73135044373a5"
     },
     {
       "name": "react-best-practices",
@@ -1044,6 +1252,19 @@
       "contentHash": "b2d22a5612b4b1871c4d33765f8ee875ffc7eb3604cc9f2faabb1ff3c0c527ea"
     },
     {
+      "name": "sales-motion-design",
+      "description": "\"When the user wants to choose between PLG and sales-led, design a sales motion, optimize time-to-first-value, or build a value-before-purchase experience. Also use when the user mentions 'PLG,' 'product-led growth,' 'sales-led,' 'sales motion,' 'free trial,' 'freemium,' 'self-serve,' 'demo-first,' 'time-to-first-value,' 'TTFV,' or 'agent-led sales.' This skill covers sales motion selection, value delivery design, and go-to-market motion architecture. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/sales-motion-design",
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "8f9829a2107c994a3a4d2fcaec73def4bcc1a7fac20c64b452093a4e7018e93f"
+    },
+    {
       "name": "security-best-practices",
       "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Use when the user explicitly requests security best practices guidance, a security review or report, or secure-by-default coding help. Supports Python, JavaScript/TypeScript, and Go. Do NOT use for general code review, debugging, threat modeling (use security-threat-model), or non-security tasks.",
       "category": "security",
@@ -1163,6 +1384,30 @@
       "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
     },
     {
+      "name": "social-selling",
+      "description": "\"When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also use when the user mentions 'social selling,' 'LinkedIn selling,' 'LinkedIn DMs,' 'social prospecting,' 'LinkedIn Sales Navigator,' 'DM sequences,' 'LinkedIn outreach,' 'social pipeline,' or 'LinkedIn optimization.' This skill covers social selling strategy from profile optimization through DM-to-deal conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/social-selling",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "7cc6fba77aff372c64d8e2b97b2b645ef641ef78a266b602e5e6fdd74231460e"
+    },
+    {
+      "name": "solo-founder-gtm",
+      "description": "\"When the user is a solo founder building their GTM motion, wants to scale without hiring, or needs to design an AI agent team for go-to-market. Also use when the user mentions 'solo founder,' 'one-person startup,' 'solopreneur,' 'bootstrapped,' 'no team,' 'AI agents as team,' 'scaling without hiring,' 'founder-led sales,' 'lean GTM,' 'one-person company,' or 'no employees.' This skill covers the complete solo founder GTM playbook from stack selection through agent team design, revenue-stage transitions, time allocation, and when to finally hire. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/solo-founder-gtm",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "95d71f10ea8a48767cb871ad72c09745cb6ecd822ed71be659cbd960b6503445"
+    },
+    {
       "name": "subagent-creator",
       "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\". Do NOT use for Cursor-specific subagents (use cursor-subagent-creator instead).",
       "category": "creation",
@@ -1244,6 +1489,18 @@
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "53985dad8a6cf5571b8eb796668502f2e82f0574ab15d31609486de8317f0ec5"
+    },
+    {
+      "name": "video-outreach",
+      "description": "\"When the user wants to build video-first cold outreach, create personalized video at scale, implement async selling, or use AI demo generation for prospecting. Also use when the user mentions 'video outreach,' 'personalized video,' 'video prospecting,' 'Tavus,' 'Sendspark,' 'HeyGen,' 'video email,' 'async selling,' 'video demo,' or 'made this for you.' This skill covers video-first outreach systems from personalization through conversion optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
+      "category": "gtm",
+      "path": "(gtm)/video-outreach",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Chad Boyda / agent-gtm-skills",
+      "version": "1.0.0",
+      "contentHash": "b918e2c62adf317b82ac43e4731e300ff4f163383aebe7ae8532f7ea69c24c29"
     },
     {
       "name": "web-design-guidelines",

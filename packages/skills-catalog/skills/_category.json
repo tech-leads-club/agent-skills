@@ -19,6 +19,10 @@
     "name": "Design",
     "description": "Skills for UI/UX design and design systems"
   },
+  "(gtm)": {
+    "name": "Go-to-Market",
+    "description": "Skills for GTM, pricing, outbound, inbound, paid, retention, and GTM operations"
+  },
   "(development)": {
     "name": "Development",
     "description": "Skills for software development workflows"
