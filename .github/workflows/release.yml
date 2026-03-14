@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     types: [opened, synchronize, labeled]
+  # Enables "scan before merge" for fork PRs: when using Merge Queue, this job runs with base repo secrets
+  merge_group:
 
 permissions:
   actions: read
@@ -60,9 +62,16 @@ jobs:
 
       - name: Security Scan
         id: security-scan
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: ./.github/actions/security-scan
         with:
           artifact-name: security-scan-results-pr
+
+      - name: Note (fork PRs)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "Security scan is skipped for PRs from forks (GitHub does not expose secrets to fork workflows)."
+          echo "Maintainers will run the scan before merge or you can run \`npm run scan\` locally with your own SNYK_TOKEN."
 
       - name: Comment on PR if scan failed
         if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name == github.repository
@@ -82,6 +91,36 @@ jobs:
         if: always()
         run: npx nx fix-ci || NX_NO_CLOUD=true npx nx fix-ci
         continue-on-error: true
+
+  # Runs when a PR is added to Merge Queue (including fork PRs). Has access to secrets; blocks merge if scan fails.
+  security-scan-merge-queue:
+    name: Security Scan (merge queue)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'merge_group'
+    env:
+      PARALLEL_JOBS: 8
+    steps:
+      - name: Checkout merge commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
+      - name: Security Scan
+        id: security-scan
+        uses: ./.github/actions/security-scan
+        with:
+          artifact-name: security-scan-results-merge-queue
+
+      - name: Fail job if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
 
   snapshot:
     name: Snapshot Release
