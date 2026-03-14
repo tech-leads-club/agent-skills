@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 
 import { CATEGORY_FOLDER_PATTERN, CATEGORY_METADATA_FILE, DEFAULT_CATEGORY_ID } from '../constants'
 import type { CorePorts } from '../ports'
@@ -92,7 +92,7 @@ function tryReadSkillFromPath(ports: CorePorts, skillPath: string, categoryId: s
   if (!ports.fs.existsSync(skillMdPath)) return null
   const content = ports.fs.readFileSync(skillMdPath, 'utf-8')
   const { name, description } = parseSkillFrontmatter(content)
-  const folderName = skillPath.split('/').pop() ?? ''
+  const folderName = basename(skillPath)
 
   return {
     name: name ?? folderName,
