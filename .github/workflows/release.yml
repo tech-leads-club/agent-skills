@@ -94,7 +94,7 @@ jobs:
               const s = d.summary || {};
               console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
               (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
-                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
             "
           fi
       - name: Fail if scan failed
@@ -143,7 +143,7 @@ jobs:
               const s = d.summary || {};
               console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
               (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
-                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
             "
           fi
       - name: Fail job if scan failed
@@ -263,7 +263,7 @@ jobs:
               const s = d.summary || {};
               console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
               (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
-                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100))
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
             "
           fi
       - name: Fail job if scan failed
