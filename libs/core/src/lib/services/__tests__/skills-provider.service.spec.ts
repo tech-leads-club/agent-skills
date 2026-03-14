@@ -10,7 +10,7 @@ import type {
   ShellPort,
 } from '../../ports'
 
-import { detectMode, discoverSkills, getSkillsDirectory } from '../skills-provider.service'
+import { detectMode, discoverSkills, discoverSkillsAsync, getSkillsDirectory } from '../skills-provider.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -19,6 +19,12 @@ type TestPorts = {
     (path: string, options?: { withFileTypes?: boolean }) => { name: string; isDirectory: () => boolean }[]
   >
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
+  getWithFallbackMock: jest.MockedFunction<
+    (
+      url: string,
+      fallbackUrl?: string,
+    ) => Promise<{ ok: boolean; status: number; json(): Promise<unknown>; text(): Promise<string> }>
+  >
 }
 
 const createPorts = (): TestPorts => {
@@ -27,6 +33,12 @@ const createPorts = (): TestPorts => {
     (path: string, options?: { withFileTypes?: boolean }) => { name: string; isDirectory: () => boolean }[]
   >()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
+  const getWithFallbackMock = jest.fn<
+    (
+      url: string,
+      fallbackUrl?: string,
+    ) => Promise<{ ok: boolean; status: number; json(): Promise<unknown>; text(): Promise<string> }>
+  >()
 
   existsSyncMock.mockReturnValue(false)
   readdirSyncMock.mockReturnValue([])
@@ -44,12 +56,16 @@ const createPorts = (): TestPorts => {
     cwd: jest.fn(() => '/workspace/project'),
     homedir: jest.fn(() => '/home/tester'),
     platform: jest.fn(() => 'linux'),
-    getEnv: jest.fn(() => undefined),
+    getEnv: jest.fn((key: string) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined)),
   } as unknown as EnvPort
+
+  const http = {
+    getWithFallback: getWithFallbackMock,
+  } as unknown as HttpPort
 
   const ports: CorePorts = {
     fs,
-    http: {} as HttpPort,
+    http,
     shell: {} as ShellPort,
     env,
     logger: {
@@ -58,11 +74,17 @@ const createPorts = (): TestPorts => {
       info: jest.fn(),
       debug: jest.fn(),
     } as unknown as LoggerPort,
-    packageResolver: {} as PackageResolverPort,
+    packageResolver: {
+      getLatestVersion: jest.fn<(pkg: string) => Promise<string>>().mockResolvedValue('latest'),
+    } as unknown as PackageResolverPort,
   }
 
-  return { ports, existsSyncMock, readdirSyncMock, readFileSyncMock }
+  return { ports, existsSyncMock, readdirSyncMock, readFileSyncMock, getWithFallbackMock }
 }
+
+beforeEach(() => {
+  jest.clearAllMocks()
+})
 
 describe('detectMode', () => {
   it('returns local when skills catalog directory exists', () => {
@@ -141,5 +163,71 @@ describe('discoverSkills', () => {
     readdirSyncMock.mockReturnValue([{ name: 'broken-skill', isDirectory: () => true }])
 
     expect(discoverSkills(ports)).toEqual([])
+  })
+})
+
+describe('discoverSkillsAsync', () => {
+  it('returns local skills when in local mode', async () => {
+    const { ports, existsSyncMock, readdirSyncMock, readFileSyncMock } = createPorts()
+    existsSyncMock.mockImplementation((p) => {
+      const path = p as string
+      return (
+        path.endsWith('packages/skills-catalog/skills') ||
+        path.endsWith('packages/skills-catalog/skills/seo/SKILL.md')
+      )
+    })
+    readdirSyncMock.mockImplementation((p) => {
+      const path = p as string
+      if (path.endsWith('packages/skills-catalog/skills')) {
+        return [{ name: 'seo', isDirectory: () => true }]
+      }
+      return []
+    })
+    readFileSyncMock.mockReturnValue('---\nname: seo\ndescription: SEO optimization\n---\n# Body')
+
+    const skills = await discoverSkillsAsync(ports)
+
+    expect(skills).toHaveLength(1)
+    expect(skills[0].name).toBe('seo')
+  })
+
+  it('fetches remote skills when in remote mode', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    const remoteRegistry = {
+      version: 'main',
+      generatedAt: '2026-03-14T00:00:00.000Z',
+      baseUrl: 'https://cdn.jsdelivr.net',
+      categories: {},
+      skills: [
+        {
+          name: 'accessibility',
+          description: 'Audit web accessibility',
+          category: 'quality',
+          path: '(quality)/accessibility',
+          files: ['SKILL.md'],
+          contentHash: 'abc123',
+        },
+      ],
+    }
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => remoteRegistry,
+      text: async () => JSON.stringify(remoteRegistry),
+    })
+
+    const skills = await discoverSkillsAsync(ports)
+
+    expect(skills).toHaveLength(1)
+    expect(skills[0].name).toBe('accessibility')
+  })
+
+  it('returns empty array when remote registry is unavailable', async () => {
+    const { ports, getWithFallbackMock } = createPorts()
+    getWithFallbackMock.mockRejectedValue(new Error('network error'))
+
+    const skills = await discoverSkillsAsync(ports)
+
+    expect(skills).toEqual([])
   })
 })

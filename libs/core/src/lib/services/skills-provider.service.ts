@@ -135,3 +135,18 @@ export function discoverSkills(ports: CorePorts): SkillInfo[] {
   return localDir ? discoverLocalSkills(ports, localDir) : []
 }
 
+/**
+ * Discovers skills from local catalog or remote registry, depending on the detected mode.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @returns Skills from the local catalog in local mode, or from the remote registry in remote mode.
+ *
+ * @example
+ * ```ts
+ * const skills = await discoverSkillsAsync(ports)
+ * ```
+ */
+export async function discoverSkillsAsync(ports: CorePorts): Promise<SkillInfo[]> {
+  const localDir = getLocalSkillsDirectory(ports)
+  return localDir ? discoverLocalSkills(ports, localDir) : getRemoteSkills(ports)
+}
