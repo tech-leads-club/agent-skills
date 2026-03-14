@@ -88,6 +88,19 @@ const SKILLS_DIR = join(__dirname, '..', 'skills')
 const forceRescan = process.argv.includes('--force')
 const updateAllowlist = process.argv.includes('--update-allowlist')
 
+// Scanner infrastructure failure codes — do not cache these so the next run retries the scan
+const SCANNER_INFRASTRUCTURE_CODES = new Set([
+  'SCANNER_PROCESS_FAILED',
+  'SCANNER_SPAWN_ERROR',
+  'SCANNER_PARSE_ERROR',
+  'SCANNER_MISSING_OUTPUT',
+  'SCANNER_INTERNAL_ERROR',
+])
+
+function isOnlyInfrastructureFailures(issues: ScanIssue[]): boolean {
+  return issues.length > 0 && issues.every((i) => SCANNER_INFRASTRUCTURE_CODES.has(i.code))
+}
+
 // Main execution wrapper
 async function main() {
   try {
@@ -101,6 +114,12 @@ async function main() {
 
     // 2. Load cache and allowlist
     const cache = loadCache()
+    // Do not reuse cached scanner-infrastructure failures (e.g. old mcp-scan or broken-run cache from CI)
+    for (const [name, entry] of Object.entries(cache.skills)) {
+      if (isOnlyInfrastructureFailures(entry.issues)) {
+        delete cache.skills[name]
+      }
+    }
     const allowlist = loadAllowlist()
 
     // 3. Check for expired allowlist entries
@@ -140,6 +159,8 @@ async function main() {
     printSummaryLine('✓', `${cached.length} cached (hash unchanged)`)
     printSummaryLine('→', `${toScan.length} to scan (new/modified)`)
     console.log()
+
+    const currentRunResults = new Map<string, ScanIssue[]>() // filled by scan; infrastructure-only failures are not cached
 
     // 6. Scan changed skills
     if (toScan.length > 0) {
@@ -200,7 +221,7 @@ async function main() {
           const mediumCount = issues.filter((i) => i.severity === 'medium').length
 
           if (critCount > 0 || highCount > 0) {
-            const parts = []
+            const parts: string[] = []
             if (critCount > 0) parts.push(chalk.red(`${critCount}C`))
             if (highCount > 0) parts.push(chalk.red(`${highCount}H`))
             if (mediumCount > 0) parts.push(chalk.yellow(`${mediumCount}M`))
@@ -213,8 +234,11 @@ async function main() {
             )
           }
 
-          // Update cache
-          cache.skills[skill.name] = { contentHash: skill.contentHash, issues, scannedAt: new Date().toISOString() }
+          currentRunResults.set(skill.name, issues)
+          // Do not cache scanner infrastructure failures so the next run retries instead of reusing the failure
+          if (!isOnlyInfrastructureFailures(issues)) {
+            cache.skills[skill.name] = { contentHash: skill.contentHash, issues, scannedAt: new Date().toISOString() }
+          }
         },
       )
 
@@ -231,13 +255,18 @@ async function main() {
       console.log()
     }
 
-    // 7. Merge all results (cached + newly scanned)
+    // 7. Merge all results (current run takes precedence; then cached — infrastructure failures are not cached)
     const allIssues: ScanIssue[] = []
 
     for (const skill of skills) {
-      const cacheEntry = cache.skills[skill.name]
-      if (cacheEntry) {
-        allIssues.push(...cacheEntry.issues)
+      const fromCurrentRun = currentRunResults.get(skill.name)
+      if (fromCurrentRun !== undefined) {
+        allIssues.push(...fromCurrentRun)
+      } else {
+        const cacheEntry = cache.skills[skill.name]
+        if (cacheEntry) {
+          allIssues.push(...cacheEntry.issues)
+        }
       }
     }
 
