@@ -12,7 +12,14 @@ import type {
 } from '../../ports'
 import type { InstallOptions, SkillInfo } from '../../types'
 
-import { getCanonicalPath, getInstallPath, installSkills, listInstalledSkills, removeSkill } from '../installer.service'
+import {
+  getCanonicalPath,
+  getInstallPath,
+  installSkills,
+  isSkillInstalled,
+  listInstalledSkills,
+  removeSkill,
+} from '../installer.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -450,5 +457,24 @@ describe('listInstalledSkills', () => {
     const installedSkills = await listInstalledSkills(ports, 'cursor', false)
 
     expect(installedSkills).toEqual([])
+  })
+})
+
+describe('isSkillInstalled', () => {
+  it('returns true when the installed skill path exists', async () => {
+    const { ports, lstatMock } = createPorts()
+
+    lstatMock.mockResolvedValueOnce({
+      isDirectory: () => true,
+      isSymbolicLink: () => false,
+    })
+
+    await expect(isSkillInstalled(ports, 'my-skill', 'cursor')).resolves.toBe(true)
+  })
+
+  it('returns false when the installed skill path does not exist', async () => {
+    const { ports } = createPorts()
+
+    await expect(isSkillInstalled(ports, 'missing-skill', 'cursor')).resolves.toBe(false)
   })
 })
