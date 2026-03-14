@@ -195,9 +195,6 @@ describe('fetchRegistry', () => {
     const fetchedAt = Date.now() - 60_000
 
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills',
-    )
-    existsSyncMock.mockImplementation(
       (path) =>
         path === '/home/tester/.cache/agent-skills' ||
         path === '/home/tester/.cache/agent-skills/skills' ||
