@@ -12,7 +12,7 @@ import type {
 } from '../../ports'
 import type { InstallOptions, SkillInfo } from '../../types'
 
-import { getCanonicalPath, getInstallPath, installSkills, removeSkill } from '../installer.service'
+import { getCanonicalPath, getInstallPath, installSkills, listInstalledSkills, removeSkill } from '../installer.service'
 
 type TestPorts = {
   ports: CorePorts
@@ -21,6 +21,12 @@ type TestPorts = {
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
   lstatMock: jest.MockedFunction<(path: string) => Promise<{ isDirectory(): boolean; isSymbolicLink(): boolean }>>
   mkdirMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => Promise<void>>
+  readdirMock: jest.MockedFunction<
+    (
+      path: string,
+      options?: { withFileTypes: true },
+    ) => Promise<{ name: string; isDirectory(): boolean; isSymbolicLink?(): boolean }[]>
+  >
   readFileMock: jest.MockedFunction<(path: string, encoding: string) => Promise<string>>
   readlinkMock: jest.MockedFunction<(linkPath: string) => Promise<string>>
   renameMock: jest.MockedFunction<(oldPath: string, newPath: string) => Promise<void>>
@@ -44,6 +50,13 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const lstatMock = jest.fn<(path: string) => Promise<{ isDirectory(): boolean; isSymbolicLink(): boolean }>>()
   const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
+  const readdirMock =
+    jest.fn<
+      (
+        path: string,
+        options?: { withFileTypes: true },
+      ) => Promise<{ name: string; isDirectory(): boolean; isSymbolicLink?(): boolean }[]>
+    >()
   const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
   const readlinkMock = jest.fn<(linkPath: string) => Promise<string>>()
   const renameMock = jest.fn<(oldPath: string, newPath: string) => Promise<void>>()
@@ -59,6 +72,7 @@ const createPorts = (): TestPorts => {
     throw error
   })
   mkdirMock.mockResolvedValue(undefined)
+  readdirMock.mockResolvedValue([])
   readFileMock.mockRejectedValue(new Error('missing'))
   readlinkMock.mockResolvedValue('')
   renameMock.mockResolvedValue(undefined)
@@ -73,7 +87,7 @@ const createPorts = (): TestPorts => {
     mkdir: mkdirMock,
     readFile: readFileMock,
     readFileSync: jest.fn(() => ''),
-    readdir: jest.fn(async () => []),
+    readdir: readdirMock,
     readdirSync: jest.fn(() => []),
     readlink: readlinkMock,
     rename: renameMock,
@@ -115,6 +129,7 @@ const createPorts = (): TestPorts => {
     existsSyncMock,
     lstatMock,
     mkdirMock,
+    readdirMock,
     readFileMock,
     readlinkMock,
     renameMock,
@@ -409,5 +424,31 @@ describe('removeSkill', () => {
         success: true,
       },
     ])
+  })
+})
+
+describe('listInstalledSkills', () => {
+  it('returns installed skill directories and symlinks for an agent', async () => {
+    const { ports, readdirMock } = createPorts()
+
+    readdirMock.mockResolvedValue([
+      { name: 'alpha-skill', isDirectory: () => true, isSymbolicLink: () => false },
+      { name: 'beta-skill', isDirectory: () => false, isSymbolicLink: () => true },
+      { name: 'notes.txt', isDirectory: () => false, isSymbolicLink: () => false },
+    ])
+
+    const installedSkills = await listInstalledSkills(ports, 'cursor', false)
+
+    expect(installedSkills).toEqual(['alpha-skill', 'beta-skill'])
+  })
+
+  it('returns an empty array when the skills directory does not exist', async () => {
+    const { ports, readdirMock } = createPorts()
+
+    readdirMock.mockRejectedValueOnce(new Error('missing directory'))
+
+    const installedSkills = await listInstalledSkills(ports, 'cursor', false)
+
+    expect(installedSkills).toEqual([])
   })
 })

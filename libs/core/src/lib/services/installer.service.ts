@@ -410,6 +410,31 @@ export async function installSkills(
 }
 
 /**
+ * Lists installed skills for a single agent and scope.
+ *
+ * @param ports - Core ports used for filesystem, environment, and dependent service access.
+ * @param agent - Agent whose installed skills should be listed.
+ * @param global - When `true`, reads the global skills directory; otherwise reads the project-local directory.
+ * @returns Installed skill directory names, or an empty array when the target directory is unavailable.
+ *
+ * @example
+ * ```ts
+ * const installed = await listInstalledSkills(ports, 'cursor', false)
+ * ```
+ */
+export async function listInstalledSkills(ports: CorePorts, agent: AgentType, global: boolean): Promise<string[]> {
+  const config = getAgentConfig(ports, agent)
+  const targetDir = global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
+
+  try {
+    const entries = await ports.fs.readdir(targetDir, { withFileTypes: true })
+    return entries.filter((entry) => entry.isDirectory() || entry.isSymbolicLink?.()).map((entry) => entry.name)
+  } catch {
+    return []
+  }
+}
+
+/**
  * Removes a skill from the requested agent directories.
  *
  * The orchestration mirrors the CLI installer by checking the lockfile first,
