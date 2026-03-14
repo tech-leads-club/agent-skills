@@ -1,4 +1,4 @@
-import { join, normalize, relative, resolve, sep } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 
 import { AGENTS_DIR, CANONICAL_SKILLS_DIR } from '../constants'
 import type { CorePorts } from '../ports'
@@ -164,6 +164,23 @@ const installSkillForAgent = async (
   }
 }
 
+/**
+ * Installs one or more skills for the requested agents.
+ *
+ * @param ports - Core ports used for filesystem access, environment checks, and audit logging.
+ * @param skills - Skills that should be installed.
+ * @param options - Installation options including target agents, mode, and scope.
+ * @returns Installation results for every agent and skill combination.
+ *
+ * @example
+ * ```ts
+ * const results = await installSkills(ports, [skill], {
+ *   agents: ['claude-code'],
+ *   method: 'copy',
+ *   global: false,
+ * })
+ * ```
+ */
 export const installSkills = async (
   ports: CorePorts,
   skills: SkillInfo[],
@@ -216,6 +233,19 @@ export const installSkills = async (
   return results
 }
 
+/**
+ * Lists installed skills for a single agent and scope.
+ *
+ * @param ports - Core ports used to resolve paths and read directory contents.
+ * @param agent - Agent whose skills directory should be inspected.
+ * @param global - Whether to inspect the global skills directory instead of the project-local one.
+ * @returns Installed skill directory names, or an empty list when the directory does not exist.
+ *
+ * @example
+ * ```ts
+ * const installed = await listInstalledSkills(ports, 'claude-code', false)
+ * ```
+ */
 export const listInstalledSkills = async (ports: CorePorts, agent: AgentType, global: boolean): Promise<string[]> => {
   const config = getAgentConfig(ports, agent)
   const targetDir = global ? config.globalSkillsDir : join(findProjectRoot(ports), config.skillsDir)
@@ -228,6 +258,20 @@ export const listInstalledSkills = async (ports: CorePorts, agent: AgentType, gl
   }
 }
 
+/**
+ * Checks whether a skill exists for a given agent.
+ *
+ * @param ports - Core ports used to resolve install paths and inspect the filesystem.
+ * @param skillName - Canonical skill name to check.
+ * @param agent - Agent whose install directory should be inspected.
+ * @param options - Optional scope selector for global or local installs.
+ * @returns `true` when the skill directory exists for the selected agent and scope.
+ *
+ * @example
+ * ```ts
+ * const installed = await isSkillInstalled(ports, 'accessibility', 'claude-code')
+ * ```
+ */
 export const isSkillInstalled = async (
   ports: CorePorts,
   skillName: string,
@@ -248,6 +292,21 @@ export const isSkillInstalled = async (
   }
 }
 
+/**
+ * Resolves the expected install path for a skill and agent.
+ *
+ * @param ports - Core ports used to resolve project paths.
+ * @param skillName - Canonical skill name.
+ * @param agent - Agent that owns the destination directory.
+ * @param options - Optional scope selector for global or local installs.
+ * @returns The absolute install path for the skill.
+ * @throws {Error} Throws when the sanitized skill name would resolve outside the allowed install directory.
+ *
+ * @example
+ * ```ts
+ * const path = getInstallPath(ports, 'accessibility', 'claude-code')
+ * ```
+ */
 export const getInstallPath = (
   ports: CorePorts,
   skillName: string,
@@ -266,6 +325,20 @@ export const getInstallPath = (
   return installPath
 }
 
+/**
+ * Resolves the canonical storage path used for copied local skill content.
+ *
+ * @param ports - Core ports used to resolve home and project directories.
+ * @param skillName - Canonical skill name.
+ * @param options - Optional scope selector for global or local canonical storage.
+ * @returns The absolute canonical path for the skill.
+ * @throws {Error} Throws when the sanitized skill name would resolve outside the canonical skills directory.
+ *
+ * @example
+ * ```ts
+ * const path = getCanonicalPath(ports, 'accessibility')
+ * ```
+ */
 export const getCanonicalPath = (ports: CorePorts, skillName: string, options: { global?: boolean } = {}): string => {
   const safeSkillName = sanitizeName(skillName)
   const baseDir = options.global ? ports.env.homedir() : findProjectRoot(ports)
@@ -278,6 +351,20 @@ export const getCanonicalPath = (ports: CorePorts, skillName: string, options: {
   return canonicalPath
 }
 
+/**
+ * Removes an installed skill from one or more agents and updates the lockfile.
+ *
+ * @param ports - Core ports used for filesystem access, path resolution, and audit logging.
+ * @param skillName - Canonical skill name to remove.
+ * @param agents - Agents from which the skill should be removed.
+ * @param options - Removal options controlling scope and forced cleanup behavior.
+ * @returns Removal results for each requested agent.
+ *
+ * @example
+ * ```ts
+ * const results = await removeSkill(ports, 'accessibility', ['claude-code'])
+ * ```
+ */
 export const removeSkill = async (
   ports: CorePorts,
   skillName: string,
@@ -370,4 +457,7 @@ export const removeSkill = async (
   return results
 }
 
+/**
+ * Re-exports the global installation check used by installer workflows.
+ */
 export { isGloballyInstalled }
