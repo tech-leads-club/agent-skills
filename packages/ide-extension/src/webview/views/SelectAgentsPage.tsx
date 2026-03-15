@@ -231,7 +231,6 @@ export function SelectAgentsPage({
             <AgentSelectCard
               key={agent.agent}
               agent={agent}
-              company={agent.company}
               isSelected={selectedAgents.includes(agent.agent)}
               onToggle={() => onToggleAgent(agent.agent)}
               isInstalled={Object.keys(installedSkills).some((skillName) =>

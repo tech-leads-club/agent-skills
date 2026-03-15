@@ -8,16 +8,15 @@ const { axe } = jestAxe
 const agent = { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' }
 
 describe('AgentSelectCard', () => {
-  it('renders name and company only', () => {
-    render(<AgentSelectCard agent={agent} company="Anysphere" isSelected={false} onToggle={jest.fn()} />)
+  it('renders agent name only', () => {
+    render(<AgentSelectCard agent={agent} isSelected={false} onToggle={jest.fn()} />)
     expect(screen.getByText('Cursor')).toBeInTheDocument()
-    expect(screen.getByText('Anysphere')).toBeInTheDocument()
   })
 
   it('toggles checkbox selection', async () => {
     const onToggle = jest.fn()
     const user = userEvent.setup()
-    render(<AgentSelectCard agent={agent} company="Anysphere" isSelected={false} onToggle={onToggle} />)
+    render(<AgentSelectCard agent={agent} isSelected={false} onToggle={onToggle} />)
 
     await user.click(screen.getByRole('checkbox', { name: /select cursor/i }))
     expect(onToggle).toHaveBeenCalledTimes(1)
@@ -25,7 +24,7 @@ describe('AgentSelectCard', () => {
 
   it('has no accessibility violations', async () => {
     const { container } = render(
-      <AgentSelectCard agent={agent} company="Anysphere" isSelected={true} onToggle={jest.fn()} />,
+      <AgentSelectCard agent={agent} isSelected={true} onToggle={jest.fn()} />,
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()

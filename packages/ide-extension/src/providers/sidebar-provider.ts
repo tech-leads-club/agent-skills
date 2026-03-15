@@ -53,6 +53,15 @@ interface ConfirmationSummary {
 }
 
 /**
+ * Single result line for batch operations.
+ */
+interface BatchResultLine {
+  skillName: string
+  success: boolean
+  errorMessage?: string
+}
+
+/**
  * State of a batch operation in progress.
  */
 interface BatchProgressState {
@@ -60,6 +69,7 @@ interface BatchProgressState {
   remaining: number
   total: number
   failedSkills: string[]
+  results: BatchResultLine[]
 }
 
 /**
@@ -145,6 +155,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             remaining: event.metadata.batchSize,
             total: event.metadata.batchSize,
             failedSkills: [],
+            results: [],
           })
         }
 
@@ -188,6 +199,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             if (!event.success) {
               state.failedSkills.push(event.skillName)
             }
+            state.results.push({
+              skillName: event.skillName,
+              success: event.success ?? false,
+              errorMessage: event.errorMessage,
+            })
 
             if (state.remaining <= 0) {
               const success = state.failedSkills.length === 0
@@ -202,6 +218,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                   success,
                   failedSkills: state.failedSkills.length > 0 ? state.failedSkills : undefined,
                   errorMessage,
+                  results: state.results.length > 0 ? state.results : undefined,
+                  action: state.action,
                 },
               })
 
@@ -566,11 +584,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     if (this.policy.effectiveScopes.length === 0) {
       const reason = this.policy.blockedReason ?? 'policy-none'
       const message = `Lifecycle actions are disabled by policy: ${reason}`
-      void vscode.window.showErrorMessage(message, 'Open Settings').then((selection) => {
-        if (selection === 'Open Settings') {
-          void vscode.commands.executeCommand('agentSkills.openSettings')
-        }
-      })
+      void vscode.window.showErrorMessage(message)
       return true
     }
     return false

@@ -171,9 +171,6 @@ export function SelectOutdatedSkillsPage({
                 ? 'All installed skills are up to date.'
                 : 'No skills match your search.'}
             </p>
-            <button type="button" className="secondary-footer-button" onClick={onCancel}>
-              Cancel
-            </button>
           </div>
         ) : (
           visibleSkills.map((skill) => (
@@ -191,9 +188,6 @@ export function SelectOutdatedSkillsPage({
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
-          <button type="button" className="secondary-footer-button" onClick={onCancel}>
-            Cancel
-          </button>
           <button
             type="button"
             className="primary-footer-button primary-footer-button--install"

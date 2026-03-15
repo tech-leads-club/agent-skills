@@ -37,6 +37,5 @@ suite('Extension Test Suite', () => {
 
     const commands = await vscode.commands.getCommands(true)
     assert.ok(commands.includes('agentSkills.refresh'), 'Refresh command missing')
-    assert.ok(commands.includes('agentSkills.openSettings'), 'Settings command missing')
   })
 })

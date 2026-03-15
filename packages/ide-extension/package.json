@@ -42,11 +42,6 @@
     },
     "commands": [
       {
-        "command": "agentSkills.openSettings",
-        "title": "Agent Skills: Open Settings",
-        "icon": "$(settings-gear)"
-      },
-      {
         "command": "agentSkills.refresh",
         "title": "Agent Skills: Refresh Skills",
         "icon": "$(refresh)"
@@ -65,13 +60,7 @@
       }
     ],
     "menus": {
-      "view/title": [
-        {
-          "command": "agentSkills.openSettings",
-          "when": "view == agentSkillsSidebar",
-          "group": "navigation@1"
-        }
-      ]
+      "view/title": []
     }
   },
   "capabilities": {

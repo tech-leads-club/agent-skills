@@ -476,6 +476,8 @@ describe('SidebarProvider', () => {
         success: true,
         failedSkills: undefined,
         errorMessage: undefined,
+        results: [{ skillName: 'test-skill', success: true, errorMessage: undefined }],
+        action: 'install',
       },
     })
   })
@@ -829,22 +831,17 @@ describe('SidebarProvider', () => {
 
     provider.updatePolicy(policy)
 
-    // Mock executeCommand for "Open Settings"
-    const executeCommandMock = jest.spyOn(vscode.commands, 'executeCommand').mockImplementation(async () => {})
     showWarningMessageMock.mockResolvedValue(undefined)
-    // Fix showErrorMessage mock signature mismatch by casting
-    const showErrorMessageMock = jest
-      .spyOn(vscode.window, 'showErrorMessage')
-      .mockResolvedValue('Open Settings' as unknown as vscode.MessageItem)
+    const showErrorMessageMock = jest.spyOn(vscode.window, 'showErrorMessage').mockResolvedValue(undefined)
 
     showWarningMessageMock.mockResolvedValue('Install')
     await provider.runCommandPaletteAdd()
 
+    // showErrorMessage is now called with message only (no Open Settings button)
+    // @ts-expect-error - vscode types require 2+ args for showErrorMessage; we call with 1
     expect(showErrorMessageMock).toHaveBeenCalledWith(
       expect.stringContaining('Lifecycle actions are disabled'),
-      'Open Settings' as unknown as vscode.MessageOptions,
     )
-    expect(executeCommandMock).toHaveBeenCalledWith('agentSkills.openSettings')
     expect(orchestrator.installMany).not.toHaveBeenCalled()
   })
 

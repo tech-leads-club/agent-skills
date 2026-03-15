@@ -125,9 +125,13 @@ function App() {
   const [isTrusted, setIsTrusted] = useState(true)
   const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
   const [isBatchProcessing, setIsBatchProcessing] = useState(false)
-  const [batchResult, setBatchResult] = useState<{ success: boolean; failedSkills?: string[]; errorMessage?: string } | null>(
-    null,
-  )
+  const [batchResult, setBatchResult] = useState<{
+    success: boolean
+    failedSkills?: string[]
+    errorMessage?: string
+    results?: Array<{ skillName: string; success: boolean; errorMessage?: string }>
+    action?: 'install' | 'remove' | 'update'
+  } | null>(null)
   const [lastBatchContext, setLastBatchContext] = useState<{
     action: 'install' | 'remove' | 'update'
     skills: string[]
@@ -265,6 +269,8 @@ function App() {
             success: msg.payload.success,
             failedSkills: msg.payload.failedSkills,
             errorMessage: msg.payload.errorMessage,
+            results: msg.payload.results,
+            action: msg.payload.action,
           })
           break
       }

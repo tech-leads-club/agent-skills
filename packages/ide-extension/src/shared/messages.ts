@@ -150,6 +150,15 @@ export interface OperationCompletedPayload {
 }
 
 /**
+ * Single result line for batch operations (CLI-style display).
+ */
+export interface BatchResultLine {
+  skillName: string
+  success: boolean
+  errorMessage?: string
+}
+
+/**
  * Payload for batchCompleted message (Extension → Webview).
  */
 export interface BatchCompletedPayload {
@@ -157,6 +166,10 @@ export interface BatchCompletedPayload {
   success: boolean
   failedSkills?: string[]
   errorMessage?: string
+  /** Per-operation results for CLI-style listing. */
+  results?: BatchResultLine[]
+  /** Action type for CLI-style message formatting. */
+  action?: 'install' | 'remove' | 'update'
 }
 
 /**

@@ -137,7 +137,6 @@ describe('Extension Activation', () => {
   it('should register extension commands', () => {
     activate(context)
 
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.openSettings', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.add', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.remove', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.update', expect.any(Function))
@@ -150,22 +149,6 @@ describe('Extension Activation', () => {
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('v1.2.3 activated'))
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('VS Code'))
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('Workspace trusted'))
-  })
-
-  it('should handle agentSkills.openSettings command', () => {
-    activate(context)
-    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>).mock
-      .calls
-    const settingsCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.openSettings')
-    const handler = settingsCall?.[1] as (...args: unknown[]) => unknown
-
-    handler()
-
-    expect(mockLoggingService.info).toHaveBeenCalledWith('Open Settings command invoked')
-    expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
-      'workbench.action.openSettings',
-      '@ext:tech-leads-club.agent-skills',
-    )
   })
 
   it('should start reconciler on activation', () => {

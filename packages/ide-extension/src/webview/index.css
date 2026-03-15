@@ -380,7 +380,8 @@ body {
   align-items: flex-start;
 }
 
-.skill-select-card-header-end {
+.skill-select-card-header-end,
+.agent-select-card-header-end {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -454,8 +455,7 @@ body {
   color: var(--vscode-editorWidget-background, #fff);
 }
 
-.skill-select-card-description,
-.agent-select-card-company {
+.skill-select-card-description {
   margin: 0;
   color: var(--vscode-descriptionForeground);
   font-size: 12px;
@@ -670,29 +670,29 @@ body {
   font-size: 13px;
 }
 
-.status-success,
-.status-failure {
+.status-result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.status-result-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  margin: 0;
 }
 
-.status-success {
-  background-color: var(--vscode-terminal-ansiGreen, rgba(0, 128, 0, 0.2));
-  color: var(--vscode-foreground);
+.status-icon {
+  flex-shrink: 0;
 }
 
-.status-failure {
-  background-color: var(--vscode-inputValidation-errorBackground);
-  color: var(--vscode-errorForeground);
+.status-icon--success {
+  color: var(--vscode-terminal-ansiGreen, #89d185);
 }
 
-.status-failure p {
-  margin: 0 0 4px;
-}
-
-.status-failure p:last-child {
-  margin-bottom: 0;
+.status-icon--error {
+  color: var(--vscode-errorForeground, #f48771);
 }

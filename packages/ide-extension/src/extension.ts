@@ -80,13 +80,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   reconciler.start()
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('agentSkills.openSettings', () => {
-      logger.info('Open Settings command invoked')
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:tech-leads-club.agent-skills')
-    }),
-  )
-
   const registerPaletteCommand = (
     commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update',
     handler: () => Promise<void>,

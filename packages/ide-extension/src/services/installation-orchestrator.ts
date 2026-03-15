@@ -35,8 +35,6 @@ export interface OperationEvent {
  */
 export class InstallationOrchestrator implements vscode.Disposable {
   private eventHandlers: OperationEventHandler[] = []
-  private activeOperations = new Map<string, vscode.CancellationTokenSource>()
-  private progressResolvers = new Map<string, () => void>()
 
   /**
    * Creates an InstallationOrchestrator.
@@ -201,14 +199,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
    */
   cancel(operationId: string): void {
     this.logger.info(`[${operationId}] Cancelling operation`)
-    const cancelled = this.queue.cancel(operationId)
-    if (cancelled) {
-      const tokenSource = this.activeOperations.get(operationId)
-      if (tokenSource) {
-        tokenSource.cancel()
-        this.activeOperations.delete(operationId)
-      }
-    }
+    this.queue.cancel(operationId)
   }
 
   /**
@@ -225,8 +216,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
    */
   dispose(): void {
     this.queue.dispose()
-    this.activeOperations.forEach((tokenSource) => tokenSource.dispose())
-    this.activeOperations.clear()
   }
 
   /**
@@ -297,7 +286,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
       type: 'started',
       metadata: job.metadata,
     })
-    this.showProgress(job)
   }
 
   /**
@@ -343,64 +331,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
       metadata: result.metadata,
     })
 
-    this.cleanupActiveOperation(result.operationId)
     await this.handleCompletionNotification(result)
-  }
-
-  /**
-   * Initializes a VS Code progress notification for the job.
-   *
-   * @param job - The target job.
-   */
-  private showProgress(job: QueuedJob): void {
-    const tokenSource = new vscode.CancellationTokenSource()
-    this.activeOperations.set(job.operationId, tokenSource)
-
-    const completionPromise = new Promise<void>((resolve) => {
-      this.progressResolvers.set(job.operationId, resolve)
-    })
-
-    void vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: this.getProgressMessage(job.operation),
-        cancellable: true,
-      },
-      async (_progress, token) => {
-        token.onCancellationRequested(() => {
-          this.cancel(job.operationId)
-        })
-
-        await completionPromise
-      },
-    )
-  }
-
-  /**
-   * Cleans up the active operation state and resolves progress.
-   *
-   * @param operationId - The target operation identifier.
-   */
-  private cleanupActiveOperation(operationId: string): void {
-    const tokenSource = this.activeOperations.get(operationId)
-    if (tokenSource) {
-      tokenSource.dispose()
-      this.activeOperations.delete(operationId)
-    }
-    this.resolveProgress(operationId)
-  }
-
-  /**
-   * Resolves the progress notification for a given operation.
-   *
-   * @param operationId - The target operation identifier.
-   */
-  private resolveProgress(operationId: string): void {
-    const resolver = this.progressResolvers.get(operationId)
-    if (resolver) {
-      resolver()
-      this.progressResolvers.delete(operationId)
-    }
   }
 
   /**
@@ -453,64 +384,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
    */
   private emitEvent(event: OperationEvent): void {
     this.eventHandlers.forEach((handler) => handler(event))
-  }
-
-  /**
-   * Gets the localized progress message for an operation type.
-   *
-   * @param operation - The operation type.
-   * @returns Progress message string.
-   */
-  private getProgressMessage(operation: OperationType): string {
-    switch (operation) {
-      case 'install':
-        return 'Installing skill(s)...'
-      case 'remove':
-        return 'Removing skill(s)...'
-      case 'update':
-        return 'Updating skill(s)...'
-      case 'repair':
-        return 'Repairing skill(s)...'
-    }
-  }
-
-  /**
-   * Gets the localized completion message for an operation type.
-   *
-   * @param operation - The operation type.
-   * @returns Completion message string.
-   */
-  private getCompletionMessage(operation: OperationType): string {
-    switch (operation) {
-      case 'install':
-        return '✓ Skill(s) installation completed'
-      case 'remove':
-        return '✓ Skill(s) removal completed'
-      case 'update':
-        return '✓ Skill(s) update completed'
-      case 'repair':
-        return '✓ Skill(s) repair completed'
-    }
-  }
-
-  /**
-   * Gets the localized failure message for an operation type.
-   *
-   * @param operation - The operation type.
-   * @param error - The underlying error detail.
-   * @returns Failure message string.
-   */
-  private getFailureMessage(operation: OperationType, error: string): string {
-    switch (operation) {
-      case 'install':
-        return `✗ Skill(s) installation failed: ${error}`
-      case 'remove':
-        return `✗ Skill(s) removal failed: ${error}`
-      case 'update':
-        return `✗ Skill(s) update failed: ${error}`
-      case 'repair':
-        return `✗ Skill(s) repair failed: ${error}`
-    }
   }
 
   /**

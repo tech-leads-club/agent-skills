@@ -1,12 +1,23 @@
 import type { OperationState } from '../hooks/useOperations'
 
 /**
+ * Single result line for CLI-style display.
+ */
+export interface BatchResultLine {
+  skillName: string
+  success: boolean
+  errorMessage?: string
+}
+
+/**
  * Result of a completed batch operation.
  */
 export interface BatchResult {
   success: boolean
   failedSkills?: string[]
   errorMessage?: string
+  results?: BatchResultLine[]
+  action?: 'install' | 'remove' | 'update'
 }
 
 /**
@@ -31,6 +42,34 @@ export interface StatusPageProps {
  * @param props - Status state and callbacks.
  * @returns Status view.
  */
+function formatResultLine(
+  line: BatchResultLine,
+  action?: 'install' | 'remove' | 'update',
+): string {
+  if (line.success) {
+    switch (action) {
+      case 'update':
+        return line.skillName === 'all' ? 'All skills updated' : `Updated ${line.skillName}`
+      case 'remove':
+        return `${line.skillName}: Removed`
+      case 'install':
+        return line.skillName === 'install (batch)' ? 'Installed' : `Installed ${line.skillName}`
+      default:
+        return line.skillName === 'all' ? 'All skills updated' : line.skillName
+    }
+  }
+  switch (action) {
+    case 'update':
+      return `Failed to update ${line.skillName}: ${line.errorMessage ?? 'Unknown error'}`
+    case 'remove':
+      return `${line.skillName}: Failed to remove - ${line.errorMessage ?? 'Unknown error'}`
+    case 'install':
+      return `${line.skillName}: Failed to install - ${line.errorMessage ?? 'Unknown error'}`
+    default:
+      return `${line.skillName}: ${line.errorMessage ?? 'Failed'}`
+  }
+}
+
 export function StatusPage({ isProcessing, operations, batchResult, onRetry, onDone }: StatusPageProps) {
   const operationList = Array.from(operations.values())
   const hasFailures =
@@ -67,21 +106,34 @@ export function StatusPage({ isProcessing, operations, batchResult, onRetry, onD
 
         {!isProcessing && batchResult && (
           <div className="status-result" role="status">
-            {batchResult.success ? (
-              <p className="status-success">
-                <span className="codicon codicon-check" aria-hidden="true" />
-                All operations completed successfully.
+            {batchResult.results && batchResult.results.length > 0 ? (
+              <ul className="status-result-list">
+                {batchResult.results.map((line, idx) => (
+                  <li key={`${line.skillName}-${idx}`} className="status-result-line">
+                    {line.success ? (
+                      <>
+                        <span className="status-icon status-icon--success codicon codicon-check" aria-hidden="true" />
+                        <span>{formatResultLine(line, batchResult.action)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="status-icon status-icon--error codicon codicon-close" aria-hidden="true" />
+                        <span>{formatResultLine(line, batchResult.action)}</span>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : batchResult.success ? (
+              <p className="status-result-line">
+                <span className="status-icon status-icon--success codicon codicon-check" aria-hidden="true" />
+                <span>All operations completed successfully.</span>
               </p>
             ) : (
-              <div className="status-failure">
-                <p>
-                  <span className="codicon codicon-error" aria-hidden="true" />
-                  {batchResult.errorMessage ?? 'Some operations failed.'}
-                </p>
-                {batchResult.failedSkills && batchResult.failedSkills.length > 0 && (
-                  <p>Failed skills: {batchResult.failedSkills.join(', ')}</p>
-                )}
-              </div>
+              <p className="status-result-line">
+                <span className="status-icon status-icon--error codicon codicon-close" aria-hidden="true" />
+                <span>{batchResult.errorMessage ?? 'Some operations failed.'}</span>
+              </p>
             )}
           </div>
         )}
