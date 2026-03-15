@@ -17,6 +17,7 @@ import {
   getAllLockedSkills,
   getSkillFromLock,
   readSkillLock,
+  removeAgentFromLock,
   removeSkillFromLock,
   writeSkillLock,
 } from '../lockfile.service'
@@ -314,6 +315,120 @@ describe('addSkillToLock', () => {
       method: 'copy',
       global: false,
     })
+  })
+
+  it('merges agents instead of overwriting when adding to existing skill', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        'multi-agent-skill': {
+          name: 'multi-agent-skill',
+          source: 'local',
+          installedAt: '2026-03-14T10:00:00.000Z',
+          updatedAt: '2026-03-14T10:00:00.000Z',
+          agents: ['cursor'],
+          method: 'copy',
+          global: false,
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+    jest.useFakeTimers().setSystemTime(new Date('2026-03-14T11:00:00.000Z'))
+
+    await addSkillToLock(ports, 'multi-agent-skill', ['codex'], { source: 'local' })
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(writtenLock.skills['multi-agent-skill'].agents).toEqual(['cursor', 'codex'])
+  })
+})
+
+describe('removeAgentFromLock', () => {
+  it('removes only the specified agent from a multi-agent skill', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        'multi-agent-skill': {
+          name: 'multi-agent-skill',
+          source: 'local',
+          installedAt: '2026-03-14T10:00:00.000Z',
+          updatedAt: '2026-03-14T10:00:00.000Z',
+          agents: ['cursor', 'codex'],
+          method: 'copy',
+          global: false,
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+    jest.useFakeTimers().setSystemTime(new Date('2026-03-14T12:00:00.000Z'))
+
+    const removed = await removeAgentFromLock(ports, 'multi-agent-skill', 'cursor')
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(removed).toBe(true)
+    expect(writtenLock.skills['multi-agent-skill'].agents).toEqual(['codex'])
+    expect(writtenLock.skills['multi-agent-skill'].updatedAt).toBe('2026-03-14T12:00:00.000Z')
+  })
+
+  it('deletes the entire entry when removing the last agent', async () => {
+    const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    mkdirMock.mockResolvedValue(undefined)
+    writeFileMock.mockResolvedValue(undefined)
+    renameMock.mockResolvedValue(undefined)
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        'single-agent-skill': {
+          name: 'single-agent-skill',
+          source: 'local',
+          installedAt: '2026-03-14T10:00:00.000Z',
+          updatedAt: '2026-03-14T10:00:00.000Z',
+          agents: ['cursor'],
+          method: 'copy',
+          global: false,
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+
+    const removed = await removeAgentFromLock(ports, 'single-agent-skill', 'cursor')
+
+    const serializedLock = writeFileMock.mock.calls.at(-1)?.[1]
+    const writtenLock = JSON.parse(serializedLock ?? '{}') as SkillLockFile
+
+    expect(removed).toBe(true)
+    expect(writtenLock.skills).toEqual({})
+  })
+
+  it('returns false when the skill is not present', async () => {
+    const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
+
+    const removed = await removeAgentFromLock(ports, 'missing-skill', 'cursor')
+
+    expect(removed).toBe(false)
+    expect(writeFileMock).not.toHaveBeenCalled()
   })
 })
 

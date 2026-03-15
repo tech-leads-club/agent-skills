@@ -512,6 +512,104 @@ describe('removeSkill', () => {
       force: true,
     })
   })
+
+  it('removes skill from first agent and keeps lockfile for remaining agents', async () => {
+    const { ports, lstatMock, readFileMock, rmMock, writeFileMock } = createPorts()
+
+    readFileMock.mockImplementation(async (path: string) => {
+      if (path.includes('.skill-lock.json')) {
+        return JSON.stringify({
+          version: 2,
+          skills: {
+            'multi-agent-skill': {
+              name: 'multi-agent-skill',
+              source: 'local',
+              installedAt: '2026-03-14T00:00:00.000Z',
+              updatedAt: '2026-03-14T00:00:00.000Z',
+              agents: ['cursor', 'codex'],
+              method: 'symlink',
+              global: false,
+            },
+          },
+        })
+      }
+      throw new Error('File not found')
+    })
+
+    lstatMock.mockResolvedValue({
+      isDirectory: () => false,
+      isSymbolicLink: () => true,
+    })
+
+    const results = await removeSkill(ports, 'multi-agent-skill', ['cursor'])
+
+    expect(results[0].success).toBe(true)
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/multi-agent-skill', {
+      recursive: true,
+      force: true,
+    })
+
+    const lockfileWrites = writeFileMock.mock.calls.filter((call) => call[0].includes('.skill-lock.json'))
+    const lastLockWrite = lockfileWrites[lockfileWrites.length - 1]
+    if (lastLockWrite) {
+      const writtenLock = JSON.parse(lastLockWrite[1])
+      expect(writtenLock.skills['multi-agent-skill'].agents).toEqual(['codex'])
+    }
+
+    expect(rmMock).not.toHaveBeenCalledWith(
+      expect.stringContaining('.agents/skills/multi-agent-skill'),
+      expect.anything(),
+    )
+  })
+
+  it('removes skill from last agent and cleans up canonical storage', async () => {
+    const { ports, lstatMock, readFileMock, rmMock, writeFileMock } = createPorts()
+
+    let lockfileState = {
+      version: 2,
+      skills: {
+        'symlink-cleanup-skill': {
+          name: 'symlink-cleanup-skill',
+          source: 'local',
+          installedAt: '2026-03-14T00:00:00.000Z',
+          updatedAt: '2026-03-14T00:00:00.000Z',
+          agents: ['cursor'],
+          method: 'symlink',
+          global: false,
+        },
+      },
+    }
+
+    readFileMock.mockImplementation(async (path: string) => {
+      if (path.includes('.skill-lock.json')) {
+        return JSON.stringify(lockfileState)
+      }
+      throw new Error('File not found')
+    })
+
+    writeFileMock.mockImplementation(async (path: string, content: string) => {
+      if (path.includes('.skill-lock.json')) {
+        lockfileState = JSON.parse(content)
+      }
+    })
+
+    lstatMock.mockResolvedValue({
+      isDirectory: () => false,
+      isSymbolicLink: () => true,
+    })
+
+    const results = await removeSkill(ports, 'symlink-cleanup-skill', ['cursor'])
+
+    expect(results[0].success).toBe(true)
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/symlink-cleanup-skill', {
+      recursive: true,
+      force: true,
+    })
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.agents/skills/symlink-cleanup-skill', {
+      recursive: true,
+      force: true,
+    })
+  })
 })
 
 describe('listInstalledSkills', () => {

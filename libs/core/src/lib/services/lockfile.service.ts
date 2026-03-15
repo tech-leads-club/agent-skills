@@ -170,6 +170,8 @@ export async function addSkillToLock(
   const lock = await readSkillLock(ports, options.global)
   const now = new Date().toISOString()
   const existingEntry = lock.skills[skillName]
+  const existingAgents = existingEntry?.agents || []
+  const mergedAgents = Array.from(new Set([...existingAgents, ...agents]))
 
   lock.skills[skillName] = {
     name: skillName,
@@ -177,7 +179,7 @@ export async function addSkillToLock(
     contentHash: options.contentHash ?? existingEntry?.contentHash,
     installedAt: existingEntry?.installedAt ?? now,
     updatedAt: now,
-    agents,
+    agents: mergedAgents,
     method: options.method || 'copy',
     global: options.global ?? false,
     version: options.version,
@@ -187,8 +189,51 @@ export async function addSkillToLock(
 }
 
 /**
+ * Removes a specific agent from a skill entry in the shared lockfile.
+ * Deletes the entire skill entry when no agents remain.
+ *
+ * @param ports - Core ports that expose filesystem and environment access.
+ * @param skillName - Canonical skill name to update.
+ * @param agent - Agent to remove from the skill entry.
+ * @param global - When `true`, targets the global lockfile in the user's home directory.
+ * @returns `true` when the agent was removed or the entry was deleted; otherwise `false`.
+ *
+ * @example
+ * ```ts
+ * const removed = await removeAgentFromLock(ports, 'accessibility', 'cursor')
+ * ```
+ */
+export async function removeAgentFromLock(
+  ports: CorePorts,
+  skillName: string,
+  agent: AgentType,
+  global = false,
+): Promise<boolean> {
+  const lock = await readSkillLock(ports, global)
+  const entry = lock.skills[skillName]
+  if (!entry) return false
+
+  const agents = entry.agents || []
+  const updatedAgents = agents.filter((a) => a !== agent)
+
+  if (updatedAgents.length === 0) {
+    delete lock.skills[skillName]
+  } else {
+    lock.skills[skillName] = {
+      ...entry,
+      agents: updatedAgents,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  await writeSkillLock(ports, lock, global)
+  return true
+}
+
+/**
  * Removes a skill entry from the shared lockfile.
  *
+ * @deprecated Use removeAgentFromLock to remove specific agents, or call this only when removing all agents.
  * @param ports - Core ports that expose filesystem and environment access.
  * @param skillName - Canonical skill name to remove.
  * @param global - When `true`, targets the global lockfile in the user's home directory.

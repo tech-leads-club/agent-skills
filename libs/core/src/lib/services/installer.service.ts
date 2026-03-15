@@ -8,7 +8,7 @@ import { isPathSafe, sanitizeName } from '../utils'
 import { getAgentConfig } from './agents.service'
 import { logAudit } from './audit-log.service'
 import { isGloballyInstalled } from './global-path.service'
-import { addSkillToLock, getSkillFromLock, removeSkillFromLock } from './lockfile.service'
+import { addSkillToLock, getSkillFromLock, removeAgentFromLock } from './lockfile.service'
 import { findProjectRoot } from './project-root.service'
 import { getCachedContentHash } from './registry.service'
 
@@ -371,9 +371,6 @@ export const removeSkill = async (
     }))
   }
 
-  const canonicalPath = getCanonicalPath(ports, skillName, options)
-  await ports.fs.rm(canonicalPath, { recursive: true, force: true }).catch(() => {})
-
   const results = await Promise.all(
     agents.map(async (agent) => {
       const config = getAgentConfig(ports, agent)
@@ -415,9 +412,22 @@ export const removeSkill = async (
     }),
   )
 
-  if (results.some((r) => r.success)) {
-    await removeSkillFromLock(ports, skillName, true).catch(() => {})
-    await removeSkillFromLock(ports, skillName, false).catch(() => {})
+  for (const result of results) {
+    if (result.success) {
+      const agentType = agents.find((a) => getAgentConfig(ports, a).displayName === result.agent)
+      if (agentType) {
+        await removeAgentFromLock(ports, skillName, agentType, options.global ?? false).catch(() => {})
+      }
+    }
+  }
+
+  const localLockEntry = await getSkillFromLock(ports, skillName, false)
+  const globalLockEntry = await getSkillFromLock(ports, skillName, true)
+  const hasRemainingAgents = (localLockEntry?.agents?.length ?? 0) > 0 || (globalLockEntry?.agents?.length ?? 0) > 0
+
+  if (!hasRemainingAgents && lockEntry?.method === 'symlink' && !options.global) {
+    const canonicalPath = getCanonicalPath(ports, skillName, { global: false })
+    await ports.fs.rm(canonicalPath, { recursive: true, force: true }).catch(() => {})
   }
 
   await logAudit(ports, {
