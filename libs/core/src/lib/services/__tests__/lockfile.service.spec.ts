@@ -430,6 +430,33 @@ describe('removeAgentFromLock', () => {
     expect(removed).toBe(false)
     expect(writeFileMock).not.toHaveBeenCalled()
   })
+
+  it('returns false when the agent is not in the skill entry', async () => {
+    const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+
+    const existingLock: SkillLockFile = {
+      version: 2,
+      skills: {
+        'some-skill': {
+          name: 'some-skill',
+          source: 'local',
+          installedAt: '2026-03-14T10:00:00.000Z',
+          updatedAt: '2026-03-14T10:00:00.000Z',
+          agents: ['cursor'],
+          method: 'copy',
+          global: false,
+        },
+      },
+    }
+
+    readFileMock.mockResolvedValue(JSON.stringify(existingLock))
+
+    const removed = await removeAgentFromLock(ports, 'some-skill', 'codex')
+
+    expect(removed).toBe(false)
+    expect(writeFileMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('removeSkillFromLock', () => {

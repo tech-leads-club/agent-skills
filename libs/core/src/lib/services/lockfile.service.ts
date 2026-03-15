@@ -216,6 +216,10 @@ export async function removeAgentFromLock(
   const agents = entry.agents || []
   const updatedAgents = agents.filter((a) => a !== agent)
 
+  if (updatedAgents.length === agents.length) {
+    return false
+  }
+
   if (updatedAgents.length === 0) {
     delete lock.skills[skillName]
   } else {

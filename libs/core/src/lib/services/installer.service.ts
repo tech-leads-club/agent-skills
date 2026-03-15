@@ -371,7 +371,7 @@ export const removeSkill = async (
     }))
   }
 
-  const results = await Promise.all(
+  const internalResults = await Promise.all(
     agents.map(async (agent) => {
       const config = getAgentConfig(ports, agent)
       const localPath = join(projectRoot, config.skillsDir, safeSkillName)
@@ -381,12 +381,13 @@ export const removeSkill = async (
         options.global === undefined ? [localPath, globalPath] : options.global ? [globalPath] : [localPath]
 
       let removed = false
+      let removedLocal = false
+      let removedGlobal = false
       let lastError: string | undefined
 
       for (const path of pathsToTry) {
-        const baseDir = path.startsWith(config.globalSkillsDir)
-          ? config.globalSkillsDir
-          : join(projectRoot, config.skillsDir)
+        const isGlobalPath = path.startsWith(config.globalSkillsDir)
+        const baseDir = isGlobalPath ? config.globalSkillsDir : join(projectRoot, config.skillsDir)
 
         if (!isPathSafe(baseDir, path)) {
           lastError = 'Security: Invalid removal path'
@@ -397,6 +398,11 @@ export const removeSkill = async (
           await ports.fs.lstat(path)
           await ports.fs.rm(path, { recursive: true, force: true })
           removed = true
+          if (isGlobalPath) {
+            removedGlobal = true
+          } else {
+            removedLocal = true
+          }
         } catch (error) {
           const err = error as { code?: string; message?: string }
           if (err.code !== 'ENOENT' && !lastError) lastError = error instanceof Error ? error.message : String(error)
@@ -408,27 +414,41 @@ export const removeSkill = async (
         agent: config.displayName,
         success: removed,
         error: removed ? undefined : lastError || 'Skill not found',
+        removedLocal,
+        removedGlobal,
       }
     }),
   )
 
-  for (const result of results) {
+  for (const result of internalResults) {
     if (result.success) {
       const agentType = agents.find((a) => getAgentConfig(ports, a).displayName === result.agent)
       if (agentType) {
-        await removeAgentFromLock(ports, skillName, agentType, options.global ?? false).catch(() => {})
+        if (result.removedLocal) {
+          await removeAgentFromLock(ports, skillName, agentType, false).catch(() => {})
+        }
+        if (result.removedGlobal) {
+          await removeAgentFromLock(ports, skillName, agentType, true).catch(() => {})
+        }
       }
     }
   }
 
-  const localLockEntry = await getSkillFromLock(ports, skillName, false)
-  const globalLockEntry = await getSkillFromLock(ports, skillName, true)
-  const hasRemainingAgents = (localLockEntry?.agents?.length ?? 0) > 0 || (globalLockEntry?.agents?.length ?? 0) > 0
+  const localLockEntryAfter = await getSkillFromLock(ports, skillName, false)
+  const localHasRemainingAgents = (localLockEntryAfter?.agents?.length ?? 0) > 0
+  const hadLocalRemoval = internalResults.some((r) => r.removedLocal)
 
-  if (!hasRemainingAgents && lockEntry?.method === 'symlink' && !options.global) {
+  if (!localHasRemainingAgents && hadLocalRemoval && lockEntry?.method === 'symlink') {
     const canonicalPath = getCanonicalPath(ports, skillName, { global: false })
     await ports.fs.rm(canonicalPath, { recursive: true, force: true }).catch(() => {})
   }
+
+  const results: RemoveResult[] = internalResults.map(({ skill, agent, success, error }) => ({
+    skill,
+    agent,
+    success,
+    ...(error && { error }),
+  }))
 
   await logAudit(ports, {
     action: 'remove',
