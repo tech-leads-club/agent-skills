@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { createNodeAdapters } from '@tech-leads-club/core'
 import * as vscode from 'vscode'
 import type { InstalledSkillsScanner } from '../../services/installed-skills-scanner'
 import type { LoggingService } from '../../services/logging-service'
@@ -35,7 +36,7 @@ describe('StateReconciler Policy', () => {
       error: jest.fn(),
     } as unknown as jest.Mocked<LoggingService>
 
-    reconciler = new StateReconciler(scanner, registryService, logger)
+    reconciler = new StateReconciler(createNodeAdapters(), scanner, registryService, logger)
   })
 
   it('should refresh watchers when policy is updated', () => {

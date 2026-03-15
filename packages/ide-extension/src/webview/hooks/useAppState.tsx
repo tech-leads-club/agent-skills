@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
+import type { InstallMethod, LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
 
 /**
  * Target collection for bulk selection toggles.
@@ -24,6 +24,7 @@ export function useAppState() {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [activeScope, setActiveScope] = useState<LifecycleScope>('local')
+  const [installMethod, setInstallMethod] = useState<InstallMethod>('copy')
 
   const goToSkills = useCallback((action: WebviewAction) => {
     setCurrentAction(action)
@@ -34,6 +35,14 @@ export function useAppState() {
 
   const goToAgents = useCallback(() => {
     setCurrentView('selectAgents')
+  }, [])
+
+  const goToInstallConfig = useCallback(() => {
+    setCurrentView('installConfig')
+  }, [])
+
+  const goToStatus = useCallback(() => {
+    setCurrentView('status')
   }, [])
 
   const goToSkillsView = useCallback(() => {
@@ -103,10 +112,14 @@ export function useAppState() {
       selectedSkills,
       selectedAgents,
       activeScope,
+      installMethod,
       setScope: setActiveScope,
+      setInstallMethod,
       goToSkills,
       goToSkillsView,
       goToAgents,
+      goToInstallConfig,
+      goToStatus,
       goHome,
       toggleSkill,
       toggleAgent,
@@ -124,8 +137,11 @@ export function useAppState() {
       currentView,
       goHome,
       goToAgents,
+      goToInstallConfig,
+      goToStatus,
       goToSkills,
       goToSkillsView,
+      installMethod,
       selectAll,
       selectAllAgents,
       selectAllSkills,

@@ -3,8 +3,7 @@ import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
 import { AgentSelectCard } from '../../webview/components/AgentSelectCard'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 const agent = { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' }
 

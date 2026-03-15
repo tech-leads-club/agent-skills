@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { createNodeAdapters } from '@tech-leads-club/core'
 import type { LoggingService } from '../../services/logging-service'
 
 // Mock fs/promises
@@ -17,10 +18,11 @@ const { InstalledSkillsScanner } = await import('../../services/installed-skills
 
 describe('InstalledSkillsScanner', () => {
   let scanner: InstanceType<typeof InstalledSkillsScanner>
+  const ports = createNodeAdapters()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    scanner = new InstalledSkillsScanner(mockLogger as unknown as LoggingService)
+    scanner = new InstalledSkillsScanner(ports, mockLogger as unknown as LoggingService)
   })
 
   it('should detect valid installation', async () => {

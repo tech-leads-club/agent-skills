@@ -15,6 +15,7 @@ export interface MessageRouteHandlers {
     skills: string[],
     agents: string[],
     scope: 'local' | 'global',
+    method?: 'copy' | 'symlink',
   ): Promise<void>
   handleUpdateSkill(skillName: string): Promise<void>
   handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void>
@@ -68,13 +69,18 @@ export class MessageRouter {
           message.payload.skills,
           message.payload.agents,
           message.payload.scope,
+          message.payload.method,
         )
         return
       case 'updateSkill':
         await this.handlers.handleUpdateSkill(message.payload.skillName)
         return
       case 'repairSkill':
-        await this.handlers.handleRepairSkill(message.payload.skillName, message.payload.scope, message.payload.agents)
+        this.logger.warn('repairSkill is inactive in sidebar scope; use install to reinstall')
+        return
+      case 'requestAgentPick':
+      case 'requestScopePick':
+        this.logger.warn(`Message type '${message.type}' is inactive in sidebar scope`)
         return
       case 'cancelOperation':
         this.handlers.handleCancelOperation(message.payload.operationId)

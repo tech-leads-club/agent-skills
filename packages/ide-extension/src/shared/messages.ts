@@ -12,6 +12,12 @@ import type {
 /**
  * Messages sent FROM the Webview TO the Extension Host.
  * Each variant represents a user action or lifecycle event.
+ *
+ * **Active (Sidebar flow)**: webviewDidMount, requestRefresh, installSkill, removeSkill,
+ * updateSkill, executeBatch, cancelOperation.
+ *
+ * **Inactive (deferred)**: requestAgentPick, requestScopePick, repairSkill — not dispatched;
+ * MessageRouter logs a warning and ignores.
  */
 export type WebviewMessage =
   | { type: 'webviewDidMount' }
@@ -28,6 +34,11 @@ export type WebviewMessage =
 /**
  * Messages sent FROM the Extension Host TO the Webview.
  * Each variant represents a state update or response.
+ *
+ * **Active (Sidebar flow)**: initialize, registryUpdate, operationStarted, operationProgress,
+ * operationCompleted, batchCompleted, reconcileState, trustState, policyState.
+ *
+ * **Inactive (deferred)**: agentPickResult, scopePickResult — not emitted by current flow.
  */
 export type ExtensionMessage =
   | { type: 'initialize'; payload: InitializePayload }
@@ -88,6 +99,8 @@ export interface ExecuteBatchPayload {
   skills: string[]
   agents: string[]
   scope: 'local' | 'global'
+  /** Install method (copy/symlink). Only used when action is 'install'. */
+  method?: 'copy' | 'symlink'
 }
 
 /**

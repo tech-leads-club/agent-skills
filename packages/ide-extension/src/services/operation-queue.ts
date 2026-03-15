@@ -1,7 +1,12 @@
 import type { ErrorInfo, OperationBatchMetadata, OperationType } from '../shared/types'
-import type { CliProcess, CliSpawner } from './cli-spawner'
-import { classifyError } from './error-classifier'
 import { withRetry } from './retry-handler'
+
+/**
+ * Executes a queued job (e.g. via core services or CLI).
+ */
+export interface JobExecutor {
+  execute(job: QueuedJob): Promise<JobResult>
+}
 
 const UNKNOWN_ERROR_MESSAGE = 'An unexpected error occurred. Check the Agent Skills output channel for details.'
 
@@ -40,8 +45,8 @@ export interface QueuedJob {
   operationId: string
   operation: OperationType
   skillName: string
-  args: string[]
-  cwd: string
+  args?: string[]
+  cwd?: string
   metadata?: OperationBatchMetadata
 }
 
@@ -70,11 +75,11 @@ export type JobProgressHandler = (job: QueuedJob, message: string) => void
 
 /**
  * Sequential job queue with concurrency=1 (mutex pattern).
- * Ensures only one CLI process runs at a time.
+ * Ensures only one operation runs at a time.
  */
 export class OperationQueue {
   private queue: QueuedJob[] = []
-  private activeJob: { job: QueuedJob; process: CliProcess } | null = null
+  private activeJob: QueuedJob | null = null
   private processing = false
 
   private jobStartedHandlers: Array<(job: QueuedJob) => void> = []
@@ -82,11 +87,11 @@ export class OperationQueue {
   private jobProgressHandlers: JobProgressHandler[] = []
 
   /**
-   * Creates an operation queue bound to a CLI spawner.
+   * Creates an operation queue bound to an executor.
    *
-   * @param spawner - Service used to spawn CLI commands.
+   * @param executor - Service used to execute jobs (e.g. CoreJobExecutor).
    */
-  constructor(private readonly spawner: CliSpawner) {}
+  constructor(private readonly executor: JobExecutor) {}
 
   /**
    * Enqueues a job for execution.
@@ -105,15 +110,14 @@ export class OperationQueue {
   /**
    * Cancels a job by operationId.
    * If queued: removes from queue.
-   * If in-flight: sends SIGTERM to the process.
+   * If in-flight: core operations cannot be cancelled; returns false.
    *
    * @param operationId - Identifier of the job to cancel.
    * @returns true if the job was found and cancelled
    */
   cancel(operationId: string): boolean {
-    if (this.activeJob && this.activeJob.job.operationId === operationId) {
-      this.activeJob.process.kill()
-      return true
+    if (this.activeJob && this.activeJob.operationId === operationId) {
+      return false
     }
 
     const index = this.queue.findIndex((j) => j.operationId === operationId)
@@ -135,15 +139,12 @@ export class OperationQueue {
   }
 
   /**
-   * Disposes the queue: kills in-flight job and clears pending jobs.
+   * Disposes the queue: clears pending jobs and clears active job reference.
    *
    * @returns Nothing.
    */
   dispose(): void {
-    if (this.activeJob) {
-      this.activeJob.process.kill()
-      this.activeJob = null
-    }
+    this.activeJob = null
     this.queue = []
     this.processing = false
   }
@@ -239,44 +240,18 @@ export class OperationQueue {
   }
 
   /**
-   * Executes the job once, returns promise that resolves on success
-   * or rejects with ErrorInfo on failure.
+   * Executes the job once via the executor.
    *
    * @param job - Job to execute once.
    * @returns A promise that resolves with completion metadata.
    */
-  private executeOnce(job: QueuedJob): Promise<JobResult> {
-    return new Promise<JobResult>((resolve, reject) => {
-      const process = this.spawner.spawn(job.args, {
-        cwd: job.cwd,
-        operationId: job.operationId,
-      })
-
-      this.activeJob = { job, process }
-
-      process.onComplete().then((result) => {
-        this.activeJob = null
-
-        const errorInfo = classifyError(result.stderr, result.exitCode, result.signal)
-
-        if (result.exitCode === 0) {
-          resolve({
-            operationId: job.operationId,
-            operation: job.operation,
-            skillName: job.skillName,
-            status: 'completed',
-            metadata: job.metadata,
-          })
-        } else {
-          const normalizedStderr = result.stderr.trim()
-          const errorWithTrace: ErrorInfo & { stack?: string } = {
-            ...errorInfo,
-            ...(normalizedStderr.length > 0 ? { stack: normalizedStderr } : {}),
-          }
-
-          reject(errorWithTrace)
-        }
-      })
-    })
+  private async executeOnce(job: QueuedJob): Promise<JobResult> {
+    this.activeJob = job
+    try {
+      const result = await this.executor.execute(job)
+      return result
+    } finally {
+      this.activeJob = null
+    }
   }
 }

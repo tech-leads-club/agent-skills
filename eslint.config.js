@@ -49,6 +49,18 @@ export default defineConfig([
             '@testing-library/react', // Used in tests only
             'fast-check', // Used in tests only
             '@nx/next', // Used in Next.js apps
+            // ide-extension: build/test deps in devDependencies
+            'glob',
+            'mocha',
+            '@testing-library/jest-dom',
+            'jest-axe',
+            '@testing-library/user-event',
+            'react',
+            '@types/vscode',
+            '@vscode/codicons',
+            'fuse.js',
+            '@vitejs/plugin-react',
+            'vite',
           ],
         },
       ],

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode'
-import type { Skill, SkillRegistry } from '../shared/types'
+import { fetchRegistry } from '@tech-leads-club/core'
+import type { CorePorts } from '@tech-leads-club/core'
+import type { SkillRegistry } from '../shared/types'
 import type { LoggingService } from './logging-service'
 
 /**
@@ -48,10 +50,12 @@ export class SkillRegistryService implements vscode.Disposable {
   /**
    * Creates a registry service instance.
    *
+   * @param ports - Core ports for registry fetch.
    * @param context - Extension context used for persisted global state.
    * @param logger - Logging service for registry fetch/cache diagnostics.
    */
   constructor(
+    private readonly ports: CorePorts,
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
   ) {}
@@ -107,12 +111,12 @@ export class SkillRegistryService implements vscode.Disposable {
    * @returns A promise resolving to registry data and cache metadata.
    */
   private async loadRegistryInternal(forceRefresh: boolean): Promise<RegistryResult> {
-    const cached = this.loadCache()
+    const extCached = this.loadCache()
 
-    if (!cached || forceRefresh) {
+    if (!extCached || forceRefresh) {
       this.logger.info(
-        !cached
-          ? '[SkillRegistry] No cache found, fetching from CDN...'
+        !extCached
+          ? '[SkillRegistry] No cache found, fetching via core...'
           : '[SkillRegistry] Forced refresh requested, fetching the latest registry...',
       )
       const fetchResult = await this.fetchFromCdn()
@@ -123,7 +127,7 @@ export class SkillRegistryService implements vscode.Disposable {
       }
     }
 
-    const age = Date.now() - cached.timestamp
+    const age = Date.now() - extCached.timestamp
     const stale = age >= SkillRegistryService.TTL
 
     if (stale) {
@@ -131,12 +135,12 @@ export class SkillRegistryService implements vscode.Disposable {
         `[SkillRegistry] Cache is stale (${Math.round(age / 1000 / 60)}m old), emitting cached data and refreshing in background...`,
       )
       void this.refreshInBackground()
-      return { data: cached.data, fromCache: true, offline: false }
+      return { data: extCached.data, fromCache: true, offline: false }
     }
 
     this.logger.debug('[SkillRegistry] Cache is fresh, returning cached data and refreshing in background')
     void this.refreshInBackground()
-    return { data: cached.data, fromCache: false, offline: false }
+    return { data: extCached.data, fromCache: false, offline: false }
   }
 
   /**
@@ -161,24 +165,21 @@ export class SkillRegistryService implements vscode.Disposable {
   }
 
   /**
-   * Actual HTTP fetch logic.
+   * Fetches registry via core fetchRegistry.
    *
    * @returns A promise resolving to fetched registry payload metadata.
    * @throws {Error} When fetching fails and no cache is available.
    */
   private async doFetch(): Promise<CdnFetchResult> {
     try {
-      this.logger.debug(`[SkillRegistry] Fetching from ${SkillRegistryService.CDN_URL}`)
+      this.logger.debug('[SkillRegistry] Fetching via core fetchRegistry')
 
-      const response = await fetch(SkillRegistryService.CDN_URL)
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      const coreRegistry = await fetchRegistry(this.ports, true)
+      if (!coreRegistry) {
+        throw new Error('Core fetchRegistry returned null')
       }
 
-      const raw = await response.json()
-      const validated = this.validate(raw)
-
+      const validated = this.mapCoreToShared(coreRegistry)
       this.saveCache({ data: validated, timestamp: Date.now() })
       this.logger.info(`[SkillRegistry] Fetched and cached ${validated.skills.length} skills`)
 
@@ -198,6 +199,34 @@ export class SkillRegistryService implements vscode.Disposable {
   }
 
   /**
+   * Maps core SkillsRegistry to shared SkillRegistry format.
+   */
+  private mapCoreToShared(core: {
+    version: string
+    categories: Record<string, { name: string; description?: string }>
+    skills: Array<{ name: string; description: string; category: string; path: string; files: string[]; contentHash?: string; author?: string; version?: string }>
+  }): SkillRegistry {
+    const categories: Record<string, { name: string; description: string }> = {}
+    for (const [id, cat] of Object.entries(core.categories)) {
+      categories[id] = { name: cat.name, description: cat.description ?? '' }
+    }
+    return {
+      version: core.version,
+      categories,
+      skills: core.skills.map((s) => ({
+        name: s.name,
+        description: s.description,
+        category: s.category,
+        path: s.path,
+        files: s.files,
+        contentHash: s.contentHash ?? '',
+        author: s.author,
+        version: s.version,
+      })),
+    }
+  }
+
+  /**
    * Attempts a background refresh without blocking the caller.
    *
    * @returns A promise that resolves after refresh attempt completes.
@@ -211,60 +240,6 @@ export class SkillRegistryService implements vscode.Disposable {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       this.logger.warn(`[SkillRegistry] Background refresh failed: ${errorMessage}`)
-    }
-  }
-
-  /**
-   * Validate and sanitize registry JSON.
-   * Filters out invalid skill entries.
-   *
-   * @param raw - Untrusted JSON payload from CDN.
-   * @returns Sanitized registry object.
-   * @throws {Error} When required top-level registry structure is invalid.
-   */
-  private validate(raw: unknown): SkillRegistry {
-    if (typeof raw !== 'object' || raw === null) {
-      throw new Error('Invalid registry: not an object')
-    }
-
-    const data = raw as Record<string, unknown>
-
-    if (!Array.isArray(data.skills)) {
-      throw new Error('Invalid registry: missing or invalid "skills" array')
-    }
-
-    const validSkills = data.skills.filter((skill: unknown): skill is Skill => {
-      if (typeof skill !== 'object' || skill === null) {
-        this.logger.warn(`[SkillRegistry] Skipping non-object skill entry`)
-        return false
-      }
-
-      const s = skill as Record<string, unknown>
-      const valid =
-        typeof s.name === 'string' &&
-        typeof s.description === 'string' &&
-        typeof s.category === 'string' &&
-        typeof s.path === 'string' &&
-        Array.isArray(s.files) &&
-        typeof s.contentHash === 'string'
-
-      if (!valid) {
-        this.logger.warn(`[SkillRegistry] Skipping invalid skill entry: ${JSON.stringify(skill)}`)
-      }
-
-      return valid
-    })
-
-    const version = typeof data.version === 'string' ? data.version : 'unknown'
-    const categories =
-      typeof data.categories === 'object' && data.categories !== null && !Array.isArray(data.categories)
-        ? (data.categories as Record<string, { name: string; description: string }>)
-        : {}
-
-    return {
-      version,
-      categories,
-      skills: validSkills,
     }
   }
 

@@ -98,7 +98,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       handleRefreshRequest: (webview) => this.handleRefreshRequest(webview),
       handleInstallSkill: (skillName, scope, agents) => this.handleInstallSkill(skillName, scope, agents),
       handleRemoveSkill: (skillName, scope, agents) => this.handleRemoveSkill(skillName, scope, agents),
-      handleExecuteBatch: (action, skills, agents, scope) => this.handleExecuteBatch(action, skills, agents, scope),
+      handleExecuteBatch: (action, skills, agents, scope, method) =>
+        this.handleExecuteBatch(action, skills, agents, scope, method),
       handleUpdateSkill: (skillName) => this.handleUpdateSkill(skillName),
       handleRepairSkill: (skillName, scope, agents) => this.handleRepairSkill(skillName, scope, agents),
       handleCancelOperation: (operationId) => this.handleCancelOperation(operationId),
@@ -476,6 +477,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     skills: string[],
     agents: string[],
     scope: 'local' | 'global',
+    method: 'copy' | 'symlink' = 'copy',
   ): Promise<void> {
     if (skills.length === 0 || agents.length === 0) {
       vscode.window.showErrorMessage('Select at least one skill and one agent before proceeding.')
@@ -483,7 +485,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     if (action === 'install') {
-      await this.runQueueAction('install', () => this.orchestrator.installMany(skills, scope, agents))
+      await this.runQueueAction('install', () => this.orchestrator.installMany(skills, scope, agents, 'card', method))
       return
     }
 

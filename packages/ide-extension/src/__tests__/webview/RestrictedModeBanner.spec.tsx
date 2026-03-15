@@ -2,8 +2,7 @@ import { render, screen } from '@testing-library/react'
 import jestAxe from 'jest-axe'
 import { RestrictedModeBanner } from '../../webview/components/RestrictedModeBanner'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 describe('RestrictedModeBanner', () => {
   it('should not render when visible is false', () => {

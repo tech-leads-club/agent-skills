@@ -3,8 +3,7 @@ import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
 import { SelectionMenu } from '../../webview/components/SelectionMenu'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 describe('SelectionMenu', () => {
   it('shows selected count and clear button state', () => {

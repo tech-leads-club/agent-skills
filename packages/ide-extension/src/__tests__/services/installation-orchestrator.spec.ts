@@ -84,15 +84,13 @@ describe('InstallationOrchestrator', () => {
     )
   })
 
-  it('should enqueue install job with correct args', async () => {
+  it('should enqueue install job with correct metadata', async () => {
     await orchestrator.install('skill', 'local', ['agent1'])
 
     expect(mockQueue.enqueue).toHaveBeenCalledWith(
       expect.objectContaining({
         operation: 'install',
         skillName: 'skill',
-        args: ['install', '-s', 'skill', '-a', 'agent1'],
-        cwd: '/workspace',
         metadata: expect.objectContaining({
           scope: 'local',
           agents: ['agent1'],
@@ -104,42 +102,23 @@ describe('InstallationOrchestrator', () => {
     )
   })
 
-  it('should enqueue global install job with -g flag', async () => {
+  it('should enqueue global install job with global scope', async () => {
     await orchestrator.install('skill', 'global', ['agent1'])
 
     expect(mockQueue.enqueue).toHaveBeenCalledWith(
       expect.objectContaining({
-        args: ['install', '-s', 'skill', '-a', 'agent1', '-g'],
         metadata: expect.objectContaining({ scope: 'global' }),
       }),
     )
   })
 
-  it('should enqueue repair job with -f flag', async () => {
+  it('should log warning for repair (deferred flow)', async () => {
     await orchestrator.repair('skill', 'local', ['agent1'])
 
-    expect(mockQueue.enqueue).toHaveBeenCalledWith(
-      expect.objectContaining({
-        operation: 'repair',
-        args: ['install', '-f', '-s', 'skill', '-a', 'agent1'],
-        metadata: expect.objectContaining({
-          scope: 'local',
-          agents: ['agent1'],
-          skillNames: ['skill'],
-        }),
-      }),
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Repair flow is deferred'),
     )
-  })
-
-  it('should block operations if CLI is unhealthy', async () => {
-    orchestrator.setCliHealthy(false)
-    await orchestrator.install('skill', 'local', ['agent1'])
-
     expect(mockQueue.enqueue).not.toHaveBeenCalled()
-    expect(mockVscode.window.showErrorMessage).toHaveBeenCalledWith(
-      expect.stringContaining('CLI is not available'),
-      expect.anything(),
-    )
   })
 
   it('should perform post-install verification on success', async () => {
@@ -184,7 +163,7 @@ describe('InstallationOrchestrator', () => {
       corrupted: [{ agent: 'agent1', scope: 'local', expectedPath: '...' }],
     })
 
-    // Simulate user clicking "Repair"
+    // Simulate user clicking "Repair" (repair flow is deferred, logs warning only)
     ;(mockVscode.window.showWarningMessage as MockAsyncFn<string | undefined>).mockResolvedValue('Repair')
 
     expect(job.metadata).toBeDefined()
@@ -197,8 +176,7 @@ describe('InstallationOrchestrator', () => {
     })
 
     expect(mockVscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('corrupted'), 'Repair')
-    expect(mockQueue.enqueue).toHaveBeenCalledTimes(2) // 1 install + 1 repair
-    const repairJob = (mockQueue.enqueue as jest.Mock).mock.calls[1][0] as QueuedJob
-    expect(repairJob.operation).toBe('repair')
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Repair flow is deferred'))
+    expect(mockQueue.enqueue).toHaveBeenCalledTimes(1) // only install; repair is deferred
   })
 })

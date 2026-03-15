@@ -1,45 +1,49 @@
 import { jest } from '@jest/globals'
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
-import os from 'node:os'
-import path from 'node:path'
-import { SkillLockService } from '../../services/skill-lock-service'
+import type { CorePorts } from '@tech-leads-club/core'
+import type { LoggingService } from '../../services/logging-service'
 
-const mockLogger = {
+const mockLogger: Pick<LoggingService, 'debug' | 'warn'> = {
   debug: jest.fn(),
   warn: jest.fn(),
 }
 
+type LockedSkills = Record<string, { contentHash?: string; name: string; source: string; installedAt: string; updatedAt: string } | undefined>
+const mockGetAllLockedSkills = jest.fn<() => Promise<LockedSkills>>()
+
+jest.unstable_mockModule('@tech-leads-club/core', () =>
+  import('@tech-leads-club/core').then((actual) => ({
+    ...actual,
+    getAllLockedSkills: mockGetAllLockedSkills,
+  })),
+)
+
+const { SkillLockService } = await import('../../services/skill-lock-service')
+
+const createMockPorts = (): CorePorts =>
+  ({
+    fs: {} as never,
+    http: {} as never,
+    shell: {} as never,
+    env: {} as never,
+    logger: {} as never,
+    packageResolver: {} as never,
+    paths: {} as never,
+  }) as CorePorts
+
 describe('SkillLockService', () => {
-  let service: SkillLockService
-  let tempHomeDir: string
-  let homedirSpy: jest.SpiedFunction<typeof os.homedir>
+  let service: InstanceType<typeof SkillLockService>
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks()
-    tempHomeDir = await mkdtemp(path.join(os.tmpdir(), 'skill-lock-service-'))
-    homedirSpy = jest.spyOn(os, 'homedir').mockReturnValue(tempHomeDir)
-    service = new SkillLockService(mockLogger as never)
+    service = new SkillLockService(createMockPorts(), mockLogger as LoggingService)
   })
-
-  afterEach(async () => {
-    homedirSpy.mockRestore()
-    await rm(tempHomeDir, { recursive: true, force: true })
-  })
-
-  const writeLockfile = async (content: string): Promise<void> => {
-    const lockDir = path.join(tempHomeDir, '.agents')
-    await mkdir(lockDir, { recursive: true })
-    await writeFile(path.join(lockDir, '.skill-lock.json'), content, 'utf-8')
-  }
 
   it('returns hashes when lockfile is valid', async () => {
-    await writeLockfile(
-      JSON.stringify({
-        skills: {
-          seo: { contentHash: 'abc123' },
-        },
-      }),
-    )
+    mockGetAllLockedSkills
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({
+        seo: { contentHash: 'abc123', name: 'seo', source: '', installedAt: '', updatedAt: '' },
+      })
 
     const hashes = await service.getInstalledHashes()
 
@@ -48,16 +52,15 @@ describe('SkillLockService', () => {
   })
 
   it('returns empty map when lockfile is missing', async () => {
+    mockGetAllLockedSkills.mockResolvedValue({})
+
     const hashes = await service.getInstalledHashes()
 
     expect(hashes).toEqual({})
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      'Skill lockfile not found; returning empty hashes map',
-    )
   })
 
-  it('warns and returns empty map when lockfile is malformed', async () => {
-    await writeLockfile('{invalid-json')
+  it('warns and returns empty map when lockfile read fails', async () => {
+    mockGetAllLockedSkills.mockRejectedValue(new Error('ENOENT'))
 
     const hashes = await service.getInstalledHashes()
 
@@ -68,13 +71,11 @@ describe('SkillLockService', () => {
   })
 
   it('gracefully handles missing contentHash entries', async () => {
-    await writeLockfile(
-      JSON.stringify({
-        skills: {
-          seo: {},
-        },
-      }),
-    )
+    mockGetAllLockedSkills
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({
+        seo: { name: 'seo', source: '', installedAt: '', updatedAt: '' },
+      })
 
     const hashes = await service.getInstalledHashes()
 

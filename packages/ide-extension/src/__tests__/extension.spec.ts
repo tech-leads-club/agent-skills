@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
-import type { CliHealthStatus, SkillRegistry } from '../shared/types'
+import type { SkillRegistry } from '../shared/types'
 
 type MockableFn<T = unknown> = (...args: Array<unknown>) => T
 
@@ -9,8 +9,6 @@ const mockRegistryPayload: SkillRegistry = {
   categories: {},
   skills: [],
 }
-
-const mockHealthStatus: CliHealthStatus = { status: 'ok', version: '1.0.0' }
 
 // ---- Mock Instances (shared across all tests) ----
 const mockLoggingService = {
@@ -24,16 +22,8 @@ const mockRegistryService = {
   dispose: jest.fn<MockableFn<void>>(),
 }
 
-const mockCliSpawner = { dispose: jest.fn<MockableFn<void>>() }
 const mockOperationQueue = { dispose: jest.fn<MockableFn<void>>() }
-const mockOrchestrator = {
-  setCliHealthy: jest.fn<MockableFn<void>>(),
-  dispose: jest.fn<MockableFn<void>>(),
-}
-const mockHealthChecker = {
-  check: jest.fn<MockableFn<Promise<CliHealthStatus>>>().mockResolvedValue(mockHealthStatus),
-  dispose: jest.fn<MockableFn<void>>(),
-}
+const mockOrchestrator = { dispose: jest.fn<MockableFn<void>>() }
 const mockScanner = {}
 const mockReconciler = {
   reconcile: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
@@ -63,20 +53,12 @@ jest.unstable_mockModule('../services/skill-lock-service', () => ({
   SkillLockService: jest.fn<MockableFn<typeof mockSkillLockService>>(() => mockSkillLockService),
 }))
 
-jest.unstable_mockModule('../services/cli-spawner', () => ({
-  CliSpawner: jest.fn<MockableFn<typeof mockCliSpawner>>(() => mockCliSpawner),
-}))
-
 jest.unstable_mockModule('../services/operation-queue', () => ({
   OperationQueue: jest.fn<MockableFn<typeof mockOperationQueue>>(() => mockOperationQueue),
 }))
 
 jest.unstable_mockModule('../services/installation-orchestrator', () => ({
   InstallationOrchestrator: jest.fn<MockableFn<typeof mockOrchestrator>>(() => mockOrchestrator),
-}))
-
-jest.unstable_mockModule('../services/cli-health-checker', () => ({
-  CliHealthChecker: jest.fn<MockableFn<typeof mockHealthChecker>>(() => mockHealthChecker),
 }))
 
 jest.unstable_mockModule('../services/installed-skills-scanner', () => ({
@@ -160,7 +142,6 @@ describe('Extension Activation', () => {
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.add', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.remove', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.update', expect.any(Function))
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.repair', expect.any(Function))
     expect(context.subscriptions.length).toBeGreaterThanOrEqual(4)
   })
 

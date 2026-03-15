@@ -4,8 +4,7 @@ import jestAxe from 'jest-axe'
 import type { Skill } from '../../shared/types'
 import { SkillSelectCard } from '../../webview/components/SkillSelectCard'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 const skill: Skill = {
   name: 'accessibility',

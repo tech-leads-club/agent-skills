@@ -4,8 +4,7 @@ import jestAxe from 'jest-axe'
 import type { InstalledSkillsMap } from '../../shared/types'
 import { SelectAgentsPage } from '../../webview/views/SelectAgentsPage'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 const availableAgents = [
   { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },

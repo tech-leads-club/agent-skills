@@ -219,15 +219,28 @@ export function SelectAgentsPage({
       />
 
       <div className="select-page-list" aria-label="Agents list">
-        {visibleAgents.map((agent) => (
-          <AgentSelectCard
-            key={agent.agent}
-            agent={agent}
-            company={agent.company}
-            isSelected={selectedAgents.includes(agent.agent)}
-            onToggle={() => onToggleAgent(agent.agent)}
-          />
-        ))}
+        {visibleAgents.length === 0 ? (
+          <div className="select-page-empty" role="status">
+            <p>
+              {action === 'install'
+                ? 'All selected skills are already installed on every detected agent.'
+                : 'No agents have the selected skills installed.'}
+            </p>
+            <button type="button" className="secondary-footer-button" onClick={onBack}>
+              Back to Skills
+            </button>
+          </div>
+        ) : (
+          visibleAgents.map((agent) => (
+            <AgentSelectCard
+              key={agent.agent}
+              agent={agent}
+              company={agent.company}
+              isSelected={selectedAgents.includes(agent.agent)}
+              onToggle={() => onToggleAgent(agent.agent)}
+            />
+          ))
+        )}
       </div>
 
       <footer className="select-page-footer">

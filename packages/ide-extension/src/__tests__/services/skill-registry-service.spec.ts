@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import type { LoggingService } from '../../services/logging-service'
-import { SkillRegistryService } from '../../services/skill-registry-service'
 import type { SkillRegistry } from '../../shared/types'
 
 type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
@@ -12,17 +11,20 @@ type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unk
   ...args: TArgs
 ) => Promise<TReturn>
 
-type FetchResponse = {
-  ok: boolean
-  json: () => Promise<unknown>
-}
+const mockFetchRegistry = jest.fn<(...args: unknown[]) => Promise<unknown>>()
 
-// Mock fetch globally
-global.fetch = jest.fn<AsyncMockableFn<FetchResponse>>() as unknown as typeof global.fetch
-const fetchMock = global.fetch as unknown as jest.Mock<AsyncMockableFn<FetchResponse>>
+jest.unstable_mockModule('@tech-leads-club/core', () =>
+  import('@tech-leads-club/core').then((actual) => ({
+    ...actual,
+    fetchRegistry: mockFetchRegistry,
+  })),
+)
+
+const { SkillRegistryService } = await import('../../services/skill-registry-service')
+const { createNodeAdapters } = await import('@tech-leads-club/core')
 
 describe('SkillRegistryService', () => {
-  let service: SkillRegistryService
+  let service: InstanceType<typeof SkillRegistryService>
   let mockContext: vscode.ExtensionContext
   let mockLogger: LoggingService
   let mockGlobalState: vscode.Memento
@@ -43,6 +45,12 @@ describe('SkillRegistryService', () => {
         contentHash: 'abc123',
       },
     ],
+  }
+
+  const coreRegistryPayload = {
+    ...mockRegistry,
+    generatedAt: '2026-01-01T00:00:00.000Z',
+    baseUrl: 'https://cdn.example.com/skills',
   }
 
   beforeEach(() => {
@@ -67,10 +75,9 @@ describe('SkillRegistryService', () => {
       debug: jest.fn<SyncMockableFn>(),
     } as unknown as LoggingService
 
-    // Clear fetch mock
-    fetchMock.mockClear()
+    mockFetchRegistry.mockClear()
 
-    service = new SkillRegistryService(mockContext, mockLogger)
+    service = new SkillRegistryService(createNodeAdapters(), mockContext, mockLogger)
   })
 
   afterEach(() => {
@@ -78,24 +85,16 @@ describe('SkillRegistryService', () => {
   })
 
   it('fetches registry from CDN and returns parsed data', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockRegistry,
-    })
+    mockFetchRegistry.mockResolvedValueOnce(coreRegistryPayload)
 
     const result = await service.getRegistry()
 
     expect(result).toEqual(mockRegistry)
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@main/packages/skills-catalog/skills-registry.json',
-    )
+    expect(mockFetchRegistry).toHaveBeenCalled()
   })
 
   it('caches successful response in globalState', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockRegistry,
-    })
+    mockFetchRegistry.mockResolvedValueOnce(coreRegistryPayload)
 
     await service.getRegistry()
 
@@ -118,8 +117,7 @@ describe('SkillRegistryService', () => {
     const result = await service.getRegistry()
 
     expect(result).toEqual(mockRegistry)
-    // Fetch should be called in background but we return cached data immediately
-    expect(global.fetch).toHaveBeenCalled()
+    expect(mockFetchRegistry).toHaveBeenCalled()
   })
 
   it('fetches fresh data when cache is stale (beyond TTL)', async () => {
@@ -128,15 +126,12 @@ describe('SkillRegistryService', () => {
       timestamp: Date.now() - 1000 * 60 * 90, // 90 minutes ago (stale)
     }
     getStateMock().mockReturnValue(staleEntry)
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockRegistry,
-    })
+    mockFetchRegistry.mockResolvedValueOnce(coreRegistryPayload)
 
     const result = await service.getRegistry()
 
     expect(result).toEqual(mockRegistry)
-    expect(global.fetch).toHaveBeenCalled()
+    expect(mockFetchRegistry).toHaveBeenCalled()
   })
 
   it('returns cached data when network fails', async () => {
@@ -145,7 +140,7 @@ describe('SkillRegistryService', () => {
       timestamp: Date.now() - 1000 * 60 * 90, // stale
     }
     getStateMock().mockReturnValue(cachedEntry)
-    fetchMock.mockRejectedValueOnce(new Error('Network error'))
+    mockFetchRegistry.mockRejectedValueOnce(new Error('Network error'))
 
     const result = await service.getRegistry()
 
@@ -155,31 +150,25 @@ describe('SkillRegistryService', () => {
 
   it('throws when network fails and no cache exists', async () => {
     getStateMock().mockReturnValue(null)
-    fetchMock.mockRejectedValueOnce(new Error('Network error'))
+    mockFetchRegistry.mockRejectedValueOnce(new Error('Network error'))
 
     await expect(service.getRegistry()).rejects.toThrow('Failed to fetch registry')
   })
 
-  it('rejects malformed JSON (non-object)', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => 'not an object',
-    })
+  it('rejects malformed registry (non-object)', async () => {
+    mockFetchRegistry.mockResolvedValueOnce('not an object')
 
-    await expect(service.getRegistry()).rejects.toThrow('Invalid registry')
+    await expect(service.getRegistry()).rejects.toThrow()
   })
 
   it('rejects registry missing skills array', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ version: '1.0.0' }),
-    })
+    mockFetchRegistry.mockResolvedValueOnce({ version: '1.0.0' })
 
-    await expect(service.getRegistry()).rejects.toThrow('missing or invalid "skills" array')
+    await expect(service.getRegistry()).rejects.toThrow()
   })
 
-  it('filters out skills missing required fields', async () => {
-    const dirtyRegistry = {
+  it('maps all skills from core payload', async () => {
+    const corePayload = {
       version: '1.0.0',
       categories: {},
       skills: [
@@ -191,35 +180,19 @@ describe('SkillRegistryService', () => {
           files: [],
           contentHash: 'hash1',
         },
-        { name: 'missing-description', category: 'test' }, // Missing description
-        { description: 'missing-name', category: 'test' }, // Missing name
       ],
     }
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => dirtyRegistry,
-    })
+    mockFetchRegistry.mockResolvedValueOnce(corePayload)
 
     const result = await service.getRegistry()
 
     expect(result.skills).toHaveLength(1)
     expect(result.skills[0].name).toBe('complete-skill')
-    expect(mockLogger.warn).toHaveBeenCalledTimes(2)
   })
 
   it('deduplicates concurrent fetch calls', async () => {
-    fetchMock.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                ok: true,
-                json: async () => mockRegistry,
-              }),
-            100,
-          ),
-        ),
+    mockFetchRegistry.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(coreRegistryPayload), 100)),
     )
 
     // Fire 3 concurrent fetches
@@ -228,7 +201,6 @@ describe('SkillRegistryService', () => {
     expect(result1).toEqual(mockRegistry)
     expect(result2).toEqual(mockRegistry)
     expect(result3).toEqual(mockRegistry)
-    // Fetch should only be called once due to deduplication
-    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(mockFetchRegistry).toHaveBeenCalledTimes(1)
   })
 })

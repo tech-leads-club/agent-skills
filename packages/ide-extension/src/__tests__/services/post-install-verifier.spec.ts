@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { createNodeAdapters } from '@tech-leads-club/core'
 import type { LoggingService } from '../../services/logging-service'
 
 // Mock fs/promises
@@ -17,10 +18,11 @@ const { PostInstallVerifier } = await import('../../services/post-install-verifi
 
 describe('PostInstallVerifier', () => {
   let verifier: InstanceType<typeof PostInstallVerifier>
+  const ports = createNodeAdapters()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    verifier = new PostInstallVerifier(mockLogger as unknown as LoggingService)
+    verifier = new PostInstallVerifier(ports, mockLogger as unknown as LoggingService)
   })
 
   it('should return ok if all checks pass', async () => {

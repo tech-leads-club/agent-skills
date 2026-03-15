@@ -3,8 +3,7 @@ import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
 import { SearchBar } from '../../webview/components/SearchBar'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 describe('SearchBar Accessibility', () => {
   const defaultProps = {

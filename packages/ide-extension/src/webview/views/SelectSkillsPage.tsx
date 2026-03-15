@@ -235,15 +235,28 @@ export function SelectSkillsPage({
       />
 
       <div className="select-page-list" aria-label="Skills list">
-        {visibleSkills.map((skill) => (
-          <SkillSelectCard
-            key={skill.name}
-            skill={skill}
-            categoryName={registry.categories[skill.category]?.name ?? skill.category}
-            isSelected={selectedSkills.includes(skill.name)}
-            onToggle={() => onToggleSkill(skill.name)}
-          />
-        ))}
+        {visibleSkills.length === 0 ? (
+          <div className="select-page-empty" role="status">
+            <p>
+              {action === 'install'
+                ? 'All skills are already installed for the selected scope.'
+                : 'No skills are installed for the selected scope.'}
+            </p>
+            <button type="button" className="secondary-footer-button" onClick={onBack}>
+              Back to Home
+            </button>
+          </div>
+        ) : (
+          visibleSkills.map((skill) => (
+            <SkillSelectCard
+              key={skill.name}
+              skill={skill}
+              categoryName={registry.categories[skill.category]?.name ?? skill.category}
+              isSelected={selectedSkills.includes(skill.name)}
+              onToggle={() => onToggleSkill(skill.name)}
+            />
+          ))
+        )}
       </div>
 
       <footer className="select-page-footer">

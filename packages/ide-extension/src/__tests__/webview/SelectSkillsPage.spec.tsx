@@ -4,8 +4,7 @@ import jestAxe from 'jest-axe'
 import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 import { SelectSkillsPage } from '../../webview/views/SelectSkillsPage'
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 const registry: SkillRegistry = {
   version: '1',

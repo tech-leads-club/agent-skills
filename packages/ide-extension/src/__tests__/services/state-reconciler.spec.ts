@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { createNodeAdapters } from '@tech-leads-club/core'
 import type { InstalledSkillsScanner } from '../../services/installed-skills-scanner'
 import type { LoggingService } from '../../services/logging-service'
 import type { SkillRegistryService } from '../../services/skill-registry-service'
@@ -81,6 +82,7 @@ const { StateReconciler } = await import('../../services/state-reconciler')
 describe('StateReconciler', () => {
   let reconciler: InstanceType<typeof StateReconciler>
   let localOnlyPolicy: ScopePolicyEvaluation
+  const ports = createNodeAdapters()
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -94,6 +96,7 @@ describe('StateReconciler', () => {
       blockedReason: undefined,
     }
     reconciler = new StateReconciler(
+      ports,
       mockScanner as InstalledSkillsScanner,
       mockRegistry as SkillRegistryService,
       mockLogger as LoggingService,

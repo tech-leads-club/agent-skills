@@ -2,12 +2,9 @@ import { randomUUID } from 'node:crypto'
 import * as vscode from 'vscode'
 import type {
   LifecycleBatchSelection,
-  LifecycleScopeHint,
   OperationBatchMetadata,
   OperationType,
 } from '../shared/types'
-import type { CliInvocationPlan } from './batch-execution-planner'
-import { getCliCapabilities, planBatch } from './batch-execution-planner'
 import type { LoggingService } from './logging-service'
 import type { JobResult, OperationQueue, QueuedJob } from './operation-queue'
 import type { PostInstallVerifier } from './post-install-verifier'
@@ -40,8 +37,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
   private eventHandlers: OperationEventHandler[] = []
   private activeOperations = new Map<string, vscode.CancellationTokenSource>()
   private progressResolvers = new Map<string, () => void>()
-  private cliHealthy = true
-  private readonly capabilities = getCliCapabilities()
 
   /**
    * Creates an InstallationOrchestrator.
@@ -58,15 +53,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.queue.onJobStarted((job) => this.handleJobStarted(job))
     this.queue.onJobCompleted((result) => this.handleJobCompleted(result))
     this.queue.onJobProgress((job, message) => this.handleJobProgress(job, message))
-  }
-
-  /**
-   * Sets the CLI healthy state which restricts execution if false.
-   *
-   * @param healthy - True if the CLI is ready.
-   */
-  setCliHealthy(healthy: boolean): void {
-    this.cliHealthy = healthy
   }
 
   /**
@@ -87,8 +73,8 @@ export class InstallationOrchestrator implements vscode.Disposable {
     scope: 'local' | 'global' | 'all',
     agents: string[],
     source: 'card' | 'command-palette' = 'card',
+    method: 'copy' | 'symlink' = 'copy',
   ): Promise<void> {
-    if (!this.checkHealth()) return
     if (skills.length === 0) return
 
     const selection: LifecycleBatchSelection = {
@@ -97,8 +83,9 @@ export class InstallationOrchestrator implements vscode.Disposable {
       agents,
       scope,
       source,
+      method,
     }
-    await this.executePlan(planBatch(selection, this.capabilities))
+    await this.executeCorePlan(selection)
   }
 
   /**
@@ -120,7 +107,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
     agents: string[],
     source: 'card' | 'command-palette' = 'card',
   ): Promise<void> {
-    if (!this.checkHealth()) return
     if (skills.length === 0) return
 
     const selection: LifecycleBatchSelection = {
@@ -130,7 +116,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
       scope,
       source,
     }
-    await this.executePlan(planBatch(selection, this.capabilities))
+    await this.executeCorePlan(selection)
   }
 
   /**
@@ -146,8 +132,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * ```
    */
   async updateMany(skills: string[] | 'all', source: 'card' | 'command-palette' = 'card'): Promise<void> {
-    if (!this.checkHealth()) return
-
     const isUpdateAll = skills === 'all'
     const selection: LifecycleBatchSelection = {
       action: 'update',
@@ -157,7 +141,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
       source,
       updateAll: isUpdateAll,
     }
-    await this.executePlan(planBatch(selection, this.capabilities))
+    await this.executeCorePlan(selection)
   }
 
   /**
@@ -174,22 +158,12 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * ```
    */
   async repairMany(
-    skills: string[],
-    scope: 'local' | 'global' | 'all',
-    agents: string[],
-    source: 'card' | 'command-palette' = 'card',
+    _skills: string[],
+    _scope: 'local' | 'global' | 'all',
+    _agents: string[],
+    _source: 'card' | 'command-palette' = 'card',
   ): Promise<void> {
-    if (!this.checkHealth()) return
-    if (skills.length === 0) return
-
-    const selection: LifecycleBatchSelection = {
-      action: 'repair',
-      skills,
-      agents,
-      scope,
-      source,
-    }
-    await this.executePlan(planBatch(selection, this.capabilities))
+    this.logger.warn('Repair flow is deferred; use install to reinstall skills.')
   }
 
   /**
@@ -256,45 +230,54 @@ export class InstallationOrchestrator implements vscode.Disposable {
   }
 
   /**
-   * Checks if the CLI is ready for use, showing a warning otherwise.
+   * Enqueues jobs for core-based execution from a batch selection.
    */
-  private checkHealth(): boolean {
-    if (!this.cliHealthy) {
-      void vscode.window.showErrorMessage(
-        'Cannot perform operation — the Agent Skills CLI is not available.',
-        'Check Setup',
-      )
-      return false
-    }
-    return true
-  }
+  private async executeCorePlan(selection: LifecycleBatchSelection): Promise<void> {
+    const batchId = randomUUID()
+    const { action, skills, agents = [], scope } = selection
 
-  /**
-   * Enqueues all invocations defined within a CLI invocation plan.
-   *
-   * @param plan - The evaluated invocation plan.
-   */
-  private async executePlan(plan: CliInvocationPlan): Promise<void> {
-    for (const invocation of plan.invocations) {
+    const scopes: Array<'local' | 'global'> =
+      scope === 'all' ? ['local', 'global'] : scope === 'local' || scope === 'global' ? [scope] : ['local']
+
+    if (action === 'update') {
       const operationId = randomUUID()
-      const skillLabel = invocation.skillNames[0] ?? `${invocation.operation} (batch)`
       const job: QueuedJob = {
         operationId,
-        operation: invocation.operation,
-        skillName: skillLabel,
-        args: invocation.args,
-        cwd: this.getCwd(invocation.scope),
+        operation: 'update',
+        skillName: skills[0] ?? 'all',
         metadata: {
-          batchId: plan.batchId,
-          batchSize: plan.invocations.length,
-          skillNames: invocation.skillNames,
-          scope: invocation.scope,
-          agents: invocation.agents,
+          batchId,
+          batchSize: 1,
+          skillNames: skills,
+          scope: 'local',
+          agents,
+        },
+      }
+      this.logger.info(`[${operationId}] Enqueuing update batch=${batchId} skills=[${skills.join(', ') || 'all'}]`)
+      this.queue.enqueue(job)
+      return
+    }
+
+    const installMethod = selection.method ?? 'copy'
+    for (const scopeItem of scopes) {
+      const operationId = randomUUID()
+      const skillLabel = skills[0] ?? `${action} (batch)`
+      const job: QueuedJob = {
+        operationId,
+        operation: action,
+        skillName: skillLabel,
+        metadata: {
+          batchId,
+          batchSize: scopes.length * (skills.length || 1),
+          skillNames: skills,
+          scope: scopeItem,
+          agents,
+          method: action === 'install' ? installMethod : undefined,
         },
       }
 
       this.logger.info(
-        `[${operationId}] Enqueuing ${invocation.operation} batch=${plan.batchId} scope=${invocation.scope} skills=[${invocation.skillNames.join(', ')}] agents=[${invocation.agents.join(', ')}]`,
+        `[${operationId}] Enqueuing ${action} batch=${batchId} scope=${scopeItem} skills=[${skills.join(', ')}] agents=[${agents.join(', ')}]`,
       )
       this.queue.enqueue(job)
     }
@@ -487,28 +470,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
    */
   private emitEvent(event: OperationEvent): void {
     this.eventHandlers.forEach((handler) => handler(event))
-  }
-
-  /**
-   * Resolves the working directory for an operation based on its target scope.
-   *
-   * @param scope - The installation scope hint.
-   * @returns Absolute path to use as the working directory.
-   */
-  private getCwd(scope: LifecycleScopeHint): string {
-    if (scope === 'local') {
-      const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
-      if (!workspaceFolder) {
-        throw new Error('No workspace folder open. Cannot install locally.')
-      }
-      return workspaceFolder.uri.fsPath
-    }
-
-    if (scope === 'global') {
-      return process.env.HOME || process.env.USERPROFILE || '~'
-    }
-
-    return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.env.HOME || process.env.USERPROFILE || '~'
   }
 
   /**

@@ -390,7 +390,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'requestAgentPick' is inactive"))
   })
 
   it('should treat legacy requestScopePick messages as unknown', async () => {
@@ -402,7 +402,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'requestScopePick' is inactive"))
   })
 
   it('should handle executeBatch install message', async () => {
@@ -414,7 +414,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'])
+    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'], 'card', 'copy')
   })
 
   it('should handle executeBatch remove message', async () => {

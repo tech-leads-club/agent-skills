@@ -1,63 +1,40 @@
-import { readFile } from 'node:fs/promises'
-import os from 'node:os'
-import path from 'node:path'
-import { LoggingService } from './logging-service'
+import { getAllLockedSkills } from '@tech-leads-club/core'
+import type { CorePorts } from '@tech-leads-club/core'
+import type { LoggingService } from './logging-service'
 
 /**
- * Information for a single installed skill inside the lockfile.
- */
-interface LockfileSkillEntry {
-  contentHash?: string
-}
-
-/**
- * Representation of the lockfile object.
- */
-interface SkillLockfile {
-  skills?: Record<string, LockfileSkillEntry>
-}
-
-/**
- * Reads the CLI lockfile (`~/.agents/.skill-lock.json`) to surface installed content hashes.
- * The extension only reads the file and never mutates it.
+ * Reads the skill lockfile via core to surface installed content hashes.
  */
 export class SkillLockService {
   /**
    * Creates a lockfile reader service.
    *
+   * @param ports - Core ports for lockfile access.
    * @param logger - Logging service for lockfile read diagnostics.
    */
-  constructor(private readonly logger: LoggingService) {}
+  constructor(
+    private readonly ports: CorePorts,
+    private readonly logger: LoggingService,
+  ) {}
 
   /**
-   * Reads all installed skill hashes from the lockfile.
+   * Reads all installed skill hashes from the lockfile (local + global).
    *
    * @returns A map of skill name to installed content hash (if known).
-   *
-   * @example
-   * ```typescript
-   * const lockService = new SkillLockService(logger);
-   * const hashes = await lockService.getInstalledHashes();
-   * console.log(hashes['my-skill']);
-   * ```
    */
   async getInstalledHashes(): Promise<Record<string, string | undefined>> {
-    const lockfilePath = this.getLockfilePath()
     try {
-      const raw = await readFile(lockfilePath, 'utf-8')
-      const parsed: SkillLockfile = JSON.parse(raw)
-      const skills = parsed.skills ?? {}
+      const [local, global] = await Promise.all([
+        getAllLockedSkills(this.ports, false),
+        getAllLockedSkills(this.ports, true),
+      ])
       const result: Record<string, string | undefined> = {}
-      for (const [skillName, entry] of Object.entries(skills)) {
+      for (const [skillName, entry] of Object.entries({ ...local, ...global })) {
         result[skillName] = entry?.contentHash
       }
       return result
     } catch (err: unknown) {
-      if (this.isNotFoundError(err)) {
-        this.logger.debug('Skill lockfile not found; returning empty hashes map')
-        return {}
-      }
-      this.logger.warn(`Unable to read skill lockfile: ${this.formatError(err)}`)
+      this.logger.warn(`Unable to read skill lockfile: ${err instanceof Error ? err.message : 'Unknown error'}`)
       return {}
     }
   }
@@ -67,49 +44,9 @@ export class SkillLockService {
    *
    * @param skillName - Skill identifier to resolve.
    * @returns Installed content hash, or `undefined` when missing.
-   *
-   * @example
-   * ```typescript
-   * const hash = await lockService.getInstalledHash('my-skill');
-   * ```
    */
   async getInstalledHash(skillName: string): Promise<string | undefined> {
     const hashes = await this.getInstalledHashes()
     return hashes[skillName]
-  }
-
-  /**
-   * Returns the absolute path to the skill lockfile.
-   *
-   * @returns Lockfile path under the current user home directory.
-   */
-  private getLockfilePath(): string {
-    return path.join(os.homedir(), '.agents', '.skill-lock.json')
-  }
-
-  /**
-   * Detects missing-file errors from unknown exceptions.
-   *
-   * @param err - Unknown error value.
-   * @returns `true` when the error indicates `ENOENT`.
-   */
-  private isNotFoundError(err: unknown): boolean {
-    if (typeof err === 'object' && err !== null && 'code' in err) {
-      return (err as { code?: unknown }).code === 'ENOENT'
-    }
-    return false
-  }
-
-  /**
-   * Converts unknown errors to a log-friendly string.
-   *
-   * @param err - Unknown error value.
-   * @returns Error message string.
-   */
-  private formatError(err: unknown): string {
-    if (err instanceof Error) {
-      return err.message
-    }
-    return 'Unknown error'
   }
 }

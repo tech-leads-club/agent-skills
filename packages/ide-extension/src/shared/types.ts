@@ -28,6 +28,7 @@ export interface Skill {
 
 /**
  * Complete skills registry structure from the CDN.
+ * Used by Install (skill picker), Update (updatable list), Remove (installed list).
  */
 export interface SkillRegistry {
   version: string
@@ -39,6 +40,7 @@ export interface SkillRegistry {
  * Map of skill name → installation metadata.
  * A skill can be installed locally, globally, or both independently.
  * null value means the skill is not installed in any scope.
+ * Supports Install, Update, and Remove flows (scoped by local/global).
  */
 export type InstalledSkillsMap = Record<string, InstalledSkillInfo | null>
 
@@ -78,7 +80,12 @@ export interface AvailableAgent {
 /**
  * Client-side view routing.
  */
-export type ViewRoute = 'home' | 'selectSkills' | 'selectAgents'
+export type ViewRoute = 'home' | 'selectSkills' | 'selectAgents' | 'installConfig' | 'status'
+
+/**
+ * Install method for skill installation.
+ */
+export type InstallMethod = 'copy' | 'symlink'
 
 /**
  * Actions that navigate to skill selection.
@@ -87,6 +94,7 @@ export type WebviewAction = 'install' | 'uninstall'
 
 /**
  * Type of lifecycle operation being performed.
+ * **Active flows**: install, remove, update. repair is deferred (no-op in orchestrator).
  */
 export type OperationType = 'install' | 'remove' | 'update' | 'repair'
 
@@ -183,6 +191,8 @@ export interface LifecycleBatchSelection {
   scope: LifecycleScopeHint
   source: 'card' | 'command-palette'
   updateAll?: boolean
+  /** Install method (copy/symlink). Only for install action. */
+  method?: 'copy' | 'symlink'
 }
 
 /**
@@ -194,4 +204,6 @@ export interface OperationBatchMetadata {
   skillNames: string[]
   scope: LifecycleScopeHint
   agents: string[]
+  /** Install method (copy/symlink). Only for install operations. */
+  method?: 'copy' | 'symlink'
 }

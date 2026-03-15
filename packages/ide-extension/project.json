@@ -46,6 +46,9 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/ide-extension/jest.config.ts"
+      },
+      "env": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
       }
     },
     "lint": {

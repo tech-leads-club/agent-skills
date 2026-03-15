@@ -10,8 +10,7 @@ jest.mock('../../webview/lib/vscode-api', () => ({
   setState: jest.fn(),
 }))
 
-const { axe, toHaveNoViolations } = jestAxe
-expect.extend(toHaveNoViolations)
+const { axe } = jestAxe
 
 const registry: SkillRegistry = {
   version: '1',

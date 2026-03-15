@@ -1,9 +1,7 @@
-import { spawn } from 'node:child_process'
 import * as vscode from 'vscode'
 import { createExtHostAdapters } from './adapters'
 import { SidebarProvider } from './providers/sidebar-provider'
-import { CliHealthChecker } from './services/cli-health-checker'
-import { CliSpawner } from './services/cli-spawner'
+import { CoreJobExecutor } from './services/core-job-executor'
 import { InstallationOrchestrator } from './services/installation-orchestrator'
 import { InstalledSkillsScanner } from './services/installed-skills-scanner'
 import { LoggingService } from './services/logging-service'
@@ -34,17 +32,16 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(logger)
 
   const ports = createExtHostAdapters(outputChannel)
-  const registryService = new SkillRegistryService(context, logger)
-  const cliSpawner = new CliSpawner(logger)
-  const operationQueue = new OperationQueue(cliSpawner)
+  const registryService = new SkillRegistryService(ports, context, logger)
+  const executor = new CoreJobExecutor(ports)
+  const operationQueue = new OperationQueue(executor)
   const verifier = new PostInstallVerifier(ports, logger)
   const orchestrator = new InstallationOrchestrator(operationQueue, verifier, logger)
   const scanner = new InstalledSkillsScanner(ports, logger)
   const reconciler = new StateReconciler(ports, scanner, registryService, logger)
-  const skillLockService = new SkillLockService(logger)
-  const healthChecker = new CliHealthChecker(cliSpawner, logger)
+  const skillLockService = new SkillLockService(ports, logger)
 
-  context.subscriptions.push(registryService, cliSpawner, operationQueue, orchestrator, reconciler, healthChecker)
+  context.subscriptions.push(registryService, operationQueue, orchestrator, reconciler)
 
   const sidebarProvider = new SidebarProvider(
     context,
@@ -95,35 +92,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   reconciler.start()
 
-  void healthChecker.check().then((status) => {
-    const isHealthy = status.status === 'ok' || status.status === 'outdated'
-    orchestrator.setCliHealthy(isHealthy)
-
-    if (status.status === 'npx-missing') {
-      void vscode.window.showErrorMessage('Node.js/npm is required. Please install Node.js and restart VS Code.')
-    } else if (status.status === 'cli-missing') {
-      void vscode.window
-        .showErrorMessage('The @tech-leads-club/agent-skills CLI is required.', 'Install CLI')
-        .then((action) => {
-          if (action === 'Install CLI') {
-            spawn('npm', ['install', '-g', '@tech-leads-club/agent-skills@latest'], { stdio: 'ignore', shell: true })
-          }
-        })
-    } else if (status.status === 'outdated') {
-      void vscode.window
-        .showWarningMessage(
-          `The Agent Skills CLI (v${status.version}) is outdated. ` +
-            `This extension requires v${status.minVersion} or later.`,
-          'Update CLI',
-        )
-        .then((action) => {
-          if (action === 'Update CLI') {
-            spawn('npm', ['install', '-g', '@tech-leads-club/agent-skills@latest'], { stdio: 'ignore', shell: true })
-          }
-        })
-    }
-  })
-
   context.subscriptions.push(
     vscode.commands.registerCommand('agentSkills.refresh', async () => {
       logger.info('Refresh command invoked')
@@ -145,14 +113,8 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   )
 
-  /**
-   * Helper to register a command palette action bridging the UI and extension core.
-   *
-   * @param commandId - Unique identifier of the command.
-   * @param handler - Asynchronous function invoked when the command is called.
-   */
   const registerPaletteCommand = (
-    commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update' | 'agentSkills.repair',
+    commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update',
     handler: () => Promise<void>,
   ) => {
     context.subscriptions.push(
@@ -166,7 +128,6 @@ export function activate(context: vscode.ExtensionContext): void {
   registerPaletteCommand('agentSkills.add', () => sidebarProvider.runCommandPaletteAdd())
   registerPaletteCommand('agentSkills.remove', () => sidebarProvider.runCommandPaletteRemove())
   registerPaletteCommand('agentSkills.update', () => sidebarProvider.runCommandPaletteUpdate())
-  registerPaletteCommand('agentSkills.repair', () => sidebarProvider.runCommandPaletteRepair())
 
   const extensionVersion = context.extension?.packageJSON?.version ?? 'unknown'
   logger.info(`Agent Skills v${extensionVersion} activated`)
