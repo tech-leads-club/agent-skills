@@ -1,0 +1,70 @@
+{
+  "name": "ide-extension",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ide-extension/src",
+  "projectType": "application",
+  "tags": ["scope:ide-extension"],
+  "targets": {
+    "build:webview": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist/webview"],
+      "inputs": ["production", "^production"],
+      "options": {
+        "command": "npx vite build",
+        "cwd": "packages/ide-extension"
+      }
+    },
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "dependsOn": ["build:webview"],
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "inputs": ["production", "^production"],
+      "options": {
+        "deleteOutputPath": false,
+        "platform": "node",
+        "outputPath": "packages/ide-extension/dist",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "packages/ide-extension/src/extension.ts",
+        "tsConfig": "packages/ide-extension/tsconfig.lib.json",
+        "assets": ["packages/ide-extension/resources"],
+        "external": ["vscode"],
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": { ".js": ".js" },
+          "platform": "node"
+        }
+      },
+      "configurations": {
+        "development": { "minify": false },
+        "production": { "minify": true }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/ide-extension/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^production"],
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "command": "eslint . --ignore-pattern .vscode-test",
+        "cwd": "packages/ide-extension"
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "npx @vscode/vsce package --no-dependencies",
+        "cwd": "packages/ide-extension"
+      }
+    }
+  }
+}
