@@ -10,7 +10,9 @@ import './index.css'
 import { onMessage, postMessage } from './lib/vscode-api'
 import { HomePage } from './views/HomePage'
 import { InstallConfigPage } from './views/InstallConfigPage'
+import { RemoveConfirmPage } from './views/RemoveConfirmPage'
 import { SelectAgentsPage } from './views/SelectAgentsPage'
+import { SelectOutdatedSkillsPage } from './views/SelectOutdatedSkillsPage'
 import { SelectSkillsPage } from './views/SelectSkillsPage'
 import { StatusPage } from './views/StatusPage'
 
@@ -45,27 +47,17 @@ function LoadingState() {
 }
 
 /**
- * Renders an error state with a retry action.
+ * Renders an error state (no manual retry; host handles refresh).
  *
- * @param props - Error message and retry callback.
+ * @param props - Error message.
  * @returns Error UI for failed registry loading.
  *
  * @internal
- *
- * @example
- * ```tsx
- * if (status === 'error') {
- *   return <ErrorState message="Failed to load" onRetry={handleRetry} />;
- * }
- * ```
  */
-function ErrorState({ message, onRetry }: { message: string | null; onRetry: () => void }) {
+function ErrorState({ message }: { message: string | null }) {
   return (
     <div className="error-state">
       <p className="error-message">{message || 'Failed to load skill registry'}</p>
-      <button className="retry-button" onClick={onRetry}>
-        Retry
-      </button>
     </div>
   )
 }
@@ -76,23 +68,11 @@ function ErrorState({ message, onRetry }: { message: string | null; onRetry: () 
  * @returns Empty-state UI for missing registry data.
  *
  * @internal
- *
- * @example
- * ```tsx
- * if (status === 'ready' && !registry) {
- *   return <NoRegistryState />;
- * }
- * ```
  */
-function NoRegistryState({ onRetry }: { onRetry?: () => void }) {
+function NoRegistryState() {
   return (
     <div className="empty-state">
       <p>No skills available in the registry</p>
-      {onRetry && (
-        <button type="button" className="retry-button" onClick={onRetry}>
-          Retry
-        </button>
-      )}
     </div>
   )
 }
@@ -142,14 +122,19 @@ function App() {
   const [fromCache, setFromCache] = useState(false)
   const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
   const [allAgents, setAllAgents] = useState<AvailableAgent[]>([])
-  const [hasWorkspace, setHasWorkspace] = useState(false)
   const [isTrusted, setIsTrusted] = useState(true)
   const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
   const [isBatchProcessing, setIsBatchProcessing] = useState(false)
-  const [processingAction, setProcessingAction] = useState<'update' | 'repair' | null>(null)
   const [batchResult, setBatchResult] = useState<{ success: boolean; failedSkills?: string[]; errorMessage?: string } | null>(
     null,
   )
+  const [lastBatchContext, setLastBatchContext] = useState<{
+    action: 'install' | 'remove' | 'update'
+    skills: string[]
+    agents: string[]
+    scope: LifecycleScope
+    method?: 'copy' | 'symlink'
+  } | null>(null)
 
   const {
     currentView,
@@ -160,11 +145,13 @@ function App() {
     installMethod,
     setScope,
     setInstallMethod,
-    goToSkills,
-    goToSkillsView,
     goToAgents,
+    goToAgentsView,
+    goToSkillsView,
     goToInstallConfig,
+    goToRemoveConfirm,
     goToStatus,
+    goToOutdatedSkills,
     goHome,
     toggleSkill,
     toggleAgent,
@@ -176,38 +163,82 @@ function App() {
   const { installedSkills } = useInstalledState()
   const { operations } = useOperations()
 
-  const handleRefresh = useCallback(() => {
-    postMessage({ type: 'requestRefresh' })
-  }, [goHome])
-
   const handleExecuteBatch = useCallback(
     (method?: 'copy' | 'symlink') => {
-      if (!currentAction || selectedSkills.length === 0 || selectedAgents.length === 0) return
+      const action = currentAction === 'install' ? 'install' : currentAction === 'update' ? 'update' : 'remove'
+      const skills = action === 'update' ? selectedSkills : selectedSkills
+      const agents = action === 'update' ? [] : selectedAgents
 
+      if (action !== 'update' && (skills.length === 0 || agents.length === 0)) return
+      if (action === 'update' && skills.length === 0) return
+
+      const ctx = {
+        action,
+        skills,
+        agents,
+        scope: activeScope,
+        method: action === 'install' ? (method ?? installMethod) : undefined,
+      }
+      setLastBatchContext(ctx)
       setBatchResult(null)
       setIsBatchProcessing(true)
       goToStatus()
       postMessage({
         type: 'executeBatch',
         payload: {
-          action: currentAction === 'install' ? 'install' : 'remove',
-          skills: selectedSkills,
-          agents: selectedAgents,
+          action,
+          skills,
+          agents,
           scope: activeScope,
-          method: currentAction === 'install' ? (method ?? installMethod) : undefined,
+          method: ctx.method,
         },
       })
     },
     [activeScope, currentAction, installMethod, selectedAgents, selectedSkills, goToStatus],
   )
 
-  const handleUpdate = useCallback(() => {
-    setProcessingAction('update')
-  }, [])
+  const handleExecuteUpdate = useCallback(
+    (skills: string[]) => {
+      const toUpdate = skills.length > 0 ? skills : []
+      setLastBatchContext({ action: 'update', skills: toUpdate, agents: [], scope: activeScope })
+      setBatchResult(null)
+      setIsBatchProcessing(true)
+      goToStatus()
+      postMessage({
+        type: 'executeBatch',
+        payload: {
+          action: 'update',
+          skills: toUpdate,
+          agents: [],
+          scope: activeScope,
+        },
+      })
+    },
+    [activeScope, goToStatus],
+  )
 
-  const handleRepair = useCallback(() => {
-    setProcessingAction('repair')
-  }, [])
+  const handleRetry = useCallback(() => {
+    if (!lastBatchContext) return
+    const { action, skills, agents, scope, method } = lastBatchContext
+    const toRetry =
+      action === 'update'
+        ? (batchResult?.failedSkills ?? [])
+        : (batchResult?.failedSkills ?? []).filter((s) => skills.includes(s))
+    if (toRetry.length === 0) return
+
+    setBatchResult(null)
+    setIsBatchProcessing(true)
+    postMessage({
+      type: 'executeBatch',
+      payload: {
+        action,
+        skills: toRetry,
+        agents,
+        scope,
+        method,
+      },
+    })
+  }, [batchResult?.failedSkills, lastBatchContext])
 
   useEffect(() => {
     const dispose = onMessage((msg: ExtensionMessage) => {
@@ -215,7 +246,6 @@ function App() {
         case 'initialize':
           setAvailableAgents(msg.payload.availableAgents)
           setAllAgents(msg.payload.allAgents)
-          setHasWorkspace(msg.payload.hasWorkspace)
           break
         case 'registryUpdate':
           setStatus(msg.payload.status as AppStatus)
@@ -256,10 +286,10 @@ function App() {
       return <LoadingState />
     }
     if (status === 'error') {
-      return <ErrorState message={errorMessage} onRetry={handleRefresh} />
+      return <ErrorState message={errorMessage} />
     }
     return null
-  }, [status, errorMessage, handleRefresh])
+  }, [status, errorMessage])
 
   const offlineBanner =
     fromCache && status === 'offline' ? (
@@ -269,61 +299,100 @@ function App() {
     ) : null
 
   const isLifecycleBlocked = policy?.effectiveScopes.length === 0
-  const isProcessing = isBatchProcessing || operations.size > 0 || processingAction !== null
-  const actionLabel = currentAction === 'install' ? 'Install' : 'Uninstall'
+  const isProcessing = isBatchProcessing || operations.size > 0
+  const actionLabel =
+    currentAction === 'install'
+      ? 'Install'
+      : currentAction === 'update'
+        ? 'Update'
+        : 'Uninstall'
   let currentViewAnnouncement = 'Home page'
 
   if (currentView === 'selectSkills') {
     currentViewAnnouncement = `${actionLabel} select skills page`
   } else if (currentView === 'selectAgents') {
     currentViewAnnouncement = `${actionLabel} select agents page`
+  } else if (currentView === 'selectOutdatedSkills') {
+    currentViewAnnouncement = 'Update select skills page'
   } else if (currentView === 'installConfig') {
     currentViewAnnouncement = 'Install configuration page'
+  } else if (currentView === 'removeConfirm') {
+    currentViewAnnouncement = 'Remove confirmation page'
   } else if (currentView === 'status') {
     currentViewAnnouncement = isBatchProcessing ? 'Operation in progress' : 'Operation complete'
   }
-
-  useEffect(() => {
-    if (!processingAction) return
-
-    const timeout = window.setTimeout(() => {
-      setProcessingAction(null)
-    }, 1200)
-
-    return () => window.clearTimeout(timeout)
-  }, [processingAction])
 
   if (statusContent) {
     return <div className="app">{statusContent}</div>
   }
 
   const renderCurrentView = () => {
-    if (currentView !== 'home' && !registry) {
-      return <NoRegistryState onRetry={handleRefresh} />
+    if (currentView !== 'home' && currentView !== 'selectOutdatedSkills' && !registry) {
+      return <NoRegistryState />
     }
 
     if (currentView === 'home') {
       return (
         <HomePage
-          registry={registry}
-          installedSkills={installedSkills}
-          allAgents={allAgents}
           policy={policy}
           isTrusted={isTrusted}
-          hasWorkspace={hasWorkspace}
-          scope={activeScope}
           isProcessing={isProcessing}
-          processingAction={processingAction}
-          onNavigate={goToSkills}
-          onScopeChange={setScope}
-          onUpdate={handleUpdate}
-          onRepair={handleRepair}
+          onInstall={() => goToAgents('install')}
+          onUninstall={() => goToAgents('uninstall')}
+          onUpdate={goToOutdatedSkills}
         />
       )
     }
 
-    if (!currentAction || !registry) {
-      return <NoRegistryState onRetry={handleRefresh} />
+    if (currentView === 'selectOutdatedSkills') {
+      return (
+        <SelectOutdatedSkillsPage
+          registry={registry!}
+          installedSkills={installedSkills}
+          effectiveScopes={policy?.effectiveScopes ?? ['global']}
+          selectedSkills={selectedSkills}
+          onToggleSkill={toggleSkill}
+          onSelectAll={selectAllSkills}
+          onClear={clearSkillSelection}
+          onCancel={goHome}
+          onUpdate={handleExecuteUpdate}
+        />
+      )
+    }
+
+    if (!currentAction || currentAction === 'update' || !registry) {
+      if (currentView === 'status') {
+        return (
+          <StatusPage
+            isProcessing={isBatchProcessing || operations.size > 0}
+            operations={operations}
+            batchResult={batchResult}
+            onRetry={handleRetry}
+            onDone={goHome}
+          />
+        )
+      }
+      return <NoRegistryState />
+    }
+
+    if (currentView === 'selectAgents') {
+      return (
+        <SelectAgentsPage
+          action={currentAction}
+          availableAgents={allAgents.length > 0 ? allAgents : availableAgents}
+          installedSkills={installedSkills}
+          selectedSkills={selectedSkills}
+          selectedAgents={selectedAgents}
+          scope={activeScope}
+          isProcessing={isBatchProcessing}
+          onToggleAgent={toggleAgent}
+          onSelectAll={selectAllAgents}
+          onClear={clearAgentSelection}
+          onBack={goHome}
+          onCancel={goHome}
+          onProceed={goToSkillsView}
+        />
+      )
     }
 
     if (currentView === 'selectSkills') {
@@ -333,14 +402,19 @@ function App() {
           registry={registry}
           installedSkills={installedSkills}
           allAgents={allAgents}
+          selectedAgents={selectedAgents}
           scope={activeScope}
           selectedSkills={selectedSkills}
           onToggleSkill={toggleSkill}
           onSelectAll={selectAllSkills}
           onClear={clearSkillSelection}
-          onBack={goHome}
+          onBack={goToAgentsView}
           onCancel={goHome}
-          onNext={goToAgents}
+          onNext={
+            currentAction === 'install'
+              ? goToInstallConfig
+              : goToRemoveConfirm
+          }
         />
       )
     }
@@ -352,10 +426,26 @@ function App() {
           selectedAgents={selectedAgents}
           scope={activeScope}
           method={installMethod}
+          effectiveScopes={policy?.effectiveScopes ?? ['global']}
           isProcessing={isBatchProcessing}
           onMethodChange={setInstallMethod}
-          onBack={goToAgents}
+          onScopeChange={setScope}
+          onCancel={goHome}
+          onBack={goToSkillsView}
           onConfirm={() => handleExecuteBatch(installMethod)}
+        />
+      )
+    }
+
+    if (currentView === 'removeConfirm' && currentAction === 'uninstall') {
+      return (
+        <RemoveConfirmPage
+          selectedSkills={selectedSkills}
+          selectedAgents={selectedAgents}
+          scope={activeScope}
+          isProcessing={isBatchProcessing}
+          onBack={goToSkillsView}
+          onConfirm={() => handleExecuteBatch()}
         />
       )
     }
@@ -366,32 +456,13 @@ function App() {
           isProcessing={isBatchProcessing || operations.size > 0}
           operations={operations}
           batchResult={batchResult}
+          onRetry={handleRetry}
           onDone={goHome}
         />
       )
     }
 
-    return (
-      <SelectAgentsPage
-        action={currentAction}
-        availableAgents={allAgents.length > 0 ? allAgents : availableAgents}
-        installedSkills={installedSkills}
-        selectedSkills={selectedSkills}
-        selectedAgents={selectedAgents}
-        scope={activeScope}
-        isProcessing={isBatchProcessing}
-        onToggleAgent={toggleAgent}
-        onSelectAll={selectAllAgents}
-        onClear={clearAgentSelection}
-        onBack={goToSkillsView}
-        onCancel={goHome}
-        onProceed={
-          currentAction === 'install'
-            ? goToInstallConfig
-            : () => handleExecuteBatch()
-        }
-      />
-    )
+    return <NoRegistryState />
   }
 
   return (

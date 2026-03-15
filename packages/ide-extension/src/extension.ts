@@ -11,7 +11,6 @@ import { ScopePolicyService } from './services/scope-policy-service'
 import { SkillLockService } from './services/skill-lock-service'
 import { SkillRegistryService } from './services/skill-registry-service'
 import { StateReconciler } from './services/state-reconciler'
-import { AllowedScopesSetting } from './shared/types'
 
 /**
  * Entry point invoked by VS Code when the extension activates.
@@ -56,17 +55,14 @@ export function activate(context: vscode.ExtensionContext): void {
   const scopePolicyService = new ScopePolicyService()
 
   /**
-   * Evaluates the current scope policies based on workspace configuration,
-   * trust state, and loaded instances, updating policy states for features.
+   * Evaluates scope policy: workspaceOnly (local when workspace+trusted, global always).
    */
   const updatePolicy = () => {
-    const config = vscode.workspace.getConfiguration('agentSkills')
-    const allowedScopes = config.get<AllowedScopesSetting>('scopes.allowedScopes') || 'all'
     const isWorkspaceTrusted = vscode.workspace.isTrusted
     const hasWorkspaceFolder = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
 
     const policy = scopePolicyService.evaluate({
-      allowedScopes,
+      allowedScopes: 'all',
       isWorkspaceTrusted,
       hasWorkspaceFolder,
     })
@@ -78,33 +74,11 @@ export function activate(context: vscode.ExtensionContext): void {
   updatePolicy()
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('agentSkills.scopes.allowedScopes')) {
-        updatePolicy()
-      }
-    }),
-  )
-
-  context.subscriptions.push(
     vscode.workspace.onDidGrantWorkspaceTrust(() => updatePolicy()),
     vscode.workspace.onDidChangeWorkspaceFolders(() => updatePolicy()),
   )
 
   reconciler.start()
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('agentSkills.refresh', async () => {
-      logger.info('Refresh command invoked')
-      try {
-        await registryService.refresh()
-        await reconciler.reconcile()
-        vscode.window.showInformationMessage('Agent Skills: Registry refreshed')
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        vscode.window.showErrorMessage(`Agent Skills: Failed to refresh — ${errorMessage}`)
-      }
-    }),
-  )
 
   context.subscriptions.push(
     vscode.commands.registerCommand('agentSkills.openSettings', () => {

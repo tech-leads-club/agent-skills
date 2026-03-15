@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { InstallMethod, LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
+import type { FlowAction, InstallMethod, LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
 
 /**
  * Target collection for bulk selection toggles.
@@ -15,25 +15,29 @@ type SelectionTarget = 'skills' | 'agents'
  *
  * @example
  * ```tsx
- * const { currentView, goToSkills } = useAppState();
+ * const { currentView, goToAgents } = useAppState();
  * ```
  */
 export function useAppState() {
   const [currentView, setCurrentView] = useState<ViewRoute>('home')
-  const [currentAction, setCurrentAction] = useState<WebviewAction | null>(null)
+  const [currentAction, setCurrentAction] = useState<FlowAction | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [activeScope, setActiveScope] = useState<LifecycleScope>('local')
   const [installMethod, setInstallMethod] = useState<InstallMethod>('copy')
 
-  const goToSkills = useCallback((action: WebviewAction) => {
+  const goToAgents = useCallback((action: WebviewAction) => {
     setCurrentAction(action)
-    setCurrentView('selectSkills')
+    setCurrentView('selectAgents')
     setSelectedSkills([])
     setSelectedAgents([])
   }, [])
 
-  const goToAgents = useCallback(() => {
+  const goToSkillsView = useCallback(() => {
+    setCurrentView('selectSkills')
+  }, [])
+
+  const goToAgentsView = useCallback(() => {
     setCurrentView('selectAgents')
   }, [])
 
@@ -41,12 +45,19 @@ export function useAppState() {
     setCurrentView('installConfig')
   }, [])
 
+  const goToRemoveConfirm = useCallback(() => {
+    setCurrentView('removeConfirm')
+  }, [])
+
   const goToStatus = useCallback(() => {
     setCurrentView('status')
   }, [])
 
-  const goToSkillsView = useCallback(() => {
-    setCurrentView('selectSkills')
+  const goToOutdatedSkills = useCallback(() => {
+    setCurrentAction('update')
+    setCurrentView('selectOutdatedSkills')
+    setSelectedSkills([])
+    setSelectedAgents([])
   }, [])
 
   const goHome = useCallback(() => {
@@ -115,11 +126,13 @@ export function useAppState() {
       installMethod,
       setScope: setActiveScope,
       setInstallMethod,
-      goToSkills,
-      goToSkillsView,
       goToAgents,
+      goToAgentsView,
+      goToSkillsView,
       goToInstallConfig,
+      goToRemoveConfirm,
       goToStatus,
+      goToOutdatedSkills,
       goHome,
       toggleSkill,
       toggleAgent,
@@ -137,9 +150,11 @@ export function useAppState() {
       currentView,
       goHome,
       goToAgents,
+      goToAgentsView,
       goToInstallConfig,
+      goToRemoveConfirm,
       goToStatus,
-      goToSkills,
+      goToOutdatedSkills,
       goToSkillsView,
       installMethod,
       selectAll,

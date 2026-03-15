@@ -96,6 +96,7 @@ export function SelectAgentsPage({
   action,
   availableAgents,
   installedSkills,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Required by parent; unused in Agents-first flow
   selectedSkills,
   selectedAgents,
   scope,
@@ -112,24 +113,19 @@ export function SelectAgentsPage({
     action === 'uninstall' ? 'primary-footer-button--uninstall' : 'primary-footer-button--install'
 
   const candidateAgents = useMemo(() => {
+    if (action === 'install') {
+      return availableAgents
+    }
     return availableAgents.filter((agent) => {
-      if (selectedSkills.length === 0) return false
-
-      const hasAnySelectedSkillInstalled = selectedSkills.some((skillName) =>
-        isSkillInstalledOnAgent(installedSkills, skillName, agent.agent, scope),
-      )
-
-      if (action === 'uninstall') {
-        return hasAnySelectedSkillInstalled
-      }
-
-      const hasAllSelectedSkillsInstalled = selectedSkills.every((skillName) =>
-        isSkillInstalledOnAgent(installedSkills, skillName, agent.agent, scope),
-      )
-
-      return !hasAllSelectedSkillsInstalled
+      return Object.keys(installedSkills).some((skillName) => {
+        const info = installedSkills[skillName]
+        if (!info) return false
+        const agentInstall = info.agents.find((a) => a.agent === agent.agent)
+        if (!agentInstall) return false
+        return scope === 'local' ? agentInstall.local : agentInstall.global
+      })
     })
-  }, [action, availableAgents, installedSkills, scope, selectedSkills])
+  }, [action, availableAgents, installedSkills, scope])
 
   const searchableAgents = useMemo(
     () =>
@@ -193,7 +189,7 @@ export function SelectAgentsPage({
   return (
     <section className="select-page" aria-label="Select agents page">
       <header className="select-page-header">
-        <button className="icon-button" onClick={onBack} aria-label="Back to skills">
+        <button className="icon-button" onClick={onBack} aria-label="Back to previous step">
           <span className="codicon codicon-arrow-left" aria-hidden="true" />
         </button>
         <div>
@@ -221,13 +217,13 @@ export function SelectAgentsPage({
       <div className="select-page-list" aria-label="Agents list">
         {visibleAgents.length === 0 ? (
           <div className="select-page-empty" role="status">
-            <p>
-              {action === 'install'
-                ? 'All selected skills are already installed on every detected agent.'
-                : 'No agents have the selected skills installed.'}
-            </p>
-            <button type="button" className="secondary-footer-button" onClick={onBack}>
-              Back to Skills
+          <p>
+            {action === 'install'
+              ? 'No agents detected.'
+              : 'No agents have skills installed in the selected scope.'}
+          </p>
+            <button type="button" className="secondary-footer-button" onClick={onCancel}>
+              Cancel
             </button>
           </div>
         ) : (
@@ -238,6 +234,9 @@ export function SelectAgentsPage({
               company={agent.company}
               isSelected={selectedAgents.includes(agent.agent)}
               onToggle={() => onToggleAgent(agent.agent)}
+              isInstalled={Object.keys(installedSkills).some((skillName) =>
+                isSkillInstalledOnAgent(installedSkills, skillName, agent.agent, scope),
+              )}
             />
           ))
         )}
@@ -245,7 +244,7 @@ export function SelectAgentsPage({
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
-          <button className="secondary-footer-button" onClick={onCancel} disabled={isProcessing}>
+          <button className="secondary-footer-button" onClick={onCancel} disabled={isProcessing} type="button">
             Cancel
           </button>
           <button

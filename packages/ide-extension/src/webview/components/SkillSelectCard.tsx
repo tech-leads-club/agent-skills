@@ -12,6 +12,8 @@ export interface SkillSelectCardProps {
   isSelected: boolean
   /** Callback fired when the selection state is toggled. */
   onToggle: () => void
+  /** Whether the skill is installed (shows "Installed" tag). */
+  isInstalled?: boolean
 }
 
 /**
@@ -32,7 +34,13 @@ export interface SkillSelectCardProps {
  * />
  * ```
  */
-export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: SkillSelectCardProps) {
+export function SkillSelectCard({
+  skill,
+  categoryName,
+  isSelected,
+  onToggle,
+  isInstalled = false,
+}: SkillSelectCardProps) {
   const inputId = `skill-select-${skill.name}`
   const descriptionId = `${inputId}-description`
   const selectLabel = `Select ${skill.name}`
@@ -42,6 +50,9 @@ export function SkillSelectCard({ skill, categoryName, isSelected, onToggle }: S
       <div className="skill-select-card-header">
         <p>{skill.name}</p>
         <div className="skill-select-card-header-end">
+          {isInstalled && (
+            <span className="skill-select-card-tag skill-select-card-tag--installed">Installed</span>
+          )}
           <span className="skill-select-card-category" data-category={skill.category}>
             {categoryName}
           </span>

@@ -80,7 +80,14 @@ export interface AvailableAgent {
 /**
  * Client-side view routing.
  */
-export type ViewRoute = 'home' | 'selectSkills' | 'selectAgents' | 'installConfig' | 'status'
+export type ViewRoute =
+  | 'home'
+  | 'selectSkills'
+  | 'selectAgents'
+  | 'installConfig'
+  | 'removeConfirm'
+  | 'status'
+  | 'selectOutdatedSkills'
 
 /**
  * Install method for skill installation.
@@ -91,6 +98,11 @@ export type InstallMethod = 'copy' | 'symlink'
  * Actions that navigate to skill selection.
  */
 export type WebviewAction = 'install' | 'uninstall'
+
+/**
+ * Flow action for sidebar navigation (includes update).
+ */
+export type FlowAction = WebviewAction | 'update'
 
 /**
  * Type of lifecycle operation being performed.

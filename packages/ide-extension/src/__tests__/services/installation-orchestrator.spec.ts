@@ -145,10 +145,9 @@ describe('InstallationOrchestrator', () => {
     })
 
     expect(mockVerifier.verify).toHaveBeenCalledWith('skill', ['agent1'], 'local', '/workspace')
-    expect(mockVscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('completed'))
   })
 
-  it('should warn and offer repair if post-install verification fails', async () => {
+  it('should log verification failure without user prompt when post-install verification fails', async () => {
     await orchestrator.install('skill', 'local', ['agent1'])
     const job = (mockQueue.enqueue as jest.Mock).mock.calls[0][0] as QueuedJob
     const opId = job.operationId
@@ -157,14 +156,10 @@ describe('InstallationOrchestrator', () => {
       result: JobResult,
     ) => Promise<void> | void
 
-    // Verification fails
     ;(mockVerifier.verify as MockAsyncFn<VerifyResult>).mockResolvedValue({
       ok: false,
       corrupted: [{ agent: 'agent1', scope: 'local', expectedPath: '...' }],
     })
-
-    // Simulate user clicking "Repair" (repair flow is deferred, logs warning only)
-    ;(mockVscode.window.showWarningMessage as MockAsyncFn<string | undefined>).mockResolvedValue('Repair')
 
     expect(job.metadata).toBeDefined()
     await completeHandler({
@@ -175,8 +170,7 @@ describe('InstallationOrchestrator', () => {
       metadata: job.metadata,
     })
 
-    expect(mockVscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('corrupted'), 'Repair')
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Repair flow is deferred'))
-    expect(mockQueue.enqueue).toHaveBeenCalledTimes(1) // only install; repair is deferred
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Post-install verification failed'))
+    expect(mockVscode.window.showWarningMessage).not.toHaveBeenCalled()
   })
 })

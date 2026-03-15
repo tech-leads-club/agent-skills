@@ -35,7 +35,14 @@ const registry: SkillRegistry = {
 }
 
 const installedSkills: InstalledSkillsMap = {
-  accessibility: { local: true, global: false, agents: [] },
+  accessibility: {
+    local: true,
+    global: false,
+    agents: [
+      { agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false },
+      { agent: 'claude-code', displayName: 'Claude Code', local: true, global: false, corrupted: false },
+    ],
+  },
   seo: null,
 }
 
@@ -51,6 +58,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={installedSkills}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -120,6 +128,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -159,6 +168,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registryWithLongDescription}
         installedSkills={{ accessibility: null, seo: null, 'chrome-devtools': null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -181,6 +191,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -203,6 +214,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -218,12 +230,13 @@ describe('SelectSkillsPage', () => {
     expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
   })
 
-  it('disables select agents button when nothing is selected', () => {
+  it('disables configure installation button when nothing is selected', () => {
     render(
       <SelectSkillsPage
         action="install"
         registry={registry}
         installedSkills={installedSkills}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -234,15 +247,16 @@ describe('SelectSkillsPage', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /select agents/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /configure installation/i })).toBeDisabled()
   })
 
-  it('applies install accent class to select agents button', () => {
+  it('applies install accent class to configure installation button', () => {
     render(
       <SelectSkillsPage
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={['accessibility']}
         onToggleSkill={jest.fn()}
@@ -253,10 +267,10 @@ describe('SelectSkillsPage', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /select agents/i })).toHaveClass('primary-footer-button--install')
+    expect(screen.getByRole('button', { name: /configure installation/i })).toHaveClass('primary-footer-button--install')
   })
 
-  it('applies uninstall accent class to select agents button', () => {
+  it('applies uninstall accent class to confirm removal button', () => {
     render(
       <SelectSkillsPage
         action="uninstall"
@@ -272,7 +286,7 @@ describe('SelectSkillsPage', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /select agents/i })).toHaveClass('primary-footer-button--uninstall')
+    expect(screen.getByRole('button', { name: /confirm removal/i })).toHaveClass('primary-footer-button--uninstall')
   })
 
   it('supports Ctrl+A bulk selection shortcut', async () => {
@@ -284,6 +298,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}
@@ -304,6 +319,7 @@ describe('SelectSkillsPage', () => {
         action="install"
         registry={registry}
         installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
         onToggleSkill={jest.fn()}

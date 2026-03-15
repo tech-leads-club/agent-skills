@@ -404,29 +404,23 @@ export class InstallationOrchestrator implements vscode.Disposable {
   }
 
   /**
-   * Displays completion notifications and triggers post-install validation.
+   * Handles completion: post-install verification for install/repair.
+   * Sidebar flow consolidates feedback in Status page; no IDE notifications for batch ops.
    *
    * @param result - Outcome of the completed job.
    */
   private async handleCompletionNotification(result: JobResult): Promise<void> {
     if (result.status === 'completed') {
       if ((result.operation === 'install' || result.operation === 'repair') && result.metadata) {
-        const verified = await this.verifyInstallation(result, result.metadata)
-        if (!verified) {
-          return
-        }
+        await this.verifyInstallation(result, result.metadata)
       }
-
-      void vscode.window.showInformationMessage(this.getCompletionMessage(result.operation))
       return
     }
 
-    if (result.status === 'error') {
-      void vscode.window.showErrorMessage(
-        this.getFailureMessage(result.operation, result.errorMessage ?? 'Unknown error'),
+    if (result.status === 'error' || result.status === 'cancelled') {
+      this.logger.info(
+        `[${result.operationId}] ${result.status}: ${result.errorMessage ?? this.getCancelledMessage(result.operation)}`,
       )
-    } else if (result.status === 'cancelled') {
-      void vscode.window.showWarningMessage(this.getCancelledMessage(result.operation))
     }
   }
 
@@ -449,17 +443,6 @@ export class InstallationOrchestrator implements vscode.Disposable {
     this.logger.warn(
       `[${result.operationId}] Post-install verification failed: ${JSON.stringify(verifyResult.corrupted)}`,
     )
-
-    const action = await vscode.window.showWarningMessage(
-      `Skill '${result.skillName}' may be corrupted — SKILL.md not found in expected locations.`,
-      'Repair',
-    )
-
-    if (action === 'Repair') {
-      const repairScope: 'local' | 'global' = metadata.scope === 'local' ? 'local' : 'global'
-      void this.repair(result.skillName, repairScope, metadata.agents)
-    }
-
     return false
   }
 

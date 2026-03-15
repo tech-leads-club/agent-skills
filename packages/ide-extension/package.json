@@ -62,10 +62,6 @@
       {
         "command": "agentSkills.update",
         "title": "Agent Skills: Update"
-      },
-      {
-        "command": "agentSkills.repair",
-        "title": "Agent Skills: Repair"
       }
     ],
     "menus": {
@@ -73,31 +69,9 @@
         {
           "command": "agentSkills.openSettings",
           "when": "view == agentSkillsSidebar",
-          "group": "navigation@2"
-        },
-        {
-          "command": "agentSkills.refresh",
-          "when": "view == agentSkillsSidebar",
           "group": "navigation@1"
         }
       ]
-    },
-    "configuration": {
-      "title": "Agent Skills",
-      "properties": {
-        "agentSkills.scopes.allowedScopes": {
-          "type": "string",
-          "enum": [
-            "all",
-            "global",
-            "local",
-            "none"
-          ],
-          "default": "all",
-          "description": "Controls which scopes are allowed for skill installation and management. 'all' allows both local and global. 'global' restricts to global user scope. 'local' restricts to workspace scope. 'none' disables all lifecycle operations.",
-          "scope": "window"
-        }
-      }
     }
   },
   "capabilities": {

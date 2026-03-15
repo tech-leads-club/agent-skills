@@ -62,7 +62,7 @@ describe('SelectAgentsPage', () => {
     expect(screen.getByRole('button', { name: /uninstall skills/i })).toBeInTheDocument()
   })
 
-  it('filters install flow to agents missing selected skill', () => {
+  it('shows all agents for install flow', () => {
     render(
       <SelectAgentsPage
         action="install"
@@ -80,7 +80,7 @@ describe('SelectAgentsPage', () => {
       />,
     )
 
-    expect(screen.queryByText('Cursor')).not.toBeInTheDocument()
+    expect(screen.getByText('Cursor')).toBeInTheDocument()
     expect(screen.getByText('Claude Code')).toBeInTheDocument()
   })
 

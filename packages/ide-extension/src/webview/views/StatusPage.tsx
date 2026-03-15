@@ -19,7 +19,9 @@ export interface StatusPageProps {
   operations: Map<string, OperationState>
   /** Result of the last completed batch, if any. */
   batchResult: BatchResult | null
-  /** Callback to return to home. */
+  /** Callback to retry failed items only. */
+  onRetry?: () => void
+  /** Callback to return to dashboard. */
   onDone: () => void
 }
 
@@ -29,15 +31,21 @@ export interface StatusPageProps {
  * @param props - Status state and callbacks.
  * @returns Status view.
  */
-export function StatusPage({ isProcessing, operations, batchResult, onDone }: StatusPageProps) {
+export function StatusPage({ isProcessing, operations, batchResult, onRetry, onDone }: StatusPageProps) {
   const operationList = Array.from(operations.values())
+  const hasFailures =
+    !isProcessing &&
+    batchResult &&
+    !batchResult.success &&
+    batchResult.failedSkills &&
+    batchResult.failedSkills.length > 0
 
   return (
     <section className="select-page status-page" aria-label="Operation status">
       <header className="select-page-header">
         <div>
           <h1>{isProcessing ? 'Operation in progress' : 'Operation complete'}</h1>
-          <p>{isProcessing ? 'Please wait while skills are being installed.' : 'Review the results below.'}</p>
+          <p>{isProcessing ? 'Please wait while skills are being processed.' : 'Review the results below.'}</p>
         </div>
       </header>
 
@@ -81,13 +89,18 @@ export function StatusPage({ isProcessing, operations, batchResult, onDone }: St
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
+          {hasFailures && onRetry && (
+            <button type="button" className="secondary-footer-button" onClick={onRetry}>
+              Try again
+            </button>
+          )}
           <button
             type="button"
             className="primary-footer-button"
             onClick={onDone}
             disabled={isProcessing}
           >
-            Done
+            Back to Dashboard
           </button>
         </div>
       </footer>

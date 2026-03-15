@@ -12,11 +12,17 @@ export interface InstallConfigPageProps {
   scope: LifecycleScope
   /** Currently selected install method. */
   method: InstallMethod
+  /** Effective scopes from policy (workspaceOnly). */
+  effectiveScopes: LifecycleScope[]
   /** Whether a background operation is running. */
   isProcessing: boolean
   /** Callback when install method changes. */
   onMethodChange: (method: InstallMethod) => void
-  /** Callback to go back to agent selection. */
+  /** Callback when scope changes. */
+  onScopeChange: (scope: LifecycleScope) => void
+  /** Callback to cancel and return to dashboard. */
+  onCancel: () => void
+  /** Callback to go back to skills selection. */
   onBack: () => void
   /** Callback to confirm and start installation. */
   onConfirm: () => void
@@ -33,26 +39,61 @@ export function InstallConfigPage({
   selectedAgents,
   scope,
   method,
+  effectiveScopes,
   isProcessing,
   onMethodChange,
+  onScopeChange,
+  onCancel,
   onBack,
   onConfirm,
 }: InstallConfigPageProps) {
-  const scopeLabel = scope === 'local' ? 'Local (project)' : 'Global (user)'
-
   return (
     <section className="select-page" aria-label="Install configuration">
       <header className="select-page-header">
-        <button type="button" className="icon-button" onClick={onBack} aria-label="Back to agents">
+        <button type="button" className="icon-button" onClick={onBack} aria-label="Back to skills">
           <span className="codicon codicon-arrow-left" aria-hidden="true" />
         </button>
         <div>
           <h1>Install: Configuration</h1>
-          <p>Choose how skills will be installed.</p>
+          <p>Choose scope, method, and confirm installation.</p>
         </div>
       </header>
 
       <div className="install-config-content">
+        <fieldset className="install-config-fieldset">
+          <legend>Scope</legend>
+          {effectiveScopes.includes('local') && (
+            <label className="install-config-radio">
+              <input
+                type="radio"
+                name="installScope"
+                value="local"
+                checked={scope === 'local'}
+                onChange={() => onScopeChange('local')}
+                disabled={isProcessing}
+              />
+              <span>
+                <strong>Local (project)</strong> — Installed in workspace .agents directory.
+              </span>
+            </label>
+          )}
+          {effectiveScopes.includes('global') && (
+            <label className="install-config-radio">
+              <input
+                type="radio"
+                name="installScope"
+                value="global"
+                checked={scope === 'global'}
+                onChange={() => onScopeChange('global')}
+                disabled={isProcessing}
+              />
+              <span>
+                <strong>Global (user)</strong> — Installed in user home directory.
+              </span>
+            </label>
+          )}
+        </fieldset>
+
         <fieldset className="install-config-fieldset">
           <legend>Install method</legend>
           <label className="install-config-radio">
@@ -85,9 +126,6 @@ export function InstallConfigPage({
 
         <div className="install-config-summary">
           <p>
-            <strong>Scope:</strong> {scopeLabel}
-          </p>
-          <p>
             <strong>Skills:</strong> {selectedSkills.length} selected
           </p>
           <p>
@@ -98,8 +136,8 @@ export function InstallConfigPage({
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
-          <button type="button" className="secondary-footer-button" onClick={onBack} disabled={isProcessing}>
-            Back
+          <button type="button" className="secondary-footer-button" onClick={onCancel} disabled={isProcessing}>
+            Cancel
           </button>
           <button
             type="button"

@@ -137,12 +137,11 @@ describe('Extension Activation', () => {
   it('should register extension commands', () => {
     activate(context)
 
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.refresh', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.openSettings', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.add', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.remove', expect.any(Function))
     expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.update', expect.any(Function))
-    expect(context.subscriptions.length).toBeGreaterThanOrEqual(4)
+    expect(context.subscriptions.length).toBeGreaterThanOrEqual(3)
   })
 
   it('should log diagnostic info on activation', () => {
@@ -151,20 +150,6 @@ describe('Extension Activation', () => {
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('v1.2.3 activated'))
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('VS Code'))
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('Workspace trusted'))
-  })
-
-  it('should handle agentSkills.refresh command', async () => {
-    activate(context)
-    const calls = (vscode.commands.registerCommand as unknown as jest.Mock<(...args: Array<unknown>) => unknown>).mock
-      .calls
-    const refreshCall = calls.find((c: unknown[]) => c[0] === 'agentSkills.refresh')
-    const handler = refreshCall?.[1] as (...args: unknown[]) => Promise<void>
-
-    await handler()
-
-    expect(mockLoggingService.info).toHaveBeenCalledWith('Refresh command invoked')
-    expect(mockRegistryService.refresh).toHaveBeenCalled()
-    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Agent Skills: Registry refreshed')
   })
 
   it('should handle agentSkills.openSettings command', () => {

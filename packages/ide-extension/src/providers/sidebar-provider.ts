@@ -56,7 +56,7 @@ interface ConfirmationSummary {
  * State of a batch operation in progress.
  */
 interface BatchProgressState {
-  action: 'install' | 'remove'
+  action: 'install' | 'remove' | 'update'
   remaining: number
   total: number
   failedSkills: string[]
@@ -132,10 +132,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     this.orchestrator.onOperationEvent((event) => {
-      if (event.type === 'started') {
+        if (event.type === 'started') {
         if (event.metadata && !this.batchProgress.has(event.metadata.batchId)) {
+          const action =
+            event.operation === 'remove'
+              ? 'remove'
+              : event.operation === 'update'
+                ? 'update'
+                : 'install'
           this.batchProgress.set(event.metadata.batchId, {
-            action: event.operation === 'remove' ? 'remove' : 'install',
+            action,
             remaining: event.metadata.batchSize,
             total: event.metadata.batchSize,
             failedSkills: [],
@@ -185,7 +191,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
             if (state.remaining <= 0) {
               const success = state.failedSkills.length === 0
-              const verb = state.action === 'install' ? 'installed' : 'removed'
               const errorMessage = success
                 ? undefined
                 : `Failed to ${state.action} skills: ${state.failedSkills.join(', ')}`
@@ -199,14 +204,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                   errorMessage,
                 },
               })
-
-              if (success) {
-                void vscode.window.showInformationMessage(
-                  `Successfully ${verb} ${state.total} skill${state.total === 1 ? '' : 's'}.`,
-                )
-              } else {
-                void vscode.window.showErrorMessage(errorMessage ?? 'Batch operation failed.')
-              }
 
               this.batchProgress.delete(batchId)
             }
@@ -479,9 +476,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     scope: 'local' | 'global',
     method: 'copy' | 'symlink' = 'copy',
   ): Promise<void> {
-    if (skills.length === 0 || agents.length === 0) {
-      vscode.window.showErrorMessage('Select at least one skill and one agent before proceeding.')
-      return
+    if (action === 'install' || action === 'remove') {
+      if (skills.length === 0 || agents.length === 0) {
+        vscode.window.showErrorMessage('Select at least one skill and one agent before proceeding.')
+        return
+      }
     }
 
     if (action === 'install') {
@@ -491,6 +490,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     if (action === 'remove') {
       await this.runQueueAction('remove', () => this.orchestrator.removeMany(skills, scope, agents))
+      return
+    }
+
+    if (action === 'update') {
+      const updateSkills = skills.length > 0 ? skills : ('all' as const)
+      await this.runQueueAction('update', () => this.orchestrator.updateMany(updateSkills, 'card'))
       return
     }
 

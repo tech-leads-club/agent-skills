@@ -170,13 +170,6 @@ body {
   );
 }
 
-.home-action-button--repair {
-  --home-action-accent-color: var(
-    --vscode-editorWarning-foreground,
-    var(--vscode-charts-yellow, var(--vscode-terminal-ansiYellow, var(--vscode-foreground)))
-  );
-}
-
 .home-action-icon {
   font-size: 16px;
   color: var(--home-action-accent-color);
@@ -197,88 +190,6 @@ body {
 .home-action-chevron {
   font-size: 14px;
   color: var(--home-action-accent-color);
-}
-
-.scope-selector {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.scope-selector-input-wrapper {
-  position: relative;
-  width: fit-content;
-}
-
-.scope-selector-input-wrapper--open .scope-selector-chevron {
-  transform: rotate(180deg);
-}
-
-.scope-selector-input {
-  width: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 1ch;
-  background-color: transparent;
-  color: var(--vscode-dropdown-foreground);
-  border: none;
-  border-radius: 6px;
-  padding: 6px 8px;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.scope-selector-chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: var(--vscode-dropdown-foreground);
-  transition: transform 120ms ease;
-}
-
-.scope-selector-input:disabled .scope-selector-chevron {
-  opacity: 0.6;
-}
-
-.scope-selector-input:hover:not(:disabled),
-.scope-selector-input:focus-visible,
-.scope-selector-input-wrapper--open .scope-selector-input {
-  background-color: var(--vscode-list-hoverBackground);
-}
-
-.scope-selector-menu {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 6px);
-  min-width: 100%;
-  border: 1px solid var(--vscode-panel-border);
-  border-radius: 8px;
-  background-color: var(--vscode-sideBar-background);
-  overflow: hidden;
-  z-index: 10;
-}
-
-.scope-selector-option {
-  width: 100%;
-  border: none;
-  background-color: transparent;
-  color: var(--vscode-dropdown-foreground);
-  padding: 6px 8px;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-}
-
-.scope-selector-option:hover,
-.scope-selector-option:focus-visible,
-.scope-selector-option--selected {
-  background-color: var(--vscode-list-hoverBackground);
 }
 
 .select-page {
@@ -527,60 +438,20 @@ body {
   min-width: 0;
 }
 
-.skill-select-card-category {
+.skill-select-card-category,
+.skill-select-card-tag,
+.agent-select-card-tag {
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 999px;
   background-color: var(--vscode-badge-background);
-  color: var(--skill-category-color, var(--vscode-textLink-foreground));
+  color: var(--vscode-badge-foreground);
 }
 
-.skill-select-card-category[data-category='architecture'] {
-  --skill-category-color: var(--vscode-terminal-ansiMagenta, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='cloud'] {
-  --skill-category-color: var(--vscode-terminal-ansiBlue, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='creation'] {
-  --skill-category-color: var(--vscode-terminal-ansiCyan, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='design'] {
-  --skill-category-color: var(--vscode-terminal-ansiBrightMagenta, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='development'] {
-  --skill-category-color: var(--vscode-terminal-ansiBrightBlue, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='monitoring'] {
-  --skill-category-color: var(--vscode-terminal-ansiBrightCyan, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='performance'] {
-  --skill-category-color: var(--vscode-terminal-ansiYellow, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='quality'] {
-  --skill-category-color: var(--vscode-terminal-ansiGreen, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='security'] {
-  --skill-category-color: var(--vscode-terminal-ansiRed, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='tooling'] {
-  --skill-category-color: var(--vscode-terminal-ansiBrightYellow, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='web-automation'] {
-  --skill-category-color: var(--vscode-terminal-ansiBrightGreen, var(--vscode-textLink-foreground));
-}
-
-.skill-select-card-category[data-category='uncategorized'] {
-  --skill-category-color: var(--vscode-terminal-ansiWhite, var(--vscode-textLink-foreground));
+.skill-select-card-tag--installed,
+.agent-select-card-tag--installed {
+  background-color: var(--vscode-testing-iconPassed, var(--vscode-terminal-ansiGreen));
+  color: var(--vscode-editorWidget-background, #fff);
 }
 
 .skill-select-card-description,

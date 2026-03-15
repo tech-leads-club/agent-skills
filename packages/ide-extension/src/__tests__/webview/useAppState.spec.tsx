@@ -18,35 +18,35 @@ describe('useAppState', () => {
     expect(result.current.activeScope).toBe('local')
   })
 
-  it('goToSkills sets action and route', () => {
+  it('goToAgents sets action and route', () => {
     const { result } = renderHook(() => useAppState())
 
     act(() => {
-      result.current.goToSkills('install')
-    })
-
-    expect(result.current.currentView).toBe('selectSkills')
-    expect(result.current.currentAction).toBe('install')
-  })
-
-  it('goToAgents preserves selected skills', () => {
-    const { result } = renderHook(() => useAppState())
-
-    act(() => {
-      result.current.goToSkills('install')
-      result.current.toggleSkill('docs-writer')
-      result.current.goToAgents()
+      result.current.goToAgents('install')
     })
 
     expect(result.current.currentView).toBe('selectAgents')
-    expect(result.current.selectedSkills).toEqual(['docs-writer'])
+    expect(result.current.currentAction).toBe('install')
+  })
+
+  it('goToSkillsView preserves selected agents', () => {
+    const { result } = renderHook(() => useAppState())
+
+    act(() => {
+      result.current.goToAgents('install')
+      result.current.toggleAgent('cursor')
+      result.current.goToSkillsView()
+    })
+
+    expect(result.current.currentView).toBe('selectSkills')
+    expect(result.current.selectedAgents).toEqual(['cursor'])
   })
 
   it('goHome resets view, action, and all selections', () => {
     const { result } = renderHook(() => useAppState())
 
     act(() => {
-      result.current.goToSkills('uninstall')
+      result.current.goToAgents('uninstall')
       result.current.toggleSkill('docs-writer')
       result.current.toggleAgent('cursor')
       result.current.goHome()

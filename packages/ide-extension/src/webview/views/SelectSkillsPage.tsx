@@ -23,6 +23,8 @@ export interface SelectSkillsPageProps {
   installedSkills: InstalledSkillsMap
   /** Array of all available target agents. */
   allAgents?: AvailableAgent[]
+  /** Selected agent ids (for Install flow: skills not installed on these agents). */
+  selectedAgents?: string[]
   /** The target lifecycle scope for the operation. */
   scope: LifecycleScope
   /** Names of the skills that are currently checked/selected. */
@@ -133,6 +135,7 @@ export function SelectSkillsPage({
   registry,
   installedSkills,
   allAgents = [],
+  selectedAgents = [],
   scope,
   selectedSkills,
   onToggleSkill,
@@ -147,14 +150,25 @@ export function SelectSkillsPage({
     action === 'uninstall' ? 'primary-footer-button--uninstall' : 'primary-footer-button--install'
 
   const candidateSkills = useMemo(() => {
+    const agentsForInstall =
+      selectedAgents.length > 0
+        ? allAgents.filter((a) => selectedAgents.includes(a.agent))
+        : allAgents
     return registry.skills.filter((skill) => {
-      const installed =
-        action === 'install'
-          ? isInstalledForAllAgents(installedSkills[skill.name], allAgents, scope)
-          : isInstalledForScope(installedSkills[skill.name], scope)
-      return action === 'install' ? !installed : installed
+      if (action === 'install') {
+        return !isInstalledForAllAgents(installedSkills[skill.name], agentsForInstall, scope)
+      }
+      const installed = installedSkills[skill.name]
+      if (!installed || (!installed.local && !installed.global)) return false
+      const scopeInstalled = scope === 'local' ? installed.local : installed.global
+      if (!scopeInstalled) return false
+      if (selectedAgents.length === 0) return true
+      return installed.agents.some(
+        (a) =>
+          selectedAgents.includes(a.agent) && (scope === 'local' ? a.local : a.global),
+      )
     })
-  }, [action, allAgents, installedSkills, registry.skills, scope])
+  }, [action, allAgents, installedSkills, registry.skills, scope, selectedAgents])
 
   const searchableSkills = useMemo<SearchableSkillEntry[]>(
     () =>
@@ -216,7 +230,7 @@ export function SelectSkillsPage({
   return (
     <section className="select-page" aria-label="Select skills page">
       <header className="select-page-header">
-        <button className="icon-button" onClick={onBack} aria-label="Back to home">
+        <button className="icon-button" onClick={onBack} aria-label="Back to previous step">
           <span className="codicon codicon-arrow-left" aria-hidden="true" />
         </button>
         <div>
@@ -242,8 +256,8 @@ export function SelectSkillsPage({
                 ? 'All skills are already installed for the selected scope.'
                 : 'No skills are installed for the selected scope.'}
             </p>
-            <button type="button" className="secondary-footer-button" onClick={onBack}>
-              Back to Home
+            <button type="button" className="secondary-footer-button" onClick={onCancel}>
+              Cancel
             </button>
           </div>
         ) : (
@@ -254,6 +268,7 @@ export function SelectSkillsPage({
               categoryName={registry.categories[skill.category]?.name ?? skill.category}
               isSelected={selectedSkills.includes(skill.name)}
               onToggle={() => onToggleSkill(skill.name)}
+              isInstalled={action === 'uninstall' || isInstalledForScope(installedSkills[skill.name], scope)}
             />
           ))
         )}
@@ -269,7 +284,7 @@ export function SelectSkillsPage({
             onClick={onNext}
             disabled={selectedSkills.length === 0}
           >
-            Select Agents
+            {action === 'install' ? 'Configure Installation' : 'Confirm Removal'}
             <span className="codicon codicon-arrow-right" aria-hidden="true" />
           </button>
         </div>
