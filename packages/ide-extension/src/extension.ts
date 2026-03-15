@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import * as vscode from 'vscode'
-import { createNodeAdapters } from '@tech-leads-club/core'
+import { createExtHostAdapters } from './adapters'
 import { SidebarProvider } from './providers/sidebar-provider'
 import { CliHealthChecker } from './services/cli-health-checker'
 import { CliSpawner } from './services/cli-spawner'
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const logger = new LoggingService(outputChannel)
   context.subscriptions.push(logger)
 
-  const ports = createNodeAdapters()
+  const ports = createExtHostAdapters(outputChannel)
   const registryService = new SkillRegistryService(context, logger)
   const cliSpawner = new CliSpawner(logger)
   const operationQueue = new OperationQueue(cliSpawner)
