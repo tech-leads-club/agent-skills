@@ -52,20 +52,6 @@ const cleanExistingPath = async (ports: CorePorts, linkPath: string, target: str
   }
 }
 
-const validateSymlinkTarget = async (ports: CorePorts, linkPath: string, baseDir: string): Promise<boolean> => {
-  try {
-    const stats = await ports.fs.lstat(linkPath)
-    if (stats.isSymbolicLink()) {
-      const target = await ports.fs.readlink(linkPath)
-      const resolvedTarget = resolve(join(linkPath, '..'), target)
-      return isPathSafe(baseDir, resolvedTarget)
-    }
-    return true
-  } catch {
-    return true
-  }
-}
-
 const copySkillDirectory = async (ports: CorePorts, src: string, dest: string): Promise<void> => {
   await ports.fs.rm(dest, { recursive: true, force: true })
   await ports.fs.mkdir(join(dest, '..'), { recursive: true })
@@ -407,11 +393,6 @@ export const removeSkill = async (
 
         if (!isPathSafe(baseDir, path)) {
           lastError = 'Security: Invalid removal path'
-          continue
-        }
-
-        if (!(await validateSymlinkTarget(ports, path, baseDir))) {
-          lastError = 'Security: Symlink points outside allowed directory'
           continue
         }
 

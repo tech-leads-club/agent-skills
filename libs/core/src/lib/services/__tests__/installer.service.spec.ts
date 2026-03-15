@@ -432,6 +432,86 @@ describe('removeSkill', () => {
       },
     ])
   })
+
+  it('removes a local symlink install successfully', async () => {
+    const { ports, lstatMock, readFileMock, readlinkMock, rmMock } = createPorts()
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        version: 2,
+        skills: {
+          'symlink-skill': {
+            name: 'symlink-skill',
+            source: 'local',
+            installedAt: '2026-03-14T00:00:00.000Z',
+            updatedAt: '2026-03-14T00:00:00.000Z',
+            agents: ['cursor'],
+            method: 'symlink',
+            global: false,
+          },
+        },
+      }),
+    )
+    lstatMock.mockResolvedValue({
+      isDirectory: () => false,
+      isSymbolicLink: () => true,
+    })
+    readlinkMock.mockResolvedValue('../../.agents/skills/symlink-skill')
+
+    const results = await removeSkill(ports, 'symlink-skill', ['cursor'])
+
+    expect(results).toEqual([
+      {
+        skill: 'symlink-skill',
+        agent: 'Cursor',
+        success: true,
+      },
+    ])
+    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/symlink-skill', {
+      recursive: true,
+      force: true,
+    })
+  })
+
+  it('removes a global symlink install successfully', async () => {
+    const { ports, lstatMock, readFileMock, readlinkMock, rmMock } = createPorts()
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        version: 2,
+        skills: {
+          'global-symlink-skill': {
+            name: 'global-symlink-skill',
+            source: 'local',
+            installedAt: '2026-03-14T00:00:00.000Z',
+            updatedAt: '2026-03-14T00:00:00.000Z',
+            agents: ['cursor'],
+            method: 'symlink',
+            global: true,
+          },
+        },
+      }),
+    )
+    lstatMock.mockResolvedValue({
+      isDirectory: () => false,
+      isSymbolicLink: () => true,
+    })
+    readlinkMock.mockResolvedValue('../../../packages/skills-catalog/skills/global-symlink-skill')
+
+    const results = await removeSkill(ports, 'global-symlink-skill', ['cursor'], { global: true })
+
+    expect(results).toEqual([
+      {
+        skill: 'global-symlink-skill',
+        agent: 'Cursor',
+        success: true,
+      },
+    ])
+    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cursor/skills/global-symlink-skill', {
+      recursive: true,
+      force: true,
+    })
+  })
 })
 
 describe('listInstalledSkills', () => {
