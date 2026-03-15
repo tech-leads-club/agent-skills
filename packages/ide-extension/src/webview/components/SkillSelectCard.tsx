@@ -67,7 +67,7 @@ export function SkillSelectCard({
           />
         </div>
       </div>
-      <p id={descriptionId} className="skill-select-card-description" title={skill.description}>
+      <p id={descriptionId} className="skill-select-card-description">
         {skill.description}
       </p>
       <div className="skill-select-card-meta">

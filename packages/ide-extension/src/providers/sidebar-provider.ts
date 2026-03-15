@@ -174,6 +174,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           payload: {
             operationId: event.operationId,
             message: event.message || '',
+            skillName: event.skillName,
+            operation: event.operation,
+            severity: event.severity,
             metadata: event.metadata,
             increment: undefined,
           },
@@ -732,6 +735,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.logger.error(`Failed to enqueue ${action}: ${msg}`, err)
       const userFacing = this.getQueueActionNoun(action)
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
+      const batchAction = action === 'repair' ? 'install' : action
+      void this.postMessage({
+        type: 'batchCompleted',
+        payload: {
+          batchId: 'enqueue-failed',
+          success: false,
+          errorMessage: `Failed to start ${userFacing}: ${msg}`,
+          results: undefined,
+          action: batchAction,
+        },
+      })
     }
   }
 

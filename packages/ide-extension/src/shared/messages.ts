@@ -128,12 +128,21 @@ export interface OperationStartedPayload {
 }
 
 /**
+ * Severity level for structured progress/log entries.
+ */
+export type ProgressLogSeverity = 'info' | 'warn' | 'error'
+
+/**
  * Payload for operationProgress message (Extension → Webview).
  */
 export interface OperationProgressPayload {
   operationId: string
   message: string
+  skillName?: string
+  operation?: OperationType
   increment?: number
+  /** Severity for timeline display (errors shown in real time). */
+  severity?: ProgressLogSeverity
   metadata?: OperationBatchMetadata
 }
 

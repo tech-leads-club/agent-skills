@@ -105,6 +105,28 @@ describe('SelectAgentsPage', () => {
     expect(screen.getByRole('button', { name: /install skills/i })).toBeDisabled()
   })
 
+  it('shows no agents pre-selected when selectedAgents is empty', () => {
+    render(
+      <SelectAgentsPage
+        action="install"
+        availableAgents={availableAgents}
+        installedSkills={installedSkills}
+        selectedSkills={['accessibility']}
+        selectedAgents={[]}
+        scope="local"
+        isProcessing={false}
+        onToggleAgent={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onProceed={jest.fn()}
+      />,
+    )
+
+    const checkboxes = screen.getAllByRole('checkbox')
+    expect(checkboxes.every((cb) => !(cb as HTMLInputElement).checked)).toBe(true)
+  })
+
   it('calls onProceed when selected agents exist', async () => {
     const user = userEvent.setup()
     const onProceed = jest.fn()

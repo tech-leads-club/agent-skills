@@ -346,10 +346,8 @@ body {
 }
 
 .skill-select-card {
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  min-height: 112px;
-  max-height: 144px;
-  overflow: hidden;
+  grid-template-rows: auto minmax(0, auto) auto;
+  min-height: 88px;
 }
 
 .skill-select-card:hover,
@@ -457,22 +455,11 @@ body {
 
 .skill-select-card-description {
   margin: 0;
+  min-width: 0;
   color: var(--vscode-descriptionForeground);
   font-size: 12px;
-}
-
-.skill-select-card-description {
-  min-height: 0;
-  max-height: calc(1.35em * 2);
   line-height: 1.35;
-  color: currentColor;
   overflow-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
 }
 
 .agent-select-card-name {
@@ -631,6 +618,22 @@ body {
 
 .install-config-radio input {
   margin-top: 4px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--vscode-button-background);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.install-config-radio input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+}
+
+.install-config-radio input:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .install-config-summary {
@@ -695,4 +698,39 @@ body {
 
 .status-icon--error {
   color: var(--vscode-errorForeground, #f48771);
+}
+
+.status-icon--warn {
+  color: var(--vscode-editorWarning-foreground, #cca700);
+}
+
+.status-icon--info {
+  color: var(--vscode-foreground);
+  opacity: 0.8;
+}
+
+.status-log-timeline {
+  margin-bottom: 12px;
+}
+
+.status-log-timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.status-log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.status-log-entry--error {
+  color: var(--vscode-errorForeground, #f48771);
+}
+
+.status-log-entry--warn {
+  color: var(--vscode-editorWarning-foreground, #cca700);
 }

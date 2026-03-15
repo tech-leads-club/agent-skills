@@ -17,6 +17,11 @@ export interface OperationEventHandler {
 }
 
 /**
+ * Severity for progress log entries.
+ */
+export type OperationProgressSeverity = 'info' | 'warn' | 'error'
+
+/**
  * Represents an event containing the state of a CLI batch or single operation.
  */
 export interface OperationEvent {
@@ -25,6 +30,7 @@ export interface OperationEvent {
   skillName: string
   type: 'started' | 'progress' | 'completed'
   message?: string
+  severity?: OperationProgressSeverity
   success?: boolean
   errorMessage?: string
   metadata?: OperationBatchMetadata
@@ -50,7 +56,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
   ) {
     this.queue.onJobStarted((job) => this.handleJobStarted(job))
     this.queue.onJobCompleted((result) => this.handleJobCompleted(result))
-    this.queue.onJobProgress((job, message) => this.handleJobProgress(job, message))
+    this.queue.onJobProgress((job, message, severity) => this.handleJobProgress(job, message, severity))
   }
 
   /**
@@ -293,14 +299,20 @@ export class InstallationOrchestrator implements vscode.Disposable {
    *
    * @param job - Job emitting the update.
    * @param message - Status text.
+   * @param severity - Optional severity for timeline display.
    */
-  private handleJobProgress(job: QueuedJob, message: string): void {
+  private handleJobProgress(
+    job: QueuedJob,
+    message: string,
+    severity?: OperationProgressSeverity,
+  ): void {
     this.emitEvent({
       operationId: job.operationId,
       operation: job.operation,
       skillName: job.skillName,
       type: 'progress',
       message,
+      severity,
       metadata: job.metadata,
     })
   }

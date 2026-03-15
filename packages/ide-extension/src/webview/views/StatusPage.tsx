@@ -1,4 +1,4 @@
-import type { OperationState } from '../hooks/useOperations'
+import type { LogTimelineEntry, OperationState } from '../hooks/useOperations'
 
 /**
  * Single result line for CLI-style display.
@@ -28,6 +28,8 @@ export interface StatusPageProps {
   isProcessing: boolean
   /** In-flight operations with progress. */
   operations: Map<string, OperationState>
+  /** Real-time log timeline during batch execution. */
+  logTimeline: LogTimelineEntry[]
   /** Result of the last completed batch, if any. */
   batchResult: BatchResult | null
   /** Callback to retry failed items only. */
@@ -70,7 +72,14 @@ function formatResultLine(
   }
 }
 
-export function StatusPage({ isProcessing, operations, batchResult, onRetry, onDone }: StatusPageProps) {
+export function StatusPage({
+  isProcessing,
+  operations,
+  logTimeline,
+  batchResult,
+  onRetry,
+  onDone,
+}: StatusPageProps) {
   const operationList = Array.from(operations.values())
   const hasFailures =
     !isProcessing &&
@@ -89,7 +98,33 @@ export function StatusPage({ isProcessing, operations, batchResult, onRetry, onD
       </header>
 
       <div className="status-page-content">
-        {isProcessing && operationList.length > 0 && (
+        {isProcessing && logTimeline.length > 0 && (
+          <div className="status-log-timeline" role="log" aria-live="polite">
+            <ul className="status-log-timeline-list">
+              {logTimeline.map((entry, idx) => (
+                <li
+                  key={`${entry.operationId}-${idx}`}
+                  className={`status-log-entry status-log-entry--${entry.severity}`}
+                >
+                  {entry.severity === 'error' && (
+                    <span className="status-icon status-icon--error codicon codicon-close" aria-hidden="true" />
+                  )}
+                  {entry.severity === 'warn' && (
+                    <span className="status-icon status-icon--warn codicon codicon-warning" aria-hidden="true" />
+                  )}
+                  {entry.severity === 'info' && (
+                    <span className="status-icon status-icon--info codicon codicon-info" aria-hidden="true" />
+                  )}
+                  <span>
+                    {entry.operation} {entry.skillName}: {entry.message}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {isProcessing && operationList.length > 0 && logTimeline.length === 0 && (
           <div className="status-progress" role="status">
             <ul className="status-progress-list" aria-label="Active operations">
               {operationList.map((op) => (
@@ -151,6 +186,7 @@ export function StatusPage({ isProcessing, operations, batchResult, onRetry, onD
             className="primary-footer-button"
             onClick={onDone}
             disabled={isProcessing}
+            title={isProcessing ? 'Wait for the operation to complete' : undefined}
           >
             Back to Dashboard
           </button>

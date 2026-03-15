@@ -7,6 +7,7 @@ import type {
   OperationStartedPayload,
   ScopePickResultPayload,
 } from '../../shared/messages'
+import type { ProgressLogSeverity } from '../../shared/messages'
 import type { OperationType } from '../../shared/types'
 
 /**
@@ -28,6 +29,18 @@ export interface OperationState {
 }
 
 /**
+ * Single entry in the real-time log timeline shown during batch operations.
+ */
+export interface LogTimelineEntry {
+  operationId: string
+  skillName: string
+  operation: OperationType
+  message: string
+  severity: ProgressLogSeverity
+  timestamp: number
+}
+
+/**
  * Hook to track in-flight operations and their progress messages.
  * Listens for 'operationStarted', 'operationProgress', and 'operationCompleted'.
  *
@@ -40,6 +53,18 @@ export interface OperationState {
  */
 export function useOperations() {
   const [operations, setOperations] = useState<Map<string, OperationState>>(new Map())
+  const [logTimeline, setLogTimeline] = useState<LogTimelineEntry[]>([])
+
+  const appendLogEntry = useCallback(
+    (entry: Omit<LogTimelineEntry, 'timestamp'>) => {
+      setLogTimeline((prev) => [...prev, { ...entry, timestamp: Date.now() }])
+    },
+    [],
+  )
+
+  const clearLogTimeline = useCallback(() => {
+    setLogTimeline([])
+  }, [])
 
   /**
    * Marks a skill as "pending" (awaiting QuickPick selection).
@@ -121,35 +146,63 @@ export function useOperations() {
           })
           return next
         })
+        appendLogEntry({
+          operationId: payload.operationId,
+          skillName: payload.skillName,
+          operation: payload.operation,
+          message: 'Starting...',
+          severity: 'info',
+        })
       } else if (message.type === 'operationProgress') {
         const payload = message.payload as OperationProgressPayload
+        let resolvedSkillName: string | undefined = payload.skillName
+        let resolvedOperation: OperationType = payload.operation ?? 'install'
         setOperations((prev) => {
-          let skillName: string | undefined
-          for (const [key, state] of prev.entries()) {
-            if (state.operationId === payload.operationId) {
-              skillName = key
-              break
+          if (!resolvedSkillName) {
+            for (const [key, state] of prev.entries()) {
+              if (state.operationId === payload.operationId) {
+                resolvedSkillName = key
+                resolvedOperation = state.operation
+                break
+              }
             }
           }
-
-          if (skillName) {
-            const next = new Map(prev)
-            const state = next.get(skillName)!
-            next.set(skillName, {
-              ...state,
-              message: payload.message,
-              increment: payload.increment,
-            })
-            return next
+          if (resolvedSkillName) {
+            const state = prev.get(resolvedSkillName)
+            if (state) {
+              const next = new Map(prev)
+              next.set(resolvedSkillName!, {
+                ...state,
+                message: payload.message,
+                increment: payload.increment,
+              })
+              return next
+            }
           }
           return prev
         })
+        if (resolvedSkillName) {
+          appendLogEntry({
+            operationId: payload.operationId,
+            skillName: resolvedSkillName,
+            operation: resolvedOperation,
+            message: payload.message,
+            severity: payload.severity ?? 'info',
+          })
+        }
       } else if (message.type === 'operationCompleted') {
         const payload = message.payload as OperationCompletedPayload
         setOperations((prev) => {
           const next = new Map(prev)
           next.delete(payload.skillName)
           return next
+        })
+        appendLogEntry({
+          operationId: payload.operationId,
+          skillName: payload.skillName,
+          operation: payload.operation,
+          message: payload.success ? 'Completed' : `Failed: ${payload.errorMessage ?? 'Unknown error'}`,
+          severity: payload.success ? 'info' : 'error',
         })
       } else if (message.type === 'agentPickResult') {
         const payload = message.payload as AgentPickResultPayload
@@ -185,10 +238,10 @@ export function useOperations() {
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [])
+  }, [appendLogEntry])
 
   const isOperating = (skillName: string) => operations.has(skillName)
   const getMessage = (skillName: string) => operations.get(skillName)?.message
 
-  return { operations, isOperating, getMessage, markPending, clearPending }
+  return { operations, logTimeline, clearLogTimeline, isOperating, getMessage, markPending, clearPending }
 }

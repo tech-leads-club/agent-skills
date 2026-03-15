@@ -165,7 +165,7 @@ function App() {
     clearAgentSelection,
   } = useAppState()
   const { installedSkills } = useInstalledState()
-  const { operations } = useOperations()
+  const { operations, logTimeline, clearLogTimeline } = useOperations()
 
   const handleExecuteBatch = useCallback(
     (method?: 'copy' | 'symlink') => {
@@ -185,6 +185,7 @@ function App() {
       }
       setLastBatchContext(ctx)
       setBatchResult(null)
+      clearLogTimeline()
       setIsBatchProcessing(true)
       goToStatus()
       postMessage({
@@ -198,7 +199,7 @@ function App() {
         },
       })
     },
-    [activeScope, currentAction, installMethod, selectedAgents, selectedSkills, goToStatus],
+    [activeScope, clearLogTimeline, currentAction, installMethod, selectedAgents, selectedSkills, goToStatus],
   )
 
   const handleExecuteUpdate = useCallback(
@@ -206,6 +207,7 @@ function App() {
       const toUpdate = skills.length > 0 ? skills : []
       setLastBatchContext({ action: 'update', skills: toUpdate, agents: [], scope: activeScope })
       setBatchResult(null)
+      clearLogTimeline()
       setIsBatchProcessing(true)
       goToStatus()
       postMessage({
@@ -218,7 +220,7 @@ function App() {
         },
       })
     },
-    [activeScope, goToStatus],
+    [activeScope, clearLogTimeline, goToStatus],
   )
 
   const handleRetry = useCallback(() => {
@@ -231,6 +233,7 @@ function App() {
     if (toRetry.length === 0) return
 
     setBatchResult(null)
+    clearLogTimeline()
     setIsBatchProcessing(true)
     postMessage({
       type: 'executeBatch',
@@ -242,7 +245,7 @@ function App() {
         method,
       },
     })
-  }, [batchResult?.failedSkills, lastBatchContext])
+  }, [batchResult?.failedSkills, clearLogTimeline, lastBatchContext])
 
   useEffect(() => {
     const dispose = onMessage((msg: ExtensionMessage) => {
@@ -372,6 +375,7 @@ function App() {
           <StatusPage
             isProcessing={isBatchProcessing || operations.size > 0}
             operations={operations}
+            logTimeline={logTimeline}
             batchResult={batchResult}
             onRetry={handleRetry}
             onDone={goHome}
@@ -461,6 +465,7 @@ function App() {
         <StatusPage
           isProcessing={isBatchProcessing || operations.size > 0}
           operations={operations}
+          logTimeline={logTimeline}
           batchResult={batchResult}
           onRetry={handleRetry}
           onDone={goHome}

@@ -2,10 +2,15 @@ import type { ErrorInfo, OperationBatchMetadata, OperationType } from '../shared
 import { withRetry } from './retry-handler'
 
 /**
+ * Callback for progress updates during job execution.
+ */
+export type JobProgressCallback = (message: string, severity?: 'info' | 'warn' | 'error') => void
+
+/**
  * Executes a queued job (e.g. via core services or CLI).
  */
 export interface JobExecutor {
-  execute(job: QueuedJob): Promise<JobResult>
+  execute(job: QueuedJob, onProgress?: JobProgressCallback): Promise<JobResult>
 }
 
 const UNKNOWN_ERROR_MESSAGE = 'An unexpected error occurred. Check the Agent Skills output channel for details.'
@@ -71,7 +76,7 @@ export interface JobResult {
 /**
  * Receives progress notifications emitted while a job runs.
  */
-export type JobProgressHandler = (job: QueuedJob, message: string) => void
+export type JobProgressHandler = (job: QueuedJob, message: string, severity?: 'info' | 'warn' | 'error') => void
 
 /**
  * Sequential job queue with concurrency=1 (mutex pattern).
@@ -211,7 +216,9 @@ export class OperationQueue {
         baseDelayMs: 500,
         shouldRetry: (error: ErrorInfo) => error.retryable === true,
         onRetry: (attempt, max) => {
-          this.jobProgressHandlers.forEach((handler) => handler(job, `Retrying (attempt ${attempt}/${max})...`))
+          this.jobProgressHandlers.forEach((handler) =>
+            handler(job, `Retrying (attempt ${attempt}/${max})...`, 'warn'),
+          )
         },
       })
 
@@ -247,8 +254,11 @@ export class OperationQueue {
    */
   private async executeOnce(job: QueuedJob): Promise<JobResult> {
     this.activeJob = job
+    const onProgress: JobProgressCallback = (message, severity) => {
+      this.jobProgressHandlers.forEach((h) => h(job, message, severity))
+    }
     try {
-      const result = await this.executor.execute(job)
+      const result = await this.executor.execute(job, onProgress)
       return result
     } finally {
       this.activeJob = null
