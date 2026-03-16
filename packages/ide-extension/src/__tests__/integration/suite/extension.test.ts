@@ -28,7 +28,7 @@ suite('Extension Test Suite', () => {
     assert.ok(ext.isActive)
   })
 
-  test('Commands should be registered', async () => {
+  test('Lifecycle command palette commands should not be registered', async () => {
     const ext = getExtensionUnderTest()
     assert.ok(ext, 'Extension under test was not found in vscode.extensions.all')
     if (!ext.isActive) {
@@ -36,6 +36,8 @@ suite('Extension Test Suite', () => {
     }
 
     const commands = await vscode.commands.getCommands(true)
-    assert.ok(commands.includes('agentSkills.refresh'), 'Refresh command missing')
+    assert.ok(!commands.includes('agentSkills.add'), 'Add lifecycle command should be removed')
+    assert.ok(!commands.includes('agentSkills.remove'), 'Remove lifecycle command should be removed')
+    assert.ok(!commands.includes('agentSkills.update'), 'Update lifecycle command should be removed')
   })
 })

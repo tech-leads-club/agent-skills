@@ -11,14 +11,13 @@ export interface MessageRouteHandlers {
   handleInstallSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void>
   handleRemoveSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void>
   handleExecuteBatch(
-    action: 'install' | 'remove' | 'update' | 'repair',
+    action: 'install' | 'remove' | 'update',
     skills: string[],
     agents: string[],
     scope: 'local' | 'global',
     method?: 'copy' | 'symlink',
   ): Promise<void>
   handleUpdateSkill(skillName: string): Promise<void>
-  handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void>
   handleCancelOperation(operationId: string): void
 }
 
@@ -74,13 +73,6 @@ export class MessageRouter {
         return
       case 'updateSkill':
         await this.handlers.handleUpdateSkill(message.payload.skillName)
-        return
-      case 'repairSkill':
-        this.logger.warn('repairSkill is inactive in sidebar scope; use install to reinstall')
-        return
-      case 'requestAgentPick':
-      case 'requestScopePick':
-        this.logger.warn(`Message type '${message.type}' is inactive in sidebar scope`)
         return
       case 'cancelOperation':
         this.handlers.handleCancelOperation(message.payload.operationId)

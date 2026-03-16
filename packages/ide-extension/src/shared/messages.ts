@@ -13,11 +13,8 @@ import type {
  * Messages sent FROM the Webview TO the Extension Host.
  * Each variant represents a user action or lifecycle event.
  *
- * **Active (Sidebar flow)**: webviewDidMount, requestRefresh, installSkill, removeSkill,
+ * **Active (WebView flow)**: webviewDidMount, requestRefresh, installSkill, removeSkill,
  * updateSkill, executeBatch, cancelOperation.
- *
- * **Inactive (deferred)**: requestAgentPick, requestScopePick, repairSkill — not dispatched;
- * MessageRouter logs a warning and ignores.
  */
 export type WebviewMessage =
   | { type: 'webviewDidMount' }
@@ -27,18 +24,13 @@ export type WebviewMessage =
   | { type: 'executeBatch'; payload: ExecuteBatchPayload }
   | { type: 'updateSkill'; payload: UpdateSkillPayload }
   | { type: 'cancelOperation'; payload: CancelOperationPayload }
-  | { type: 'requestAgentPick'; payload: RequestAgentPickPayload }
-  | { type: 'requestScopePick'; payload: RequestScopePickPayload }
-  | { type: 'repairSkill'; payload: RepairSkillPayload }
 
 /**
  * Messages sent FROM the Extension Host TO the Webview.
  * Each variant represents a state update or response.
  *
- * **Active (Sidebar flow)**: initialize, registryUpdate, operationStarted, operationProgress,
+ * **Active (WebView flow)**: initialize, registryUpdate, operationStarted, operationProgress,
  * operationCompleted, batchCompleted, reconcileState, trustState, policyState.
- *
- * **Inactive (deferred)**: agentPickResult, scopePickResult — not emitted by current flow.
  */
 export type ExtensionMessage =
   | { type: 'initialize'; payload: InitializePayload }
@@ -48,8 +40,6 @@ export type ExtensionMessage =
   | { type: 'operationCompleted'; payload: OperationCompletedPayload }
   | { type: 'batchCompleted'; payload: BatchCompletedPayload }
   | { type: 'reconcileState'; payload: ReconcileStatePayload }
-  | { type: 'agentPickResult'; payload: AgentPickResultPayload }
-  | { type: 'scopePickResult'; payload: ScopePickResultPayload }
   | { type: 'trustState'; payload: TrustStatePayload }
   | { type: 'policyState'; payload: ScopePolicyStatePayload }
 
@@ -95,7 +85,7 @@ export interface RemoveSkillPayload {
  * Payload for executeBatch message (Webview → Extension).
  */
 export interface ExecuteBatchPayload {
-  action: OperationType
+  action: 'install' | 'remove' | 'update'
   skills: string[]
   agents: string[]
   scope: 'local' | 'global'
@@ -187,53 +177,6 @@ export interface BatchCompletedPayload {
  */
 export interface ReconcileStatePayload {
   installedSkills: InstalledSkillsMap
-}
-
-/**
- * Payload for requestAgentPick message (Webview → Extension).
- * Asks the extension host to show vscode.window.showQuickPick for agent selection.
- */
-export interface RequestAgentPickPayload {
-  skillName: string
-  action: 'add' | 'remove'
-}
-
-/**
- * Payload for requestScopePick message (Webview → Extension).
- * Asks the extension host to show vscode.window.showQuickPick for scope selection.
- */
-export interface RequestScopePickPayload {
-  skillName: string
-  action: 'add' | 'remove'
-  agents: string[]
-}
-
-/**
- * Result from agent quick pick (Extension → Webview).
- */
-export interface AgentPickResultPayload {
-  skillName: string
-  action: 'add' | 'remove'
-  agents: string[] | null
-}
-
-/**
- * Result from scope quick pick (Extension → Webview).
- */
-export interface ScopePickResultPayload {
-  skillName: string
-  action: 'add' | 'remove'
-  agents: string[]
-  scope: 'local' | 'global' | 'all' | null
-}
-
-/**
- * Payload for repairSkill message (Webview → Extension).
- */
-export interface RepairSkillPayload {
-  skillName: string
-  agents: string[]
-  scope: 'local' | 'global'
 }
 
 /**

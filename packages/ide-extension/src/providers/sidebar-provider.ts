@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import { CommandPaletteFlowService } from '../services/command-palette-flow-service'
 import type { InstallationOrchestrator } from '../services/installation-orchestrator'
 import { LoggingService } from '../services/logging-service'
 import { MessageRouter } from '../services/message-router'
@@ -83,7 +82,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private readonly batchProgress = new Map<string, BatchProgressState>()
   private readonly scopeSelectionService = new ScopeSelectionService()
   private readonly messageRouter: MessageRouter
-  private readonly commandPaletteFlowService: CommandPaletteFlowService
 
   /**
    * Creates a sidebar provider and wires orchestrator/reconciler event forwarding to the webview.
@@ -111,30 +109,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       handleExecuteBatch: (action, skills, agents, scope, method) =>
         this.handleExecuteBatch(action, skills, agents, scope, method),
       handleUpdateSkill: (skillName) => this.handleUpdateSkill(skillName),
-      handleRepairSkill: (skillName, scope, agents) => this.handleRepairSkill(skillName, scope, agents),
       handleCancelOperation: (operationId) => this.handleCancelOperation(operationId),
-    })
-
-    this.commandPaletteFlowService = new CommandPaletteFlowService(this.orchestrator, {
-      getPolicy: () => this.policy,
-      checkPolicyBlocking: () => this.checkPolicyBlocking(),
-      loadRegistryForCommand: () => this.loadRegistryForCommand(),
-      getInstalledSkills: () => this.reconciler.getInstalledSkills(),
-      getInstalledHashes: () => this.skillLockService.getInstalledHashes(),
-      getAvailableAgents: () => this.reconciler.getAvailableAgents(),
-      pickSkills: (mode, registry, installedSkills, availableAgents, installedHashes) =>
-        this.pickSkills(mode, registry, installedSkills, availableAgents, installedHashes),
-      pickAgentsForSkills: (action, skillNames, availableAgents, installedSkills) =>
-        this.pickAgentsForSkills(action, skillNames, availableAgents, installedSkills),
-      pickScopeForSkills: (action, skillNames, agents, installedSkills, hasWorkspace, isTrusted) =>
-        this.pickScopeForSkills(action, skillNames, agents, installedSkills, hasWorkspace, isTrusted),
-      doesSkillNeedActionForScope: (skillName, agents, installedSkills, scopeId, action) =>
-        this.doesSkillNeedActionForScope(skillName, agents, installedSkills, scopeId, action),
-      getAgentDisplayNames: (agentIds, availableAgents) => this.getAgentDisplayNames(agentIds, availableAgents),
-      confirmLifecycleAction: (selection, agentNames) => this.confirmLifecycleAction(selection, agentNames),
-      resolveSelectionScope: (hasLocalTargets, hasGlobalTargets) =>
-        this.resolveSelectionScope(hasLocalTargets, hasGlobalTargets),
-      runQueueAction: (action, work) => this.runQueueAction(action, work),
     })
 
     this.reconciler.onStateChanged((installedSkills) => {
@@ -142,14 +117,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     this.orchestrator.onOperationEvent((event) => {
-        if (event.type === 'started') {
+      if (event.type === 'started') {
         if (event.metadata && !this.batchProgress.has(event.metadata.batchId)) {
-          const action =
-            event.operation === 'remove'
-              ? 'remove'
-              : event.operation === 'update'
-                ? 'update'
-                : 'install'
+          const action = event.operation === 'remove' ? 'remove' : event.operation === 'update' ? 'update' : 'install'
           this.batchProgress.set(event.metadata.batchId, {
             action,
             remaining: event.metadata.batchSize,
@@ -491,7 +461,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns A promise that resolves when enqueueing completes.
    */
   private async handleExecuteBatch(
-    action: 'install' | 'remove' | 'update' | 'repair',
+    action: 'install' | 'remove' | 'update',
     skills: string[],
     agents: string[],
     scope: 'local' | 'global',
@@ -519,8 +489,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       await this.runQueueAction('update', () => this.orchestrator.updateMany(updateSkills, 'card'))
       return
     }
-
-    this.logger.warn(`Unsupported executeBatch action: ${action}`)
   }
 
   /**
@@ -543,29 +511,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Enqueues a repair operation for a skill.
-   *
-   * @param skillName - Skill identifier to repair.
-   * @param scope - Repair scope.
-   * @param agents - Agent identifiers to target.
-   * @returns A promise that resolves when enqueueing logic completes.
-   */
-  private async handleRepairSkill(skillName: string, scope: 'local' | 'global', agents: string[]): Promise<void> {
-    const availableAgents = await this.reconciler.getAvailableAgents()
-    const agentNames = this.getAgentDisplayNames(agents, availableAgents)
-    const selection: LifecycleBatchSelection = {
-      action: 'repair',
-      skills: [skillName],
-      agents,
-      scope,
-      source: 'card',
-    }
-    const confirmed = await this.confirmLifecycleAction(selection, agentNames)
-    if (!confirmed) return
-    await this.runQueueAction('repair', () => this.orchestrator.repairMany(selection.skills, scope, agents))
-  }
-
-  /**
    * Cancels a queued or active operation.
    *
    * @param operationId - Operation identifier generated by the orchestrator.
@@ -576,158 +521,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Checks if the current policy blocks lifecycle actions.
-   * If blocked, shows an error message with a link to settings.
-   *
-   * @returns `true` if actions are blocked.
-   */
-  private checkPolicyBlocking(): boolean {
-    if (!this.policy) return false // Assume allowed if policy not yet loaded
-
-    if (this.policy.effectiveScopes.length === 0) {
-      const reason = this.policy.blockedReason ?? 'policy-none'
-      const message = `Lifecycle actions are disabled by policy: ${reason}`
-      void vscode.window.showErrorMessage(message)
-      return true
-    }
-    return false
-  }
-
-  /**
-   * Runs the command-palette flow for adding one or more skills.
-   *
-   * @returns A promise that resolves when the flow completes or is cancelled.
-   */
-  async runCommandPaletteAdd(): Promise<void> {
-    await this.commandPaletteFlowService.runAddFlow()
-  }
-
-  /**
-   * Runs the command-palette flow for removing one or more skills.
-   *
-   * @returns A promise that resolves when the flow completes or is cancelled.
-   */
-  async runCommandPaletteRemove(): Promise<void> {
-    await this.commandPaletteFlowService.runRemoveFlow()
-  }
-
-  /**
-   * Runs the command-palette flow for updating one or more skills.
-   *
-   * @returns A promise that resolves when the flow completes or is cancelled.
-   */
-  async runCommandPaletteUpdate(): Promise<void> {
-    await this.commandPaletteFlowService.runUpdateFlow()
-  }
-
-  /**
-   * Runs the command-palette flow for repairing corrupted skills.
-   *
-   * @returns A promise that resolves when the flow completes or is cancelled.
-   */
-  async runCommandPaletteRepair(): Promise<void> {
-    await this.commandPaletteFlowService.runRepairFlow()
-  }
-
-  /**
-   * Shows a multi-select QuickPick for agent selection.
-   *
-   * @param skillName - Skill being acted on.
-   * @param action - Whether the flow is adding or removing the skill.
-   * @returns A promise that resolves after agent selection is handled.
-   */
-  private async handleAgentPick(skillName: string, action: 'add' | 'remove'): Promise<void> {
-    const availableAgents = await this.reconciler.getAvailableAgents()
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
-
-    const agentItems = this.buildAgentPickItems(availableAgents, installedInfo, action)
-
-    if (agentItems.length === 0) {
-      const emptyMessage =
-        action === 'add'
-          ? 'This skill is already installed for all agents in every scope.'
-          : 'This skill is not installed for any agent.'
-      vscode.window.showInformationMessage(emptyMessage)
-      return
-    }
-
-    const selected = await vscode.window.showQuickPick(agentItems, {
-      title: `${action === 'add' ? 'Add' : 'Remove'} skill: ${skillName}`,
-      placeHolder: 'Select agents',
-      canPickMany: true,
-    })
-
-    if (!selected || selected.length === 0) {
-      await this.postMessage({
-        type: 'agentPickResult',
-        payload: { skillName, action, agents: null },
-      })
-      return
-    }
-
-    const selectedAgentIds = selected.map((item) => item.agentId)
-
-    await this.postMessage({
-      type: 'agentPickResult',
-      payload: { skillName, action, agents: selectedAgentIds },
-    })
-
-    void this.handleScopePick(skillName, action, selectedAgentIds)
-  }
-
-  /**
-   * Shows a QuickPick for scope selection (Local, Global, All).
-   *
-   * @param skillName - Skill being acted on.
-   * @param action - Whether the flow is adding or removing the skill.
-   * @param agents - Agents selected in the previous picker.
-   * @returns A promise that resolves after scope selection and execution.
-   */
-  private async handleScopePick(skillName: string, action: 'add' | 'remove', agents: string[]): Promise<void> {
-    if (this.checkPolicyBlocking()) return
-
-    const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    const installedInfo: InstalledSkillInfo | null = installedSkills[skillName] || null
-    const isTrusted = vscode.workspace.isTrusted
-
-    const scopeItems = this.buildScopeQuickPickItems(action, agents, installedInfo, hasWorkspace, isTrusted)
-
-    if (scopeItems.length === 0) {
-      const message = this.getScopePickEmptyMessage(action, isTrusted, installedInfo, agents)
-      vscode.window.showInformationMessage(message)
-      return
-    }
-
-    const selectedScope = await this.selectScopeItem(scopeItems, skillName, action)
-    if (!selectedScope) {
-      await this.postMessage({
-        type: 'scopePickResult',
-        payload: { skillName, action, agents, scope: null },
-      })
-      return
-    }
-
-    await this.postMessage({
-      type: 'scopePickResult',
-      payload: { skillName, action, agents, scope: selectedScope.scopeId },
-    })
-
-    await this.executeScopeAction(skillName, action, agents, selectedScope.scopeId)
-  }
-
-  /**
    * Executes an enqueue action and handles user-facing enqueue failures.
    *
    * @param action - Operation label used for logging and UI errors.
    * @param executor - Async callback that performs the enqueue call.
    * @returns A promise that resolves when enqueueing completes or errors are surfaced.
    */
-  private async runQueueAction(
-    action: 'install' | 'remove' | 'update' | 'repair',
-    executor: () => Promise<void>,
-  ): Promise<void> {
+  private async runQueueAction(action: 'install' | 'remove' | 'update', executor: () => Promise<void>): Promise<void> {
     try {
       await executor()
     } catch (err: unknown) {
@@ -735,7 +535,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.logger.error(`Failed to enqueue ${action}: ${msg}`, err)
       const userFacing = this.getQueueActionNoun(action)
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
-      const batchAction = action === 'repair' ? 'install' : action
       void this.postMessage({
         type: 'batchCompleted',
         payload: {
@@ -743,7 +542,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           success: false,
           errorMessage: `Failed to start ${userFacing}: ${msg}`,
           results: undefined,
-          action: batchAction,
+          action,
         },
       })
     }
@@ -755,7 +554,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param action - Queue action identifier.
    * @returns User-facing action noun used in error messages.
    */
-  private getQueueActionNoun(action: 'install' | 'remove' | 'update' | 'repair'): string {
+  private getQueueActionNoun(action: 'install' | 'remove' | 'update'): string {
     if (action === 'install') {
       return 'installation'
     }

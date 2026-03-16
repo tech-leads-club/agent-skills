@@ -80,22 +80,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   reconciler.start()
 
-  const registerPaletteCommand = (
-    commandId: 'agentSkills.add' | 'agentSkills.remove' | 'agentSkills.update',
-    handler: () => Promise<void>,
-  ) => {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(commandId, async () => {
-        logger.info(`${commandId} command invoked`)
-        await handler()
-      }),
-    )
-  }
-
-  registerPaletteCommand('agentSkills.add', () => sidebarProvider.runCommandPaletteAdd())
-  registerPaletteCommand('agentSkills.remove', () => sidebarProvider.runCommandPaletteRemove())
-  registerPaletteCommand('agentSkills.update', () => sidebarProvider.runCommandPaletteUpdate())
-
   const extensionVersion = context.extension?.packageJSON?.version ?? 'unknown'
   logger.info(`Agent Skills v${extensionVersion} activated`)
   logger.info(`VS Code ${vscode.version} | Platform: ${process.platform}`)

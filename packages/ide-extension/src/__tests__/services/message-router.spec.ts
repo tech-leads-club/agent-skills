@@ -18,7 +18,6 @@ describe('MessageRouter', () => {
       handleRemoveSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleExecuteBatch: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleUpdateSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-      handleRepairSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleCancelOperation: jest.fn<() => void>(),
     }
     logger = { warn: jest.fn() } as unknown as jest.Mocked<LoggingService>
@@ -39,6 +38,12 @@ describe('MessageRouter', () => {
 
   it('warns and no-ops on unsupported message types', async () => {
     await router.route({ type: 'unknown' } as unknown as WebviewMessage, webview)
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
+  })
+
+  it('treats legacy quick-pick messages as unknown', async () => {
+    await router.route({ type: 'requestAgentPick' } as unknown as WebviewMessage, webview)
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })

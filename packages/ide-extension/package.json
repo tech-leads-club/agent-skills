@@ -40,25 +40,6 @@
         }
       ]
     },
-    "commands": [
-      {
-        "command": "agentSkills.refresh",
-        "title": "Agent Skills: Refresh Skills",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "agentSkills.add",
-        "title": "Agent Skills: Add"
-      },
-      {
-        "command": "agentSkills.remove",
-        "title": "Agent Skills: Remove"
-      },
-      {
-        "command": "agentSkills.update",
-        "title": "Agent Skills: Update"
-      }
-    ],
     "menus": {
       "view/title": []
     }

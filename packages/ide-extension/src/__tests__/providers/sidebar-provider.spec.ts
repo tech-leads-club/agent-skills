@@ -8,15 +8,8 @@ import type { RegistryResult } from '../../services/skill-registry-service'
 import { SkillRegistryService } from '../../services/skill-registry-service'
 import type { StateReconciler } from '../../services/state-reconciler'
 import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
-import type {
-  AvailableAgent,
-  InstalledSkillsMap,
-  ScopePolicyEvaluation,
-  Skill,
-  SkillRegistry,
-} from '../../shared/types'
+import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 
-const showQuickPickMock = vscode.window.showQuickPick as jest.Mock<(...args: Array<unknown>) => Promise<unknown>>
 const showWarningMessageMock = vscode.window.showWarningMessage as jest.Mock<
   (...args: Array<unknown>) => Promise<unknown>
 >
@@ -30,14 +23,6 @@ type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unk
 type WebviewUriFn = (uri: { fsPath: string }) => string
 type WebviewReceiveHandler = (handler: (message: WebviewMessage) => void) => vscode.Disposable
 type PostMessageFn = (message: ExtensionMessage) => Promise<boolean>
-
-type SkillQuickPickItem = {
-  skillName: string
-  label: string
-  categoryId: string
-  description?: string
-  detail?: string
-}
 
 describe('SidebarProvider', () => {
   let provider: SidebarProvider
@@ -390,7 +375,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'requestAgentPick' is inactive"))
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 
   it('should treat legacy requestScopePick messages as unknown', async () => {
@@ -402,7 +387,7 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'requestScopePick' is inactive"))
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 
   it('should handle executeBatch install message', async () => {
@@ -558,325 +543,5 @@ describe('SidebarProvider', () => {
     await messageHandler(message)
 
     expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
-  })
-
-  describe('Command palette flows', () => {
-    const createRegistry = (): SkillRegistry => ({
-      version: '1.0.0',
-      categories: {
-        general: { name: 'General', description: 'General category' },
-        tools: { name: 'Tools', description: 'Tools category' },
-      },
-      skills: [
-        {
-          name: 'seo',
-          description: 'SEO helper',
-          category: 'general',
-          path: '/skills/seo',
-          files: ['SKILL.md'],
-          contentHash: 'abcde12345',
-        },
-        {
-          name: 'accessibility',
-          description: 'Accessibility helper',
-          category: 'tools',
-          path: '/skills/accessibility',
-          files: ['SKILL.md'],
-          contentHash: 'fghij67890',
-        },
-      ],
-    })
-
-    const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
-
-    const addSkillWithoutDescription = (registry: SkillRegistry, skillName: string = 'no-description') => {
-      const missingSkill: Skill = {
-        name: skillName,
-        description: undefined as unknown as string,
-        category: 'general',
-        path: `/skills/${skillName}`,
-        files: ['SKILL.md'],
-        contentHash: `${skillName}-hash`,
-      } as Skill
-      registry.skills.push(missingSkill)
-    }
-
-    it('enqueues install operations for the selected skills', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([
-        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
-      ])
-
-      let skillItems: SkillQuickPickItem[] | undefined
-      showQuickPickMock
-        .mockImplementationOnce(async (items) => {
-          skillItems = items as SkillQuickPickItem[]
-          return skillItems
-        })
-        .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
-        .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
-
-      showWarningMessageMock.mockResolvedValue('Install')
-      showWarningMessageMock.mockResolvedValue('Install')
-      const commandPromise = provider.runCommandPaletteAdd()
-      await flush()
-
-      const seoItem = skillItems?.find((item) => item.skillName === 'seo')
-      const accessibilityItem = skillItems?.find((item) => item.skillName === 'accessibility')
-      expect(seoItem?.description).toBe('SEO helper')
-      expect(accessibilityItem?.description).toBe('Accessibility helper')
-
-      await commandPromise
-
-      expect(orchestrator.installMany).toHaveBeenCalledWith(
-        ['seo', 'accessibility'],
-        'local',
-        ['cursor'],
-        'command-palette',
-      )
-      expect(orchestrator.installMany).toHaveBeenCalledTimes(1)
-    })
-
-    it('shows skill descriptions and fallback text in the add quick pick', async () => {
-      const registry = createRegistry()
-      addSkillWithoutDescription(registry, 'missing-description')
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([
-        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
-      ])
-
-      let skillItems: SkillQuickPickItem[] | undefined
-      showQuickPickMock.mockImplementationOnce(async (items) => {
-        skillItems = items as SkillQuickPickItem[]
-        return null
-      })
-
-      showWarningMessageMock.mockResolvedValue('Install')
-      const commandPromise = provider.runCommandPaletteAdd()
-      await flush()
-
-      const seoItem = skillItems?.find((item) => item.skillName === 'seo')
-      const missingDescriptionItem = skillItems?.find((item) => item.skillName === 'missing-description')
-      expect(seoItem?.description).toBe('SEO helper')
-      expect(missingDescriptionItem?.description).toBe('No description')
-
-      await commandPromise
-    })
-
-    it('prompts for removal confirmation before enqueuing removals', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getAvailableAgents.mockResolvedValue([
-        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
-      ])
-      reconciler.getInstalledSkills.mockResolvedValue({
-        seo: {
-          local: true,
-          global: false,
-          agents: [
-            {
-              agent: 'cursor',
-              displayName: 'Cursor',
-              local: true,
-              global: false,
-              corrupted: false,
-            },
-          ],
-        },
-      })
-      showWarningMessageMock.mockResolvedValue('Remove')
-
-      let skillItems: SkillQuickPickItem[] | undefined
-      showQuickPickMock
-        .mockImplementationOnce(async (items) => {
-          skillItems = items as SkillQuickPickItem[]
-          return skillItems
-        })
-        .mockResolvedValueOnce([{ label: 'Cursor', agentId: 'cursor' }])
-        .mockResolvedValueOnce({ label: 'Locally', scopeId: 'local' })
-
-      const commandPromise = provider.runCommandPaletteRemove()
-      await flush()
-
-      const seoItem = skillItems?.find((item) => item.skillName === 'seo')
-      expect(seoItem?.description).toBe('SEO helper')
-
-      await commandPromise
-
-      expect(orchestrator.removeMany).toHaveBeenCalledWith(['seo'], 'local', ['cursor'], 'command-palette')
-    })
-
-    it('selects only outdated skills for update operations', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({
-        seo: {
-          local: true,
-          global: false,
-          agents: [],
-        },
-      } as InstalledSkillsMap)
-      skillLockService.getInstalledHashes.mockResolvedValue({ seo: 'old-hash', accessibility: 'fghij67890' })
-
-      let skillItems: SkillQuickPickItem[] | undefined
-      showQuickPickMock.mockImplementationOnce(async (items) => {
-        skillItems = items as SkillQuickPickItem[]
-        return skillItems.filter((item) => item.skillName === 'seo')
-      })
-
-      showWarningMessageMock.mockResolvedValue('Update')
-      const commandPromise = provider.runCommandPaletteUpdate()
-      await flush()
-
-      const seoItem = skillItems?.find((item) => item.skillName === 'seo')
-      expect(seoItem?.description).toBe('SEO helper')
-
-      await commandPromise
-
-      expect(orchestrator.updateMany).toHaveBeenCalledTimes(1)
-      expect(orchestrator.updateMany).toHaveBeenCalledWith(['seo'], 'command-palette')
-    })
-
-    it('enqueues repairs per scope for selected skills', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({
-        seo: {
-          local: true,
-          global: true,
-          agents: [
-            {
-              agent: 'cursor',
-              displayName: 'Cursor',
-              local: true,
-              global: true,
-              corrupted: true,
-            },
-          ],
-        },
-      } as InstalledSkillsMap)
-
-      let skillItems: SkillQuickPickItem[] | undefined
-      showQuickPickMock.mockImplementationOnce(async (items) => {
-        skillItems = items as SkillQuickPickItem[]
-        return skillItems.filter((item) => item.skillName === 'seo')
-      })
-
-      showWarningMessageMock.mockResolvedValue('Repair')
-      const commandPromise = provider.runCommandPaletteRepair()
-      await flush()
-
-      const seoItem = skillItems?.find((item) => item.skillName === 'seo')
-      expect(seoItem?.description).toBe('SEO helper')
-
-      await commandPromise
-
-      expect(orchestrator.repairMany).toHaveBeenCalledWith(['seo'], 'local', ['cursor'], 'command-palette')
-      expect(orchestrator.repairMany).toHaveBeenCalledWith(['seo'], 'global', ['cursor'], 'command-palette')
-    })
-
-    it('does not show healthy installed skills in repair candidates', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({
-        seo: {
-          local: true,
-          global: false,
-          agents: [
-            {
-              agent: 'cursor',
-              displayName: 'Cursor',
-              local: true,
-              global: false,
-              corrupted: false,
-            },
-          ],
-        },
-      } as InstalledSkillsMap)
-
-      await provider.runCommandPaletteRepair()
-
-      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('No corrupted skills are available to repair.')
-      expect(vscode.window.showQuickPick).not.toHaveBeenCalled()
-      expect(orchestrator.repairMany).not.toHaveBeenCalled()
-    })
-
-    it('does nothing when skill selection is cancelled', async () => {
-      const registry = createRegistry()
-      registryService.getRegistry.mockResolvedValue(registry)
-      reconciler.getInstalledSkills.mockResolvedValue({})
-      reconciler.getAvailableAgents.mockResolvedValue([
-        { agent: 'cursor', displayName: 'Cursor', company: 'Anysphere' },
-      ])
-
-      showQuickPickMock.mockResolvedValueOnce(null)
-      const commandPromise = provider.runCommandPaletteAdd()
-      await flush()
-      await commandPromise
-
-      expect(orchestrator.installMany).not.toHaveBeenCalled()
-    })
-  })
-
-  it('should block command palette action if policy blocks everything', async () => {
-    const policy: ScopePolicyEvaluation = {
-      allowedScopes: 'none',
-      environmentScopes: ['local', 'global'],
-      effectiveScopes: [],
-      blockedReason: 'policy-none',
-    }
-
-    provider.updatePolicy(policy)
-
-    showWarningMessageMock.mockResolvedValue(undefined)
-    const showErrorMessageMock = jest.spyOn(vscode.window, 'showErrorMessage').mockResolvedValue(undefined)
-
-    showWarningMessageMock.mockResolvedValue('Install')
-    await provider.runCommandPaletteAdd()
-
-    // showErrorMessage is now called with message only (no Open Settings button)
-    // @ts-expect-error - vscode types require 2+ args for showErrorMessage; we call with 1
-    expect(showErrorMessageMock).toHaveBeenCalledWith(
-      expect.stringContaining('Lifecycle actions are disabled'),
-    )
-    expect(orchestrator.installMany).not.toHaveBeenCalled()
-  })
-
-  it('should skip scope picker if only one scope is effective (local)', async () => {
-    showWarningMessageMock.mockResolvedValue('Install')
-    const policy: ScopePolicyEvaluation = {
-      allowedScopes: 'local',
-      environmentScopes: ['local', 'global'],
-      effectiveScopes: ['local'],
-      blockedReason: undefined,
-    }
-
-    provider.updatePolicy(policy)
-
-    // Setup registry and agents
-    const registry = {
-      version: '1.0.0',
-      categories: {},
-      skills: [{ name: 'skill1', category: 'cat1', path: 'p', files: [], contentHash: 'h' }],
-    }
-    registryService.getRegistry.mockResolvedValue(registry as unknown as SkillRegistry)
-    reconciler.getInstalledSkills.mockResolvedValue({})
-    reconciler.getAvailableAgents.mockResolvedValue([{ agent: 'a1', displayName: 'A1', company: 'Acme' }])
-
-    // Mocks
-    showQuickPickMock
-      .mockResolvedValueOnce([{ label: 'skill1', skillName: 'skill1' }]) // skill pick
-      .mockResolvedValueOnce([{ label: 'A1', agentId: 'a1' }]) // agent pick
-    // No scope pick expected!
-
-    await provider.runCommandPaletteAdd()
-
-    // Should auto-select 'local'
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['skill1'], 'local', ['a1'], 'command-palette')
-    // Check that showQuickPick was called exactly twice (skill + agent)
-    expect(showQuickPickMock).toHaveBeenCalledTimes(2)
   })
 })

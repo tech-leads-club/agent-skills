@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { readFileSync } from 'node:fs'
 import * as vscode from 'vscode'
 import type { SkillRegistry } from '../shared/types'
 
@@ -134,13 +135,23 @@ describe('Extension Activation', () => {
     expect(context.subscriptions.length).toBeGreaterThanOrEqual(3)
   })
 
-  it('should register extension commands', () => {
+  it('should not register command palette lifecycle commands', () => {
     activate(context)
 
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.add', expect.any(Function))
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.remove', expect.any(Function))
-    expect(vscode.commands.registerCommand).toHaveBeenCalledWith('agentSkills.update', expect.any(Function))
-    expect(context.subscriptions.length).toBeGreaterThanOrEqual(3)
+    expect(vscode.commands.registerCommand).not.toHaveBeenCalled()
+  })
+
+  it('should not contribute command palette lifecycle commands in the manifest', () => {
+    const packageJsonPath = new URL('../../package.json', import.meta.url)
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as {
+      contributes?: { commands?: Array<{ command: string }> }
+    }
+
+    const contributedCommands = packageJson.contributes?.commands?.map((command) => command.command) ?? []
+
+    expect(contributedCommands).not.toContain('agentSkills.add')
+    expect(contributedCommands).not.toContain('agentSkills.remove')
+    expect(contributedCommands).not.toContain('agentSkills.update')
   })
 
   it('should log diagnostic info on activation', () => {
