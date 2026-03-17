@@ -246,6 +246,27 @@ body {
   border-bottom: 1px solid var(--vscode-panel-border);
 }
 
+.category-filter {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.category-filter-label {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.category-filter-select {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 6px;
+  background-color: var(--vscode-dropdown-background, var(--vscode-input-background));
+  color: var(--vscode-dropdown-foreground, var(--vscode-input-foreground));
+}
+
 .search-input-wrapper {
   position: relative;
 }

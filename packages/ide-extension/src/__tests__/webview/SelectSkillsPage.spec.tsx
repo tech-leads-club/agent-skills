@@ -4,6 +4,60 @@ import jestAxe from 'jest-axe'
 import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 import { SelectSkillsPage } from '../../webview/views/SelectSkillsPage'
 
+function getCategoryOptions(registry: SkillRegistry): { id: string; label: string }[] {
+  const categories = Object.entries(registry.categories)
+    .map(([id, c]) => ({ id, label: c.name }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+  return [{ id: 'all', label: 'All categories' }, ...categories]
+}
+
+function getSelectableSkills({
+  action,
+  registry,
+  installedSkills,
+  allAgents = [],
+  selectedAgents = [],
+  scope,
+}: {
+  action: 'install' | 'uninstall'
+  registry: SkillRegistry
+  installedSkills: InstalledSkillsMap
+  allAgents?: AvailableAgent[]
+  selectedAgents?: string[]
+  scope: 'local' | 'global'
+}): typeof registry.skills {
+  const targetAgents =
+    selectedAgents.length > 0 ? allAgents.filter((a) => selectedAgents.includes(a.agent)) : allAgents
+  const inScope = (inst: { local: boolean; global: boolean }, s: string) => (s === 'local' ? inst.local : inst.global)
+  const agentInScope = (agent: { local: boolean; global: boolean }, s: string) => (s === 'local' ? agent.local : agent.global)
+  return registry.skills.filter((skill) => {
+    const installed = installedSkills[skill.name]
+    if (action === 'install') {
+      const installedForAll =
+        installed &&
+        (targetAgents.length === 0
+          ? inScope(installed, scope)
+          : targetAgents.every((a) => {
+              const info = installed.agents.find((e) => e.agent === a.agent)
+              return info && agentInScope(info, scope)
+            })
+        )
+      return !installedForAll
+    }
+    if (!installed || !inScope(installed, scope)) return false
+    if (selectedAgents.length === 0) return true
+    return installed.agents.some((a) => selectedAgents.includes(a.agent) && agentInScope(a, scope))
+  })
+}
+
+function isSkillInstalledForScope(
+  installed: InstalledSkillsMap[string],
+  scope: 'local' | 'global',
+): boolean {
+  if (!installed) return false
+  return scope === 'local' ? installed.local : installed.global
+}
+
 const { axe } = jestAxe
 
 const registry: SkillRegistry = {
@@ -61,6 +115,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -81,6 +138,9 @@ describe('SelectSkillsPage', () => {
         installedSkills={installedSkills}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -109,6 +169,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -131,6 +194,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -171,6 +237,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -194,6 +263,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -217,6 +289,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -230,6 +305,62 @@ describe('SelectSkillsPage', () => {
     expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
   })
 
+  it('filters skills by category dropdown before search', async () => {
+    const user = userEvent.setup()
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
+        scope="local"
+        selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /filter by category/i }), 'quality')
+
+    expect(screen.getByText('accessibility')).toBeInTheDocument()
+    expect(screen.queryByText('seo')).not.toBeInTheDocument()
+  })
+
+  it('keeps category and search filters composed together', async () => {
+    const user = userEvent.setup()
+    render(
+      <SelectSkillsPage
+        action="install"
+        registry={registry}
+        installedSkills={{ accessibility: null, seo: null }}
+        allAgents={allAgents}
+        scope="local"
+        selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+        onNext={jest.fn()}
+      />,
+    )
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /filter by category/i }), 'search')
+    await user.type(screen.getByRole('searchbox', { name: /search skills/i }), 'seo')
+
+    expect(screen.getByText('seo')).toBeInTheDocument()
+    expect(screen.queryByText('accessibility')).not.toBeInTheDocument()
+    expect(screen.getByText(/1 selected|0 selected/i)).toBeInTheDocument()
+  })
+
   it('disables configure installation button when nothing is selected', () => {
     render(
       <SelectSkillsPage
@@ -239,6 +370,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -259,6 +393,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={['accessibility']}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -267,7 +404,9 @@ describe('SelectSkillsPage', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /configure installation/i })).toHaveClass('primary-footer-button--install')
+    expect(screen.getByRole('button', { name: /configure installation/i })).toHaveClass(
+      'primary-footer-button--install',
+    )
   })
 
   it('applies uninstall accent class to confirm removal button', () => {
@@ -278,6 +417,9 @@ describe('SelectSkillsPage', () => {
         installedSkills={installedSkills}
         scope="local"
         selectedSkills={['accessibility']}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}
@@ -301,6 +443,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={onSelectAll}
         onClear={jest.fn()}
@@ -322,6 +467,9 @@ describe('SelectSkillsPage', () => {
         allAgents={allAgents}
         scope="local"
         selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getSelectableSkills={getSelectableSkills}
+        isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={jest.fn()}
         onSelectAll={jest.fn()}
         onClear={jest.fn()}

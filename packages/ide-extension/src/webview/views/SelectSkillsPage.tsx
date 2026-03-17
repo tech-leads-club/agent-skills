@@ -1,135 +1,36 @@
-import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   AvailableAgent,
   InstalledSkillsMap,
   LifecycleScope,
+  Skill,
   SkillRegistry,
   WebviewAction,
 } from '../../shared/types'
-import { SearchBar } from '../components/SearchBar'
-import { SelectionMenu } from '../components/SelectionMenu'
 import { SkillSelectCard } from '../components/SkillSelectCard'
+import { SkillSelectionToolbar } from '../components/SkillSelectionToolbar'
+import { useFilteredSkills } from '../hooks/useFilteredSkills'
+import type { CategoryOption, SelectableSkillsInput } from '../../services/selection-selectors'
 
-/**
- * Props for the SelectSkillsPage component.
- */
 export interface SelectSkillsPageProps {
-  /** The webview action being performed (e.g., 'install' or 'uninstall'). */
   action: WebviewAction
-  /** The skill registry instance containing all available skills. */
   registry: SkillRegistry
-  /** Map of currently installed skills system-wide. */
   installedSkills: InstalledSkillsMap
-  /** Array of all available target agents. */
   allAgents?: AvailableAgent[]
-  /** Selected agent ids (for Install flow: skills not installed on these agents). */
   selectedAgents?: string[]
-  /** The target lifecycle scope for the operation. */
   scope: LifecycleScope
-  /** Names of the skills that are currently checked/selected. */
   selectedSkills: string[]
-  /** Callback to toggle selection of a single skill. */
+  getCategoryOptions: (registry: SkillRegistry) => CategoryOption[]
+  getSelectableSkills: (input: SelectableSkillsInput) => Skill[]
+  isSkillInstalledForScope: (installed: InstalledSkillsMap[string], scope: LifecycleScope) => boolean
   onToggleSkill: (skillName: string) => void
-  /** Callback to replace the entire skill selection. */
   onSelectAll: (skills: string[]) => void
-  /** Callback to clear all skill selections. */
   onClear: () => void
-  /** Callback to navigate back to the previous page. */
   onBack: () => void
-  /** Callback to cancel the entire operation. */
   onCancel?: () => void
-  /** Callback to proceed to the next configuration step. */
   onNext: () => void
 }
 
-/**
- * Searchable wrapper for skills.
- *
- * @internal
- */
-interface SearchableSkillEntry {
-  /** The underlying skill registry item. */
-  skill: SkillRegistry['skills'][number]
-  /** Human-readable category label. */
-  categoryName: string
-  /** The author's name formatted for search. */
-  authorName: string
-}
-
-/**
- * Checks if a skill is installed in the given scope.
- *
- * @param installed - Installation info for a skill.
- * @param scope - Scope to check.
- * @returns True if installed.
- *
- * @example
- * ```typescript
- * const isInstalled = isInstalledForScope(installedSkills['my-skill'], 'local');
- * ```
- */
-function isInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
-  if (!installed) return false
-  return scope === 'local' ? installed.local : installed.global
-}
-
-/**
- * Checks if a skill is installed across all provided agents in the given scope.
- *
- * @param installed - Installation info for a skill.
- * @param allAgents - List of all agents to check.
- * @param scope - Scope to check.
- * @returns True if installed.
- *
- * @example
- * ```typescript
- * const isInstalledOnAll = isInstalledForAllAgents(
- *   installedSkills['my-skill'],
- *   availableAgents,
- *   'global'
- * );
- * ```
- */
-function isInstalledForAllAgents(
-  installed: InstalledSkillsMap[string],
-  allAgents: AvailableAgent[],
-  scope: LifecycleScope,
-): boolean {
-  if (!installed) return false
-  if (allAgents.length === 0) return isInstalledForScope(installed, scope)
-
-  return allAgents.every((agent) => {
-    const installInfo = installed.agents.find((entry) => entry.agent === agent.agent)
-    if (!installInfo) return false
-    return scope === 'local' ? installInfo.local : installInfo.global
-  })
-}
-
-/**
- * Skills page for searching and selecting skills for a batch action.
- *
- * @param props - Selection context and callbacks for skill selection flow.
- * @returns Skills selection view.
- *
- * @see {@link SelectSkillsPageProps} for available props.
- *
- * @example
- * ```tsx
- * <SelectSkillsPage
- *   action="install"
- *   registry={registry}
- *   installedSkills={installedSkills}
- *   scope="local"
- *   selectedSkills={['my-skill']}
- *   onToggleSkill={(skillName) => toggleSkill(skillName)}
- *   onSelectAll={(skills) => selectAllSkills(skills)}
- *   onClear={() => clearSkillSelection()}
- *   onBack={() => goBack()}
- *   onNext={() => goToAgents()}
- * />
- * ```
- */
 export function SelectSkillsPage({
   action,
   registry,
@@ -138,6 +39,9 @@ export function SelectSkillsPage({
   selectedAgents = [],
   scope,
   selectedSkills,
+  getCategoryOptions,
+  getSelectableSkills,
+  isSkillInstalledForScope,
   onToggleSkill,
   onSelectAll,
   onClear,
@@ -146,58 +50,31 @@ export function SelectSkillsPage({
   onNext,
 }: SelectSkillsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('all')
   const nextStepActionClassName =
     action === 'uninstall' ? 'primary-footer-button--uninstall' : 'primary-footer-button--install'
 
-  const candidateSkills = useMemo(() => {
-    const agentsForInstall =
-      selectedAgents.length > 0
-        ? allAgents.filter((a) => selectedAgents.includes(a.agent))
-        : allAgents
-    return registry.skills.filter((skill) => {
-      if (action === 'install') {
-        return !isInstalledForAllAgents(installedSkills[skill.name], agentsForInstall, scope)
-      }
-      const installed = installedSkills[skill.name]
-      if (!installed || (!installed.local && !installed.global)) return false
-      const scopeInstalled = scope === 'local' ? installed.local : installed.global
-      if (!scopeInstalled) return false
-      if (selectedAgents.length === 0) return true
-      return installed.agents.some(
-        (a) =>
-          selectedAgents.includes(a.agent) && (scope === 'local' ? a.local : a.global),
-      )
-    })
-  }, [action, allAgents, installedSkills, registry.skills, scope, selectedAgents])
-
-  const searchableSkills = useMemo<SearchableSkillEntry[]>(
+  const candidateSkills = useMemo(
     () =>
-      candidateSkills.map((skill) => ({
-        skill,
-        categoryName: registry.categories[skill.category]?.name ?? skill.category,
-        authorName: skill.author ?? '',
-      })),
-    [candidateSkills, registry.categories],
-  )
-
-  const fuseInstance = useMemo(
-    () =>
-      new Fuse(searchableSkills, {
-        keys: ['skill.name', 'skill.description', 'skill.category', 'categoryName', 'authorName'],
-        threshold: 0.3,
-        ignoreLocation: true,
+      getSelectableSkills({
+        action,
+        registry,
+        installedSkills,
+        allAgents,
+        selectedAgents,
+        scope,
       }),
-    [searchableSkills],
+    [action, allAgents, getSelectableSkills, installedSkills, registry, scope, selectedAgents],
   )
-
-  const visibleSkills = useMemo(() => {
-    const normalizedSearchQuery = searchQuery.trim()
-    if (!normalizedSearchQuery) return candidateSkills
-    return fuseInstance.search(normalizedSearchQuery).map((result) => result.item.skill)
-  }, [candidateSkills, fuseInstance, searchQuery])
+  const categoryOptions = useMemo(() => getCategoryOptions(registry), [getCategoryOptions, registry])
+  const visibleSkills = useFilteredSkills({
+    skills: candidateSkills,
+    registry,
+    searchQuery,
+    selectedCategoryId,
+  })
 
   const visibleSkillNames = useMemo(() => visibleSkills.map((skill) => skill.name), [visibleSkills])
-
   const allVisibleSelected =
     visibleSkillNames.length > 0 && visibleSkillNames.every((skillName) => selectedSkills.includes(skillName))
 
@@ -239,9 +116,13 @@ export function SelectSkillsPage({
         </div>
       </header>
 
-      <SearchBar value={searchQuery} onChange={setSearchQuery} resultCount={visibleSkills.length} />
-
-      <SelectionMenu
+      <SkillSelectionToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categoryOptions={categoryOptions}
+        selectedCategoryId={selectedCategoryId}
+        onCategoryChange={setSelectedCategoryId}
+        resultCount={visibleSkills.length}
         selectedCount={selectedSkills.length}
         allSelected={allVisibleSelected}
         onToggleAll={handleToggleAllVisible}
@@ -268,7 +149,7 @@ export function SelectSkillsPage({
               categoryName={registry.categories[skill.category]?.name ?? skill.category}
               isSelected={selectedSkills.includes(skill.name)}
               onToggle={() => onToggleSkill(skill.name)}
-              isInstalled={action === 'uninstall' || isInstalledForScope(installedSkills[skill.name], scope)}
+              isInstalled={action === 'uninstall' || isSkillInstalledForScope(installedSkills[skill.name], scope)}
             />
           ))
         )}
