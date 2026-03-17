@@ -53,7 +53,8 @@
   "scripts": {
     "build": "nx build ide-extension",
     "build:webview": "nx run ide-extension:build:webview",
-    "test": "nx run ide-extension:test",
+    "lint": "nx run ide-extension:lint",
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run ide-extension:test",
     "test:integration": "node ./scripts/run-integration-tests.mjs",
     "typecheck": "tsc --noEmit",
     "package": "nx run ide-extension:package"

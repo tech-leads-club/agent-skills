@@ -88,15 +88,6 @@ export function useHostState() {
             })
           }
           break
-        case 'batchCompleted':
-          setBatchResult({
-            success: message.payload.success,
-            failedSkills: message.payload.failedSkills,
-            errorMessage: message.payload.errorMessage,
-            results: message.payload.results,
-            action: message.payload.action,
-          })
-          break
       }
     })
 

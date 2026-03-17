@@ -1,56 +1,26 @@
 import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
+import type { ActionState } from '../../shared/types'
 
-describe('Shared Messages', () => {
-  it('should construct WebviewMessage with webviewDidMount', () => {
-    const msg: WebviewMessage = { type: 'webviewDidMount' }
-    expect(msg.type).toBe('webviewDidMount')
+describe('shared messages', () => {
+  it('constructs the active webview messages', () => {
+    const mount: WebviewMessage = { type: 'webviewDidMount' }
+    const refresh: WebviewMessage = { type: 'requestRefresh' }
+    const action: WebviewMessage = {
+      type: 'requestRunAction',
+      payload: { action: 'install', skills: ['seo'], agents: ['cursor'], scope: 'local', method: 'copy' },
+    }
+
+    expect(mount.type).toBe('webviewDidMount')
+    expect(refresh.type).toBe('requestRefresh')
+    expect(action.type).toBe('requestRunAction')
   })
 
-  it('should construct ExtensionMessage with initialize', () => {
-    const msg: ExtensionMessage = {
+  it('constructs initialize and registry update messages', () => {
+    const initialize: ExtensionMessage = {
       type: 'initialize',
       payload: { version: '1.0.0', availableAgents: [], allAgents: [], hasWorkspace: true },
     }
-    expect(msg.type).toBe('initialize')
-    if (msg.type === 'initialize') {
-      expect(msg.payload.version).toBe('1.0.0')
-    }
-  })
-
-  it('should use discriminated union in switch statement for WebviewMessage', () => {
-    const msg: WebviewMessage = { type: 'webviewDidMount' }
-    let handled = false
-    switch (msg.type) {
-      case 'webviewDidMount':
-        handled = true
-        break
-    }
-    expect(handled).toBe(true)
-  })
-
-  it('should use discriminated union in switch statement for ExtensionMessage', () => {
-    const msg: ExtensionMessage = {
-      type: 'initialize',
-      payload: { version: '1.0.0', availableAgents: [], allAgents: [], hasWorkspace: true },
-    }
-    let version = ''
-    switch (msg.type) {
-      case 'initialize':
-        version = msg.payload.version
-        break
-    }
-    expect(version).toBe('1.0.0')
-  })
-
-  // NEW TESTS FOR REGISTRY MESSAGES
-
-  it('should construct WebviewMessage with requestRefresh', () => {
-    const msg: WebviewMessage = { type: 'requestRefresh' }
-    expect(msg.type).toBe('requestRefresh')
-  })
-
-  it('should construct ExtensionMessage with registryUpdate', () => {
-    const msg: ExtensionMessage = {
+    const update: ExtensionMessage = {
       type: 'registryUpdate',
       payload: {
         status: 'ready',
@@ -58,49 +28,52 @@ describe('Shared Messages', () => {
         fromCache: false,
       },
     }
-    expect(msg.type).toBe('registryUpdate')
-    expect(msg.payload.status).toBe('ready')
-    expect(msg.payload.registry).toBeTruthy()
+
+    expect(initialize.type).toBe('initialize')
+    expect(update.type).toBe('registryUpdate')
   })
 
-  it('should support all status variants in RegistryUpdatePayload', () => {
+  it('supports all registry status variants', () => {
     const statuses: Array<'loading' | 'ready' | 'error' | 'offline'> = ['loading', 'ready', 'error', 'offline']
-    statuses.forEach((status) => {
-      const msg: ExtensionMessage = {
+
+    for (const status of statuses) {
+      const message: ExtensionMessage = {
         type: 'registryUpdate',
-        payload: {
-          status,
-          registry: null,
-          errorMessage: 'test error',
-          fromCache: true,
-        },
+        payload: { status, registry: null, errorMessage: 'test error', fromCache: true },
       }
-      expect(msg.payload.status).toBe(status)
-    })
-  })
 
-  // TESTS FOR INSTALL/REMOVE PAYLOADS WITH MULTI-AGENT SUPPORT
-
-  it('should construct installSkill with multiple agents', () => {
-    const msg: WebviewMessage = {
-      type: 'installSkill',
-      payload: { skillName: 'test', agents: ['cursor', 'claude-code'], scope: 'local' },
-    }
-    expect(msg.type).toBe('installSkill')
-    if (msg.type === 'installSkill') {
-      expect(msg.payload.agents).toEqual(['cursor', 'claude-code'])
-      expect(msg.payload.scope).toBe('local')
+      expect(message.payload.status).toBe(status)
     }
   })
 
-  it('should construct removeSkill with multiple agents', () => {
-    const msg: WebviewMessage = {
-      type: 'removeSkill',
-      payload: { skillName: 'test', agents: ['cursor'], scope: 'global' },
+  it('constructs action state messages with the single-action contract', () => {
+    const actionState: ActionState = {
+      status: 'completed',
+      actionId: 'action-1',
+      action: 'update',
+      currentStep: 'Completed update',
+      errorMessage: null,
+      request: { action: 'update', skills: [], agents: [], scope: 'all' },
+      results: [{ skillName: 'seo', operation: 'update', scope: 'local', success: true }],
+      logs: [{ operation: 'update', skillName: 'seo', scope: 'local', message: 'Completed', severity: 'info' }],
+      rejectionMessage: null,
     }
-    expect(msg.type).toBe('removeSkill')
-    if (msg.type === 'removeSkill') {
-      expect(msg.payload.agents).toEqual(['cursor'])
+    const message: ExtensionMessage = { type: 'actionState', payload: actionState }
+
+    expect(message.type).toBe('actionState')
+    expect(message.payload.results).toHaveLength(1)
+  })
+
+  it('constructs snapshot messages for installed, trust, and policy state', () => {
+    const reconcile: ExtensionMessage = { type: 'reconcileState', payload: { installedSkills: { seo: null } } }
+    const trust: ExtensionMessage = { type: 'trustState', payload: { isTrusted: true } }
+    const policy: ExtensionMessage = {
+      type: 'policyState',
+      payload: { allowedScopes: 'all', effectiveScopes: ['local', 'global'], blockedReason: undefined },
     }
+
+    expect(reconcile.type).toBe('reconcileState')
+    expect(trust.type).toBe('trustState')
+    expect(policy.type).toBe('policyState')
   })
 })

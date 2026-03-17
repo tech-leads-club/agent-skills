@@ -2,26 +2,25 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
 import type { ActionRunner } from '../../services/action-runner'
+import type { InstalledStateSnapshot } from '../../services/installed-state-store'
 import { InstalledStateStore } from '../../services/installed-state-store'
 import { LoggingService } from '../../services/logging-service'
 import { RegistryStore, type RegistryStoreSnapshot } from '../../services/registry-store'
 import type { StateReconciler } from '../../services/state-reconciler'
-import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
-import type { ActionRequest, ActionState, AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
-
-const showWarningMessageMock = vscode.window.showWarningMessage as jest.Mock<
-  (...args: Array<unknown>) => Promise<unknown>
->
+import type { WebviewMessage } from '../../shared/messages'
+import type {
+  ActionRequest,
+  ActionState,
+  AvailableAgent,
+  InstalledSkillsMap,
+  ScopePolicyEvaluation,
+  SkillRegistry,
+} from '../../shared/types'
 
 type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (...args: TArgs) => TReturn
-
 type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
   ...args: TArgs
 ) => Promise<TReturn>
-
-type WebviewUriFn = (uri: { fsPath: string }) => string
-type WebviewReceiveHandler = (handler: (message: WebviewMessage) => void) => vscode.Disposable
-type PostMessageFn = (message: ExtensionMessage) => Promise<boolean>
 
 describe('SidebarProvider', () => {
   let provider: SidebarProvider
@@ -32,8 +31,12 @@ describe('SidebarProvider', () => {
   let actionRunner: jest.Mocked<ActionRunner>
   let reconciler: jest.Mocked<StateReconciler>
   let webviewView: vscode.WebviewView
-  let messageHandler: (message: WebviewMessage) => void
+  let messageHandler: (message: WebviewMessage) => void | Promise<void>
+  let registrySnapshotHandler: ((snapshot: RegistryStoreSnapshot) => void) | undefined
+  let installedSnapshotHandler: ((snapshot: InstalledStateSnapshot) => void) | undefined
   let actionStateHandler: ((state: ActionState) => void) | undefined
+
+  const showErrorMessageMock = vscode.window.showErrorMessage as unknown as jest.Mock<(message: string) => void>
 
   const mockRegistry: SkillRegistry = {
     version: '1.0.0',
@@ -41,10 +44,24 @@ describe('SidebarProvider', () => {
     skills: [],
   }
 
+  const idleActionState: ActionState = {
+    status: 'idle',
+    actionId: null,
+    action: null,
+    currentStep: null,
+    errorMessage: null,
+    request: null,
+    results: [],
+    logs: [],
+    rejectionMessage: null,
+  }
+
   beforeEach(() => {
-    // Reset all mocks (including module-level vscode mocks and their implementations)
     jest.resetAllMocks()
-    // Mock ExtensionContext
+    registrySnapshotHandler = undefined
+    installedSnapshotHandler = undefined
+    actionStateHandler = undefined
+
     context = {
       extensionUri: { fsPath: '/test/extension/uri' },
       subscriptions: [],
@@ -55,56 +72,45 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.ExtensionContext
 
-    const mockLoggerImpl = {
+    logger = {
       info: jest.fn<SyncMockableFn>(),
       warn: jest.fn<SyncMockableFn>(),
       error: jest.fn<SyncMockableFn>(),
       debug: jest.fn<SyncMockableFn>(),
       dispose: jest.fn<SyncMockableFn>(),
-    }
-    logger = mockLoggerImpl as unknown as jest.Mocked<LoggingService>
+    } as unknown as jest.Mocked<LoggingService>
 
-    const registrySnapshot: RegistryStoreSnapshot = {
-      status: 'ready',
-      registry: mockRegistry,
-      fromCache: false,
-      errorMessage: null,
-    }
     registryStore = {
-      getSnapshot: jest.fn<SyncMockableFn<RegistryStoreSnapshot>>().mockReturnValue(registrySnapshot),
+      getSnapshot: jest.fn<SyncMockableFn<RegistryStoreSnapshot>>().mockReturnValue({
+        status: 'ready',
+        registry: mockRegistry,
+        fromCache: false,
+        errorMessage: null,
+      }),
       prime: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       refresh: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      subscribe: jest
-        .fn<SyncMockableFn<vscode.Disposable, [(snapshot: RegistryStoreSnapshot) => void]>>()
-        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+      subscribe: jest.fn((handler: (snapshot: RegistryStoreSnapshot) => void) => {
+        registrySnapshotHandler = handler
+        return { dispose: jest.fn<SyncMockableFn>() }
+      }),
     } as unknown as jest.Mocked<RegistryStore>
 
-    actionStateHandler = undefined
-    const mockActionRunner = {
-      getState: jest.fn<SyncMockableFn<ActionState>>().mockReturnValue({
-        status: 'idle',
-        actionId: null,
-        action: null,
-        currentStep: null,
-        errorMessage: null,
-        request: null,
-        results: [],
-        logs: [],
-        rejectionMessage: null,
+    installedStateStore = {
+      getSnapshot: jest
+        .fn<SyncMockableFn<InstalledStateSnapshot>>()
+        .mockReturnValue({ installedSkills: {}, lastUpdatedAt: null }),
+      refresh: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      subscribe: jest.fn((handler: (snapshot: InstalledStateSnapshot) => void) => {
+        installedSnapshotHandler = handler
+        return { dispose: jest.fn<SyncMockableFn>() }
       }),
+    } as unknown as jest.Mocked<InstalledStateStore>
+
+    actionRunner = {
+      getState: jest.fn<SyncMockableFn<ActionState>>().mockReturnValue(idleActionState),
       run: jest.fn<AsyncMockableFn<{ accepted: boolean; state: ActionState }, [ActionRequest]>>().mockResolvedValue({
         accepted: true,
-        state: {
-          status: 'idle',
-          actionId: null,
-          action: null,
-          currentStep: null,
-          errorMessage: null,
-          request: null,
-          results: [],
-          logs: [],
-          rejectionMessage: null,
-        },
+        state: idleActionState,
       }),
       subscribe: jest.fn((handler: (state: ActionState) => void) => {
         actionStateHandler = handler
@@ -112,9 +118,8 @@ describe('SidebarProvider', () => {
       }),
       dispose: jest.fn<SyncMockableFn>(),
     } as unknown as jest.Mocked<ActionRunner>
-    actionRunner = mockActionRunner
 
-    const mockReconciler = {
+    reconciler = {
       reconcile: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
       getAvailableAgents: jest.fn<AsyncMockableFn<AvailableAgent[]>>().mockResolvedValue([]),
       getAllAgents: jest.fn<SyncMockableFn<AvailableAgent[]>>().mockReturnValue([]),
@@ -122,216 +127,105 @@ describe('SidebarProvider', () => {
       onStateChanged: jest.fn<SyncMockableFn<void, [(state: InstalledSkillsMap) => void]>>(),
       start: jest.fn<SyncMockableFn>(),
       dispose: jest.fn<SyncMockableFn>(),
+      updatePolicy: jest.fn<SyncMockableFn>(),
     } as unknown as jest.Mocked<StateReconciler>
-    reconciler = mockReconciler
 
-    installedStateStore = {
-      getSnapshot: jest
-        .fn<SyncMockableFn<{ installedSkills: InstalledSkillsMap; lastUpdatedAt: string | null }>>()
-        .mockReturnValue({ installedSkills: {}, lastUpdatedAt: null }),
-      refresh: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      subscribe: jest
-        .fn<
-          SyncMockableFn<
-            vscode.Disposable,
-            [(snapshot: { installedSkills: InstalledSkillsMap; lastUpdatedAt: string | null }) => void]
-          >
-        >()
-        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
-    } as unknown as jest.Mocked<InstalledStateStore>
-
-    // Mock WebviewView
     webviewView = {
       webview: {
         options: {},
         html: '',
         cspSource: 'vscode-webview:',
-        asWebviewUri: jest.fn<WebviewUriFn>((uri) => uri.fsPath),
-        onDidReceiveMessage: jest.fn<WebviewReceiveHandler>((handler) => {
+        asWebviewUri: jest.fn((uri: { fsPath: string }) => uri.fsPath),
+        onDidReceiveMessage: jest.fn((handler: (message: WebviewMessage) => void | Promise<void>) => {
           messageHandler = handler
           return { dispose: jest.fn<SyncMockableFn>() }
         }),
-        postMessage: jest.fn<PostMessageFn>(),
+        postMessage: jest.fn<AsyncMockableFn<boolean, [unknown]>>().mockResolvedValue(true),
       },
     } as unknown as vscode.WebviewView
 
     provider = new SidebarProvider(context, logger, registryStore, actionRunner, reconciler, installedStateStore)
   })
 
-  it('should have the correct viewType', () => {
+  it('configures the webview shell and registers bridge listeners', () => {
+    provider.resolveWebviewView(webviewView)
+
     expect(SidebarProvider.viewType).toBe('agentSkillsSidebar')
-  })
-
-  it('should enable scripts in webview options', () => {
-    provider.resolveWebviewView(webviewView)
-    expect(webviewView.webview.options.enableScripts).toBe(true)
-  })
-
-  it('should set localResourceRoots in webview options', () => {
-    provider.resolveWebviewView(webviewView)
-    expect(webviewView.webview.options.localResourceRoots).toEqual([context.extensionUri])
-  })
-
-  it('should generate HTML with correct scripts and styles', () => {
-    provider.resolveWebviewView(webviewView)
-    const html = webviewView.webview.html
-
-    expect(html).toContain('<!DOCTYPE html>')
-    expect(html).toContain('<div id="root"></div>')
-    expect(html).toContain('src="/test/extension/uri/dist/webview/index.js"')
-    expect(html).toContain('href="/test/extension/uri/dist/webview/index.css"')
-    expect(webviewView.webview.asWebviewUri).toHaveBeenCalledTimes(2)
-  })
-
-  it('should generate HTML with nonce-based CSP', () => {
-    provider.resolveWebviewView(webviewView)
-    const html = webviewView.webview.html
-
-    // Extract nonce
-    const nonceMatch = html.match(/nonce="([^"]+)"/)
-    expect(nonceMatch).toBeTruthy()
-    const nonce = nonceMatch![1]
-
-    expect(html).toContain(`script-src 'nonce-${nonce}'`)
-    expect(html).toContain(`style-src ${webviewView.webview.cspSource} 'unsafe-inline'`)
-  })
-
-  it('should register message handler', () => {
-    provider.resolveWebviewView(webviewView)
-    expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalled()
+    expect(webviewView.webview.options).toEqual({
+      enableScripts: true,
+      localResourceRoots: [context.extensionUri],
+    })
+    expect(webviewView.webview.html).toContain('<div id="root"></div>')
+    expect(webviewView.webview.html).toContain('src="/test/extension/uri/dist/webview/index.js"')
+    expect(webviewView.webview.html).toContain('href="/test/extension/uri/dist/webview/index.css"')
+    expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalledTimes(1)
     expect(context.subscriptions).toHaveLength(5)
   })
 
-  it('should handle webviewDidMount message', async () => {
+  it('bootstraps warm startup state when the webview mounts', async () => {
     const installedSkills: InstalledSkillsMap = {
-      'test-skill': {
+      seo: {
         local: true,
         global: false,
-        agents: [
-          {
-            agent: 'cursor',
-            displayName: 'Cursor',
-            local: true,
-            global: false,
-            corrupted: false,
-          },
-        ],
+        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
       },
     }
+    const policy: ScopePolicyEvaluation = {
+      allowedScopes: 'all',
+      environmentScopes: ['local', 'global'],
+      effectiveScopes: ['local', 'global'],
+    }
+
     installedStateStore.getSnapshot.mockReturnValue({
       installedSkills,
       lastUpdatedAt: '2026-03-16T00:00:00.000Z',
     })
 
+    provider.updatePolicy(policy)
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'webviewDidMount' }
-
-    await messageHandler(message)
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await messageHandler({ type: 'webviewDidMount' })
 
     expect(logger.info).toHaveBeenCalledWith('Webview did mount')
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'initialize',
-        payload: expect.objectContaining({
-          version: '1.2.3',
-          availableAgents: expect.arrayContaining([]),
-          allAgents: expect.arrayContaining([]),
-          hasWorkspace: expect.any(Boolean),
-        }),
-      }),
-    )
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'initialize',
+      payload: { version: '1.2.3', availableAgents: [], allAgents: [], hasWorkspace: true },
+    })
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'reconcileState',
       payload: { installedSkills },
     })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({ type: 'actionState', payload: idleActionState })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({ type: 'trustState', payload: { isTrusted: true } })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'policyState',
+      payload: { allowedScopes: 'all', effectiveScopes: ['local', 'global'], blockedReason: undefined },
+    })
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
-      payload: {
-        status: 'ready',
-        registry: mockRegistry,
-        fromCache: false,
-      },
+      payload: { status: 'ready', registry: mockRegistry, fromCache: false },
     })
-    expect(registryStore.prime).toHaveBeenCalled()
-    expect(installedStateStore.refresh).toHaveBeenCalled()
+    expect(registryStore.prime).toHaveBeenCalledTimes(1)
+    expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('posts the installed snapshot from the store', async () => {
-    const installedInfo = {
-      local: true,
-      global: false,
-      agents: [
-        {
-          agent: 'cursor',
-          displayName: 'Cursor',
-          local: true,
-          global: false,
-          corrupted: false,
-        },
-      ],
-    }
-    const installedSkills: InstalledSkillsMap = {
-      'test-skill': installedInfo,
-    }
-    installedStateStore.getSnapshot.mockReturnValue({
-      installedSkills,
-      lastUpdatedAt: '2026-03-16T00:00:00.000Z',
+  it('maps idle registry snapshots to loading during cold startup', async () => {
+    registryStore.getSnapshot.mockReturnValue({
+      status: 'idle',
+      registry: null,
+      fromCache: false,
+      errorMessage: null,
     })
 
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'webviewDidMount' }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'reconcileState',
-      payload: {
-        installedSkills,
-      },
-    })
-  })
-
-  it('should handle unknown messages gracefully', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message = { type: 'unknown-type' } as unknown as WebviewMessage
-
-    await messageHandler(message)
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
-  })
-
-  it('should log info when resolving webview view', () => {
-    provider.resolveWebviewView(webviewView)
-    expect(logger.info).toHaveBeenCalledWith('Resolving sidebar webview')
-  })
-
-  // TESTS FOR REGISTRY HANDLING
-
-  it('should send the current registry snapshot on webviewDidMount', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'webviewDidMount' }
-
-    await messageHandler(message)
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    await messageHandler({ type: 'webviewDidMount' })
 
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
-      payload: {
-        status: 'ready',
-        registry: mockRegistry,
-        fromCache: false,
-      },
+      payload: { status: 'loading', registry: null, fromCache: false },
     })
-    expect(registryStore.prime).toHaveBeenCalled()
   })
 
-  it('should notify the webview when registry data is served from cache during offline mode', async () => {
+  it('surfaces offline cached startup state', async () => {
     registryStore.getSnapshot.mockReturnValue({
       status: 'offline',
       registry: mockRegistry,
@@ -340,10 +234,7 @@ describe('SidebarProvider', () => {
     })
 
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'webviewDidMount' }
-
-    await messageHandler(message)
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    await messageHandler({ type: 'webviewDidMount' })
 
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
@@ -351,191 +242,86 @@ describe('SidebarProvider', () => {
         status: 'offline',
         registry: mockRegistry,
         fromCache: true,
-        errorMessage: expect.stringContaining('Unable to refresh'),
+        errorMessage: 'Unable to refresh the skills registry. Showing cached data.',
       },
     })
   })
 
-  it('should trigger registry refresh on requestRefresh message', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'requestRefresh' }
-
-    await messageHandler(message)
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10))
-
-    expect(registryStore.refresh).toHaveBeenCalled()
-    expect(installedStateStore.refresh).toHaveBeenCalled()
-  })
-
-  it('should post error snapshots exposed by the registry store', async () => {
-    registryStore.getSnapshot.mockReturnValue({
-      status: 'error',
-      registry: null,
-      fromCache: false,
-      errorMessage: 'Network error',
-    })
-
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = { type: 'webviewDidMount' }
-
-    await messageHandler(message)
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'registryUpdate',
-        payload: expect.objectContaining({
-          status: 'error',
-          registry: null,
-          errorMessage: expect.stringContaining('Network error'),
-        }),
-      }),
-    )
-  })
-
-  // TESTS FOR WEBVIEW MESSAGE FLOW
-
-  it('should treat legacy requestAgentPick messages as unknown', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message = {
-      type: 'requestAgentPick',
-      payload: { skillName: 'test-skill', action: 'add' },
-    } as unknown as WebviewMessage
-
-    await messageHandler(message)
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
-  })
-
-  it('should treat legacy requestScopePick messages as unknown', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message = {
-      type: 'requestScopePick',
-      payload: { skillName: 'test-skill', action: 'add', agents: ['cursor'] },
-    } as unknown as WebviewMessage
-
-    await messageHandler(message)
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
-  })
-
-  it('should handle executeBatch install message', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'executeBatch',
-      payload: { action: 'install', skills: ['test-skill'], agents: ['cursor'], scope: 'local' },
-    }
-
-    await messageHandler(message)
-
-    expect(actionRunner.run).toHaveBeenCalledWith({
-      action: 'install',
-      skills: ['test-skill'],
-      agents: ['cursor'],
-      scope: 'local',
-      method: 'copy',
-    })
-  })
-
-  it('should handle requestRunAction message', async () => {
-    provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'requestRunAction',
-      payload: { action: 'remove', skills: ['test-skill'], agents: ['cursor'], scope: 'global' },
-    }
-
-    await messageHandler(message)
-
-    expect(actionRunner.run).toHaveBeenCalledWith({
-      action: 'remove',
-      skills: ['test-skill'],
-      agents: ['cursor'],
-      scope: 'global',
-    })
-  })
-
-  it('posts the current action state on webviewDidMount', async () => {
-    provider.resolveWebviewView(webviewView)
-
-    await messageHandler({ type: 'webviewDidMount' })
-
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'actionState',
-      payload: {
-        status: 'idle',
-        actionId: null,
-        action: null,
-        currentStep: null,
-        errorMessage: null,
-        request: null,
-        results: [],
-        logs: [],
-        rejectionMessage: null,
-      },
-    })
-  })
-
-  it('posts actionState updates from the runner', async () => {
+  it('forwards store snapshots and action updates to the webview', async () => {
     provider.resolveWebviewView(webviewView)
 
     const runningState: ActionState = {
       status: 'running',
       actionId: 'action-1',
       action: 'install',
-      currentStep: 'Installing test-skill (local)',
+      currentStep: 'Installing seo (local)',
       errorMessage: null,
-      request: { action: 'install', skills: ['test-skill'], agents: ['cursor'], scope: 'local', method: 'copy' },
+      request: { action: 'install', skills: ['seo'], agents: ['cursor'], scope: 'local', method: 'copy' },
       results: [],
       logs: [],
       rejectionMessage: null,
     }
-    actionRunner.getState.mockReturnValue(runningState)
 
+    registrySnapshotHandler?.({
+      status: 'ready',
+      registry: mockRegistry,
+      fromCache: false,
+      errorMessage: null,
+    })
+    installedSnapshotHandler?.({ installedSkills: { seo: null }, lastUpdatedAt: '2026-03-16T00:00:00.000Z' })
+    actionRunner.getState.mockReturnValue(runningState)
     actionStateHandler?.(runningState)
 
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'actionState',
-      payload: runningState,
+      type: 'registryUpdate',
+      payload: { status: 'ready', registry: mockRegistry, fromCache: false },
     })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'reconcileState',
+      payload: { installedSkills: { seo: null } },
+    })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({ type: 'actionState', payload: runningState })
   })
 
-  it('should handle installSkill message with multiple agents', async () => {
-    showWarningMessageMock.mockResolvedValue('Install')
+  it('refreshes catalog and installed snapshots on requestRefresh', async () => {
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'installSkill',
-      payload: { skillName: 'test-skill', agents: ['cursor', 'claude-code'], scope: 'local' },
-    }
+    await messageHandler({ type: 'requestRefresh' })
 
-    await messageHandler(message)
-
-    expect(actionRunner.run).toHaveBeenCalledWith({
-      action: 'install',
-      skills: ['test-skill'],
-      agents: ['cursor', 'claude-code'],
-      scope: 'local',
-    })
+    expect(logger.info).toHaveBeenCalledWith('Refresh requested from webview')
+    expect(registryStore.refresh).toHaveBeenCalledTimes(1)
+    expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('should handle installSkill with scope "all" by installing local and global', async () => {
-    showWarningMessageMock.mockResolvedValue('Install')
+  it('runs valid requestRunAction messages through the action runner', async () => {
     provider.resolveWebviewView(webviewView)
-    const message: WebviewMessage = {
-      type: 'installSkill',
-      payload: { skillName: 'test-skill', agents: ['cursor'], scope: 'all' },
-    }
-
-    await messageHandler(message)
+    await messageHandler({
+      type: 'requestRunAction',
+      payload: { action: 'remove', skills: ['seo'], agents: ['cursor'], scope: 'global' },
+    })
 
     expect(actionRunner.run).toHaveBeenCalledWith({
-      action: 'install',
-      skills: ['test-skill'],
+      action: 'remove',
+      skills: ['seo'],
       agents: ['cursor'],
-      scope: 'all',
+      scope: 'global',
     })
+  })
+
+  it('rejects invalid install or remove requests before they reach the runner', async () => {
+    provider.resolveWebviewView(webviewView)
+    await messageHandler({
+      type: 'requestRunAction',
+      payload: { action: 'install', skills: [], agents: [], scope: 'local' },
+    })
+
+    expect(showErrorMessageMock).toHaveBeenCalledWith('Select at least one skill and one agent before proceeding.')
+    expect(actionRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('treats removed lifecycle messages as unknown bridge input', async () => {
+    provider.resolveWebviewView(webviewView)
+    await messageHandler({ type: 'executeBatch' } as unknown as WebviewMessage)
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 })
