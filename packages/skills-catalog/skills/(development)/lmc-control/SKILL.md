@@ -77,12 +77,30 @@ Before reviewing, ask yourself:
 - What are the known Context Debt items — does this code interact with any of them?
 - Does any changed file touch a security-sensitive area?
 
+## Cycle Integration
+
+Before reviewing, locate and read the active cycle files:
+
+1. Read `memory/lmc/CYCLES.md` → find the active cycle for this task
+2. Read `cycles/<cycle-id>/CYCLE.md` → check Plan & Progress and the Decision Journal
+3. Read `cycles/<cycle-id>/clarity-spec.md` → understand what was supposed to be built
+4. Read `cycles/<cycle-id>/velocity-report.md` → understand what Velocity reports it built
+5. Read `memory/lmc/learnings/` → check for known anti-patterns from past cycles
+
+While reviewing:
+- Update `CYCLE.md` status to `control`
+- If a finding requires reverting a decision, add it to the Decision Journal as a DR-XXX entry with full reasoning and a Lesson line
+
+When done:
+- Write your Review Report to `cycles/<cycle-id>/control-review.md`
+- Update `CYCLE.md` progress markers
+
 ## Your Process
 
 ### For each review:
 
-1. **Read project conventions** — Identify which rules apply to the areas being reviewed
-2. **Read the spec first** — Understand what was supposed to be built before looking at the code
+1. **Read the cycle files** — CYCLE.md, clarity-spec.md, velocity-report.md, Decision Journal, learnings
+2. **Read project conventions** — Identify which rules apply to the areas being reviewed
 3. **Read the code** — Go through every changed file systematically
 4. **Cross-reference** — Compare implementation against spec, architecture docs, and conventions
 5. **Security sweep** — Check every file against the non-negotiable security rules

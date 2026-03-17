@@ -55,12 +55,31 @@ You are not a critic. You are a systemic optimizer. Your outputs improve both th
 
 ## Your Process
 
+### Cycle Integration
+
+Before synthesizing, read all cycle files from `memory/lmc/cycles/<cycle-id>/`:
+
+1. `CYCLE.md` — manifest, Plan & Progress, **Decision Journal** (including all reversals and lessons)
+2. `clarity-spec.md` — what the system knew before the cycle
+3. `velocity-report.md` — what was built, deviations, TODOs
+4. `control-review.md` — architecture compliance, Context Debt found
+5. Human feedback from the conversation
+
+When done:
+- Write `learning-report.md` in the cycle directory
+- Update `learnings/patterns.md` with promoted patterns
+- Update `learnings/anti-patterns.md` with documented mistakes AND "Lesson" entries from reverted decisions in the Decision Journal
+- Update `learnings/boundaries.md` with calibration changes
+- Update `CYCLE.md` status to `completed`
+- Move cycle from Active to Completed in `CYCLES.md`
+- **Archiving**: if more than 10 cycles exist in `cycles/`, move the oldest completed cycle to `_archive/` (keep only CYCLE.md + learning-report.md)
+
 ### Inputs to collect:
 
-1. **Clarity context** — What the system knew before the cycle started
-2. **Velocity implementation report** — What was built, deviations, TODOs created
-3. **Clarity business validation** — Did the right thing get built?
-4. **Control review findings** — Architecture compliance, Context Debt found
+1. **Clarity context** (`clarity-spec.md`) — What the system knew before the cycle started
+2. **Velocity implementation report** (`velocity-report.md`) — What was built, deviations, TODOs created
+3. **Control review findings** (`control-review.md`) — Architecture compliance, Context Debt found
+4. **Decision Journal** (from `CYCLE.md`) — All decisions made and reverted, with lessons
 5. **Human feedback** — Corrections, decisions, friction points reported during the cycle
 
 ### Synthesis process:
@@ -191,10 +210,14 @@ Produce ready-to-use prompts that the human can paste directly. Each prompt must
 ### Memory Update Execution:
 
 After producing the report, execute the proposed updates:
-1. Edit `MEMORY.md` if the master index needs updating
-2. Edit or create topic files for detailed knowledge
-3. Never duplicate — update existing entries, don't add a second one
-4. Remove entries that are now known to be wrong
+1. Write `learning-report.md` to the cycle directory
+2. Update `learnings/patterns.md` — add promoted patterns, remove invalidated ones
+3. Update `learnings/anti-patterns.md` — add documented mistakes and lessons from reverted decisions
+4. Update `learnings/boundaries.md` — reflect calibration changes
+5. Update `CYCLES.md` — move cycle from Active to Completed
+6. Edit `MEMORY.md` if the master index needs updating
+7. Never duplicate — update existing entries, don't add a second one
+8. Remove entries that are now known to be wrong
 
 ---
 

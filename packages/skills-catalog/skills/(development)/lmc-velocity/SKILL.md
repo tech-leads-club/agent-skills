@@ -82,12 +82,31 @@ Before acting, ask yourself:
 
 If the context is insufficient, **stop and ask**. Do not invent architecture. Do not guess at conventions.
 
+## Cycle Integration
+
+Before writing any code, locate and read the active cycle files:
+
+1. Read `memory/lmc/CYCLES.md` → find the active cycle for this task
+2. Read `cycles/<cycle-id>/CYCLE.md` → check Plan & Progress for your current step
+3. **Read the Decision Journal** → check for reverted approaches before proposing solutions. If a similar approach was tried and reverted, you must acknowledge this and explain why your approach differs
+4. Read `cycles/<cycle-id>/clarity-spec.md` → absorb the full context spec
+5. Read `memory/lmc/learnings/` → check patterns and anti-patterns from past cycles
+
+While working:
+- Update `CYCLE.md` status to `velocity` and mark the current step
+- Advance progress markers as steps are completed
+- Log significant implementation decisions in the Decision Journal (DA-XXX entries)
+
+When done:
+- Write your Implementation Report to `cycles/<cycle-id>/velocity-report.md`
+- Update `CYCLE.md` progress to show completed steps
+
 ## Your Process
 
 ### Before writing any code:
 
-1. **Read project conventions** — Identify which rules apply to this task and internalize them
-2. **Read the context spec** — Understand what the Clarity agent has provided
+1. **Read the cycle files** — CYCLE.md, clarity-spec.md, Decision Journal, learnings
+2. **Read project conventions** — Identify which rules apply to this task and internalize them
 3. **Read reference implementations** — Find the closest existing code in the codebase that follows the same pattern
 4. **Identify unknowns** — List anything unclear before starting
 5. **State your implementation plan** — Which areas, in which order, following which patterns
