@@ -11,7 +11,7 @@ type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unk
 
 describe('InstalledStateStore', () => {
   let reconciler: jest.Mocked<Pick<StateReconciler, 'reconcile' | 'getInstalledSkills' | 'onStateChanged'>>
-  let skillLockService: jest.Mocked<Pick<SkillLockService, 'getInstalledHashes'>>
+  let skillLockService: jest.Mocked<Pick<SkillLockService, 'getInstalledHashesByScope'>>
   let logger: jest.Mocked<Pick<LoggingService, 'debug'>>
   let stateChangedHandler: ((state: InstalledSkillsMap) => void) | undefined
 
@@ -43,9 +43,9 @@ describe('InstalledStateStore', () => {
     }
 
     skillLockService = {
-      getInstalledHashes: jest
-        .fn<AsyncMockableFn<Record<string, string | undefined>>>()
-        .mockResolvedValue({ seo: 'hash-123' }),
+      getInstalledHashesByScope: jest
+        .fn<AsyncMockableFn<Record<string, { local?: string; global?: string }>>>()
+        .mockResolvedValue({ seo: { local: 'hash-123' } }),
     }
 
     logger = {
@@ -73,6 +73,7 @@ describe('InstalledStateStore', () => {
         seo: {
           ...installedSkills.seo,
           contentHash: 'hash-123',
+          scopeHashes: { local: 'hash-123' },
         },
       },
       lastUpdatedAt: expect.any(String),
@@ -92,6 +93,7 @@ describe('InstalledStateStore', () => {
         seo: {
           ...installedSkills.seo,
           contentHash: 'hash-123',
+          scopeHashes: { local: 'hash-123' },
         },
       },
       lastUpdatedAt: expect.any(String),

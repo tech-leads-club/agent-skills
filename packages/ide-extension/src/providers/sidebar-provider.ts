@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import type { InstallationOrchestrator } from '../services/installation-orchestrator'
+import type { ActionRunner } from '../services/action-runner'
 import { InstalledStateStore } from '../services/installed-state-store'
 import { LoggingService } from '../services/logging-service'
 import { MessageRouter } from '../services/message-router'
@@ -8,6 +8,7 @@ import { ScopeSelectionService, type ScopeQuickPickItem } from '../services/scop
 import type { StateReconciler } from '../services/state-reconciler'
 import type { ExtensionMessage, RegistryUpdatePayload, WebviewMessage } from '../shared/messages'
 import type {
+  ActionRequest,
   AgentInstallInfo,
   AvailableAgent,
   InstalledSkillInfo,
@@ -52,26 +53,6 @@ interface ConfirmationSummary {
 }
 
 /**
- * Single result line for batch operations.
- */
-interface BatchResultLine {
-  skillName: string
-  success: boolean
-  errorMessage?: string
-}
-
-/**
- * State of a batch operation in progress.
- */
-interface BatchProgressState {
-  action: 'install' | 'remove' | 'update'
-  remaining: number
-  total: number
-  failedSkills: string[]
-  results: BatchResultLine[]
-}
-
-/**
  * Manages the sidebar Webview life cycle, message routing, and registry synchronization.
  */
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -79,7 +60,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private webviewView?: vscode.WebviewView
   private policy?: ScopePolicyEvaluation
-  private readonly batchProgress = new Map<string, BatchProgressState>()
   private readonly scopeSelectionService = new ScopeSelectionService()
   private readonly messageRouter: MessageRouter
 
@@ -97,7 +77,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
     private readonly registryStore: RegistryStore,
-    private readonly orchestrator: InstallationOrchestrator,
+    private readonly actionRunner: ActionRunner,
     private readonly reconciler: StateReconciler,
     private readonly installedStateStore: InstalledStateStore,
   ) {
@@ -106,6 +86,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       handleRefreshRequest: (webview) => this.handleRefreshRequest(webview),
       handleInstallSkill: (skillName, scope, agents) => this.handleInstallSkill(skillName, scope, agents),
       handleRemoveSkill: (skillName, scope, agents) => this.handleRemoveSkill(skillName, scope, agents),
+      handleRequestRunAction: (request: ActionRequest) => this.handleRequestRunAction(request),
       handleExecuteBatch: (action, skills, agents, scope, method) =>
         this.handleExecuteBatch(action, skills, agents, scope, method),
       handleUpdateSkill: (skillName) => this.handleUpdateSkill(skillName),
@@ -119,96 +100,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.installedStateStore.subscribe((snapshot) => {
         void this.postInstalledState(snapshot.installedSkills)
       }),
+      this.actionRunner.subscribe(() => {
+        void this.postActionState()
+      }),
     )
-
-    this.orchestrator.onOperationEvent((event) => {
-      if (event.type === 'started') {
-        if (event.metadata && !this.batchProgress.has(event.metadata.batchId)) {
-          const action = event.operation === 'remove' ? 'remove' : event.operation === 'update' ? 'update' : 'install'
-          this.batchProgress.set(event.metadata.batchId, {
-            action,
-            remaining: event.metadata.batchSize,
-            total: event.metadata.batchSize,
-            failedSkills: [],
-            results: [],
-          })
-        }
-
-        this.postMessage({
-          type: 'operationStarted',
-          payload: {
-            operationId: event.operationId,
-            operation: event.operation,
-            skillName: event.skillName,
-            metadata: event.metadata,
-          },
-        })
-      } else if (event.type === 'progress') {
-        this.postMessage({
-          type: 'operationProgress',
-          payload: {
-            operationId: event.operationId,
-            message: event.message || '',
-            skillName: event.skillName,
-            operation: event.operation,
-            severity: event.severity,
-            metadata: event.metadata,
-            increment: undefined,
-          },
-        })
-      } else if (event.type === 'completed') {
-        this.postMessage({
-          type: 'operationCompleted',
-          payload: {
-            operationId: event.operationId,
-            operation: event.operation,
-            skillName: event.skillName,
-            success: event.success ?? false,
-            errorMessage: event.errorMessage,
-            metadata: event.metadata,
-          },
-        })
-
-        const batchId = event.metadata?.batchId
-        if (batchId) {
-          const state = this.batchProgress.get(batchId)
-          if (state) {
-            state.remaining -= 1
-            if (!event.success) {
-              state.failedSkills.push(event.skillName)
-            }
-            state.results.push({
-              skillName: event.skillName,
-              success: event.success ?? false,
-              errorMessage: event.errorMessage,
-            })
-
-            if (state.remaining <= 0) {
-              const success = state.failedSkills.length === 0
-              const errorMessage = success
-                ? undefined
-                : `Failed to ${state.action} skills: ${state.failedSkills.join(', ')}`
-
-              void this.postMessage({
-                type: 'batchCompleted',
-                payload: {
-                  batchId,
-                  success,
-                  failedSkills: state.failedSkills.length > 0 ? state.failedSkills : undefined,
-                  errorMessage,
-                  results: state.results.length > 0 ? state.results : undefined,
-                  action: state.action,
-                },
-              })
-
-              this.batchProgress.delete(batchId)
-            }
-          }
-        }
-
-        void this.installedStateStore.refresh()
-      }
-    })
   }
 
   /**
@@ -300,6 +195,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
   }
 
+  private async postActionState(): Promise<void> {
+    await this.postMessage({
+      type: 'actionState',
+      payload: this.actionRunner.getState(),
+    })
+  }
+
   /**
    * Refreshes installed state through the store and publishes the latest snapshot.
    *
@@ -350,6 +252,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     })
 
     await this.postInstalledState(installedSnapshot.installedSkills)
+    await this.postActionState()
 
     await this.postMessage({
       type: 'trustState',
@@ -409,7 +312,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
     const confirmed = await this.confirmLifecycleAction(selection, agentNames)
     if (!confirmed) return
-    await this.runQueueAction('install', () => this.orchestrator.installMany(selection.skills, scope, agents))
+    await this.runActionRequest({ action: 'install', skills: [skillName], agents, scope })
   }
 
   /**
@@ -436,7 +339,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
     const confirmed = await this.confirmLifecycleAction(selection, agentNames)
     if (!confirmed) return
-    await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scope, agents))
+    await this.runActionRequest({ action: 'remove', skills: [skillName], agents, scope })
+  }
+
+  private async handleRequestRunAction(request: ActionRequest): Promise<void> {
+    if (
+      (request.action === 'install' || request.action === 'remove') &&
+      (request.skills.length === 0 || request.agents.length === 0)
+    ) {
+      vscode.window.showErrorMessage('Select at least one skill and one agent before proceeding.')
+      return
+    }
+
+    await this.runActionRequest(request)
   }
 
   /**
@@ -452,7 +367,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     action: 'install' | 'remove' | 'update',
     skills: string[],
     agents: string[],
-    scope: 'local' | 'global',
+    scope: 'local' | 'global' | 'all',
     method: 'copy' | 'symlink' = 'copy',
   ): Promise<void> {
     if (action === 'install' || action === 'remove') {
@@ -463,18 +378,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     if (action === 'install') {
-      await this.runQueueAction('install', () => this.orchestrator.installMany(skills, scope, agents, 'card', method))
+      await this.runActionRequest({ action, skills, agents, scope, method })
       return
     }
 
     if (action === 'remove') {
-      await this.runQueueAction('remove', () => this.orchestrator.removeMany(skills, scope, agents))
+      await this.runActionRequest({ action, skills, agents, scope })
       return
     }
 
     if (action === 'update') {
-      const updateSkills = skills.length > 0 ? skills : ('all' as const)
-      await this.runQueueAction('update', () => this.orchestrator.updateMany(updateSkills, 'card'))
+      await this.runActionRequest({ action, skills, agents: [], scope, method })
       return
     }
   }
@@ -495,7 +409,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
     const confirmed = await this.confirmLifecycleAction(selection, [])
     if (!confirmed) return
-    await this.runQueueAction('update', () => this.orchestrator.updateMany(selection.skills, 'card'))
+    await this.runActionRequest({ action: 'update', skills: [skillName], agents: [], scope: 'all' })
   }
 
   /**
@@ -505,7 +419,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @returns Nothing.
    */
   private handleCancelOperation(operationId: string): void {
-    this.orchestrator.cancel(operationId)
+    this.logger.warn(`Cancellation is not supported for action ${operationId}`)
   }
 
   /**
@@ -515,24 +429,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param executor - Async callback that performs the enqueue call.
    * @returns A promise that resolves when enqueueing completes or errors are surfaced.
    */
-  private async runQueueAction(action: 'install' | 'remove' | 'update', executor: () => Promise<void>): Promise<void> {
+  private async runActionRequest(request: ActionRequest): Promise<void> {
     try {
-      await executor()
+      await this.actionRunner.run(request)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      this.logger.error(`Failed to enqueue ${action}: ${msg}`, err)
-      const userFacing = this.getQueueActionNoun(action)
+      this.logger.error(`Failed to start ${request.action}: ${msg}`, err)
+      const userFacing = this.getQueueActionNoun(request.action)
       vscode.window.showErrorMessage(`Failed to start ${userFacing}: ${msg}`)
-      void this.postMessage({
-        type: 'batchCompleted',
-        payload: {
-          batchId: 'enqueue-failed',
-          success: false,
-          errorMessage: `Failed to start ${userFacing}: ${msg}`,
-          results: undefined,
-          action,
-        },
-      })
     }
   }
 
@@ -1364,11 +1268,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     if (!confirmed) return
 
     if (action === 'add') {
-      await this.runQueueAction('install', () => this.orchestrator.installMany(selection.skills, scopeId, agents))
+      await this.runActionRequest({ action: 'install', skills: [skillName], agents, scope: scopeId })
       return
     }
 
-    await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scopeId, agents))
+    await this.runActionRequest({ action: 'remove', skills: [skillName], agents, scope: scopeId })
   }
 
   /**

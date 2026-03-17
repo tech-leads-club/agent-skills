@@ -160,4 +160,29 @@ describe('SelectOutdatedSkillsPage', () => {
     expect(screen.getByText('accessibility')).toBeInTheDocument()
     expect(screen.queryByText('seo')).not.toBeInTheDocument()
   })
+
+  it('sends an empty selection to let the host decide update all', async () => {
+    const user = userEvent.setup()
+    const onUpdate = jest.fn()
+
+    render(
+      <SelectOutdatedSkillsPage
+        registry={registry}
+        installedSkills={installedSkills}
+        effectiveScopes={['local']}
+        selectedSkills={[]}
+        getCategoryOptions={getCategoryOptions}
+        getOutdatedSkills={getOutdatedSkills}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onCancel={jest.fn()}
+        onUpdate={onUpdate}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /^update$/i }))
+
+    expect(onUpdate).toHaveBeenCalledWith([])
+  })
 })

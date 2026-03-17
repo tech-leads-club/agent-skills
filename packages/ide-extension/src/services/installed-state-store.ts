@@ -1,4 +1,4 @@
-import type { InstalledSkillsMap } from '../shared/types'
+import type { InstalledScopeHashes, InstalledSkillsMap } from '../shared/types'
 import type { LoggingService } from './logging-service'
 import type { SkillLockService } from './skill-lock-service'
 import type { StateReconciler } from './state-reconciler'
@@ -20,7 +20,7 @@ export class InstalledStateStore {
 
   constructor(
     private readonly reconciler: Pick<StateReconciler, 'reconcile' | 'getInstalledSkills' | 'onStateChanged'>,
-    private readonly skillLockService: Pick<SkillLockService, 'getInstalledHashes'>,
+    private readonly skillLockService: Pick<SkillLockService, 'getInstalledHashesByScope'>,
     private readonly logger: Pick<LoggingService, 'debug'>,
   ) {
     this.reconciler.onStateChanged((state) => {
@@ -56,7 +56,7 @@ export class InstalledStateStore {
   }
 
   private async publishState(installedSkills: InstalledSkillsMap): Promise<void> {
-    const installedHashes = await this.skillLockService.getInstalledHashes()
+    const installedHashes = await this.skillLockService.getInstalledHashesByScope()
     const nextSnapshot: InstalledStateSnapshot = {
       installedSkills: this.withInstalledHashes(installedSkills, installedHashes),
       lastUpdatedAt: new Date().toISOString(),
@@ -75,7 +75,7 @@ export class InstalledStateStore {
 
   private withInstalledHashes(
     installedSkills: InstalledSkillsMap,
-    installedHashes: Record<string, string | undefined>,
+    installedHashes: Record<string, InstalledScopeHashes>,
   ): InstalledSkillsMap {
     const merged: InstalledSkillsMap = {}
 
@@ -85,15 +85,16 @@ export class InstalledStateStore {
         continue
       }
 
-      const installedHash = installedHashes[skillName]
-      if (installedHash === undefined) {
+      const scopeHashes = installedHashes[skillName]
+      if (!scopeHashes) {
         merged[skillName] = installedInfo
         continue
       }
 
       merged[skillName] = {
         ...installedInfo,
-        contentHash: installedHash,
+        contentHash: scopeHashes.local ?? scopeHashes.global,
+        scopeHashes,
       }
     }
 

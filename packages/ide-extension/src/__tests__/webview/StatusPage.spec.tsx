@@ -1,29 +1,34 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
-import type { LogTimelineEntry } from '../../webview/hooks/useOperations'
 import { StatusPage } from '../../webview/views/StatusPage'
 
 const { axe } = jestAxe
 
-const emptyLogTimeline: LogTimelineEntry[] = []
+const emptyLogTimeline: Array<{
+  operation: 'install' | 'remove' | 'update'
+  skillName: string
+  message: string
+  severity: 'info' | 'warn' | 'error'
+}> = []
 
-const sampleLogTimeline: LogTimelineEntry[] = [
+const sampleLogTimeline: Array<{
+  operation: 'install' | 'remove' | 'update'
+  skillName: string
+  message: string
+  severity: 'info' | 'warn' | 'error'
+}> = [
   {
-    operationId: 'op-1',
     skillName: 'accessibility',
     operation: 'install',
     message: 'Starting...',
     severity: 'info',
-    timestamp: Date.now(),
   },
   {
-    operationId: 'op-1',
     skillName: 'accessibility',
     operation: 'install',
     message: 'Downloaded accessibility',
     severity: 'info',
-    timestamp: Date.now(),
   },
 ]
 
@@ -32,7 +37,7 @@ describe('StatusPage', () => {
     render(
       <StatusPage
         isProcessing={true}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={sampleLogTimeline}
         batchResult={null}
         onDone={jest.fn()}
@@ -47,7 +52,7 @@ describe('StatusPage', () => {
     render(
       <StatusPage
         isProcessing={true}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={sampleLogTimeline}
         batchResult={null}
         onDone={jest.fn()}
@@ -61,7 +66,7 @@ describe('StatusPage', () => {
     render(
       <StatusPage
         isProcessing={false}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={emptyLogTimeline}
         batchResult={{ success: true }}
         onDone={jest.fn()}
@@ -77,7 +82,7 @@ describe('StatusPage', () => {
     render(
       <StatusPage
         isProcessing={false}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={emptyLogTimeline}
         batchResult={{ success: true }}
         onDone={onDone}
@@ -91,7 +96,7 @@ describe('StatusPage', () => {
     render(
       <StatusPage
         isProcessing={false}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={emptyLogTimeline}
         batchResult={{
           success: false,
@@ -109,7 +114,7 @@ describe('StatusPage', () => {
     const { container } = render(
       <StatusPage
         isProcessing={false}
-        operations={new Map()}
+        currentStep={null}
         logTimeline={emptyLogTimeline}
         batchResult={{ success: true }}
         onDone={jest.fn()}
@@ -117,5 +122,20 @@ describe('StatusPage', () => {
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
+  })
+
+  it('shows concurrent rejection feedback while an action is running', () => {
+    render(
+      <StatusPage
+        isProcessing={true}
+        currentStep={'Installing seo (local)'}
+        logTimeline={emptyLogTimeline}
+        batchResult={null}
+        rejectionMessage={'Another action is already running.'}
+        onDone={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Another action is already running.')
   })
 })

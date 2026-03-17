@@ -16,6 +16,7 @@ describe('MessageRouter', () => {
       handleRefreshRequest: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleInstallSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleRemoveSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+      handleRequestRunAction: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleExecuteBatch: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleUpdateSkill: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       handleCancelOperation: jest.fn<() => void>(),
@@ -40,6 +41,17 @@ describe('MessageRouter', () => {
     await router.route({ type: 'unknown' } as unknown as WebviewMessage, webview)
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
+  })
+
+  it('routes requestRunAction messages to the action runner handler', async () => {
+    const message: WebviewMessage = {
+      type: 'requestRunAction',
+      payload: { action: 'update', skills: ['seo'], agents: [], scope: 'all' },
+    }
+
+    await router.route(message, webview)
+
+    expect(handlers.handleRequestRunAction as jest.Mock).toHaveBeenCalledWith(message.payload)
   })
 
   it('treats legacy quick-pick messages as unknown', async () => {

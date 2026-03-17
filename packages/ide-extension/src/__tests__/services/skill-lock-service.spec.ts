@@ -7,7 +7,10 @@ const mockLogger: Pick<LoggingService, 'debug' | 'warn'> = {
   warn: jest.fn(),
 }
 
-type LockedSkills = Record<string, { contentHash?: string; name: string; source: string; installedAt: string; updatedAt: string } | undefined>
+type LockedSkills = Record<
+  string,
+  { contentHash?: string; name: string; source: string; installedAt: string; updatedAt: string } | undefined
+>
 const mockGetAllLockedSkills = jest.fn<() => Promise<LockedSkills>>()
 
 jest.unstable_mockModule('@tech-leads-club/core', () =>
@@ -40,15 +43,19 @@ describe('SkillLockService', () => {
 
   it('returns hashes when lockfile is valid', async () => {
     mockGetAllLockedSkills
-      .mockResolvedValueOnce({})
       .mockResolvedValueOnce({
-        seo: { contentHash: 'abc123', name: 'seo', source: '', installedAt: '', updatedAt: '' },
+        seo: { contentHash: 'local-hash', name: 'seo', source: '', installedAt: '', updatedAt: '' },
+      })
+      .mockResolvedValueOnce({
+        seo: { contentHash: 'global-hash', name: 'seo', source: '', installedAt: '', updatedAt: '' },
       })
 
     const hashes = await service.getInstalledHashes()
+    const hashesByScope = await service.getInstalledHashesByScope()
 
-    expect(hashes).toEqual({ seo: 'abc123' })
-    expect(await service.getInstalledHash('seo')).toBe('abc123')
+    expect(hashes).toEqual({ seo: 'local-hash' })
+    expect(hashesByScope).toEqual({ seo: { local: 'local-hash', global: 'global-hash' } })
+    expect(await service.getInstalledHash('seo')).toBe('local-hash')
   })
 
   it('returns empty map when lockfile is missing', async () => {
@@ -65,20 +72,18 @@ describe('SkillLockService', () => {
     const hashes = await service.getInstalledHashes()
 
     expect(hashes).toEqual({})
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Unable to read skill lockfile'),
-    )
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Unable to read skill lockfile'))
   })
 
   it('gracefully handles missing contentHash entries', async () => {
-    mockGetAllLockedSkills
-      .mockResolvedValueOnce({})
-      .mockResolvedValueOnce({
-        seo: { name: 'seo', source: '', installedAt: '', updatedAt: '' },
-      })
+    mockGetAllLockedSkills.mockResolvedValueOnce({}).mockResolvedValueOnce({
+      seo: { name: 'seo', source: '', installedAt: '', updatedAt: '' },
+    })
 
     const hashes = await service.getInstalledHashes()
+    const hashesByScope = await service.getInstalledHashesByScope()
 
     expect(hashes).toEqual({ seo: undefined })
+    expect(hashesByScope).toEqual({ seo: { global: undefined } })
   })
 })

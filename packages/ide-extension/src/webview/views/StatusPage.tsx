@@ -1,4 +1,4 @@
-import type { LogTimelineEntry, OperationState } from '../hooks/useOperations'
+import type { LifecycleScope } from '../../shared/types'
 
 /**
  * Single result line for CLI-style display.
@@ -6,7 +6,17 @@ import type { LogTimelineEntry, OperationState } from '../hooks/useOperations'
 export interface BatchResultLine {
   skillName: string
   success: boolean
+  scope?: LifecycleScope
   errorMessage?: string
+  message?: string
+}
+
+export interface StatusLogEntry {
+  operation: 'install' | 'remove' | 'update'
+  skillName: string
+  scope?: LifecycleScope
+  message: string
+  severity: 'info' | 'warn' | 'error'
 }
 
 /**
@@ -26,12 +36,14 @@ export interface BatchResult {
 export interface StatusPageProps {
   /** Whether a batch is currently running. */
   isProcessing: boolean
-  /** In-flight operations with progress. */
-  operations: Map<string, OperationState>
+  /** Current action step reported by the host. */
+  currentStep: string | null
   /** Real-time log timeline during batch execution. */
-  logTimeline: LogTimelineEntry[]
+  logTimeline: StatusLogEntry[]
   /** Result of the last completed batch, if any. */
   batchResult: BatchResult | null
+  /** Visible rejection feedback when a concurrent action was denied. */
+  rejectionMessage?: string | null
   /** Callback to retry failed items only. */
   onRetry?: () => void
   /** Callback to return to dashboard. */
@@ -44,29 +56,31 @@ export interface StatusPageProps {
  * @param props - Status state and callbacks.
  * @returns Status view.
  */
-function formatResultLine(
-  line: BatchResultLine,
-  action?: 'install' | 'remove' | 'update',
-): string {
+function formatResultLine(line: BatchResultLine, action?: 'install' | 'remove' | 'update'): string {
+  if (line.message) {
+    return line.message
+  }
+
+  const scopeLabel = line.scope ? ` (${line.scope})` : ''
   if (line.success) {
     switch (action) {
       case 'update':
-        return line.skillName === 'all' ? 'All skills updated' : `Updated ${line.skillName}`
+        return line.skillName === 'all' ? 'All skills updated' : `Updated ${line.skillName}${scopeLabel}`
       case 'remove':
-        return `${line.skillName}: Removed`
+        return `${line.skillName}${scopeLabel}: Removed`
       case 'install':
-        return line.skillName === 'install (batch)' ? 'Installed' : `Installed ${line.skillName}`
+        return line.skillName === 'install (batch)' ? 'Installed' : `Installed ${line.skillName}${scopeLabel}`
       default:
         return line.skillName === 'all' ? 'All skills updated' : line.skillName
     }
   }
   switch (action) {
     case 'update':
-      return `Failed to update ${line.skillName}: ${line.errorMessage ?? 'Unknown error'}`
+      return `Failed to update ${line.skillName}${scopeLabel}: ${line.errorMessage ?? 'Unknown error'}`
     case 'remove':
-      return `${line.skillName}: Failed to remove - ${line.errorMessage ?? 'Unknown error'}`
+      return `${line.skillName}${scopeLabel}: Failed to remove - ${line.errorMessage ?? 'Unknown error'}`
     case 'install':
-      return `${line.skillName}: Failed to install - ${line.errorMessage ?? 'Unknown error'}`
+      return `${line.skillName}${scopeLabel}: Failed to install - ${line.errorMessage ?? 'Unknown error'}`
     default:
       return `${line.skillName}: ${line.errorMessage ?? 'Failed'}`
   }
@@ -74,13 +88,13 @@ function formatResultLine(
 
 export function StatusPage({
   isProcessing,
-  operations,
+  currentStep,
   logTimeline,
   batchResult,
+  rejectionMessage,
   onRetry,
   onDone,
 }: StatusPageProps) {
-  const operationList = Array.from(operations.values())
   const hasFailures =
     !isProcessing &&
     batchResult &&
@@ -98,12 +112,21 @@ export function StatusPage({
       </header>
 
       <div className="status-page-content">
+        {rejectionMessage && (
+          <div className="status-result" role="alert">
+            <p className="status-result-line">
+              <span className="status-icon status-icon--warn codicon codicon-warning" aria-hidden="true" />
+              <span>{rejectionMessage}</span>
+            </p>
+          </div>
+        )}
+
         {isProcessing && logTimeline.length > 0 && (
           <div className="status-log-timeline" role="log" aria-live="polite">
             <ul className="status-log-timeline-list">
               {logTimeline.map((entry, idx) => (
                 <li
-                  key={`${entry.operationId}-${idx}`}
+                  key={`${entry.operation}-${entry.skillName}-${entry.scope ?? 'all'}-${idx}`}
                   className={`status-log-entry status-log-entry--${entry.severity}`}
                 >
                   {entry.severity === 'error' && (
@@ -116,7 +139,8 @@ export function StatusPage({
                     <span className="status-icon status-icon--info codicon codicon-info" aria-hidden="true" />
                   )}
                   <span>
-                    {entry.operation} {entry.skillName}: {entry.message}
+                    {entry.operation} {entry.skillName}
+                    {entry.scope ? ` (${entry.scope})` : ''}: {entry.message}
                   </span>
                 </li>
               ))}
@@ -124,17 +148,13 @@ export function StatusPage({
           </div>
         )}
 
-        {isProcessing && operationList.length > 0 && logTimeline.length === 0 && (
+        {isProcessing && currentStep && logTimeline.length === 0 && (
           <div className="status-progress" role="status">
             <ul className="status-progress-list" aria-label="Active operations">
-              {operationList.map((op) => (
-                <li key={op.operationId}>
-                  <span className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
-                  <span>
-                    {op.operation} {op.skillName}: {op.message}
-                  </span>
-                </li>
-              ))}
+              <li>
+                <span className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
+                <span>{currentStep}</span>
+              </li>
             </ul>
           </div>
         )}

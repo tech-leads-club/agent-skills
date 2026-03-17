@@ -114,4 +114,33 @@ describe('selection-selectors', () => {
 
     expect(result.map((skill) => skill.name)).toEqual(['accessibility'])
   })
+
+  it('evaluates outdated state per installed scope', () => {
+    const installedSkills: InstalledSkillsMap = {
+      accessibility: {
+        local: true,
+        global: true,
+        contentHash: 'old-hash',
+        scopeHashes: { local: 'old-hash', global: 'hash-accessibility' },
+        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: true, corrupted: false }],
+      },
+      seo: null,
+    }
+
+    expect(
+      getOutdatedSkills({
+        registry,
+        installedSkills,
+        effectiveScopes: ['global'],
+      }).map((skill) => skill.name),
+    ).toEqual([])
+
+    expect(
+      getOutdatedSkills({
+        registry,
+        installedSkills,
+        effectiveScopes: ['local'],
+      }).map((skill) => skill.name),
+    ).toEqual(['accessibility'])
+  })
 })

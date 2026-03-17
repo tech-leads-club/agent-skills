@@ -1,12 +1,11 @@
 import * as vscode from 'vscode'
 import { createExtHostAdapters } from './adapters'
 import { SidebarProvider } from './providers/sidebar-provider'
+import { ActionRunner } from './services/action-runner'
 import { CoreJobExecutor } from './services/core-job-executor'
-import { InstallationOrchestrator } from './services/installation-orchestrator'
 import { InstalledSkillsScanner } from './services/installed-skills-scanner'
 import { InstalledStateStore } from './services/installed-state-store'
 import { LoggingService } from './services/logging-service'
-import { OperationQueue } from './services/operation-queue'
 import { PostInstallVerifier } from './services/post-install-verifier'
 import { RegistryStore } from './services/registry-store'
 import { ScopePolicyService } from './services/scope-policy-service'
@@ -35,22 +34,21 @@ export function activate(context: vscode.ExtensionContext): void {
   const ports = createExtHostAdapters(outputChannel)
   const registryService = new SkillRegistryService(ports, context, logger)
   const executor = new CoreJobExecutor(ports)
-  const operationQueue = new OperationQueue(executor)
   const verifier = new PostInstallVerifier(ports, logger)
-  const orchestrator = new InstallationOrchestrator(operationQueue, verifier, logger)
   const scanner = new InstalledSkillsScanner(ports, logger)
   const reconciler = new StateReconciler(ports, scanner, registryService, logger)
   const skillLockService = new SkillLockService(ports, logger)
   const registryStore = new RegistryStore(registryService, logger)
   const installedStateStore = new InstalledStateStore(reconciler, skillLockService, logger)
+  const actionRunner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
 
-  context.subscriptions.push(registryService, operationQueue, orchestrator, reconciler)
+  context.subscriptions.push(registryService, actionRunner, reconciler)
 
   const sidebarProvider = new SidebarProvider(
     context,
     logger,
     registryStore,
-    orchestrator,
+    actionRunner,
     reconciler,
     installedStateStore,
   )

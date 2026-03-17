@@ -4,7 +4,6 @@ import { ErrorState, LoadingState } from './components/AppStatusViews'
 import { useAppState } from './hooks/useAppState'
 import { useHostState, type LastBatchContext } from './hooks/useHostState'
 import { useInstalledState } from './hooks/useInstalledState'
-import { useOperations } from './hooks/useOperations'
 import { postMessage } from './lib/vscode-api'
 import { renderCurrentView } from './render-current-view'
 
@@ -21,9 +20,8 @@ export function App() {
   const appState = useAppState()
   const hostState = useHostState()
   const { installedSkills } = useInstalledState()
-  const { operations, logTimeline, clearLogTimeline } = useOperations()
 
-  const handleExecuteBatch = useCallback(
+  const handleRunAction = useCallback(
     (method?: 'copy' | 'symlink') => {
       const action =
         appState.currentAction === 'install' ? 'install' : appState.currentAction === 'update' ? 'update' : 'remove'
@@ -43,26 +41,20 @@ export function App() {
       }
 
       setLastBatchContext(batchContext)
-      hostState.setBatchResult(null)
-      clearLogTimeline()
-      hostState.setIsBatchProcessing(true)
       appState.goToStatus()
-      postMessage({ type: 'executeBatch', payload: batchContext })
+      postMessage({ type: 'requestRunAction', payload: batchContext })
     },
-    [appState, clearLogTimeline, hostState],
+    [appState],
   )
 
   const handleExecuteUpdate = useCallback(
     (skills: string[]) => {
       const batchContext: LastBatchContext = { action: 'update', skills, agents: [], scope: appState.activeScope }
       setLastBatchContext(batchContext)
-      hostState.setBatchResult(null)
-      clearLogTimeline()
-      hostState.setIsBatchProcessing(true)
       appState.goToStatus()
-      postMessage({ type: 'executeBatch', payload: batchContext })
+      postMessage({ type: 'requestRunAction', payload: batchContext })
     },
-    [appState, clearLogTimeline, hostState],
+    [appState],
   )
 
   const handleRetry = useCallback(() => {
@@ -73,11 +65,8 @@ export function App() {
         : hostState.batchResult.failedSkills.filter((skill) => lastBatchContext.skills.includes(skill))
     if (retrySkills.length === 0) return
 
-    hostState.setBatchResult(null)
-    clearLogTimeline()
-    hostState.setIsBatchProcessing(true)
-    postMessage({ type: 'executeBatch', payload: { ...lastBatchContext, skills: retrySkills } })
-  }, [clearLogTimeline, hostState, lastBatchContext])
+    postMessage({ type: 'requestRunAction', payload: { ...lastBatchContext, skills: retrySkills } })
+  }, [hostState.batchResult, lastBatchContext])
 
   useEffect(() => {
     const fallbackScope = getFallbackScope(hostState.policy, appState.activeScope)
@@ -131,14 +120,15 @@ export function App() {
         allAgents: hostState.allAgents,
         policy: hostState.policy,
         isTrusted: hostState.isTrusted,
-        isProcessing: hostState.isBatchProcessing || operations.size > 0,
+        isProcessing: hostState.isBatchProcessing,
         selectedSkills: appState.selectedSkills,
         selectedAgents: appState.selectedAgents,
         activeScope: appState.activeScope,
         installMethod: appState.installMethod,
-        operations,
-        logTimeline,
+        currentStep: hostState.actionState.currentStep,
+        logTimeline: hostState.actionState.logs,
         batchResult: hostState.batchResult,
+        rejectionMessage: hostState.actionState.rejectionMessage,
         goToAgents: appState.goToAgents,
         goToAgentsView: appState.goToAgentsView,
         goToSkillsView: appState.goToSkillsView,
@@ -154,7 +144,7 @@ export function App() {
         clearAgentSelection: appState.clearAgentSelection,
         setScope: appState.setScope,
         setInstallMethod: appState.setInstallMethod,
-        handleExecuteBatch,
+        handleExecuteBatch: handleRunAction,
         handleExecuteUpdate,
         handleRetry,
       })}

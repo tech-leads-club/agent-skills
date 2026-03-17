@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { CategoryOption, OutdatedSkillsInput } from '../../services/selection-selectors'
 import type { InstalledSkillsMap, LifecycleScope, Skill, SkillRegistry } from '../../shared/types'
 import { SkillSelectCard } from '../components/SkillSelectCard'
 import { SkillSelectionToolbar } from '../components/SkillSelectionToolbar'
 import { useFilteredSkills } from '../hooks/useFilteredSkills'
-import type { CategoryOption, OutdatedSkillsInput } from '../../services/selection-selectors'
 
 export interface SelectOutdatedSkillsPageProps {
   registry: SkillRegistry
@@ -78,9 +78,8 @@ export function SelectOutdatedSkillsPage({
   }, [handleToggleAllVisible, onCancel])
 
   const handleUpdate = useCallback(() => {
-    const skillsToUpdate = selectedSkills.length > 0 ? selectedSkills : outdatedSkills.map((skill) => skill.name)
-    onUpdate(skillsToUpdate)
-  }, [onUpdate, outdatedSkills, selectedSkills])
+    onUpdate(selectedSkills)
+  }, [onUpdate, selectedSkills])
 
   return (
     <section className="select-page" aria-label="Update: select outdated skills">

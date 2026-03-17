@@ -1,5 +1,6 @@
 import type * as vscode from 'vscode'
 import type { WebviewMessage } from '../shared/messages'
+import type { ActionRequest } from '../shared/types'
 import type { LoggingService } from './logging-service'
 
 /**
@@ -10,11 +11,12 @@ export interface MessageRouteHandlers {
   handleRefreshRequest(webview: vscode.Webview): Promise<void>
   handleInstallSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void>
   handleRemoveSkill(skillName: string, scope: 'local' | 'global' | 'all', agents: string[]): Promise<void>
+  handleRequestRunAction(request: ActionRequest): Promise<void>
   handleExecuteBatch(
     action: 'install' | 'remove' | 'update',
     skills: string[],
     agents: string[],
-    scope: 'local' | 'global',
+    scope: 'local' | 'global' | 'all',
     method?: 'copy' | 'symlink',
   ): Promise<void>
   handleUpdateSkill(skillName: string): Promise<void>
@@ -61,6 +63,9 @@ export class MessageRouter {
         return
       case 'removeSkill':
         await this.handlers.handleRemoveSkill(message.payload.skillName, message.payload.scope, message.payload.agents)
+        return
+      case 'requestRunAction':
+        await this.handlers.handleRequestRunAction(message.payload)
         return
       case 'executeBatch':
         await this.handlers.handleExecuteBatch(

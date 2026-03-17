@@ -74,7 +74,7 @@ export function getOutdatedSkills({ registry, installedSkills, effectiveScopes }
       return false
     }
 
-    return installed.contentHash !== skill.contentHash || installed.contentHash === undefined
+    return effectiveScopes.some((scope) => isScopeOutdated(installed, scope, skill.contentHash))
   })
 }
 
@@ -92,6 +92,17 @@ function hasAllowedInstallation(installed: InstalledSkillInfo, effectiveScopes: 
 
 function isInstalledInScope(installed: InstalledSkillInfo, scope: LifecycleScope): boolean {
   return scope === 'local' ? installed.local : installed.global
+}
+
+function isScopeOutdated(installed: InstalledSkillInfo, scope: LifecycleScope, registryHash: string): boolean {
+  if (!isInstalledInScope(installed, scope)) {
+    return false
+  }
+
+  const scopedHash = installed.scopeHashes?.[scope]
+  const installedHash = scopedHash ?? installed.contentHash
+
+  return installedHash !== registryHash || installedHash === undefined
 }
 
 function isInstalledForAllAgents(

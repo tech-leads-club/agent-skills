@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
-import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
+import type { ActionRunner } from '../../services/action-runner'
 import { InstalledStateStore } from '../../services/installed-state-store'
 import { LoggingService } from '../../services/logging-service'
 import { RegistryStore, type RegistryStoreSnapshot } from '../../services/registry-store'
 import type { StateReconciler } from '../../services/state-reconciler'
 import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
-import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
+import type { ActionRequest, ActionState, AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 
 const showWarningMessageMock = vscode.window.showWarningMessage as jest.Mock<
   (...args: Array<unknown>) => Promise<unknown>
@@ -29,10 +29,11 @@ describe('SidebarProvider', () => {
   let logger: LoggingService
   let registryStore: jest.Mocked<RegistryStore>
   let installedStateStore: jest.Mocked<InstalledStateStore>
-  let orchestrator: jest.Mocked<InstallationOrchestrator>
+  let actionRunner: jest.Mocked<ActionRunner>
   let reconciler: jest.Mocked<StateReconciler>
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
+  let actionStateHandler: ((state: ActionState) => void) | undefined
 
   const mockRegistry: SkillRegistry = {
     version: '1.0.0',
@@ -78,22 +79,40 @@ describe('SidebarProvider', () => {
         .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
     } as unknown as jest.Mocked<RegistryStore>
 
-    const mockOrchestrator = {
-      installMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      removeMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      updateMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      repairMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      install: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      remove: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      update: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      repair: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
-      cancel: jest.fn<SyncMockableFn>(),
-      onOperationEvent: jest
-        .fn<SyncMockableFn<vscode.Disposable>>()
-        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+    actionStateHandler = undefined
+    const mockActionRunner = {
+      getState: jest.fn<SyncMockableFn<ActionState>>().mockReturnValue({
+        status: 'idle',
+        actionId: null,
+        action: null,
+        currentStep: null,
+        errorMessage: null,
+        request: null,
+        results: [],
+        logs: [],
+        rejectionMessage: null,
+      }),
+      run: jest.fn<AsyncMockableFn<{ accepted: boolean; state: ActionState }, [ActionRequest]>>().mockResolvedValue({
+        accepted: true,
+        state: {
+          status: 'idle',
+          actionId: null,
+          action: null,
+          currentStep: null,
+          errorMessage: null,
+          request: null,
+          results: [],
+          logs: [],
+          rejectionMessage: null,
+        },
+      }),
+      subscribe: jest.fn((handler: (state: ActionState) => void) => {
+        actionStateHandler = handler
+        return { dispose: jest.fn<SyncMockableFn>() }
+      }),
       dispose: jest.fn<SyncMockableFn>(),
-    } as unknown as jest.Mocked<InstallationOrchestrator>
-    orchestrator = mockOrchestrator
+    } as unknown as jest.Mocked<ActionRunner>
+    actionRunner = mockActionRunner
 
     const mockReconciler = {
       reconcile: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
@@ -136,7 +155,7 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.WebviewView
 
-    provider = new SidebarProvider(context, logger, registryStore, orchestrator, reconciler, installedStateStore)
+    provider = new SidebarProvider(context, logger, registryStore, actionRunner, reconciler, installedStateStore)
   })
 
   it('should have the correct viewType', () => {
@@ -180,7 +199,7 @@ describe('SidebarProvider', () => {
   it('should register message handler', () => {
     provider.resolveWebviewView(webviewView)
     expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalled()
-    expect(context.subscriptions).toHaveLength(4)
+    expect(context.subscriptions).toHaveLength(5)
   })
 
   it('should handle webviewDidMount message', async () => {
@@ -413,94 +432,75 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor'], 'card', 'copy')
+    expect(actionRunner.run).toHaveBeenCalledWith({
+      action: 'install',
+      skills: ['test-skill'],
+      agents: ['cursor'],
+      scope: 'local',
+      method: 'copy',
+    })
   })
 
-  it('should handle executeBatch remove message', async () => {
+  it('should handle requestRunAction message', async () => {
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = {
-      type: 'executeBatch',
+      type: 'requestRunAction',
       payload: { action: 'remove', skills: ['test-skill'], agents: ['cursor'], scope: 'global' },
     }
 
     await messageHandler(message)
 
-    expect(orchestrator.removeMany).toHaveBeenCalledWith(['test-skill'], 'global', ['cursor'])
+    expect(actionRunner.run).toHaveBeenCalledWith({
+      action: 'remove',
+      skills: ['test-skill'],
+      agents: ['cursor'],
+      scope: 'global',
+    })
   })
 
-  it('should post batchCompleted when final batched operation finishes', async () => {
+  it('posts the current action state on webviewDidMount', async () => {
     provider.resolveWebviewView(webviewView)
 
-    const eventHandler = (orchestrator.onOperationEvent as jest.Mock).mock.calls[0][0] as (
-      event: Parameters<NonNullable<InstallationOrchestrator['onOperationEvent']>>[0] extends (e: infer E) => void
-        ? E
-        : never,
-    ) => void
-
-    eventHandler({
-      type: 'started',
-      operationId: 'op-1',
-      operation: 'install',
-      skillName: 'test-skill',
-      metadata: {
-        batchId: 'batch-1',
-        batchSize: 1,
-        skillNames: ['test-skill'],
-        scope: 'local',
-        agents: ['cursor'],
-      },
-    })
-
-    eventHandler({
-      type: 'completed',
-      operationId: 'op-1',
-      operation: 'install',
-      skillName: 'test-skill',
-      success: true,
-      metadata: {
-        batchId: 'batch-1',
-        batchSize: 1,
-        skillNames: ['test-skill'],
-        scope: 'local',
-        agents: ['cursor'],
-      },
-    })
-
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    await messageHandler({ type: 'webviewDidMount' })
 
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'batchCompleted',
+      type: 'actionState',
       payload: {
-        batchId: 'batch-1',
-        success: true,
-        failedSkills: undefined,
-        errorMessage: undefined,
-        results: [{ skillName: 'test-skill', success: true, errorMessage: undefined }],
-        action: 'install',
+        status: 'idle',
+        actionId: null,
+        action: null,
+        currentStep: null,
+        errorMessage: null,
+        request: null,
+        results: [],
+        logs: [],
+        rejectionMessage: null,
       },
     })
   })
 
-  it('posts refreshed reconcile state after operation completion', async () => {
+  it('posts actionState updates from the runner', async () => {
     provider.resolveWebviewView(webviewView)
 
-    const eventHandler = (orchestrator.onOperationEvent as jest.Mock).mock.calls[0][0] as (
-      event: Parameters<NonNullable<InstallationOrchestrator['onOperationEvent']>>[0] extends (e: infer E) => void
-        ? E
-        : never,
-    ) => void
+    const runningState: ActionState = {
+      status: 'running',
+      actionId: 'action-1',
+      action: 'install',
+      currentStep: 'Installing test-skill (local)',
+      errorMessage: null,
+      request: { action: 'install', skills: ['test-skill'], agents: ['cursor'], scope: 'local', method: 'copy' },
+      results: [],
+      logs: [],
+      rejectionMessage: null,
+    }
+    actionRunner.getState.mockReturnValue(runningState)
 
-    eventHandler({
-      type: 'completed',
-      operationId: 'op-update',
-      operation: 'update',
-      skillName: 'seo',
-      success: true,
+    actionStateHandler?.(runningState)
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'actionState',
+      payload: runningState,
     })
-
-    await new Promise((resolve) => setTimeout(resolve, 10))
-
-    expect(installedStateStore.refresh).toHaveBeenCalled()
   })
 
   it('should handle installSkill message with multiple agents', async () => {
@@ -513,7 +513,12 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'local', ['cursor', 'claude-code'])
+    expect(actionRunner.run).toHaveBeenCalledWith({
+      action: 'install',
+      skills: ['test-skill'],
+      agents: ['cursor', 'claude-code'],
+      scope: 'local',
+    })
   })
 
   it('should handle installSkill with scope "all" by installing local and global', async () => {
@@ -526,6 +531,11 @@ describe('SidebarProvider', () => {
 
     await messageHandler(message)
 
-    expect(orchestrator.installMany).toHaveBeenCalledWith(['test-skill'], 'all', ['cursor'])
+    expect(actionRunner.run).toHaveBeenCalledWith({
+      action: 'install',
+      skills: ['test-skill'],
+      agents: ['cursor'],
+      scope: 'all',
+    })
   })
 })

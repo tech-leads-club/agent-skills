@@ -1,4 +1,6 @@
 import type {
+  ActionRequest,
+  ActionState,
   AllowedScopesSetting,
   AvailableAgent,
   BlockedReason,
@@ -14,13 +16,14 @@ import type {
  * Each variant represents a user action or lifecycle event.
  *
  * **Active (WebView flow)**: webviewDidMount, requestRefresh, installSkill, removeSkill,
- * updateSkill, executeBatch, cancelOperation.
+ * updateSkill, requestRunAction, cancelOperation.
  */
 export type WebviewMessage =
   | { type: 'webviewDidMount' }
   | { type: 'requestRefresh' }
   | { type: 'installSkill'; payload: InstallSkillPayload }
   | { type: 'removeSkill'; payload: RemoveSkillPayload }
+  | { type: 'requestRunAction'; payload: RequestRunActionPayload }
   | { type: 'executeBatch'; payload: ExecuteBatchPayload }
   | { type: 'updateSkill'; payload: UpdateSkillPayload }
   | { type: 'cancelOperation'; payload: CancelOperationPayload }
@@ -29,12 +32,13 @@ export type WebviewMessage =
  * Messages sent FROM the Extension Host TO the Webview.
  * Each variant represents a state update or response.
  *
- * **Active (WebView flow)**: initialize, registryUpdate, operationStarted, operationProgress,
- * operationCompleted, batchCompleted, reconcileState, trustState, policyState.
+ * **Active (WebView flow)**: initialize, registryUpdate, actionState,
+ * reconcileState, trustState, policyState.
  */
 export type ExtensionMessage =
   | { type: 'initialize'; payload: InitializePayload }
   | { type: 'registryUpdate'; payload: RegistryUpdatePayload }
+  | { type: 'actionState'; payload: ActionStatePayload }
   | { type: 'operationStarted'; payload: OperationStartedPayload }
   | { type: 'operationProgress'; payload: OperationProgressPayload }
   | { type: 'operationCompleted'; payload: OperationCompletedPayload }
@@ -82,16 +86,15 @@ export interface RemoveSkillPayload {
 }
 
 /**
- * Payload for executeBatch message (Webview → Extension).
+ * Payload for requestRunAction message (Webview → Extension).
  */
-export interface ExecuteBatchPayload {
-  action: 'install' | 'remove' | 'update'
-  skills: string[]
-  agents: string[]
-  scope: 'local' | 'global'
-  /** Install method (copy/symlink). Only used when action is 'install'. */
-  method?: 'copy' | 'symlink'
-}
+export type RequestRunActionPayload = ActionRequest
+
+/**
+ * Payload for executeBatch message (Webview → Extension).
+ * Legacy alias kept during the phase-4 contract migration.
+ */
+export type ExecuteBatchPayload = ActionRequest
 
 /**
  * Payload for updateSkill message (Webview → Extension).
@@ -99,6 +102,11 @@ export interface ExecuteBatchPayload {
 export interface UpdateSkillPayload {
   skillName: string
 }
+
+/**
+ * Payload for actionState message (Extension → Webview).
+ */
+export type ActionStatePayload = ActionState
 
 /**
  * Payload for cancelOperation message (Webview → Extension).

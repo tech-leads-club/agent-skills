@@ -53,8 +53,14 @@ export interface InstalledSkillInfo {
   global: boolean
   agents: AgentInstallInfo[]
   contentHash?: string
+  scopeHashes?: InstalledScopeHashes
   installedAt?: string
   updatedAt?: string
+}
+
+export interface InstalledScopeHashes {
+  local?: string
+  global?: string
 }
 
 /**
@@ -103,6 +109,8 @@ export type WebviewAction = 'install' | 'uninstall'
  * Flow action for sidebar navigation (includes update).
  */
 export type FlowAction = WebviewAction | 'update'
+
+export type LifecycleAction = 'install' | 'remove' | 'update'
 
 /**
  * Type of lifecycle operation being performed.
@@ -168,6 +176,43 @@ export type AllowedScopesSetting = 'all' | 'global' | 'local' | 'none'
  * Normalized scope values used in policy evaluation.
  */
 export type LifecycleScope = 'local' | 'global'
+
+export interface ActionRequest {
+  action: LifecycleAction
+  skills: string[]
+  agents: string[]
+  scope: LifecycleScope | 'all'
+  method?: InstallMethod
+}
+
+export interface ActionLogEntry {
+  operation: LifecycleAction
+  skillName: string
+  scope?: LifecycleScope
+  message: string
+  severity: 'info' | 'warn' | 'error'
+}
+
+export interface ActionResultLine {
+  skillName: string
+  operation: LifecycleAction
+  success: boolean
+  scope?: LifecycleScope
+  errorMessage?: string
+  message?: string
+}
+
+export interface ActionState {
+  status: 'idle' | 'running' | 'completed'
+  actionId: string | null
+  action: LifecycleAction | null
+  currentStep: string | null
+  errorMessage: string | null
+  request: ActionRequest | null
+  results: ActionResultLine[]
+  logs: ActionLogEntry[]
+  rejectionMessage: string | null
+}
 
 /**
  * Reasons why lifecycle operations might be blocked.

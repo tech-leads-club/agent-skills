@@ -1,14 +1,13 @@
-import type { ScopePolicyStatePayload } from '../shared/messages'
-import type { FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
 import {
   getCategoryOptions,
   getOutdatedSkills,
   getSelectableSkills,
   isSkillInstalledForScope,
 } from '../services/selection-selectors'
+import type { ScopePolicyStatePayload } from '../shared/messages'
+import type { FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
 import type { BatchResult } from './hooks/useHostState'
-import type { LogTimelineEntry, OperationState } from './hooks/useOperations'
 import { HomePage } from './views/HomePage'
 import { InstallConfigPage } from './views/InstallConfigPage'
 import { RemoveConfirmPage } from './views/RemoveConfirmPage'
@@ -38,9 +37,16 @@ interface RenderCurrentViewProps {
   selectedAgents: string[]
   activeScope: LifecycleScope
   installMethod: InstallMethod
-  operations: Map<string, OperationState>
-  logTimeline: LogTimelineEntry[]
+  currentStep: string | null
+  logTimeline: Array<{
+    operation: 'install' | 'remove' | 'update'
+    skillName: string
+    scope?: LifecycleScope
+    message: string
+    severity: 'info' | 'warn' | 'error'
+  }>
   batchResult: BatchResult | null
+  rejectionMessage: string | null
   goToAgents: (action: 'install' | 'uninstall') => void
   goToAgentsView: () => void
   goToSkillsView: () => void
@@ -76,9 +82,10 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
     selectedAgents,
     activeScope,
     installMethod,
-    operations,
+    currentStep,
     logTimeline,
     batchResult,
+    rejectionMessage,
     goToAgents,
     goToAgentsView,
     goToSkillsView,
@@ -131,9 +138,10 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
     return currentView === 'status' ? (
       <StatusPage
         isProcessing={isProcessing}
-        operations={operations}
+        currentStep={currentStep}
         logTimeline={logTimeline}
         batchResult={batchResult}
+        rejectionMessage={rejectionMessage}
         onRetry={handleRetry}
         onDone={goHome}
       />
@@ -210,9 +218,10 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
     return (
       <StatusPage
         isProcessing={isProcessing}
-        operations={operations}
+        currentStep={currentStep}
         logTimeline={logTimeline}
         batchResult={batchResult}
+        rejectionMessage={rejectionMessage}
         onRetry={handleRetry}
         onDone={goHome}
       />
