@@ -911,6 +911,54 @@
       "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
     },
     {
+      "name": "lmc-clarity",
+      "description": "LMC Context Architect and Business Validator. Maps codebase areas, detects context debt, produces specs for implementation, and validates business intent after delivery. Use when starting a feature cycle, mapping a new codebase area, detecting stale documentation, producing a spec before coding, or validating \"did we build the right thing?\". Do NOT use for writing code (use lmc-velocity), reviewing code quality (use lmc-control), or synthesizing cycle learnings (use lmc-learning).",
+      "category": "development",
+      "path": "(development)/lmc-clarity",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "medium.com/@ggimenez87",
+      "version": "1.0.0\n  author: medium.com/@ggimenez87",
+      "contentHash": "22cd4090ff3ea9e21f9a69e582791795fb0c5731acdfdcf8278be31c8b44d3b7"
+    },
+    {
+      "name": "lmc-control",
+      "description": "LMC Validation Gate. Reviews implementations against specs, architecture rules, and security standards. Use when reviewing what was built, validating architecture compliance, checking for security issues, or performing a structured code review after implementation. Do NOT use for writing code (use lmc-velocity), mapping context (use lmc-clarity), or synthesizing learnings (use lmc-learning).",
+      "category": "development",
+      "path": "(development)/lmc-control",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "medium.com/@ggimenez87",
+      "version": "1.0.0\n  author: medium.com/@ggimenez87",
+      "contentHash": "4d9edb7646b1c5fbf3bde008c03e503fa7f9b80e21d25875935ec5ef32fefc0d"
+    },
+    {
+      "name": "lmc-learning",
+      "description": "LMC Cycle Optimizer. Synthesizes learnings after a full Clarity-Velocity-Control cycle, updates memory files, calibrates human boundaries, and generates ready-to-use prompts for the next cycle. Use when a development cycle is complete, you want to capture what worked and what did not, calibrate where human review is needed, or generate context-loaded prompts for the next iteration. Do NOT use for writing code (use lmc-velocity), mapping context (use lmc-clarity), or reviewing implementations (use lmc-control).",
+      "category": "development",
+      "path": "(development)/lmc-learning",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "medium.com/@ggimenez87",
+      "version": "1.0.0\n  author: medium.com/@ggimenez87",
+      "contentHash": "2ab720c447248d8400e49be139ff578925d862b1fceddae95bf19c8239f76447"
+    },
+    {
+      "name": "lmc-velocity",
+      "description": "LMC Implementation Engine. Consumes context specs from Clarity and produces working code following project conventions and coding standards. Use when you have a Clarity spec ready and need to implement a feature, write code from a task spec, or execute a planned change. Do NOT use for mapping context or producing specs (use lmc-clarity), reviewing implementations (use lmc-control), or capturing learnings (use lmc-learning).",
+      "category": "development",
+      "path": "(development)/lmc-velocity",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "medium.com/@ggimenez87",
+      "version": "1.0.0\n  author: medium.com/@ggimenez87",
+      "contentHash": "24681b42c7d5989ba4ec17da74aeb00103d62f5a9d8be51a4885a4be66c30f0b"
+    },
+    {
       "name": "mermaid-studio",
       "description": "Expert Mermaid diagram creation, validation, and rendering with dual-engine output (SVG/PNG/ASCII). Supports all 20+ diagram types including C4 architecture, AWS architecture-beta with service icons, flowcharts, sequence, ERD, state, class, mindmap, timeline, git graph, sankey, and more. Features code-to-diagram analysis, batch rendering, 15+ themes, and syntax validation. Use when users ask to create diagrams, visualize architecture, render mermaid files, generate ASCII diagrams, document system flows, model databases, draw AWS infrastructure, analyze code structure, or anything involving \"mermaid\", \"diagram\", \"flowchart\", \"architecture diagram\", \"sequence diagram\", \"ERD\", \"C4\", \"ASCII diagram\". Do NOT use for non-Mermaid image generation, data plotting with chart libraries, or general documentation writing.",
       "category": "tooling",
