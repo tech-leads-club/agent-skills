@@ -41,6 +41,19 @@ const mockSkillLockService = {
   getInstalledHash: jest.fn<MockableFn<Promise<string | undefined>>>().mockResolvedValue(undefined),
 }
 
+const mockRegistryStore = {
+  prime: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
+  getSnapshot: jest.fn<MockableFn>(),
+  refresh: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
+  subscribe: jest.fn<MockableFn<{ dispose: () => void }>>(() => ({ dispose: jest.fn() })),
+}
+
+const mockInstalledStateStore = {
+  refresh: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
+  getSnapshot: jest.fn<MockableFn>(),
+  subscribe: jest.fn<MockableFn<{ dispose: () => void }>>(() => ({ dispose: jest.fn() })),
+}
+
 // ---- ESM Module Mocks (must be before dynamic imports) ----
 jest.unstable_mockModule('../services/logging-service', () => ({
   LoggingService: jest.fn<MockableFn<typeof mockLoggingService>>(() => mockLoggingService),
@@ -52,6 +65,14 @@ jest.unstable_mockModule('../services/skill-registry-service', () => ({
 
 jest.unstable_mockModule('../services/skill-lock-service', () => ({
   SkillLockService: jest.fn<MockableFn<typeof mockSkillLockService>>(() => mockSkillLockService),
+}))
+
+jest.unstable_mockModule('../services/registry-store', () => ({
+  RegistryStore: jest.fn<MockableFn<typeof mockRegistryStore>>(() => mockRegistryStore),
+}))
+
+jest.unstable_mockModule('../services/installed-state-store', () => ({
+  InstalledStateStore: jest.fn<MockableFn<typeof mockInstalledStateStore>>(() => mockInstalledStateStore),
 }))
 
 jest.unstable_mockModule('../services/operation-queue', () => ({
@@ -83,6 +104,8 @@ const { activate, deactivate } = await import('../extension')
 const { LoggingService } = await import('../services/logging-service')
 const { SkillRegistryService } = await import('../services/skill-registry-service')
 const { SkillLockService } = await import('../services/skill-lock-service')
+const { RegistryStore } = await import('../services/registry-store')
+const { InstalledStateStore } = await import('../services/installed-state-store')
 const { SidebarProvider } = await import('../providers/sidebar-provider')
 const { StateReconciler } = await import('../services/state-reconciler')
 
@@ -106,11 +129,17 @@ describe('Extension Activation', () => {
     ;(SkillLockService as unknown as jest.Mock<() => typeof mockSkillLockService>).mockImplementation(
       () => mockSkillLockService,
     )
+    ;(RegistryStore as unknown as jest.Mock<() => typeof mockRegistryStore>).mockImplementation(() => mockRegistryStore)
+    ;(InstalledStateStore as unknown as jest.Mock<() => typeof mockInstalledStateStore>).mockImplementation(
+      () => mockInstalledStateStore,
+    )
 
     // Reset mock return values
     mockRegistryService.getRegistry.mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] })
     mockRegistryService.refresh.mockResolvedValue({ version: '1.0.0', categories: {}, skills: [] })
     mockReconciler.reconcile.mockResolvedValue(undefined)
+    mockRegistryStore.prime.mockResolvedValue(undefined)
+    mockInstalledStateStore.refresh.mockResolvedValue(undefined)
 
     context = {
       subscriptions: [],
@@ -162,9 +191,11 @@ describe('Extension Activation', () => {
     expect(mockLoggingService.info).toHaveBeenCalledWith(expect.stringContaining('Workspace trusted'))
   })
 
-  it('should start reconciler on activation', () => {
+  it('should start background priming and installed-state refresh on activation', () => {
     activate(context)
-    expect(mockReconciler.start).toHaveBeenCalled()
+
+    expect(mockRegistryStore.prime).toHaveBeenCalled()
+    expect(mockInstalledStateStore.refresh).toHaveBeenCalled()
   })
 
   it('should deactivate without error', () => {

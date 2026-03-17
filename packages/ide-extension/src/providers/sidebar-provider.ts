@@ -1,10 +1,10 @@
 import * as vscode from 'vscode'
 import type { InstallationOrchestrator } from '../services/installation-orchestrator'
+import { InstalledStateStore } from '../services/installed-state-store'
 import { LoggingService } from '../services/logging-service'
 import { MessageRouter } from '../services/message-router'
+import { RegistryStore, type RegistryStoreSnapshot } from '../services/registry-store'
 import { ScopeSelectionService, type ScopeQuickPickItem } from '../services/scope-selection-service'
-import { SkillLockService } from '../services/skill-lock-service'
-import { SkillRegistryService, type RegistryResult } from '../services/skill-registry-service'
 import type { StateReconciler } from '../services/state-reconciler'
 import type { ExtensionMessage, RegistryUpdatePayload, WebviewMessage } from '../shared/messages'
 import type {
@@ -88,18 +88,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    *
    * @param context - Extension context used for URIs and disposable registration.
    * @param logger - Logging service for telemetry and diagnostics.
-   * @param registryService - Service that loads and caches the skills registry.
+   * @param registryStore - Store that exposes registry snapshots and background refresh.
    * @param orchestrator - Operation orchestrator used for install/remove/update/repair flows.
    * @param reconciler - State reconciler that publishes installed-skill updates.
-   * @param skillLockService - Service that reads installed lockfile hashes for update checks.
+   * @param installedStateStore - Store that exposes installed-state snapshots.
    */
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly logger: LoggingService,
-    private readonly registryService: SkillRegistryService,
+    private readonly registryStore: RegistryStore,
     private readonly orchestrator: InstallationOrchestrator,
     private readonly reconciler: StateReconciler,
-    private readonly skillLockService: SkillLockService,
+    private readonly installedStateStore: InstalledStateStore,
   ) {
     this.messageRouter = new MessageRouter(this.logger, {
       handleWebviewDidMount: (message, webview) => this.handleWebviewDidMount(message, webview),
@@ -112,9 +112,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       handleCancelOperation: (operationId) => this.handleCancelOperation(operationId),
     })
 
-    this.reconciler.onStateChanged((installedSkills) => {
-      void this.postReconciledState(installedSkills)
-    })
+    this.context.subscriptions.push(
+      this.registryStore.subscribe((snapshot) => {
+        void this.postRegistrySnapshot(snapshot)
+      }),
+      this.installedStateStore.subscribe((snapshot) => {
+        void this.postInstalledState(snapshot.installedSkills)
+      }),
+    )
 
     this.orchestrator.onOperationEvent((event) => {
       if (event.type === 'started') {
@@ -201,7 +206,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
         }
 
-        void this.reconcileAndPostInstalledState()
+        void this.installedStateStore.refresh()
       }
     })
   }
@@ -284,63 +289,44 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param installedSkills - Installed-skill map from disk reconciliation.
    * @returns A promise that resolves after the webview receives the state.
    */
-  private async postReconciledState(installedSkills: InstalledSkillsMap): Promise<void> {
+  private async postInstalledState(installedSkills: InstalledSkillsMap): Promise<void> {
     if (!this.webviewView?.webview) {
       return
     }
 
-    const installedHashes = await this.skillLockService.getInstalledHashes()
-    const installedSkillsWithHashes = this.withInstalledHashes(installedSkills, installedHashes)
-
     await this.postMessage({
       type: 'reconcileState',
-      payload: { installedSkills: installedSkillsWithHashes },
+      payload: { installedSkills },
     })
   }
 
   /**
-   * Reconciles disk state, then posts the latest installed map with lockfile hashes.
+   * Refreshes installed state through the store and publishes the latest snapshot.
    *
-   * @returns A promise that resolves when reconciliation and state post complete.
+   * @returns A promise that resolves when refresh completes.
    */
   private async reconcileAndPostInstalledState(): Promise<void> {
-    await this.reconciler.reconcile()
-    const installedSkills = await this.reconciler.getInstalledSkills()
-    await this.postReconciledState(installedSkills)
+    await this.installedStateStore.refresh()
   }
 
   /**
-   * Merges lockfile content hashes into installed-skill entries.
+   * Posts the current registry snapshot to the webview.
    *
-   * @param installedSkills - Installed-skill map keyed by skill name.
-   * @param installedHashes - Lockfile hash map keyed by skill name.
-   * @returns Installed-skill map with content hashes attached when available.
+   * @param snapshot - Registry snapshot stored in the host.
+   * @returns A promise that resolves after the webview receives the update.
    */
-  private withInstalledHashes(
-    installedSkills: InstalledSkillsMap,
-    installedHashes: Record<string, string | undefined>,
-  ): InstalledSkillsMap {
-    const merged: InstalledSkillsMap = {}
+  private async postRegistrySnapshot(snapshot: RegistryStoreSnapshot): Promise<void> {
+    const status: RegistryUpdatePayload['status'] = snapshot.status === 'idle' ? 'loading' : snapshot.status
 
-    for (const [skillName, installedInfo] of Object.entries(installedSkills)) {
-      if (!installedInfo) {
-        merged[skillName] = null
-        continue
-      }
-
-      const installedHash = installedHashes[skillName]
-      if (installedHash === undefined) {
-        merged[skillName] = installedInfo
-        continue
-      }
-
-      merged[skillName] = {
-        ...installedInfo,
-        contentHash: installedHash,
-      }
-    }
-
-    return merged
+    await this.postMessage({
+      type: 'registryUpdate',
+      payload: {
+        status,
+        registry: snapshot.registry,
+        fromCache: snapshot.fromCache,
+        ...(snapshot.errorMessage ? { errorMessage: snapshot.errorMessage } : {}),
+      },
+    })
   }
 
   /**
@@ -350,12 +336,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param webview - Destination webview for bootstrap updates.
    * @returns A promise that resolves after initialization messages are posted.
    */
-  private async handleWebviewDidMount(_message: WebviewMessage, webview: vscode.Webview): Promise<void> {
+  private async handleWebviewDidMount(_message: WebviewMessage, _webview: vscode.Webview): Promise<void> {
     this.logger.info('Webview did mount')
     const version = this.context.extension.packageJSON.version ?? 'unknown'
     const availableAgents = await this.reconciler.getAvailableAgents()
     const allAgents = this.reconciler.getAllAgents()
-    const installedSkills = await this.reconciler.getInstalledSkills()
+    const installedSnapshot = this.installedStateStore.getSnapshot()
     const hasWorkspace = !!vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
 
     await this.postMessage({
@@ -363,7 +349,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       payload: { version, availableAgents, allAgents, hasWorkspace },
     })
 
-    await this.postReconciledState(installedSkills)
+    await this.postInstalledState(installedSnapshot.installedSkills)
 
     await this.postMessage({
       type: 'trustState',
@@ -381,8 +367,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       })
     }
 
-    void this.loadAndPushRegistry(webview)
-    void this.reconcileAndPostInstalledState()
+    await this.postRegistrySnapshot(this.registryStore.getSnapshot())
+
+    void this.registryStore.prime()
+    void this.installedStateStore.refresh()
   }
 
   /**
@@ -391,10 +379,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
    * @param webview - Destination webview used for registry updates.
    * @returns A promise that resolves once refresh orchestration is triggered.
    */
-  private async handleRefreshRequest(webview: vscode.Webview): Promise<void> {
+  private async handleRefreshRequest(_webview: vscode.Webview): Promise<void> {
     this.logger.info('Refresh requested from webview')
-    void this.loadAndPushRegistry(webview, true)
-    void this.reconcileAndPostInstalledState()
+    void this.registryStore.refresh()
+    void this.installedStateStore.refresh()
   }
 
   /**
@@ -1321,22 +1309,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Loads registry data for command-palette flows with error handling.
-   *
-   * @returns Registry payload, or `null` when loading fails.
-   */
-  private async loadRegistryForCommand(): Promise<SkillRegistry | null> {
-    try {
-      return await this.registryService.getRegistry()
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`Unable to load registry for command palette: ${message}`, err)
-      vscode.window.showErrorMessage(`Unable to load skills registry: ${message}`)
-      return null
-    }
-  }
-
-  /**
    * Returns a user-facing empty-state message for scope selection.
    *
    * @param action - Whether the flow is add or remove.
@@ -1397,57 +1369,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     await this.runQueueAction('remove', () => this.orchestrator.removeMany(selection.skills, scopeId, agents))
-  }
-
-  /**
-   * Load registry from service and push to webview.
-   * Sends loading status first, then ready/error/offline.
-   *
-   * @param webview - Destination webview for registry state messages.
-   * @param forceRefresh - When true, bypasses cache TTL during fetch.
-   * @returns A promise that resolves once status messages are posted.
-   */
-  private async loadAndPushRegistry(webview: vscode.Webview, forceRefresh = false): Promise<void> {
-    await this.postMessage({
-      type: 'registryUpdate',
-      payload: { status: 'loading', registry: null },
-    })
-
-    try {
-      const {
-        data: registry,
-        fromCache,
-        offline,
-      }: RegistryResult = await this.registryService.getRegistryWithMetadata(forceRefresh)
-      const status: RegistryUpdatePayload['status'] = offline ? 'offline' : 'ready'
-      const payload = {
-        status,
-        registry,
-        fromCache,
-        ...(offline
-          ? {
-              errorMessage:
-                'Unable to refresh the skills registry. Showing cached data. Please check your connection and retry.',
-            }
-          : {}),
-      }
-
-      await this.postMessage({
-        type: 'registryUpdate',
-        payload,
-      })
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      this.logger.error(`Failed to load registry: ${errorMessage}`, err)
-      await this.postMessage({
-        type: 'registryUpdate',
-        payload: {
-          status: 'error',
-          registry: null,
-          errorMessage: errorMessage || 'Failed to load skill registry',
-        },
-      })
-    }
   }
 
   /**

@@ -2,10 +2,9 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as vscode from 'vscode'
 import { SidebarProvider } from '../../providers/sidebar-provider'
 import type { InstallationOrchestrator } from '../../services/installation-orchestrator'
+import { InstalledStateStore } from '../../services/installed-state-store'
 import { LoggingService } from '../../services/logging-service'
-import { SkillLockService } from '../../services/skill-lock-service'
-import type { RegistryResult } from '../../services/skill-registry-service'
-import { SkillRegistryService } from '../../services/skill-registry-service'
+import { RegistryStore, type RegistryStoreSnapshot } from '../../services/registry-store'
 import type { StateReconciler } from '../../services/state-reconciler'
 import { ExtensionMessage, WebviewMessage } from '../../shared/messages'
 import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
@@ -28,12 +27,12 @@ describe('SidebarProvider', () => {
   let provider: SidebarProvider
   let context: vscode.ExtensionContext
   let logger: LoggingService
-  let registryService: jest.Mocked<SkillRegistryService>
+  let registryStore: jest.Mocked<RegistryStore>
+  let installedStateStore: jest.Mocked<InstalledStateStore>
   let orchestrator: jest.Mocked<InstallationOrchestrator>
   let reconciler: jest.Mocked<StateReconciler>
   let webviewView: vscode.WebviewView
   let messageHandler: (message: WebviewMessage) => void
-  let skillLockService: jest.Mocked<SkillLockService>
 
   const mockRegistry: SkillRegistry = {
     version: '1.0.0',
@@ -64,18 +63,20 @@ describe('SidebarProvider', () => {
     }
     logger = mockLoggerImpl as unknown as jest.Mocked<LoggingService>
 
-    const registryMetadata: RegistryResult = {
-      data: mockRegistry,
+    const registrySnapshot: RegistryStoreSnapshot = {
+      status: 'ready',
+      registry: mockRegistry,
       fromCache: false,
-      offline: false,
+      errorMessage: null,
     }
-    const mockRegistryService = {
-      getRegistry: jest.fn<AsyncMockableFn<SkillRegistry>>().mockResolvedValue(mockRegistry),
-      refresh: jest.fn<AsyncMockableFn<SkillRegistry>>().mockResolvedValue(mockRegistry),
-      getRegistryWithMetadata: jest.fn<AsyncMockableFn<RegistryResult>>().mockResolvedValue(registryMetadata),
-      dispose: jest.fn<SyncMockableFn>(),
-    } as unknown as jest.Mocked<SkillRegistryService>
-    registryService = mockRegistryService
+    registryStore = {
+      getSnapshot: jest.fn<SyncMockableFn<RegistryStoreSnapshot>>().mockReturnValue(registrySnapshot),
+      prime: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      refresh: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      subscribe: jest
+        .fn<SyncMockableFn<vscode.Disposable, [(snapshot: RegistryStoreSnapshot) => void]>>()
+        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+    } as unknown as jest.Mocked<RegistryStore>
 
     const mockOrchestrator = {
       installMany: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
@@ -99,19 +100,26 @@ describe('SidebarProvider', () => {
       getAvailableAgents: jest.fn<AsyncMockableFn<AvailableAgent[]>>().mockResolvedValue([]),
       getAllAgents: jest.fn<SyncMockableFn<AvailableAgent[]>>().mockReturnValue([]),
       getInstalledSkills: jest.fn<AsyncMockableFn<InstalledSkillsMap>>().mockResolvedValue({}),
-      onStateChanged: jest
-        .fn<SyncMockableFn<vscode.Disposable>>()
-        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+      onStateChanged: jest.fn<SyncMockableFn<void, [(state: InstalledSkillsMap) => void]>>(),
       start: jest.fn<SyncMockableFn>(),
       dispose: jest.fn<SyncMockableFn>(),
     } as unknown as jest.Mocked<StateReconciler>
     reconciler = mockReconciler
 
-    const mockSkillLockService = {
-      getInstalledHashes: jest.fn<AsyncMockableFn<Record<string, string | undefined>>>().mockResolvedValue({}),
-      getInstalledHash: jest.fn<AsyncMockableFn<string | undefined>>().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<SkillLockService>
-    skillLockService = mockSkillLockService
+    installedStateStore = {
+      getSnapshot: jest
+        .fn<SyncMockableFn<{ installedSkills: InstalledSkillsMap; lastUpdatedAt: string | null }>>()
+        .mockReturnValue({ installedSkills: {}, lastUpdatedAt: null }),
+      refresh: jest.fn<AsyncMockableFn<void>>().mockResolvedValue(undefined),
+      subscribe: jest
+        .fn<
+          SyncMockableFn<
+            vscode.Disposable,
+            [(snapshot: { installedSkills: InstalledSkillsMap; lastUpdatedAt: string | null }) => void]
+          >
+        >()
+        .mockReturnValue({ dispose: jest.fn<SyncMockableFn>() }),
+    } as unknown as jest.Mocked<InstalledStateStore>
 
     // Mock WebviewView
     webviewView = {
@@ -128,7 +136,7 @@ describe('SidebarProvider', () => {
       },
     } as unknown as vscode.WebviewView
 
-    provider = new SidebarProvider(context, logger, registryService, orchestrator, reconciler, skillLockService)
+    provider = new SidebarProvider(context, logger, registryStore, orchestrator, reconciler, installedStateStore)
   })
 
   it('should have the correct viewType', () => {
@@ -172,7 +180,7 @@ describe('SidebarProvider', () => {
   it('should register message handler', () => {
     provider.resolveWebviewView(webviewView)
     expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalled()
-    expect(context.subscriptions).toHaveLength(2)
+    expect(context.subscriptions).toHaveLength(4)
   })
 
   it('should handle webviewDidMount message', async () => {
@@ -191,7 +199,10 @@ describe('SidebarProvider', () => {
         ],
       },
     }
-    reconciler.getInstalledSkills.mockResolvedValue(installedSkills)
+    installedStateStore.getSnapshot.mockReturnValue({
+      installedSkills,
+      lastUpdatedAt: '2026-03-16T00:00:00.000Z',
+    })
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
@@ -202,7 +213,6 @@ describe('SidebarProvider', () => {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     expect(logger.info).toHaveBeenCalledWith('Webview did mount')
-    expect(reconciler.getInstalledSkills).toHaveBeenCalled()
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'initialize',
@@ -218,9 +228,19 @@ describe('SidebarProvider', () => {
       type: 'reconcileState',
       payload: { installedSkills },
     })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
+      type: 'registryUpdate',
+      payload: {
+        status: 'ready',
+        registry: mockRegistry,
+        fromCache: false,
+      },
+    })
+    expect(registryStore.prime).toHaveBeenCalled()
+    expect(installedStateStore.refresh).toHaveBeenCalled()
   })
 
-  it('hydrates installed-skill hashes before posting reconcile state', async () => {
+  it('posts the installed snapshot from the store', async () => {
     const installedInfo = {
       local: true,
       global: false,
@@ -237,8 +257,10 @@ describe('SidebarProvider', () => {
     const installedSkills: InstalledSkillsMap = {
       'test-skill': installedInfo,
     }
-    reconciler.getInstalledSkills.mockResolvedValue(installedSkills)
-    skillLockService.getInstalledHashes.mockResolvedValue({ 'test-skill': 'hash-123' })
+    installedStateStore.getSnapshot.mockReturnValue({
+      installedSkills,
+      lastUpdatedAt: '2026-03-16T00:00:00.000Z',
+    })
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
@@ -249,12 +271,7 @@ describe('SidebarProvider', () => {
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'reconcileState',
       payload: {
-        installedSkills: {
-          'test-skill': {
-            ...installedInfo,
-            contentHash: 'hash-123',
-          },
-        },
+        installedSkills,
       },
     })
   })
@@ -275,7 +292,7 @@ describe('SidebarProvider', () => {
 
   // TESTS FOR REGISTRY HANDLING
 
-  it('should send loading status then registryUpdate on webviewDidMount', async () => {
+  it('should send the current registry snapshot on webviewDidMount', async () => {
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
 
@@ -286,26 +303,22 @@ describe('SidebarProvider', () => {
 
     expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
       type: 'registryUpdate',
-      payload: { status: 'loading', registry: null },
-    })
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'registryUpdate',
       payload: {
         status: 'ready',
         registry: mockRegistry,
         fromCache: false,
       },
     })
-    expect(registryService.getRegistryWithMetadata).toHaveBeenCalled()
+    expect(registryStore.prime).toHaveBeenCalled()
   })
 
   it('should notify the webview when registry data is served from cache during offline mode', async () => {
-    const offlineMetadata: RegistryResult = {
-      data: mockRegistry,
+    registryStore.getSnapshot.mockReturnValue({
+      status: 'offline',
+      registry: mockRegistry,
       fromCache: true,
-      offline: true,
-    }
-    registryService.getRegistryWithMetadata.mockResolvedValueOnce(offlineMetadata)
+      errorMessage: 'Unable to refresh the skills registry. Showing cached data.',
+    })
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
@@ -333,16 +346,17 @@ describe('SidebarProvider', () => {
     // Wait for async operations
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(registryService.getRegistryWithMetadata).toHaveBeenCalledWith(true)
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'registryUpdate',
-      }),
-    )
+    expect(registryStore.refresh).toHaveBeenCalled()
+    expect(installedStateStore.refresh).toHaveBeenCalled()
   })
 
-  it('should handle registry service error gracefully', async () => {
-    registryService.getRegistryWithMetadata.mockRejectedValueOnce(new Error('Network error'))
+  it('should post error snapshots exposed by the registry store', async () => {
+    registryStore.getSnapshot.mockReturnValue({
+      status: 'error',
+      registry: null,
+      fromCache: false,
+      errorMessage: 'Network error',
+    })
 
     provider.resolveWebviewView(webviewView)
     const message: WebviewMessage = { type: 'webviewDidMount' }
@@ -352,16 +366,16 @@ describe('SidebarProvider', () => {
     // Wait for async operations
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(registryService.getRegistryWithMetadata).toHaveBeenCalled()
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load registry'), expect.any(Error))
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'registryUpdate',
-      payload: {
-        status: 'error',
-        registry: null,
-        errorMessage: expect.stringContaining('Network error'),
-      },
-    })
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'registryUpdate',
+        payload: expect.objectContaining({
+          status: 'error',
+          registry: null,
+          errorMessage: expect.stringContaining('Network error'),
+        }),
+      }),
+    )
   })
 
   // TESTS FOR WEBVIEW MESSAGE FLOW
@@ -470,25 +484,6 @@ describe('SidebarProvider', () => {
   it('posts refreshed reconcile state after operation completion', async () => {
     provider.resolveWebviewView(webviewView)
 
-    const installedInfo = {
-      local: true,
-      global: false,
-      agents: [
-        {
-          agent: 'cursor',
-          displayName: 'Cursor',
-          local: true,
-          global: false,
-          corrupted: false,
-        },
-      ],
-    }
-
-    reconciler.getInstalledSkills.mockResolvedValueOnce({
-      seo: installedInfo,
-    })
-    skillLockService.getInstalledHashes.mockResolvedValueOnce({ seo: 'new-hash' })
-
     const eventHandler = (orchestrator.onOperationEvent as jest.Mock).mock.calls[0][0] as (
       event: Parameters<NonNullable<InstallationOrchestrator['onOperationEvent']>>[0] extends (e: infer E) => void
         ? E
@@ -505,18 +500,7 @@ describe('SidebarProvider', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(reconciler.reconcile).toHaveBeenCalled()
-    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({
-      type: 'reconcileState',
-      payload: {
-        installedSkills: {
-          seo: {
-            ...installedInfo,
-            contentHash: 'new-hash',
-          },
-        },
-      },
-    })
+    expect(installedStateStore.refresh).toHaveBeenCalled()
   })
 
   it('should handle installSkill message with multiple agents', async () => {
