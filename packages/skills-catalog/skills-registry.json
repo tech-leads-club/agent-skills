@@ -68,7 +68,10 @@
       "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\". Do NOT use for SEO (use seo), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-accessibility",
-      "files": ["SKILL.md", "references/WCAG.md"],
+      "files": [
+        "SKILL.md",
+        "references/WCAG.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "706129400c8c91a9264582940b36007116faffcaf27bb0780bdab87337b4f881"
@@ -78,50 +81,66 @@
       "description": "\"When the user wants to build an AI-powered outreach system, write cold emails, improve deliverability, or scale personalized outreach. Also use when the user mentions 'cold email,' 'cold outreach,' 'outreach automation,' 'Instantly,' 'Smartlead,' 'Clay,' 'email sequences,' 'deliverability,' 'personalization at scale,' 'reply rate,' or 'outreach stack.' This skill covers the complete AI cold outreach system from signal detection through conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-cold-outreach",
-      "files": ["SKILL.md", "references/benchmarks-deliverability-tactics.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/benchmarks-deliverability-tactics.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "7a2ca1d3f443357b96f22ffce9fb6d5e19134bb5d723ea55ca939873b3777c12"
+      "contentHash": "d9b812e4ed9549bfc9aba7a3ceafb6d0d37d15b414ceded7159da882a1124f4b"
     },
     {
       "name": "ai-pricing",
       "description": "\"When the user wants to price an AI product, choose a charge metric, design pricing tiers, or optimize margins. Also use when the user mentions 'AI pricing,' 'usage-based pricing,' 'consumption pricing,' 'outcome pricing,' 'BYOK,' 'bring your own key,' 'per-seat pricing,' 'pricing tiers,' 'AI margins,' 'cost per token,' or 'pricing model.' This skill covers pricing strategy, packaging, and margin management for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-pricing",
-      "files": ["SKILL.md", "references/implementation-guide.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "642a42cf94b8061aad642d84363bb4f60712af858c093bed6f2ec6135a3e7937"
+      "contentHash": "67d8f77f6625b7515ff2f0c5437cf271da101af1f007385be211564a118f2226"
     },
     {
       "name": "ai-sdr",
       "description": "\"When the user wants to deploy AI sales development reps, automate sales qualification, build signal-to-action routing, or design AI agent architecture for sales. Also use when the user mentions 'AI SDR,' 'AI sales agent,' 'automated qualification,' 'signal routing,' 'sales automation,' '11x,' 'Artisan,' 'AiSDR,' 'AI BDR,' or 'autonomous sales.' This skill covers AI SDR deployment, qualification automation, and agent architecture for sales development. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-sdr",
-      "files": ["SKILL.md", "references/implementation-guide.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3f36a4b65cb1fc97722341b9fb1849fcecf320be8a1d8892028fa45663719786"
+      "contentHash": "ca62ff560bb4b25d993cf32fcf11cebc2857c125f54fc06072aeda38ac09e8d9"
     },
     {
       "name": "ai-seo",
       "description": "\"When the user wants to build programmatic SEO with AI, create competitor alternative pages, optimize for AI Overviews, or scale content production. Also use when the user mentions 'SEO,' 'programmatic SEO,' 'AI content,' 'competitor alternative pages,' 'AI Overviews,' 'search optimization,' 'DataForSEO,' 'content at scale,' 'keyword strategy,' or 'organic traffic.' This skill covers AI-powered SEO strategy from keyword research through programmatic page generation. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-seo",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "8ff9c7d6181c37c92fb225a8559d50ee5413c20e6a7ae240e05bb6a532d64f9b"
+      "contentHash": "053e85660bc5fcca0876873409b462de843cbe318d50ac7554870ad7c33afd63"
     },
     {
       "name": "ai-ugc-ads",
       "description": "\"When the user wants to create UGC ad campaigns, recruit UGC creators, generate AI UGC content, or scale with user-generated content. Also use when the user mentions 'UGC,' 'user-generated content,' 'creator ads,' 'Spark Ads,' 'whitelisting,' 'AI UGC,' 'Arcads,' 'Creatify,' 'creator brief,' or 'UGC testing.' This skill covers the UGC growth framework from creator recruitment through AI-powered scaling. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-ugc-ads",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "92f981122d6add656bd10cae4404fa94a79db93f3cad2cd978ef12a4eea51b83"
+      "contentHash": "b507bc1b3cf8058e63db64f322692b926e636e8839fc4e3a313300b6be688b35"
     },
     {
       "name": "aws-advisor",
@@ -148,7 +167,9 @@
       "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when asked to \"apply best practices\", \"security audit\", \"modernize code\", \"code quality review\", or \"check for vulnerabilities\". Do NOT use for accessibility (use web-accessibility), SEO (use seo), performance (use core-web-vitals), or comprehensive multi-area audits (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-best-practices",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "2abba650ba22a819e67f8c2fb09d0f5f33a24d66d945ee2ef824751bc97151ce"
@@ -158,7 +179,9 @@
       "description": "Browser debugging, performance profiling, and automation via Chrome DevTools MCP. Use when user says \"debug this page\", \"take a screenshot\", \"check network requests\", \"profile performance\", \"inspect console errors\", or \"analyze page load\". Do NOT use for full E2E test suites (use playwright-skill) or non-browser debugging.",
       "category": "tooling",
       "path": "(tooling)/chrome-devtools",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "249d0fb724d83a9dc1b81f5812b894d471b36e6e629407cd43f9b8135fe4630a"
     },
     {
@@ -486,17 +509,23 @@
       "description": "Your pathfinder for navigating unknown codebases. Investigates with precision, implements surgically, and never assumes — if it doesn't know, it says so. Maintains a .notebook/ knowledge base that grows across sessions, turning every discovery into lasting intelligence. Summons available skills, MCPs, and docs when the mission demands. Use when fixing bugs, implementing features, refactoring, investigating flows, or any development task in unfamiliar territory. Triggers on \"fix this\", \"implement this\", \"how does this work\", \"investigate this flow\", \"help me with this code\". Do NOT use for greenfield scaffolding, CI/CD, or infrastructure provisioning.",
       "category": "development",
       "path": "(development)/codenavi",
-      "files": ["SKILL.md", "references/coding-principles.md", "references/notebook-spec.md"],
+      "files": [
+        "SKILL.md",
+        "references/coding-principles.md",
+        "references/notebook-spec.md"
+      ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "23ac05b7f2d8df8311129d41432eba248bdcf14e9ace3f17c581976f7d888ada"
+      "contentHash": "87bf4a5308d87fb9fdd63a734a9ec98e3f836ff3de4ee6a4ff0c03e7477924db"
     },
     {
       "name": "coding-guidelines",
       "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, modifying, or reviewing code — implementation tasks, code changes, refactoring, bug fixes, or feature development. Do NOT use for architecture design, documentation, or non-code tasks.",
       "category": "development",
       "path": "(development)/coding-guidelines",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "ale",
       "version": "1.0.0",
       "contentHash": "28a414c715d3c41aae28a25e2f109813ec3f246f76b5567c1e7d6a128cd289ff"
@@ -506,7 +535,11 @@
       "description": "Finds duplicate business logic spread across multiple components and suggests consolidation. Use when asking \"where is this logic duplicated?\", \"find common code between services\", \"what can be consolidated?\", \"detect shared domain logic\", or analyzing component overlap before refactoring. Do NOT use for code-level duplication detection (use linters) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/component-common-domain-detection",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "58c72d63eaf387cf11ae36b223ff80478ba861f53265e42a3c4fbcb3bc739208"
     },
     {
@@ -514,7 +547,11 @@
       "description": "Detects misplaced classes and fixes component hierarchy problems — finds code that should belong inside a component but sits at the root level. Use when asking \"clean up component structure\", \"find orphaned classes\", \"fix module hierarchy\", \"flatten nested components\", or analyzing why namespaces have misplaced code. Do NOT use for dependency analysis (use coupling-analysis) or domain grouping (use domain-identification-grouping).",
       "category": "architecture",
       "path": "(architecture)/component-flattening-analysis",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "085696b944897a2d8c96efb6e0a3faab00f910a62a49a45c3293c32458962411"
     },
     {
@@ -522,7 +559,11 @@
       "description": "Maps architectural components in a codebase and measures their size to identify what should be extracted first. Use when asking \"how big is each module?\", \"what components do I have?\", \"which service is too large?\", \"analyze codebase structure\", \"size my monolith\", or planning where to start decomposing. Do NOT use for runtime performance sizing or infrastructure capacity planning.",
       "category": "architecture",
       "path": "(architecture)/component-identification-sizing",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "8ec5eb90e86cc84a346f15f50c86960d8f4ba6876f6fe27d687a1ba43a2448a0"
     },
     {
@@ -530,7 +571,9 @@
       "description": "Expert in Confluence operations using Atlassian MCP. Use when the user says \"search Confluence\", \"create a Confluence page\", \"update a page\", \"find documentation in Confluence\", \"list spaces\", or \"add a comment to a page\". Do NOT use for Jira issues, general web search, or local file creation.",
       "category": "development",
       "path": "(development)/confluence-assistant",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Waldemar Neto - github.com/waldemarnt",
       "version": "1.0.0",
       "contentHash": "b9f019173a7d864db1d0a9eca13ee920d294806ea4c5cabfb626ccaedbaaeae7"
@@ -540,17 +583,24 @@
       "description": "\"When the user wants to turn content into revenue, build a content-led GTM motion, reverse engineer distribution, or repurpose content across platforms. Also use when the user mentions 'content marketing,' 'content-led growth,' 'content to pipeline,' 'distribution,' 'content repurposing,' 'content strategy,' 'thought leadership,' 'newsletter,' 'content flywheel,' 'organic growth.' This skill covers content-to-revenue systems from creation through pipeline attribution. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/content-to-pipeline",
-      "files": ["SKILL.md", "references/podcast-community-cadence.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/podcast-community-cadence.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "925f769a4c601ea7fac8cab4d3ee00f799921eb0600427d18f458eb35db2e2ed"
+      "contentHash": "5459417957d807a06601092a59ab47999dbb1c786ec6d6591ca873422409c658"
     },
     {
       "name": "core-web-vitals",
       "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\". Focuses specifically on the three Core Web Vitals metrics. Do NOT use for general web performance (use perf-web-optimization), Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).",
       "category": "performance",
       "path": "(performance)/core-web-vitals",
-      "files": ["SKILL.md", "references/LCP.md"],
+      "files": [
+        "SKILL.md",
+        "references/LCP.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "3a67190e1dea1f2573d4fbb17071bbdac5ff4fd087d8cb5271094851c2acd559"
@@ -560,35 +610,46 @@
       "description": "Analyzes coupling between modules using the three-dimensional model (strength, distance, volatility) from \"Balancing Coupling in Software Design\". Use when asking \"are these modules too coupled?\", \"show me dependencies\", \"analyze integration quality\", \"which modules should I decouple?\", \"coupling report\", or evaluating architectural health. Do NOT use for domain boundary analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/coupling-analysis",
-      "files": ["SKILL.md"],
-      "contentHash": "a33a142a73ac2e6b8db300acb3d13dba5077e225cbfad7599b0ac431290ab5c7"
+      "files": [
+        "SKILL.md"
+      ],
+      "contentHash": "dc4e546cf73cfe35a7bdecaedd1ddcde340f2e76cf267e8ca5a0200f9825bc2b"
     },
     {
       "name": "create-adr",
       "description": "Creates Architecture Decision Records (ADRs) to document significant architectural choices and their rationale for future team members. Use when the user says \"write an ADR\", \"document this decision\", \"record why we chose X\", \"add an architecture decision record\", \"create an ADR for\", or wants to capture the reasoning behind a technical choice so the team understands it later. Do NOT use when the decision hasn't been made yet (use create-rfc instead), for implementation planning (use technical-design-doc-creator), or for general documentation.",
       "category": "creation",
       "path": "(creation)/create-adr",
-      "files": ["README.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "47ec663c849e8c1620c6f33a7be0055acdcf838c27ab7c16f44260244b80195a"
+      "contentHash": "e3680fb32b76ab8f4cf51facdd3d0ded5a472e5ec2a2d162c65297626ed3e1cc"
     },
     {
       "name": "create-rfc",
       "description": "Creates structured Request for Comments (RFC) documents for proposing and deciding on significant changes. Use when the user says \"write an RFC\", \"create a proposal\", \"I need to propose a change\", \"draft an RFC\", \"document a decision\", or needs stakeholder alignment before making a major technical or process decision. Do NOT use for TDDs/implementation docs (use technical-design-doc-creator instead), README files, or general documentation.",
       "category": "creation",
       "path": "(creation)/create-rfc",
-      "files": ["README.md", "SKILL.md", "references/section-templates.md"],
+      "files": [
+        "README.md",
+        "SKILL.md",
+        "references/section-templates.md"
+      ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "3f391b6c4397bb1590bbad511eca95c297dd0467e65385fa28b3724851c42ea8"
+      "contentHash": "e2e483650fb9497b9c6a01b1c4b3fae742ab222cf069770999c8a242ffa82256"
     },
     {
       "name": "cursor-subagent-creator",
       "description": "Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows. Use when creating subagents for Cursor editor specifically, following Cursor's patterns and directories (.cursor/agents/). Triggers on \"cursor subagent\", \"cursor agent\". Do NOT use for generic subagent creation outside Cursor (use subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/cursor-subagent-creator",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "658a170d783a694e638814bed35a738184795da2d0f0b36489cac94a478cd8d7"
     },
     {
@@ -596,7 +657,11 @@
       "description": "Creates step-by-step decomposition plans and migration roadmaps for breaking apart monolithic applications. Use when asking \"what order should I extract services?\", \"plan my migration\", \"create a decomposition roadmap\", \"prioritize what to split\", \"monolith to microservices strategy\", or tracking decomposition progress. Do NOT use for domain analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/decomposition-planning-roadmap",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "8de88d993b2556a6b38c26fd79c863f06bf7746faf87c0c9fd1b9a198a49e1ac"
     },
     {
@@ -604,7 +669,10 @@
       "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
       "category": "development",
       "path": "(development)/docs-writer",
-      "files": ["SKILL.md", "references/style-guide.md"],
+      "files": [
+        "SKILL.md",
+        "references/style-guide.md"
+      ],
       "contentHash": "c49827c59d2e27d313731dfd36314cfde0e8dbf15be0e8f813d2f8b751546b0c"
     },
     {
@@ -612,15 +680,24 @@
       "description": "Maps business domains and suggests service boundaries in any codebase using DDD Strategic Design. Use when asking \"what are the domains in this codebase?\", \"where should I draw service boundaries?\", \"identify bounded contexts\", \"classify subdomains\", \"DDD analysis\", or analyzing domain cohesion. Do NOT use for grouping existing components into domains (use domain-identification-grouping) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-analysis",
-      "files": ["EXAMPLES.md", "QUICK-REFERENCE.md", "README.md", "SKILL.md"],
-      "contentHash": "5914beeaf1aa1fe57cd95cf0afb60ee1cccc58eedaddd123a43cad32d6a70077"
+      "files": [
+        "EXAMPLES.md",
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
+      "contentHash": "c95591aa790449afce2b3da2e95733b90f14346107044b00cfd75fbf8ccb3c29"
     },
     {
       "name": "domain-identification-grouping",
       "description": "Groups existing components into logical business domains to plan service-based architecture. Use when asking \"which components belong together?\", \"group these into services\", \"organize by domain\", \"component-to-domain mapping\", or planning service extraction from an existing codebase. Do NOT use for identifying new domains from scratch (use domain-analysis) or analyzing coupling (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-identification-grouping",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "ac3c94d9910a75aa6a61f7866507d16a3c646ff17e86b79667d1a19c6fa6c659"
     },
     {
@@ -648,24 +725,31 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
-      "contentHash": "08f4964859a421cccfc52314f2e5b3484b1163ecf558ccdbb6746127229b9399"
+      "contentHash": "b4a64c92bcd88d5e6ef7a4f50c2c2649ded01a563ea9921a4fe8e158fcae00e9"
     },
     {
       "name": "expansion-retention",
       "description": "\"When the user wants to reduce churn, build expansion revenue, automate customer success, or optimize net revenue retention. Also use when the user mentions 'churn,' 'retention,' 'expansion revenue,' 'upsell,' 'NRR,' 'net revenue retention,' 'customer success,' 'land and expand,' 'closed-lost,' or 'renewal.' This skill covers expansion and retention systems from usage triggers through automated customer success. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/expansion-retention",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "e5420a123058969e8e5014d74120daf7a1c598e1fb44e6d152c6b60a71a81e95"
+      "contentHash": "28473cb2d312d8df355f2d39b865cb573bcf87eaf3dbdc0c28cdf547562cc98e"
     },
     {
       "name": "figma",
       "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Use when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting. Covers general Figma data fetching and exploration. Do NOT use when the goal is specifically pixel-perfect code implementation from a Figma design (use figma-implement-design instead).",
       "category": "design",
       "path": "(design)/figma",
-      "files": ["LICENSE.txt", "SKILL.md", "references/figma-mcp-config.md", "references/figma-tools-and-prompts.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/figma-mcp-config.md",
+        "references/figma-tools-and-prompts.md"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "5da2000639e7aee302556408a161168b8955758da0da3305842e14a93a40a7b7"
@@ -675,7 +759,10 @@
       "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Use when the user provides Figma URLs or node IDs and asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection. Do NOT use for general Figma data fetching, variable exploration, or MCP troubleshooting (use figma instead).",
       "category": "design",
       "path": "(design)/figma-implement-design",
-      "files": ["LICENSE.txt", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "6177778eac45026cf58d1f86447fa730e39389e54a99df2c5f35cd6905371b1d"
@@ -693,7 +780,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "c79c5acbf69e88e1b0c848e64afb671f33091e32b6dcb1b2e6f9c78213a10ec3"
+      "contentHash": "5a503532da0cc1f37309661e4975c5fd0a63b0e5e244dd5207c103ef0ae28de0"
     },
     {
       "name": "frontend-design",
@@ -712,14 +799,18 @@
       ],
       "author": "Impeccable (Paul Bakaus), based on Anthropic frontend-design",
       "version": "1.0.0",
-      "contentHash": "b20162c8d6bcdd9137c4afceaeb4f9dce2c1ba3ccb57a96a3228b8cb33104ec4"
+      "contentHash": "48c8d5e126edca65e1241a98e1b84da9d20493cc2486ef31ddf311152e3ceda5"
     },
     {
       "name": "gh-address-comments",
       "description": "Address review and issue comments on the open GitHub PR for the current branch using gh CLI. Use when user says \"address PR comments\", \"fix review feedback\", \"respond to PR review\", or \"handle PR comments\". Verifies gh auth first and prompts to authenticate if not logged in. Do NOT use for creating PRs, CI debugging (use gh-fix-ci), or general Git operations.",
       "category": "development",
       "path": "(development)/gh-address-comments",
-      "files": ["LICENSE.txt", "SKILL.md", "scripts/fetch_comments.py"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/fetch_comments.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "a1808fb136b7118a7bdac65415e9a40a7982953f8b3339c97087fc0807865d88"
@@ -729,7 +820,11 @@
       "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions. Uses `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treats external providers (for example Buildkite) as out of scope and reports only the details URL. Do NOT use for addressing PR review comments (use gh-address-comments) or general CI outside GitHub Actions.",
       "category": "tooling",
       "path": "(tooling)/gh-fix-ci",
-      "files": ["LICENSE.txt", "SKILL.md", "scripts/inspect_pr_checks.py"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/inspect_pr_checks.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "f032610bcbf7f7a7b6b13d20de360608c10328b7a9e507610323e843d613f1f4"
@@ -739,45 +834,60 @@
       "description": "\"When the user wants to build GTM automation with code, design workflow architectures, use AI agents for GTM tasks, or implement the 'architecture over tools' principle. Also use when the user mentions 'GTM engineering,' 'GTM automation,' 'n8n,' 'Make,' 'Zapier,' 'workflow automation,' 'Clay API,' 'instruction stacks,' 'AI agents for GTM,' or 'revenue automation.' This skill covers technical GTM infrastructure from workflow design through agent orchestration. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/gtm-engineering",
-      "files": ["SKILL.md", "references/implementation-guide.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "b2cfbea2da9f2a52527f6c41f128df2dba76c33df90692357a5533c06b78223f"
+      "contentHash": "6727ff7eea07903d85b6d7174348de4b074ce130a1f9a7cd373e0cb885456cca"
     },
     {
       "name": "gtm-metrics",
       "description": "\"When the user wants to define GTM metrics, build a metrics dashboard, measure pipeline efficiency, or track AI product performance. Also use when the user mentions 'GTM metrics,' 'revenue latency,' 'pipeline metrics,' 'TTFV,' 'time-to-first-value,' 'data health,' 'attribution,' 'conversion rate,' 'CAC,' 'LTV,' 'NRR,' 'GTM dashboard,' 'magic number,' 'pipeline velocity,' or 'funnel metrics.' This skill covers GTM measurement from metric selection through dashboard design, including AI-specific cost metrics, attribution models, and weekly review cadences. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/gtm-metrics",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "9f2afa96826b0456cf79f05b43ab4470fd6802990e301bb898c2cbaa6f01cf5c"
+      "contentHash": "a295034897e16147ca7ee4333a8f0be95e2cd26da92f58f90167a4dda4cbb23c"
     },
     {
       "name": "jira-assistant",
       "description": "Manage Jira issues via Atlassian MCP — search, create, update, transition status, and handle sprint tasks. Auto-detects workspace configuration. Use when user says \"create a Jira ticket\", \"update my sprint\", \"check Jira status\", \"transition this issue\", \"search Jira\", or \"move ticket to done\". Do NOT use for Confluence pages (use confluence-assistant).",
       "category": "development",
       "path": "(development)/jira-assistant",
-      "files": ["README.md", "SKILL.md"],
-      "contentHash": "fa63880889d2206548e33489a0ac1aa849c4e6ab879ea769c2715521a8231c8a"
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
+      "contentHash": "765c33ada37c8b92082cd14a1123170d8cb34b868da480d8f83020d37d0b2946"
     },
     {
       "name": "lead-enrichment",
       "description": "\"When the user wants to build data enrichment workflows, score leads against ICP, set up Clay waterfalls, or improve contact data quality. Also use when the user mentions 'enrichment,' 'data enrichment,' 'Clay,' 'waterfall enrichment,' 'ICP scoring,' 'lead scoring,' 'intent data,' 'contact verification,' 'Apollo,' 'ZoomInfo,' or 'data quality.' This skill covers lead enrichment waterfalls, ICP scoring frameworks, and contact verification systems. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/lead-enrichment",
-      "files": ["SKILL.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "c062dadf96d7a1500457c222b95baff7f5aade66486044be360a13268b251940"
+      "contentHash": "fb48350f46cd074ea929634e2f6b1d7b88116101464034ca0a4d49ab87ed9d52"
     },
     {
       "name": "learning-opportunities",
       "description": "Facilitates deliberate skill development during AI-assisted coding. Offers interactive learning exercises after architectural work (new files, schema changes, refactors). Use when completing features, making design decisions, or when user asks to understand code better. Triggers on \"learning exercise\", \"help me understand\", \"teach me\", \"why does this work\", or after creating new files/modules. Do NOT use for urgent debugging, quick fixes, or when user says \"just ship it\".",
       "category": "learning",
       "path": "(learning)/learning-opportunities",
-      "files": ["SKILL.md", "references/PRINCIPLES.md"],
+      "files": [
+        "SKILL.md",
+        "references/PRINCIPLES.md"
+      ],
       "author": "Chris Hicks",
       "version": "1.1.0",
       "contentHash": "47c4d62eebf29a61477c1b611c6ae360b028e1e23e09df1f6a33b5ff32b020f7"
@@ -798,7 +908,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
+      "contentHash": "dea33225547121f05b3582d3b7e085a3fcf9790b910b1e5dbc6cc262691e95b8"
     },
     {
       "name": "mermaid-studio",
@@ -822,17 +932,21 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
-      "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
+      "contentHash": "27b1634db5a1c80b3eb44235770b5b2e3dcfb3bddc80070798da4791066c47dc"
     },
     {
       "name": "multi-platform-launch",
       "description": "\"When the user wants to launch a product across multiple platforms, plan a Product Hunt launch, build a waitlist, or execute a multi-channel launch strategy. Also use when the user mentions 'product launch,' 'Product Hunt,' 'launch strategy,' 'waitlist,' 'beta launch,' 'BetaList,' 'Hacker News,' 'launch day,' 'AppSumo,' 'multi-channel launch.' This skill covers multi-platform launch execution from pre-launch through post-launch optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/multi-platform-launch",
-      "files": ["SKILL.md", "references/directories-timing-mistakes.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/directories-timing-mistakes.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "22552e0a3fde93c57715295f52b31d0695ad78d10512e5793ea93c7b138c79ee"
+      "contentHash": "7d7a0d1622ad0114fdc7ab3e61505228fba15e72e53e4ea654765b675a28f1ed"
     },
     {
       "name": "nestjs-modular-monolith",
@@ -874,7 +988,9 @@
       "description": "Monitor Nx Cloud CI pipeline status and handle self-healing fixes automatically. Use when user says \"watch CI\", \"monitor pipeline\", \"check CI status\", \"fix CI failures\", or \"self-heal CI\". Requires Nx Cloud connection. Do NOT use for local task execution (use nx-run-tasks) or general CI debugging outside Nx Cloud.",
       "category": "tooling",
       "path": "(tooling)/nx-ci-monitor",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "ddb5bf9bd2a5ca0eac8fa01632a19569baed922201b2cc501975edd77697f75c"
     },
     {
@@ -882,7 +998,9 @@
       "description": "Generate code using Nx generators — scaffold projects, libraries, features, or run workspace-specific generators with proper discovery, validation, and verification. Use when user says \"create a new library\", \"scaffold a component\", \"generate code with Nx\", \"run a generator\", \"nx generate\", or any code scaffolding task in a monorepo. Prefers local workspace-plugin generators over external plugins. Do NOT use for running build/test/lint tasks (use nx-run-tasks) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-generate",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "b975e1a0caa6cc9922ba941e0746a2f141c708e41c8bbddb395d40e3efecf2a0"
     },
     {
@@ -890,7 +1008,9 @@
       "description": "Execute build, test, lint, serve, and other tasks in an Nx workspace using single runs, run-many, and affected commands. Use when user says \"run tests\", \"build my app\", \"lint affected\", \"serve the project\", \"run all tasks\", or \"nx affected\". Do NOT use for code generation (use nx-generate) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-run-tasks",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "3c4d49d795b02e6a4a82606891a7da4773c3bc1ef883c1b980ac17596883397f"
     },
     {
@@ -905,34 +1025,43 @@
         "reference/commands.md",
         "reference/configuration.md"
       ],
-      "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
+      "contentHash": "84cd823507b0a45f4b1c12fc6387a2d643809043de56b622deb7cb2426c2df23"
     },
     {
       "name": "paid-creative-ai",
       "description": "\"When the user wants to create AI-generated ad creative, test performance creative, manage creative fatigue, or optimize paid media with AI tools. Also use when the user mentions 'ad creative,' 'performance creative,' 'creative testing,' 'creative fatigue,' 'Meta ads,' 'Google ads,' 'TikTok ads,' 'AI ads,' 'ad budget,' 'ROAS,' 'Advantage+,' or 'Performance Max.' This skill covers AI-powered paid creative from generation through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/paid-creative-ai",
-      "files": ["SKILL.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "89328ab72ff4336917031a217f43bd19b133a7d17202bf70d8d8d7f59d69ce29"
+      "contentHash": "9d00e20c9e8c298a5407f4c522a6e80cc055de0006906b22b5846adae99d709d"
     },
     {
       "name": "partner-affiliate",
       "description": "\"When the user wants to build a partner program, launch an affiliate program, design integration partnerships, or create distribution partnerships. Also use when the user mentions 'partnerships,' 'affiliate program,' 'referral program,' 'partner ecosystem,' 'integration partner,' 'reseller,' 'co-marketing,' 'PartnerStack,' or 'revenue share.' This skill covers partner and affiliate program design from recruitment through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/partner-affiliate",
-      "files": ["SKILL.md", "references/implementation-guide.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3ff5e89d89da30e46eef1d6fa4379aa1b41c30be16e2ca761a5581267c41561e"
+      "contentHash": "1452c16403678a0314eebaa6ffe702ba0130d2814b75cac68ee59f598f95d8e2"
     },
     {
       "name": "perf-astro",
       "description": "'Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Use when optimizing Astro site performance, improving Astro Lighthouse scores, or configuring astro-critters. Do NOT use for non-Astro sites (use perf-web-optimization or core-web-vitals) or running Lighthouse audits (use perf-lighthouse).'",
       "category": "performance",
       "path": "(performance)/perf-astro",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "11b50b27564085d9bff6d558bd4e9f31e5bce3c9a82af4c7203d9a4cd1ff43e4"
     },
     {
@@ -940,7 +1069,9 @@
       "description": "'Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, and set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget. Do NOT use for fixing specific performance issues (use perf-web-optimization or core-web-vitals) or Astro-specific optimization (use perf-astro).'",
       "category": "performance",
       "path": "(performance)/perf-lighthouse",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "2ef96cebc94fda975a7bba9e37511bff65739c91e61b950be0bd3048b8c9760d"
     },
     {
@@ -954,25 +1085,34 @@
         "references/core-web-vitals.md",
         "references/image-optimization.md"
       ],
-      "contentHash": "864bb35d6ec7e7755181886b57709b76d8b5da5181a6d8480cd412dd772f1ffb"
+      "contentHash": "97bd991a2513d4e171f2e9e09446338f35d65c6143e60f4563452f40335dcfe8"
     },
     {
       "name": "playwright-skill",
       "description": "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login flows, check links, automate any browser task. Use when user wants to test websites, automate browser interactions, validate web functionality, or perform any browser-based testing. Do NOT use for quick page debugging or network inspection (use chrome-devtools instead).",
       "category": "web-automation",
       "path": "(web-automation)/playwright-skill",
-      "files": ["API_REFERENCE.md", "SKILL.md", "lib/helpers.js", "package.json", "run.js"],
-      "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
+      "files": [
+        "API_REFERENCE.md",
+        "SKILL.md",
+        "lib/helpers.js",
+        "package.json",
+        "run.js"
+      ],
+      "contentHash": "1a3e37218d51fbbfc64d614e15f1499f344bb7f98183ecf3cbf953b183617bee"
     },
     {
       "name": "positioning-icp",
       "description": "\"When the user wants to define their ideal customer profile, position an AI product, build messaging architecture, or validate product-market fit. Also use when the user mentions 'ICP,' 'ideal customer profile,' 'positioning,' 'PMF,' 'product-market fit,' 'messaging,' 'buyer persona,' 'enrichment signals,' 'market positioning,' or 'competitive positioning.' This skill covers market positioning, ICP definition, messaging architecture, and PMF validation for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/positioning-icp",
-      "files": ["SKILL.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3b940bcd8ad2035177bffb04e34d52fe038f669a2d466e8d67e73135044373a5"
+      "contentHash": "babec5f0b78a4bb0c782f30e0cc5242e2a4bc2187456f7be34619bba898931c8"
     },
     {
       "name": "react-best-practices",
@@ -1045,7 +1185,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "e96f99e13dc2acc75efc1793aee08fe244802a97a4e190af38bd5a871a5c9636"
+      "contentHash": "0715a0c348c42b5403b83a9fb40b7964479a38a147e4caf6ab74a4b39adeff06"
     },
     {
       "name": "react-composition-patterns",
@@ -1069,7 +1209,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "171c6a35a0a74a6b37facf2a6e3883a02f53e3f2d429e6aa5834412c65d38dc7"
+      "contentHash": "8cbb577874989133256f309b9787988ac5577aa0e2214dc3ceb447f7cc052669"
     },
     {
       "name": "react-native-expert",
@@ -1086,7 +1226,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "9da108258c0a93cd04b57d94a5a7788e6c37c704ca4322ca9b6bedce8e3ff683"
+      "contentHash": "fe86bbee9242897c735e0f3e7eb12a7cc40b77dc3b4b66a789c704db7c238d66"
     },
     {
       "name": "render-deploy",
@@ -1116,10 +1256,13 @@
       "description": "\"When the user wants to choose between PLG and sales-led, design a sales motion, optimize time-to-first-value, or build a value-before-purchase experience. Also use when the user mentions 'PLG,' 'product-led growth,' 'sales-led,' 'sales motion,' 'free trial,' 'freemium,' 'self-serve,' 'demo-first,' 'time-to-first-value,' 'TTFV,' or 'agent-led sales.' This skill covers sales motion selection, value delivery design, and go-to-market motion architecture. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/sales-motion-design",
-      "files": ["SKILL.md", "references/quick-reference.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "8f9829a2107c994a3a4d2fcaec73def4bcc1a7fac20c64b452093a4e7018e93f"
+      "contentHash": "3838ac7762928e509debe10e8389493554043065f3849fe0175afc840648958e"
     },
     {
       "name": "security-best-practices",
@@ -1182,7 +1325,11 @@
       "description": "Inspect Sentry issues, summarize production errors, and pull health data via the Sentry API (read-only). Use when user says \"check Sentry\", \"what errors in production?\", \"summarize Sentry issues\", \"recent crashes\", or \"production error report\". Requires SENTRY_AUTH_TOKEN. Do NOT use for setting up Sentry SDK, configuring alerts, or non-Sentry error monitoring.",
       "category": "monitoring",
       "path": "(monitoring)/sentry",
-      "files": ["LICENSE.txt", "SKILL.md", "scripts/sentry_api.py"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/sentry_api.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "aa0e533aff9a319b0aef86ad3e543f61b812bf159c27fc9ebb1c7ad97d5db937"
@@ -1192,7 +1339,9 @@
       "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\". Do NOT use for accessibility (use web-accessibility), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/seo",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "fc9897a3923b5e23e00545ac67f4c8c2b6903113bd5f046cda259c98a0f3cd40"
@@ -1216,7 +1365,7 @@
         "references/performance.md",
         "references/theme-development.md"
       ],
-      "contentHash": "10dd4806c0061bb9e89914557f6aec6badcef893e601293711ba3e8993527e9f"
+      "contentHash": "e0332008f0d7ffc64d776f9005a29c158212373da5d8723de5356fe27da1c569"
     },
     {
       "name": "skill-architect",
@@ -1232,34 +1381,40 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
+      "contentHash": "ebe465fa4b8900c8db32bd9ffe68bba9992befdbb8150178af0b4da647bfb13b"
     },
     {
       "name": "social-selling",
       "description": "\"When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also use when the user mentions 'social selling,' 'LinkedIn selling,' 'LinkedIn DMs,' 'social prospecting,' 'LinkedIn Sales Navigator,' 'DM sequences,' 'LinkedIn outreach,' 'social pipeline,' or 'LinkedIn optimization.' This skill covers social selling strategy from profile optimization through DM-to-deal conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/social-selling",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "7cc6fba77aff372c64d8e2b97b2b645ef641ef78a266b602e5e6fdd74231460e"
+      "contentHash": "f464e571fa6c1be3a03c8ab9abee64c0f27e0c24415ef8fa56f2d345ac80c828"
     },
     {
       "name": "solo-founder-gtm",
       "description": "\"When the user is a solo founder building their GTM motion, wants to scale without hiring, or needs to design an AI agent team for go-to-market. Also use when the user mentions 'solo founder,' 'one-person startup,' 'solopreneur,' 'bootstrapped,' 'no team,' 'AI agents as team,' 'scaling without hiring,' 'founder-led sales,' 'lean GTM,' 'one-person company,' or 'no employees.' This skill covers the complete solo founder GTM playbook from stack selection through agent team design, revenue-stage transitions, time allocation, and when to finally hire. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/solo-founder-gtm",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "95d71f10ea8a48767cb871ad72c09745cb6ecd822ed71be659cbd960b6503445"
+      "contentHash": "76d0a67d3e0cb49e479a35a24ed360e6d521d48aca1291284be109867c62c761"
     },
     {
       "name": "subagent-creator",
       "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\". Do NOT use for Cursor-specific subagents (use cursor-subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/subagent-creator",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "bef6b5a9f23b3186af259c1041c2561e9af15fa94810009d72d775bb217aa3ca"
     },
     {
@@ -1267,7 +1422,10 @@
       "description": "Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to \"write a design doc\", \"create a TDD\", \"technical spec\", \"architecture document\", \"RFC\", \"design proposal\", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).",
       "category": "creation",
       "path": "(creation)/create-technical-design-doc",
-      "files": ["README.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "d05974df076f695f96b4e4c263ad19f2aaffe8ee6248c1b07a634dd9ed0ea51e"
     },
     {
@@ -1287,7 +1445,7 @@
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
-      "contentHash": "b761f983e21e00173ac42760f478095a3e8c733862c20d9f711d10d962f407cc"
+      "contentHash": "fd38643a85c773554f86019f43083467186d25f6d3b2840e4c3fdf9e4ebd1fea"
     },
     {
       "name": "tlc-spec-driven",
@@ -1323,7 +1481,11 @@
       "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\". Do NOT use for deploying to Netlify, Cloudflare, or Render (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/vercel-deploy",
-      "files": ["LICENSE.txt", "SKILL.md", "scripts/deploy.sh"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/deploy.sh"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "53985dad8a6cf5571b8eb796668502f2e82f0574ab15d31609486de8317f0ec5"
@@ -1333,27 +1495,35 @@
       "description": "\"When the user wants to build video-first cold outreach, create personalized video at scale, implement async selling, or use AI demo generation for prospecting. Also use when the user mentions 'video outreach,' 'personalized video,' 'video prospecting,' 'Tavus,' 'Sendspark,' 'HeyGen,' 'video email,' 'async selling,' 'video demo,' or 'made this for you.' This skill covers video-first outreach systems from personalization through conversion optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/video-outreach",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "b918e2c62adf317b82ac43e4731e300ff4f163383aebe7ae8532f7ea69c24c29"
+      "contentHash": "a66f3692d30020e9d6f42eaf9209203f23277ebfb5729d5ef28ee7d607dca545"
     },
     {
       "name": "web-design-guidelines",
       "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\". Focuses on visual design and interaction patterns. Do NOT use for performance audits (use core-web-vitals), SEO (use seo), or comprehensive site audits (use web-quality-audit).",
       "category": "design",
       "path": "(design)/web-design-guidelines",
-      "files": ["SKILL.md", "references/guideline.md"],
+      "files": [
+        "SKILL.md",
+        "references/guideline.md"
+      ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "213a23fff251b12ddfec648bda148bf10704ef6617e162eb9329cc83963dd138"
+      "contentHash": "9ee66dc780a2ff757d769b179fd38e2ed02dfa2c470ebf561c7ab54a9f64abf1"
     },
     {
       "name": "web-quality-audit",
       "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices in a single review. Use when asked to \"audit my site\", \"review web quality\", \"run lighthouse audit\", \"check page quality\", or \"optimize my website\" across multiple areas at once. Orchestrates specialized skills for depth. Do NOT use for single-area audits — prefer core-web-vitals, web-accessibility, seo, or web-best-practices for focused work.",
       "category": "quality",
       "path": "(quality)/web-quality-audit",
-      "files": ["SKILL.md", "scripts/analyze.sh"],
+      "files": [
+        "SKILL.md",
+        "scripts/analyze.sh"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "8af5bd3453984bdcef903709b6ef0606b12ae1badb6dd5b5b382b930d2594d7c"
@@ -1363,27 +1533,37 @@
     {
       "name": "react-native-skills",
       "message": "Use react-native-expert instead",
-      "alternatives": ["react-native-expert"]
+      "alternatives": [
+        "react-native-expert"
+      ]
     },
     {
       "name": "cursor-skill-creator",
       "message": "Use skill-architect instead",
-      "alternatives": ["skill-architect"]
+      "alternatives": [
+        "skill-architect"
+      ]
     },
     {
       "name": "skill-creator",
       "message": "Use skill-architect instead",
-      "alternatives": ["skill-architect"]
+      "alternatives": [
+        "skill-architect"
+      ]
     },
     {
       "name": "run-nx-generator",
       "message": "Use nx-generate instead",
-      "alternatives": ["nx-generate"]
+      "alternatives": [
+        "nx-generate"
+      ]
     },
     {
       "name": "excalidraw-diagram-generator",
       "message": "Use excalidraw-studio instead",
-      "alternatives": ["excalidraw-studio"]
+      "alternatives": [
+        "excalidraw-studio"
+      ]
     }
   ]
 }

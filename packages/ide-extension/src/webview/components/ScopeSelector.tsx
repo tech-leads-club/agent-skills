@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import type { AllowedScopesSetting, LifecycleScope } from '../../shared/types'
+import type { ActionRequest, AllowedScopesSetting, LifecycleScope } from '../../shared/types'
 import { getState, setState } from '../lib/vscode-api'
 
 const SCOPE_OPTIONS_BY_SETTING: Readonly<Record<AllowedScopesSetting, LifecycleScope[]>> = {
@@ -9,9 +9,10 @@ const SCOPE_OPTIONS_BY_SETTING: Readonly<Record<AllowedScopesSetting, LifecycleS
   none: [],
 }
 
-const SCOPE_LABELS: Readonly<Record<LifecycleScope, string>> = {
+const SCOPE_LABELS: Readonly<Record<LifecycleScope | 'all', string>> = {
   local: 'Local',
   global: 'Global',
+  all: 'Both',
 }
 
 const SCOPE_SELECTOR_STATE_KEY = 'scopeSelectorState'
@@ -59,8 +60,12 @@ function readPersistedScope(): LifecycleScope | null {
  *
  * @param selectedScope - The scope to persist.
  */
-function persistSelectedScope(selectedScope: LifecycleScope): void {
+function persistSelectedScope(selectedScope: ActionRequest['scope']): void {
   const persistedState = getState<PersistedWebviewState>() ?? {}
+  if (selectedScope === 'all') {
+    return
+  }
+
   setState<PersistedWebviewState>({
     ...persistedState,
     [SCOPE_SELECTOR_STATE_KEY]: {
@@ -74,15 +79,17 @@ function persistSelectedScope(selectedScope: LifecycleScope): void {
  */
 export interface ScopeSelectorProps {
   /** The currently selected target scope. */
-  value: LifecycleScope
+  value: ActionRequest['scope']
   /** Callback fired when a new scope is chosen. */
-  onChange: (scope: LifecycleScope) => void
+  onChange: (scope: ActionRequest['scope']) => void
   /** The policy-constrained allowed scopes setting. @defaultValue 'all' */
   allowedScopes?: AllowedScopesSetting
   /** Whether the selector is disabled. @defaultValue false */
   disabled?: boolean
   /** The reason the selector is disabled, shown as a tooltip. */
   disabledReason?: string
+  /** The current action (install/uninstall). When 'uninstall', 'all' option is shown. */
+  action?: 'install' | 'uninstall' | 'update'
 }
 
 /**
@@ -109,14 +116,20 @@ export function ScopeSelector({
   allowedScopes = 'all',
   disabled = false,
   disabledReason,
+  action,
 }: ScopeSelectorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const hasAppliedPersistedScopeRef = useRef(false)
   const labelId = useId()
   const menuId = useId()
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const visibleScopes = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
-  const selectedScope = visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
+
+  const policyScopeOptions = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
+  const visibleScopes: Array<ActionRequest['scope']> =
+    action === 'uninstall' ? [...policyScopeOptions, 'all'] : policyScopeOptions
+
+  const selectedScope =
+    visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
   const isDisabled = disabled
 
   useEffect(() => {
@@ -184,7 +197,7 @@ export function ScopeSelector({
     }
   }
 
-  const handleOptionSelect = (nextScope: LifecycleScope) => {
+  const handleOptionSelect = (nextScope: ActionRequest['scope']) => {
     if (visibleScopes.includes(nextScope)) {
       onChange(nextScope)
     }

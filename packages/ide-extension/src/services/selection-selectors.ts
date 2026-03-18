@@ -18,7 +18,7 @@ export interface SelectableSkillsInput {
   installedSkills: InstalledSkillsMap
   allAgents?: AvailableAgent[]
   selectedAgents?: string[]
-  scope: LifecycleScope
+  scope: LifecycleScope | 'all'
 }
 
 export interface OutdatedSkillsInput {
@@ -78,9 +78,13 @@ export function getOutdatedSkills({ registry, installedSkills, effectiveScopes }
   })
 }
 
-export function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope): boolean {
+export function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope | 'all'): boolean {
   if (!installed) {
     return false
+  }
+
+  if (scope === 'all') {
+    return installed.local || installed.global
   }
 
   return isInstalledInScope(installed, scope)
@@ -90,7 +94,11 @@ function hasAllowedInstallation(installed: InstalledSkillInfo, effectiveScopes: 
   return effectiveScopes.some((scope) => isInstalledInScope(installed, scope))
 }
 
-function isInstalledInScope(installed: InstalledSkillInfo, scope: LifecycleScope): boolean {
+function isInstalledInScope(installed: InstalledSkillInfo, scope: LifecycleScope | 'all'): boolean {
+  if (scope === 'all') {
+    return installed.local || installed.global
+  }
+
   return scope === 'local' ? installed.local : installed.global
 }
 
@@ -108,7 +116,7 @@ function isScopeOutdated(installed: InstalledSkillInfo, scope: LifecycleScope, r
 function isInstalledForAllAgents(
   installed: InstalledSkillsMap[string],
   allAgents: AvailableAgent[],
-  scope: LifecycleScope,
+  scope: LifecycleScope | 'all',
 ): boolean {
   if (!installed) {
     return false
@@ -128,6 +136,10 @@ function isInstalledForAllAgents(
   })
 }
 
-function isAgentInstalledInScope(agent: InstalledSkillInfo['agents'][number], scope: LifecycleScope): boolean {
+function isAgentInstalledInScope(agent: InstalledSkillInfo['agents'][number], scope: LifecycleScope | 'all'): boolean {
+  if (scope === 'all') {
+    return agent.local || agent.global
+  }
+
   return scope === 'local' ? agent.local : agent.global
 }

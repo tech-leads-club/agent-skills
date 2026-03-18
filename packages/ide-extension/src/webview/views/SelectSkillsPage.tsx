@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CategoryOption, SelectableSkillsInput } from '../../services/selection-selectors'
 import type {
+  ActionRequest,
   AvailableAgent,
   InstalledSkillsMap,
-  LifecycleScope,
   Skill,
   SkillRegistry,
   WebviewAction,
@@ -18,11 +18,11 @@ export interface SelectSkillsPageProps {
   installedSkills: InstalledSkillsMap
   allAgents?: AvailableAgent[]
   selectedAgents?: string[]
-  scope: LifecycleScope
+  scope: ActionRequest['scope']
   selectedSkills: string[]
   getCategoryOptions: (registry: SkillRegistry) => CategoryOption[]
   getSelectableSkills: (input: SelectableSkillsInput) => Skill[]
-  isSkillInstalledForScope: (installed: InstalledSkillsMap[string], scope: LifecycleScope) => boolean
+  isSkillInstalledForScope: (installed: InstalledSkillsMap[string], scope: ActionRequest['scope']) => boolean
   onToggleSkill: (skillName: string) => void
   onSelectAll: (skills: string[]) => void
   onClear: () => void

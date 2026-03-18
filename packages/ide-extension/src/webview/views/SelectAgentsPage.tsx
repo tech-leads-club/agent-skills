@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { AvailableAgent, InstalledSkillsMap, LifecycleScope, WebviewAction } from '../../shared/types'
+import type { ActionRequest, AvailableAgent, InstalledSkillsMap, WebviewAction } from '../../shared/types'
 import { AgentSelectCard } from '../components/AgentSelectCard'
 import { SearchBar } from '../components/SearchBar'
 import { SelectionMenu } from '../components/SelectionMenu'
@@ -19,8 +19,8 @@ export interface SelectAgentsPageProps {
   selectedSkills: string[]
   /** IDs of the agents currently selected. */
   selectedAgents: string[]
-  /** The install/uninstall scope (local or global). */
-  scope: LifecycleScope
+  /** The install/uninstall scope (local, global, or all). */
+  scope: ActionRequest['scope']
   /** Whether a background operation is currently running. */
   isProcessing: boolean
   /** Callback to toggle an agent's selection state. */
@@ -55,13 +55,17 @@ function isSkillInstalledOnAgent(
   installedSkills: InstalledSkillsMap,
   skillName: string,
   agentId: string,
-  scope: LifecycleScope,
+  scope: ActionRequest['scope'],
 ): boolean {
   const installed = installedSkills[skillName]
   if (!installed) return false
 
   const agentInstall = installed.agents.find((entry) => entry.agent === agentId)
   if (!agentInstall) return false
+
+  if (scope === 'all') {
+    return agentInstall.local || agentInstall.global
+  }
 
   return scope === 'local' ? agentInstall.local : agentInstall.global
 }
@@ -122,6 +126,10 @@ export function SelectAgentsPage({
         if (!info) return false
         const agentInstall = info.agents.find((a) => a.agent === agent.agent)
         if (!agentInstall) return false
+        if (scope === 'all') {
+          return agentInstall.local || agentInstall.global
+        }
+
         return scope === 'local' ? agentInstall.local : agentInstall.global
       })
     })

@@ -5,7 +5,7 @@ import {
   isSkillInstalledForScope,
 } from '../services/selection-selectors'
 import type { ScopePolicyStatePayload } from '../shared/messages'
-import type { FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
+import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
 import type { BatchResult } from './hooks/useHostState'
 import { HomePage } from './views/HomePage'
@@ -35,13 +35,13 @@ interface RenderCurrentViewProps {
   isProcessing: boolean
   selectedSkills: string[]
   selectedAgents: string[]
-  activeScope: LifecycleScope
+  activeScope: ActionRequest['scope']
   installMethod: InstallMethod
   currentStep: string | null
   logTimeline: Array<{
     operation: 'install' | 'remove' | 'update'
     skillName: string
-    scope?: LifecycleScope
+    scope?: ActionRequest['scope']
     message: string
     severity: 'info' | 'warn' | 'error'
   }>
@@ -60,7 +60,7 @@ interface RenderCurrentViewProps {
   clearSkillSelection: () => void
   selectAllAgents: (agents: string[]) => void
   clearAgentSelection: () => void
-  setScope: (scope: LifecycleScope) => void
+  setScope: (scope: ActionRequest['scope']) => void
   setInstallMethod: (method: InstallMethod) => void
   handleExecuteBatch: (method?: 'copy' | 'symlink') => void
   handleExecuteUpdate: (skills: string[]) => void

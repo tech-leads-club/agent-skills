@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { LifecycleScope } from '../shared/types'
+import type { ActionRequest } from '../shared/types'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
 import { useAppState } from './hooks/useAppState'
 import { useHostState, type LastBatchContext } from './hooks/useHostState'
@@ -9,9 +9,19 @@ import { renderCurrentView } from './render-current-view'
 
 function getFallbackScope(
   policy: ReturnType<typeof useHostState>['policy'],
-  currentScope: LifecycleScope,
-): LifecycleScope | null {
-  if (!policy || policy.effectiveScopes.length === 0 || policy.effectiveScopes.includes(currentScope)) return null
+  currentScope: ActionRequest['scope'],
+): ActionRequest['scope'] | null {
+  if (!policy || policy.effectiveScopes.length === 0) return null
+
+  if (currentScope === 'all') {
+    if (policy.effectiveScopes.length === 2) {
+      return null
+    }
+
+    return policy.effectiveScopes[0]
+  }
+
+  if (policy.effectiveScopes.includes(currentScope)) return null
   return policy.effectiveScopes[0]
 }
 

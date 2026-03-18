@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
 import { useState } from 'react'
+import type { ActionRequest } from '../../shared/types'
 import { ScopeSelector } from '../../webview/components/ScopeSelector'
 import { getState, setState } from '../../webview/lib/vscode-api'
 
@@ -103,7 +104,7 @@ describe('ScopeSelector', () => {
     })
 
     function StatefulWrapper() {
-      const [scope, setScope] = useState<'local' | 'global'>('local')
+      const [scope, setScope] = useState<ActionRequest['scope']>('local')
       return <ScopeSelector value={scope} onChange={setScope} allowedScopes="all" />
     }
 

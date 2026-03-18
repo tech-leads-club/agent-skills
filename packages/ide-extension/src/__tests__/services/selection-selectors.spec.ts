@@ -143,4 +143,62 @@ describe('selection-selectors', () => {
       }).map((skill) => skill.name),
     ).toEqual(['accessibility'])
   })
+
+  it('treats all scope as installed in either scope for uninstall', () => {
+    const installedSkills: InstalledSkillsMap = {
+      accessibility: {
+        local: true,
+        global: false,
+        agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+      },
+      seo: {
+        local: false,
+        global: true,
+        agents: [{ agent: 'claude-code', displayName: 'Claude Code', local: false, global: true, corrupted: false }],
+      },
+    }
+
+    const result = getSelectableSkills({
+      action: 'uninstall',
+      registry,
+      installedSkills,
+      allAgents,
+      selectedAgents: [],
+      scope: 'all',
+    })
+
+    expect(result.map((skill) => skill.name)).toEqual(['accessibility', 'seo'])
+  })
+
+  it('treats all scope as installed in any scope for install', () => {
+    const installedSkills: InstalledSkillsMap = {
+      accessibility: {
+        local: true,
+        global: false,
+        agents: [
+          { agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false },
+          { agent: 'claude-code', displayName: 'Claude Code', local: false, global: false, corrupted: false },
+        ],
+      },
+      seo: {
+        local: false,
+        global: false,
+        agents: [
+          { agent: 'cursor', displayName: 'Cursor', local: false, global: false, corrupted: false },
+          { agent: 'claude-code', displayName: 'Claude Code', local: false, global: false, corrupted: false },
+        ],
+      },
+    }
+
+    const result = getSelectableSkills({
+      action: 'install',
+      registry,
+      installedSkills,
+      allAgents,
+      selectedAgents: [],
+      scope: 'all',
+    })
+
+    expect(result.map((skill) => skill.name)).toEqual(['accessibility', 'seo'])
+  })
 })

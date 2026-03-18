@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { FlowAction, InstallMethod, LifecycleScope, ViewRoute, WebviewAction } from '../../shared/types'
+import type { ActionRequest, FlowAction, InstallMethod, ViewRoute, WebviewAction } from '../../shared/types'
 
 /**
  * Target collection for bulk selection toggles.
@@ -23,7 +23,7 @@ export function useAppState() {
   const [currentAction, setCurrentAction] = useState<FlowAction | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
-  const [activeScope, setActiveScope] = useState<LifecycleScope>('local')
+  const [activeScope, setActiveScope] = useState<ActionRequest['scope']>('local')
   const [installMethod, setInstallMethod] = useState<InstallMethod>('copy')
 
   const goToAgents = useCallback((action: WebviewAction) => {
@@ -31,6 +31,9 @@ export function useAppState() {
     setCurrentView('selectAgents')
     setSelectedSkills([])
     setSelectedAgents([])
+    if (action === 'uninstall') {
+      setActiveScope('all')
+    }
   }, [])
 
   const goToSkillsView = useCallback(() => {

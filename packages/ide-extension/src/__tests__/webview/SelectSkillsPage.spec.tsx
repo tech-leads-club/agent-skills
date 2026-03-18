@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import jestAxe from 'jest-axe'
-import type { AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
+import type { ActionRequest, AvailableAgent, InstalledSkillsMap, SkillRegistry } from '../../shared/types'
 import { SelectSkillsPage } from '../../webview/views/SelectSkillsPage'
 
 function getCategoryOptions(registry: SkillRegistry): { id: string; label: string }[] {
@@ -24,12 +24,13 @@ function getSelectableSkills({
   installedSkills: InstalledSkillsMap
   allAgents?: AvailableAgent[]
   selectedAgents?: string[]
-  scope: 'local' | 'global'
+  scope: ActionRequest['scope']
 }): typeof registry.skills {
   const targetAgents = selectedAgents.length > 0 ? allAgents.filter((a) => selectedAgents.includes(a.agent)) : allAgents
-  const inScope = (inst: { local: boolean; global: boolean }, s: string) => (s === 'local' ? inst.local : inst.global)
-  const agentInScope = (agent: { local: boolean; global: boolean }, s: string) =>
-    s === 'local' ? agent.local : agent.global
+  const inScope = (inst: { local: boolean; global: boolean }, s: ActionRequest['scope']) =>
+    s === 'all' ? inst.local || inst.global : s === 'local' ? inst.local : inst.global
+  const agentInScope = (agent: { local: boolean; global: boolean }, s: ActionRequest['scope']) =>
+    s === 'all' ? agent.local || agent.global : s === 'local' ? agent.local : agent.global
   return registry.skills.filter((skill) => {
     const installed = installedSkills[skill.name]
     if (action === 'install') {
@@ -49,8 +50,12 @@ function getSelectableSkills({
   })
 }
 
-function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: 'local' | 'global'): boolean {
+function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: ActionRequest['scope']): boolean {
   if (!installed) return false
+  if (scope === 'all') {
+    return installed.local || installed.global
+  }
+
   return scope === 'local' ? installed.local : installed.global
 }
 

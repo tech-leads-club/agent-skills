@@ -1,4 +1,4 @@
-import type { LifecycleScope } from '../../shared/types'
+import type { ActionRequest } from '../../shared/types'
 
 /**
  * Props for the RemoveConfirmPage component.
@@ -9,7 +9,7 @@ export interface RemoveConfirmPageProps {
   /** Selected agent identifiers. */
   selectedAgents: string[]
   /** Target scope for removal. */
-  scope: LifecycleScope
+  scope: ActionRequest['scope']
   /** Whether removal is in progress. */
   isProcessing: boolean
   /** Callback to go back to skills selection. */
@@ -32,7 +32,8 @@ export function RemoveConfirmPage({
   onBack,
   onConfirm,
 }: RemoveConfirmPageProps) {
-  const scopeLabel = scope === 'local' ? 'Local (project)' : 'Global (user)'
+  const scopeLabel =
+    scope === 'local' ? 'Local (project)' : scope === 'global' ? 'Global (user)' : 'Local and global'
 
   return (
     <section className="select-page" aria-label="Remove confirmation">
