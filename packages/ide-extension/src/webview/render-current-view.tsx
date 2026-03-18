@@ -5,6 +5,7 @@ import {
   isSkillInstalledForScope,
 } from '../services/selection-selectors'
 import type { ScopePolicyStatePayload } from '../shared/messages'
+import { postMessage } from './lib/vscode-api'
 import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
 import type { BatchResult } from './hooks/useHostState'
@@ -180,6 +181,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         getSelectableSkills={getSelectableSkills}
         isSkillInstalledForScope={isSkillInstalledForScope}
         onToggleSkill={toggleSkill}
+        onPreviewSkill={(skillName) => postMessage({ type: 'requestPreviewSkill', payload: { skillName } })}
         onSelectAll={selectAllSkills}
         onClear={clearSkillSelection}
         onBack={goToAgentsView}

@@ -64,6 +64,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case 'requestRunAction':
           await this.handleRequestRunAction(message.payload)
           return
+        case 'requestPreviewSkill':
+          await this.handlePreviewSkill(message.payload.skillName)
+          return
         default:
           this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
       }
@@ -140,5 +143,28 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private async postPolicyState(policy: ScopePolicyEvaluation): Promise<void> {
     await this.postMessage(toPolicyStateMessage(policy))
+  }
+
+  private async handlePreviewSkill(skillName: string): Promise<void> {
+    const snapshot = this.registryStore.getSnapshot()
+    const skill = snapshot.registry?.skills.find((s) => s.name === skillName)
+    if (!skill) {
+      this.logger.warn(`Skill not found for preview: ${skillName}`)
+      return
+    }
+
+    const cdnBase = 'https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@main/packages/skills-catalog/skills'
+    const response = await fetch(`${cdnBase}/${skill.path}/SKILL.md`)
+    if (!response.ok) {
+      vscode.window.showErrorMessage(`Could not fetch preview for "${skillName}".`)
+      return
+    }
+
+    const content = await response.text()
+    const previewDir = vscode.Uri.joinPath(this.context.globalStorageUri, 'previews')
+    await vscode.workspace.fs.createDirectory(previewDir)
+    const fileUri = vscode.Uri.joinPath(previewDir, `${skillName}.md`)
+    await vscode.workspace.fs.writeFile(fileUri, Buffer.from(content, 'utf-8'))
+    await vscode.commands.executeCommand('markdown.showPreview', fileUri)
   }
 }

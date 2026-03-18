@@ -12,6 +12,7 @@ export type WebviewMessage =
   | { type: 'webviewDidMount' }
   | { type: 'requestRefresh' }
   | { type: 'requestRunAction'; payload: ActionRequest }
+  | { type: 'requestPreviewSkill'; payload: { skillName: string } }
 
 export type ExtensionMessage =
   | { type: 'initialize'; payload: InitializePayload }

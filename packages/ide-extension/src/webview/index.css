@@ -474,6 +474,38 @@ body {
   color: var(--vscode-editorWidget-background, #fff);
 }
 
+.skill-select-card-preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out;
+}
+
+.skill-select-card:hover .skill-select-card-preview-btn,
+.skill-select-card--selected .skill-select-card-preview-btn {
+  opacity: 1;
+}
+
+.skill-select-card-preview-btn:hover {
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.skill-select-card-preview-btn:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
 .skill-select-card-description {
   margin: 0;
   min-width: 0;

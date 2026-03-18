@@ -24,6 +24,7 @@ export interface SelectSkillsPageProps {
   getSelectableSkills: (input: SelectableSkillsInput) => Skill[]
   isSkillInstalledForScope: (installed: InstalledSkillsMap[string], scope: ActionRequest['scope']) => boolean
   onToggleSkill: (skillName: string) => void
+  onPreviewSkill: (skillName: string) => void
   onSelectAll: (skills: string[]) => void
   onClear: () => void
   onBack: () => void
@@ -43,6 +44,7 @@ export function SelectSkillsPage({
   getSelectableSkills,
   isSkillInstalledForScope,
   onToggleSkill,
+  onPreviewSkill,
   onSelectAll,
   onClear,
   onBack,
@@ -150,6 +152,7 @@ export function SelectSkillsPage({
               isSelected={selectedSkills.includes(skill.name)}
               onToggle={() => onToggleSkill(skill.name)}
               isInstalled={action === 'uninstall' || isSkillInstalledForScope(installedSkills[skill.name], scope)}
+              onPreview={() => onPreviewSkill(skill.name)}
             />
           ))
         )}

@@ -14,6 +14,8 @@ export interface SkillSelectCardProps {
   onToggle: () => void
   /** Whether the skill is installed (shows "Installed" tag). */
   isInstalled?: boolean
+  /** Callback fired when the preview button is clicked. */
+  onPreview?: () => void
 }
 
 /**
@@ -40,6 +42,7 @@ export function SkillSelectCard({
   isSelected,
   onToggle,
   isInstalled = false,
+  onPreview,
 }: SkillSelectCardProps) {
   const inputId = `skill-select-${skill.name}`
   const descriptionId = `${inputId}-description`
@@ -50,6 +53,20 @@ export function SkillSelectCard({
       <div className="skill-select-card-header">
         <p>{skill.name}</p>
         <div className="skill-select-card-header-end">
+          {onPreview && (
+            <button
+              type="button"
+              className="skill-select-card-preview-btn"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onPreview()
+              }}
+              aria-label={`Preview ${skill.name}`}
+            >
+              <span className="codicon codicon-eye" aria-hidden="true" />
+            </button>
+          )}
           {isInstalled && <span className="skill-select-card-tag skill-select-card-tag--installed">Installed</span>}
           <span className="skill-select-card-category" data-category={skill.category}>
             {categoryName}
