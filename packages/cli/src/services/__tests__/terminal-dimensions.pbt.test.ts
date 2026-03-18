@@ -1,5 +1,5 @@
+import { afterEach, describe, expect, it } from '@jest/globals'
 import * as fc from 'fast-check'
-import { describe, it, expect, afterEach } from '@jest/globals'
 import { getTerminalSize, shouldUseBottomPanel } from '../terminal-dimensions'
 
 describe('terminal-dimensions service - Property-Based Tests', () => {
@@ -48,9 +48,9 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
           const size = getTerminalSize()
           expect(size.width).toBe(width)
           expect(size.height).toBe(height)
-        }
+        },
       ),
-      { numRuns: 500 }
+      { numRuns: 500 },
     )
   })
 
@@ -78,9 +78,9 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
           const expectedBottomPanel = offset < 0
 
           expect(useBottomPanel).toBe(expectedBottomPanel)
-        }
+        },
       ),
-      { numRuns: 300 }
+      { numRuns: 300 },
     )
   })
 
@@ -100,7 +100,7 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
         (width, height1, height2) => {
           // Setup: Test with same width but different heights
           process.stdout.columns = width
-          
+
           // First test with height1
           process.stdout.rows = height1
           const result1 = shouldUseBottomPanel()
@@ -116,9 +116,9 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
           const expectedBottomPanel = width < 120
           expect(result1).toBe(expectedBottomPanel)
           expect(result2).toBe(expectedBottomPanel)
-        }
+        },
       ),
-      { numRuns: 300 }
+      { numRuns: 300 },
     )
   })
 
@@ -152,9 +152,9 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
           // Verify the result matches the expected value
           const expectedBottomPanel = width < 120
           expect(firstResult).toBe(expectedBottomPanel)
-        }
+        },
       ),
-      { numRuns: 200 }
+      { numRuns: 200 },
     )
   })
 
@@ -167,10 +167,7 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
     fc.assert(
       fc.property(
         // Generate extreme widths: very small (1-10) or very large (200-500)
-        fc.oneof(
-          fc.integer({ min: 1, max: 10 }),
-          fc.integer({ min: 200, max: 500 })
-        ),
+        fc.oneof(fc.integer({ min: 1, max: 10 }), fc.integer({ min: 200, max: 500 })),
         fc.integer({ min: 1, max: 100 }),
         (width, height) => {
           // Setup: Set terminal dimensions
@@ -194,9 +191,9 @@ describe('terminal-dimensions service - Property-Based Tests', () => {
           if (width >= 200) {
             expect(useBottomPanel).toBe(false)
           }
-        }
+        },
       ),
-      { numRuns: 200 }
+      { numRuns: 200 },
     )
   })
 

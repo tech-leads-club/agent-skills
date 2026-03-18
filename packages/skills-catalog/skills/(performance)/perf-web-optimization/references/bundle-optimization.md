@@ -1,6 +1,7 @@
 # Bundle Size Optimization
 
 ## Table of Contents
+
 - [Analysis Tools](#analysis-tools)
 - [Heavy Dependencies](#heavy-dependencies)
 - [Code Splitting](#code-splitting)
@@ -35,42 +36,42 @@ npx bundlephobia lodash
 
 ```javascript
 // Before: moment (67KB)
-import moment from 'moment';
-moment(date).format('YYYY-MM-DD');
+import moment from 'moment'
+moment(date).format('YYYY-MM-DD')
 
 // After: date-fns (tree-shakeable, ~2KB per function)
-import { format } from 'date-fns';
-format(date, 'yyyy-MM-dd');
+import { format } from 'date-fns'
+format(date, 'yyyy-MM-dd')
 
 // After: dayjs (2KB total, moment-compatible API)
-import dayjs from 'dayjs';
-dayjs(date).format('YYYY-MM-DD');
+import dayjs from 'dayjs'
+dayjs(date).format('YYYY-MM-DD')
 ```
 
 ### lodash → cherry-pick or native
 
 ```javascript
 // Before: entire lodash (72KB)
-import _ from 'lodash';
-_.uniq(array);
-_.debounce(fn, 300);
+import _ from 'lodash'
+_.uniq(array)
+_.debounce(fn, 300)
 
 // After: cherry-pick (2KB each)
-import uniq from 'lodash/uniq';
-import debounce from 'lodash/debounce';
+import uniq from 'lodash/uniq'
+import debounce from 'lodash/debounce'
 
 // After: native alternatives
-[...new Set(array)]; // uniq
+;[...new Set(array)] // uniq
 // debounce - use custom or lodash-es/debounce
 ```
 
 ### Other common swaps
 
-| Heavy | Light Alternative |
-|-------|-------------------|
-| `axios` (13KB) | `fetch` (native) or `ky` (3KB) |
-| `uuid` (4KB) | `crypto.randomUUID()` (native) |
-| `classnames` (1KB) | template literals |
+| Heavy              | Light Alternative              |
+| ------------------ | ------------------------------ |
+| `axios` (13KB)     | `fetch` (native) or `ky` (3KB) |
+| `uuid` (4KB)       | `crypto.randomUUID()` (native) |
+| `classnames` (1KB) | template literals              |
 
 ---
 
@@ -79,10 +80,10 @@ import debounce from 'lodash/debounce';
 ### React.lazy
 
 ```javascript
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react'
 
-const Chart = lazy(() => import('./Chart'));
-const AdminPanel = lazy(() => import('./AdminPanel'));
+const Chart = lazy(() => import('./Chart'))
+const AdminPanel = lazy(() => import('./AdminPanel'))
 
 function App() {
   return (
@@ -90,22 +91,22 @@ function App() {
       {showChart && <Chart />}
       {isAdmin && <AdminPanel />}
     </Suspense>
-  );
+  )
 }
 ```
 
 ### Next.js dynamic
 
 ```javascript
-import dynamic from 'next/dynamic';
+import dynamic from 'next/dynamic'
 
 // Client-only component
-const Map = dynamic(() => import('./Map'), { ssr: false });
+const Map = dynamic(() => import('./Map'), { ssr: false })
 
 // With loading state
 const Chart = dynamic(() => import('./Chart'), {
-  loading: () => <Skeleton height={300} />
-});
+  loading: () => <Skeleton height={300} />,
+})
 ```
 
 ### Route-based splitting (automatic in most frameworks)
@@ -116,8 +117,8 @@ const Chart = dynamic(() => import('./Chart'), {
 // pages/admin.js → chunks/pages/admin.js
 
 // React Router with lazy
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Admin = lazy(() => import('./pages/Admin'));
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Admin = lazy(() => import('./pages/Admin'))
 ```
 
 ### Manual chunks (Vite/Rollup)
@@ -131,11 +132,11 @@ export default {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           charts: ['recharts', 'd3'],
-        }
-      }
-    }
-  }
-};
+        },
+      },
+    },
+  },
+}
 ```
 
 ---
@@ -151,8 +152,8 @@ module.exports = {
   optimization: {
     usedExports: true,
     sideEffects: true,
-  }
-};
+  },
+}
 ```
 
 ### Mark package as side-effect free
@@ -173,8 +174,8 @@ module.exports = {
 
 ```javascript
 // Bad: default export of object
-export default { foo, bar, baz };
+export default { foo, bar, baz }
 
 // Good: named exports
-export { foo, bar, baz };
+export { foo, bar, baz }
 ```

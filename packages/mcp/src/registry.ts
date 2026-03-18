@@ -22,7 +22,9 @@ const RegistrySchema = z.object({
   version: z.string(),
   categories: z.record(z.string(), z.object({ name: z.string(), description: z.string() })),
   skills: z.array(SkillEntrySchema),
-  deprecated: z.array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) })).optional(),
+  deprecated: z
+    .array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) }))
+    .optional(),
 })
 
 let cache: RegistryCache | null = null

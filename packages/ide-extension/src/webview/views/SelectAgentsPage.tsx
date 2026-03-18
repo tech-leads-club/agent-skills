@@ -217,11 +217,9 @@ export function SelectAgentsPage({
       <div className="select-page-list" aria-label="Agents list">
         {visibleAgents.length === 0 ? (
           <div className="select-page-empty" role="status">
-          <p>
-            {action === 'install'
-              ? 'No agents detected.'
-              : 'No agents have skills installed in the selected scope.'}
-          </p>
+            <p>
+              {action === 'install' ? 'No agents detected.' : 'No agents have skills installed in the selected scope.'}
+            </p>
             <button type="button" className="secondary-footer-button" onClick={onCancel}>
               Cancel
             </button>

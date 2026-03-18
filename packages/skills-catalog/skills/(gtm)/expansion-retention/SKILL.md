@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Expansion & Retention Systems
@@ -16,6 +15,7 @@ You are a GTM strategist specializing in post-sale revenue growth, churn prevent
 ## Before Starting
 
 Ask the user:
+
 1. What is your current NRR? (Below 100% = contraction, 100-110% = stable, 110%+ = expanding)
 2. What pricing model do you use? (Seat-based, usage-based, hybrid, flat-rate)
 3. What does your customer segmentation look like? (SMB, mid-market, enterprise, mixed)
@@ -39,23 +39,23 @@ NRR = (Starting MRR + Expansion - Contraction - Churn) / Starting MRR x 100
 
 ### 2025-2026 NRR Benchmarks by Segment
 
-| Segment | Median NRR | Top Quartile | Best-in-Class |
-|---|---|---|---|
-| Enterprise ($100M+ ARR) | 115% | 120% | 130%+ |
-| Mid-Market ($10-100M ARR) | 108% | 115% | 125% |
-| SMB ($1-10M ARR) | 98% | 105% | 115% |
-| Bootstrapped SaaS | 104% | 112% | 118% |
-| Usage-Based Pricing | 110% | 118% | 135%+ |
+| Segment                   | Median NRR | Top Quartile | Best-in-Class |
+| ------------------------- | ---------- | ------------ | ------------- |
+| Enterprise ($100M+ ARR)   | 115%       | 120%         | 130%+         |
+| Mid-Market ($10-100M ARR) | 108%       | 115%         | 125%          |
+| SMB ($1-10M ARR)          | 98%        | 105%         | 115%          |
+| Bootstrapped SaaS         | 104%       | 112%         | 118%          |
+| Usage-Based Pricing       | 110%       | 118%         | 135%+         |
 
 ### NRR Benchmarks by Pricing Model
 
-| Pricing Model | Median NRR | Volatility | Expansion Potential |
-|---|---|---|---|
-| Seat-based | 105% | Low | Moderate - tied to headcount |
-| Usage/consumption | 110% | High | High - tied to value delivered |
-| Hybrid (seat + usage) | 112% | Medium | High - dual expansion vectors |
-| Flat-rate | 95% | Very low | Low - requires plan tier jumps |
-| Platform/marketplace | 115% | Medium | Very high - network effects |
+| Pricing Model         | Median NRR | Volatility | Expansion Potential            |
+| --------------------- | ---------- | ---------- | ------------------------------ |
+| Seat-based            | 105%       | Low        | Moderate - tied to headcount   |
+| Usage/consumption     | 110%       | High       | High - tied to value delivered |
+| Hybrid (seat + usage) | 112%       | Medium     | High - dual expansion vectors  |
+| Flat-rate             | 95%        | Very low   | Low - requires plan tier jumps |
+| Platform/marketplace  | 115%       | Medium     | Very high - network effects    |
 
 Companies with consumption-based pricing see 38% faster revenue growth than seat-based peers. Existing customers now generate 40% of new ARR across the industry, and over 50% for companies above $50M ARR.
 
@@ -91,18 +91,18 @@ Current NRR 120%+
 
 ### Expansion Trigger Matrix
 
-| Trigger Signal | Automated Action | Timing | Owner |
-|---|---|---|---|
-| Usage hits 80% of plan limit | In-product upgrade prompt + email | Immediate | Product |
-| User invites 3+ teammates | Suggest team plan with ROI calc | Within 24 hours | Product |
-| Feature gate hit (3+ times) | Contextual upgrade with feature preview | On third gate hit | Product |
-| Usage growing >20% MoM | CSM outreach with expansion proposal | Monthly review | CS |
-| New department starts using product | Cross-sell motion with champion intro | Within first week | Sales |
-| Customer publishes positive review | Ask for case study + referral | Within 48 hours | Marketing |
-| API usage exceeds free tier | Developer-focused upgrade path | On limit hit | Product |
-| Admin creates second workspace | Enterprise consolidation offer | Within 48 hours | Sales |
-| Power user identified (top 5% usage) | Beta access + advisory board invite | Monthly cohort | CS |
-| Contract renewal within 90 days | Expansion packaging with annual discount | 90 days out | CS |
+| Trigger Signal                       | Automated Action                         | Timing            | Owner     |
+| ------------------------------------ | ---------------------------------------- | ----------------- | --------- |
+| Usage hits 80% of plan limit         | In-product upgrade prompt + email        | Immediate         | Product   |
+| User invites 3+ teammates            | Suggest team plan with ROI calc          | Within 24 hours   | Product   |
+| Feature gate hit (3+ times)          | Contextual upgrade with feature preview  | On third gate hit | Product   |
+| Usage growing >20% MoM               | CSM outreach with expansion proposal     | Monthly review    | CS        |
+| New department starts using product  | Cross-sell motion with champion intro    | Within first week | Sales     |
+| Customer publishes positive review   | Ask for case study + referral            | Within 48 hours   | Marketing |
+| API usage exceeds free tier          | Developer-focused upgrade path           | On limit hit      | Product   |
+| Admin creates second workspace       | Enterprise consolidation offer           | Within 48 hours   | Sales     |
+| Power user identified (top 5% usage) | Beta access + advisory board invite      | Monthly cohort    | CS        |
+| Contract renewal within 90 days      | Expansion packaging with annual discount | 90 days out       | CS        |
 
 ### In-Product Expansion Mechanics
 
@@ -138,12 +138,12 @@ Design principles: each tier needs a clear "aha moment" that pulls users up. Usa
 
 ### Land-and-Expand Metrics
 
-| Metric | Good | Great |
-|---|---|---|
-| Time to First Expansion | < 120 days | < 90 days |
-| Expansion Rate (accounts that expanded / total) | > 20% | > 35% |
+| Metric                                             | Good       | Great     |
+| -------------------------------------------------- | ---------- | --------- |
+| Time to First Expansion                            | < 120 days | < 90 days |
+| Expansion Rate (accounts that expanded / total)    | > 20%      | > 35%     |
 | Average Expansion Multiple (current ACV / initial) | 1.5x in Y1 | 2x+ in Y1 |
-| Expansion Revenue % of New MRR | > 30% | > 50% |
+| Expansion Revenue % of New MRR                     | > 30%      | > 50%     |
 
 ---
 
@@ -153,14 +153,14 @@ AI-enhanced health scores can predict churn 3-6 months in advance with 85%+ accu
 
 ### Health Score Components
 
-| Signal Category | Weight | Data Source | Refresh Rate |
-|---|---|---|---|
-| Product Usage | 35% | Product analytics | Daily |
-| Engagement (emails, meetings) | 20% | CRM + email | Weekly |
-| Support Health | 15% | Ticketing system | Real-time |
-| Business Outcomes | 15% | Customer reporting | Monthly |
-| Relationship Strength | 10% | CRM + surveys | Quarterly |
-| Contract/Financial | 5% | Billing system | On change |
+| Signal Category               | Weight | Data Source        | Refresh Rate |
+| ----------------------------- | ------ | ------------------ | ------------ |
+| Product Usage                 | 35%    | Product analytics  | Daily        |
+| Engagement (emails, meetings) | 20%    | CRM + email        | Weekly       |
+| Support Health                | 15%    | Ticketing system   | Real-time    |
+| Business Outcomes             | 15%    | Customer reporting | Monthly      |
+| Relationship Strength         | 10%    | CRM + surveys      | Quarterly    |
+| Contract/Financial            | 5%     | Billing system     | On change    |
 
 ### Health Score by Segment
 
@@ -170,27 +170,27 @@ AI-enhanced health scores can predict churn 3-6 months in advance with 85%+ accu
 
 ### Health Score Ranges and Actions
 
-| Score Range | Label | Action | Cadence |
-|---|---|---|---|
-| 85-100 | Thriving | Expansion outreach, advocacy asks | Monthly check-in |
-| 70-84 | Healthy | Monitor, share best practices | Bi-weekly check-in |
-| 50-69 | Neutral | Proactive feature training | Weekly check-in |
-| 30-49 | At Risk | CSM intervention, exec sponsor call | 2x weekly |
-| 0-29 | Critical | Save team deployed, exec escalation | Daily until resolved |
+| Score Range | Label    | Action                              | Cadence              |
+| ----------- | -------- | ----------------------------------- | -------------------- |
+| 85-100      | Thriving | Expansion outreach, advocacy asks   | Monthly check-in     |
+| 70-84       | Healthy  | Monitor, share best practices       | Bi-weekly check-in   |
+| 50-69       | Neutral  | Proactive feature training          | Weekly check-in      |
+| 30-49       | At Risk  | CSM intervention, exec sponsor call | 2x weekly            |
+| 0-29        | Critical | Save team deployed, exec escalation | Daily until resolved |
 
 ### Churn Risk Signals and Automated Responses
 
-| Risk Signal | Severity | Automated Response | Escalation |
-|---|---|---|---|
-| Login frequency dropped >40% | High | Re-engagement email sequence | CSM alert at day 7 |
-| Support tickets spiking (3x normal) | High | Proactive CSM outreach | Manager alert at 5x |
-| Key user left company (LinkedIn) | Critical | Identify new champion campaign | CSM call within 48 hrs |
-| Usage plateau for 30+ days | Medium | "Did you know?" feature email | CSM review at day 45 |
-| Competitor evaluation detected | Critical | Competitive displacement content | AE + CSM war room |
-| Payment failure | High | Dunning sequence (3-5-7-14 day) | Finance + CS at day 14 |
-| NPS detractor score (<6) | High | CSM call + issue resolution | Manager review |
-| Champion goes silent (14+ days) | Medium | Multi-channel re-engagement | CSM direct outreach |
-| Contract renewal < 60 days, no contact | Critical | Renewal rescue sequence | CS leadership involved |
+| Risk Signal                            | Severity | Automated Response               | Escalation             |
+| -------------------------------------- | -------- | -------------------------------- | ---------------------- |
+| Login frequency dropped >40%           | High     | Re-engagement email sequence     | CSM alert at day 7     |
+| Support tickets spiking (3x normal)    | High     | Proactive CSM outreach           | Manager alert at 5x    |
+| Key user left company (LinkedIn)       | Critical | Identify new champion campaign   | CSM call within 48 hrs |
+| Usage plateau for 30+ days             | Medium   | "Did you know?" feature email    | CSM review at day 45   |
+| Competitor evaluation detected         | Critical | Competitive displacement content | AE + CSM war room      |
+| Payment failure                        | High     | Dunning sequence (3-5-7-14 day)  | Finance + CS at day 14 |
+| NPS detractor score (<6)               | High     | CSM call + issue resolution      | Manager review         |
+| Champion goes silent (14+ days)        | Medium   | Multi-channel re-engagement      | CSM direct outreach    |
+| Contract renewal < 60 days, no contact | Critical | Renewal rescue sequence          | CS leadership involved |
 
 ---
 
@@ -200,16 +200,16 @@ PQAs are grounded in actual product behavior, making them 3-5x more likely to co
 
 ### PQA Scoring Model
 
-| Behavior | Points | Decay | Notes |
-|---|---|---|---|
-| Activated core feature | +20 | None | One-time credit |
-| Daily active user (per user) | +2/day | -1/day inactive | Tracks engagement depth |
-| Invited teammate | +15 | None | Strong expansion signal |
-| Hit usage limit | +25 | Resets monthly | Immediate upsell opportunity |
-| Feature gate interaction | +10 | Resets weekly | Shows unmet need |
-| API integration built | +30 | None | High switching cost |
-| Data imported (>threshold) | +20 | None | Investment signal |
-| Admin settings configured | +15 | None | Customization = commitment |
+| Behavior                     | Points | Decay           | Notes                        |
+| ---------------------------- | ------ | --------------- | ---------------------------- |
+| Activated core feature       | +20    | None            | One-time credit              |
+| Daily active user (per user) | +2/day | -1/day inactive | Tracks engagement depth      |
+| Invited teammate             | +15    | None            | Strong expansion signal      |
+| Hit usage limit              | +25    | Resets monthly  | Immediate upsell opportunity |
+| Feature gate interaction     | +10    | Resets weekly   | Shows unmet need             |
+| API integration built        | +30    | None            | High switching cost          |
+| Data imported (>threshold)   | +20    | None            | Investment signal            |
+| Admin settings configured    | +15    | None            | Customization = commitment   |
 
 ### PQA Threshold Actions
 
@@ -224,12 +224,12 @@ Recalculate PQA scores daily. Route score-80+ accounts to sales within 4 hours. 
 
 ### PQA vs. PQL vs. MQL
 
-| Attribute | MQL | PQL | PQA |
-|---|---|---|---|
-| Signal source | Marketing activity | Individual user behavior | Account-level product usage |
-| Conversion rate | 1-3% | 8-15% | 15-25% |
-| Best for | Top-of-funnel | PLG new business | Expansion + cross-sell |
-| Sales effort | High | Medium | Low - value already proven |
+| Attribute       | MQL                | PQL                      | PQA                         |
+| --------------- | ------------------ | ------------------------ | --------------------------- |
+| Signal source   | Marketing activity | Individual user behavior | Account-level product usage |
+| Conversion rate | 1-3%               | 8-15%                    | 15-25%                      |
+| Best for        | Top-of-funnel      | PLG new business         | Expansion + cross-sell      |
+| Sales effort    | High               | Medium                   | Low - value already proven  |
 
 ---
 
@@ -239,15 +239,15 @@ Users who reach their "aha moment" in the first session are 3x more likely to re
 
 ### Onboarding Milestone Framework
 
-| Milestone | Target Timing | Success Metric | If Missed |
-|---|---|---|---|
-| Account created | Day 0 | Signup completed | Abandon recovery email |
-| First value action | < 5 minutes | Core workflow completed | In-app tooltip nudge |
-| Data connected | Day 1 | Integration or import done | Setup assistance email |
-| Team invited | Day 3 | 2+ users active | Collaboration benefit email |
-| Habit formed | Day 7 | 3+ sessions in 7 days | Usage tip drip sequence |
-| ROI realized | Day 14 | Outcome metric visible | Success story + CSM check |
-| Expansion ready | Day 30 | Usage approaching limit | Upgrade path presented |
+| Milestone          | Target Timing | Success Metric             | If Missed                   |
+| ------------------ | ------------- | -------------------------- | --------------------------- |
+| Account created    | Day 0         | Signup completed           | Abandon recovery email      |
+| First value action | < 5 minutes   | Core workflow completed    | In-app tooltip nudge        |
+| Data connected     | Day 1         | Integration or import done | Setup assistance email      |
+| Team invited       | Day 3         | 2+ users active            | Collaboration benefit email |
+| Habit formed       | Day 7         | 3+ sessions in 7 days      | Usage tip drip sequence     |
+| ROI realized       | Day 14        | Outcome metric visible     | Success story + CSM check   |
+| Expansion ready    | Day 30        | Usage approaching limit    | Upgrade path presented      |
 
 ### Automated Onboarding Email Sequence
 
@@ -270,14 +270,14 @@ Average B2B SaaS win rates sit around 20-30%. Reactivating former prospects cost
 
 ### Re-engagement Timeline by Lost Reason
 
-| Lost Reason | Day 30 | Day 60 | Day 90 | Day 180 |
-|---|---|---|---|---|
-| Too expensive | "New ROI calculator" | Customer success story | New pricing announcement | Annual discount offer |
-| Not ready / timing | "Quick check-in" | Industry trend report | "Things have changed" update | Re-evaluation offer |
-| Chose competitor | Silence | Competitive comparison update | Competitor frustration survey | Displacement offer |
-| No budget | "Planning ahead" guide | QBR invite | New fiscal year outreach | Budget season proposal |
-| No champion | LinkedIn monitoring | New stakeholder intro request | Department change trigger | Re-qualify with new team |
-| Product gap | Feature announcement | Roadmap preview | Beta invite for requested feature | Re-demo with gap closed |
+| Lost Reason        | Day 30                 | Day 60                        | Day 90                            | Day 180                  |
+| ------------------ | ---------------------- | ----------------------------- | --------------------------------- | ------------------------ |
+| Too expensive      | "New ROI calculator"   | Customer success story        | New pricing announcement          | Annual discount offer    |
+| Not ready / timing | "Quick check-in"       | Industry trend report         | "Things have changed" update      | Re-evaluation offer      |
+| Chose competitor   | Silence                | Competitive comparison update | Competitor frustration survey     | Displacement offer       |
+| No budget          | "Planning ahead" guide | QBR invite                    | New fiscal year outreach          | Budget season proposal   |
+| No champion        | LinkedIn monitoring    | New stakeholder intro request | Department change trigger         | Re-qualify with new team |
+| Product gap        | Feature announcement   | Roadmap preview               | Beta invite for requested feature | Re-demo with gap closed  |
 
 ### Closed-Lost Cadence Design
 
@@ -289,14 +289,14 @@ Average B2B SaaS win rates sit around 20-30%. Reactivating former prospects cost
 
 ### Win-Back Segmentation Scoring
 
-| Factor | High Priority (3 pts) | Medium (2 pts) | Low (1 pt) |
-|---|---|---|---|
-| Deal size | Enterprise | Mid-market | SMB |
-| Stage reached | Late (proposal+) | Mid (demo) | Early (discovery) |
-| Engagement level | Multi-threaded, deep eval | Single thread, moderate | Light touch |
-| Lost reason | Timing/budget | Product gap (now fixed) | Chose competitor |
-| Time since loss | 60-120 days | 30-60 days | 180+ days |
-| Company trajectory | Growing/funded recently | Stable | Contracting |
+| Factor             | High Priority (3 pts)     | Medium (2 pts)          | Low (1 pt)        |
+| ------------------ | ------------------------- | ----------------------- | ----------------- |
+| Deal size          | Enterprise                | Mid-market              | SMB               |
+| Stage reached      | Late (proposal+)          | Mid (demo)              | Early (discovery) |
+| Engagement level   | Multi-threaded, deep eval | Single thread, moderate | Light touch       |
+| Lost reason        | Timing/budget             | Product gap (now fixed) | Chose competitor  |
+| Time since loss    | 60-120 days               | 30-60 days              | 180+ days         |
+| Company trajectory | Growing/funded recently   | Stable                  | Contracting       |
 
 Score 15-18: Priority re-engagement (personalized AE outreach). Score 10-14: Automated nurture with escalation triggers. Score 6-9: Low-touch content nurture only.
 
@@ -308,12 +308,12 @@ Companies with sophisticated usage tracking see 32% higher NRR. 78% of IT leader
 
 ### Usage Metric Selection
 
-| Metric Type | Example | Best For | Risk |
-|---|---|---|---|
-| Direct consumption | API calls, compute hours | Infrastructure products | Unpredictable bills |
-| Outcome-based | Leads generated, tickets resolved | Value-aligned products | Hard to attribute |
-| Seat-based with usage | Per-user + usage overages | Collaboration tools | Punishes adoption |
-| Platform transactions | Messages sent, records processed | Marketplace/platform | Volume sensitivity |
+| Metric Type           | Example                           | Best For                | Risk                |
+| --------------------- | --------------------------------- | ----------------------- | ------------------- |
+| Direct consumption    | API calls, compute hours          | Infrastructure products | Unpredictable bills |
+| Outcome-based         | Leads generated, tickets resolved | Value-aligned products  | Hard to attribute   |
+| Seat-based with usage | Per-user + usage overages         | Collaboration tools     | Punishes adoption   |
+| Platform transactions | Messages sent, records processed  | Marketplace/platform    | Volume sensitivity  |
 
 ### Proactive Cost Alerts
 
@@ -332,25 +332,25 @@ Build real-time usage dashboards, weekly digest emails, configurable spend caps,
 
 ### Advocacy Program Tiers
 
-| Tier | Qualification | Activities | Rewards |
-|---|---|---|---|
-| Supporter | NPS 8+, active user | Social shares, reviews | Swag, early feature access |
-| Advocate | NPS 9+, case study willing | References, speaking, content | Conference passes, advisory board |
-| Champion | NPS 10, multi-deal referrer | Co-selling, executive intros | Revenue share, custom features |
+| Tier      | Qualification               | Activities                    | Rewards                           |
+| --------- | --------------------------- | ----------------------------- | --------------------------------- |
+| Supporter | NPS 8+, active user         | Social shares, reviews        | Swag, early feature access        |
+| Advocate  | NPS 9+, case study willing  | References, speaking, content | Conference passes, advisory board |
+| Champion  | NPS 10, multi-deal referrer | Co-selling, executive intros  | Revenue share, custom features    |
 
 Best advocacy triggers: customer hits ROI milestone, publishes positive review, renews or expands, champion gets promoted, or wins award using your product. Focus on your top 25% of customers. Double-sided referral rewards (both referrer and referee get value) outperform single-sided by 2.3x.
 
 ### Renewal Timeline
 
-| Days Before Renewal | Action | Owner |
-|---|---|---|
-| 180 days | Health score review, risk assessment | CS Ops |
-| 120 days | QBR with ROI report and expansion options | CSM |
-| 90 days | Formal renewal conversation + proposal | CSM |
-| 60 days | Negotiation and contract review | CSM + Legal |
-| 30 days | Final terms, signature push | CSM |
-| 14 days | Escalation if unsigned | CS Leadership |
-| 7 days | Executive outreach if still unsigned | VP CS or CRO |
+| Days Before Renewal | Action                                    | Owner         |
+| ------------------- | ----------------------------------------- | ------------- |
+| 180 days            | Health score review, risk assessment      | CS Ops        |
+| 120 days            | QBR with ROI report and expansion options | CSM           |
+| 90 days             | Formal renewal conversation + proposal    | CSM           |
+| 60 days             | Negotiation and contract review           | CSM + Legal   |
+| 30 days             | Final terms, signature push               | CSM           |
+| 14 days             | Escalation if unsigned                    | CS Leadership |
+| 7 days              | Executive outreach if still unsigned      | VP CS or CRO  |
 
 Renewals are not an event. They are a continuous process that starts at onboarding.
 
@@ -370,14 +370,14 @@ Clients with strong ICP fit are 2x less likely to churn and 4x more likely to ex
 
 ### Save Plays by Churn Reason
 
-| Churn Reason | Save Play | Success Rate | Escalation |
-|---|---|---|---|
-| Price | Right-sizing, annual discount, ROI review | 35-45% | Finance approval for custom pricing |
-| Product gaps | Roadmap preview, beta access, workaround | 25-35% | Product team meeting with customer |
-| Low usage | Onboarding reboot, training sessions | 40-50% | CSM-led adoption sprint |
-| Lost champion | New stakeholder mapping + re-onboarding | 20-30% | Executive alignment call |
-| Competitor | Competitive teardown, migration cost analysis | 15-25% | CRO-level retention offer |
-| Company change | Contract pause option, reactivation path | 30-40% | Flexible terms negotiation |
+| Churn Reason   | Save Play                                     | Success Rate | Escalation                          |
+| -------------- | --------------------------------------------- | ------------ | ----------------------------------- |
+| Price          | Right-sizing, annual discount, ROI review     | 35-45%       | Finance approval for custom pricing |
+| Product gaps   | Roadmap preview, beta access, workaround      | 25-35%       | Product team meeting with customer  |
+| Low usage      | Onboarding reboot, training sessions          | 40-50%       | CSM-led adoption sprint             |
+| Lost champion  | New stakeholder mapping + re-onboarding       | 20-30%       | Executive alignment call            |
+| Competitor     | Competitive teardown, migration cost analysis | 15-25%       | CRO-level retention offer           |
+| Company change | Contract pause option, reactivation path      | 30-40%       | Flexible terms negotiation          |
 
 ---
 
@@ -399,57 +399,61 @@ Clients with strong ICP fit are 2x less likely to churn and 4x more likely to ex
 
 ### Key Metric Targets
 
-| Metric | Acceptable | Good | Best-in-Class |
-|---|---|---|---|
-| Net Revenue Retention | 100-105% | 105-115% | 115%+ |
-| Gross Revenue Retention | 85-90% | 90-95% | 95%+ |
-| Logo Retention Rate | 80-85% | 85-92% | 92%+ |
-| Time to First Expansion | < 180 days | < 120 days | < 90 days |
-| Expansion Revenue % of New ARR | 20-30% | 30-50% | 50%+ |
-| Time to Value | < 7 days | < 3 days | < 1 day |
-| Closed-Lost Win-Back Rate | 5-10% | 10-15% | 15-25% |
+| Metric                         | Acceptable | Good       | Best-in-Class |
+| ------------------------------ | ---------- | ---------- | ------------- |
+| Net Revenue Retention          | 100-105%   | 105-115%   | 115%+         |
+| Gross Revenue Retention        | 85-90%     | 90-95%     | 95%+          |
+| Logo Retention Rate            | 80-85%     | 85-92%     | 92%+          |
+| Time to First Expansion        | < 180 days | < 120 days | < 90 days     |
+| Expansion Revenue % of New ARR | 20-30%     | 30-50%     | 50%+          |
+| Time to Value                  | < 7 days   | < 3 days   | < 1 day       |
+| Closed-Lost Win-Back Rate      | 5-10%      | 10-15%     | 15-25%        |
 
 ### CS Team Capacity Planning
 
-| Segment | CSM-to-Account Ratio | Touch Model |
-|---|---|---|
-| Enterprise (>$100K ACV) | 1:10-15 | High-touch (weekly) |
-| Mid-Market ($25-100K ACV) | 1:30-50 | Medium-touch (bi-weekly) |
-| SMB ($5-25K ACV) | 1:100-200 | Tech-touch (automated) |
-| Self-Serve (<$5K ACV) | 1:500+ | No-touch (fully automated) |
+| Segment                   | CSM-to-Account Ratio | Touch Model                |
+| ------------------------- | -------------------- | -------------------------- |
+| Enterprise (>$100K ACV)   | 1:10-15              | High-touch (weekly)        |
+| Mid-Market ($25-100K ACV) | 1:30-50              | Medium-touch (bi-weekly)   |
+| SMB ($5-25K ACV)          | 1:100-200            | Tech-touch (automated)     |
+| Self-Serve (<$5K ACV)     | 1:500+               | No-touch (fully automated) |
 
 ### Tech Stack
 
-| Function | Tools |
-|---|---|
-| CS Platform | Gainsight, ChurnZero, Vitally |
-| Product Analytics | Amplitude, Mixpanel, Pendo |
-| In-App Engagement | Pendo, Chameleon, Userpilot |
-| Billing/Usage | Metronome, Orb, Stripe Billing |
-| Churn Prediction | Pecan AI, custom ML models |
-| Onboarding | Rocketlane, OnRamp, GUIDEcx |
-| Advocacy | Influitive, ReferralCandy, Cello |
+| Function          | Tools                            |
+| ----------------- | -------------------------------- |
+| CS Platform       | Gainsight, ChurnZero, Vitally    |
+| Product Analytics | Amplitude, Mixpanel, Pendo       |
+| In-App Engagement | Pendo, Chameleon, Userpilot      |
+| Billing/Usage     | Metronome, Orb, Stripe Billing   |
+| Churn Prediction  | Pecan AI, custom ML models       |
+| Onboarding        | Rocketlane, OnRamp, GUIDEcx      |
+| Advocacy          | Influitive, ReferralCandy, Cello |
 
 ---
 
 ## Questions to Ask
 
 **Reducing churn:**
+
 - What does your churn look like by cohort? Concentrated in specific segments or months?
 - Do you have a health scoring system? How accurate has it been?
 - When do most customers churn - early (first 90 days) or late (at renewal)?
 
 **Building expansion revenue:**
+
 - What percentage of customers expand within the first year?
 - Do you have in-product expansion triggers or is it all sales-driven?
 - Are you tracking PQAs or relying on CSM intuition for upsell timing?
 
 **CS function from scratch:**
+
 - What is your current ARR and average deal size?
 - What data do you currently collect on customer usage and engagement?
 - Are you hiring CSMs or building a tech-touch model first?
 
 **Re-engaging closed-lost deals:**
+
 - How many closed-lost deals from the last 12 months fit your current ICP?
 - Do you track the reason for each closed-lost deal?
 - What has changed about your product since those deals were lost?

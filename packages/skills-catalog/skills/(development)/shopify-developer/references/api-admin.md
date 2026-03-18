@@ -5,11 +5,13 @@
 Modern API for Shopify Admin operations with efficient data fetching.
 
 **Endpoint:**
+
 ```
 POST https://{store}.myshopify.com/admin/api/2026-01/graphql.json
 ```
 
 **Headers:**
+
 ```javascript
 {
   'X-Shopify-Access-Token': 'shpat_...',
@@ -18,6 +20,7 @@ POST https://{store}.myshopify.com/admin/api/2026-01/graphql.json
 ```
 
 **Basic Query:**
+
 ```graphql
 query GetProducts($first: Int!) {
   products(first: $first) {
@@ -32,8 +35,14 @@ query GetProducts($first: Int!) {
 
         # Pricing
         priceRange {
-          minVariantPrice { amount currencyCode }
-          maxVariantPrice { amount currencyCode }
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+          maxVariantPrice {
+            amount
+            currencyCode
+          }
         }
 
         # Images
@@ -74,6 +83,7 @@ query GetProducts($first: Int!) {
 ```
 
 **Variables:**
+
 ```json
 {
   "first": 10
@@ -81,6 +91,7 @@ query GetProducts($first: Int!) {
 ```
 
 **JavaScript Example:**
+
 ```javascript
 async function getProducts(accessToken, store, limit = 10) {
   const query = `
@@ -102,37 +113,35 @@ async function getProducts(accessToken, store, limit = 10) {
         }
       }
     }
-  `;
+  `
 
-  const response = await fetch(
-    `https://${store}.myshopify.com/admin/api/2026-01/graphql.json`,
-    {
-      method: 'POST',
-      headers: {
-        'X-Shopify-Access-Token': accessToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        variables: { first: limit },
-      }),
-    }
-  );
+  const response = await fetch(`https://${store}.myshopify.com/admin/api/2026-01/graphql.json`, {
+    method: 'POST',
+    headers: {
+      'X-Shopify-Access-Token': accessToken,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      variables: { first: limit },
+    }),
+  })
 
-  const { data, errors } = await response.json();
+  const { data, errors } = await response.json()
 
   if (errors) {
-    console.error('GraphQL Errors:', errors);
-    throw new Error(errors[0].message);
+    console.error('GraphQL Errors:', errors)
+    throw new Error(errors[0].message)
   }
 
-  return data.products;
+  return data.products
 }
 ```
 
 **Common Mutations:**
 
 Create product:
+
 ```graphql
 mutation CreateProduct($input: ProductInput!) {
   productCreate(input: $input) {
@@ -150,6 +159,7 @@ mutation CreateProduct($input: ProductInput!) {
 ```
 
 Update product:
+
 ```graphql
 mutation UpdateProduct($input: ProductInput!) {
   productUpdate(input: $input) {
@@ -167,6 +177,7 @@ mutation UpdateProduct($input: ProductInput!) {
 ```
 
 Set metafield:
+
 ```graphql
 mutation SetMetafield($input: MetafieldInput!) {
   metafieldSet(input: $input) {
@@ -192,11 +203,13 @@ mutation SetMetafield($input: MetafieldInput!) {
 Traditional REST API for Shopify Admin operations.
 
 **Base URL:**
+
 ```
 https://{store}.myshopify.com/admin/api/2026-01/
 ```
 
 **Authentication:**
+
 ```javascript
 headers: {
   'X-Shopify-Access-Token': 'shpat_...'
@@ -206,6 +219,7 @@ headers: {
 **Common Endpoints:**
 
 Get products:
+
 ```javascript
 GET /admin/api/2026-01/products.json?limit=50&status=active
 
@@ -223,11 +237,13 @@ const { products } = await response.json();
 ```
 
 Get single product:
+
 ```javascript
-GET /admin/api/2026-01/products/{product_id}.json
+GET / admin / api / 2026 - 01 / products / { product_id }.json
 ```
 
 Create product:
+
 ```javascript
 POST /admin/api/2026-01/products.json
 
@@ -244,6 +260,7 @@ POST /admin/api/2026-01/products.json
 ```
 
 Update product:
+
 ```javascript
 PUT /admin/api/2026-01/products/{product_id}.json
 
@@ -257,11 +274,13 @@ PUT /admin/api/2026-01/products/{product_id}.json
 ```
 
 Get orders:
+
 ```javascript
 GET /admin/api/2026-01/orders.json?status=any&limit=50
 ```
 
 Get customers:
+
 ```javascript
 GET /admin/api/2026-01/customers.json?limit=50
 ```
@@ -271,6 +290,7 @@ GET /admin/api/2026-01/customers.json?limit=50
 Complete OAuth flow for custom apps.
 
 **Step 1: Authorization Request**
+
 ```
 GET https://{shop}.myshopify.com/admin/oauth/authorize?
   client_id={api_key}&
@@ -280,6 +300,7 @@ GET https://{shop}.myshopify.com/admin/oauth/authorize?
 ```
 
 **Scopes:**
+
 ```javascript
 const scopes = [
   'read_products',
@@ -292,10 +313,11 @@ const scopes = [
   'write_inventory',
   'read_metafields',
   'write_metafields',
-].join(',');
+].join(',')
 ```
 
 **Step 2: Handle Callback**
+
 ```javascript
 // User approves, Shopify redirects to:
 GET {redirect_uri}?code={auth_code}&state={state}&hmac={hmac}&shop={shop}
@@ -319,6 +341,7 @@ function verifyHmac(query, secret) {
 ```
 
 **Step 3: Exchange Code for Token**
+
 ```javascript
 POST https://{shop}.myshopify.com/admin/oauth/access_token
 
@@ -360,46 +383,49 @@ async function getAccessToken(shop, code, apiKey, apiSecret) {
 GraphQL uses points-based rate limiting.
 
 **Rate Limits:**
+
 - 50 cost points per second maximum
 - Bucket refills at 50 points/second
 - Each query has a calculated cost
 
 **Check Rate Limit:**
-```javascript
-const response = await fetch(graphqlEndpoint, options);
 
-const rateLimitHeader = response.headers.get('X-Shopify-GraphQL-Admin-Api-Call-Limit');
+```javascript
+const response = await fetch(graphqlEndpoint, options)
+
+const rateLimitHeader = response.headers.get('X-Shopify-GraphQL-Admin-Api-Call-Limit')
 // Example: "42/50" (42 points used, 50 max)
 
-const [used, limit] = rateLimitHeader.split('/').map(Number);
+const [used, limit] = rateLimitHeader.split('/').map(Number)
 
 if (used > 40) {
   // Approaching limit, slow down
-  await delay(1000);
+  await delay(1000)
 }
 ```
 
 **Implement Retry Logic:**
+
 ```javascript
 async function fetchWithRetry(url, options, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
-    const response = await fetch(url, options);
+    const response = await fetch(url, options)
 
     if (response.status === 429) {
       // Rate limited
-      const retryAfter = response.headers.get('Retry-After') || 2;
-      await delay(retryAfter * 1000 * Math.pow(2, i)); // Exponential backoff
-      continue;
+      const retryAfter = response.headers.get('Retry-After') || 2
+      await delay(retryAfter * 1000 * Math.pow(2, i)) // Exponential backoff
+      continue
     }
 
-    return response;
+    return response
   }
 
-  throw new Error('Max retries exceeded');
+  throw new Error('Max retries exceeded')
 }
 
 function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 ```
 
@@ -408,6 +434,7 @@ function delay(ms) {
 Event-driven notifications for app integrations.
 
 **Common Webhooks:**
+
 ```javascript
 // Product events
 'products/create'
@@ -438,6 +465,7 @@ Event-driven notifications for app integrations.
 ```
 
 **Register Webhook (GraphQL):**
+
 ```graphql
 mutation CreateWebhook($input: WebhookSubscriptionInput!) {
   webhookSubscriptionCreate(input: $input) {
@@ -460,6 +488,7 @@ mutation CreateWebhook($input: WebhookSubscriptionInput!) {
 ```
 
 **Variables:**
+
 ```json
 {
   "input": {
@@ -473,31 +502,29 @@ mutation CreateWebhook($input: WebhookSubscriptionInput!) {
 ```
 
 **Handle Webhook (Node.js/Express):**
+
 ```javascript
 app.post('/webhooks/orders', async (req, res) => {
   // Verify webhook HMAC
-  const hmac = req.headers['x-shopify-hmac-sha256'];
-  const body = JSON.stringify(req.body);
+  const hmac = req.headers['x-shopify-hmac-sha256']
+  const body = JSON.stringify(req.body)
 
-  const hash = crypto
-    .createHmac('sha256', SHOPIFY_WEBHOOK_SECRET)
-    .update(body)
-    .digest('base64');
+  const hash = crypto.createHmac('sha256', SHOPIFY_WEBHOOK_SECRET).update(body).digest('base64')
 
   if (hash !== hmac) {
-    return res.status(401).send('Invalid HMAC');
+    return res.status(401).send('Invalid HMAC')
   }
 
   // Process order
-  const order = req.body;
-  console.log('New order:', order.id, order.email);
+  const order = req.body
+  console.log('New order:', order.id, order.email)
 
   // Respond quickly (within 5 seconds)
-  res.status(200).send('OK');
+  res.status(200).send('OK')
 
   // Process in background
-  await processOrder(order);
-});
+  await processOrder(order)
+})
 ```
 
 ## Common Patterns
@@ -506,9 +533,9 @@ app.post('/webhooks/orders', async (req, res) => {
 
 ```javascript
 async function getAllProducts(accessToken, store) {
-  let allProducts = [];
-  let hasNextPage = true;
-  let cursor = null;
+  let allProducts = []
+  let hasNextPage = true
+  let cursor = null
 
   while (hasNextPage) {
     const query = `
@@ -523,7 +550,7 @@ async function getAllProducts(accessToken, store) {
           }
         }
       }
-    `;
+    `
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -535,16 +562,16 @@ async function getAllProducts(accessToken, store) {
         query,
         variables: { first: 50, after: cursor },
       }),
-    });
+    })
 
-    const { data } = await response.json();
-    allProducts.push(...data.products.edges.map(e => e.node));
+    const { data } = await response.json()
+    allProducts.push(...data.products.edges.map((e) => e.node))
 
-    hasNextPage = data.products.pageInfo.hasNextPage;
-    cursor = data.products.pageInfo.endCursor;
+    hasNextPage = data.products.pageInfo.hasNextPage
+    cursor = data.products.pageInfo.endCursor
   }
 
-  return allProducts;
+  return allProducts
 }
 ```
 
@@ -560,23 +587,23 @@ async function safeApiCall(query, variables) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query, variables }),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
-    const { data, errors } = await response.json();
+    const { data, errors } = await response.json()
 
     if (errors) {
-      console.error('GraphQL Errors:', errors);
-      throw new Error(errors[0].message);
+      console.error('GraphQL Errors:', errors)
+      throw new Error(errors[0].message)
     }
 
-    return data;
+    return data
   } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+    console.error('API Error:', error)
+    throw error
   }
 }
 ```

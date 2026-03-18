@@ -37,18 +37,21 @@ orchestrates the right calls in the right sequence.
 ## Workflow: [Name]
 
 ### Step 1: [Action]
+
 Call tool: `tool_name`
 Parameters: [what's needed]
 Validation: [how to know it succeeded]
 On failure: [what to do]
 
 ### Step 2: [Action]
+
 Depends on: Step 1 (uses [specific output])
 Call tool: `tool_name`
 Parameters: [include output from Step 1]
 Validation: [check]
 
 ### Step 3: [Action]
+
 ...
 ```
 
@@ -85,20 +88,25 @@ via its own MCP server.
 ## Workflow: [Name]
 
 ### Phase 1: [Service A] ([MCP name])
+
 1. [Action using Service A tools]
 2. [Action using Service A tools]
-Output: [data needed by Phase 2]
+   Output: [data needed by Phase 2]
 
 ### Phase 2: [Service B] ([MCP name])
+
 Input: [data from Phase 1]
+
 1. [Action using Service B tools]
 2. [Action using Service B tools]
-Output: [data needed by Phase 3]
+   Output: [data needed by Phase 3]
 
 ### Phase 3: [Service C] ([MCP name])
+
 ...
 
 ## Error Handling
+
 - If Phase 1 fails: [action]
 - If Phase 2 fails but Phase 1 succeeded: [action]
 ```
@@ -135,29 +143,36 @@ Output: [data needed by Phase 3]
 ## Workflow: [Name]
 
 ### Initial Draft
+
 1. Gather input data
 2. Generate first version
 3. Save to working file
 
 ### Quality Check
+
 Run validation: `scripts/check_quality.py`
 Criteria:
+
 - [Criterion 1]: [how to check]
 - [Criterion 2]: [how to check]
 - [Criterion 3]: [how to check]
 
 ### Refinement Loop
+
 For each issue found:
+
 1. Identify the specific problem
 2. Fix it
 3. Re-validate
 
 STOP when:
+
 - All criteria pass, OR
 - 3 iterations completed (diminishing returns), OR
 - User signals satisfaction
 
 ### Finalization
+
 1. Apply final formatting
 2. Generate summary of changes
 3. Save final version
@@ -195,24 +210,29 @@ on the input or context.
 ## Workflow: [Name]
 
 ### Analyze Input
+
 Check: [what properties to examine]
+
 - Property A: [value range or type]
 - Property B: [value range or type]
 
 ### Decision Tree
+
 IF [condition 1]:
-  → Use [Tool/Approach A]
-  Rationale: [why this is better for this case]
+→ Use [Tool/Approach A]
+Rationale: [why this is better for this case]
 ELIF [condition 2]:
-  → Use [Tool/Approach B]
-  Rationale: [why]
+→ Use [Tool/Approach B]
+Rationale: [why]
 ELSE:
-  → Use [Tool/Approach C] (default)
+→ Use [Tool/Approach C] (default)
 
 ### Execute
+
 Based on decision, execute using the selected approach.
 
 ### Explain Choice
+
 Tell the user which approach was selected and why.
 ```
 
@@ -248,22 +268,28 @@ tool orchestration.
 ## Workflow: [Name]
 
 ### Pre-Check ([Domain] Rules)
+
 Before proceeding, verify:
+
 1. [Domain rule 1]: [how to check]
 2. [Domain rule 2]: [how to check]
 3. [Domain rule 3]: [how to check]
 
 IF any rule fails:
-  → [Escalation or alternative path]
-  → Document the failure
+→ [Escalation or alternative path]
+→ Document the failure
 
 ### Execute
+
 Only if pre-checks pass:
+
 1. [Action with domain context]
 2. [Action with domain context]
 
 ### Audit Trail
+
 Log:
+
 - All checks performed and results
 - Decisions made and rationale
 - Actions taken
@@ -286,16 +312,16 @@ Log:
 
 ## 6. Choosing Between Patterns
 
-| Signal | Suggested Pattern |
-|--------|------------------|
-| "Do A, then B, then C" | Sequential Workflow |
-| "Get data from X, send to Y, notify in Z" | Multi-MCP Coordination |
-| "Make it good, then review and improve" | Iterative Refinement |
-| "Handle PDFs differently from CSVs" | Context-Aware Selection |
-| "Follow our compliance rules" | Domain-Specific Intelligence |
-| Steps have no dependencies | Consider parallel execution |
-| User says "it depends" a lot | Context-Aware Selection |
-| Quality is subjective | Iterative Refinement |
+| Signal                                    | Suggested Pattern            |
+| ----------------------------------------- | ---------------------------- |
+| "Do A, then B, then C"                    | Sequential Workflow          |
+| "Get data from X, send to Y, notify in Z" | Multi-MCP Coordination       |
+| "Make it good, then review and improve"   | Iterative Refinement         |
+| "Handle PDFs differently from CSVs"       | Context-Aware Selection      |
+| "Follow our compliance rules"             | Domain-Specific Intelligence |
+| Steps have no dependencies                | Consider parallel execution  |
+| User says "it depends" a lot              | Context-Aware Selection      |
+| Quality is subjective                     | Iterative Refinement         |
 
 ---
 

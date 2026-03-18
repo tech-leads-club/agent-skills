@@ -169,13 +169,13 @@ After setup, ask the agent: "Show me my Stitch projects" or
 
 ### Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| "Unauthenticated" error | API key invalid or OAuth token expired — regenerate |
-| "Permission denied" | For OAuth: ensure `serviceUsageConsumer` role is granted |
-| Connection timeout | Stitch MCP is remote — check internet, retry in 30s |
-| Tool not found | Ensure MCP URL is exactly `https://stitch.googleapis.com/mcp` |
-| Config not recognized | Check your tool's MCP docs for the correct config format |
+| Problem                 | Solution                                                      |
+| ----------------------- | ------------------------------------------------------------- |
+| "Unauthenticated" error | API key invalid or OAuth token expired — regenerate           |
+| "Permission denied"     | For OAuth: ensure `serviceUsageConsumer` role is granted      |
+| Connection timeout      | Stitch MCP is remote — check internet, retry in 30s           |
+| Tool not found          | Ensure MCP URL is exactly `https://stitch.googleapis.com/mcp` |
+| Config not recognized   | Check your tool's MCP docs for the correct config format      |
 
 ---
 
@@ -218,14 +218,14 @@ DON'T:
 When generating prompts from the agreed Design Direction (Phase 3),
 map each element systematically:
 
-| Design Direction element | Stitch prompt mapping |
-|--------------------------|----------------------|
-| Mood/vibe | Idea + Theme section with adjectives |
-| Color palette | Theme: specific hex codes or mood description |
-| Typography | Theme: font name if in Stitch's 29 fonts, or description |
-| Layout approach | Content: describe grid, spacing, component arrangement |
-| Icon style | Content: describe icon treatment in components |
-| References applied | Use key descriptors from refs, not URLs |
+| Design Direction element | Stitch prompt mapping                                    |
+| ------------------------ | -------------------------------------------------------- |
+| Mood/vibe                | Idea + Theme section with adjectives                     |
+| Color palette            | Theme: specific hex codes or mood description            |
+| Typography               | Theme: font name if in Stitch's 29 fonts, or description |
+| Layout approach          | Content: describe grid, spacing, component arrangement   |
+| Icon style               | Content: describe icon treatment in components           |
+| References applied       | Use key descriptors from refs, not URLs                  |
 
 ### Stitch's Supported Fonts (29 families)
 
@@ -385,12 +385,12 @@ background. Use the Inter font for headers."
 
 ### Choosing the Right Type
 
-| Type | Use when | MCP enum |
-|------|----------|----------|
-| Mobile | Primary mobile app, phone-first UI | `MOBILE` |
-| Desktop | Web apps, dashboards, wide layouts | `DESKTOP` |
-| Tablet | Tablet-specific apps, iPad layouts | `TABLET` |
-| Agnostic | Not tied to a specific device | `AGNOSTIC` |
+| Type     | Use when                           | MCP enum   |
+| -------- | ---------------------------------- | ---------- |
+| Mobile   | Primary mobile app, phone-first UI | `MOBILE`   |
+| Desktop  | Web apps, dashboards, wide layouts | `DESKTOP`  |
+| Tablet   | Tablet-specific apps, iPad layouts | `TABLET`   |
+| Agnostic | Not tied to a specific device      | `AGNOSTIC` |
 
 ### How Device Type Affects Generation
 
@@ -494,23 +494,23 @@ the prototyping phase when the user needs to compare options.
 
 ### Creative Range
 
-| Range | Behavior | Use when |
-|-------|----------|----------|
-| REFINE | Keeps structure, tweaks fonts/spacing/colors | Polishing |
-| EXPLORE | Balanced exploration (default) | Comparing options |
-| REIMAGINE | Complete restructure allowed | Starting over or pivoting |
+| Range     | Behavior                                     | Use when                  |
+| --------- | -------------------------------------------- | ------------------------- |
+| REFINE    | Keeps structure, tweaks fonts/spacing/colors | Polishing                 |
+| EXPLORE   | Balanced exploration (default)               | Comparing options         |
+| REIMAGINE | Complete restructure allowed                 | Starting over or pivoting |
 
 ### Variant Aspects
 
 Focus generation on specific dimensions:
 
-| Aspect | What changes |
-|--------|-------------|
-| LAYOUT | Element arrangement and grid structure |
-| COLOR_SCHEME | Color palette variations |
-| IMAGES | Image usage and treatment |
-| TEXT_FONT | Typography choices |
-| TEXT_CONTENT | Actual text content |
+| Aspect       | What changes                           |
+| ------------ | -------------------------------------- |
+| LAYOUT       | Element arrangement and grid structure |
+| COLOR_SCHEME | Color palette variations               |
+| IMAGES       | Image usage and treatment              |
+| TEXT_FONT    | Typography choices                     |
+| TEXT_CONTENT | Actual text content                    |
 
 ### MCP Call: generate_variants
 
@@ -544,19 +544,19 @@ has a preference for speed vs quality.
 
 ### Project Management
 
-| Tool | Purpose | Key params |
-|------|---------|-----------|
-| `create_project` | New design project | `title` (string) |
-| `get_project` | Get project details | `name` (format: `projects/{id}`) |
-| `delete_project` | Delete project (irreversible!) | `name` |
-| `list_projects` | List all projects | `filter`: "owned" or "shared" |
+| Tool             | Purpose                        | Key params                       |
+| ---------------- | ------------------------------ | -------------------------------- |
+| `create_project` | New design project             | `title` (string)                 |
+| `get_project`    | Get project details            | `name` (format: `projects/{id}`) |
+| `delete_project` | Delete project (irreversible!) | `name`                           |
+| `list_projects`  | List all projects              | `filter`: "owned" or "shared"    |
 
 ### Screen Management
 
-| Tool | Purpose | Key params |
-|------|---------|-----------|
-| `list_screens` | All screens in project | `projectId` |
-| `get_screen` | Screen details + code + image URLs | `name`, `projectId`, `screenId` |
+| Tool           | Purpose                            | Key params                      |
+| -------------- | ---------------------------------- | ------------------------------- |
+| `list_screens` | All screens in project             | `projectId`                     |
+| `get_screen`   | Screen details + code + image URLs | `name`, `projectId`, `screenId` |
 
 The `get_screen` response includes:
 
@@ -568,12 +568,12 @@ The `get_screen` response includes:
 
 ### AI Generation
 
-| Tool | Purpose | Key params |
-|------|---------|-----------|
-| `generate_screen_from_text` | Generate new screen | `projectId`, `prompt`, `deviceType`, `modelId` (optional) |
-| `upload_screens_from_images` | Upload images as screens | `projectId`, `images[]` (base64 + mimeType) |
-| `edit_screens` | Edit existing screens | `projectId`, `selectedScreenIds[]`, `prompt`, `deviceType`, `modelId` (optional) |
-| `generate_variants` | Generate design variants | `projectId`, `selectedScreenIds[]`, `prompt`, `variantOptions`, `modelId` (optional) |
+| Tool                         | Purpose                  | Key params                                                                           |
+| ---------------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| `generate_screen_from_text`  | Generate new screen      | `projectId`, `prompt`, `deviceType`, `modelId` (optional)                            |
+| `upload_screens_from_images` | Upload images as screens | `projectId`, `images[]` (base64 + mimeType)                                          |
+| `edit_screens`               | Edit existing screens    | `projectId`, `selectedScreenIds[]`, `prompt`, `deviceType`, `modelId` (optional)     |
+| `generate_variants`          | Generate design variants | `projectId`, `selectedScreenIds[]`, `prompt`, `variantOptions`, `modelId` (optional) |
 
 IMPORTANT: `generate_screen_from_text` and `edit_screens` take a few
 minutes. Connection errors don't mean failure — check with `get_screen`
@@ -584,12 +584,12 @@ the user. If accepted, call again with the suggestion as the new prompt.
 
 ### Design Systems
 
-| Tool | Purpose | Key params |
-|------|---------|-----------|
-| `create_design_system` | Create new system | `designSystem` (DesignSystem object), `projectId` |
-| `update_design_system` | Update existing system | `designSystem` (Asset wrapper with `name`) |
-| `list_design_systems` | List systems | `projectId` (optional) |
-| `apply_design_system` | Apply to screens | `projectId`, `selectedScreenIds[]`, `assetId` |
+| Tool                   | Purpose                | Key params                                        |
+| ---------------------- | ---------------------- | ------------------------------------------------- |
+| `create_design_system` | Create new system      | `designSystem` (DesignSystem object), `projectId` |
+| `update_design_system` | Update existing system | `designSystem` (Asset wrapper with `name`)        |
+| `list_design_systems`  | List systems           | `projectId` (optional)                            |
+| `apply_design_system`  | Apply to screens       | `projectId`, `selectedScreenIds[]`, `assetId`     |
 
 ### Device Type Enum Values
 

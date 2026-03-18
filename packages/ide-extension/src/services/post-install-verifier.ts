@@ -1,6 +1,6 @@
+import type { CorePorts } from '@tech-leads-club/core'
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { CorePorts } from '@tech-leads-club/core'
 import type { VerifyResult } from '../shared/types'
 import { findAgentPathConfig } from './agent-paths'
 import type { LoggingService } from './logging-service'

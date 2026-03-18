@@ -203,12 +203,12 @@ When endpoints are being migrated, you need a versioning strategy to avoid break
 
 **Strategies (choose based on context):**
 
-| Strategy | Mechanism | Best For |
-|----------|-----------|----------|
-| **URL versioning** | `/api/v1/` vs `/api/v2/` | Public APIs with many consumers |
-| **Header versioning** | `Accept-Version: 2` | Internal APIs, fewer consumers |
-| **Content negotiation** | `Accept: application/vnd.api.v2+json` | REST-purist APIs |
-| **No versioning** (additive only) | New fields added, nothing removed | Simple migrations, backward-compatible changes |
+| Strategy                          | Mechanism                             | Best For                                       |
+| --------------------------------- | ------------------------------------- | ---------------------------------------------- |
+| **URL versioning**                | `/api/v1/` vs `/api/v2/`              | Public APIs with many consumers                |
+| **Header versioning**             | `Accept-Version: 2`                   | Internal APIs, fewer consumers                 |
+| **Content negotiation**           | `Accept: application/vnd.api.v2+json` | REST-purist APIs                               |
+| **No versioning** (additive only) | New fields added, nothing removed     | Simple migrations, backward-compatible changes |
 
 **Deprecation protocol:**
 

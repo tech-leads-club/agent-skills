@@ -95,9 +95,9 @@ function registerHelpPrompt(server: FastMCP): void {
   })
 }
 
-export function buildCatalogPromptMessages(
-  task?: string,
-): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+export function buildCatalogPromptMessages(task?: string): {
+  messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }>
+} {
   const taskText = task?.trim() ?? ''
   const instructions = [
     `Call search_skills with a concise intent phrase describing: ${taskText}`,
@@ -127,9 +127,9 @@ export function buildSkillPromptMessages(
   }
 }
 
-export function buildUsePromptNotFoundMessages(
-  skillName?: string,
-): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+export function buildUsePromptNotFoundMessages(skillName?: string): {
+  messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }>
+} {
   const requested = skillName && skillName.length > 0 ? skillName : '(empty)'
   return {
     messages: [

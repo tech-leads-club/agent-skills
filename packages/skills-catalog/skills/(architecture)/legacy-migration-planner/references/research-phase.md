@@ -27,10 +27,10 @@ Output format for `dependency-map.md`:
 ```markdown
 ## Dependencies — {file:line ref to dependency file}
 
-| Dependency | Current Version | Latest Version | Status | Notes |
-|------------|----------------|----------------|--------|-------|
-| express    | 4.17.1         | 4.21.2         | Active | Minor upgrade needed |
-| moment     | 2.29.1         | 2.30.1         | Deprecated | Replace with dayjs/date-fns |
+| Dependency | Current Version | Latest Version | Status     | Notes                       |
+| ---------- | --------------- | -------------- | ---------- | --------------------------- |
+| express    | 4.17.1          | 4.21.2         | Active     | Minor upgrade needed        |
+| moment     | 2.29.1          | 2.30.1         | Deprecated | Replace with dayjs/date-fns |
 ```
 
 ### 1.3 — Module Responsibility Mapping
@@ -119,15 +119,15 @@ Output format for `stack-research.md`:
 ```markdown
 ## Current Stack
 
-| Technology | Version in Use | Latest Stable | EOL Date | Source |
-|------------|---------------|---------------|----------|--------|
-| Node.js    | 16.x          | 22.x LTS     | 2023-09  | [nodejs.org/releases](url) |
+| Technology | Version in Use | Latest Stable | EOL Date | Source                     |
+| ---------- | -------------- | ------------- | -------- | -------------------------- |
+| Node.js    | 16.x           | 22.x LTS      | 2023-09  | [nodejs.org/releases](url) |
 
 ## Target Stack (if applicable)
 
-| Technology | Recommended Version | Justification | Source |
-|------------|-------------------|---------------|--------|
-| NestJS     | 10.x             | Latest stable, TS-first | [docs.nestjs.com](url) |
+| Technology | Recommended Version | Justification           | Source                 |
+| ---------- | ------------------- | ----------------------- | ---------------------- |
+| NestJS     | 10.x                | Latest stable, TS-first | [docs.nestjs.com](url) |
 
 ## Migration Guides Found
 

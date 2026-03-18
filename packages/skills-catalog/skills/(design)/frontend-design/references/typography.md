@@ -12,13 +12,13 @@ The common mistake: too many font sizes that are too close together (14px, 15px,
 
 **Use fewer sizes with more contrast.** A 5-size system covers most needs:
 
-| Role | Typical Ratio | Use Case |
-|------|---------------|----------|
-| xs | 0.75rem | Captions, legal |
-| sm | 0.875rem | Secondary UI, metadata |
-| base | 1rem | Body text |
-| lg | 1.25-1.5rem | Subheadings, lead text |
-| xl+ | 2-4rem | Headlines, hero text |
+| Role | Typical Ratio | Use Case               |
+| ---- | ------------- | ---------------------- |
+| xs   | 0.75rem       | Captions, legal        |
+| sm   | 0.875rem      | Secondary UI, metadata |
+| base | 1rem          | Body text              |
+| lg   | 1.25-1.5rem   | Subheadings, lead text |
+| xl+  | 2-4rem        | Headlines, hero text   |
 
 Popular ratios: 1.25 (major third), 1.333 (perfect fourth), 1.5 (perfect fifth). Pick one and commit.
 
@@ -35,6 +35,7 @@ Use `ch` units for character-based measure (`max-width: 65ch`). Line-height scal
 **Avoid the invisible defaults**: Inter, Roboto, Open Sans, Lato, Montserrat. These are everywhere, making your design feel generic. They're fine for documentation or tools where personality isn't the goal—but if you want distinctive design, look elsewhere.
 
 **Better Google Fonts alternatives**:
+
 - Instead of Inter → **Instrument Sans**, **Plus Jakarta Sans**, **Outfit**
 - Instead of Roboto → **Onest**, **Figtree**, **Urbanist**
 - Instead of Open Sans → **Source Sans 3**, **Nunito Sans**, **DM Sans**
@@ -47,6 +48,7 @@ Use `ch` units for character-based measure (`max-width: 65ch`). Line-height scal
 **The non-obvious truth**: You often don't need a second font. One well-chosen font family in multiple weights creates cleaner hierarchy than two competing typefaces. Only add a second font when you need genuine contrast (e.g., display headlines + body serif).
 
 When pairing, contrast on multiple axes:
+
 - Serif + Sans (structure contrast)
 - Geometric + Humanist (personality contrast)
 - Condensed display + Wide body (proportion contrast)
@@ -69,10 +71,10 @@ The layout shift problem: fonts load late, text reflows, and users see content j
 @font-face {
   font-family: 'CustomFont-Fallback';
   src: local('Arial');
-  size-adjust: 105%;        /* Scale to match x-height */
-  ascent-override: 90%;     /* Match ascender height */
-  descent-override: 20%;    /* Match descender depth */
-  line-gap-override: 10%;   /* Match line spacing */
+  size-adjust: 105%; /* Scale to match x-height */
+  ascent-override: 90%; /* Match ascender height */
+  descent-override: 20%; /* Match descender depth */
+  line-gap-override: 10%; /* Match line spacing */
 }
 
 body {
@@ -96,19 +98,29 @@ Most developers don't know these exist. Use them for polish:
 
 ```css
 /* Tabular numbers for data alignment */
-.data-table { font-variant-numeric: tabular-nums; }
+.data-table {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Proper fractions */
-.recipe-amount { font-variant-numeric: diagonal-fractions; }
+.recipe-amount {
+  font-variant-numeric: diagonal-fractions;
+}
 
 /* Small caps for abbreviations */
-abbr { font-variant-caps: all-small-caps; }
+abbr {
+  font-variant-caps: all-small-caps;
+}
 
 /* Disable ligatures in code */
-code { font-variant-ligatures: none; }
+code {
+  font-variant-ligatures: none;
+}
 
 /* Enable kerning (usually on by default, but be explicit) */
-body { font-kerning: normal; }
+body {
+  font-kerning: normal;
+}
 ```
 
 Check what features your font supports at [Wakamai Fondue](https://wakamaifondue.com/).

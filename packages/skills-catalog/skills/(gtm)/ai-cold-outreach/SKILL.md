@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # AI Cold Outreach
@@ -64,16 +63,16 @@ Signals tell you WHO to reach out to and WHEN. Cold email without signals is spa
 
 **Signal types ranked by conversion intent:**
 
-| Signal Type | Source | Intent Level | Timing Window |
-|---|---|---|---|
-| Category page view on G2 | G2 Buyer Intent | Very High | 7-14 days |
-| Competitor evaluation | Bombora + G2 | Very High | 7-21 days |
-| Job posting for your category | LinkedIn, Indeed | High | 14-30 days |
-| Funding announcement | Crunchbase, Clay | High | 30-60 days |
-| Tech stack change | BuiltWith, HG Data | Medium-High | 14-30 days |
-| Leadership hire | LinkedIn Sales Nav | Medium | 30-45 days |
-| Content engagement | Bombora cooperative | Medium | 7-14 days |
-| Company growth spike | Clay, LinkedIn | Medium-Low | 30-60 days |
+| Signal Type                   | Source              | Intent Level | Timing Window |
+| ----------------------------- | ------------------- | ------------ | ------------- |
+| Category page view on G2      | G2 Buyer Intent     | Very High    | 7-14 days     |
+| Competitor evaluation         | Bombora + G2        | Very High    | 7-21 days     |
+| Job posting for your category | LinkedIn, Indeed    | High         | 14-30 days    |
+| Funding announcement          | Crunchbase, Clay    | High         | 30-60 days    |
+| Tech stack change             | BuiltWith, HG Data  | Medium-High  | 14-30 days    |
+| Leadership hire               | LinkedIn Sales Nav  | Medium       | 30-45 days    |
+| Content engagement            | Bombora cooperative | Medium       | 7-14 days     |
+| Company growth spike          | Clay, LinkedIn      | Medium-Low   | 30-60 days    |
 
 **Signal layering strategy:**
 Single signals produce 3-5% reply rates. Layer two or more signals and reply rates jump to 8-15%. Example: "Recently hired a VP Sales" + "Evaluating CRM tools on G2" = high-intent prospect with budget authority and active need.
@@ -157,29 +156,30 @@ Enriched lead data (company news, tech stack, hiring, social)
 
 **First line frameworks that work:**
 
-| Framework | Example | Best For |
-|---|---|---|
-| Observation + Implication | "Saw you just opened a London office - scaling support across time zones gets messy fast." | Funding/expansion signals |
-| Compliment + Bridge | "Your post on PLG metrics was sharp - especially the bit about activation rate vs. NPS." | Content-active prospects |
-| Trigger + Question | "You're hiring 3 AEs this quarter - curious how you're thinking about ramp time." | Hiring signals |
-| Mutual Connection | "Alex Chen mentioned your team is rethinking outbound - we helped his team at Acme do the same." | Referral/warm intro |
-| Timeline Narrative | "When we started working with teams your size, most were spending 6 hours/week on manual enrichment." | Timeline hooks (highest reply rate) |
+| Framework                 | Example                                                                                               | Best For                            |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Observation + Implication | "Saw you just opened a London office - scaling support across time zones gets messy fast."            | Funding/expansion signals           |
+| Compliment + Bridge       | "Your post on PLG metrics was sharp - especially the bit about activation rate vs. NPS."              | Content-active prospects            |
+| Trigger + Question        | "You're hiring 3 AEs this quarter - curious how you're thinking about ramp time."                     | Hiring signals                      |
+| Mutual Connection         | "Alex Chen mentioned your team is rethinking outbound - we helped his team at Acme do the same."      | Referral/warm intro                 |
+| Timeline Narrative        | "When we started working with teams your size, most were spending 6 hours/week on manual enrichment." | Timeline hooks (highest reply rate) |
 
 **Timeline hooks outperform everything else:**
 Data from 2025 shows timeline-based hooks achieve 10% reply rates vs. 4.4% for problem-based hooks - a 2.3x gap. Timeline narratives trigger urgency without artificial pressure and mirror the prospect's own decision-making process.
 
 **AI model selection for personalization:**
 
-| Model | Strength | Best Use |
-|---|---|---|
-| Claude Sonnet | Natural tone, avoids corporate speak | First lines, full email drafts |
-| Claude Opus | Deep research synthesis | Complex enterprise personalization |
-| GPT-4o | Speed, structured output | Batch processing at scale |
-| Claude Haiku | Cost-efficient | Simple variable generation |
+| Model         | Strength                             | Best Use                           |
+| ------------- | ------------------------------------ | ---------------------------------- |
+| Claude Sonnet | Natural tone, avoids corporate speak | First lines, full email drafts     |
+| Claude Opus   | Deep research synthesis              | Complex enterprise personalization |
+| GPT-4o        | Speed, structured output             | Batch processing at scale          |
+| Claude Haiku  | Cost-efficient                       | Simple variable generation         |
 
 Claude models produce the most natural-sounding cold emails. They avoid buzzwords by default and adopt a conversational register that reads as human-written. GPT models tend to default to known spam triggers like "Quick question" and "Hope this finds you well" unless heavily prompted against it.
 
 **Scaling AI personalization with Clay:**
+
 1. Build a Clay table with enriched leads
 2. Add an AI enrichment column using Claude
 3. Prompt: "Research this company using the data provided. Write a 1-sentence observation about [specific context]. Do not use corporate jargon."
@@ -206,16 +206,17 @@ Day 18: Email 5 - Permission-based close ("Should I close this out?")
 
 **Sequence length and timing rules:**
 
-| Factor | Recommendation | Why |
-|---|---|---|
-| Total emails | 4-7 | First email captures 58% of replies. Diminishing returns after 7. |
-| Gap between emails | 2-4 business days | 3 days is the sweet spot. Less feels pushy, more loses momentum. |
-| Total sequence duration | 14-25 days | Beyond 25 days, leads go stale. |
-| SMB sequences | 5-8 touches over 30 days | Shorter decision cycles. |
-| Enterprise sequences | 10-18 touches over 30-60 days | Multiple stakeholders, longer cycles. |
+| Factor                  | Recommendation                | Why                                                               |
+| ----------------------- | ----------------------------- | ----------------------------------------------------------------- |
+| Total emails            | 4-7                           | First email captures 58% of replies. Diminishing returns after 7. |
+| Gap between emails      | 2-4 business days             | 3 days is the sweet spot. Less feels pushy, more loses momentum.  |
+| Total sequence duration | 14-25 days                    | Beyond 25 days, leads go stale.                                   |
+| SMB sequences           | 5-8 touches over 30 days      | Shorter decision cycles.                                          |
+| Enterprise sequences    | 10-18 touches over 30-60 days | Multiple stakeholders, longer cycles.                             |
 
 **Conditional branching logic:**
 Modern sequences are not linear. Build branches based on:
+
 - **Opens without reply** - Send a shorter follow-up with different angle
 - **Link clicks** - Accelerate sequence, add phone call step
 - **No opens** - Test different subject line, change send time
@@ -225,13 +226,13 @@ Modern sequences are not linear. Build branches based on:
 **A/B testing framework:**
 Test ONE variable at a time across minimum 200 sends per variant:
 
-| Priority | Variable | Impact on Reply Rate |
-|---|---|---|
-| 1 | Subject line | 20-40% swing in open rate |
-| 2 | First line / hook | 2-3x reply rate difference |
-| 3 | CTA style | 1.5-2x reply rate difference |
-| 4 | Email length | Moderate impact |
-| 5 | Send time | Marginal impact |
+| Priority | Variable          | Impact on Reply Rate         |
+| -------- | ----------------- | ---------------------------- |
+| 1        | Subject line      | 20-40% swing in open rate    |
+| 2        | First line / hook | 2-3x reply rate difference   |
+| 3        | CTA style         | 1.5-2x reply rate difference |
+| 4        | Email length      | Moderate impact              |
+| 5        | Send time         | Marginal impact              |
 
 ### Stage 5: Sending Infrastructure
 
@@ -262,29 +263,29 @@ Example: 600 emails/day
 **Infrastructure sizing guide:**
 
 | Daily Volume | Domains Needed | Mailboxes | Monthly Domain Cost |
-|---|---|---|---|
-| 100-200 | 2-3 | 4-6 | $20-30 |
-| 300-500 | 3-5 | 6-10 | $30-50 |
-| 500-1,000 | 5-8 | 10-16 | $50-80 |
-| 1,000-2,000 | 8-15 | 16-30 | $80-150 |
-| 2,000+ | 15+ | 30+ | $150+ |
+| ------------ | -------------- | --------- | ------------------- |
+| 100-200      | 2-3            | 4-6       | $20-30              |
+| 300-500      | 3-5            | 6-10      | $30-50              |
+| 500-1,000    | 5-8            | 10-16     | $50-80              |
+| 1,000-2,000  | 8-15           | 16-30     | $80-150             |
+| 2,000+       | 15+            | 30+       | $150+               |
 
 **Per-mailbox sending limits:**
 
-| Type | Daily Limit | Notes |
-|---|---|---|
-| Warmup emails | 15-20/day | Run for 14-21 days before cold sends |
-| Cold emails | 25-30/day | Never exceed 40 |
-| Combined total | 40-50/day | Stay under provider thresholds |
+| Type           | Daily Limit | Notes                                |
+| -------------- | ----------- | ------------------------------------ |
+| Warmup emails  | 15-20/day   | Run for 14-21 days before cold sends |
+| Cold emails    | 25-30/day   | Never exceed 40                      |
+| Combined total | 40-50/day   | Stay under provider thresholds       |
 
 **Domain warmup protocol:**
 
-| Week | Daily Volume/Mailbox | Activity |
-|---|---|---|
-| Week 1 | 10-15 | Warmup only, no cold sends |
-| Week 2 | 20-30 | Warmup + 5-10 cold sends |
-| Week 3 | 30-40 | Warmup + 15-20 cold sends |
-| Week 4 | 40-50 | Full cold sending capacity |
+| Week   | Daily Volume/Mailbox | Activity                   |
+| ------ | -------------------- | -------------------------- |
+| Week 1 | 10-15                | Warmup only, no cold sends |
+| Week 2 | 20-30                | Warmup + 5-10 cold sends   |
+| Week 3 | 30-40                | Warmup + 15-20 cold sends  |
+| Week 4 | 40-50                | Full cold sending capacity |
 
 **Authentication setup checklist (do this on Day 1):**
 
@@ -299,6 +300,7 @@ Example: 600 emails/day
 Authenticated senders are 2.7x more likely to reach the inbox vs. unauthenticated.
 
 **DMARC rollout sequence:**
+
 1. Week 1-2: `p=none` with reporting (`rua=mailto:dmarc@yourdomain.com`)
 2. Week 3-4: Review reports, fix any alignment issues
 3. Week 5-6: `p=quarantine` (soft enforcement)
@@ -308,24 +310,24 @@ Never jump straight to `p=reject` before inventorying all legitimate senders.
 
 **Sending platform comparison: Instantly vs. Smartlead**
 
-| Feature | Instantly | Smartlead |
-|---|---|---|
-| **Best for** | Solo founders, small teams | Agencies, high-volume senders |
-| **Pricing (entry)** | $37/mo | $33/mo |
-| **Pricing (scale)** | $97-358/mo | $94-174/mo |
-| **Email accounts** | Unlimited (Growth+) | Unlimited (all plans) |
-| **Built-in lead database** | Yes (SuperSearch, 450M+) | No (import only) |
-| **Warmup network** | 4.2M+ accounts | Smaller network |
-| **AI reply agent** | Yes (responds in <5 min) | Limited |
-| **Deliverability approach** | IP sharding + rotation (SISR) | Human-mimicking variable volume |
-| **Sending behavior** | Exact daily volume | Variable (sends 22 when set to 25) |
-| **API and webhook support** | Good | Excellent (API-first) |
-| **White-label** | Limited | Full white-label |
-| **CRM integration** | Built-in basic CRM | Via integrations |
-| **Clay integration** | Native | Native |
-| **Inbox rotation** | Automatic | Automatic |
-| **Campaign analytics** | Detailed dashboards | Detailed dashboards |
-| **Multi-channel** | Email + LinkedIn (beta) | Email focused |
+| Feature                     | Instantly                     | Smartlead                          |
+| --------------------------- | ----------------------------- | ---------------------------------- |
+| **Best for**                | Solo founders, small teams    | Agencies, high-volume senders      |
+| **Pricing (entry)**         | $37/mo                        | $33/mo                             |
+| **Pricing (scale)**         | $97-358/mo                    | $94-174/mo                         |
+| **Email accounts**          | Unlimited (Growth+)           | Unlimited (all plans)              |
+| **Built-in lead database**  | Yes (SuperSearch, 450M+)      | No (import only)                   |
+| **Warmup network**          | 4.2M+ accounts                | Smaller network                    |
+| **AI reply agent**          | Yes (responds in <5 min)      | Limited                            |
+| **Deliverability approach** | IP sharding + rotation (SISR) | Human-mimicking variable volume    |
+| **Sending behavior**        | Exact daily volume            | Variable (sends 22 when set to 25) |
+| **API and webhook support** | Good                          | Excellent (API-first)              |
+| **White-label**             | Limited                       | Full white-label                   |
+| **CRM integration**         | Built-in basic CRM            | Via integrations                   |
+| **Clay integration**        | Native                        | Native                             |
+| **Inbox rotation**          | Automatic                     | Automatic                          |
+| **Campaign analytics**      | Detailed dashboards           | Detailed dashboards                |
+| **Multi-channel**           | Email + LinkedIn (beta)       | Email focused                      |
 
 **Decision framework:**
 
@@ -357,17 +359,18 @@ Most replies are not "Yes, let's meet." They are questions, objections, or soft 
 
 **Reply categories and handling:**
 
-| Reply Type | % of Replies | AI Action |
-|---|---|---|
-| Positive interest | 25-35% | Book meeting link, confirm time |
-| Question about offer | 20-30% | Answer with specifics, re-CTA |
-| Objection (timing) | 15-20% | Acknowledge, offer future follow-up |
-| Objection (budget) | 5-10% | Share ROI data, offer smaller entry |
-| Referral to colleague | 10-15% | Thank, ask for intro or direct email |
-| Not interested | 10-15% | Thank, remove from sequence |
-| Auto-reply/OOO | 5-10% | Pause, re-send after return date |
+| Reply Type            | % of Replies | AI Action                            |
+| --------------------- | ------------ | ------------------------------------ |
+| Positive interest     | 25-35%       | Book meeting link, confirm time      |
+| Question about offer  | 20-30%       | Answer with specifics, re-CTA        |
+| Objection (timing)    | 15-20%       | Acknowledge, offer future follow-up  |
+| Objection (budget)    | 5-10%        | Share ROI data, offer smaller entry  |
+| Referral to colleague | 10-15%       | Thank, ask for intro or direct email |
+| Not interested        | 10-15%       | Thank, remove from sequence          |
+| Auto-reply/OOO        | 5-10%        | Pause, re-send after return date     |
 
 **AI reply handling setup:**
+
 1. Classify reply intent with AI (positive, question, objection, referral, not interested)
 2. Route positive replies to a human or booking link immediately
 3. Generate contextual responses for questions and objections
@@ -413,6 +416,7 @@ Line 3 (CTA):  A low-friction ask.
 > scale your sales team. Would Tuesday at 2pm work?
 
 **Why the bad example fails:**
+
 - "Hope this finds you well" - spam trigger, zero value
 - Generic observation - "growing" applies to everyone
 - Self-centered proof - "leading platform" is unverifiable
@@ -421,24 +425,22 @@ Line 3 (CTA):  A low-friction ask.
 
 **Cold email anatomy rules:**
 
-| Element | Rule | Why |
-|---|---|---|
-| Subject line | 2-5 words, lowercase, no punctuation | Looks like an internal email |
-| Preview text | First 40 chars of body visible in inbox | Make the hook visible |
-| Word count | 50-125 words | Under 50 feels incomplete, over 125 loses attention |
-| Paragraphs | 1-2 sentences each | Mobile-friendly whitespace |
-| Links | Zero in first email | Links trigger spam filters |
-| Images | Zero in first email | Images trigger spam filters |
-| Attachments | Zero in first email | Attachments trigger spam filters |
-| Signature | Name + title + company only | Minimal, no banners or social icons |
-| CTA | One per email | Multiple CTAs reduce response rate |
-| Personalization | First 1-2 lines | Generic everything else is fine if the hook lands |
+| Element         | Rule                                    | Why                                                 |
+| --------------- | --------------------------------------- | --------------------------------------------------- |
+| Subject line    | 2-5 words, lowercase, no punctuation    | Looks like an internal email                        |
+| Preview text    | First 40 chars of body visible in inbox | Make the hook visible                               |
+| Word count      | 50-125 words                            | Under 50 feels incomplete, over 125 loses attention |
+| Paragraphs      | 1-2 sentences each                      | Mobile-friendly whitespace                          |
+| Links           | Zero in first email                     | Links trigger spam filters                          |
+| Images          | Zero in first email                     | Images trigger spam filters                         |
+| Attachments     | Zero in first email                     | Attachments trigger spam filters                    |
+| Signature       | Name + title + company only             | Minimal, no banners or social icons                 |
+| CTA             | One per email                           | Multiple CTAs reduce response rate                  |
+| Personalization | First 1-2 lines                         | Generic everything else is fine if the hook lands   |
 
 ---
 
-
 For benchmarks, deliverability playbook, week-by-week build, cost analysis, failure modes, and advanced tactics read `references/benchmarks-deliverability-tactics.md`.
-
 
 ## Examples
 
@@ -453,7 +455,6 @@ For benchmarks, deliverability playbook, week-by-week build, cost analysis, fail
 - **Meetings don’t show up** → **Cause:** CTA is too big (e.g. "book 30 min") or sequence stops too early. **Fix:** Use lower-friction CTA first (reply, short call); extend to 5–7 touches with 3–5 day spacing.
 
 ---
-
 
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 

@@ -2,20 +2,20 @@
 
 ## Quick Reference
 
-| Concept | Key Number or Rule |
-|---|---|
-| ICP review cadence | Every 90 days minimum for AI products |
-| Sean Ellis PMF threshold | 40%+ "very disappointed" |
-| Enrichment confidence threshold | 0.85+ for outreach, 0.50+ for nurture, reject below 0.50 |
-| Positioning stack layers | Category, Wedge, Proof Vector, Alternative Framing |
-| Messaging tiers | Tier 1 (narrative), Tier 2 (value props), Tier 3 (features) |
-| Fit Score weights | Firmographic 40%, Technographic 35%, Behavioral 25% |
-| Intent Score weights | First-Party 40%, Third-Party 35%, Triggers 25% |
-| Seat-based pricing trend | Dropped from 21% to 15% in 12 months |
-| Hybrid pricing trend | Surged from 27% to 41% |
-| Buyer shift | Business function leaders now primary AI buyers, not IT |
-| ACTIVATE threshold | High Fit + High Intent, respond in under 4 hours |
-| Messaging test | "Would a VP forward this to their CFO?" If no, wrong altitude |
+| Concept                         | Key Number or Rule                                            |
+| ------------------------------- | ------------------------------------------------------------- |
+| ICP review cadence              | Every 90 days minimum for AI products                         |
+| Sean Ellis PMF threshold        | 40%+ "very disappointed"                                      |
+| Enrichment confidence threshold | 0.85+ for outreach, 0.50+ for nurture, reject below 0.50      |
+| Positioning stack layers        | Category, Wedge, Proof Vector, Alternative Framing            |
+| Messaging tiers                 | Tier 1 (narrative), Tier 2 (value props), Tier 3 (features)   |
+| Fit Score weights               | Firmographic 40%, Technographic 35%, Behavioral 25%           |
+| Intent Score weights            | First-Party 40%, Third-Party 35%, Triggers 25%                |
+| Seat-based pricing trend        | Dropped from 21% to 15% in 12 months                          |
+| Hybrid pricing trend            | Surged from 27% to 41%                                        |
+| Buyer shift                     | Business function leaders now primary AI buyers, not IT       |
+| ACTIVATE threshold              | High Fit + High Intent, respond in under 4 hours              |
+| Messaging test                  | "Would a VP forward this to their CFO?" If no, wrong altitude |
 
 ---
 

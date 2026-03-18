@@ -110,7 +110,7 @@ This was a version bump only for @tech-leads-club/agent-skills to align it with 
 
 - add onChange callback to MultiSelectPrompt for selection updates ([bc0c94fa2](https://github.com/tech-leads-club/agent-skills/commit/bc0c94fa2))
 - add extension detection for agents installation ([370896f38](https://github.com/tech-leads-club/agent-skills/commit/370896f38))
-- ⚠️  add CLI description for clarity and security emphasis ([c918702d7](https://github.com/tech-leads-club/agent-skills/commit/c918702d7))
+- ⚠️ add CLI description for clarity and security emphasis ([c918702d7](https://github.com/tech-leads-club/agent-skills/commit/c918702d7))
 - implement CLI audit functionality with log viewer ([caea9d926](https://github.com/tech-leads-club/agent-skills/commit/caea9d926))
 - add readAuditLog function and update logAudit for better path handling ([53188752e](https://github.com/tech-leads-club/agent-skills/commit/53188752e))
 - add AuditLogViewer component to display audit entries ([87e111b3f](https://github.com/tech-leads-club/agent-skills/commit/87e111b3f))
@@ -240,9 +240,9 @@ This was a version bump only for @tech-leads-club/agent-skills to align it with 
 - update jest configuration for improved test matching and module handling ([f44ff64f1](https://github.com/tech-leads-club/agent-skills/commit/f44ff64f1))
 - remove implicit dependencies and streamline build targets ([8b8dcbc0c](https://github.com/tech-leads-club/agent-skills/commit/8b8dcbc0c))
 
-### ⚠️  Breaking Changes
+### ⚠️ Breaking Changes
 
-- add CLI description for clarity and security emphasis  ([c918702d7](https://github.com/tech-leads-club/agent-skills/commit/c918702d7))
+- add CLI description for clarity and security emphasis ([c918702d7](https://github.com/tech-leads-club/agent-skills/commit/c918702d7))
 
 ### ❤️ Thank You
 

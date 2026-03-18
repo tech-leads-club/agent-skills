@@ -1,6 +1,6 @@
-import chalk from 'chalk'
-import { ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
 import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
+import { ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
 
@@ -23,7 +23,9 @@ async function downloadSkills(skillNames: string[], forceDownload: boolean): Pro
       continue
     }
 
-    const path = forceDownload ? await forceDownloadSkill(ports, skillName) : await ensureSkillDownloaded(ports, skillName)
+    const path = forceDownload
+      ? await forceDownloadSkill(ports, skillName)
+      : await ensureSkillDownloaded(ports, skillName)
     if (path) {
       selectedSkills.push({ ...skill, path })
     } else {

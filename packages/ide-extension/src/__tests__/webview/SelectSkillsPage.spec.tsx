@@ -26,10 +26,10 @@ function getSelectableSkills({
   selectedAgents?: string[]
   scope: 'local' | 'global'
 }): typeof registry.skills {
-  const targetAgents =
-    selectedAgents.length > 0 ? allAgents.filter((a) => selectedAgents.includes(a.agent)) : allAgents
+  const targetAgents = selectedAgents.length > 0 ? allAgents.filter((a) => selectedAgents.includes(a.agent)) : allAgents
   const inScope = (inst: { local: boolean; global: boolean }, s: string) => (s === 'local' ? inst.local : inst.global)
-  const agentInScope = (agent: { local: boolean; global: boolean }, s: string) => (s === 'local' ? agent.local : agent.global)
+  const agentInScope = (agent: { local: boolean; global: boolean }, s: string) =>
+    s === 'local' ? agent.local : agent.global
   return registry.skills.filter((skill) => {
     const installed = installedSkills[skill.name]
     if (action === 'install') {
@@ -40,8 +40,7 @@ function getSelectableSkills({
           : targetAgents.every((a) => {
               const info = installed.agents.find((e) => e.agent === a.agent)
               return info && agentInScope(info, scope)
-            })
-        )
+            }))
       return !installedForAll
     }
     if (!installed || !inScope(installed, scope)) return false
@@ -50,10 +49,7 @@ function getSelectableSkills({
   })
 }
 
-function isSkillInstalledForScope(
-  installed: InstalledSkillsMap[string],
-  scope: 'local' | 'global',
-): boolean {
+function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: 'local' | 'global'): boolean {
   if (!installed) return false
   return scope === 'local' ? installed.local : installed.global
 }

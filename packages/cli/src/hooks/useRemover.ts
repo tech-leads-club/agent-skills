@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { removeSkill } from '@tech-leads-club/core'
 import type { AgentType } from '@tech-leads-club/core'
+import { removeSkill } from '@tech-leads-club/core'
+import { useState } from 'react'
 
 import { ports } from '../ports'
 

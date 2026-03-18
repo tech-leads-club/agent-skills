@@ -62,12 +62,7 @@ export function RemoveConfirmPage({
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
-          <button
-            type="button"
-            className="secondary-footer-button"
-            onClick={onBack}
-            disabled={isProcessing}
-          >
+          <button type="button" className="secondary-footer-button" onClick={onBack} disabled={isProcessing}>
             Cancel
           </button>
           <button

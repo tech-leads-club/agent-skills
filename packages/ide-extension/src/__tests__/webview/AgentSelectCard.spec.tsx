@@ -23,9 +23,7 @@ describe('AgentSelectCard', () => {
   })
 
   it('has no accessibility violations', async () => {
-    const { container } = render(
-      <AgentSelectCard agent={agent} isSelected={true} onToggle={jest.fn()} />,
-    )
+    const { container } = render(<AgentSelectCard agent={agent} isSelected={true} onToggle={jest.fn()} />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })

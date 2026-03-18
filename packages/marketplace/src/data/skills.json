@@ -10,9 +10,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "WCAG.md"
-        ],
+        "referenceFiles": ["WCAG.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -26,10 +24,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "benchmarks-deliverability-tactics.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["benchmarks-deliverability-tactics.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -43,10 +38,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "implementation-guide.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["implementation-guide.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -60,10 +52,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "implementation-guide.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["implementation-guide.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -105,11 +94,7 @@
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
-        "referenceFiles": [
-          "checklists.md",
-          "decision-trees.md",
-          "mcp-guide.md"
-        ],
+        "referenceFiles": ["checklists.md", "decision-trees.md", "mcp-guide.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -473,10 +458,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "coding-principles.md",
-          "notebook-spec.md"
-        ],
+        "referenceFiles": ["coding-principles.md", "notebook-spec.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -560,10 +542,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "podcast-community-cadence.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["podcast-community-cadence.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -577,9 +556,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "LCP.md"
-        ],
+        "referenceFiles": ["LCP.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -621,9 +598,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "section-templates.md"
-        ],
+        "referenceFiles": ["section-templates.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -665,9 +640,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "style-guide.md"
-        ],
+        "referenceFiles": ["style-guide.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -709,11 +682,7 @@
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
-        "referenceFiles": [
-          "element-types.md",
-          "excalidraw-schema.md",
-          "icon-libraries.md"
-        ],
+        "referenceFiles": ["element-types.md", "excalidraw-schema.md", "icon-libraries.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -741,10 +710,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "figma-mcp-config.md",
-          "figma-tools-and-prompts.md"
-        ],
+        "referenceFiles": ["figma-mcp-config.md", "figma-tools-and-prompts.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -772,11 +738,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "collection-guide.md",
-          "design-principles.md",
-          "stitch-integration.md"
-        ],
+        "referenceFiles": ["collection-guide.md", "design-principles.md", "stitch-integration.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -840,10 +802,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "implementation-guide.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["implementation-guide.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -885,9 +844,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -901,9 +858,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "PRINCIPLES.md"
-        ],
+        "referenceFiles": ["PRINCIPLES.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -959,10 +914,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "directories-timing-mistakes.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["directories-timing-mistakes.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -997,11 +949,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "cli-commands.md",
-          "deployment-patterns.md",
-          "netlify-toml.md"
-        ],
+        "referenceFiles": ["cli-commands.md", "deployment-patterns.md", "netlify-toml.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1071,9 +1019,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1087,10 +1033,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "implementation-guide.md",
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["implementation-guide.md", "quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1132,11 +1075,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "bundle-optimization.md",
-          "core-web-vitals.md",
-          "image-optimization.md"
-        ],
+        "referenceFiles": ["bundle-optimization.md", "core-web-vitals.md", "image-optimization.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1164,9 +1103,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1253,9 +1190,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "quick-reference.md"
-        ],
+        "referenceFiles": ["quick-reference.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1294,9 +1229,7 @@
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
-        "referenceFiles": [
-          "neo4j-import.md"
-        ],
+        "referenceFiles": ["neo4j-import.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1310,10 +1243,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "prompt-template.md",
-          "security-controls-and-assets.md"
-        ],
+        "referenceFiles": ["prompt-template.md", "security-controls-and-assets.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1381,11 +1311,7 @@
       "metadata": {
         "hasScripts": true,
         "hasReferences": true,
-        "referenceFiles": [
-          "examples.md",
-          "patterns.md",
-          "quality-checklist.md"
-        ],
+        "referenceFiles": ["examples.md", "patterns.md", "quality-checklist.md"],
         "lastModified": "2026-03-14"
       }
     },
@@ -1536,9 +1462,7 @@
       "metadata": {
         "hasScripts": false,
         "hasReferences": true,
-        "referenceFiles": [
-          "guideline.md"
-        ],
+        "referenceFiles": ["guideline.md"],
         "lastModified": "2026-03-14"
       }
     },

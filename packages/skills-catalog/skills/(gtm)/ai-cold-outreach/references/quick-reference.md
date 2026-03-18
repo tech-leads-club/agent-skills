@@ -3,6 +3,7 @@
 ## Quick Reference
 
 ### 5-Minute Cold Email Audit
+
 1. Is the subject line 2-5 words, lowercase? (Y/N)
 2. Is the first line a specific observation, not a generic question? (Y/N)
 3. Is the email under 100 words? (Y/N)
@@ -14,6 +15,7 @@
 If any answer is "No," fix it before sending.
 
 ### Sending Capacity Formula
+
 ```
 Domains needed = (daily_volume / 150) * 1.5
 Mailboxes = domains * 2
@@ -22,6 +24,7 @@ Warmup period = 14-21 days before cold sends
 ```
 
 ### Key Metrics to Track Weekly
+
 - Open rate (target: 45%+)
 - Reply rate (target: 5%+)
 - Positive reply rate (target: 3%+)

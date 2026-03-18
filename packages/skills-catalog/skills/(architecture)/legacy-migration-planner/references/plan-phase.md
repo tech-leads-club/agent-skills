@@ -10,13 +10,13 @@ Every decision in this phase must trace back to evidence from the RESEARCH outpu
 
 Based on RESEARCH findings, determine which migration direction applies. This is NOT a choice you make — it is determined by evidence.
 
-| Direction | Evidence That Points Here |
-|-----------|--------------------------|
-| **Decomposition** (monolith → services) | High coupling ratios across domains, deployment bottlenecks cited in CI/CD config, scaling constraints in infrastructure config, team autonomy requirements stated by user |
-| **Consolidation** (services → modular monolith) | Excessive inter-service communication found in integration catalog, operational overhead in infrastructure config, data consistency issues across services, small team stated by user |
-| **Cross-stack** (language/framework change) | EOL/deprecated stack in dependency inventory, target stack specified by user, performance/ecosystem gaps documented in stack research |
-| **Modernization in-place** (same stack, better architecture) | Stack is current but architecture has issues (circular deps, no domain boundaries, scattered data access) |
-| **Hybrid** | Combination of above — document which direction applies to which domain |
+| Direction                                                    | Evidence That Points Here                                                                                                                                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Decomposition** (monolith → services)                      | High coupling ratios across domains, deployment bottlenecks cited in CI/CD config, scaling constraints in infrastructure config, team autonomy requirements stated by user            |
+| **Consolidation** (services → modular monolith)              | Excessive inter-service communication found in integration catalog, operational overhead in infrastructure config, data consistency issues across services, small team stated by user |
+| **Cross-stack** (language/framework change)                  | EOL/deprecated stack in dependency inventory, target stack specified by user, performance/ecosystem gaps documented in stack research                                                 |
+| **Modernization in-place** (same stack, better architecture) | Stack is current but architecture has issues (circular deps, no domain boundaries, scattered data access)                                                                             |
+| **Hybrid**                                                   | Combination of above — document which direction applies to which domain                                                                                                               |
 
 ### 5.2 — Direction Documentation
 
@@ -26,11 +26,13 @@ In `00-roadmap.md`, document the chosen direction with explicit evidence:
 ## Migration Direction: {Direction}
 
 **Rationale**: Based on the following RESEARCH findings:
+
 - {Finding 1 — reference to research/file.md}
 - {Finding 2 — reference to research/file.md}
 - {Finding 3 — reference to research/file.md}
 
 **User-confirmed constraints**:
+
 - {Any constraints the user provided}
 ```
 
@@ -90,22 +92,25 @@ Every domain file must follow this structure:
 **Modules**: {List with file:line refs}
 **Responsibility**: {One sentence}
 **Dependencies**:
+
 - Depends on: {Other domains, with file:line refs to import statements}
 - Depended on by: {Other domains that import from this one}
-**Data stores**: {Tables/collections with file:line refs to models}
-**External integrations**: {APIs, queues, etc. with file:line refs}
+  **Data stores**: {Tables/collections with file:line refs to models}
+  **External integrations**: {APIs, queues, etc. with file:line refs}
 
 ## Target State
 
 **Architecture**: {Target structure}
 **Technology**: {Stack — verified via web search in RESEARCH, cite stack-research.md}
 **Key changes**:
+
 - {Change 1 — what moves where}
 - {Change 2}
 
 ## Migration Steps
 
 ### Step 1: {Action}
+
 **Pattern**: {Reference to strangler-fig-patterns.md section}
 **Seam**: {Reference to seam identified in Step 6}
 **What changes**: {Specific description}
@@ -115,20 +120,23 @@ Every domain file must follow this structure:
 **Success criteria**: {Measurable metrics}
 
 ### Step 2: {Action}
+
 ...
 
 ## Risks Specific to This Domain
 
-| Risk | Impact | Mitigation | Evidence |
-|------|--------|------------|----------|
+| Risk   | Impact  | Mitigation | Evidence                    |
+| ------ | ------- | ---------- | --------------------------- |
 | {Risk} | {Level} | {Strategy} | {file:line or research ref} |
 
 ## Dependencies on Other Domains
 
 **Must complete before this domain**:
+
 - {Domain X} — because {reason with evidence}
 
 **Blocks these domains**:
+
 - {Domain Y} — because {reason with evidence}
 ```
 
@@ -163,6 +171,7 @@ Write `./migration-plan/00-roadmap.md` as the master document that ties everythi
 ## Phase Sequence
 
 ### Phase 0: Safety Net Setup
+
 **Duration estimate**: {Based on codebase size from RESEARCH}
 **Goal**: Establish characterization tests and monitoring before any migration begins.
 **Details**: See `references/testing-safety-nets.md` for methodology.
@@ -170,6 +179,7 @@ Write `./migration-plan/00-roadmap.md` as the master document that ties everythi
 **Success criteria**: {Measurable}
 
 ### Phase 1: {First domain(s) to migrate}
+
 **Domains**: {List — leaf nodes from dependency analysis}
 **Why first**: {Evidence — lowest coupling, no incoming dependencies}
 **Plan files**: `domains/01-domain-{name}.md`
@@ -177,9 +187,11 @@ Write `./migration-plan/00-roadmap.md` as the master document that ties everythi
 **Success criteria**: {Measurable}
 
 ### Phase 2: {Next domain(s)}
+
 ...
 
 ### Phase N: Legacy Decommission
+
 **Goal**: Remove legacy code paths after all domains are migrated and validated.
 **Prerequisites**: All domains at 100% traffic on new paths for minimum 30 days.
 **Rollback**: Feature flags preserved for 60 days post-decommission.
@@ -187,14 +199,17 @@ Write `./migration-plan/00-roadmap.md` as the master document that ties everythi
 ## Cross-Domain Concerns
 
 ### Shared Database Tables
-| Table | Accessed By | Strategy | Reference |
-|-------|------------|----------|-----------|
-| {table} | {domains} | Dual-write / facade | {domain file ref} |
+
+| Table   | Accessed By | Strategy            | Reference         |
+| ------- | ----------- | ------------------- | ----------------- |
+| {table} | {domains}   | Dual-write / facade | {domain file ref} |
 
 ### Shared Authentication / Session
+
 {How auth is handled during migration — cite research}
 
 ### Observability
+
 {Monitoring strategy to compare old vs new behavior during migration}
 
 ## Risk Summary

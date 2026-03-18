@@ -9,6 +9,7 @@ Expert guidance for optimising Shopify store performance including theme speed, 
 Images are typically the largest assets - optimise aggressively.
 
 **Use Shopify CDN Image Sizing:**
+
 ```liquid
 {# ❌ Don't load full-size images #}
 <img src="{{ product.featured_image.src }}" alt="{{ product.title }}">
@@ -24,6 +25,7 @@ Images are typically the largest assets - optimise aggressively.
 ```
 
 **Responsive Images:**
+
 ```liquid
 <img
   src="{{ image | img_url: '800x' }}"
@@ -42,6 +44,7 @@ Images are typically the largest assets - optimise aggressively.
 ```
 
 **Modern Image Formats:**
+
 ```liquid
 <picture>
   {# WebP for modern browsers #}
@@ -67,6 +70,7 @@ Images are typically the largest assets - optimise aggressively.
 ```
 
 **Lazy Loading:**
+
 ```liquid
 {# Native lazy loading #}
 <img
@@ -85,6 +89,7 @@ Images are typically the largest assets - optimise aggressively.
 ```
 
 **Preload Critical Images:**
+
 ```liquid
 {# In <head> for hero images #}
 <link
@@ -104,6 +109,7 @@ Images are typically the largest assets - optimise aggressively.
 Reduce JS payload and execution time.
 
 **Defer Non-Critical JavaScript:**
+
 ```html
 {# ❌ Blocking JavaScript #}
 <script src="{{ 'theme.js' | asset_url }}"></script>
@@ -116,6 +122,7 @@ Reduce JS payload and execution time.
 ```
 
 **Inline Critical JavaScript:**
+
 ```liquid
 {# Inline small, critical scripts #}
 <script>
@@ -126,21 +133,27 @@ Reduce JS payload and execution time.
 ```
 
 **Code Splitting:**
+
 ```javascript
 // Load features only when needed
 async function loadCart() {
-  const { Cart } = await import('./cart.js');
-  return new Cart();
+  const { Cart } = await import('./cart.js')
+  return new Cart()
 }
 
 // Load on interaction
-document.querySelector('.cart-icon').addEventListener('click', async () => {
-  const cart = await loadCart();
-  cart.open();
-}, { once: true });
+document.querySelector('.cart-icon').addEventListener(
+  'click',
+  async () => {
+    const cart = await loadCart()
+    cart.open()
+  },
+  { once: true },
+)
 ```
 
 **Remove Unused JavaScript:**
+
 ```javascript
 // ❌ Don't load libraries you don't use
 // Example: Don't include entire jQuery if you only need a few functions
@@ -154,6 +167,7 @@ document.querySelector('.cart-icon').addEventListener('click', async () => {
 ```
 
 **Minify JavaScript:**
+
 ```bash
 # Use build tools to minify
 npm install terser --save-dev
@@ -167,6 +181,7 @@ terser theme.js -o theme.min.js -c -m
 Optimise stylesheets for faster rendering.
 
 **Critical CSS:**
+
 ```liquid
 {# Inline critical above-the-fold CSS in <head> #}
 <style>
@@ -189,6 +204,7 @@ Optimise stylesheets for faster rendering.
 ```
 
 **Remove Unused CSS:**
+
 ```bash
 # Use PurgeCSS to remove unused styles
 npm install @fullhuman/postcss-purgecss --save-dev
@@ -205,6 +221,7 @@ module.exports = {
 ```
 
 **Minify CSS:**
+
 ```bash
 # Use cssnano
 npm install cssnano --save-dev
@@ -214,6 +231,7 @@ npx cssnano style.css style.min.css
 ```
 
 **Avoid @import:**
+
 ```css
 /* ❌ Don't use @import (blocks rendering) */
 @import url('fonts.css');
@@ -231,6 +249,7 @@ npx cssnano style.css style.min.css
 Optimise web fonts for faster text rendering.
 
 **Font Loading:**
+
 ```liquid
 {# Preload fonts #}
 <link
@@ -254,21 +273,16 @@ Optimise web fonts for faster text rendering.
 ```
 
 **System Font Stack:**
+
 ```css
 /* Use system fonts for instant rendering */
 body {
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 ```
 
 **Subset Fonts:**
+
 ```css
 /* Load only required characters */
 @font-face {
@@ -283,6 +297,7 @@ body {
 Optimise Liquid rendering for faster server response.
 
 **Cache Expensive Operations:**
+
 ```liquid
 {# ❌ Repeated calculations #}
 {% for i in (1..10) %}
@@ -297,6 +312,7 @@ Optimise Liquid rendering for faster server response.
 ```
 
 **Use limit and offset:**
+
 ```liquid
 {# ❌ Iterate full array and break #}
 {% for product in collection.products %}
@@ -311,6 +327,7 @@ Optimise Liquid rendering for faster server response.
 ```
 
 **Avoid Nested Loops:**
+
 ```liquid
 {# ❌ O(n²) complexity #}
 {% for product in collection.products %}
@@ -327,6 +344,7 @@ Optimise Liquid rendering for faster server response.
 ```
 
 **Prefer render over include:**
+
 ```liquid
 {# ❌ include (slower, shared scope) #}
 {% include 'product-card' %}
@@ -336,6 +354,7 @@ Optimise Liquid rendering for faster server response.
 ```
 
 **Use section-specific stylesheets:**
+
 ```liquid
 {# Scope CSS to section for better caching #}
 {% stylesheet %}
@@ -353,6 +372,7 @@ Optimise Liquid rendering for faster server response.
 Minimise impact of external scripts.
 
 **Defer Third-Party Scripts:**
+
 ```liquid
 {# ❌ Blocking third-party script #}
 <script src="https://external.com/script.js"></script>
@@ -379,20 +399,21 @@ Minimise impact of external scripts.
 ```
 
 **Use Facade Pattern:**
+
 ```html
 {# Show placeholder instead of embedding heavy iframe #}
 <div class="video-facade" data-video-id="abc123">
-  <img src="thumbnail.jpg" alt="Video">
+  <img src="thumbnail.jpg" alt="Video" />
   <button onclick="loadVideo(this)">Play Video</button>
 </div>
 
 <script>
   function loadVideo(btn) {
-    const facade = btn.parentElement;
-    const videoId = facade.dataset.videoId;
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-    facade.replaceWith(iframe);
+    const facade = btn.parentElement
+    const videoId = facade.dataset.videoId
+    const iframe = document.createElement('iframe')
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`
+    facade.replaceWith(iframe)
   }
 </script>
 ```
@@ -402,6 +423,7 @@ Minimise impact of external scripts.
 Leverage browser and CDN caching.
 
 **Asset Versioning:**
+
 ```liquid
 {# Shopify auto-versions assets #}
 <link rel="stylesheet" href="{{ 'theme.css' | asset_url }}">
@@ -409,6 +431,7 @@ Leverage browser and CDN caching.
 ```
 
 **Long Cache Headers:**
+
 ```liquid
 {# Shopify CDN sets appropriate cache headers #}
 {# CSS/JS: 1 year #}
@@ -416,27 +439,24 @@ Leverage browser and CDN caching.
 ```
 
 **Service Worker (Advanced):**
+
 ```javascript
 // sw.js - Cache static assets
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('v1').then(cache => {
-      return cache.addAll([
-        '/cdn/.../theme.css',
-        '/cdn/.../theme.js',
-        '/cdn/.../logo.png',
-      ]);
-    })
-  );
-});
+    caches.open('v1').then((cache) => {
+      return cache.addAll(['/cdn/.../theme.css', '/cdn/.../theme.js', '/cdn/.../logo.png'])
+    }),
+  )
+})
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request)
+    }),
+  )
+})
 ```
 
 ### 8. Core Web Vitals Optimisation
@@ -444,6 +464,7 @@ self.addEventListener('fetch', event => {
 Improve Google's Core Web Vitals metrics.
 
 **Largest Contentful Paint (LCP):**
+
 ```liquid
 {# Optimise largest element load time #}
 
@@ -460,34 +481,36 @@ Improve Google's Core Web Vitals metrics.
 ```
 
 **Interaction to Next Paint (INP):**
+
 ```javascript
 // 1. Reduce JavaScript execution time
 // 2. Break up long tasks
 function processItems(items) {
   // ❌ Long task
-  items.forEach(item => processItem(item));
+  items.forEach((item) => processItem(item))
 
   // ✅ Break into smaller chunks
   async function processInChunks() {
     for (let i = 0; i < items.length; i++) {
-      processItem(items[i]);
+      processItem(items[i])
 
       // Yield to main thread every 50 items
       if (i % 50 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0))
       }
     }
   }
-  processInChunks();
+  processInChunks()
 }
 
 // 3. Use requestIdleCallback
 requestIdleCallback(() => {
   // Non-critical work
-});
+})
 ```
 
 **Cumulative Layout Shift (CLS):**
+
 ```liquid
 {# 1. Always set width and height on images #}
 <img
@@ -515,9 +538,10 @@ requestIdleCallback(() => {
 Track performance metrics.
 
 **Measure Core Web Vitals:**
+
 ```javascript
 // Load web-vitals library
-import { getCLS, getINP, getLCP } from 'web-vitals';
+import { getCLS, getINP, getLCP } from 'web-vitals'
 
 function sendToAnalytics({ name, value, id }) {
   // Send to analytics
@@ -525,29 +549,31 @@ function sendToAnalytics({ name, value, id }) {
     event_category: 'Web Vitals',
     event_label: id,
     value: Math.round(name === 'CLS' ? value * 1000 : value),
-  });
+  })
 }
 
-getCLS(sendToAnalytics);
-getINP(sendToAnalytics);
-getLCP(sendToAnalytics);
+getCLS(sendToAnalytics)
+getINP(sendToAnalytics)
+getLCP(sendToAnalytics)
 ```
 
 **Performance Observer:**
+
 ```javascript
 // Monitor long tasks
-const observer = new PerformanceObserver(list => {
+const observer = new PerformanceObserver((list) => {
   for (const entry of list.getEntries()) {
-    console.warn('Long task detected:', entry.duration, 'ms');
+    console.warn('Long task detected:', entry.duration, 'ms')
   }
-});
+})
 
-observer.observe({ entryTypes: ['longtask'] });
+observer.observe({ entryTypes: ['longtask'] })
 ```
 
 ## Performance Checklist
 
 **Images:**
+
 - [ ] Use `img_url` filter with appropriate sizes
 - [ ] Implement responsive images with `srcset`
 - [ ] Add `loading="lazy"` to below-fold images
@@ -556,6 +582,7 @@ observer.observe({ entryTypes: ['longtask'] });
 - [ ] Use modern formats (WebP)
 
 **JavaScript:**
+
 - [ ] Defer or async all non-critical scripts
 - [ ] Minify and bundle JavaScript
 - [ ] Code-split large bundles
@@ -563,6 +590,7 @@ observer.observe({ entryTypes: ['longtask'] });
 - [ ] Lazy load features on interaction
 
 **CSS:**
+
 - [ ] Inline critical CSS
 - [ ] Defer non-critical CSS
 - [ ] Remove unused styles
@@ -570,24 +598,28 @@ observer.observe({ entryTypes: ['longtask'] });
 - [ ] Avoid `@import`
 
 **Fonts:**
+
 - [ ] Preload critical fonts
 - [ ] Use `font-display: swap`
 - [ ] Consider system font stack
 - [ ] Subset fonts when possible
 
 **Third-Party:**
+
 - [ ] Audit all third-party scripts
 - [ ] Load scripts async or on interaction
 - [ ] Use facade pattern for heavy embeds
 - [ ] Monitor third-party impact
 
 **Liquid:**
+
 - [ ] Cache expensive calculations
 - [ ] Use `limit` instead of manual breaks
 - [ ] Prefer `render` over `include`
 - [ ] Avoid nested loops
 
 **Core Web Vitals:**
+
 - [ ] LCP < 2.5s
 - [ ] INP < 200ms
 - [ ] CLS < 0.1

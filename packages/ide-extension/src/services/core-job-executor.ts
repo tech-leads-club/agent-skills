@@ -1,15 +1,11 @@
-import type { CorePorts } from '@tech-leads-club/core'
+import type { AgentType, CorePorts, InstallResult } from '@tech-leads-club/core'
 import {
-  detectInstalledAgents,
-  ensureSkillDownloaded,
   getAllLockedSkills,
-  getSkillMetadata,
   getSkillWithPath,
   getUpdatableSkills,
   installSkills,
   removeSkill,
 } from '@tech-leads-club/core'
-import type { AgentType } from '@tech-leads-club/core'
 import type { JobProgressCallback, JobResult, QueuedJob } from './operation-queue'
 
 /**
@@ -32,7 +28,7 @@ export class CoreJobExecutor {
       case 'remove':
         return this.executeRemove(skillNames, agents, global, job, onProgress)
       case 'update':
-        return this.executeUpdate(skillNames, agents, job, onProgress)
+        return this.executeUpdate(skillNames, job, onProgress)
       default:
         return {
           operationId: job.operationId,
@@ -167,22 +163,23 @@ export class CoreJobExecutor {
 
   private async executeUpdate(
     skillNames: string[],
-    agents: AgentType[],
     job: QueuedJob,
     onProgress?: JobProgressCallback,
   ): Promise<JobResult> {
     onProgress?.('Checking for updatable skills...')
-    let namesToUpdate: string[]
-    if (skillNames.length === 0) {
-      const local = await getAllLockedSkills(this.ports, false)
-      const global = await getAllLockedSkills(this.ports, true)
-      const allNames = [...new Set([...Object.keys(local), ...Object.keys(global)])]
-      namesToUpdate = (await getUpdatableSkills(this.ports, allNames)).toUpdate
-    } else {
-      namesToUpdate = (await getUpdatableSkills(this.ports, skillNames)).toUpdate
-    }
+    const meta = job.metadata
 
-    if (namesToUpdate.length === 0) {
+    const [localLock, globalLock] = await Promise.all([
+      getAllLockedSkills(this.ports, false),
+      getAllLockedSkills(this.ports, true),
+    ])
+
+    const candidates =
+      skillNames.length > 0 ? skillNames : [...new Set([...Object.keys(localLock), ...Object.keys(globalLock)])]
+
+    const { toUpdate } = await getUpdatableSkills(this.ports, candidates)
+
+    if (toUpdate.length === 0) {
       onProgress?.('All skills are up to date')
       return {
         operationId: job.operationId,
@@ -193,17 +190,60 @@ export class CoreJobExecutor {
       }
     }
 
-    onProgress?.(`Downloading ${namesToUpdate.length} skill(s) for update...`)
-    const skills: Array<{ name: string; description: string; path: string; category?: string }> = []
-    for (const name of namesToUpdate) {
-      const path = await ensureSkillDownloaded(this.ports, name)
-      const meta = await getSkillMetadata(this.ports, name)
-      if (!path || !meta) continue
-      skills.push({ name: meta.name, description: meta.description, path, category: meta.category })
-      onProgress?.(`Downloaded ${name}`)
+    interface ScopedWork {
+      name: string
+      global: boolean
+      method: 'copy' | 'symlink'
+      agents: AgentType[]
     }
 
-    if (skills.length === 0) {
+    // null = auto-detect from both lockfiles; false = local only; true = global only
+    const scopeFilter = meta?.scope === 'local' ? false : meta?.scope === 'global' ? true : null
+
+    const work: ScopedWork[] = []
+    for (const name of toUpdate) {
+      const localEntry = localLock[name]
+      const globalEntry = globalLock[name]
+      if (localEntry && scopeFilter !== true) {
+        work.push({
+          name,
+          global: false,
+          method: (localEntry.method ?? 'copy') as 'copy' | 'symlink',
+          agents: (localEntry.agents ?? []) as AgentType[],
+        })
+      }
+      if (globalEntry && scopeFilter !== false) {
+        work.push({
+          name,
+          global: true,
+          method: (globalEntry.method ?? 'copy') as 'copy' | 'symlink',
+          agents: (globalEntry.agents ?? []) as AgentType[],
+        })
+      }
+    }
+
+    if (work.length === 0) {
+      onProgress?.('All skills are up to date')
+      return {
+        operationId: job.operationId,
+        operation: 'update',
+        skillName: job.skillName,
+        status: 'completed',
+        metadata: job.metadata,
+      }
+    }
+
+    onProgress?.(`Downloading ${toUpdate.length} skill(s) for update...`)
+    const skillInfoMap = new Map<string, { name: string; description: string; path: string; category?: string }>()
+    for (const name of toUpdate) {
+      const skill = await getSkillWithPath(this.ports, name)
+      if (skill) {
+        skillInfoMap.set(name, skill)
+        onProgress?.(`Downloaded ${name}`)
+      }
+    }
+
+    if (skillInfoMap.size === 0) {
       const msg = 'No skills could be downloaded for update'
       onProgress?.(msg, 'error')
       return {
@@ -216,18 +256,24 @@ export class CoreJobExecutor {
       }
     }
 
-    const targetAgents = agents.length > 0 ? agents : detectInstalledAgents(this.ports)
-    onProgress?.(`Installing updates to ${targetAgents.length} agent(s)...`)
-    const results = await installSkills(this.ports, skills, {
-      agents: targetAgents,
-      method: 'copy',
-      global: false,
-      skills: namesToUpdate,
-      forceUpdate: true,
-      isUpdate: true,
-    })
+    onProgress?.('Installing updates...')
+    const allResults: InstallResult[] = []
+    for (const { name, global, method, agents } of work) {
+      const skill = skillInfoMap.get(name)
+      if (!skill || agents.length === 0) continue
+      const results = await installSkills(this.ports, [skill], {
+        agents,
+        method,
+        global,
+        skills: [name],
+        forceUpdate: true,
+        isUpdate: true,
+      })
+      allResults.push(...results)
+      onProgress?.(`Updated ${name} (${global ? 'global' : 'local'})`)
+    }
 
-    const failed = results.filter((r) => !r.success)
+    const failed = allResults.filter((r) => !r.success)
     if (failed.length > 0) {
       const msg = failed.map((r) => `${r.agent}: ${r.error}`).join('; ')
       onProgress?.(msg, 'error')

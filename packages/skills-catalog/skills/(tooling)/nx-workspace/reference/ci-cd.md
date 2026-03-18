@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: "npm"
+          cache: 'npm'
 
       - run: npm ci
       - uses: nrwl/nx-set-shas@v4
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: 'npm'
 
       - run: npm ci
       - uses: nrwl/nx-set-shas@v4
@@ -195,43 +195,43 @@ pr:
   - main
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: 'ubuntu-latest'
 
 variables:
-  CI: "true"
+  CI: 'true'
   NX_CLOUD_ACCESS_TOKEN: $(NX_CLOUD_ACCESS_TOKEN)
 
 steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: "20.x"
-    displayName: "Install Node.js"
+      versionSpec: '20.x'
+    displayName: 'Install Node.js'
 
   - script: npm ci
-    displayName: "Install dependencies"
+    displayName: 'Install dependencies'
 
   - script: |
       npx nx affected -t lint --base=origin/main --parallel=3
-    displayName: "Lint affected"
+    displayName: 'Lint affected'
 
   - script: |
       npx nx affected -t test --base=origin/main --parallel=3 --configuration=ci
-    displayName: "Test affected"
+    displayName: 'Test affected'
 
   - script: |
       npx nx affected -t build --base=origin/main --parallel=3
-    displayName: "Build affected"
+    displayName: 'Build affected'
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:
-      testResultsFormat: "JUnit"
-      testResultsFiles: "**/junit.xml"
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/junit.xml'
 
   - task: PublishCodeCoverageResults@1
     inputs:
-      codeCoverageTool: "Cobertura"
-      summaryFileLocation: "coverage/cobertura-coverage.xml"
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: 'coverage/cobertura-coverage.xml'
 ```
 
 ## CircleCI
@@ -350,7 +350,7 @@ Ensure git history is available:
 ```yaml
 - uses: actions/checkout@v4
   with:
-    fetch-depth: 0  # Important for affected commands
+    fetch-depth: 0 # Important for affected commands
 ```
 
 ### Parallel Execution
@@ -368,7 +368,7 @@ Cache node_modules between runs:
 ```yaml
 - uses: actions/setup-node@v4
   with:
-    cache: "npm"
+    cache: 'npm'
 ```
 
 ### Separate Build and Deploy

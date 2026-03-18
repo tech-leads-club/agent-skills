@@ -106,9 +106,7 @@ All elements share these base properties:
     "strokeColor": "#1971c2",
     "strokeWidth": 2,
     "roundness": { "type": 3 },
-    "boundElements": [
-      { "type": "text", "id": "text-step-1" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-step-1" }]
   },
   {
     "id": "text-step-1",
@@ -135,18 +133,18 @@ This works for `rectangle`, `ellipse`, and `diamond` elements.
 
 **Required properties for text elements inside containers:**
 
-| Property        | Value      | Description                                                          |
-| --------------- | ---------- | -------------------------------------------------------------------- |
-| `containerId`   | required   | ID of the parent shape                                               |
-| `originalText`  | required   | Exact copy of `text` — used by the Excalidraw editor                 |
-| `lineHeight`    | `1.25`     | Always set this for contained text                                   |
-| `text`          | required   | The text content. Use `\n` for line breaks.                          |
-| `fontSize`      | `20`       | 14-36 depending on purpose                                           |
-| `fontFamily`    | `5`        | 5 = Excalifont (hand-drawn), 1 = Virgil, 2 = Helvetica, 3 = Cascadia |
-| `textAlign`     | `"center"` | `"left"`, `"center"`, `"right"`                                      |
-| `verticalAlign` | `"middle"` | `"top"`, `"middle"`, `"bottom"`                                      |
-| `strokeColor`   | `"#1e1e1e"` | Text color                                                          |
-| `roundness`     | `null`     | Always null for text elements                                        |
+| Property        | Value       | Description                                                          |
+| --------------- | ----------- | -------------------------------------------------------------------- |
+| `containerId`   | required    | ID of the parent shape                                               |
+| `originalText`  | required    | Exact copy of `text` — used by the Excalidraw editor                 |
+| `lineHeight`    | `1.25`      | Always set this for contained text                                   |
+| `text`          | required    | The text content. Use `\n` for line breaks.                          |
+| `fontSize`      | `20`        | 14-36 depending on purpose                                           |
+| `fontFamily`    | `5`         | 5 = Excalifont (hand-drawn), 1 = Virgil, 2 = Helvetica, 3 = Cascadia |
+| `textAlign`     | `"center"`  | `"left"`, `"center"`, `"right"`                                      |
+| `verticalAlign` | `"middle"`  | `"top"`, `"middle"`, `"bottom"`                                      |
+| `strokeColor`   | `"#1e1e1e"` | Text color                                                           |
+| `roundness`     | `null`      | Always null for text elements                                        |
 
 **Text element positioning inside a container at (x, y, w, h):**
 
@@ -195,9 +193,7 @@ Arrow labels also require `boundElements` on the arrow and a separate text eleme
     ],
     "roundness": { "type": 2 },
     "strokeWidth": 2,
-    "boundElements": [
-      { "type": "text", "id": "text-arrow-1" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-arrow-1" }]
   },
   {
     "id": "text-arrow-1",
@@ -267,9 +263,7 @@ Every connected shape must also list the arrow in its `boundElements` array.
     ],
     "startBinding": { "elementId": "box-a", "focus": 0, "gap": 1 },
     "endBinding": { "elementId": "box-b", "focus": 0, "gap": 1 },
-    "boundElements": [
-      { "type": "text", "id": "text-arrow-a-b" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-arrow-a-b" }]
   },
   {
     "id": "text-box-a",
@@ -330,11 +324,11 @@ Every connected shape must also list the arrow in its `boundElements` array.
 
 **Binding properties:**
 
-| Property    | Value   | Description                                             |
-| ----------- | ------- | ------------------------------------------------------- |
-| `elementId` | string  | ID of the connected shape                               |
-| `focus`     | `0`     | Connection point: 0 = center, -1/+1 = top-bottom edges  |
-| `gap`       | `1`     | Gap in pixels between arrow tip and shape boundary      |
+| Property    | Value  | Description                                            |
+| ----------- | ------ | ------------------------------------------------------ |
+| `elementId` | string | ID of the connected shape                              |
+| `focus`     | `0`    | Connection point: 0 = center, -1/+1 = top-bottom edges |
+| `gap`       | `1`    | Gap in pixels between arrow tip and shape boundary     |
 
 ### Arrow Directions
 
@@ -367,21 +361,21 @@ Use these curated colors for professional, modern diagrams. Avoid raw primary co
 
 Excalidraw's native color picker is built around [Open Colors](https://yeun.github.io/open-colors/). Use shade-2 for fills and shade-8 for matching strokes to create depth.
 
-| Family  | Fill (shade-2) | Stroke (shade-8) | Fill hex  | Stroke hex |
-| ------- | -------------- | ---------------- | --------- | ---------- |
-| Gray    | `gray-2`       | `gray-8`         | `#e9ecef` | `#343a40`  |
-| Red     | `red-2`        | `red-8`          | `#ffc9c9` | `#c92a2a`  |
-| Pink    | `pink-2`       | `pink-8`         | `#fcc2d7` | `#a61e4d`  |
-| Grape   | `grape-2`      | `grape-8`        | `#e5dbff` | `#6741d9`  |
-| Violet  | `violet-2`     | `violet-8`       | `#d0bfff` | `#5f3dc4`  |
-| Indigo  | `indigo-2`     | `indigo-8`       | `#bac8ff` | `#3b5bdb`  |
-| Blue    | `blue-2`       | `blue-8`         | `#a5d8ff` | `#1864ab`  |
-| Cyan    | `cyan-2`       | `cyan-8`         | `#99e9f2` | `#0b7285`  |
-| Teal    | `teal-2`       | `teal-8`         | `#96f2d7` | `#087f5b`  |
-| Green   | `green-2`      | `green-8`        | `#b2f2bb` | `#2b8a3e`  |
-| Lime    | `lime-2`       | `lime-8`         | `#d8f5a2` | `#5c940d`  |
-| Yellow  | `yellow-2`     | `yellow-8`       | `#ffec99` | `#e67700`  |
-| Orange  | `orange-2`     | `orange-8`       | `#ffd8a8` | `#d9480f`  |
+| Family | Fill (shade-2) | Stroke (shade-8) | Fill hex  | Stroke hex |
+| ------ | -------------- | ---------------- | --------- | ---------- |
+| Gray   | `gray-2`       | `gray-8`         | `#e9ecef` | `#343a40`  |
+| Red    | `red-2`        | `red-8`          | `#ffc9c9` | `#c92a2a`  |
+| Pink   | `pink-2`       | `pink-8`         | `#fcc2d7` | `#a61e4d`  |
+| Grape  | `grape-2`      | `grape-8`        | `#e5dbff` | `#6741d9`  |
+| Violet | `violet-2`     | `violet-8`       | `#d0bfff` | `#5f3dc4`  |
+| Indigo | `indigo-2`     | `indigo-8`       | `#bac8ff` | `#3b5bdb`  |
+| Blue   | `blue-2`       | `blue-8`         | `#a5d8ff` | `#1864ab`  |
+| Cyan   | `cyan-2`       | `cyan-8`         | `#99e9f2` | `#0b7285`  |
+| Teal   | `teal-2`       | `teal-8`         | `#96f2d7` | `#087f5b`  |
+| Green  | `green-2`      | `green-8`        | `#b2f2bb` | `#2b8a3e`  |
+| Lime   | `lime-2`       | `lime-8`         | `#d8f5a2` | `#5c940d`  |
+| Yellow | `yellow-2`     | `yellow-8`       | `#ffec99` | `#e67700`  |
+| Orange | `orange-2`     | `orange-8`       | `#ffd8a8` | `#d9480f`  |
 
 ### Curated Professional Palettes
 
@@ -640,9 +634,7 @@ Use `groupIds` to create compound elements that move together:
     "width": 180,
     "height": 80,
     "groupIds": ["server-group"],
-    "boundElements": [
-      { "type": "text", "id": "text-server-box" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-server-box" }]
   },
   {
     "id": "server-icon",

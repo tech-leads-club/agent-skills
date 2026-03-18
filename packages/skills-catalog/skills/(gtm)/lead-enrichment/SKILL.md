@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Lead Enrichment Skill
@@ -27,11 +26,11 @@ If the user provides a draft workflow or existing Clay table, analyze it before 
 
 Every ICP score pulls from three distinct signal categories. Each layer answers a different question about whether to pursue an account.
 
-| Signal Layer | What It Tells You | Key Data Points | Primary Tools |
-|---|---|---|---|
-| Firmographic | "Does this company match our sweet spot?" | Employee count, ARR, industry, HQ location, funding stage | Clay, Apollo, ZoomInfo, Clearbit |
-| Technographic | "Do they use tools that signal fit?" | Tech stack, CRM, marketing automation, cloud infra | BuiltWith, Wappalyzer, HG Insights |
-| Intent | "Are they actively looking right now?" | Content consumption, G2 visits, job postings, funding events | Bombora, G2 Buyer Intent, Clay signals |
+| Signal Layer  | What It Tells You                         | Key Data Points                                              | Primary Tools                          |
+| ------------- | ----------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| Firmographic  | "Does this company match our sweet spot?" | Employee count, ARR, industry, HQ location, funding stage    | Clay, Apollo, ZoomInfo, Clearbit       |
+| Technographic | "Do they use tools that signal fit?"      | Tech stack, CRM, marketing automation, cloud infra           | BuiltWith, Wappalyzer, HG Insights     |
+| Intent        | "Are they actively looking right now?"    | Content consumption, G2 visits, job postings, funding events | Bombora, G2 Buyer Intent, Clay signals |
 
 ### ICP Scoring Formula
 
@@ -45,13 +44,13 @@ Weight intent highest because timing beats targeting. A perfect-fit company with
 
 Score each firmographic dimension, then average:
 
-| Dimension | 100 (Ideal) | 75 (Strong) | 50 (Acceptable) | 25 (Stretch) | 0 (Disqualify) |
-|---|---|---|---|---|---|
-| Employee Count | 50-200 | 200-500 | 20-50 or 500-1000 | 10-20 or 1000-2000 | <10 or >2000 |
-| Annual Revenue | $5M-$50M | $50M-$100M | $1M-$5M | $100M-$500M | <$1M or >$500M |
-| Industry | SaaS B2B | Fintech, Healthtech | Professional Services | Retail, Media | Government, Education |
-| Geography | US, UK, CA | DACH, Nordics | ANZ, Benelux | LATAM, SEA | Sanctioned regions |
-| Funding Stage | Series A-B | Series C | Seed, Series D+ | Pre-seed | No data |
+| Dimension      | 100 (Ideal) | 75 (Strong)         | 50 (Acceptable)       | 25 (Stretch)       | 0 (Disqualify)        |
+| -------------- | ----------- | ------------------- | --------------------- | ------------------ | --------------------- |
+| Employee Count | 50-200      | 200-500             | 20-50 or 500-1000     | 10-20 or 1000-2000 | <10 or >2000          |
+| Annual Revenue | $5M-$50M    | $50M-$100M          | $1M-$5M               | $100M-$500M        | <$1M or >$500M        |
+| Industry       | SaaS B2B    | Fintech, Healthtech | Professional Services | Retail, Media      | Government, Education |
+| Geography      | US, UK, CA  | DACH, Nordics       | ANZ, Benelux          | LATAM, SEA         | Sanctioned regions    |
+| Funding Stage  | Series A-B  | Series C            | Seed, Series D+       | Pre-seed           | No data               |
 
 Adjust the ranges to your actual closed-won customer profile. Pull ranges from your CRM data, not assumptions.
 
@@ -65,32 +64,32 @@ Tech_Score = (Stack_Match x 0.50) + (Complexity_Signal x 0.30) + (Migration_Sign
 
 **Stack Match (0-100):** Does their current tooling create a natural integration or replacement opportunity?
 
-| Signal | Score |
-|---|---|
-| Uses your direct integration partner | 100 |
-| Uses a competitor you commonly displace | 85 |
-| Uses adjacent tooling in your category | 60 |
-| Generic/unknown stack | 30 |
-| Uses a tool that blocks adoption | 0 |
+| Signal                                  | Score |
+| --------------------------------------- | ----- |
+| Uses your direct integration partner    | 100   |
+| Uses a competitor you commonly displace | 85    |
+| Uses adjacent tooling in your category  | 60    |
+| Generic/unknown stack                   | 30    |
+| Uses a tool that blocks adoption        | 0     |
 
 **Complexity Signal (0-100):** Does their tech footprint suggest they can absorb your product?
 
-| Signal | Score |
-|---|---|
-| 3-5 tools in your category (consolidation ready) | 100 |
-| Running modern cloud infra + APIs | 80 |
-| 1-2 tools, clear gap | 60 |
-| Legacy on-prem heavy | 30 |
-| No detectable tech presence | 10 |
+| Signal                                           | Score |
+| ------------------------------------------------ | ----- |
+| 3-5 tools in your category (consolidation ready) | 100   |
+| Running modern cloud infra + APIs                | 80    |
+| 1-2 tools, clear gap                             | 60    |
+| Legacy on-prem heavy                             | 30    |
+| No detectable tech presence                      | 10    |
 
 **Migration Signal (0-100):** Are they showing signs of switching?
 
-| Signal | Score |
-|---|---|
-| Job posting for role that owns your category | 100 |
-| Recently adopted adjacent tool | 75 |
-| Removed a competitor from their stack (BuiltWith delta) | 90 |
-| Stable stack, no changes in 12 months | 20 |
+| Signal                                                  | Score |
+| ------------------------------------------------------- | ----- |
+| Job posting for role that owns your category            | 100   |
+| Recently adopted adjacent tool                          | 75    |
+| Removed a competitor from their stack (BuiltWith delta) | 90    |
+| Stable stack, no changes in 12 months                   | 20    |
 
 ### Intent Score Calculation (0-100)
 
@@ -104,41 +103,41 @@ Intent_Score = max(Bombora_Surge, G2_Intent, First_Party) x 0.60
 
 **Bombora Company Surge scoring:**
 
-| Surge Score | Interpretation | Lead Priority |
-|---|---|---|
-| 80-100 | Heavy active research across multiple topics | Route to SDR within 24 hours |
-| 60-79 | Moderate research, early buying cycle | Add to nurture + monitor |
-| 40-59 | Light research, could be noise | Score with other signals before acting |
-| Below 40 | No meaningful surge detected | Do not prioritize |
+| Surge Score | Interpretation                               | Lead Priority                          |
+| ----------- | -------------------------------------------- | -------------------------------------- |
+| 80-100      | Heavy active research across multiple topics | Route to SDR within 24 hours           |
+| 60-79       | Moderate research, early buying cycle        | Add to nurture + monitor               |
+| 40-59       | Light research, could be noise               | Score with other signals before acting |
+| Below 40    | No meaningful surge detected                 | Do not prioritize                      |
 
 **G2 Buyer Intent signals:**
 
-| Signal Type | Weight | Why It Matters |
-|---|---|---|
-| Visited your G2 profile | High | Direct purchase consideration |
-| Compared you vs. competitor | Very High | Active evaluation stage |
-| Visited category page | Medium | Early research phase |
-| Read reviews in your category | Medium-High | Validation stage |
+| Signal Type                   | Weight      | Why It Matters                |
+| ----------------------------- | ----------- | ----------------------------- |
+| Visited your G2 profile       | High        | Direct purchase consideration |
+| Compared you vs. competitor   | Very High   | Active evaluation stage       |
+| Visited category page         | Medium      | Early research phase          |
+| Read reviews in your category | Medium-High | Validation stage              |
 
 **First-party intent signals (your own data):**
 
-| Signal | Score Boost |
-|---|---|
-| Pricing page visit (2+ times) | +30 |
-| Demo page visit without booking | +25 |
-| Downloaded gated content | +15 |
-| Blog visit (3+ pages, single session) | +10 |
-| Email opened but no click | +5 |
+| Signal                                | Score Boost |
+| ------------------------------------- | ----------- |
+| Pricing page visit (2+ times)         | +30         |
+| Demo page visit without booking       | +25         |
+| Downloaded gated content              | +15         |
+| Blog visit (3+ pages, single session) | +10         |
+| Email opened but no click             | +5          |
 
 ### Composite Score Interpretation
 
-| ICP Score Range | Action | SLA |
-|---|---|---|
-| 85-100 | Hot lead - immediate SDR outreach | Contact within 4 hours |
-| 70-84 | Warm lead - prioritized sequence | Enroll within 24 hours |
-| 50-69 | Nurture - automated drip | Weekly content touches |
-| 30-49 | Monitor - check quarterly | Re-score monthly |
-| Below 30 | Disqualify - do not pursue | Archive, re-evaluate in 6 months |
+| ICP Score Range | Action                            | SLA                              |
+| --------------- | --------------------------------- | -------------------------------- |
+| 85-100          | Hot lead - immediate SDR outreach | Contact within 4 hours           |
+| 70-84           | Warm lead - prioritized sequence  | Enroll within 24 hours           |
+| 50-69           | Nurture - automated drip          | Weekly content touches           |
+| 30-49           | Monitor - check quarterly         | Re-score monthly                 |
+| Below 30        | Disqualify - do not pursue        | Archive, re-evaluate in 6 months |
 
 ---
 
@@ -183,45 +182,45 @@ Not every waterfall needs the same providers. Match your stack to your market an
 
 **High-volume outbound (1000+ leads/month):**
 
-| Step | Provider | Why | Cost Level |
-|---|---|---|---|
-| 1 | Apollo | Large database, good mid-market coverage | $$ |
-| 2 | Hunter | Email pattern matching at scale | $ |
-| 3 | FindyMail | Catches emails Apollo and Hunter miss, <2% bounce | $$ |
-| 4 | Clay AI | LinkedIn enrichment, custom fields | $$$ |
-| Verify | MillionVerifier or ZeroBounce | Bulk verification, cheap per-unit | $ |
+| Step   | Provider                      | Why                                               | Cost Level |
+| ------ | ----------------------------- | ------------------------------------------------- | ---------- |
+| 1      | Apollo                        | Large database, good mid-market coverage          | $$         |
+| 2      | Hunter                        | Email pattern matching at scale                   | $          |
+| 3      | FindyMail                     | Catches emails Apollo and Hunter miss, <2% bounce | $$         |
+| 4      | Clay AI                       | LinkedIn enrichment, custom fields                | $$$        |
+| Verify | MillionVerifier or ZeroBounce | Bulk verification, cheap per-unit                 | $          |
 
 **Enterprise targeting (under 500 leads/month):**
 
-| Step | Provider | Why | Cost Level |
-|---|---|---|---|
-| 1 | ZoomInfo | Best Fortune 1000 coverage (23% unique contacts) | $$$$ |
-| 2 | Clearbit (now Breeze) | Real-time HubSpot enrichment, firmographic depth | $$$ |
-| 3 | Dropcontact | GDPR-compliant, algorithm-generated (no database) | $$ |
-| 4 | Clay AI | Flexible enrichment + AI agent for custom fields | $$$ |
-| Verify | NeverBounce or DeBounce | High-accuracy verification | $ |
+| Step   | Provider                | Why                                               | Cost Level |
+| ------ | ----------------------- | ------------------------------------------------- | ---------- |
+| 1      | ZoomInfo                | Best Fortune 1000 coverage (23% unique contacts)  | $$$$       |
+| 2      | Clearbit (now Breeze)   | Real-time HubSpot enrichment, firmographic depth  | $$$        |
+| 3      | Dropcontact             | GDPR-compliant, algorithm-generated (no database) | $$         |
+| 4      | Clay AI                 | Flexible enrichment + AI agent for custom fields  | $$$        |
+| Verify | NeverBounce or DeBounce | High-accuracy verification                        | $          |
 
 **Startup / budget-conscious (under 200 leads/month):**
 
-| Step | Provider | Why | Cost Level |
-|---|---|---|---|
-| 1 | Apollo (free tier) | 10K credits/month on free plan | Free |
-| 2 | Hunter (free tier) | 25 searches/month free | Free |
-| 3 | Snov.io | Affordable at $39/month for 1,000 credits | $ |
-| Verify | MillionVerifier | $0.0005/email bulk pricing | $ |
+| Step   | Provider           | Why                                       | Cost Level |
+| ------ | ------------------ | ----------------------------------------- | ---------- |
+| 1      | Apollo (free tier) | 10K credits/month on free plan            | Free       |
+| 2      | Hunter (free tier) | 25 searches/month free                    | Free       |
+| 3      | Snov.io            | Affordable at $39/month for 1,000 credits | $          |
+| Verify | MillionVerifier    | $0.0005/email bulk pricing                | $          |
 
 ### Provider Comparison Matrix
 
-| Provider | Database Size | Email Accuracy | Best For | Pricing (Annual) | GDPR Compliant |
-|---|---|---|---|---|---|
-| ZoomInfo | 220M+ contacts | 95% (triple-verified) | Enterprise, Fortune 1000 | $10K-$50K | Yes |
-| Apollo | 275M+ contacts | 65-80% (varies by region) | Mid-market, high volume | $1.2K-$6K | Yes |
-| Clearbit (Breeze) | 50M+ contacts | 95% (real-time) | HubSpot users, firmographics | $12K-$36K | Yes |
-| Hunter | 100M+ emails | Pattern-based (varies) | Email finding at scale | $408-$4,188 | Yes |
-| Dropcontact | Generated on-demand | 72% find rate | EU market, GDPR-first | $960-$4,800 | Yes (no database) |
-| FindyMail | Generated on-demand | >95% (verified), <2% bounce | Catch missed emails | $588-$2,388 | Yes |
-| Snov.io | 60M+ contacts | 7-tier verification | Budget outbound | $468-$2,988 | Yes |
-| Bombora | N/A (intent only) | N/A | Intent data, account targeting | $25K-$100K+ | Yes |
+| Provider          | Database Size       | Email Accuracy              | Best For                       | Pricing (Annual) | GDPR Compliant    |
+| ----------------- | ------------------- | --------------------------- | ------------------------------ | ---------------- | ----------------- |
+| ZoomInfo          | 220M+ contacts      | 95% (triple-verified)       | Enterprise, Fortune 1000       | $10K-$50K        | Yes               |
+| Apollo            | 275M+ contacts      | 65-80% (varies by region)   | Mid-market, high volume        | $1.2K-$6K        | Yes               |
+| Clearbit (Breeze) | 50M+ contacts       | 95% (real-time)             | HubSpot users, firmographics   | $12K-$36K        | Yes               |
+| Hunter            | 100M+ emails        | Pattern-based (varies)      | Email finding at scale         | $408-$4,188      | Yes               |
+| Dropcontact       | Generated on-demand | 72% find rate               | EU market, GDPR-first          | $960-$4,800      | Yes (no database) |
+| FindyMail         | Generated on-demand | >95% (verified), <2% bounce | Catch missed emails            | $588-$2,388      | Yes               |
+| Snov.io           | 60M+ contacts       | 7-tier verification         | Budget outbound                | $468-$2,988      | Yes               |
+| Bombora           | N/A (intent only)   | N/A                         | Intent data, account targeting | $25K-$100K+      | Yes               |
 
 ### Incremental Coverage by Waterfall Step
 
@@ -247,37 +246,37 @@ Clay operates on a table-based model. Each row is a lead. Each column is a data 
 
 **Core Clay concepts:**
 
-| Concept | What It Does |
-|---|---|
-| Table | Your lead list - imported via CSV, CRM sync, or API |
-| Enrichment Column | Calls a provider to fill a specific field |
-| Waterfall Column | Tries multiple providers in sequence for one field |
-| AI Column | Uses GPT/Claude to derive insights from other columns |
-| Formula Column | Computes values from other columns (like ICP score) |
-| Integration Push | Sends enriched data to CRM, sequencer, or webhook |
+| Concept           | What It Does                                          |
+| ----------------- | ----------------------------------------------------- |
+| Table             | Your lead list - imported via CSV, CRM sync, or API   |
+| Enrichment Column | Calls a provider to fill a specific field             |
+| Waterfall Column  | Tries multiple providers in sequence for one field    |
+| AI Column         | Uses GPT/Claude to derive insights from other columns |
+| Formula Column    | Computes values from other columns (like ICP score)   |
+| Integration Push  | Sends enriched data to CRM, sequencer, or webhook     |
 
 ### Credit Consumption Guide
 
 Clay charges credits per enrichment action. Budget carefully.
 
-| Action Type | Credits Per Row | Example |
-|---|---|---|
-| Basic enrichment (1 provider) | 4-10 | Email lookup, job title |
-| Waterfall enrichment (3 providers) | 12-30 | Email waterfall with fallbacks |
-| AI/GPT column | 10-25 | Persona summary, pain point extraction |
-| Multi-step automation | 30+ | Full enrichment + scoring + routing |
+| Action Type                        | Credits Per Row | Example                                |
+| ---------------------------------- | --------------- | -------------------------------------- |
+| Basic enrichment (1 provider)      | 4-10            | Email lookup, job title                |
+| Waterfall enrichment (3 providers) | 12-30           | Email waterfall with fallbacks         |
+| AI/GPT column                      | 10-25           | Persona summary, pain point extraction |
+| Multi-step automation              | 30+             | Full enrichment + scoring + routing    |
 
 **Credit math:** 1,000 leads at 25 credits/lead = 25,000 credits. Starter plan handles that in 12.5 months, Explorer in 2.5 months, Pro in 0.5 months. Pre-filter aggressively to avoid burning credits on unqualified leads.
 
 ### Clay Pricing (2026)
 
-| Plan | Price/Mo | Credits/Mo | Per Credit |
-|---|---|---|---|
-| Free | $0 | 100 | N/A |
-| Starter | $149 | 2,000 | $0.075 |
-| Explorer | $349 | 10,000 | $0.035 |
-| Pro | $800 | 50,000 | $0.016 |
-| Enterprise | Custom | Custom | Custom |
+| Plan       | Price/Mo | Credits/Mo | Per Credit |
+| ---------- | -------- | ---------- | ---------- |
+| Free       | $0       | 100        | N/A        |
+| Starter    | $149     | 2,000      | $0.075     |
+| Explorer   | $349     | 10,000     | $0.035     |
+| Pro        | $800     | 50,000     | $0.016     |
+| Enterprise | Custom   | Custom     | Custom     |
 
 ### Sample Clay Table Structure
 
@@ -317,23 +316,23 @@ Unverified cold email lists carry 10-30% invalid addresses. Sending to bad addre
 
 ### Verification Pipeline Steps
 
-| Step | Check | Action | Cost |
-|---|---|---|---|
-| 1 | Syntax validation | Remove malformed addresses (missing @, double dots) | Free |
-| 2 | DNS/MX lookup | Verify domain has valid mail server | Free |
-| 3 | SMTP verification | Confirm mailbox exists at provider | Provider-based |
-| 4 | Catch-all detection | Flag domains that accept all addresses | Provider-based |
-| 5 | Role account check | Flag info@, support@, admin@, sales@ | Provider-based |
-| 6 | Confidence scoring | Assign final deliverability score | Computed |
+| Step | Check               | Action                                              | Cost           |
+| ---- | ------------------- | --------------------------------------------------- | -------------- |
+| 1    | Syntax validation   | Remove malformed addresses (missing @, double dots) | Free           |
+| 2    | DNS/MX lookup       | Verify domain has valid mail server                 | Free           |
+| 3    | SMTP verification   | Confirm mailbox exists at provider                  | Provider-based |
+| 4    | Catch-all detection | Flag domains that accept all addresses              | Provider-based |
+| 5    | Role account check  | Flag info@, support@, admin@, sales@                | Provider-based |
+| 6    | Confidence scoring  | Assign final deliverability score                   | Computed       |
 
 ### Confidence Score Thresholds
 
-| Confidence | Classification | Action |
-|---|---|---|
-| >0.85 | Deliverable | Safe to send. Include in sequences. |
-| 0.70-0.85 | Risky | Send in small batches. Monitor bounce rate per batch. |
-| 0.50-0.69 | Catch-all/Unverifiable | Segment separately. Maximum 50 per day. Watch closely. |
-| <0.50 | Invalid/High Risk | Reject. Do not send. Re-enrich with alternate provider. |
+| Confidence | Classification         | Action                                                  |
+| ---------- | ---------------------- | ------------------------------------------------------- |
+| >0.85      | Deliverable            | Safe to send. Include in sequences.                     |
+| 0.70-0.85  | Risky                  | Send in small batches. Monitor bounce rate per batch.   |
+| 0.50-0.69  | Catch-all/Unverifiable | Segment separately. Maximum 50 per day. Watch closely.  |
+| <0.50      | Invalid/High Risk      | Reject. Do not send. Re-enrich with alternate provider. |
 
 ### Catch-All Domain Handling
 
@@ -349,13 +348,13 @@ Catch-all domains accept every email sent to them, even addresses that do not ex
 
 ### Verification Tool Comparison
 
-| Tool | Verification Method | Catch-All Detection | Bulk Speed | Pricing |
-|---|---|---|---|---|
-| MillionVerifier | SMTP + proprietary | Yes | 1M/hour | $0.0005/email |
-| ZeroBounce | SMTP + AI scoring | Yes | 100K/hour | $0.008/email |
-| NeverBounce | SMTP + real-time API | Yes | 50K/hour | $0.008/email |
-| DeBounce | SMTP + disposable detect | Yes | 500K/hour | $0.001/email |
-| Bouncer | SMTP + toxicity check | Yes | 200K/hour | $0.005/email |
+| Tool            | Verification Method      | Catch-All Detection | Bulk Speed | Pricing       |
+| --------------- | ------------------------ | ------------------- | ---------- | ------------- |
+| MillionVerifier | SMTP + proprietary       | Yes                 | 1M/hour    | $0.0005/email |
+| ZeroBounce      | SMTP + AI scoring        | Yes                 | 100K/hour  | $0.008/email  |
+| NeverBounce     | SMTP + real-time API     | Yes                 | 50K/hour   | $0.008/email  |
+| DeBounce        | SMTP + disposable detect | Yes                 | 500K/hour  | $0.001/email  |
+| Bouncer         | SMTP + toxicity check    | Yes                 | 200K/hour  | $0.005/email  |
 
 ### Deliverability Protection Checklist
 
@@ -376,24 +375,24 @@ Before sending any enriched list to outreach:
 
 ### Expected Conversion Lift from Enrichment
 
-| Metric | Before Waterfall | After Waterfall | Improvement |
-|---|---|---|---|
-| Email coverage rate | 55-65% | 85-95% | +30-40% |
-| Email bounce rate | 7-15% | <2% (verified) | -70-85% |
-| Connect rate (cold call) | 4-6% | 8-12% | +80-100% |
-| Pipeline generated | Baseline | +37% | Significant |
-| Meeting-to-customer conversion | Baseline | +27% | Significant |
-| MQL-to-SQL rate (with intent) | 8-12% | 15-25% | +80-100% |
+| Metric                         | Before Waterfall | After Waterfall | Improvement |
+| ------------------------------ | ---------------- | --------------- | ----------- |
+| Email coverage rate            | 55-65%           | 85-95%          | +30-40%     |
+| Email bounce rate              | 7-15%            | <2% (verified)  | -70-85%     |
+| Connect rate (cold call)       | 4-6%             | 8-12%           | +80-100%    |
+| Pipeline generated             | Baseline         | +37%            | Significant |
+| Meeting-to-customer conversion | Baseline         | +27%            | Significant |
+| MQL-to-SQL rate (with intent)  | 8-12%            | 15-25%          | +80-100%    |
 
 ### Cost-Per-Verified-Lead Benchmarks
 
-| Approach | Cost Per Lead | Coverage | Quality |
-|---|---|---|---|
-| Single provider (Apollo) | $0.05-$0.15 | 60% | Medium |
-| Two-step waterfall | $0.15-$0.35 | 78% | Medium-High |
-| Three-step waterfall | $0.30-$0.60 | 88% | High |
-| Full waterfall + verification | $0.50-$1.00 | 92% verified | Very High |
-| Full waterfall + intent scoring | $1.50-$3.00 | 92% + scored | Premium |
+| Approach                        | Cost Per Lead | Coverage     | Quality     |
+| ------------------------------- | ------------- | ------------ | ----------- |
+| Single provider (Apollo)        | $0.05-$0.15   | 60%          | Medium      |
+| Two-step waterfall              | $0.15-$0.35   | 78%          | Medium-High |
+| Three-step waterfall            | $0.30-$0.60   | 88%          | High        |
+| Full waterfall + verification   | $0.50-$1.00   | 92% verified | Very High   |
+| Full waterfall + intent scoring | $1.50-$3.00   | 92% + scored | Premium     |
 
 ### ROI Calculation Framework
 
@@ -412,12 +411,12 @@ Adjust conversion rates for your actual pipeline. The framework matters more tha
 
 ### Compliance by Region
 
-| Requirement | US (CAN-SPAM/CCPA) | EU (GDPR) | UK (UK GDPR) |
-|---|---|---|---|
-| B2B email consent | Opt-out model | Legitimate interest | Legitimate interest |
-| Data source docs | Recommended | Required | Required |
-| Right to erasure | CCPA: Yes | Required | Required |
-| Data retention | Disclosure required | Define and enforce | Define and enforce |
+| Requirement       | US (CAN-SPAM/CCPA)  | EU (GDPR)           | UK (UK GDPR)        |
+| ----------------- | ------------------- | ------------------- | ------------------- |
+| B2B email consent | Opt-out model       | Legitimate interest | Legitimate interest |
+| Data source docs  | Recommended         | Required            | Required            |
+| Right to erasure  | CCPA: Yes           | Required            | Required            |
+| Data retention    | Disclosure required | Define and enforce  | Define and enforce  |
 
 ### Provider Notes
 
@@ -449,7 +448,6 @@ Adjust conversion rates for your actual pipeline. The framework matters more tha
 - **Credits burning too fast** → **Cause:** Enriching everyone or wrong filters. **Fix:** Pre-filter by domain, industry, geo; set confidence threshold (e.g. 0.85 outreach, 0.50 nurture); cap credits per qualified lead (&lt;50).
 
 ---
-
 
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 

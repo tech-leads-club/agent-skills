@@ -51,8 +51,8 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
         <span>{skill.metadata.lastModified}</span>
       </div>
 
-      <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 mb-4 flex items-center justify-between">      
-        <code className="text-sm text-green-400 break-all font-mono">{installCommand}</code>        
+      <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 mb-4 flex items-center justify-between">
+        <code className="text-sm text-green-400 break-all font-mono">{installCommand}</code>
       </div>
       <CopyButton text={installCommand} className="w-full mb-3" />
       <Link

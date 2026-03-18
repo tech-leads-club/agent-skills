@@ -4,16 +4,16 @@
 
 Every interactive element needs these states designed:
 
-| State | When | Visual Treatment |
-|-------|------|------------------|
-| **Default** | At rest | Base styling |
-| **Hover** | Pointer over (not touch) | Subtle lift, color shift |
-| **Focus** | Keyboard/programmatic focus | Visible ring (see below) |
-| **Active** | Being pressed | Pressed in, darker |
-| **Disabled** | Not interactive | Reduced opacity, no pointer |
-| **Loading** | Processing | Spinner, skeleton |
-| **Error** | Invalid state | Red border, icon, message |
-| **Success** | Completed | Green check, confirmation |
+| State        | When                        | Visual Treatment            |
+| ------------ | --------------------------- | --------------------------- |
+| **Default**  | At rest                     | Base styling                |
+| **Hover**    | Pointer over (not touch)    | Subtle lift, color shift    |
+| **Focus**    | Keyboard/programmatic focus | Visible ring (see below)    |
+| **Active**   | Being pressed               | Pressed in, darker          |
+| **Disabled** | Not interactive             | Reduced opacity, no pointer |
+| **Loading**  | Processing                  | Spinner, skeleton           |
+| **Error**    | Invalid state               | Red border, icon, message   |
+| **Success**  | Completed                   | Green check, confirmation   |
 
 **The common miss**: Designing hover without focus, or vice versa. They're different. Keyboard users never see hover states.
 
@@ -35,6 +35,7 @@ button:focus-visible {
 ```
 
 **Focus ring design**:
+
 - High contrast (3:1 minimum against adjacent colors)
 - 2-3px thick
 - Offset from element (not inside it)
@@ -66,8 +67,8 @@ Focus trapping in modals used to require complex JavaScript. Now use the `inert`
 Or use the native `<dialog>` element:
 
 ```javascript
-const dialog = document.querySelector('dialog');
-dialog.showModal();  // Opens with focus trap, closes on Escape
+const dialog = document.querySelector('dialog')
+dialog.showModal() // Opens with focus trap, closes on Escape
 ```
 
 ## The Popover API

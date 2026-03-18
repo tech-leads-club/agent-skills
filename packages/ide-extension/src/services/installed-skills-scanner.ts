@@ -1,6 +1,6 @@
+import type { CorePorts } from '@tech-leads-club/core'
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { CorePorts } from '@tech-leads-club/core'
 import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo, InstalledSkillsMap, Skill } from '../shared/types'
 import { getAgentPathConfigs } from './agent-paths'
 import type { LoggingService } from './logging-service'

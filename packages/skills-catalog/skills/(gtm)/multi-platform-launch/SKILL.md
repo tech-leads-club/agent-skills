@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Multi-Platform Launch Skill
@@ -37,66 +36,66 @@ audience context will produce generic advice.
 
 ### Discovery Platforms
 
-| Platform | Audience | Best For | Effort | Timeline Impact |
-|---|---|---|---|---|
-| Product Hunt | Tech-savvy early adopters, 5M+ monthly | Launch day spike, press signal, investor signal | High | Day 0 |
-| BetaList | Pre-launch beta testers, early adopters | Waitlist building, pre-launch validation | Low | Week -2 to -1 |
-| What Launched Today | Casual tech browsers | Secondary launch day traffic | Low | Day 0 |
-| Launching.io | Startup watchers | Supplementary visibility | Low | Day 0-1 |
+| Platform            | Audience                                | Best For                                        | Effort | Timeline Impact |
+| ------------------- | --------------------------------------- | ----------------------------------------------- | ------ | --------------- |
+| Product Hunt        | Tech-savvy early adopters, 5M+ monthly  | Launch day spike, press signal, investor signal | High   | Day 0           |
+| BetaList            | Pre-launch beta testers, early adopters | Waitlist building, pre-launch validation        | Low    | Week -2 to -1   |
+| What Launched Today | Casual tech browsers                    | Secondary launch day traffic                    | Low    | Day 0           |
+| Launching.io        | Startup watchers                        | Supplementary visibility                        | Low    | Day 0-1         |
 
 ### Developer Platforms
 
-| Platform | Audience | Best For | Effort | Timeline Impact |
-|---|---|---|---|---|
-| Hacker News (Show HN) | Engineers, technical founders | Technical credibility, GitHub stars | High | Day 0-1 |
-| Dev Hunt | Developer tool users | Dev-focused discovery | Low | Week -1 to 0 |
-| GitHub Trending | Open-source developers | Stars, contributors, credibility | Medium | Ongoing |
-| StackShare | Engineering teams evaluating tools | Enterprise dev tool discovery | Low | Week +1 |
+| Platform              | Audience                           | Best For                            | Effort | Timeline Impact |
+| --------------------- | ---------------------------------- | ----------------------------------- | ------ | --------------- |
+| Hacker News (Show HN) | Engineers, technical founders      | Technical credibility, GitHub stars | High   | Day 0-1         |
+| Dev Hunt              | Developer tool users               | Dev-focused discovery               | Low    | Week -1 to 0    |
+| GitHub Trending       | Open-source developers             | Stars, contributors, credibility    | Medium | Ongoing         |
+| StackShare            | Engineering teams evaluating tools | Enterprise dev tool discovery       | Low    | Week +1         |
 
 ### Indie/Founder Platforms
 
-| Platform | Audience | Best For | Effort | Timeline Impact |
-|---|---|---|---|---|
-| Indie Hackers | Solo founders, indie makers | Community feedback, early revenue | Medium | Week -1 to +1 |
-| Microlaunch | Micro-SaaS builders | Quiet pre/post-PH launch | Low | Week -1 or +1 |
-| NextBigProduct | Startup watchers | Supplementary visibility | Low | Week 0-1 |
-| Foundout.io | Long-tail product discovery | Persistent visibility post-launch | Low | Week +1 |
+| Platform       | Audience                    | Best For                          | Effort | Timeline Impact |
+| -------------- | --------------------------- | --------------------------------- | ------ | --------------- |
+| Indie Hackers  | Solo founders, indie makers | Community feedback, early revenue | Medium | Week -1 to +1   |
+| Microlaunch    | Micro-SaaS builders         | Quiet pre/post-PH launch          | Low    | Week -1 or +1   |
+| NextBigProduct | Startup watchers            | Supplementary visibility          | Low    | Week 0-1        |
+| Foundout.io    | Long-tail product discovery | Persistent visibility post-launch | Low    | Week +1         |
 
 ### AI/Tech Directories
 
-| Platform | Monthly Users | Domain Authority | Best For |
-|---|---|---|---|
-| There's An AI For That (TAAFT) | 2M+ | High | AI tool discovery, SEO |
-| Futurepedia | 1M+ | High | AI tool aggregation |
-| Toolify | 500K+ | Medium | AI tool comparison |
-| Uneed | Growing | Medium | Curated indie tools |
-| AI Tool Directory (aitoolfor.org) | Growing | Medium | Broad AI tool listing |
+| Platform                          | Monthly Users | Domain Authority | Best For               |
+| --------------------------------- | ------------- | ---------------- | ---------------------- |
+| There's An AI For That (TAAFT)    | 2M+           | High             | AI tool discovery, SEO |
+| Futurepedia                       | 1M+           | High             | AI tool aggregation    |
+| Toolify                           | 500K+         | Medium           | AI tool comparison     |
+| Uneed                             | Growing       | Medium           | Curated indie tools    |
+| AI Tool Directory (aitoolfor.org) | Growing       | Medium           | Broad AI tool listing  |
 
 ### Social Channels
 
-| Platform | Strategy | Timeline |
-|---|---|---|
-| X (Twitter) | Building in public, launch threads, engagement pods | Weeks -4 to +4 |
-| LinkedIn | Professional launch posts, founder story | Week -1 to +2 |
-| Reddit | Relevant subreddit posts (r/SaaS, r/startups, niche subs) | Day 0 to +7 |
-| Discord/Slack communities | Targeted community seeding | Ongoing |
+| Platform                  | Strategy                                                  | Timeline       |
+| ------------------------- | --------------------------------------------------------- | -------------- |
+| X (Twitter)               | Building in public, launch threads, engagement pods       | Weeks -4 to +4 |
+| LinkedIn                  | Professional launch posts, founder story                  | Week -1 to +2  |
+| Reddit                    | Relevant subreddit posts (r/SaaS, r/startups, niche subs) | Day 0 to +7    |
+| Discord/Slack communities | Targeted community seeding                                | Ongoing        |
 
 ### Content Channels
 
-| Platform | Content Type | SEO Value | Timeline |
-|---|---|---|---|
-| YouTube | Product demo, launch story video | Medium | Week -1 to +1 |
-| Blog/personal site | Launch blog post, technical deep-dive | High | Week 0-1 |
-| Podcasts | Founder interview circuit | Medium | Week +1 to +4 |
-| Newsletter | Cross-promotions with aligned newsletters | Medium | Week -1 to +1 |
+| Platform           | Content Type                              | SEO Value | Timeline      |
+| ------------------ | ----------------------------------------- | --------- | ------------- |
+| YouTube            | Product demo, launch story video          | Medium    | Week -1 to +1 |
+| Blog/personal site | Launch blog post, technical deep-dive     | High      | Week 0-1      |
+| Podcasts           | Founder interview circuit                 | Medium    | Week +1 to +4 |
+| Newsletter         | Cross-promotions with aligned newsletters | Medium    | Week -1 to +1 |
 
 ### Paid/Review Platforms
 
-| Platform | Model | Best For | Timeline |
-|---|---|---|---|
-| AppSumo | Lifetime deal revenue split | Revenue boost, user acquisition at scale | Week +2 to +4 |
-| G2 | Free listing + paid promotion | Enterprise social proof, SEO | Week +2 to +8 |
-| Capterra | Free listing + paid placement | SMB discovery, comparison shopping | Week +2 to +8 |
+| Platform | Model                         | Best For                                 | Timeline      |
+| -------- | ----------------------------- | ---------------------------------------- | ------------- |
+| AppSumo  | Lifetime deal revenue split   | Revenue boost, user acquisition at scale | Week +2 to +4 |
+| G2       | Free listing + paid promotion | Enterprise social proof, SEO             | Week +2 to +8 |
+| Capterra | Free listing + paid placement | SMB discovery, comparison shopping       | Week +2 to +8 |
 
 Note: G2 is acquiring Capterra/GetApp/Software Advice from Gartner (closing Q1 2026).
 
@@ -181,23 +180,23 @@ Early velocity still matters, but gaming is harder than before.
 
 ### Product Hunt Launch Page Anatomy
 
-| Element | Requirements |
-|---|---|
-| Title | 60-70 chars, customer-focused, communicate value without context |
-| Tagline | One sentence reinforcing the title's value proposition |
-| Gallery | 4-6 images or GIF/video; first image is hero; show product in use |
-| Description | What it does (1 sentence), who for (1 sentence), differentiator (1 sentence) |
-| Maker Comment | Story behind building it, why this moment matters, invite feedback |
+| Element       | Requirements                                                                 |
+| ------------- | ---------------------------------------------------------------------------- |
+| Title         | 60-70 chars, customer-focused, communicate value without context             |
+| Tagline       | One sentence reinforcing the title's value proposition                       |
+| Gallery       | 4-6 images or GIF/video; first image is hero; show product in use            |
+| Description   | What it does (1 sentence), who for (1 sentence), differentiator (1 sentence) |
+| Maker Comment | Story behind building it, why this moment matters, invite feedback           |
 
 ### Title Strategy: Three Variants
 
 Prepare three title options with distinct angles:
 
-| Angle | Example |
-|---|---|
-| Value-first | "Ship blog posts 10x faster with AI that matches your voice" |
-| Social proof | "The writing tool 500 founders use to publish daily" |
-| Curiosity | "What happens when you give your blog an AI co-writer" |
+| Angle        | Example                                                      |
+| ------------ | ------------------------------------------------------------ |
+| Value-first  | "Ship blog posts 10x faster with AI that matches your voice" |
+| Social proof | "The writing tool 500 founders use to publish daily"         |
+| Curiosity    | "What happens when you give your blog an AI co-writer"       |
 
 Test these with 5-10 people before launch. Pick the one with the strongest immediate reaction.
 
@@ -205,23 +204,23 @@ Test these with 5-10 people before launch. Pick the one with the strongest immed
 
 For teams of 2+, assign these roles explicitly:
 
-| Role | Responsibility |
-|---|---|
-| Thread Owner | Responds to every PH comment within 30 min |
-| Social Driver | Posts updates on X, LinkedIn, communities |
-| Support Lead | Handles signups, onboarding, bug reports |
-| Metrics Tracker | Monitors upvotes, rank position, traffic |
+| Role            | Responsibility                             |
+| --------------- | ------------------------------------------ |
+| Thread Owner    | Responds to every PH comment within 30 min |
+| Social Driver   | Posts updates on X, LinkedIn, communities  |
+| Support Lead    | Handles signups, onboarding, bug reports   |
+| Metrics Tracker | Monitors upvotes, rank position, traffic   |
 
 Solo founders: prioritize Thread Owner and Social Driver. Let support queue until evening.
 
 ### Performance Benchmarks (2025)
 
-| Metric | Good | Great | Top 5 |
-|---|---|---|---|
-| Upvotes | 150-300 | 300-600 | 600-900+ |
-| Comments | 30-60 | 60-120 | 120+ |
-| Launch day signups | 200-500 | 500-1500 | 1500+ |
-| Traffic spike | 2K-5K visits | 5K-15K | 15K+ |
+| Metric             | Good         | Great    | Top 5    |
+| ------------------ | ------------ | -------- | -------- |
+| Upvotes            | 150-300      | 300-600  | 600-900+ |
+| Comments           | 30-60        | 60-120   | 120+     |
+| Launch day signups | 200-500      | 500-1500 | 1500+    |
+| Traffic spike      | 2K-5K visits | 5K-15K   | 15K+     |
 
 Products in the top 6 appear on the first page without scrolling. This is the target.
 
@@ -241,6 +240,7 @@ Show HN is for things people can run, use, or interact with. Blog posts, signup 
 and newsletters are explicitly off-topic for Show HN.
 
 **Ideal post types:**
+
 - Live demo with no signup required
 - Open-source tool with GitHub repo
 - Technical deep-dive with benchmarks
@@ -255,10 +255,10 @@ Bad: "Show HN: The Best Design-to-Code Tool Ever Made"
 
 ### Timing
 
-| Window | Why |
-|---|---|
+| Window                    | Why                                 |
+| ------------------------- | ----------------------------------- |
 | Tue-Thu, 8:00-10:00 AM PT | Engineers check news before standup |
-| Sunday, 6:00-9:00 PM PT | Low competition, relaxed browsing |
+| Sunday, 6:00-9:00 PM PT   | Low competition, relaxed browsing   |
 
 Check hn.algolia.com before posting to verify your slot is not crowded by major stories.
 
@@ -278,11 +278,11 @@ Shadow-banning is aggressive and permanent.
 
 ### HN Performance Benchmarks
 
-| Result | Points | What You Get |
-|---|---|---|
-| Front page (1hr) | 10-20 | ~500 visits, 20-50 GitHub stars |
-| Front page (4hrs) | 30-80 | ~2K-5K visits, 50-121 GitHub stars |
-| Front page (12hrs+) | 100+ | 5K-20K visits, major credibility signal |
+| Result              | Points | What You Get                            |
+| ------------------- | ------ | --------------------------------------- |
+| Front page (1hr)    | 10-20  | ~500 visits, 20-50 GitHub stars         |
+| Front page (4hrs)   | 30-80  | ~2K-5K visits, 50-121 GitHub stars      |
+| Front page (12hrs+) | 100+   | 5K-20K visits, major credibility signal |
 
 Expect brutally honest feedback. Respond to criticism thoughtfully and you earn respect.
 
@@ -303,12 +303,12 @@ SEO/social traffic, segmentation for launch day personalization, and viral growt
 
 The highest-performing waitlists use tiered referral rewards:
 
-| Referrals | Reward |
-|---|---|
-| 1 | Early access (move up the line) |
-| 3 | Extended free trial or bonus feature |
-| 5 | Lifetime discount or founding member status |
-| 10 | Direct call with founder, input on roadmap |
+| Referrals | Reward                                      |
+| --------- | ------------------------------------------- |
+| 1         | Early access (move up the line)             |
+| 3         | Extended free trial or bonus feature        |
+| 5         | Lifetime discount or founding member status |
+| 10        | Direct call with founder, input on roadmap  |
 
 Tools: LaunchList (getlaunchlist.com), Waitlister, Viral Loops, ReferralHero
 
@@ -320,15 +320,14 @@ keep the list warm, and let top referrers in early for pre-launch testimonials.
 
 ### Waitlist Size Benchmarks
 
-| Product Stage | Target Waitlist | Conversion Expectation |
-|---|---|---|
-| Pre-MVP validation | 100-500 | 40-60% to beta signup |
-| MVP ready | 500-2000 | 30-50% to active user |
-| Product-market fit | 2000-10000 | 25-40% to paid/active |
-| Scaled launch | 10000+ | 15-30% to paid |
+| Product Stage      | Target Waitlist | Conversion Expectation |
+| ------------------ | --------------- | ---------------------- |
+| Pre-MVP validation | 100-500         | 40-60% to beta signup  |
+| MVP ready          | 500-2000        | 30-50% to active user  |
+| Product-market fit | 2000-10000      | 25-40% to paid/active  |
+| Scaled launch      | 10000+          | 15-30% to paid         |
 
 ---
-
 
 For directory submission, AppSumo, G2/Capterra, UGC scaling, budget framework, timing, success metrics, and common mistakes read `references/directories-timing-mistakes.md`.
 
@@ -345,7 +344,6 @@ For directory submission, AppSumo, G2/Capterra, UGC scaling, budget framework, t
 - **Launch day then silence** → **Cause:** No Week +1 plan. **Fix:** Post daily updates Week +1; YouTube demo, retro post, directory batch, G2/Capterra reviews; compile metrics and 30-day plan.
 
 ---
-
 
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 

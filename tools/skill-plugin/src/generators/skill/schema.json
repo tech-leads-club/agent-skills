@@ -35,7 +35,5 @@
       "default": "1.0.0"
     }
   },
-  "required": [
-    "name"
-  ]
+  "required": ["name"]
 }

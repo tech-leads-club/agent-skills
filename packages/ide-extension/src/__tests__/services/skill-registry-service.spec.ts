@@ -3,9 +3,7 @@ import * as vscode from 'vscode'
 import type { LoggingService } from '../../services/logging-service'
 import type { SkillRegistry } from '../../shared/types'
 
-type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
-  ...args: TArgs
-) => TReturn
+type SyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (...args: TArgs) => TReturn
 
 type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
   ...args: TArgs

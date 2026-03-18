@@ -9,6 +9,7 @@ Expert guidance for debugging Shopify themes, apps, and API integrations with pr
 Debug Liquid template errors and rendering issues.
 
 **Enable Theme Preview:**
+
 ```
 1. Go to Online Store > Themes
 2. Click "Customise" on your theme
@@ -19,6 +20,7 @@ Debug Liquid template errors and rendering issues.
 **Common Liquid Errors:**
 
 **Syntax Error:**
+
 ```liquid
 {# ❌ Error: Missing endif #}
 {% if product.available %}
@@ -32,6 +34,7 @@ Debug Liquid template errors and rendering issues.
 ```
 
 **Undefined Variable:**
+
 ```liquid
 {# ❌ Error: product undefined on collection page #}
 {{ product.title }}
@@ -45,6 +48,7 @@ Debug Liquid template errors and rendering issues.
 ```
 
 **Invalid Filter:**
+
 ```liquid
 {# ❌ Error: Unknown filter #}
 {{ product.price | format_money }}
@@ -54,6 +58,7 @@ Debug Liquid template errors and rendering issues.
 ```
 
 **Debug Output:**
+
 ```liquid
 {# Output variable as JSON #}
 {{ product | json }}
@@ -73,6 +78,7 @@ Debug Liquid template errors and rendering issues.
 ```
 
 **Console Logging from Liquid:**
+
 ```liquid
 <script>
   console.log('Product ID:', {{ product.id }});
@@ -86,62 +92,66 @@ Debug Liquid template errors and rendering issues.
 Debug JavaScript errors in themes and apps.
 
 **Browser Console:**
+
 ```javascript
 // Log to console
-console.log('Debug:', variable);
-console.error('Error:', error);
-console.warn('Warning:', warning);
+console.log('Debug:', variable)
+console.error('Error:', error)
+console.warn('Warning:', warning)
 
 // Log object properties
-console.table(data);
+console.table(data)
 
 // Group related logs
-console.group('Cart Operations');
-console.log('Cart ID:', cartId);
-console.log('Items:', items);
-console.groupEnd();
+console.group('Cart Operations')
+console.log('Cart ID:', cartId)
+console.log('Items:', items)
+console.groupEnd()
 
 // Time operations
-console.time('API Call');
-await fetch('/api/data');
-console.timeEnd('API Call');
+console.time('API Call')
+await fetch('/api/data')
+console.timeEnd('API Call')
 
 // Stack trace
-console.trace('Execution path');
+console.trace('Execution path')
 ```
 
 **Breakpoints:**
+
 ```javascript
 // Programmatic breakpoint
-debugger;
+debugger
 
 // Set in browser DevTools:
 // Sources tab > Click line number
 ```
 
 **Error Handling:**
+
 ```javascript
 // ❌ Unhandled error
-const data = await fetch('/api/data').then(r => r.json());
+const data = await fetch('/api/data').then((r) => r.json())
 
 // ✅ Proper error handling
 try {
-  const response = await fetch('/api/data');
+  const response = await fetch('/api/data')
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   }
 
-  const data = await response.json();
-  console.log('Data:', data);
+  const data = await response.json()
+  console.log('Data:', data)
 } catch (error) {
-  console.error('Failed to fetch data:', error);
+  console.error('Failed to fetch data:', error)
   // Show user-friendly error message
-  alert('Failed to load data. Please try again.');
+  alert('Failed to load data. Please try again.')
 }
 ```
 
 **Network Debugging:**
+
 ```
 1. Open DevTools > Network tab
 2. Filter by XHR or Fetch
@@ -160,6 +170,7 @@ Debug GraphQL and REST API errors.
 **GraphQL Errors:**
 
 Error response format:
+
 ```json
 {
   "errors": [
@@ -178,6 +189,7 @@ Error response format:
 ```
 
 **Check for errors BEFORE accessing data:**
+
 ```javascript
 const response = await fetch(graphqlEndpoint, {
   method: 'POST',
@@ -186,39 +198,43 @@ const response = await fetch(graphqlEndpoint, {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({ query, variables }),
-});
+})
 
-const { data, errors } = await response.json();
+const { data, errors } = await response.json()
 
 // ✅ Always check errors first
 if (errors) {
-  console.error('GraphQL Errors:');
-  errors.forEach(error => {
-    console.error('Message:', error.message);
-    console.error('Location:', error.locations);
-    console.error('Path:', error.path);
-    console.error('Code:', error.extensions?.code);
-  });
-  throw new Error(errors[0].message);
+  console.error('GraphQL Errors:')
+  errors.forEach((error) => {
+    console.error('Message:', error.message)
+    console.error('Location:', error.locations)
+    console.error('Path:', error.path)
+    console.error('Code:', error.extensions?.code)
+  })
+  throw new Error(errors[0].message)
 }
 
 // Now safe to use data
-console.log('Products:', data.products);
+console.log('Products:', data.products)
 ```
 
 **Common GraphQL Errors:**
 
 **Authentication Error:**
+
 ```json
 {
-  "errors": [{
-    "message": "Access denied",
-    "extensions": { "code": "UNAUTHENTICATED" }
-  }]
+  "errors": [
+    {
+      "message": "Access denied",
+      "extensions": { "code": "UNAUTHENTICATED" }
+    }
+  ]
 }
 ```
 
 **Fix:** Check access token:
+
 ```javascript
 // Verify token is valid
 const token = 'shpat_...';
@@ -236,15 +252,19 @@ headers: {
 ```
 
 **Field Not Found:**
+
 ```json
 {
-  "errors": [{
-    "message": "Field 'invalidField' doesn't exist on type 'Product'"
-  }]
+  "errors": [
+    {
+      "message": "Field 'invalidField' doesn't exist on type 'Product'"
+    }
+  ]
 }
 ```
 
 **Fix:** Check field name in API docs:
+
 ```graphql
 # ❌ Wrong field name
 query {
@@ -264,29 +284,31 @@ query {
 ```
 
 **Rate Limit Error:**
+
 ```javascript
 // Check rate limit header
-const response = await fetch(graphqlEndpoint, options);
+const response = await fetch(graphqlEndpoint, options)
 
-const rateLimit = response.headers.get('X-Shopify-GraphQL-Admin-Api-Call-Limit');
-console.log('Rate limit:', rateLimit); // "42/50"
+const rateLimit = response.headers.get('X-Shopify-GraphQL-Admin-Api-Call-Limit')
+console.log('Rate limit:', rateLimit) // "42/50"
 
 if (response.status === 429) {
-  const retryAfter = response.headers.get('Retry-After');
-  console.log(`Rate limited. Retry after ${retryAfter} seconds`);
+  const retryAfter = response.headers.get('Retry-After')
+  console.log(`Rate limited. Retry after ${retryAfter} seconds`)
 }
 ```
 
 **REST API Errors:**
 
 **404 Not Found:**
+
 ```javascript
 const response = await fetch(`https://${shop}/admin/api/2026-01/products/999999.json`, {
   headers: { 'X-Shopify-Access-Token': token },
-});
+})
 
 if (response.status === 404) {
-  console.error('Product not found');
+  console.error('Product not found')
   // Check:
   // 1. Product ID is correct
   // 2. Product exists in store
@@ -295,6 +317,7 @@ if (response.status === 404) {
 ```
 
 **422 Unprocessable Entity:**
+
 ```json
 {
   "errors": {
@@ -305,6 +328,7 @@ if (response.status === 404) {
 ```
 
 **Fix:** Validate input:
+
 ```javascript
 const response = await fetch(endpoint, {
   method: 'POST',
@@ -314,21 +338,21 @@ const response = await fetch(endpoint, {
   },
   body: JSON.stringify({
     product: {
-      title: '',  // ❌ Empty title
+      title: '', // ❌ Empty title
       price: -10, // ❌ Negative price
     },
   }),
-});
+})
 
 if (response.status === 422) {
-  const { errors } = await response.json();
-  console.error('Validation errors:', errors);
+  const { errors } = await response.json()
+  console.error('Validation errors:', errors)
 
   // Fix data
   const validProduct = {
-    title: 'Product Name',  // ✅ Valid title
-    price: 19.99,           // ✅ Valid price
-  };
+    title: 'Product Name', // ✅ Valid title
+    price: 19.99, // ✅ Valid price
+  }
 }
 ```
 
@@ -337,62 +361,65 @@ if (response.status === 422) {
 Debug cart and Ajax API issues.
 
 **Cart Not Updating:**
+
 ```javascript
 // ❌ Common mistake: Wrong variant ID
 fetch('/cart/add.js', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    id: '123',  // ❌ Wrong: using product ID instead of variant ID
+    id: '123', // ❌ Wrong: using product ID instead of variant ID
     quantity: 1,
   }),
-});
+})
 
 // ✅ Fixed: Use variant ID
 fetch('/cart/add.js', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    id: 123456789,  // ✅ Variant ID (numeric)
+    id: 123456789, // ✅ Variant ID (numeric)
     quantity: 1,
   }),
 })
-  .then(response => {
+  .then((response) => {
     if (!response.ok) {
-      return response.json().then(err => {
-        console.error('Cart error:', err);
-        throw err;
-      });
+      return response.json().then((err) => {
+        console.error('Cart error:', err)
+        throw err
+      })
     }
-    return response.json();
+    return response.json()
   })
-  .then(item => {
-    console.log('Added to cart:', item);
+  .then((item) => {
+    console.log('Added to cart:', item)
     // Update cart UI
   })
-  .catch(error => {
-    console.error('Failed to add to cart:', error);
-  });
+  .catch((error) => {
+    console.error('Failed to add to cart:', error)
+  })
 ```
 
 **Get Current Cart:**
+
 ```javascript
 // Debug current cart state
 fetch('/cart.js')
-  .then(r => r.json())
-  .then(cart => {
-    console.log('Cart:', cart);
-    console.log('Item count:', cart.item_count);
-    console.log('Total:', cart.total_price);
-    console.log('Items:', cart.items);
+  .then((r) => r.json())
+  .then((cart) => {
+    console.log('Cart:', cart)
+    console.log('Item count:', cart.item_count)
+    console.log('Total:', cart.total_price)
+    console.log('Items:', cart.items)
 
-    cart.items.forEach(item => {
-      console.log('Item:', item.product_id, item.variant_id, item.quantity);
-    });
-  });
+    cart.items.forEach((item) => {
+      console.log('Item:', item.product_id, item.variant_id, item.quantity)
+    })
+  })
 ```
 
 **Cart AJAX Errors:**
+
 ```javascript
 // Common error: Insufficient inventory
 {
@@ -416,6 +443,7 @@ if (variant.inventory_quantity < quantity) {
 Debug issues in the theme customiser.
 
 **Theme Editor Console:**
+
 ```
 1. Open theme customiser
 2. Open DevTools (F12)
@@ -427,6 +455,7 @@ Debug issues in the theme customiser.
 ```
 
 **Section Not Rendering:**
+
 ```liquid
 {# Check section schema #}
 {% schema %}
@@ -440,6 +469,7 @@ Debug issues in the theme customiser.
 ```
 
 **Settings Not Updating:**
+
 ```liquid
 {# ❌ Wrong: Using hardcoded value #}
 <h1>Hardcoded Title</h1>
@@ -463,6 +493,7 @@ Debug issues in the theme customiser.
 ```
 
 **Block Attributes Missing:**
+
 ```liquid
 {# ❌ Missing shopify_attributes #}
 <div class="block">
@@ -482,6 +513,7 @@ Debug webhook delivery and processing.
 **Webhook Not Received:**
 
 Check in Shopify Admin:
+
 ```
 1. Settings > Notifications > Webhooks
 2. Click webhook
@@ -492,57 +524,56 @@ Check in Shopify Admin:
 ```
 
 **Verify Webhook HMAC:**
+
 ```javascript
-import crypto from 'crypto';
+import crypto from 'crypto'
 
 function verifyWebhook(body, hmac, secret) {
-  const hash = crypto
-    .createHmac('sha256', secret)
-    .update(body, 'utf8')
-    .digest('base64');
+  const hash = crypto.createHmac('sha256', secret).update(body, 'utf8').digest('base64')
 
-  return hash === hmac;
+  return hash === hmac
 }
 
 // Express example
 app.post('/webhooks/orders', (req, res) => {
-  const hmac = req.headers['x-shopify-hmac-sha256'];
-  const body = JSON.stringify(req.body);
+  const hmac = req.headers['x-shopify-hmac-sha256']
+  const body = JSON.stringify(req.body)
 
   if (!verifyWebhook(body, hmac, process.env.SHOPIFY_WEBHOOK_SECRET)) {
-    console.error('Invalid webhook HMAC');
-    return res.status(401).send('Unauthorised');
+    console.error('Invalid webhook HMAC')
+    return res.status(401).send('Unauthorised')
   }
 
-  console.log('Webhook verified');
+  console.log('Webhook verified')
 
   // Process webhook
-  const order = req.body;
-  console.log('Order:', order.id, order.email);
+  const order = req.body
+  console.log('Order:', order.id, order.email)
 
   // Respond quickly (< 5 seconds)
-  res.status(200).send('OK');
-});
+  res.status(200).send('OK')
+})
 ```
 
 **Webhook Timeout:**
+
 ```javascript
 // ❌ Processing takes too long (> 5 seconds)
 app.post('/webhooks/orders', async (req, res) => {
-  await processOrder(req.body);  // Slow operation
-  res.send('OK');  // Response delayed
-});
+  await processOrder(req.body) // Slow operation
+  res.send('OK') // Response delayed
+})
 
 // ✅ Respond immediately, process async
 app.post('/webhooks/orders', async (req, res) => {
-  const order = req.body;
+  const order = req.body
 
   // Respond quickly
-  res.status(200).send('OK');
+  res.status(200).send('OK')
 
   // Process in background
-  processOrder(order).catch(console.error);
-});
+  processOrder(order).catch(console.error)
+})
 ```
 
 ### 7. Common Error Messages
@@ -605,6 +636,7 @@ Fix: Check API version and field availability in docs.
 ## Debugging Toolkit
 
 **Browser DevTools:**
+
 ```
 - Console: View errors and logs
 - Network: Inspect API requests
@@ -614,6 +646,7 @@ Fix: Check API version and field availability in docs.
 ```
 
 **Shopify Tools:**
+
 ```
 - Theme Preview: Test changes before publishing
 - Theme Inspector: View section data
@@ -622,6 +655,7 @@ Fix: Check API version and field availability in docs.
 ```
 
 **Useful Console Commands:**
+
 ```javascript
 // Get all form data
 new FormData(document.querySelector('form'))

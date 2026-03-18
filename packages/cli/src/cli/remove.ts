@@ -1,6 +1,6 @@
-import chalk from 'chalk'
-import { removeSkill } from '@tech-leads-club/core'
 import type { AgentType } from '@tech-leads-club/core'
+import { removeSkill } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
 

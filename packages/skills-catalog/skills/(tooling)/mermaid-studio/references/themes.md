@@ -405,6 +405,7 @@ Use max 3-4 colors per diagram and map them to meaning:
 Do NOT use `system-ui`, `-apple-system`, or `Segoe UI` in `fontFamily` theme variables. These fonts are not available in headless Chromium (used by `mmdc` for rendering) and will silently fall back to a serif font like Times New Roman, making the diagram look unprofessional.
 
 **Safe font stacks for `fontFamily`:**
+
 - Default (best): `'trebuchet ms', 'verdana', 'arial', sans-serif` — this is Mermaid's built-in default and works everywhere
 - If you must customize: `'verdana', 'arial', 'helvetica', sans-serif`
 

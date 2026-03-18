@@ -44,14 +44,12 @@ describe('OperationQueue', () => {
 
   it('should retry on retryable error', async () => {
     const retryableError = { category: 'cli-error', retryable: true, message: 'EPERM' }
-    mockExecute
-      .mockRejectedValueOnce(retryableError)
-      .mockResolvedValueOnce({
-        operationId: '1',
-        operation: 'install',
-        skillName: 'skill',
-        status: 'completed',
-      })
+    mockExecute.mockRejectedValueOnce(retryableError).mockResolvedValueOnce({
+      operationId: '1',
+      operation: 'install',
+      skillName: 'skill',
+      status: 'completed',
+    })
 
     const onProgress = jest.fn()
     queue.onJobProgress(onProgress)
@@ -113,7 +111,14 @@ describe('OperationQueue', () => {
       status: 'completed',
       metadata: batchMeta,
     })
-    queue.enqueue({ operationId: 'meta', operation: 'install', skillName: 'meta', args: [], cwd: '/', metadata: batchMeta })
+    queue.enqueue({
+      operationId: 'meta',
+      operation: 'install',
+      skillName: 'meta',
+      args: [],
+      cwd: '/',
+      metadata: batchMeta,
+    })
 
     await jest.runAllTimersAsync()
 

@@ -12,7 +12,7 @@ For the JSON properties and format, see `excalidraw-schema.md`.
 | `ellipse`   | ○     | Start/end, states, emphasis            | via `boundElements` | Arrows can bind |
 | `diamond`   | ◇     | Decision points, conditions            | via `boundElements` | Arrows can bind |
 | `arrow`     | →     | Directional flow, relationships        | via `boundElements` | Binds to shapes |
-| `line`      | —     | Non-directional connections, dividers  | ❌                   | Binds to shapes |
+| `line`      | —     | Non-directional connections, dividers  | ❌                  | Binds to shapes |
 | `text`      | A     | Standalone labels, titles, annotations | —                   | Not bindable    |
 
 ## Shapes — Rectangle, Ellipse, Diamond
@@ -43,9 +43,7 @@ For the JSON properties and format, see `excalidraw-schema.md`.
     "strokeColor": "#1971c2",
     "strokeWidth": 2,
     "roundness": { "type": 3 },
-    "boundElements": [
-      { "type": "text", "id": "text-step-1" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-step-1" }]
   },
   {
     "id": "text-step-1",
@@ -150,15 +148,16 @@ Arrow labels also require `boundElements` on the arrow + a separate text element
     "y": 140,
     "width": 200,
     "height": 0,
-    "points": [[0, 0], [200, 0]],
+    "points": [
+      [0, 0],
+      [200, 0]
+    ],
     "strokeWidth": 2,
     "roundness": { "type": 2 },
     "lastCommittedPoint": null,
     "startArrowhead": null,
     "endArrowhead": "arrow",
-    "boundElements": [
-      { "type": "text", "id": "text-flow-1" }
-    ]
+    "boundElements": [{ "type": "text", "id": "text-flow-1" }]
   },
   {
     "id": "text-flow-1",
@@ -208,7 +207,10 @@ Use `startBinding`/`endBinding` — **never `start`/`end`**. Connected shapes mu
   {
     "id": "flow-1",
     "type": "arrow",
-    "points": [[0, 0], [200, 0]],
+    "points": [
+      [0, 0],
+      [200, 0]
+    ],
     "startBinding": { "elementId": "source-box", "focus": 0, "gap": 1 },
     "endBinding": { "elementId": "target-box", "focus": 0, "gap": 1 },
     "lastCommittedPoint": null,
@@ -346,13 +348,13 @@ Add a standalone text label near the top-left corner of the zone:
 
 **Zone color recommendations:**
 
-| Zone purpose    | backgroundColor | strokeColor |
-| --------------- | --------------- | ----------- |
-| Services/Logic  | `#dbe4ff`       | `#4c6ef5`   |
-| Data layer      | `#d3f9d8`       | `#2f9e44`   |
-| External/Users  | `#fff9db`       | `#f08c00`   |
-| Messaging/Events| `#f3d9fa`       | `#ae3ec9`   |
-| Infrastructure  | `#e3fafc`       | `#0c8599`   |
+| Zone purpose     | backgroundColor | strokeColor |
+| ---------------- | --------------- | ----------- |
+| Services/Logic   | `#dbe4ff`       | `#4c6ef5`   |
+| Data layer       | `#d3f9d8`       | `#2f9e44`   |
+| External/Users   | `#fff9db`       | `#f08c00`   |
+| Messaging/Events | `#f3d9fa`       | `#ae3ec9`   |
+| Infrastructure   | `#e3fafc`       | `#0c8599`   |
 
 ## Visual Modes
 
@@ -501,4 +503,4 @@ Use **background zones** to show layers (see Background Zones section):
 | Annotation                     | `text` (small font, `containerId: null`, positioned near target)              |
 | Non-directional connection     | `line`                                                                        |
 | Section divider                | `line` (horizontal, dashed)                                                   |
-| Visual grouping region         | `rectangle` (large, `opacity: 35`, `strokeStyle: "dashed"`, `roughness: 0`)  |
+| Visual grouping region         | `rectangle` (large, `opacity: 35`, `strokeStyle: "dashed"`, `roughness: 0`)   |

@@ -1,6 +1,6 @@
-import * as vscode from 'vscode'
-import { fetchRegistry } from '@tech-leads-club/core'
 import type { CorePorts } from '@tech-leads-club/core'
+import { fetchRegistry } from '@tech-leads-club/core'
+import * as vscode from 'vscode'
 import type { SkillRegistry } from '../shared/types'
 import type { LoggingService } from './logging-service'
 
@@ -204,7 +204,16 @@ export class SkillRegistryService implements vscode.Disposable {
   private mapCoreToShared(core: {
     version: string
     categories: Record<string, { name: string; description?: string }>
-    skills: Array<{ name: string; description: string; category: string; path: string; files: string[]; contentHash?: string; author?: string; version?: string }>
+    skills: Array<{
+      name: string
+      description: string
+      category: string
+      path: string
+      files: string[]
+      contentHash?: string
+      author?: string
+      version?: string
+    }>
   }): SkillRegistry {
     const categories: Record<string, { name: string; description: string }> = {}
     for (const [id, cat] of Object.entries(core.categories)) {

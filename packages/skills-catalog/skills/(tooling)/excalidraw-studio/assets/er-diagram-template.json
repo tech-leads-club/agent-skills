@@ -6,7 +6,10 @@
     {
       "id": "entity-user",
       "type": "rectangle",
-      "x": 60, "y": 120, "width": 220, "height": 180,
+      "x": 60,
+      "y": 120,
+      "width": 220,
+      "height": 180,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "#a5d8ff",
@@ -26,14 +29,15 @@
       "versionNonce": 8002,
       "updated": 1706659200000,
       "roundness": { "type": 3 },
-      "boundElements": [
-        { "type": "arrow", "id": "arrow-user-order" }
-      ]
+      "boundElements": [{ "type": "arrow", "id": "arrow-user-order" }]
     },
     {
       "id": "entity-order",
       "type": "rectangle",
-      "x": 400, "y": 120, "width": 220, "height": 180,
+      "x": 400,
+      "y": 120,
+      "width": 220,
+      "height": 180,
       "angle": 0,
       "strokeColor": "#e67700",
       "backgroundColor": "#ffec99",
@@ -61,7 +65,10 @@
     {
       "id": "entity-product",
       "type": "rectangle",
-      "x": 740, "y": 120, "width": 220, "height": 180,
+      "x": 740,
+      "y": 120,
+      "width": 220,
+      "height": 180,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "#b2f2bb",
@@ -81,14 +88,15 @@
       "versionNonce": 8006,
       "updated": 1706659200000,
       "roundness": { "type": 3 },
-      "boundElements": [
-        { "type": "arrow", "id": "arrow-order-product" }
-      ]
+      "boundElements": [{ "type": "arrow", "id": "arrow-order-product" }]
     },
     {
       "id": "sep-user",
       "type": "line",
-      "x": 60, "y": 168, "width": 220, "height": 0,
+      "x": 60,
+      "y": 168,
+      "width": 220,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -109,12 +117,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [220, 0]]
+      "points": [
+        [0, 0],
+        [220, 0]
+      ]
     },
     {
       "id": "sep-order",
       "type": "line",
-      "x": 400, "y": 168, "width": 220, "height": 0,
+      "x": 400,
+      "y": 168,
+      "width": 220,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#e67700",
       "backgroundColor": "transparent",
@@ -135,12 +149,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [220, 0]]
+      "points": [
+        [0, 0],
+        [220, 0]
+      ]
     },
     {
       "id": "sep-product",
       "type": "line",
-      "x": 740, "y": 168, "width": 220, "height": 0,
+      "x": 740,
+      "y": 168,
+      "width": 220,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "transparent",
@@ -161,12 +181,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [220, 0]]
+      "points": [
+        [0, 0],
+        [220, 0]
+      ]
     },
     {
       "id": "arrow-user-order",
       "type": "arrow",
-      "x": 280, "y": 210, "width": 120, "height": 0,
+      "x": 280,
+      "y": 210,
+      "width": 120,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -187,7 +213,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-rel-user-order" }],
-      "points": [[0, 0], [120, 0]],
+      "points": [
+        [0, 0],
+        [120, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -197,7 +226,10 @@
     {
       "id": "arrow-order-product",
       "type": "arrow",
-      "x": 620, "y": 210, "width": 120, "height": 0,
+      "x": 620,
+      "y": 210,
+      "width": 120,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -218,7 +250,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-rel-order-product" }],
-      "points": [[0, 0], [120, 0]],
+      "points": [
+        [0, 0],
+        [120, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -228,8 +263,10 @@
     {
       "id": "title",
       "type": "text",
-      "x": 300, "y": 60,
-      "width": 440, "height": 35,
+      "x": 300,
+      "y": 60,
+      "width": 440,
+      "height": 35,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -262,8 +299,10 @@
     {
       "id": "text-user-name",
       "type": "text",
-      "x": 80, "y": 128,
-      "width": 180, "height": 25,
+      "x": 80,
+      "y": 128,
+      "width": 180,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -296,8 +335,10 @@
     {
       "id": "text-user-attrs",
       "type": "text",
-      "x": 72, "y": 176,
-      "width": 200, "height": 80,
+      "x": 72,
+      "y": 176,
+      "width": 200,
+      "height": 80,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -330,8 +371,10 @@
     {
       "id": "text-order-name",
       "type": "text",
-      "x": 420, "y": 128,
-      "width": 180, "height": 25,
+      "x": 420,
+      "y": 128,
+      "width": 180,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -364,8 +407,10 @@
     {
       "id": "text-order-attrs",
       "type": "text",
-      "x": 412, "y": 176,
-      "width": 200, "height": 80,
+      "x": 412,
+      "y": 176,
+      "width": 200,
+      "height": 80,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -398,8 +443,10 @@
     {
       "id": "text-product-name",
       "type": "text",
-      "x": 760, "y": 128,
-      "width": 180, "height": 25,
+      "x": 760,
+      "y": 128,
+      "width": 180,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -432,8 +479,10 @@
     {
       "id": "text-product-attrs",
       "type": "text",
-      "x": 752, "y": 176,
-      "width": 200, "height": 64,
+      "x": 752,
+      "y": 176,
+      "width": 200,
+      "height": 64,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -466,8 +515,10 @@
     {
       "id": "text-rel-user-order",
       "type": "text",
-      "x": 298, "y": 192,
-      "width": 100, "height": 18,
+      "x": 298,
+      "y": 192,
+      "width": 100,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -500,8 +551,10 @@
     {
       "id": "text-rel-order-product",
       "type": "text",
-      "x": 638, "y": 192,
-      "width": 100, "height": 18,
+      "x": 638,
+      "y": 192,
+      "width": 100,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",

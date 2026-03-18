@@ -3,9 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/skills-catalog",
   "projectType": "library",
-  "tags": [
-    "scope:skills"
-  ],
+  "tags": ["scope:skills"],
   "targets": {
     "generate-registry": {
       "executor": "nx:run-commands",
@@ -13,12 +11,8 @@
         "command": "npx tsx packages/skills-catalog/src/generate-registry.ts",
         "cwd": "{workspaceRoot}"
       },
-      "inputs": [
-        "{projectRoot}/skills/**/*"
-      ],
-      "outputs": [
-        "{projectRoot}/skills-registry.json"
-      ]
+      "inputs": ["{projectRoot}/skills/**/*"],
+      "outputs": ["{projectRoot}/skills-registry.json"]
     },
     "generate-data": {
       "executor": "nx:run-commands",
@@ -29,9 +23,7 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "generate-registry"
-      ],
+      "dependsOn": ["generate-registry"],
       "options": {
         "commands": [
           "mkdir -p {projectRoot}/dist",
@@ -42,14 +34,8 @@
         "cwd": "{workspaceRoot}",
         "parallel": false
       },
-      "inputs": [
-        "{projectRoot}/package.json",
-        "{projectRoot}/skills-registry.json",
-        "{projectRoot}/skills/**/*"
-      ],
-      "outputs": [
-        "{projectRoot}/dist"
-      ]
+      "inputs": ["{projectRoot}/package.json", "{projectRoot}/skills-registry.json", "{projectRoot}/skills/**/*"],
+      "outputs": ["{projectRoot}/dist"]
     },
     "validate": {
       "executor": "nx:run-commands",

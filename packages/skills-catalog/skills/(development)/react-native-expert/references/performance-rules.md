@@ -85,7 +85,6 @@ Use LegendList (preferred) or FlashList. Never use ScrollView with `.map()`.
 
 // CORRECT: only renders visible items
 import { LegendList } from '@legendapp/list'
-
 ;<LegendList
   data={items}
   renderItem={({ item }) => <ItemCard item={item} />}
@@ -201,7 +200,6 @@ type FeedItem =
   | { id: string; type: 'header'; title: string }
   | { id: string; type: 'message'; text: string }
   | { id: string; type: 'image'; url: string }
-
 ;<LegendList
   data={items}
   getItemType={(item) => item.type}
@@ -492,7 +490,6 @@ Always use `expo-image` instead of React Native's `Image`:
 
 ```tsx
 import { Image } from 'expo-image'
-
 ;<Image
   source={{ uri: url }}
   placeholder={{ blurhash: 'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.' }}
@@ -535,7 +532,6 @@ import { Pressable } from 'react-native-gesture-handler'
 
 ```tsx
 import * as DropdownMenu from 'zeego/dropdown-menu'
-
 ;<DropdownMenu.Root>
   <DropdownMenu.Trigger>
     <Pressable>
@@ -586,7 +582,6 @@ const onLayout = (e: LayoutChangeEvent) => {
 ```tsx
 import { Galeria } from '@nandorojo/galeria'
 import { Image } from 'expo-image'
-
 ;<Galeria urls={urls}>
   {urls.map((url, index) => (
     <Galeria.Image index={index} key={url}>

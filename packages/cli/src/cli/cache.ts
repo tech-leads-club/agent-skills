@@ -1,5 +1,5 @@
-import chalk from 'chalk'
 import { clearCache, clearRegistryCache, getCacheDir } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
 

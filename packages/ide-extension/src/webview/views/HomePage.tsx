@@ -43,14 +43,7 @@ export interface HomePageProps {
  * />
  * ```
  */
-export function HomePage({
-  policy,
-  isTrusted,
-  isProcessing,
-  onInstall,
-  onUninstall,
-  onUpdate,
-}: HomePageProps) {
+export function HomePage({ policy, isTrusted, isProcessing, onInstall, onUninstall, onUpdate }: HomePageProps) {
   const lifecycleBlocked = (policy?.effectiveScopes.length ?? 0) === 0
   const lifecycleBlockedMessage = `Lifecycle actions are disabled: ${policy?.blockedReason ?? 'policy-none'}`
 

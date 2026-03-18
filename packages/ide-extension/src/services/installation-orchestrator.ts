@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import * as vscode from 'vscode'
-import type {
-  LifecycleBatchSelection,
-  OperationBatchMetadata,
-  OperationType,
-} from '../shared/types'
+import type { LifecycleBatchSelection, OperationBatchMetadata, OperationType } from '../shared/types'
 import type { LoggingService } from './logging-service'
 import type { JobResult, OperationQueue, QueuedJob } from './operation-queue'
 import type { PostInstallVerifier } from './post-install-verifier'
@@ -244,7 +240,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
           batchId,
           batchSize: 1,
           skillNames: skills,
-          scope: 'local',
+          scope: 'auto',
           agents,
         },
       }
@@ -301,11 +297,7 @@ export class InstallationOrchestrator implements vscode.Disposable {
    * @param message - Status text.
    * @param severity - Optional severity for timeline display.
    */
-  private handleJobProgress(
-    job: QueuedJob,
-    message: string,
-    severity?: OperationProgressSeverity,
-  ): void {
+  private handleJobProgress(job: QueuedJob, message: string, severity?: OperationProgressSeverity): void {
     this.emitEvent({
       operationId: job.operationId,
       operation: job.operation,

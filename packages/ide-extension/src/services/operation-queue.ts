@@ -216,9 +216,7 @@ export class OperationQueue {
         baseDelayMs: 500,
         shouldRetry: (error: ErrorInfo) => error.retryable === true,
         onRetry: (attempt, max) => {
-          this.jobProgressHandlers.forEach((handler) =>
-            handler(job, `Retrying (attempt ${attempt}/${max})...`, 'warn'),
-          )
+          this.jobProgressHandlers.forEach((handler) => handler(job, `Retrying (attempt ${attempt}/${max})...`, 'warn'))
         },
       })
 

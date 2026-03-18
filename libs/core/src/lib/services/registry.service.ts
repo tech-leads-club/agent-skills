@@ -26,7 +26,6 @@ type CachedSkillMeta = {
   downloadedAt: number
 }
 
-
 function getRegistryCachePath(ports: CorePorts): string {
   return join(getCacheDir(ports), REGISTRY_CACHE_FILENAME)
 }

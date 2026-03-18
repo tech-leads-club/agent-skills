@@ -1,5 +1,5 @@
 import type { CorePorts } from '@tech-leads-club/core'
-import { getAllAgentTypes, getAgentConfig } from '@tech-leads-club/core'
+import { getAgentConfig, getAllAgentTypes } from '@tech-leads-club/core'
 
 /**
  * Extension-facing projection of shared agent topology information.

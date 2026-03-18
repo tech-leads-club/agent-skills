@@ -15,22 +15,30 @@ Don't chase device sizes—let content tell you where to break. Start narrow, st
 ```css
 /* Fine pointer (mouse, trackpad) */
 @media (pointer: fine) {
-  .button { padding: 8px 16px; }
+  .button {
+    padding: 8px 16px;
+  }
 }
 
 /* Coarse pointer (touch, stylus) */
 @media (pointer: coarse) {
-  .button { padding: 12px 20px; }  /* Larger touch target */
+  .button {
+    padding: 12px 20px;
+  } /* Larger touch target */
 }
 
 /* Device supports hover */
 @media (hover: hover) {
-  .card:hover { transform: translateY(-2px); }
+  .card:hover {
+    transform: translateY(-2px);
+  }
 }
 
 /* Device doesn't support hover (touch) */
 @media (hover: none) {
-  .card { /* No hover state - use active instead */ }
+  .card {
+    /* No hover state - use active instead */
+  }
 }
 ```
 
@@ -55,8 +63,9 @@ body {
 ```
 
 **Enable viewport-fit** in your meta tag:
+
 ```html
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 ```
 
 ## Responsive Images: Get It Right
@@ -66,17 +75,14 @@ body {
 ```html
 <img
   src="hero-800.jpg"
-  srcset="
-    hero-400.jpg 400w,
-    hero-800.jpg 800w,
-    hero-1200.jpg 1200w
-  "
+  srcset="hero-400.jpg 400w, hero-800.jpg 800w, hero-1200.jpg 1200w"
   sizes="(max-width: 768px) 100vw, 50vw"
   alt="Hero image"
->
+/>
 ```
 
 **How it works**:
+
 - `srcset` lists available images with their actual widths (`w` descriptors)
 - `sizes` tells the browser how wide the image will display
 - Browser picks the best file based on viewport width AND device pixel ratio
@@ -87,9 +93,9 @@ When you need different crops/compositions (not just resolutions):
 
 ```html
 <picture>
-  <source media="(min-width: 768px)" srcset="wide.jpg">
-  <source media="(max-width: 767px)" srcset="tall.jpg">
-  <img src="fallback.jpg" alt="...">
+  <source media="(min-width: 768px)" srcset="wide.jpg" />
+  <source media="(max-width: 767px)" srcset="tall.jpg" />
+  <img src="fallback.jpg" alt="..." />
 </picture>
 ```
 

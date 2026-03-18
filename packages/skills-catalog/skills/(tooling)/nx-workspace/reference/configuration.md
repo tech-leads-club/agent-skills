@@ -17,13 +17,7 @@ Full nx.json template with all common options:
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e",
-          "build-storybook"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e", "build-storybook"],
         "parallel": 3
       }
     }
@@ -56,10 +50,7 @@ Full nx.json template with all common options:
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/.eslintrc.json"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/babel.config.json",
-      "{workspaceRoot}/tsconfig.base.json"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/babel.config.json", "{workspaceRoot}/tsconfig.base.json"]
   },
   "generators": {
     "@nx/react": {
@@ -163,20 +154,11 @@ Complete .eslintrc.json configuration with module boundaries:
             "depConstraints": [
               {
                 "sourceTag": "type:app",
-                "onlyDependOnLibsWithTags": [
-                  "type:feature",
-                  "type:ui",
-                  "type:data-access",
-                  "type:util"
-                ]
+                "onlyDependOnLibsWithTags": ["type:feature", "type:ui", "type:data-access", "type:util"]
               },
               {
                 "sourceTag": "type:feature",
-                "onlyDependOnLibsWithTags": [
-                  "type:ui",
-                  "type:data-access",
-                  "type:util"
-                ]
+                "onlyDependOnLibsWithTags": ["type:ui", "type:data-access", "type:util"]
               },
               {
                 "sourceTag": "type:ui",
@@ -254,61 +236,41 @@ Complete .eslintrc.json configuration with module boundaries:
 
 ```typescript
 // tools/generators/feature-lib/index.ts
-import {
-  Tree,
-  formatFiles,
-  generateFiles,
-  joinPathFragments,
-  names,
-  readProjectConfiguration,
-} from "@nx/devkit";
-import { libraryGenerator } from "@nx/react";
+import { Tree, formatFiles, generateFiles, joinPathFragments, names, readProjectConfiguration } from '@nx/devkit'
+import { libraryGenerator } from '@nx/react'
 
 interface FeatureLibraryGeneratorSchema {
-  name: string;
-  scope: string;
-  directory?: string;
+  name: string
+  scope: string
+  directory?: string
 }
 
-export default async function featureLibraryGenerator(
-  tree: Tree,
-  options: FeatureLibraryGeneratorSchema,
-) {
-  const { name, scope, directory } = options;
-  const projectDirectory = directory
-    ? `${directory}/${name}`
-    : `libs/${scope}/feature-${name}`;
+export default async function featureLibraryGenerator(tree: Tree, options: FeatureLibraryGeneratorSchema) {
+  const { name, scope, directory } = options
+  const projectDirectory = directory ? `${directory}/${name}` : `libs/${scope}/feature-${name}`
 
   // Generate base library
   await libraryGenerator(tree, {
     name: `feature-${name}`,
     directory: projectDirectory,
     tags: `type:feature,scope:${scope}`,
-    style: "css",
+    style: 'css',
     skipTsConfig: false,
     skipFormat: true,
-    unitTestRunner: "jest",
-    linter: "eslint",
-  });
+    unitTestRunner: 'jest',
+    linter: 'eslint',
+  })
 
   // Add custom files
-  const projectConfig = readProjectConfiguration(
-    tree,
-    `${scope}-feature-${name}`,
-  );
-  const projectNames = names(name);
+  const projectConfig = readProjectConfiguration(tree, `${scope}-feature-${name}`)
+  const projectNames = names(name)
 
-  generateFiles(
-    tree,
-    joinPathFragments(__dirname, "files"),
-    projectConfig.sourceRoot,
-    {
-      ...projectNames,
-      scope,
-      tmpl: "",
-    },
-  );
+  generateFiles(tree, joinPathFragments(__dirname, 'files'), projectConfig.sourceRoot, {
+    ...projectNames,
+    scope,
+    tmpl: '',
+  })
 
-  await formatFiles(tree);
+  await formatFiles(tree)
 }
 ```

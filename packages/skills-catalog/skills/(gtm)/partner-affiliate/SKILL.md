@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Partner & Affiliate Program Design
@@ -35,27 +34,27 @@ The partner landscape has shifted decisively. Traditional reseller models where 
 
 ### Model Comparison
 
-| Dimension | Traditional Reseller Model | Co-Creation Ecosystem Model |
-|---|---|---|
-| Partner role | Resells your product as-is | Builds on your product, extends it for their vertical |
-| Compensation | Margin-based (15-25% discount) | Performance-based revenue share (10-40%) |
-| Partner enablement | Train partner on your product | Partner has API access, sandbox, and GTM support |
-| Post-sale alignment | Low - partner moves to next deal | High - shared revenue creates ongoing alignment |
-| Integration depth | White-label or bundle | Native API integration, joint product development |
-| Scalability | Linear - each deal requires partner effort | Compounding - integration drives organic adoption |
-| Data sharing | Minimal - lead handoff only | Bi-directional - shared customer insights via Crossbeam |
-| Time to first revenue | 3-6 months (training + pipeline build) | 6-12 months (integration + GTM ramp) |
-| Long-term value | Flat - margin stays constant | Growing - deeper integration increases switching cost |
+| Dimension             | Traditional Reseller Model                 | Co-Creation Ecosystem Model                             |
+| --------------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Partner role          | Resells your product as-is                 | Builds on your product, extends it for their vertical   |
+| Compensation          | Margin-based (15-25% discount)             | Performance-based revenue share (10-40%)                |
+| Partner enablement    | Train partner on your product              | Partner has API access, sandbox, and GTM support        |
+| Post-sale alignment   | Low - partner moves to next deal           | High - shared revenue creates ongoing alignment         |
+| Integration depth     | White-label or bundle                      | Native API integration, joint product development       |
+| Scalability           | Linear - each deal requires partner effort | Compounding - integration drives organic adoption       |
+| Data sharing          | Minimal - lead handoff only                | Bi-directional - shared customer insights via Crossbeam |
+| Time to first revenue | 3-6 months (training + pipeline build)     | 6-12 months (integration + GTM ramp)                    |
+| Long-term value       | Flat - margin stays constant               | Growing - deeper integration increases switching cost   |
 
 ### When to Use Each Model
 
-| Scenario | Recommended Model | Rationale |
-|---|---|---|
-| Product under $500/mo ACV | Affiliate/referral | Low deal value cannot support partner training overhead |
-| Complex enterprise product | Integration + solution partner | High ACV justifies deep partner investment |
-| Platform with API | Co-creation ecosystem | Partners extend the platform, creating network effects |
-| Vertical SaaS | Solution partner with vertical specialization | Partners bring domain expertise you lack |
-| Horizontal tool | Affiliate + integration partner mix | Broad market needs volume (affiliate) plus depth (integration) |
+| Scenario                   | Recommended Model                             | Rationale                                                      |
+| -------------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| Product under $500/mo ACV  | Affiliate/referral                            | Low deal value cannot support partner training overhead        |
+| Complex enterprise product | Integration + solution partner                | High ACV justifies deep partner investment                     |
+| Platform with API          | Co-creation ecosystem                         | Partners extend the platform, creating network effects         |
+| Vertical SaaS              | Solution partner with vertical specialization | Partners bring domain expertise you lack                       |
+| Horizontal tool            | Affiliate + integration partner mix           | Broad market needs volume (affiliate) plus depth (integration) |
 
 ---
 
@@ -67,57 +66,57 @@ Design your program in three tiers. Partners self-select based on their investme
 
 **Tier 1: Referral Partner (Entry Level)**
 
-| Element | Details |
-|---|---|
-| Compensation | 10-15% of first-year revenue per referred customer |
-| Requirements | Signed partner agreement, completed onboarding module |
-| Support provided | Referral link, basic marketing assets, monthly newsletter |
-| Expected volume | 1-5 referrals per quarter |
-| Partner type | Consultants, freelancers, happy customers, content creators |
-| Tracking | UTM links, referral codes, cookie-based attribution |
-| Payout timing | Net-30 after customer payment clears, with 60-day clawback on churn |
+| Element          | Details                                                             |
+| ---------------- | ------------------------------------------------------------------- |
+| Compensation     | 10-15% of first-year revenue per referred customer                  |
+| Requirements     | Signed partner agreement, completed onboarding module               |
+| Support provided | Referral link, basic marketing assets, monthly newsletter           |
+| Expected volume  | 1-5 referrals per quarter                                           |
+| Partner type     | Consultants, freelancers, happy customers, content creators         |
+| Tracking         | UTM links, referral codes, cookie-based attribution                 |
+| Payout timing    | Net-30 after customer payment clears, with 60-day clawback on churn |
 
 **Tier 2: Integration Partner (Mid Level)**
 
-| Element | Details |
-|---|---|
-| Compensation | 20-25% of joint customer revenue, ongoing for customer lifetime |
-| Requirements | Live integration, 3+ joint customers, co-marketing commitment |
+| Element          | Details                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| Compensation     | 20-25% of joint customer revenue, ongoing for customer lifetime                                  |
+| Requirements     | Live integration, 3+ joint customers, co-marketing commitment                                    |
 | Support provided | API sandbox, dedicated partner manager, co-marketing budget ($2K-$10K/quarter), joint case study |
-| Expected volume | 5-20 joint customers per quarter |
-| Partner type | Complementary SaaS products, platforms, workflow tools |
-| Tracking | API usage monitoring, Crossbeam overlap reporting, deal registration |
-| Payout timing | Monthly revenue share, no clawback after 90-day retention threshold |
+| Expected volume  | 5-20 joint customers per quarter                                                                 |
+| Partner type     | Complementary SaaS products, platforms, workflow tools                                           |
+| Tracking         | API usage monitoring, Crossbeam overlap reporting, deal registration                             |
+| Payout timing    | Monthly revenue share, no clawback after 90-day retention threshold                              |
 
 **Tier 3: Solution Partner (Top Level)**
 
-| Element | Details |
-|---|---|
-| Compensation | 30-40% of revenue from their customer base, shared product roadmap influence |
-| Requirements | 10+ joint customers, dedicated team member, quarterly business review |
+| Element          | Details                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| Compensation     | 30-40% of revenue from their customer base, shared product roadmap influence                               |
+| Requirements     | 10+ joint customers, dedicated team member, quarterly business review                                      |
 | Support provided | Priority API access, engineering office hours, joint GTM planning, executive sponsor, early feature access |
-| Expected volume | 20+ joint customers per quarter |
-| Partner type | System integrators, vertical platforms, agencies with deep client relationships |
-| Tracking | Full CRM integration, joint pipeline reviews, Crossbeam account mapping |
-| Payout timing | Monthly revenue share with quarterly true-up, no clawback |
+| Expected volume  | 20+ joint customers per quarter                                                                            |
+| Partner type     | System integrators, vertical platforms, agencies with deep client relationships                            |
+| Tracking         | Full CRM integration, joint pipeline reviews, Crossbeam account mapping                                    |
+| Payout timing    | Monthly revenue share with quarterly true-up, no clawback                                                  |
 
 ### Commission Structures by Revenue Model
 
-| Your Revenue Model | Referral Commission | Integration Commission | Solution Commission |
-|---|---|---|---|
+| Your Revenue Model   | Referral Commission                                    | Integration Commission              | Solution Commission                    |
+| -------------------- | ------------------------------------------------------ | ----------------------------------- | -------------------------------------- |
 | Monthly subscription | 15% of month-1 revenue, or 10% recurring for 12 months | 20% recurring for customer lifetime | 30-40% recurring for customer lifetime |
-| Annual subscription | 10-15% of first-year ACV | 20-25% of ACV, renewed annually | 30-40% of ACV, renewed annually |
-| Usage-based | 10% of first 12 months usage | 20% of ongoing usage | 30% of ongoing usage |
-| Outcome-based | 10% of first outcome payment | 20% of ongoing outcome payments | 35% of ongoing outcome payments |
+| Annual subscription  | 10-15% of first-year ACV                               | 20-25% of ACV, renewed annually     | 30-40% of ACV, renewed annually        |
+| Usage-based          | 10% of first 12 months usage                           | 20% of ongoing usage                | 30% of ongoing usage                   |
+| Outcome-based        | 10% of first outcome payment                           | 20% of ongoing outcome payments     | 35% of ongoing outcome payments        |
 
 ### Clawback and Protection Policies
 
-| Policy | Referral Tier | Integration Tier | Solution Tier |
-|---|---|---|---|
-| Clawback window | 60 days | 90 days | None |
-| Customer churn trigger | Full commission returned | Pro-rated return | No return, partner helps with retention |
-| Deal overlap resolution | First-touch attribution | Multi-touch with registration priority | Joint pipeline, split credit |
-| Direct sale overlap | Partner loses if deal registered after direct contact | Deal registration within 14 days protects partner | Protected account list reviewed quarterly |
+| Policy                  | Referral Tier                                         | Integration Tier                                  | Solution Tier                             |
+| ----------------------- | ----------------------------------------------------- | ------------------------------------------------- | ----------------------------------------- |
+| Clawback window         | 60 days                                               | 90 days                                           | None                                      |
+| Customer churn trigger  | Full commission returned                              | Pro-rated return                                  | No return, partner helps with retention   |
+| Deal overlap resolution | First-touch attribution                               | Multi-touch with registration priority            | Joint pipeline, split credit              |
+| Direct sale overlap     | Partner loses if deal registered after direct contact | Deal registration within 14 days protects partner | Protected account list reviewed quarterly |
 
 ---
 
@@ -125,13 +124,13 @@ Design your program in three tiers. Partners self-select based on their investme
 
 ### Platform Selection Framework
 
-| Platform | Best For | Pricing (Starting) | Key Strengths | Limitations |
-|---|---|---|---|---|
-| PartnerStack | B2B SaaS, multi-partner-type programs | Custom (mid-market+) | Manages affiliates, referrals, and resellers in one platform. Automated global payouts. Large B2B marketplace network. | Higher cost. Overkill for simple referral programs. |
-| Impact.com | Enterprise, large-scale affiliate programs | Custom (enterprise) | Vast partner network, granular attribution, custom recurring commissions. | Steep learning curve. Requires dedicated admin. |
-| Rewardful | Early-stage SaaS, Stripe-first companies | $49/month | Fast Stripe integration, simple setup, affordable. 30+ integrations. | No built-in email automation. Limited as programs scale. |
-| FirstPromoter | Growth-stage SaaS, MRR-focused teams | $99/month | Strong recurring billing tracking, 18+ detailed metrics, built-in fraud protection, email automation. | Higher price than Rewardful. Fewer marketplace features. |
-| Refgrow | Bootstrapped SaaS | $0-49/month | Free tier available, simple widget-based setup | Limited features at lower tiers |
+| Platform      | Best For                                   | Pricing (Starting)   | Key Strengths                                                                                                          | Limitations                                              |
+| ------------- | ------------------------------------------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| PartnerStack  | B2B SaaS, multi-partner-type programs      | Custom (mid-market+) | Manages affiliates, referrals, and resellers in one platform. Automated global payouts. Large B2B marketplace network. | Higher cost. Overkill for simple referral programs.      |
+| Impact.com    | Enterprise, large-scale affiliate programs | Custom (enterprise)  | Vast partner network, granular attribution, custom recurring commissions.                                              | Steep learning curve. Requires dedicated admin.          |
+| Rewardful     | Early-stage SaaS, Stripe-first companies   | $49/month            | Fast Stripe integration, simple setup, affordable. 30+ integrations.                                                   | No built-in email automation. Limited as programs scale. |
+| FirstPromoter | Growth-stage SaaS, MRR-focused teams       | $99/month            | Strong recurring billing tracking, 18+ detailed metrics, built-in fraud protection, email automation.                  | Higher price than Rewardful. Fewer marketplace features. |
+| Refgrow       | Bootstrapped SaaS                          | $0-49/month          | Free tier available, simple widget-based setup                                                                         | Limited features at lower tiers                          |
 
 ### Platform Decision Tree
 
@@ -161,18 +160,18 @@ START: What is your monthly revenue?
 
 ### Affiliate Program Launch Checklist
 
-| Phase | Action | Timeline |
-|---|---|---|
-| Week 1 | Define commission structure (flat vs. recurring, percentage, tiers) | Day 1-3 |
-| Week 1 | Choose and configure affiliate platform | Day 3-5 |
-| Week 1 | Create affiliate agreement (terms, payment, clawback, brand guidelines) | Day 5-7 |
-| Week 2 | Build affiliate portal: signup page, dashboard, asset library | Day 8-10 |
-| Week 2 | Create marketing assets: banners, email templates, social copy, landing page copy | Day 10-14 |
-| Week 3 | Recruit first 10-20 affiliates from existing customers, advisors, content creators | Day 15-18 |
-| Week 3 | Send onboarding sequence (welcome, platform walkthrough, first campaign guide) | Day 18-21 |
-| Week 4 | Monitor first conversions, adjust tracking if attribution gaps appear | Day 22-28 |
-| Month 2 | Analyze top performer patterns, create case study from first successful affiliate | Day 30-60 |
-| Month 3 | Scale recruitment, launch tiered commission structure based on performance data | Day 60-90 |
+| Phase   | Action                                                                             | Timeline  |
+| ------- | ---------------------------------------------------------------------------------- | --------- |
+| Week 1  | Define commission structure (flat vs. recurring, percentage, tiers)                | Day 1-3   |
+| Week 1  | Choose and configure affiliate platform                                            | Day 3-5   |
+| Week 1  | Create affiliate agreement (terms, payment, clawback, brand guidelines)            | Day 5-7   |
+| Week 2  | Build affiliate portal: signup page, dashboard, asset library                      | Day 8-10  |
+| Week 2  | Create marketing assets: banners, email templates, social copy, landing page copy  | Day 10-14 |
+| Week 3  | Recruit first 10-20 affiliates from existing customers, advisors, content creators | Day 15-18 |
+| Week 3  | Send onboarding sequence (welcome, platform walkthrough, first campaign guide)     | Day 18-21 |
+| Week 4  | Monitor first conversions, adjust tracking if attribution gaps appear              | Day 22-28 |
+| Month 2 | Analyze top performer patterns, create case study from first successful affiliate  | Day 30-60 |
+| Month 3 | Scale recruitment, launch tiered commission structure based on performance data    | Day 60-90 |
 
 ---
 
@@ -186,13 +185,13 @@ Integration partnerships have become the fastest-growing partnership category be
 
 Use this scoring model to decide which integrations to build first.
 
-| Factor | Weight | Scoring Criteria |
-|---|---|---|
-| Customer overlap | 30% | Crossbeam or manually surveyed overlap. 50+ shared accounts = 100pts, 20-49 = 75pts, 10-19 = 50pts, under 10 = 25pts |
-| Strategic fit | 25% | Adjacent in the workflow (100pts), complementary but separate (60pts), tangential (25pts) |
-| Partner GTM commitment | 20% | Co-marketing budget committed (100pts), willing to co-market (60pts), integration-only (25pts) |
-| Technical feasibility | 15% | API available, under 2 weeks to build (100pts), API available, 2-8 weeks (60pts), no API or 8+ weeks (25pts) |
-| Market signal | 10% | Customers actively requesting (100pts), competitor has it (60pts), nice-to-have (25pts) |
+| Factor                 | Weight | Scoring Criteria                                                                                                     |
+| ---------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| Customer overlap       | 30%    | Crossbeam or manually surveyed overlap. 50+ shared accounts = 100pts, 20-49 = 75pts, 10-19 = 50pts, under 10 = 25pts |
+| Strategic fit          | 25%    | Adjacent in the workflow (100pts), complementary but separate (60pts), tangential (25pts)                            |
+| Partner GTM commitment | 20%    | Co-marketing budget committed (100pts), willing to co-market (60pts), integration-only (25pts)                       |
+| Technical feasibility  | 15%    | API available, under 2 weeks to build (100pts), API available, 2-8 weeks (60pts), no API or 8+ weeks (25pts)         |
+| Market signal          | 10%    | Customers actively requesting (100pts), competitor has it (60pts), nice-to-have (25pts)                              |
 
 **Score = Sum of (Factor Weight x Points). Prioritize integrations scoring 70+.**
 
@@ -223,7 +222,6 @@ Step 4: Ongoing Optimization (Monthly)
 
 ---
 
-
 For integration strategy, marketplace, recruitment, co-marketing, attribution, channel conflict, AI partnerships, operations, and implementation playbook read `references/implementation-guide.md`.
 
 ## Examples
@@ -240,21 +238,20 @@ For integration strategy, marketplace, recruitment, co-marketing, attribution, c
 
 ---
 
-
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 
 ---
 
 ## Related Skills
 
-| Skill | When to Cross-Reference |
-|---|---|
-| expansion-retention | When designing partner retention incentives and expanding partner-sourced accounts |
-| multi-platform-launch | When coordinating partner program launch across channels and marketplaces |
-| sales-motion-design | When aligning partner-sourced leads with your sales process and deal stages |
-| content-to-pipeline | When building co-marketing content that generates pipeline through partner channels |
-| gtm-metrics | When measuring partner program ROI, attribution, and revenue contribution |
-| ai-pricing | When designing commission structures that account for AI model costs and margin |
-| lead-enrichment | When enriching partner-referred leads with firmographic and intent data |
-| gtm-engineering | When automating partner attribution, deal registration, and commission calculations |
-| positioning-icp | When ensuring partner messaging aligns with your positioning and targets the right ICP |
+| Skill                 | When to Cross-Reference                                                                |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| expansion-retention   | When designing partner retention incentives and expanding partner-sourced accounts     |
+| multi-platform-launch | When coordinating partner program launch across channels and marketplaces              |
+| sales-motion-design   | When aligning partner-sourced leads with your sales process and deal stages            |
+| content-to-pipeline   | When building co-marketing content that generates pipeline through partner channels    |
+| gtm-metrics           | When measuring partner program ROI, attribution, and revenue contribution              |
+| ai-pricing            | When designing commission structures that account for AI model costs and margin        |
+| lead-enrichment       | When enriching partner-referred leads with firmographic and intent data                |
+| gtm-engineering       | When automating partner attribution, deal registration, and commission calculations    |
+| positioning-icp       | When ensuring partner messaging aligns with your positioning and targets the right ICP |

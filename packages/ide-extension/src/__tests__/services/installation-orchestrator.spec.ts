@@ -115,9 +115,7 @@ describe('InstallationOrchestrator', () => {
   it('should log warning for repair (deferred flow)', async () => {
     await orchestrator.repair('skill', 'local', ['agent1'])
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Repair flow is deferred'),
-    )
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Repair flow is deferred'))
     expect(mockQueue.enqueue).not.toHaveBeenCalled()
   })
 

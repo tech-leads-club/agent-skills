@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { CategoryOption, SelectableSkillsInput } from '../../services/selection-selectors'
 import type {
   AvailableAgent,
   InstalledSkillsMap,
@@ -10,7 +11,6 @@ import type {
 import { SkillSelectCard } from '../components/SkillSelectCard'
 import { SkillSelectionToolbar } from '../components/SkillSelectionToolbar'
 import { useFilteredSkills } from '../hooks/useFilteredSkills'
-import type { CategoryOption, SelectableSkillsInput } from '../../services/selection-selectors'
 
 export interface SelectSkillsPageProps {
   action: WebviewAction

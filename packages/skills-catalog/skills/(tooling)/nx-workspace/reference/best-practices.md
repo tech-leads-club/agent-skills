@@ -79,11 +79,13 @@ Add README to explain module structure:
 # Library Architecture
 
 ## Type Tags
+
 - `type:feature` - Business logic
 - `type:ui` - Components
 - `type:data-access` - API calls
 
 ## Scope Tags
+
 - `scope:web` - Web app specific
 - `scope:mobile` - Mobile app specific
 - `scope:shared` - Shared across apps
@@ -373,10 +375,7 @@ Define what affects cache:
 {
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
-    "production": [
-      "default",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?"
-    ]
+    "production": ["default", "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?"]
   }
 }
 ```

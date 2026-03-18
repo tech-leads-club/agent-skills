@@ -4,28 +4,28 @@ Shopify Functions replace Scripts as the way to customise backend logic. They ru
 
 ## Overview
 
-| Item | Value |
-|------|-------|
-| Runtime | WebAssembly (Wasm) |
-| Languages | Rust (recommended), JavaScript (via Javy) |
-| Execution limit | 11ms instruction count limit |
-| Memory limit | 64 KB linear memory |
-| Input/Output | JSON (stdin/stdout) |
-| API version | 2026-01 |
+| Item            | Value                                     |
+| --------------- | ----------------------------------------- |
+| Runtime         | WebAssembly (Wasm)                        |
+| Languages       | Rust (recommended), JavaScript (via Javy) |
+| Execution limit | 11ms instruction count limit              |
+| Memory limit    | 64 KB linear memory                       |
+| Input/Output    | JSON (stdin/stdout)                       |
+| API version     | 2026-01                                   |
 
 ## Function Types
 
-| Type | Purpose | Replaces |
-|------|---------|----------|
-| `product_discounts` | Automatic product discounts | Shopify Scripts (line item) |
-| `order_discounts` | Order-level discounts | Shopify Scripts (order) |
-| `shipping_discounts` | Shipping rate discounts | Shopify Scripts (shipping) |
-| `payment_customization` | Hide/reorder payment methods | Shopify Scripts |
-| `delivery_customization` | Hide/reorder/rename delivery options | Shopify Scripts |
-| `cart_transform` | Merge/expand/update cart lines | New |
-| `fulfillment_constraints` | Constrain fulfillment locations | New |
-| `order_routing_location_rule` | Custom order routing | New |
-| `cart_checkout_validation` | Validate cart at checkout | New |
+| Type                          | Purpose                              | Replaces                    |
+| ----------------------------- | ------------------------------------ | --------------------------- |
+| `product_discounts`           | Automatic product discounts          | Shopify Scripts (line item) |
+| `order_discounts`             | Order-level discounts                | Shopify Scripts (order)     |
+| `shipping_discounts`          | Shipping rate discounts              | Shopify Scripts (shipping)  |
+| `payment_customization`       | Hide/reorder payment methods         | Shopify Scripts             |
+| `delivery_customization`      | Hide/reorder/rename delivery options | Shopify Scripts             |
+| `cart_transform`              | Merge/expand/update cart lines       | New                         |
+| `fulfillment_constraints`     | Constrain fulfillment locations      | New                         |
+| `order_routing_location_rule` | Custom order routing                 | New                         |
+| `cart_checkout_validation`    | Validate cart at checkout            | New                         |
 
 ## Getting Started
 
@@ -150,23 +150,20 @@ fn function(input: input::ResponseData) -> Result<output::FunctionRunResult> {
 ```javascript
 // src/run.js
 export function run(input) {
-  const config = JSON.parse(
-    input?.discountNode?.metafield?.value ?? "{}"
-  );
+  const config = JSON.parse(input?.discountNode?.metafield?.value ?? '{}')
 
-  const percentage = parseFloat(config.percentage) || 0;
+  const percentage = parseFloat(config.percentage) || 0
 
   const targets = input.cart.lines
     .filter((line) => {
-      return line.merchandise?.__typename === "ProductVariant"
-        && line.merchandise.product.hasAnyTag;
+      return line.merchandise?.__typename === 'ProductVariant' && line.merchandise.product.hasAnyTag
     })
     .map((line) => ({
       productVariant: { id: line.merchandise.id },
-    }));
+    }))
 
   if (targets.length === 0) {
-    return { discounts: [], discountApplicationStrategy: "FIRST" };
+    return { discounts: [], discountApplicationStrategy: 'FIRST' }
   }
 
   return {
@@ -179,8 +176,8 @@ export function run(input) {
         },
       },
     ],
-    discountApplicationStrategy: "FIRST",
-  };
+    discountApplicationStrategy: 'FIRST',
+  }
 }
 ```
 
@@ -265,14 +262,14 @@ shopify app deploy
 
 ## Migration from Scripts
 
-| Scripts | Functions |
-|---------|-----------|
-| Ruby-like DSL | Rust or JavaScript (Wasm) |
-| Online Store only | All channels (POS, B2B, headless) |
-| Limited to 3 types | 10+ function types |
-| No version control | Git-based, CI/CD ready |
-| Script Editor app | Shopify CLI |
-| Shopify-hosted | Developer-hosted logic |
+| Scripts            | Functions                         |
+| ------------------ | --------------------------------- |
+| Ruby-like DSL      | Rust or JavaScript (Wasm)         |
+| Online Store only  | All channels (POS, B2B, headless) |
+| Limited to 3 types | 10+ function types                |
+| No version control | Git-based, CI/CD ready            |
+| Script Editor app  | Shopify CLI                       |
+| Shopify-hosted     | Developer-hosted logic            |
 
 **Migration steps:**
 

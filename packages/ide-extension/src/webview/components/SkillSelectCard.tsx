@@ -50,9 +50,7 @@ export function SkillSelectCard({
       <div className="skill-select-card-header">
         <p>{skill.name}</p>
         <div className="skill-select-card-header-end">
-          {isInstalled && (
-            <span className="skill-select-card-tag skill-select-card-tag--installed">Installed</span>
-          )}
+          {isInstalled && <span className="skill-select-card-tag skill-select-card-tag--installed">Installed</span>}
           <span className="skill-select-card-category" data-category={skill.category}>
             {categoryName}
           </span>

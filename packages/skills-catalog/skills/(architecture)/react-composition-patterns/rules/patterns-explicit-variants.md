@@ -15,13 +15,7 @@ itself.
 
 ```tsx
 // What does this component actually render?
-<Composer
-  isThread
-  isEditing={false}
-  channelId='abc'
-  showAttachments
-  showFormatting={false}
-/>
+<Composer isThread isEditing={false} channelId="abc" showAttachments showFormatting={false} />
 ```
 
 **Correct (explicit variants):**

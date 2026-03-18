@@ -1,6 +1,6 @@
+import { getAuditLogPath, readAuditLog } from '@tech-leads-club/core'
 import { render } from 'ink'
 import React from 'react'
-import { getAuditLogPath, readAuditLog } from '@tech-leads-club/core'
 
 import { AuditLogViewer } from '../components/AuditLogViewer'
 import { ports } from '../ports'

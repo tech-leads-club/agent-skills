@@ -111,10 +111,10 @@ Examples:
 
 Use when you already know the exact skill name and want a direct shortcut.
 
-| Argument  | Required | Description                            |
-| :-------- | :------- | :------------------------------------- |
+| Argument  | Required | Description                           |
+| :-------- | :------- | :------------------------------------ |
 | `name`    | Yes      | Exact skill name (e.g. `docs-writer`) |
-| `context` | No       | What specifically you need help with   |
+| `context` | No       | What specifically you need help with  |
 
 Examples:
 

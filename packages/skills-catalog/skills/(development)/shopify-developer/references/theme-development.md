@@ -64,6 +64,7 @@ theme/
 Modern template format using JSON configuration:
 
 **templates/index.json (Homepage):**
+
 ```json
 {
   "sections": {
@@ -104,6 +105,7 @@ Modern template format using JSON configuration:
 ```
 
 **templates/product.json:**
+
 ```json
 {
   "sections": {
@@ -132,6 +134,7 @@ Modern template format using JSON configuration:
 Sections are reusable content blocks with schema configuration:
 
 **sections/hero-banner.liquid:**
+
 ```liquid
 <div class="hero" style="background-color: {{ section.settings.background_color }}">
   {% if section.settings.image %}
@@ -242,6 +245,7 @@ Sections are reusable content blocks with schema configuration:
 Sections can contain dynamic blocks for flexible layouts:
 
 **sections/featured-products.liquid:**
+
 ```liquid
 <div class="featured-products" {{ section.shopify_attributes }}>
   <h2>{{ section.settings.title }}</h2>
@@ -376,6 +380,7 @@ Sections can contain dynamic blocks for flexible layouts:
 Reusable template partials:
 
 **snippets/product-card.liquid:**
+
 ```liquid
 {% comment %}
   Usage: {% render 'product-card', product: product, show_vendor: true %}
@@ -415,6 +420,7 @@ Reusable template partials:
 ```
 
 **snippets/product-price.liquid:**
+
 ```liquid
 {% comment %}
   Usage: {% render 'product-price', product: product %}
@@ -446,6 +452,7 @@ Reusable template partials:
 Complete theme customisation interface:
 
 **config/settings_schema.json:**
+
 ```json
 [
   {
@@ -595,6 +602,7 @@ Complete theme customisation interface:
 Master template wrappers:
 
 **layout/theme.liquid:**
+
 ```liquid
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
@@ -726,6 +734,7 @@ Slider input:
 ```
 
 **Common units:**
+
 - `px` - Pixels
 - `%` - Percentage
 - `em` - Em units
@@ -839,6 +848,7 @@ Colour with gradient support:
 ```
 
 **Supports:**
+
 - Solid colours: `#ffffff`
 - Linear gradients: `linear-gradient(#fff, #000)`
 - Radial gradients
@@ -927,6 +937,7 @@ Google Fonts selector:
 ```
 
 **Font format:** `family_weight`
+
 - `n4` - Normal 400
 - `n7` - Bold 700
 - `i4` - Italic 400

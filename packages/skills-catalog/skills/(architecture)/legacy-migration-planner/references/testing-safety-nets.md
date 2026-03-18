@@ -6,14 +6,14 @@ No migration step should execute without a safety net. This reference defines th
 
 Choose testing strategies based on the migration context:
 
-| Situation | Primary Strategy | Supporting Strategies |
-|-----------|-----------------|---------------------|
-| Legacy code with no tests | Characterization Tests | Golden Master |
-| API migration | Contract Tests | Parallel Run, Snapshot Tests |
-| Database migration | Data Consistency Validation | Parallel Run |
-| Frontend migration | Visual Regression | Snapshot Tests, E2E |
-| Algorithm replacement | Property-Based Tests | Parallel Run |
-| Full system migration | Parallel Run | All of the above |
+| Situation                 | Primary Strategy            | Supporting Strategies        |
+| ------------------------- | --------------------------- | ---------------------------- |
+| Legacy code with no tests | Characterization Tests      | Golden Master                |
+| API migration             | Contract Tests              | Parallel Run, Snapshot Tests |
+| Database migration        | Data Consistency Validation | Parallel Run                 |
+| Frontend migration        | Visual Regression           | Snapshot Tests, E2E          |
+| Algorithm replacement     | Property-Based Tests        | Parallel Run                 |
+| Full system migration     | Parallel Run                | All of the above             |
 
 ## Characterization Tests
 
@@ -36,10 +36,11 @@ Choose testing strategies based on the migration context:
 **Target**: `src/orders/service.ts` (functions: createOrder, updateOrder, cancelOrder)
 **Coverage goal**: 80% line coverage before any migration begins
 **Edge cases to cover**:
+
 - Empty order items (`file:line` — current behavior: throws generic Error)
 - Negative quantities (`file:line` — current behavior: accepts silently, BUG)
 - Concurrent modifications (`file:line` — no locking, potential race condition)
-**Known bugs captured** (do not fix during characterization):
+  **Known bugs captured** (do not fix during characterization):
 - {Bug description} at `file:line`
 ```
 
@@ -99,10 +100,11 @@ Choose testing strategies based on the migration context:
 
 **Contract**: Order API
 **Endpoints covered**:
+
 - `POST /api/orders` — request: OrderCreate schema, response: Order schema, status: 201
 - `GET /api/orders/:id` — response: Order schema, status: 200 | 404
-**Schema location**: `file:line` (OpenAPI spec) or defined inline
-**Both implementations must pass**: Legacy (`src/legacy/orders.ts`) and New (`src/new/orders.ts`)
+  **Schema location**: `file:line` (OpenAPI spec) or defined inline
+  **Both implementations must pass**: Legacy (`src/legacy/orders.ts`) and New (`src/new/orders.ts`)
 ```
 
 ## Parallel Run Testing
@@ -133,12 +135,13 @@ Choose testing strategies based on the migration context:
 
 **Target function**: `calculateShipping()` at `file:line`
 **Comparison criteria**:
+
 - Result amount must match within $0.01
 - Delivery date must match exactly
 - Carrier selection must match
-**Acceptable discrepancy rate**: < 0.1% over 10,000 invocations
-**Duration**: 2 weeks minimum
-**Monitoring**: Log to `{observability tool}` — ASK USER what they use
+  **Acceptable discrepancy rate**: < 0.1% over 10,000 invocations
+  **Duration**: 2 weeks minimum
+  **Monitoring**: Log to `{observability tool}` — ASK USER what they use
 ```
 
 ## Property-Based Testing
@@ -168,10 +171,11 @@ Choose testing strategies based on the migration context:
 
 **Target**: `calculateDiscount()` at `file:line`
 **Properties**:
+
 - Result >= 0 (never negative)
 - Result <= originalPrice (never exceeds price)
-- Result >= originalPrice * 0.5 (max 50% discount, per business rule at `file:line`)
-**Input space**: price [0.01, 100000], quantity [1, 1000], customerType [regular, premium]
+- Result >= originalPrice \* 0.5 (max 50% discount, per business rule at `file:line`)
+  **Input space**: price [0.01, 100000], quantity [1, 1000], customerType [regular, premium]
 ```
 
 ## Data Consistency Validation
@@ -233,12 +237,12 @@ Choose testing strategies based on the migration context:
 
 Map testing strategies to migration phases:
 
-| Migration Phase | Required Tests | Purpose |
-|----------------|---------------|---------|
-| **Phase 0 (Safety Net)** | Characterization, Golden Master | Capture current behavior |
-| **Phase 0 (Safety Net)** | Contract Tests | Define the interface contract |
-| **Shadow phase** | Parallel Run | Compare old vs new without risk |
-| **Canary phase** | All above + monitoring | Validate with real traffic |
-| **Ramp phase** | Continuous contract + consistency | Ensure no drift at scale |
-| **Full migration** | Full regression suite | Confirm no regressions |
-| **Post-migration** | Remove parallel run, keep contracts | Ongoing validation |
+| Migration Phase          | Required Tests                      | Purpose                         |
+| ------------------------ | ----------------------------------- | ------------------------------- |
+| **Phase 0 (Safety Net)** | Characterization, Golden Master     | Capture current behavior        |
+| **Phase 0 (Safety Net)** | Contract Tests                      | Define the interface contract   |
+| **Shadow phase**         | Parallel Run                        | Compare old vs new without risk |
+| **Canary phase**         | All above + monitoring              | Validate with real traffic      |
+| **Ramp phase**           | Continuous contract + consistency   | Ensure no drift at scale        |
+| **Full migration**       | Full regression suite               | Confirm no regressions          |
+| **Post-migration**       | Remove parallel run, keep contracts | Ongoing validation              |

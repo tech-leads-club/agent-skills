@@ -1,5 +1,5 @@
-import * as vscode from 'vscode'
 import type { CorePorts } from '@tech-leads-club/core'
+import * as vscode from 'vscode'
 import type { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation } from '../shared/types'
 import { getLocalWatcherPatterns } from './agent-paths'
 import type { InstalledSkillsScanner } from './installed-skills-scanner'
