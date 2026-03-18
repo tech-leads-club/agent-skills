@@ -18,7 +18,7 @@ export class StateReconciler implements vscode.Disposable {
   private stateChangedHandlers: Array<(state: InstalledSkillsMap) => void> = []
   private watchersInitialized = false
 
-  private readonly DEBOUNCE_MS = 500
+  private readonly DEBOUNCE_MS = 150
 
   private policy?: ScopePolicyEvaluation
   private globalFocusSubscription?: vscode.Disposable
