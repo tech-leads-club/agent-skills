@@ -6,7 +6,21 @@
   "publisher": "tech-leads-club",
   "author": "Tech Leads Club",
   "license": "MIT",
+  "icon": "resources/icon.png",
+  "homepage": "https://github.com/tech-leads-club/agent-skills/tree/main/packages/ide-extension",
+  "bugs": {
+    "url": "https://github.com/tech-leads-club/agent-skills/issues"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "copilot",
+    "cursor",
+    "claude"
+  ],
   "repository": {
+    "directory": "packages/ide-extension",
     "type": "git",
     "url": "git+https://github.com/tech-leads-club/agent-skills.git"
   },
@@ -15,6 +29,7 @@
   "files": [
     "dist/**",
     "resources/**",
+    "README.md",
     "LICENSE"
   ],
   "engines": {
