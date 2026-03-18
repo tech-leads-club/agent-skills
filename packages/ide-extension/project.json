@@ -10,35 +10,27 @@
       "outputs": ["{projectRoot}/dist/webview"],
       "inputs": ["production", "^production"],
       "options": {
-        "command": "npx vite build",
+        "command": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && npx vite build",
         "cwd": "packages/ide-extension"
       }
     },
     "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "dependsOn": ["build:webview"],
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "dependsOn": ["build:webview", "^build"],
+      "outputs": ["{projectRoot}/dist"],
       "defaultConfiguration": "production",
       "inputs": ["production", "^production"],
       "options": {
-        "deleteOutputPath": false,
-        "platform": "node",
-        "outputPath": "packages/ide-extension/dist",
-        "format": ["esm"],
-        "bundle": true,
-        "main": "packages/ide-extension/src/extension.ts",
-        "tsConfig": "packages/ide-extension/tsconfig.lib.json",
-        "assets": ["packages/ide-extension/resources"],
-        "external": ["vscode"],
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": { ".js": ".js" },
-          "platform": "node"
-        }
+        "command": "npx tsc -p tsconfig.lib.json --noEmit && node ./scripts/build-extension.mjs",
+        "cwd": "packages/ide-extension"
       },
       "configurations": {
-        "development": { "minify": false },
-        "production": { "minify": true }
+        "development": {
+          "command": "npx tsc -p tsconfig.lib.json --noEmit && node ./scripts/build-extension.mjs"
+        },
+        "production": {
+          "command": "npx tsc -p tsconfig.lib.json --noEmit && node ./scripts/build-extension.mjs --production"
+        }
       }
     },
     "test": {
@@ -63,7 +55,6 @@
     },
     "package": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "options": {
         "command": "npx @vscode/vsce package --no-dependencies",
         "cwd": "packages/ide-extension"

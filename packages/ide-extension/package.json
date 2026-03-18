@@ -12,6 +12,11 @@
   },
   "type": "module",
   "main": "./dist/extension.js",
+  "files": [
+    "dist/**",
+    "resources/**",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22",
     "vscode": "^1.96.0"
@@ -57,7 +62,8 @@
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run ide-extension:test",
     "test:integration": "node ./scripts/run-integration-tests.mjs",
     "typecheck": "tsc --noEmit",
-    "package": "nx run ide-extension:package"
+    "package": "nx run ide-extension:package",
+    "vscode:prepublish": "npm run build"
   },
   "dependencies": {
     "@tech-leads-club/core": "0.0.1"
