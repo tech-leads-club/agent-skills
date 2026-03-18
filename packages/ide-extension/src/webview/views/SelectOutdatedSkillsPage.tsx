@@ -135,7 +135,12 @@ export function SelectOutdatedSkillsPage({
 
       <footer className="select-page-footer">
         <div className="select-page-footer-actions">
-          <button type="button" className="primary-footer-button primary-footer-button--install" onClick={handleUpdate}>
+          <button
+            type="button"
+            className="primary-footer-button primary-footer-button--install"
+            onClick={handleUpdate}
+            disabled={outdatedSkills.length === 0}
+          >
             Update
           </button>
         </div>
