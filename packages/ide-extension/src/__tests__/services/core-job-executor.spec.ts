@@ -6,6 +6,7 @@ import type { JobResult, QueuedJob } from '../../services/operation-queue'
 const mockCore: any = {
   getAllLockedSkills: jest.fn(),
   getSkillWithPath: jest.fn(),
+  getSkillWithPathForced: jest.fn(),
   getUpdatableSkills: jest.fn(),
   installSkills: jest.fn(),
   removeSkill: jest.fn(),
@@ -56,7 +57,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-a'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-a',
         description: 'Skill A',
         path: '/path/to/skill-a',
@@ -114,7 +115,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-b'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-b',
         description: 'Skill B',
         path: '/path/to/skill-b',
@@ -172,7 +173,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-c'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-c',
         description: 'Skill C',
         path: '/path/to/skill-c',
@@ -240,7 +241,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-d'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-d',
         description: 'Skill D',
         path: '/path/to/skill-d',
@@ -296,7 +297,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-e'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-e',
         description: 'Skill E',
         path: '/path/to/skill-e',
@@ -383,7 +384,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-f'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue(null)
+      mockCore.getSkillWithPathForced.mockResolvedValue(null)
 
       const job: QueuedJob = {
         operationId: 'op-7',
@@ -420,7 +421,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-g'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-g',
         description: 'Skill G',
         path: '/path/to/skill-g',
@@ -465,7 +466,7 @@ describe('CoreJobExecutor', () => {
         toUpdate: ['skill-h'],
       })
 
-      mockCore.getSkillWithPath.mockResolvedValue({
+      mockCore.getSkillWithPathForced.mockResolvedValue({
         name: 'skill-h',
         description: 'Skill H',
         path: '/path/to/skill-h',

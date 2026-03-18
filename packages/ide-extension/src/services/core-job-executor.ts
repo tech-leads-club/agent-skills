@@ -2,6 +2,7 @@ import type { AgentType, CorePorts, InstallResult } from '@tech-leads-club/core'
 import {
   getAllLockedSkills,
   getSkillWithPath,
+  getSkillWithPathForced,
   getUpdatableSkills,
   installSkills,
   removeSkill,
@@ -236,7 +237,7 @@ export class CoreJobExecutor {
     onProgress?.(`Downloading ${toUpdate.length} skill(s) for update...`)
     const skillInfoMap = new Map<string, { name: string; description: string; path: string; category?: string }>()
     for (const name of toUpdate) {
-      const skill = await getSkillWithPath(this.ports, name)
+      const skill = await getSkillWithPathForced(this.ports, name)
       if (skill) {
         skillInfoMap.set(name, skill)
         onProgress?.(`Downloaded ${name}`)

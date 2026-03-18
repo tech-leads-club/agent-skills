@@ -43,6 +43,7 @@ import {
   getSkillFromLock,
   getSkillMetadata,
   getSkillWithPath,
+  getSkillWithPathForced,
   getUpdatableSkills,
   groupSkillsByCategory,
   installSkills,
@@ -115,6 +116,7 @@ const coreApiSurface = {
   getSkillByNameAsync,
   ensureSkillAvailable,
   getSkillWithPath,
+  getSkillWithPathForced,
   detectMode,
   getCategories,
   getCategoryById,
@@ -180,6 +182,7 @@ type ExpectedPromiseShape = {
   getSkillByNameAsync: true
   ensureSkillAvailable: true
   getSkillWithPath: true
+  getSkillWithPathForced: true
   detectMode: false
   getCategories: false
   getCategoryById: false
@@ -216,6 +219,6 @@ describe('core API surface', () => {
   })
 
   it('preserves the documented sync and async API shape', () => {
-    expect(Object.keys(coreApiSurface)).toHaveLength(62)
+    expect(Object.keys(coreApiSurface)).toHaveLength(63)
   })
 })

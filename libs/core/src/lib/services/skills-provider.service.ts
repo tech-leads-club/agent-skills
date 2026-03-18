@@ -5,7 +5,13 @@ import type { CorePorts } from '../ports'
 import type { CategoryInfo, SkillInfo, SkillsMode } from '../types'
 import { formatCategoryName } from '../utils'
 
-import { ensureSkillDownloaded, getRemoteCategories, getRemoteSkills, getSkillMetadata } from './registry.service'
+import {
+  ensureSkillDownloaded,
+  forceDownloadSkill,
+  getRemoteCategories,
+  getRemoteSkills,
+  getSkillMetadata,
+} from './registry.service'
 
 interface ModeCache {
   mode: SkillsMode | null
@@ -313,6 +319,31 @@ export async function getSkillWithPath(ports: CorePorts, skillName: string): Pro
   const metadata = await getSkillMetadata(ports, skillName)
   if (!metadata) return null
   const localPath = await ensureSkillDownloaded(ports, skillName)
+  if (!localPath) return null
+  return { name: metadata.name, description: metadata.description, path: localPath, category: metadata.category }
+}
+
+/**
+ * Returns skill information including the resolved local path, forcing a fresh download.
+ *
+ * Unlike {@link getSkillWithPath}, this always re-downloads the skill files and updates
+ * the cached metadata hash. Use this during update operations to ensure the lockfile
+ * receives the current registry hash rather than a stale cached value.
+ *
+ * @param ports - Core ports used for filesystem access and HTTP registry fetching.
+ * @param skillName - The skill name to retrieve with path.
+ * @returns The `SkillInfo` with a resolved local path, or `null` when unavailable.
+ *
+ * @example
+ * ```ts
+ * const skill = await getSkillWithPathForced(ports, 'cloudflare-deploy')
+ * ```
+ */
+export async function getSkillWithPathForced(ports: CorePorts, skillName: string): Promise<SkillInfo | null> {
+  if (isLocalMode(ports)) return getSkillByName(ports, skillName) ?? null
+  const metadata = await getSkillMetadata(ports, skillName)
+  if (!metadata) return null
+  const localPath = await forceDownloadSkill(ports, skillName)
   if (!localPath) return null
   return { name: metadata.name, description: metadata.description, path: localPath, category: metadata.category }
 }
