@@ -178,7 +178,11 @@ export class CoreJobExecutor {
     const candidates =
       skillNames.length > 0 ? skillNames : [...new Set([...Object.keys(localLock), ...Object.keys(globalLock)])]
 
-    const { toUpdate } = await getUpdatableSkills(this.ports, candidates)
+    // When skills are explicitly specified, the UI already determined they are outdated by comparing
+    // lockfile hashes against the registry. Bypassing getUpdatableSkills here avoids a divergence
+    // where .skill-meta.json agrees with the CDN but the lockfile does not — which would cause
+    // getUpdatableSkills to report nothing to update while the UI keeps showing the skill as outdated.
+    const toUpdate = skillNames.length > 0 ? candidates : (await getUpdatableSkills(this.ports, candidates)).toUpdate
 
     if (toUpdate.length === 0) {
       onProgress?.('All skills are up to date')
