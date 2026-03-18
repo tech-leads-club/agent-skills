@@ -10,7 +10,6 @@ export interface AgentPathConfig {
   company: string
   localSkillsDir: string
   globalSkillsDir: string
-  localWatcherGlob: string
 }
 
 /**
@@ -29,7 +28,6 @@ export function getAgentPathConfigs(ports: CorePorts): AgentPathConfig[] {
       company: '',
       localSkillsDir: config.skillsDir,
       globalSkillsDir: config.globalSkillsDir,
-      localWatcherGlob: `${config.skillsDir}/**`,
     }
   })
 }
@@ -46,12 +44,3 @@ export function findAgentPathConfig(ports: CorePorts, agentId: string): AgentPat
   return configs.find((config) => config.agent === agentId)
 }
 
-/**
- * Returns all local watcher glob patterns derived from agent topology.
- *
- * @param ports - Core ports for path resolution.
- * @returns Local watcher glob patterns for every supported agent.
- */
-export function getLocalWatcherPatterns(ports: CorePorts): string[] {
-  return getAgentPathConfigs(ports).map((config) => config.localWatcherGlob)
-}
