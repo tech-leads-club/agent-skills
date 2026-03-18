@@ -202,4 +202,164 @@ describe('ActionRunner', () => {
       expect.any(Function),
     )
   })
+
+  describe('remove with scope', () => {
+    it('creates one job (local) when skill is installed only locally and scope is all', async () => {
+      installedStateStore.getSnapshot.mockReturnValue({
+        installedSkills: {
+          'local-only': {
+            local: true,
+            global: false,
+            contentHash: 'h',
+            scopeHashes: { local: 'h' },
+            agents: [{ agent: 'cursor', displayName: 'Cursor', local: true, global: false, corrupted: false }],
+          },
+        },
+        lastUpdatedAt: null,
+      })
+      ;(executor.execute as ExecuteMock).mockResolvedValue({
+        operationId: 'job-1',
+        operation: 'remove',
+        skillName: 'local-only',
+        status: 'completed',
+        metadata: { batchId: 'batch', batchSize: 1, skillNames: ['local-only'], scope: 'local', agents: ['cursor'] },
+      })
+
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['local-only'], agents: ['cursor'], scope: 'all' })
+
+      expect(executor.execute).toHaveBeenCalledTimes(1)
+      expect(executor.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'local-only',
+          metadata: expect.objectContaining({ scope: 'local' }),
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('creates one job (global) when skill is installed only globally and scope is all', async () => {
+      ;(executor.execute as ExecuteMock).mockResolvedValue({
+        operationId: 'job-1',
+        operation: 'remove',
+        skillName: 'accessibility',
+        status: 'completed',
+        metadata: { batchId: 'batch', batchSize: 1, skillNames: ['accessibility'], scope: 'global', agents: ['cursor'] },
+      })
+
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['accessibility'], agents: ['cursor'], scope: 'all' })
+
+      expect(executor.execute).toHaveBeenCalledTimes(1)
+      expect(executor.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'accessibility',
+          metadata: expect.objectContaining({ scope: 'global' }),
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('creates two jobs when skill is installed in both scopes and scope is all', async () => {
+      ;(executor.execute as ExecuteMock)
+        .mockResolvedValueOnce({
+          operationId: 'job-1',
+          operation: 'remove',
+          skillName: 'seo',
+          status: 'completed',
+          metadata: { batchId: 'batch', batchSize: 2, skillNames: ['seo'], scope: 'local', agents: ['cursor'] },
+        })
+        .mockResolvedValueOnce({
+          operationId: 'job-2',
+          operation: 'remove',
+          skillName: 'seo',
+          status: 'completed',
+          metadata: { batchId: 'batch', batchSize: 2, skillNames: ['seo'], scope: 'global', agents: ['cursor'] },
+        })
+
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['seo'], agents: ['cursor'], scope: 'all' })
+
+      expect(executor.execute).toHaveBeenCalledTimes(2)
+      expect(executor.execute).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'seo',
+          metadata: expect.objectContaining({ scope: 'local' }),
+        }),
+        expect.any(Function),
+      )
+      expect(executor.execute).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'seo',
+          metadata: expect.objectContaining({ scope: 'global' }),
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('creates zero jobs when skill is not installed and scope is all', async () => {
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['not-installed'], agents: ['cursor'], scope: 'all' })
+
+      expect(executor.execute).not.toHaveBeenCalled()
+    })
+
+    it('creates one job (local) when scope is explicit local', async () => {
+      ;(executor.execute as ExecuteMock).mockResolvedValue({
+        operationId: 'job-1',
+        operation: 'remove',
+        skillName: 'seo',
+        status: 'completed',
+        metadata: { batchId: 'batch', batchSize: 1, skillNames: ['seo'], scope: 'local', agents: ['cursor'] },
+      })
+
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['seo'], agents: ['cursor'], scope: 'local' })
+
+      expect(executor.execute).toHaveBeenCalledTimes(1)
+      expect(executor.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'seo',
+          metadata: expect.objectContaining({ scope: 'local' }),
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('creates one job (global) when scope is explicit global', async () => {
+      ;(executor.execute as ExecuteMock).mockResolvedValue({
+        operationId: 'job-1',
+        operation: 'remove',
+        skillName: 'seo',
+        status: 'completed',
+        metadata: { batchId: 'batch', batchSize: 1, skillNames: ['seo'], scope: 'global', agents: ['cursor'] },
+      })
+
+      const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
+
+      await runner.run({ action: 'remove', skills: ['seo'], agents: ['cursor'], scope: 'global' })
+
+      expect(executor.execute).toHaveBeenCalledTimes(1)
+      expect(executor.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'remove',
+          skillName: 'seo',
+          metadata: expect.objectContaining({ scope: 'global' }),
+        }),
+        expect.any(Function),
+      )
+    })
+  })
 })

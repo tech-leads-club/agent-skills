@@ -136,7 +136,14 @@ export class ActionRunner implements vscode.Disposable {
   }
 
   private planJobs(actionId: string, request: ActionRequest): QueuedJob[] {
-    const specs = request.action === 'update' ? this.planUpdateJobs(request) : this.planLifecycleJobs(request)
+    let specs: PlannedJobSpec[]
+    if (request.action === 'update') {
+      specs = this.planUpdateJobs(request)
+    } else if (request.action === 'remove') {
+      specs = this.planRemoveJobs(request)
+    } else {
+      specs = this.planLifecycleJobs(request)
+    }
     return specs.map((spec) => ({
       operationId: randomUUID(),
       operation: spec.operation,
@@ -163,6 +170,32 @@ export class ActionRunner implements vscode.Disposable {
         method: request.action === 'install' ? (request.method ?? 'copy') : undefined,
       })),
     )
+  }
+
+  private planRemoveJobs(request: ActionRequest): PlannedJobSpec[] {
+    if (request.scope !== 'all') {
+      return this.planLifecycleJobs(request)
+    }
+
+    const installedSkills = this.installedStateStore.getSnapshot().installedSkills
+    const specs: PlannedJobSpec[] = []
+
+    for (const skillName of request.skills) {
+      const installed = installedSkills[skillName]
+      if (!installed) continue
+
+      for (const scope of ['local', 'global'] as const) {
+        if (!installed[scope]) continue
+        specs.push({
+          operation: 'remove',
+          skillName,
+          scope,
+          agents: [...request.agents],
+        })
+      }
+    }
+
+    return specs
   }
 
   private planUpdateJobs(request: ActionRequest): PlannedJobSpec[] {
