@@ -51,6 +51,7 @@ describe('StateReconciler Policy', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockVscode.workspace.createFileSystemWatcher.mockClear()
 
     scanner = {
       scan: jest.fn<AsyncMockableFn<InstalledSkillsMap>>().mockResolvedValue({}),
@@ -107,18 +108,27 @@ describe('StateReconciler Policy', () => {
   })
 
   it('should disable local watchers if policy excludes local', () => {
-    mockVscode.workspace.createFileSystemWatcher.mockClear()
+    // Create a fresh reconciler for this test
+    const freshReconciler = new StateReconciler(createNodeAdapters(), scanner, registryService, logger)
 
-    const policy: ScopePolicyEvaluation = {
+    // Now disable local from the start
+    const globalOnlyPolicy: ScopePolicyEvaluation = {
       allowedScopes: 'global',
       environmentScopes: ['local', 'global'],
-      effectiveScopes: ['global'],
+      effectiveScopes: ['global'] as any,
       blockedReason: undefined,
     }
+    mockVscode.workspace.createFileSystemWatcher.mockClear()
+    freshReconciler.updatePolicy(globalOnlyPolicy)
 
-    reconciler.updatePolicy(policy)
-
-    // Should NOT create local watchers
-    expect(mockVscode.workspace.createFileSystemWatcher).not.toHaveBeenCalled()
+    // Should NOT create local watchers (but may create global)
+    const allCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls
+    const localCalls = allCalls.filter((call) => {
+      const patternArg = (call as unknown[])?.[0] as unknown
+      if (!patternArg) return false
+      const pattern = patternArg as { baseUri: { fsPath: string }; pattern: string }
+      return pattern.baseUri.fsPath.includes('/workspace')
+    })
+    expect(localCalls.length).toBe(0)
   })
 })

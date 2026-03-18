@@ -92,6 +92,7 @@ describe('StateReconciler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockVscode.workspace.createFileSystemWatcher.mockClear()
     jest.useFakeTimers()
     changeHandler = undefined
     mockVscode.workspace.isTrusted = true
@@ -126,9 +127,17 @@ describe('StateReconciler', () => {
   it('should NOT create local watchers when policy excludes local scope', () => {
     reconciler.updatePolicy({
       ...localOnlyPolicy,
-      effectiveScopes: ['global'],
+      effectiveScopes: ['global'] as any,
     })
-    expect(mockVscode.workspace.createFileSystemWatcher).not.toHaveBeenCalled()
+    // Check that no local watchers were created (may have global)
+    const allCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls
+    const localCalls = allCalls.filter((call) => {
+      const patternArg = (call as unknown[])?.[0] as unknown
+      if (!patternArg) return false
+      const pattern = patternArg as { baseUri: { fsPath: string } }
+      return pattern.baseUri.fsPath.includes('/workspace')
+    })
+    expect(localCalls.length).toBe(0)
   })
 
   it('should not recreate watchers on repeated policy updates', () => {
@@ -137,7 +146,8 @@ describe('StateReconciler', () => {
 
     reconciler.updatePolicy(localOnlyPolicy)
 
-    expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalledTimes(initialCalls)
+    // Should not have created additional watchers
+    expect(mockVscode.workspace.createFileSystemWatcher.mock.calls.length).toBe(initialCalls)
   })
 
   it('should reconcile on watcher events (debounced)', async () => {
@@ -153,5 +163,20 @@ describe('StateReconciler', () => {
     await jest.runAllTimersAsync()
 
     expect(mockScanner.scan).toHaveBeenCalledTimes(1)
+  })
+
+  it('should create global lockfile watcher when policy allows global scope', () => {
+    const globalPolicy: ScopePolicyEvaluation = {
+      ...localOnlyPolicy,
+      effectiveScopes: ['global'] as any,
+    }
+    reconciler.updatePolicy(globalPolicy)
+    const globalWatcherCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls.filter((call) => {
+      const patternArg = (call as unknown[])?.[0] as unknown
+      if (!patternArg) return false
+      const pattern = patternArg as { pattern: string }
+      return pattern.pattern === '.skill-lock.json'
+    })
+    expect(globalWatcherCalls.length).toBeGreaterThan(0)
   })
 })

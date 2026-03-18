@@ -13,6 +13,7 @@ import type { SkillRegistryService } from './skill-registry-service'
  */
 export class StateReconciler implements vscode.Disposable {
   private localLockfileWatcher?: vscode.FileSystemWatcher
+  private globalLockfileWatcher?: vscode.FileSystemWatcher
   private subscriptions: vscode.Disposable[] = []
   private debounceTimer: NodeJS.Timeout | null = null
   private previousState: InstalledSkillsMap = {}
@@ -21,7 +22,6 @@ export class StateReconciler implements vscode.Disposable {
   private readonly DEBOUNCE_MS = 150
 
   private policy?: ScopePolicyEvaluation
-  private globalFocusSubscription?: vscode.Disposable
 
   /**
    * Creates a state reconciler that bridges scanner output to subscribers.
@@ -82,28 +82,51 @@ export class StateReconciler implements vscode.Disposable {
   }
 
   /**
-   * Evaluates policy to determine if the global window focus watcher should be active.
+   * Evaluates policy to determine if the global lockfile watcher should be active.
    */
   private refreshGlobalWatcher(): void {
     const allowGlobal = this.policy?.effectiveScopes.includes('global') ?? false
 
     if (allowGlobal) {
-      if (!this.globalFocusSubscription) {
-        this.logger.debug('Enabling global focus watcher')
-        this.globalFocusSubscription = vscode.window.onDidChangeWindowState((state) => {
-          if (state.focused) {
-            this.logger.debug('Window focused, triggering reconciliation')
-            this.scheduleReconciliation()
-          }
-        })
-      }
+      this.createGlobalLockfileWatcher()
     } else {
-      if (this.globalFocusSubscription) {
-        this.logger.debug('Disabling global focus watcher')
-        this.globalFocusSubscription.dispose()
-        this.globalFocusSubscription = undefined
-      }
+      this.disposeGlobalWatcher()
     }
+  }
+
+  /**
+   * Disposes of the global lockfile watcher.
+   */
+  private disposeGlobalWatcher(): void {
+    if (this.globalLockfileWatcher) {
+      this.logger.debug('Disposing global lockfile FileSystemWatcher')
+      this.globalLockfileWatcher.dispose()
+      this.globalLockfileWatcher = undefined
+    }
+  }
+
+  /**
+   * Creates a FileSystemWatcher for the global lockfile.
+   *
+   * @returns Nothing.
+   */
+  private createGlobalLockfileWatcher(): void {
+    if (this.globalLockfileWatcher) {
+      this.logger.debug('Global lockfile watcher already initialized, skipping duplicate creation')
+      return
+    }
+
+    const homedir = this.ports.env.homedir()
+    const lockfileDir = vscode.Uri.file(path.join(homedir, AGENTS_DIR))
+    const pattern = new vscode.RelativePattern(lockfileDir, LOCK_FILE)
+    const watcher = vscode.workspace.createFileSystemWatcher(pattern)
+
+    watcher.onDidCreate(() => this.scheduleReconciliation())
+    watcher.onDidDelete(() => this.scheduleReconciliation())
+    watcher.onDidChange(() => this.scheduleReconciliation())
+
+    this.globalLockfileWatcher = watcher
+    this.logger.debug('Created global lockfile FileSystemWatcher')
   }
 
   /**
@@ -186,10 +209,8 @@ export class StateReconciler implements vscode.Disposable {
   dispose(): void {
     this.logger.info('Disposing state reconciler')
     this.disposeLocalWatchers()
+    this.disposeGlobalWatcher()
     this.subscriptions.forEach((sub) => sub.dispose())
-    if (this.globalFocusSubscription) {
-      this.globalFocusSubscription.dispose()
-    }
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
     }
