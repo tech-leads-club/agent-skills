@@ -1,24 +1,57 @@
 import { jest } from '@jest/globals'
 import { createNodeAdapters } from '@tech-leads-club/core'
-import * as vscode from 'vscode'
 import type { InstalledSkillsScanner } from '../../services/installed-skills-scanner'
 import type { LoggingService } from '../../services/logging-service'
 import type { SkillRegistryService } from '../../services/skill-registry-service'
-import { StateReconciler } from '../../services/state-reconciler'
 import { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation, SkillRegistry } from '../../shared/types'
 
 type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
   ...args: TArgs
 ) => Promise<TReturn>
 
+type Listener = () => void
+type DisposableLike = { dispose: () => void }
+
+const mockVscode = {
+  Uri: {
+    file: jest.fn<(_path: string) => { fsPath: string }>((_path: string) => ({ fsPath: _path })),
+  },
+  RelativePattern: jest.fn<
+    (_baseUri: { fsPath: string }, _pattern: string) => { baseUri: { fsPath: string }; pattern: string }
+  >((_baseUri, _pattern) => ({ baseUri: _baseUri, pattern: _pattern })),
+  workspace: {
+    workspaceFolders: [{ uri: { fsPath: '/workspace' } }],
+    createFileSystemWatcher: jest.fn(() => ({
+      dispose: jest.fn(),
+      onDidCreate: jest.fn(() => ({ dispose: jest.fn() })),
+      onDidDelete: jest.fn(() => ({ dispose: jest.fn() })),
+      onDidChange: jest.fn(() => ({ dispose: jest.fn() })),
+    })),
+    isTrusted: true,
+    onDidGrantWorkspaceTrust: jest.fn<(_listener: Listener) => DisposableLike>((_listener) => ({ dispose: jest.fn() })),
+  },
+  window: {
+    onDidChangeWindowState: jest.fn<(_listener: (_state: { focused: boolean }) => void) => DisposableLike>(
+      (_listener) => ({
+        dispose: jest.fn(),
+      }),
+    ),
+  },
+}
+
+jest.unstable_mockModule('vscode', () => mockVscode)
+
+const { StateReconciler } = await import('../../services/state-reconciler')
+
 describe('StateReconciler Policy', () => {
-  let reconciler: StateReconciler
+  let reconciler: InstanceType<typeof StateReconciler>
   let scanner: jest.Mocked<InstalledSkillsScanner>
   let registryService: jest.Mocked<SkillRegistryService>
   let logger: jest.Mocked<LoggingService>
 
   beforeEach(() => {
     jest.clearAllMocks()
+
     scanner = {
       scan: jest.fn<AsyncMockableFn<InstalledSkillsMap>>().mockResolvedValue({}),
       getAvailableAgents: jest.fn<AsyncMockableFn<AvailableAgent[]>>().mockResolvedValue([]),
@@ -40,16 +73,6 @@ describe('StateReconciler Policy', () => {
   })
 
   it('should refresh watchers when policy is updated', () => {
-    // Mock createFileSystemWatcher
-    const disposeMock = jest.fn()
-    const createWatcherMock = jest.fn().mockReturnValue({
-      dispose: disposeMock,
-      onDidCreate: jest.fn(),
-      onDidDelete: jest.fn(),
-      onDidChange: jest.fn(),
-    })
-    ;(vscode.workspace.createFileSystemWatcher as jest.Mock) = createWatcherMock
-
     const policy: ScopePolicyEvaluation = {
       allowedScopes: 'local',
       environmentScopes: ['local', 'global'],
@@ -60,7 +83,7 @@ describe('StateReconciler Policy', () => {
     reconciler.updatePolicy(policy)
 
     // Should create local watchers because 'local' is in effectiveScopes
-    expect(createWatcherMock).toHaveBeenCalled()
+    expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalled()
   })
 
   it('should pass scope options to scanner based on policy', async () => {
@@ -84,14 +107,7 @@ describe('StateReconciler Policy', () => {
   })
 
   it('should disable local watchers if policy excludes local', () => {
-    // Mock createFileSystemWatcher
-    const createWatcherMock = jest.fn().mockReturnValue({
-      dispose: jest.fn(),
-      onDidCreate: jest.fn(),
-      onDidDelete: jest.fn(),
-      onDidChange: jest.fn(),
-    })
-    ;(vscode.workspace.createFileSystemWatcher as jest.Mock) = createWatcherMock
+    mockVscode.workspace.createFileSystemWatcher.mockClear()
 
     const policy: ScopePolicyEvaluation = {
       allowedScopes: 'global',
@@ -103,6 +119,6 @@ describe('StateReconciler Policy', () => {
     reconciler.updatePolicy(policy)
 
     // Should NOT create local watchers
-    expect(createWatcherMock).not.toHaveBeenCalled()
+    expect(mockVscode.workspace.createFileSystemWatcher).not.toHaveBeenCalled()
   })
 })

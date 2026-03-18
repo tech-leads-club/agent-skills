@@ -34,9 +34,15 @@ const mockWatcher = {
 }
 
 const mockVscode = {
+  Uri: {
+    file: jest.fn<SyncMockableFn<{ fsPath: string }, [string]>>((path) => ({ fsPath: path })),
+  },
+  RelativePattern: jest.fn<SyncMockableFn<{ baseUri: { fsPath: string }; pattern: string }, [{ fsPath: string }, string]>>(
+    (baseUri, pattern) => ({ baseUri, pattern }),
+  ),
   workspace: {
     workspaceFolders: [{ uri: { fsPath: '/workspace' } }],
-    createFileSystemWatcher: jest.fn<SyncMockableFn<typeof mockWatcher, [string]>>(() => mockWatcher),
+    createFileSystemWatcher: jest.fn<SyncMockableFn<typeof mockWatcher, [unknown]>>(() => mockWatcher),
     isTrusted: true,
     onDidGrantWorkspaceTrust: jest.fn<SyncMockableFn<DisposableLike, [Listener]>>(() => ({ dispose: jest.fn() })),
   },
@@ -107,9 +113,14 @@ describe('StateReconciler', () => {
     jest.useRealTimers()
   })
 
-  it('should create local watchers when policy allows local scope', () => {
+  it('should create exactly 1 local lockfile watcher when policy allows local scope', () => {
     reconciler.updatePolicy(localOnlyPolicy)
-    expect(mockVscode.workspace.createFileSystemWatcher).toHaveBeenCalled()
+    const callCount = mockVscode.workspace.createFileSystemWatcher.mock.calls.length
+    expect(callCount).toBe(1)
+    // Verify the pattern is a RelativePattern with .skill-lock.json
+    const firstCall = mockVscode.workspace.createFileSystemWatcher.mock.calls[0]
+    const pattern = firstCall[0] as { pattern: string }
+    expect(pattern.pattern).toBe('.skill-lock.json')
   })
 
   it('should NOT create local watchers when policy excludes local scope', () => {

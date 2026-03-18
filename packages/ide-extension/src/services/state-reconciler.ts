@@ -1,7 +1,8 @@
 import type { CorePorts } from '@tech-leads-club/core'
+import { AGENTS_DIR, LOCK_FILE } from '@tech-leads-club/core'
+import * as path from 'node:path'
 import * as vscode from 'vscode'
 import type { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation } from '../shared/types'
-import { getLocalWatcherPatterns } from './agent-paths'
 import type { InstalledSkillsScanner } from './installed-skills-scanner'
 import type { LoggingService } from './logging-service'
 import type { SkillRegistryService } from './skill-registry-service'
@@ -11,12 +12,11 @@ import type { SkillRegistryService } from './skill-registry-service'
  * Uses FileSystemWatcher for local changes and window focus for global changes.
  */
 export class StateReconciler implements vscode.Disposable {
-  private watchers: vscode.FileSystemWatcher[] = []
+  private localLockfileWatcher?: vscode.FileSystemWatcher
   private subscriptions: vscode.Disposable[] = []
   private debounceTimer: NodeJS.Timeout | null = null
   private previousState: InstalledSkillsMap = {}
   private stateChangedHandlers: Array<(state: InstalledSkillsMap) => void> = []
-  private watchersInitialized = false
 
   private readonly DEBOUNCE_MS = 150
 
@@ -71,14 +71,13 @@ export class StateReconciler implements vscode.Disposable {
   }
 
   /**
-   * Disposes of all local filesystem watchers.
+   * Disposes of the local lockfile watcher.
    */
   private disposeLocalWatchers(): void {
-    if (this.watchers.length > 0) {
-      this.logger.debug(`Disposing ${this.watchers.length} local FileSystemWatchers`)
-      this.watchers.forEach((watcher) => watcher.dispose())
-      this.watchers = []
-      this.watchersInitialized = false
+    if (this.localLockfileWatcher) {
+      this.logger.debug('Disposing local lockfile FileSystemWatcher')
+      this.localLockfileWatcher.dispose()
+      this.localLockfileWatcher = undefined
     }
   }
 
@@ -186,44 +185,43 @@ export class StateReconciler implements vscode.Disposable {
    */
   dispose(): void {
     this.logger.info('Disposing state reconciler')
-    this.watchers.forEach((watcher) => watcher.dispose())
+    this.disposeLocalWatchers()
     this.subscriptions.forEach((sub) => sub.dispose())
+    if (this.globalFocusSubscription) {
+      this.globalFocusSubscription.dispose()
+    }
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
     }
-    this.watchers = []
-    this.watchersInitialized = false
   }
 
   /**
-   * Creates FileSystemWatchers for all agent skill directories.
+   * Creates a FileSystemWatcher for the local lockfile.
    *
    * @returns Nothing.
    */
   private createLocalWatchers(): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
     if (!workspaceRoot) {
-      this.logger.debug('No workspace folder, skipping FileSystemWatcher creation')
+      this.logger.debug('No workspace folder, skipping local lockfile watcher creation')
       return
     }
 
-    if (this.watchersInitialized || this.watchers.length > 0) {
-      this.logger.debug('Local FileSystemWatchers already initialized, skipping duplicate creation')
+    if (this.localLockfileWatcher) {
+      this.logger.debug('Local lockfile watcher already initialized, skipping duplicate creation')
       return
     }
 
-    const patterns = getLocalWatcherPatterns(this.ports)
+    const lockfileDir = vscode.Uri.file(path.join(workspaceRoot, AGENTS_DIR))
+    const pattern = new vscode.RelativePattern(lockfileDir, LOCK_FILE)
+    const watcher = vscode.workspace.createFileSystemWatcher(pattern)
 
-    for (const pattern of patterns) {
-      const watcher = vscode.workspace.createFileSystemWatcher(pattern)
-      watcher.onDidCreate(() => this.scheduleReconciliation())
-      watcher.onDidDelete(() => this.scheduleReconciliation())
-      watcher.onDidChange(() => this.scheduleReconciliation())
-      this.watchers.push(watcher)
-    }
+    watcher.onDidCreate(() => this.scheduleReconciliation())
+    watcher.onDidDelete(() => this.scheduleReconciliation())
+    watcher.onDidChange(() => this.scheduleReconciliation())
 
-    this.watchersInitialized = true
-    this.logger.debug(`Created ${this.watchers.length} FileSystemWatchers`)
+    this.localLockfileWatcher = watcher
+    this.logger.debug('Created local lockfile FileSystemWatcher')
   }
 
   /**
