@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ExtensionMessage, ScopePolicyStatePayload } from '../../shared/messages'
-import type { ActionState, AvailableAgent, LifecycleScope, SkillRegistry } from '../../shared/types'
+import type { ActionRequest, ActionState, AvailableAgent, LifecycleScope, SkillRegistry } from '../../shared/types'
 import { onMessage, postMessage } from '../lib/vscode-api'
 
 export type AppStatus = 'loading' | 'ready' | 'error' | 'offline'
@@ -23,7 +23,7 @@ export interface LastBatchContext {
   action: 'install' | 'remove' | 'update'
   skills: string[]
   agents: string[]
-  scope: LifecycleScope
+  scope: ActionRequest['scope']
   method?: 'copy' | 'symlink'
 }
 

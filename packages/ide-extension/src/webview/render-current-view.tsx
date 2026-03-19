@@ -6,7 +6,7 @@ import {
 } from '../services/selection-selectors'
 import type { ScopePolicyStatePayload } from '../shared/messages'
 import { postMessage } from './lib/vscode-api'
-import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, SkillRegistry } from '../shared/types'
+import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
 import type { BatchResult } from './hooks/useHostState'
 import { HomePage } from './views/HomePage'
@@ -43,7 +43,7 @@ interface RenderCurrentViewProps {
   logTimeline: Array<{
     operation: 'install' | 'remove' | 'update'
     skillName: string
-    scope?: ActionRequest['scope']
+    scope?: LifecycleScope
     message: string
     severity: 'info' | 'warn' | 'error'
   }>

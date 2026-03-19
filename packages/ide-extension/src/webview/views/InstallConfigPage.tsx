@@ -1,4 +1,4 @@
-import type { InstallMethod, LifecycleScope } from '../../shared/types'
+import type { ActionRequest, InstallMethod, LifecycleScope } from '../../shared/types'
 
 /**
  * Props for the InstallConfigPage component.
@@ -8,8 +8,8 @@ export interface InstallConfigPageProps {
   selectedSkills: string[]
   /** Selected agent identifiers. */
   selectedAgents: string[]
-  /** Target scope (local or global). */
-  scope: LifecycleScope
+  /** Target scope (local, global, or all). */
+  scope: ActionRequest['scope']
   /** Currently selected install method. */
   method: InstallMethod
   /** Effective scopes from policy (workspaceOnly). */
@@ -19,7 +19,7 @@ export interface InstallConfigPageProps {
   /** Callback when install method changes. */
   onMethodChange: (method: InstallMethod) => void
   /** Callback when scope changes. */
-  onScopeChange: (scope: LifecycleScope) => void
+  onScopeChange: (scope: ActionRequest['scope']) => void
   /** Callback to cancel and return to dashboard. */
   onCancel: () => void
   /** Callback to go back to skills selection. */
