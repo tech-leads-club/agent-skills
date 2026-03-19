@@ -160,7 +160,9 @@ describe('Extension Activation', () => {
     expect(context.subscriptions).toContain(mockLoggingService)
 
     expect(SidebarProvider).toHaveBeenCalledTimes(1)
-    expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalledWith('agentSkillsSidebar', expect.anything())
+    expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalledWith('agentSkillsSidebar', expect.anything(), {
+      webviewOptions: { retainContextWhenHidden: true },
+    })
     expect(context.subscriptions.length).toBeGreaterThanOrEqual(3)
   })
 

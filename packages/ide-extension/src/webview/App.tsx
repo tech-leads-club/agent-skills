@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ActionRequest } from '../shared/types'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
 import { useAppState } from './hooks/useAppState'
@@ -89,6 +89,16 @@ export function App() {
     if (fallbackScope) appState.setScope(fallbackScope)
   }, [appState, hostState.policy])
 
+  // Preload lazy view chunks after initial render so navigations are instant
+  useEffect(() => {
+    void import('./views/SelectAgentsPage')
+    void import('./views/SelectSkillsPage')
+    void import('./views/SelectOutdatedSkillsPage')
+    void import('./views/StatusPage')
+    void import('./views/InstallConfigPage')
+    void import('./views/RemoveConfirmPage')
+  }, [])
+
   const currentViewAnnouncement = useMemo(() => {
     if (appState.currentView === 'status')
       return hostState.isBatchProcessing ? 'Operation in progress' : 'Operation complete'
@@ -127,6 +137,7 @@ export function App() {
           </div>
         )}
       </header>
+      <Suspense fallback={null}>
       {renderCurrentView({
         currentView: appState.currentView,
         currentAction: appState.currentAction,
@@ -165,6 +176,7 @@ export function App() {
         handleExecuteUpdate,
         handleRetry,
       })}
+      </Suspense>
       {hostState.policy?.effectiveScopes.length === 0 && (
         <div className="footer-warning">Lifecycle actions are disabled: {hostState.policy.blockedReason}</div>
       )}

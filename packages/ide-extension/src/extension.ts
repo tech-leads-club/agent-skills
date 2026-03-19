@@ -52,7 +52,11 @@ export function activate(context: vscode.ExtensionContext): void {
     reconciler,
     installedStateStore,
   )
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider))
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
+  )
 
   const scopePolicyService = new ScopePolicyService()
 

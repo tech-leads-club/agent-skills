@@ -9,13 +9,17 @@ import { postMessage } from './lib/vscode-api'
 import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
 import type { BatchResult } from './hooks/useHostState'
+import { lazy } from 'react'
 import { HomePage } from './views/HomePage'
-import { InstallConfigPage } from './views/InstallConfigPage'
-import { RemoveConfirmPage } from './views/RemoveConfirmPage'
-import { SelectAgentsPage } from './views/SelectAgentsPage'
-import { SelectOutdatedSkillsPage } from './views/SelectOutdatedSkillsPage'
-import { SelectSkillsPage } from './views/SelectSkillsPage'
-import { StatusPage } from './views/StatusPage'
+
+const InstallConfigPage = lazy(() => import('./views/InstallConfigPage').then((m) => ({ default: m.InstallConfigPage })))
+const RemoveConfirmPage = lazy(() => import('./views/RemoveConfirmPage').then((m) => ({ default: m.RemoveConfirmPage })))
+const SelectAgentsPage = lazy(() => import('./views/SelectAgentsPage').then((m) => ({ default: m.SelectAgentsPage })))
+const SelectOutdatedSkillsPage = lazy(() =>
+  import('./views/SelectOutdatedSkillsPage').then((m) => ({ default: m.SelectOutdatedSkillsPage })),
+)
+const SelectSkillsPage = lazy(() => import('./views/SelectSkillsPage').then((m) => ({ default: m.SelectSkillsPage })))
+const StatusPage = lazy(() => import('./views/StatusPage').then((m) => ({ default: m.StatusPage })))
 
 interface RenderCurrentViewProps {
   currentView:

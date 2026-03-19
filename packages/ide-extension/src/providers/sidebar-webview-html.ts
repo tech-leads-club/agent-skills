@@ -17,7 +17,7 @@ export const getSidebarWebviewHtml = (extensionUri: vscode.Uri, webview: vscode.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${webview.cspSource};">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'strict-dynamic'; font-src ${webview.cspSource};">
     <link rel="stylesheet" href="${styleUri}">
     <title>Agent Skills</title>
 </head>
@@ -25,7 +25,7 @@ export const getSidebarWebviewHtml = (extensionUri: vscode.Uri, webview: vscode.
     <div id="root">
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--vscode-foreground);font-family:var(--vscode-font-family);font-size:13px;">Loading…</div>
     </div>
-    <script nonce="${nonce}" src="${scriptUri}"></script>
+    <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`
 }

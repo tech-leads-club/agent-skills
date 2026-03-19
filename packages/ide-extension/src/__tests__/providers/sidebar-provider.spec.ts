@@ -155,7 +155,8 @@ describe('SidebarProvider', () => {
       enableScripts: true,
       localResourceRoots: [context.extensionUri],
     })
-    expect(webviewView.webview.html).toContain('<div id="root"></div>')
+    expect(webviewView.webview.html).toContain('<div id="root">')
+    expect(webviewView.webview.html).toContain('Loading')
     expect(webviewView.webview.html).toContain('src="/test/extension/uri/dist/webview/index.js"')
     expect(webviewView.webview.html).toContain('href="/test/extension/uri/dist/webview/index.css"')
     expect(webviewView.webview.onDidReceiveMessage).toHaveBeenCalledTimes(1)
@@ -289,7 +290,8 @@ describe('SidebarProvider', () => {
 
     expect(logger.info).toHaveBeenCalledWith('Refresh requested from webview')
     expect(registryStore.refresh).toHaveBeenCalledTimes(1)
-    expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
+    // Called twice: once as early prefetch in resolveWebviewView, once from requestRefresh handler
+    expect(installedStateStore.refresh).toHaveBeenCalledTimes(2)
   })
 
   it('awaits registry and installed refresh then sends refreshForUpdateComplete on requestRefreshForUpdate', async () => {
@@ -312,7 +314,8 @@ describe('SidebarProvider', () => {
     const refreshPromise = messageHandler({ type: 'requestRefreshForUpdate' })
 
     expect(registryStore.refresh).toHaveBeenCalledTimes(1)
-    expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
+    // Called twice: once as early prefetch in resolveWebviewView, once from requestRefreshForUpdate handler
+    expect(installedStateStore.refresh).toHaveBeenCalledTimes(2)
     expect(webviewView.webview.postMessage).not.toHaveBeenCalledWith({
       type: 'refreshForUpdateComplete',
     })

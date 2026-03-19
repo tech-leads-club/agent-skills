@@ -50,6 +50,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         void this.postMessage({ type: 'trustState', payload: { isTrusted: true } })
       }),
     )
+
+    // Start fetching data in parallel with webview bundle load (~1s).
+    // By the time webviewDidMount fires, the data is likely ready.
+    void this.registryStore.prime()
+    void this.installedStateStore.refresh()
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
@@ -95,8 +100,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     await this.postRegistrySnapshot(this.registryStore.getSnapshot())
-    void this.registryStore.prime()
-    void this.installedStateStore.refresh()
   }
 
   private async handleRefreshRequest(): Promise<void> {
