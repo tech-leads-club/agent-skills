@@ -22,7 +22,9 @@ export const getSidebarWebviewHtml = (extensionUri: vscode.Uri, webview: vscode.
     <title>Agent Skills</title>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--vscode-foreground);font-family:var(--vscode-font-family);font-size:13px;">Loading…</div>
+    </div>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`
