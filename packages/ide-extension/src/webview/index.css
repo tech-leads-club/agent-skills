@@ -18,6 +18,10 @@ body {
   outline-offset: 2px;
 }
 
+a:focus, input:focus, select:focus, textarea:focus {
+  outline: none;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
