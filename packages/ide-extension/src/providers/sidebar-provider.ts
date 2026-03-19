@@ -61,6 +61,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case 'requestRefresh':
           await this.handleRefreshRequest()
           return
+        case 'requestRefreshForUpdate':
+          await this.handleRefreshForUpdate()
+          return
         case 'requestRunAction':
           await this.handleRequestRunAction(message.payload)
           return
@@ -100,6 +103,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.logger.info('Refresh requested from webview')
     void this.registryStore.refresh()
     void this.installedStateStore.refresh()
+  }
+
+  private async handleRefreshForUpdate(): Promise<void> {
+    await Promise.all([this.registryStore.refresh(), this.installedStateStore.refresh()])
+    await this.postMessage({ type: 'refreshForUpdateComplete' })
   }
 
   private async handleRequestRunAction(request: ActionRequest): Promise<void> {

@@ -292,6 +292,38 @@ describe('SidebarProvider', () => {
     expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
   })
 
+  it('awaits registry and installed refresh then sends refreshForUpdateComplete on requestRefreshForUpdate', async () => {
+    let resolveRegistry: () => void
+    let resolveInstalled: () => void
+    registryStore.refresh.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRegistry = resolve
+        }),
+    )
+    installedStateStore.refresh.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveInstalled = resolve
+        }),
+    )
+
+    provider.resolveWebviewView(webviewView)
+    const refreshPromise = messageHandler({ type: 'requestRefreshForUpdate' })
+
+    expect(registryStore.refresh).toHaveBeenCalledTimes(1)
+    expect(installedStateStore.refresh).toHaveBeenCalledTimes(1)
+    expect(webviewView.webview.postMessage).not.toHaveBeenCalledWith({
+      type: 'refreshForUpdateComplete',
+    })
+
+    resolveRegistry!()
+    resolveInstalled!()
+    await refreshPromise
+
+    expect(webviewView.webview.postMessage).toHaveBeenCalledWith({ type: 'refreshForUpdateComplete' })
+  })
+
   it('runs valid requestRunAction messages through the action runner', async () => {
     provider.resolveWebviewView(webviewView)
     await messageHandler({

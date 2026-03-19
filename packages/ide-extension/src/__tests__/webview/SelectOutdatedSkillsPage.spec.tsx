@@ -161,6 +161,29 @@ describe('SelectOutdatedSkillsPage', () => {
     expect(screen.queryByText('seo')).not.toBeInTheDocument()
   })
 
+  it('shows loading state and disables actions when isRefreshing is true', () => {
+    render(
+      <SelectOutdatedSkillsPage
+        registry={registry}
+        installedSkills={installedSkills}
+        effectiveScopes={['local']}
+        selectedSkills={[]}
+        isRefreshing
+        getCategoryOptions={getCategoryOptions}
+        getOutdatedSkills={getOutdatedSkills}
+        onToggleSkill={jest.fn()}
+        onSelectAll={jest.fn()}
+        onClear={jest.fn()}
+        onCancel={jest.fn()}
+        onUpdate={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Checking for updates...')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^update$/i })).toBeDisabled()
+  })
+
   it('sends an empty selection to let the host decide update all', async () => {
     const user = userEvent.setup()
     const onUpdate = jest.fn()

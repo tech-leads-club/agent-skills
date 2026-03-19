@@ -67,6 +67,12 @@ export function App() {
     [appState],
   )
 
+  const handleUpdateFromHome = useCallback(() => {
+    hostState.startRefreshForUpdate()
+    appState.goToOutdatedSkills()
+    postMessage({ type: 'requestRefreshForUpdate' })
+  }, [appState, hostState.startRefreshForUpdate])
+
   const handleRetry = useCallback(() => {
     if (!lastBatchContext || !hostState.batchResult?.failedSkills?.length) return
     const retrySkills =
@@ -131,6 +137,7 @@ export function App() {
         policy: hostState.policy,
         isTrusted: hostState.isTrusted,
         isProcessing: hostState.isBatchProcessing,
+        isRefreshingForUpdate: hostState.isRefreshingForUpdate,
         selectedSkills: appState.selectedSkills,
         selectedAgents: appState.selectedAgents,
         activeScope: appState.activeScope,
@@ -144,7 +151,7 @@ export function App() {
         goToSkillsView: appState.goToSkillsView,
         goToInstallConfig: appState.goToInstallConfig,
         goToRemoveConfirm: appState.goToRemoveConfirm,
-        goToOutdatedSkills: appState.goToOutdatedSkills,
+        goToOutdatedSkills: handleUpdateFromHome,
         goHome: appState.goHome,
         toggleSkill: appState.toggleSkill,
         toggleAgent: appState.toggleAgent,

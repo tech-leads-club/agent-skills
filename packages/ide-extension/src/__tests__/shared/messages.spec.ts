@@ -5,6 +5,7 @@ describe('shared messages', () => {
   it('constructs the active webview messages', () => {
     const mount: WebviewMessage = { type: 'webviewDidMount' }
     const refresh: WebviewMessage = { type: 'requestRefresh' }
+    const refreshForUpdate: WebviewMessage = { type: 'requestRefreshForUpdate' }
     const action: WebviewMessage = {
       type: 'requestRunAction',
       payload: { action: 'install', skills: ['seo'], agents: ['cursor'], scope: 'local', method: 'copy' },
@@ -12,6 +13,7 @@ describe('shared messages', () => {
 
     expect(mount.type).toBe('webviewDidMount')
     expect(refresh.type).toBe('requestRefresh')
+    expect(refreshForUpdate.type).toBe('requestRefreshForUpdate')
     expect(action.type).toBe('requestRunAction')
   })
 
@@ -75,5 +77,10 @@ describe('shared messages', () => {
     expect(reconcile.type).toBe('reconcileState')
     expect(trust.type).toBe('trustState')
     expect(policy.type).toBe('policyState')
+  })
+
+  it('constructs refreshForUpdateComplete extension message', () => {
+    const complete: ExtensionMessage = { type: 'refreshForUpdateComplete' }
+    expect(complete.type).toBe('refreshForUpdateComplete')
   })
 })

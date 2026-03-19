@@ -11,6 +11,7 @@ import type {
 export type WebviewMessage =
   | { type: 'webviewDidMount' }
   | { type: 'requestRefresh' }
+  | { type: 'requestRefreshForUpdate' }
   | { type: 'requestRunAction'; payload: ActionRequest }
   | { type: 'requestPreviewSkill'; payload: { skillName: string } }
 
@@ -21,6 +22,7 @@ export type ExtensionMessage =
   | { type: 'reconcileState'; payload: ReconcileStatePayload }
   | { type: 'trustState'; payload: TrustStatePayload }
   | { type: 'policyState'; payload: ScopePolicyStatePayload }
+  | { type: 'refreshForUpdateComplete' }
 
 export interface InitializePayload {
   version: string

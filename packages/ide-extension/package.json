@@ -95,6 +95,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "@vscode/codicons": "^0.0.44",
     "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.4",
     "fuse.js": "^7.1.0",
     "glob": "^10.5.0",
     "mocha": "^11.7.5",

@@ -10,6 +10,7 @@ export interface SelectOutdatedSkillsPageProps {
   installedSkills: InstalledSkillsMap
   effectiveScopes: LifecycleScope[]
   selectedSkills: string[]
+  isRefreshing?: boolean
   getCategoryOptions: (registry: SkillRegistry) => CategoryOption[]
   getOutdatedSkills: (input: OutdatedSkillsInput) => Skill[]
   onToggleSkill: (skillName: string) => void
@@ -24,6 +25,7 @@ export function SelectOutdatedSkillsPage({
   installedSkills,
   effectiveScopes,
   selectedSkills,
+  isRefreshing = false,
   getCategoryOptions,
   getOutdatedSkills,
   onToggleSkill,
@@ -82,9 +84,19 @@ export function SelectOutdatedSkillsPage({
   }, [onUpdate, selectedSkills])
 
   return (
-    <section className="select-page" aria-label="Update: select outdated skills">
+    <section
+      className="select-page"
+      aria-label="Update: select outdated skills"
+      aria-busy={isRefreshing}
+    >
       <header className="select-page-header">
-        <button type="button" className="icon-button" onClick={onCancel} aria-label="Cancel">
+        <button
+          type="button"
+          className="icon-button"
+          onClick={onCancel}
+          aria-label="Cancel"
+          disabled={isRefreshing}
+        >
           <span className="codicon codicon-arrow-left" aria-hidden="true" />
         </button>
         <div>
@@ -97,21 +109,32 @@ export function SelectOutdatedSkillsPage({
         </div>
       </header>
 
-      <SkillSelectionToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        categoryOptions={categoryOptions}
-        selectedCategoryId={selectedCategoryId}
-        onCategoryChange={setSelectedCategoryId}
-        resultCount={visibleSkills.length}
-        selectedCount={selectedSkills.length}
-        allSelected={allVisibleSelected}
-        onToggleAll={handleToggleAllVisible}
-        onClear={onClear}
-      />
+      <div style={isRefreshing ? { pointerEvents: 'none', opacity: 0.7 } : undefined}>
+        <SkillSelectionToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          categoryOptions={categoryOptions}
+          selectedCategoryId={selectedCategoryId}
+          onCategoryChange={setSelectedCategoryId}
+          resultCount={visibleSkills.length}
+          selectedCount={selectedSkills.length}
+          allSelected={allVisibleSelected}
+          onToggleAll={handleToggleAllVisible}
+          onClear={onClear}
+        />
+      </div>
 
-      <div className="select-page-list" aria-label="Outdated skills list">
-        {visibleSkills.length === 0 ? (
+      <div
+        className="select-page-list"
+        aria-label="Outdated skills list"
+        style={isRefreshing ? { pointerEvents: 'none' } : undefined}
+      >
+        {isRefreshing ? (
+          <div className="loading-state" role="status">
+            <div className="spinner" />
+            <p>Checking for updates...</p>
+          </div>
+        ) : visibleSkills.length === 0 ? (
           <div className="select-page-empty" role="status">
             <p>
               {outdatedSkills.length === 0
@@ -139,7 +162,7 @@ export function SelectOutdatedSkillsPage({
             type="button"
             className="primary-footer-button primary-footer-button--install"
             onClick={handleUpdate}
-            disabled={outdatedSkills.length === 0}
+            disabled={outdatedSkills.length === 0 || isRefreshing}
           >
             Update
           </button>

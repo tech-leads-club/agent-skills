@@ -3,7 +3,7 @@ import { createNodeAdapters } from '@tech-leads-club/core'
 import type { InstalledSkillsScanner } from '../../services/installed-skills-scanner'
 import type { LoggingService } from '../../services/logging-service'
 import type { SkillRegistryService } from '../../services/skill-registry-service'
-import { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation, SkillRegistry } from '../../shared/types'
+import { AvailableAgent, InstalledSkillsMap, LifecycleScope, ScopePolicyEvaluation, SkillRegistry } from '../../shared/types'
 
 type AsyncMockableFn<TReturn = unknown, TArgs extends Array<unknown> = Array<unknown>> = (
   ...args: TArgs
@@ -115,7 +115,7 @@ describe('StateReconciler Policy', () => {
     const globalOnlyPolicy: ScopePolicyEvaluation = {
       allowedScopes: 'global',
       environmentScopes: ['local', 'global'],
-      effectiveScopes: ['global'] as any,
+      effectiveScopes: ['global'] as LifecycleScope[],
       blockedReason: undefined,
     }
     mockVscode.workspace.createFileSystemWatcher.mockClear()

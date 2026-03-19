@@ -6,6 +6,7 @@ import type { SkillRegistryService } from '../../services/skill-registry-service
 import type {
   AvailableAgent,
   InstalledSkillsMap,
+  LifecycleScope,
   ScopePolicyEvaluation,
   Skill,
   SkillRegistry,
@@ -127,7 +128,7 @@ describe('StateReconciler', () => {
   it('should NOT create local watchers when policy excludes local scope', () => {
     reconciler.updatePolicy({
       ...localOnlyPolicy,
-      effectiveScopes: ['global'] as any,
+      effectiveScopes: ['global'] as LifecycleScope[],
     })
     // Check that no local watchers were created (may have global)
     const allCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls
@@ -168,7 +169,7 @@ describe('StateReconciler', () => {
   it('should create global lockfile watcher when policy allows global scope', () => {
     const globalPolicy: ScopePolicyEvaluation = {
       ...localOnlyPolicy,
-      effectiveScopes: ['global'] as any,
+      effectiveScopes: ['global'] as LifecycleScope[],
     }
     reconciler.updatePolicy(globalPolicy)
     const globalWatcherCalls = mockVscode.workspace.createFileSystemWatcher.mock.calls.filter((call) => {

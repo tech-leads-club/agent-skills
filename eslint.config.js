@@ -9,6 +9,10 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
+  {
+    files: ['packages/ide-extension/scripts/**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+  },
   globalIgnores([
     'dist/**',
     'node_modules/**',
@@ -61,6 +65,7 @@ export default defineConfig([
             'fuse.js',
             '@vitejs/plugin-react',
             'vite',
+            'esbuild', // ide-extension: build script only (devDependencies)
           ],
         },
       ],

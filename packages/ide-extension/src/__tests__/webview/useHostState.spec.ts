@@ -117,6 +117,20 @@ describe('useHostState', () => {
     })
   })
 
+  it('sets isRefreshingForUpdate to true when startRefreshForUpdate is called and to false on refreshForUpdateComplete', () => {
+    const { result } = renderHook(() => useHostState())
+
+    expect(result.current.isRefreshingForUpdate).toBe(false)
+
+    act(() => {
+      result.current.startRefreshForUpdate()
+    })
+    expect(result.current.isRefreshingForUpdate).toBe(true)
+
+    dispatchMessage({ type: 'refreshForUpdateComplete' })
+    expect(result.current.isRefreshingForUpdate).toBe(false)
+  })
+
   it('clears the previous action result when a new action starts', () => {
     const { result } = renderHook(() => useHostState())
 

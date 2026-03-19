@@ -48,6 +48,7 @@ export function useHostState() {
   const [isTrusted, setIsTrusted] = useState(true)
   const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
   const [batchResult, setBatchResult] = useState<BatchResult | null>(null)
+  const [isRefreshingForUpdate, setIsRefreshingForUpdate] = useState(false)
 
   useEffect(() => {
     const dispose = onMessage((message: ExtensionMessage) => {
@@ -67,6 +68,9 @@ export function useHostState() {
           break
         case 'policyState':
           setPolicy(message.payload)
+          break
+        case 'refreshForUpdateComplete':
+          setIsRefreshingForUpdate(false)
           break
         case 'actionState':
           setActionState(message.payload)
@@ -107,5 +111,7 @@ export function useHostState() {
     actionState,
     isBatchProcessing: actionState.status === 'running',
     batchResult,
+    isRefreshingForUpdate,
+    startRefreshForUpdate: () => setIsRefreshingForUpdate(true),
   }
 }

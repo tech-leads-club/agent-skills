@@ -34,6 +34,7 @@ interface RenderCurrentViewProps {
   policy: ScopePolicyStatePayload | null
   isTrusted: boolean
   isProcessing: boolean
+  isRefreshingForUpdate: boolean
   selectedSkills: string[]
   selectedAgents: string[]
   activeScope: ActionRequest['scope']
@@ -79,6 +80,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
     policy,
     isTrusted,
     isProcessing,
+    isRefreshingForUpdate,
     selectedSkills,
     selectedAgents,
     activeScope,
@@ -126,6 +128,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         installedSkills={installedSkills}
         effectiveScopes={policy?.effectiveScopes ?? ['global']}
         selectedSkills={selectedSkills}
+        isRefreshing={isRefreshingForUpdate}
         getCategoryOptions={getCategoryOptions}
         getOutdatedSkills={getOutdatedSkills}
         onToggleSkill={toggleSkill}
