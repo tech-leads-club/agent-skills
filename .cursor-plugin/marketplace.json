@@ -1,6 +1,8 @@
 {
   "name": "tech-leads-club",
-  "owner": "tech-leads-club",
+  "owner": {
+    "name": "tech-leads-club"
+  },
   "plugins": [
     {
       "name": "agent-skills",
