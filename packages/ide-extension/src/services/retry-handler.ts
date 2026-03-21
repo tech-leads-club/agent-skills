@@ -1,4 +1,40 @@
-import { ErrorInfo } from '../shared/types'
+import type { ErrorCategory, ErrorInfo } from '../shared/types'
+
+const ERROR_CATEGORIES: readonly ErrorCategory[] = [
+  'cancelled',
+  'terminated',
+  'file-locked',
+  'npx-missing',
+  'disk-full',
+  'permission-denied',
+  'cli-missing',
+  'cli-error',
+  'unknown',
+]
+
+function isErrorCategory(value: unknown): value is ErrorCategory {
+  return typeof value === 'string' && (ERROR_CATEGORIES as readonly string[]).includes(value)
+}
+
+function isErrorInfo(value: unknown): value is ErrorInfo {
+  if (value === null || typeof value !== 'object') {
+    return false
+  }
+  const o = value as Record<string, unknown>
+  if (!isErrorCategory(o.category) || typeof o.message !== 'string' || typeof o.retryable !== 'boolean') {
+    return false
+  }
+  if (o.action !== undefined) {
+    if (o.action === null || typeof o.action !== 'object') {
+      return false
+    }
+    const a = o.action as Record<string, unknown>
+    if (typeof a.label !== 'string' || typeof a.command !== 'string') {
+      return false
+    }
+  }
+  return true
+}
 
 /**
  * Configuration for retrying CLI operations with backoff and optional hooks.
@@ -25,9 +61,7 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions):
       return await fn()
     } catch (error) {
       lastError = error
-      const errorInfo = error as ErrorInfo
-
-      if (attempt > options.maxRetries || !options.shouldRetry(errorInfo)) {
+      if (attempt > options.maxRetries || !isErrorInfo(error) || !options.shouldRetry(error)) {
         throw error
       }
 

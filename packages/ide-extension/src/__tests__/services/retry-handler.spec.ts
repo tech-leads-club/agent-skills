@@ -24,7 +24,7 @@ describe('RetryHandler', () => {
   })
 
   it('should retry if function fails and shouldRetry returns true', async () => {
-    const error = { category: 'file-locked', retryable: true } as ErrorInfo
+    const error: ErrorInfo = { category: 'file-locked', message: 'locked', retryable: true }
     const fn = jest.fn<() => Promise<string>>().mockRejectedValueOnce(error).mockResolvedValue('success')
 
     const promise = withRetry(fn, {
@@ -42,7 +42,7 @@ describe('RetryHandler', () => {
   })
 
   it('should exhaust retries and throw last error', async () => {
-    const error = { category: 'file-locked', retryable: true } as ErrorInfo
+    const error: ErrorInfo = { category: 'file-locked', message: 'locked', retryable: true }
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
 
     const promise = withRetry(fn, {
@@ -64,7 +64,7 @@ describe('RetryHandler', () => {
   })
 
   it('should throw immediately if shouldRetry returns false', async () => {
-    const error = { category: 'cli-error', retryable: false } as ErrorInfo
+    const error: ErrorInfo = { category: 'cli-error', message: 'cli failed', retryable: false }
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
 
     await expect(
@@ -78,8 +78,25 @@ describe('RetryHandler', () => {
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
+  it('should not retry when caught value is not ErrorInfo', async () => {
+    const plainError = new Error('not classified')
+    const fn = jest.fn<() => Promise<string>>().mockRejectedValue(plainError)
+    const shouldRetry = jest.fn<(err: ErrorInfo) => boolean>().mockReturnValue(true)
+
+    await expect(
+      withRetry(fn, {
+        maxRetries: 3,
+        baseDelayMs: 100,
+        shouldRetry,
+      }),
+    ).rejects.toBe(plainError)
+
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(shouldRetry).not.toHaveBeenCalled()
+  })
+
   it('should implement exponential backoff', async () => {
-    const error = { category: 'file-locked', retryable: true } as ErrorInfo
+    const error: ErrorInfo = { category: 'file-locked', message: 'locked', retryable: true }
     const fn = jest.fn<() => Promise<string>>().mockRejectedValue(error)
     const onRetry = jest.fn()
 
