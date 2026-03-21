@@ -99,7 +99,7 @@ export function SelectOutdatedSkillsPage({
         </div>
       </header>
 
-      <div style={isRefreshing ? { pointerEvents: 'none', opacity: 0.7 } : undefined}>
+      <div className={isRefreshing ? 'refreshing-disabled' : undefined}>
         <SkillSelectionToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
