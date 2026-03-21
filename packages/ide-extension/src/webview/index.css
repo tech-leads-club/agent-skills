@@ -433,6 +433,27 @@ textarea:focus {
   color: var(--vscode-list-activeSelectionForeground);
 }
 
+.skill-select-card--selected .skill-select-card-description,
+.skill-select-card--selected .skill-select-card-meta,
+.skill-select-card--selected .skill-select-card-preview-btn,
+.agent-select-card--selected .agent-select-card-name {
+  color: inherit;
+}
+
+.skill-select-card--selected .skill-select-card-meta {
+  border-top-color: currentColor;
+  opacity: 0.8;
+}
+
+.skill-select-card--selected .skill-select-card-category,
+.skill-select-card--selected .skill-select-card-tag,
+.agent-select-card--selected .agent-select-card-tag {
+  background-color: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+
 .skill-select-card-header,
 .agent-select-card-header {
   display: flex;
