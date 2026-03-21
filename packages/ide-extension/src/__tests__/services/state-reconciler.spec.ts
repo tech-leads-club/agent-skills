@@ -180,4 +180,48 @@ describe('StateReconciler', () => {
     })
     expect(globalWatcherCalls.length).toBeGreaterThan(0)
   })
+
+  it('should not emit changes for equivalent state with different property order', async () => {
+    const firstState: InstalledSkillsMap = {
+      seo: {
+        local: true,
+        global: false,
+        agents: [
+          {
+            agent: 'cursor',
+            displayName: 'Cursor',
+            local: true,
+            global: false,
+            corrupted: false,
+          },
+        ],
+      },
+    }
+    const reorderedState: InstalledSkillsMap = {
+      seo: {
+        global: false,
+        local: true,
+        agents: [
+          {
+            displayName: 'Cursor',
+            agent: 'cursor',
+            global: false,
+            local: true,
+            corrupted: false,
+          },
+        ],
+      },
+    }
+
+    const scanMock = mockScanner.scan as jest.MockedFunction<typeof mockScanner.scan>
+    scanMock.mockResolvedValueOnce(firstState).mockResolvedValueOnce(reorderedState)
+
+    const onStateChanged = jest.fn()
+    reconciler.onStateChanged(onStateChanged)
+
+    await reconciler.reconcile()
+    await reconciler.reconcile()
+
+    expect(onStateChanged).toHaveBeenCalledTimes(1)
+  })
 })

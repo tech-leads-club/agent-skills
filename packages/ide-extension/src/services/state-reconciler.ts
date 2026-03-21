@@ -1,5 +1,6 @@
 import type { CorePorts } from '@tech-leads-club/core'
 import { AGENTS_DIR, LOCK_FILE } from '@tech-leads-club/core'
+import deepEqual from 'fast-deep-equal'
 import * as path from 'node:path'
 import * as vscode from 'vscode'
 import type { AvailableAgent, InstalledSkillsMap, ScopePolicyEvaluation } from '../shared/types'
@@ -266,9 +267,9 @@ export class StateReconciler implements vscode.Disposable {
    * Checks if the state has changed using deep equality.
    *
    * @param newState - Newly scanned installed-skill state.
-   * @returns `true` when serialized state differs from the previous snapshot.
+   * @returns `true` when state differs from the previous snapshot.
    */
   private hasStateChanged(newState: InstalledSkillsMap): boolean {
-    return JSON.stringify(this.previousState) !== JSON.stringify(newState)
+    return !deepEqual(this.previousState, newState)
   }
 }

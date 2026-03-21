@@ -1,3 +1,4 @@
+import deepEqual from 'fast-deep-equal'
 import type { InstalledScopeHashes, InstalledSkillsMap } from '../shared/types'
 import type { LoggingService } from './logging-service'
 import type { SkillLockService } from './skill-lock-service'
@@ -62,7 +63,7 @@ export class InstalledStateStore {
       lastUpdatedAt: new Date().toISOString(),
     }
 
-    if (JSON.stringify(nextSnapshot) === JSON.stringify(this.snapshot)) {
+    if (deepEqual(nextSnapshot, this.snapshot)) {
       return
     }
 
