@@ -85,7 +85,7 @@ describe('core library', () => {
       method: 'copy',
       skills: [],
     }
-    const ports = {} as CorePorts
+    const _ports = {} as CorePorts
 
     // Runtime validation that the types work correctly
     expect(agent).toBe('cursor')

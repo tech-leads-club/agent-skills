@@ -10,11 +10,25 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    files: ['packages/ide-extension/scripts/**/*.mjs'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+    files: ['packages/ide-extension/scripts/**/*.mjs', 'packages/skills-catalog/skills/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        URL: 'readonly',
+        window: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
   },
   globalIgnores([
     'dist/**',
+    '**/dist/**',
     'node_modules/**',
     '**/*.js',
     '**/*.d.ts',
@@ -30,7 +44,7 @@ export default defineConfig([
     rules: {
       'prefer-const': 'error',
       'no-var': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },

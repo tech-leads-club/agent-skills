@@ -200,7 +200,7 @@ const BEAUTIFUL_MERMAID_THEMES = new Set([
   'one-dark',
 ])
 
-const MMDC_THEMES = new Set(['default', 'forest', 'dark', 'neutral', 'base'])
+const _MMDC_THEMES = new Set(['default', 'forest', 'dark', 'neutral', 'base'])
 
 // --- Rendering engines ---
 

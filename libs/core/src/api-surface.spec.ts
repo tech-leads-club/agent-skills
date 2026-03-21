@@ -208,7 +208,6 @@ type ExpectedPromiseShape = {
 
 // This type-level assertion ensures that the documented async/sync shape of the core API surface
 // (ExpectedPromiseShape) stays in lockstep with the actual implementation in coreApiSurface.
-// eslint-disable-next-line
 type _ApiSurfaceParityChecks = Assert<Equal<PromiseShape<typeof coreApiSurface>, ExpectedPromiseShape>>
 
 describe('core API surface', () => {

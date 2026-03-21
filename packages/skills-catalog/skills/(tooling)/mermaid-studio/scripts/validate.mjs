@@ -100,7 +100,7 @@ function detectDiagramType(content) {
   return null
 }
 
-function basicValidation(content, filename) {
+function basicValidation(content, _filename) {
   const errors = []
   const warnings = []
 
@@ -186,7 +186,7 @@ function basicValidation(content, filename) {
   }
 
   // Node count warning
-  const nodePattern = /\b\w+[\[({]/g
+  const nodePattern = /\b\w+[[({]/g
   const nodeMatches = cleaned.match(nodePattern) || []
   if (nodeMatches.length > 25) {
     warnings.push(
@@ -255,7 +255,7 @@ function printResult(filename, basicResult, parserResult) {
   }
 
   if (!hasErrors) {
-    const diagramType = detectDiagramType(readFileSync ? '' : '')
+    const _diagramType = detectDiagramType(readFileSync ? '' : '')
     console.log(`\n✅ Valid${parserResult?.available ? ' (parser verified)' : ' (basic checks only)'}`)
     if (hasWarnings) {
       console.log('   (warnings above are non-blocking suggestions)')
