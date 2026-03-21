@@ -63,24 +63,27 @@ export class CoreJobExecutor {
     }
 
     onProgress?.(`Downloading ${skillNames.length} skill(s)...`)
-    const skills: Array<{ name: string; description: string; path: string; category?: string }> = []
-    for (const name of skillNames) {
-      const skill = await getSkillWithPath(this.ports, name)
-      if (!skill) {
-        const msg = `Skill not found or failed to download: ${name}`
-        onProgress?.(msg, 'error')
-        return {
-          operationId: job.operationId,
-          operation: 'install',
-          skillName: name,
-          status: 'error',
-          errorMessage: msg,
-          metadata: job.metadata,
-        }
+    const downloaded = await Promise.all(
+      skillNames.map(async (name) => {
+        const skill = await getSkillWithPath(this.ports, name)
+        if (skill) onProgress?.(`Downloaded ${name}`)
+        return { name, skill }
+      }),
+    )
+    const failedDownload = downloaded.find((d) => !d.skill)
+    if (failedDownload) {
+      const msg = `Skill not found or failed to download: ${failedDownload.name}`
+      onProgress?.(msg, 'error')
+      return {
+        operationId: job.operationId,
+        operation: 'install',
+        skillName: failedDownload.name,
+        status: 'error',
+        errorMessage: msg,
+        metadata: job.metadata,
       }
-      skills.push(skill)
-      onProgress?.(`Downloaded ${name}`)
     }
+    const skills = downloaded.map((d) => d.skill!)
 
     onProgress?.(`Installing to ${agents.length} agent(s)...`)
     const results = await installSkills(this.ports, skills, {
@@ -90,9 +93,9 @@ export class CoreJobExecutor {
       skills: skillNames,
     })
 
-    const failed = results.filter((r) => !r.success)
-    if (failed.length > 0) {
-      const msg = failed.map((r) => `${r.agent}: ${r.error}`).join('; ')
+    const failedInstall = results.filter((r): r is typeof results[0] & { success: false } => !r.success)
+    if (failedInstall.length > 0) {
+      const msg = failedInstall.map((r) => `${r.agent}: ${r.error}`).join('; ')
       onProgress?.(msg, 'error')
       return {
         operationId: job.operationId,
@@ -240,12 +243,15 @@ export class CoreJobExecutor {
 
     onProgress?.(`Downloading ${toUpdate.length} skill(s) for update...`)
     const skillInfoMap = new Map<string, { name: string; description: string; path: string; category?: string }>()
-    for (const name of toUpdate) {
-      const skill = await getSkillWithPathForced(this.ports, name)
-      if (skill) {
-        skillInfoMap.set(name, skill)
-        onProgress?.(`Downloaded ${name}`)
-      }
+    const downloaded = await Promise.all(
+      toUpdate.map(async (name) => {
+        const skill = await getSkillWithPathForced(this.ports, name)
+        if (skill) onProgress?.(`Downloaded ${name}`)
+        return { name, skill }
+      }),
+    )
+    for (const { name, skill } of downloaded) {
+      if (skill) skillInfoMap.set(name, skill)
     }
 
     if (skillInfoMap.size === 0) {
