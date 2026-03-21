@@ -106,10 +106,18 @@ export class ActionRunner implements vscode.Disposable {
         return { accepted: true, state: this.getState() }
       }
 
-      const results: ActionResultLine[] = []
-      for (const job of jobs) {
-        results.push(await this.executeJob(job))
-      }
+      const byScope = Map.groupBy(jobs, (j: QueuedJob) => j.metadata?.scope ?? 'local')
+      const groups = [...byScope.values()]
+      const groupResults = await Promise.all(
+        groups.map(async (scopeJobs) => {
+          const results: ActionResultLine[] = []
+          for (const job of scopeJobs) {
+            results.push(await this.executeJob(job))
+          }
+          return results
+        }),
+      )
+      const results = groupResults.flat()
 
       await this.installedStateStore.refresh()
       const failedResults = results.filter((result) => !result.success)
