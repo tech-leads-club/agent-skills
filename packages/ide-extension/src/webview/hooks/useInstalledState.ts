@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { ReconcileStatePayload } from '../../shared/messages'
+import type { ExtensionMessage } from '../../shared/messages'
 import type { InstalledSkillsMap } from '../../shared/types'
+import { onMessage } from '../lib/vscode-api'
 
 /**
  * Hook that mirrors the latest installed skills snapshot pushed from the extension host.
@@ -16,19 +17,12 @@ export function useInstalledState() {
   const [installedSkills, setInstalledSkills] = useState<InstalledSkillsMap>({})
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      const message = event.data
+    const dispose = onMessage((message: ExtensionMessage) => {
       if (message.type === 'reconcileState') {
-        const payload = message.payload as ReconcileStatePayload
-        setInstalledSkills(payload.installedSkills)
+        setInstalledSkills(message.payload.installedSkills)
       }
-    }
-
-    window.addEventListener('message', handleMessage)
-
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
+    })
+    return dispose
   }, [])
 
   return { installedSkills }
