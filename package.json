@@ -35,7 +35,7 @@
     "validate": "npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills",
     "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
-    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test; node .github/setup.js"
   },
   "repository": {
     "type": "git",
@@ -59,18 +59,18 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@modelcontextprotocol/inspector": "^0.21.1",
-    "@nx/devkit": "^22.5.4",
-    "@nx/esbuild": "^22.5.4",
-    "@nx/eslint": "^22.5.4",
-    "@nx/eslint-plugin": "^22.5.4",
-    "@nx/jest": "22.5.4",
-    "@nx/js": "^22.5.4",
-    "@nx/next": "^22.5.4",
-    "@nx/node": "^22.5.4",
-    "@nx/plugin": "^22.5.4",
+    "@nx/devkit": "^22.6.3",
+    "@nx/esbuild": "^22.6.3",
+    "@nx/eslint": "^22.6.3",
+    "@nx/eslint-plugin": "^22.6.3",
+    "@nx/jest": "^22.7.0",
+    "@nx/js": "^22.6.3",
+    "@nx/next": "^22.6.3",
+    "@nx/node": "^22.6.3",
+    "@nx/plugin": "^22.6.3",
     "@swc-node/register": "^1.11.1",
-    "@swc/core": "1.15.18",
-    "@swc/helpers": "~0.5.19",
+    "@swc/core": "1.15.21",
+    "@swc/helpers": "~0.5.20",
     "@types/jest": "^30.0.0",
     "@types/node": "^24",
     "cross-env": "^10.1.0",
@@ -82,8 +82,8 @@
     "jest-environment-node": "^30.3.0",
     "jest-util": "^30.3.0",
     "jsonc-eslint-parser": "^2.4.2",
-    "next": "~16.1.6",
-    "nx": "^22.5.4",
+    "next": "~16.2.2",
+    "nx": "^22.6.3",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "react": "^19.2.4",
@@ -93,8 +93,16 @@
     "tslib": "^2.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0",
-    "yaml": "^2.8.2"
+    "typescript-eslint": "^8.58.0",
+    "yaml": "^2.8.3"
+  },
+  "overrides": {
+    "follow-redirects": "^1.16.0",
+    "postcss": "^8.5.10",
+    "nx": {
+      "brace-expansion": "^5.0.5",
+      "yaml": "^2.8.3"
+    }
   },
   "nx": {
     "includedScripts": []
