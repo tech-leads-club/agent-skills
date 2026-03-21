@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import type { ReactNode } from 'react'
+import jestAxe from 'jest-axe'
 import {
   AppStateContext,
   HostStateContext,
@@ -12,6 +13,8 @@ import type { AppStateContextValue, HostStateContextValue } from '../../webview/
 import { ActionsProvider } from '../../webview/contexts'
 import { CurrentView } from '../../webview/render-current-view'
 import type { ActionState } from '../../shared/types'
+
+const { axe } = jestAxe
 
 jest.mock('../../webview/lib/vscode-api', () => ({
   postMessage: jest.fn(),
@@ -236,5 +239,53 @@ describe('CurrentView — context consumer wiring', () => {
     expect(await screen.findByRole('button', { name: /install add new capabilities/i })).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: /uninstall remove installed skills/i })).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: /^update/i })).toBeInTheDocument()
+  })
+
+  it('moves focus to the first heading when changing views', async () => {
+    const runningActionState: ActionState = {
+      ...idleActionState,
+      status: 'running',
+      action: 'install',
+      currentStep: 'Installing accessibility...',
+    }
+    const stubRegistry = { version: '1', categories: {}, skills: [] }
+
+    render(
+      <AllProviders
+        appState={{ currentView: 'status', currentAction: null }}
+        hostState={{
+          isBatchProcessing: true,
+          actionState: runningActionState,
+          registry: stubRegistry,
+        }}
+      >
+        <CurrentView />
+      </AllProviders>,
+    )
+
+    const heading = await screen.findByRole('heading', { name: /operation in progress/i })
+    await waitFor(() => expect(heading).toHaveFocus())
+  })
+
+  it('falls back to first focusable element when no heading exists', async () => {
+    render(
+      <AllProviders appState={{ currentView: 'home' }}>
+        <CurrentView />
+      </AllProviders>,
+    )
+
+    const installButton = await screen.findByRole('button', { name: /install add new capabilities/i })
+    await waitFor(() => expect(installButton).toHaveFocus())
+  })
+
+  it('has no accessibility violations with focus management enabled', async () => {
+    const { container } = render(
+      <AllProviders appState={{ currentView: 'home' }}>
+        <CurrentView />
+      </AllProviders>,
+    )
+
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
   })
 })

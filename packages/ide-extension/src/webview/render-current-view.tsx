@@ -6,7 +6,7 @@ import {
 } from '../services/selection-selectors'
 import { postMessage } from './lib/vscode-api'
 import { NoRegistryState } from './components/AppStatusViews'
-import { lazy } from 'react'
+import { lazy, useEffect } from 'react'
 import { HomePage } from './views/HomePage'
 import { useAppStateContext, useHostStateContext, useActionsContext } from './contexts'
 
@@ -18,6 +18,32 @@ const SelectOutdatedSkillsPage = lazy(() =>
 )
 const SelectSkillsPage = lazy(() => import('./views/SelectSkillsPage').then((m) => ({ default: m.SelectSkillsPage })))
 const StatusPage = lazy(() => import('./views/StatusPage').then((m) => ({ default: m.StatusPage })))
+
+const focusableSelector = [
+  'button:not([disabled])',
+  '[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+  '[contenteditable="true"]',
+].join(', ')
+
+function focusViewRoot() {
+  const heading = document.querySelector('h1')
+  if (heading instanceof HTMLElement) {
+    if (!heading.hasAttribute('tabindex')) {
+      heading.setAttribute('tabindex', '-1')
+    }
+    heading.focus()
+    return
+  }
+
+  const fallbackElement = Array.from(document.querySelectorAll<HTMLElement>(focusableSelector)).find(
+    (element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true',
+  )
+  fallbackElement?.focus()
+}
 
 /**
  * Renders the active view by reading all state and actions from context.
@@ -61,6 +87,10 @@ export function CurrentView() {
   } = useHostStateContext()
 
   const { handleRunAction, handleExecuteUpdate, handleRetry, handleUpdateFromHome } = useActionsContext()
+
+  useEffect(() => {
+    focusViewRoot()
+  }, [currentView])
 
   if (currentView !== 'home' && currentView !== 'selectOutdatedSkills' && !registry) return <NoRegistryState />
 
