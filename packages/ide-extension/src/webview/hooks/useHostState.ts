@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { ExtensionMessage, ScopePolicyStatePayload } from '../../shared/messages'
+import { useEffect, useReducer } from 'react'
+import type { ExtensionMessage, InitializePayload, RegistryUpdatePayload, ScopePolicyStatePayload } from '../../shared/messages'
 import type { ActionRequest, ActionState, AvailableAgent, LifecycleScope, SkillRegistry } from '../../shared/types'
 import { onMessage, postMessage } from '../lib/vscode-api'
 
@@ -27,8 +27,31 @@ export interface LastBatchContext {
   method?: 'copy' | 'symlink'
 }
 
-export function useHostState() {
-  const [actionState, setActionState] = useState<ActionState>({
+interface HostState {
+  actionState: ActionState
+  registry: SkillRegistry | null
+  status: AppStatus
+  errorMessage: string | null
+  fromCache: boolean
+  availableAgents: AvailableAgent[]
+  allAgents: AvailableAgent[]
+  isTrusted: boolean
+  policy: ScopePolicyStatePayload | null
+  batchResult: BatchResult | null
+  isRefreshingForUpdate: boolean
+}
+
+export type HostStateAction =
+  | { type: 'INITIALIZE'; payload: InitializePayload }
+  | { type: 'REGISTRY_UPDATE'; payload: RegistryUpdatePayload }
+  | { type: 'TRUST_STATE'; payload: { isTrusted: boolean } }
+  | { type: 'POLICY_UPDATE'; payload: ScopePolicyStatePayload }
+  | { type: 'ACTION_STATE'; payload: ActionState }
+  | { type: 'REFRESH_FOR_UPDATE_STARTED' }
+  | { type: 'REFRESH_FOR_UPDATE_COMPLETE' }
+
+const initialState: HostState = {
+  actionState: {
     status: 'idle',
     actionId: null,
     action: null,
@@ -38,59 +61,82 @@ export function useHostState() {
     results: [],
     logs: [],
     rejectionMessage: null,
-  })
-  const [registry, setRegistry] = useState<SkillRegistry | null>(null)
-  const [status, setStatus] = useState<AppStatus>('loading')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [fromCache, setFromCache] = useState(false)
-  const [availableAgents, setAvailableAgents] = useState<AvailableAgent[]>([])
-  const [allAgents, setAllAgents] = useState<AvailableAgent[]>([])
-  const [isTrusted, setIsTrusted] = useState(true)
-  const [policy, setPolicy] = useState<ScopePolicyStatePayload | null>(null)
-  const [batchResult, setBatchResult] = useState<BatchResult | null>(null)
-  const [isRefreshingForUpdate, setIsRefreshingForUpdate] = useState(false)
+  },
+  registry: null,
+  status: 'loading',
+  errorMessage: null,
+  fromCache: false,
+  availableAgents: [],
+  allAgents: [],
+  isTrusted: true,
+  policy: null,
+  batchResult: null,
+  isRefreshingForUpdate: false,
+}
+
+function deriveBatchResult(payload: ActionState): BatchResult | null {
+  if (payload.status !== 'completed') return null
+  const failedResults = payload.results.filter((r) => !r.success)
+  return {
+    success: failedResults.length === 0,
+    failedSkills: failedResults.length > 0 ? failedResults.map((r) => r.skillName) : undefined,
+    errorMessage: payload.errorMessage ?? undefined,
+    results: payload.results,
+    action: payload.action ?? undefined,
+  }
+}
+
+function hostStateReducer(state: HostState, action: HostStateAction): HostState {
+  switch (action.type) {
+    case 'INITIALIZE':
+      return { ...state, availableAgents: action.payload.availableAgents, allAgents: action.payload.allAgents }
+    case 'REGISTRY_UPDATE':
+      return {
+        ...state,
+        status: action.payload.status as AppStatus,
+        registry: action.payload.registry,
+        errorMessage: action.payload.errorMessage ?? null,
+        fromCache: action.payload.fromCache ?? false,
+      }
+    case 'TRUST_STATE':
+      return { ...state, isTrusted: action.payload.isTrusted }
+    case 'POLICY_UPDATE':
+      return { ...state, policy: action.payload }
+    case 'ACTION_STATE': {
+      const batchResult =
+        action.payload.status === 'running' ? null : deriveBatchResult(action.payload)
+      return { ...state, actionState: action.payload, batchResult }
+    }
+    case 'REFRESH_FOR_UPDATE_STARTED':
+      return { ...state, isRefreshingForUpdate: true }
+    case 'REFRESH_FOR_UPDATE_COMPLETE':
+      return { ...state, isRefreshingForUpdate: false }
+  }
+}
+
+export function useHostState() {
+  const [state, dispatch] = useReducer(hostStateReducer, initialState)
 
   useEffect(() => {
     const dispose = onMessage((message: ExtensionMessage) => {
       switch (message.type) {
         case 'initialize':
-          setAvailableAgents(message.payload.availableAgents)
-          setAllAgents(message.payload.allAgents)
+          dispatch({ type: 'INITIALIZE', payload: message.payload })
           break
         case 'registryUpdate':
-          setStatus(message.payload.status as AppStatus)
-          setRegistry(message.payload.registry)
-          setErrorMessage(message.payload.errorMessage || null)
-          setFromCache(message.payload.fromCache || false)
+          dispatch({ type: 'REGISTRY_UPDATE', payload: message.payload })
           break
         case 'trustState':
-          setIsTrusted(message.payload.isTrusted)
+          dispatch({ type: 'TRUST_STATE', payload: message.payload })
           break
         case 'policyState':
-          setPolicy(message.payload)
+          dispatch({ type: 'POLICY_UPDATE', payload: message.payload })
           break
         case 'refreshForUpdateComplete':
-          setIsRefreshingForUpdate(false)
+          dispatch({ type: 'REFRESH_FOR_UPDATE_COMPLETE' })
           break
         case 'actionState':
-          setActionState(message.payload)
-          if (message.payload.status === 'running') {
-            setBatchResult(null)
-            break
-          }
-
-          if (message.payload.status === 'completed') {
-            const failedResults = message.payload.results.filter((result) => !result.success)
-            const failedSkills = failedResults.map((result) => result.skillName)
-
-            setBatchResult({
-              success: failedResults.length === 0,
-              failedSkills: failedSkills.length > 0 ? failedSkills : undefined,
-              errorMessage: message.payload.errorMessage ?? undefined,
-              results: message.payload.results,
-              action: message.payload.action ?? undefined,
-            })
-          }
+          dispatch({ type: 'ACTION_STATE', payload: message.payload })
           break
       }
     })
@@ -100,18 +146,18 @@ export function useHostState() {
   }, [])
 
   return {
-    registry,
-    status,
-    errorMessage,
-    fromCache,
-    availableAgents,
-    allAgents,
-    isTrusted,
-    policy,
-    actionState,
-    isBatchProcessing: actionState.status === 'running',
-    batchResult,
-    isRefreshingForUpdate,
-    startRefreshForUpdate: () => setIsRefreshingForUpdate(true),
+    registry: state.registry,
+    status: state.status,
+    errorMessage: state.errorMessage,
+    fromCache: state.fromCache,
+    availableAgents: state.availableAgents,
+    allAgents: state.allAgents,
+    isTrusted: state.isTrusted,
+    policy: state.policy,
+    actionState: state.actionState,
+    isBatchProcessing: state.actionState.status === 'running',
+    batchResult: state.batchResult,
+    isRefreshingForUpdate: state.isRefreshingForUpdate,
+    startRefreshForUpdate: () => dispatch({ type: 'REFRESH_FOR_UPDATE_STARTED' }),
   }
 }
