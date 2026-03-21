@@ -1,17 +1,14 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import type { ActionRequest } from '../shared/types'
+import { Suspense, useEffect, useMemo } from 'react'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
 import { ErrorBoundary } from './components/error-boundary'
-import { useAppState } from './hooks/useAppState'
-import { useHostState, type LastBatchContext } from './hooks/useHostState'
+import { ActionsProvider, AppStateProvider, HostStateProvider, useActionsContext, useAppStateContext, useHostStateContext } from './contexts'
 import { useInstalledState } from './hooks/useInstalledState'
-import { postMessage } from './lib/vscode-api'
 import { renderCurrentView } from './render-current-view'
 
 function getFallbackScope(
-  policy: ReturnType<typeof useHostState>['policy'],
-  currentScope: ActionRequest['scope'],
-): ActionRequest['scope'] | null {
+  policy: ReturnType<typeof useHostStateContext>['policy'],
+  currentScope: ReturnType<typeof useAppStateContext>['activeScope'],
+): ReturnType<typeof useAppStateContext>['activeScope'] | null {
   if (!policy || policy.effectiveScopes.length === 0) return null
 
   if (currentScope === 'all') {
@@ -26,64 +23,11 @@ function getFallbackScope(
   return policy.effectiveScopes[0]
 }
 
-export function App() {
-  const [lastBatchContext, setLastBatchContext] = useState<LastBatchContext | null>(null)
-  const appState = useAppState()
-  const hostState = useHostState()
+function AppContent() {
+  const appState = useAppStateContext()
+  const hostState = useHostStateContext()
   const { installedSkills } = useInstalledState()
-
-  const handleRunAction = useCallback(
-    (method?: 'copy' | 'symlink') => {
-      const action =
-        appState.currentAction === 'install' ? 'install' : appState.currentAction === 'update' ? 'update' : 'remove'
-      const agents = action === 'update' ? [] : appState.selectedAgents
-      if (
-        (action !== 'update' && (appState.selectedSkills.length === 0 || agents.length === 0)) ||
-        (action === 'update' && appState.selectedSkills.length === 0)
-      )
-        return
-
-      const batchContext: LastBatchContext = {
-        action,
-        skills: appState.selectedSkills,
-        agents,
-        scope: appState.activeScope,
-        method: action === 'install' ? (method ?? appState.installMethod) : undefined,
-      }
-
-      setLastBatchContext(batchContext)
-      appState.goToStatus()
-      postMessage({ type: 'requestRunAction', payload: batchContext })
-    },
-    [appState],
-  )
-
-  const handleExecuteUpdate = useCallback(
-    (skills: string[]) => {
-      const batchContext: LastBatchContext = { action: 'update', skills, agents: [], scope: appState.activeScope }
-      setLastBatchContext(batchContext)
-      appState.goToStatus()
-      postMessage({ type: 'requestRunAction', payload: batchContext })
-    },
-    [appState],
-  )
-
-  const handleUpdateFromHome = useCallback(() => {
-    hostState.startRefreshForUpdate()
-    appState.goToOutdatedSkills()
-    postMessage({ type: 'requestRefreshForUpdate' })
-  }, [appState, hostState.startRefreshForUpdate])
-
-  const handleRetry = useCallback(() => {
-    if (!lastBatchContext || !hostState.batchResult?.failedSkills?.length) return
-    const retrySkills =
-      lastBatchContext.action === 'update'
-        ? hostState.batchResult.failedSkills
-        : hostState.batchResult.failedSkills.filter((skill) => lastBatchContext.skills.includes(skill))
-    if (retrySkills.length === 0) return
-
-    postMessage({ type: 'requestRunAction', payload: { ...lastBatchContext, skills: retrySkills } })
-  }, [hostState.batchResult, lastBatchContext])
+  const { handleRunAction, handleExecuteUpdate, handleUpdateFromHome, handleRetry } = useActionsContext()
 
   useEffect(() => {
     const fallbackScope = getFallbackScope(hostState.policy, appState.activeScope)
@@ -184,5 +128,17 @@ export function App() {
         )}
       </div>
     </ErrorBoundary>
+  )
+}
+
+export function App() {
+  return (
+    <HostStateProvider>
+      <AppStateProvider>
+        <ActionsProvider>
+          <AppContent />
+        </ActionsProvider>
+      </AppStateProvider>
+    </HostStateProvider>
   )
 }
