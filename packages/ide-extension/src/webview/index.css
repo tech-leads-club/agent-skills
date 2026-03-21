@@ -81,7 +81,7 @@ textarea:focus {
   width: 28px;
   height: 28px;
   border: 3px solid var(--vscode-panel-border);
-  border-top-color: var(--vscode-progressBar-background);
+  border-top-color: var(--vscode-focusBorder);
   border-radius: 50%;
   margin: 0 auto 10px;
   animation: spin 1s linear infinite;
@@ -271,7 +271,7 @@ textarea:focus {
   width: 30px;
   height: 30px;
   background-color: transparent;
-  color: var(--vscode-button-secondaryForeground);
+  color: var(--vscode-foreground);
   flex-shrink: 0;
 }
 
@@ -368,7 +368,7 @@ textarea:focus {
 .selection-menu-button,
 .selection-menu-clear {
   background-color: transparent;
-  color: var(--vscode-button-secondaryForeground);
+  color: var(--vscode-foreground);
   padding: 6px 8px;
 }
 
