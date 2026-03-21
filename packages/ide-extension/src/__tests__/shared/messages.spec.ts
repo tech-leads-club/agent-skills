@@ -10,11 +10,16 @@ describe('shared messages', () => {
       type: 'requestRunAction',
       payload: { action: 'install', skills: ['seo'], agents: ['cursor'], scope: 'local', method: 'copy' },
     }
+    const webviewError: WebviewMessage = {
+      type: 'webviewError',
+      payload: { message: 'Something exploded', stack: 'stack', componentStack: 'componentStack' },
+    }
 
     expect(mount.type).toBe('webviewDidMount')
     expect(refresh.type).toBe('requestRefresh')
     expect(refreshForUpdate.type).toBe('requestRefreshForUpdate')
     expect(action.type).toBe('requestRunAction')
+    expect(webviewError.type).toBe('webviewError')
   })
 
   it('constructs initialize and registry update messages', () => {

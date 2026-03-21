@@ -75,6 +75,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case 'requestPreviewSkill':
           await this.handlePreviewSkill(message.payload.skillName)
           return
+        case 'webviewError':
+          this.logger.error(
+            `Webview error boundary captured: ${message.payload.message}`,
+            message.payload.componentStack ?? message.payload.stack,
+          )
+          return
         default:
           this.logger.warn(`Unknown webview message type: ${(message as { type: string }).type}`)
       }

@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ActionRequest } from '../shared/types'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
+import { ErrorBoundary } from './components/error-boundary'
 import { useAppState } from './hooks/useAppState'
 import { useHostState, type LastBatchContext } from './hooks/useHostState'
 import { useInstalledState } from './hooks/useInstalledState'
@@ -126,60 +127,62 @@ export function App() {
     )
 
   return (
-    <div className="app">
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {currentViewAnnouncement}
-      </div>
-      <header className="app-header">
-        {hostState.fromCache && hostState.status === 'offline' && (
-          <div className="offline-banner" role="status">
-            Offline - showing cached data
-          </div>
+    <ErrorBoundary>
+      <div className="app">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {currentViewAnnouncement}
+        </div>
+        <header className="app-header">
+          {hostState.fromCache && hostState.status === 'offline' && (
+            <div className="offline-banner" role="status">
+              Offline - showing cached data
+            </div>
+          )}
+        </header>
+        <Suspense fallback={null}>
+          {renderCurrentView({
+            currentView: appState.currentView,
+            currentAction: appState.currentAction,
+            registry: hostState.registry,
+            installedSkills,
+            availableAgents: hostState.availableAgents,
+            allAgents: hostState.allAgents,
+            policy: hostState.policy,
+            isTrusted: hostState.isTrusted,
+            isProcessing: hostState.isBatchProcessing,
+            isRefreshingForUpdate: hostState.isRefreshingForUpdate,
+            selectedSkills: appState.selectedSkills,
+            selectedAgents: appState.selectedAgents,
+            activeScope: appState.activeScope,
+            installMethod: appState.installMethod,
+            currentStep: hostState.actionState.currentStep,
+            logTimeline: hostState.actionState.logs,
+            batchResult: hostState.batchResult,
+            rejectionMessage: hostState.actionState.rejectionMessage,
+            goToAgents: appState.goToAgents,
+            goToAgentsView: appState.goToAgentsView,
+            goToSkillsView: appState.goToSkillsView,
+            goToInstallConfig: appState.goToInstallConfig,
+            goToRemoveConfirm: appState.goToRemoveConfirm,
+            goToOutdatedSkills: handleUpdateFromHome,
+            goHome: appState.goHome,
+            toggleSkill: appState.toggleSkill,
+            toggleAgent: appState.toggleAgent,
+            selectAllSkills: appState.selectAllSkills,
+            clearSkillSelection: appState.clearSkillSelection,
+            selectAllAgents: appState.selectAllAgents,
+            clearAgentSelection: appState.clearAgentSelection,
+            setScope: appState.setScope,
+            setInstallMethod: appState.setInstallMethod,
+            handleExecuteBatch: handleRunAction,
+            handleExecuteUpdate,
+            handleRetry,
+          })}
+        </Suspense>
+        {hostState.policy?.effectiveScopes.length === 0 && (
+          <div className="footer-warning">Lifecycle actions are disabled: {hostState.policy.blockedReason}</div>
         )}
-      </header>
-      <Suspense fallback={null}>
-      {renderCurrentView({
-        currentView: appState.currentView,
-        currentAction: appState.currentAction,
-        registry: hostState.registry,
-        installedSkills,
-        availableAgents: hostState.availableAgents,
-        allAgents: hostState.allAgents,
-        policy: hostState.policy,
-        isTrusted: hostState.isTrusted,
-        isProcessing: hostState.isBatchProcessing,
-        isRefreshingForUpdate: hostState.isRefreshingForUpdate,
-        selectedSkills: appState.selectedSkills,
-        selectedAgents: appState.selectedAgents,
-        activeScope: appState.activeScope,
-        installMethod: appState.installMethod,
-        currentStep: hostState.actionState.currentStep,
-        logTimeline: hostState.actionState.logs,
-        batchResult: hostState.batchResult,
-        rejectionMessage: hostState.actionState.rejectionMessage,
-        goToAgents: appState.goToAgents,
-        goToAgentsView: appState.goToAgentsView,
-        goToSkillsView: appState.goToSkillsView,
-        goToInstallConfig: appState.goToInstallConfig,
-        goToRemoveConfirm: appState.goToRemoveConfirm,
-        goToOutdatedSkills: handleUpdateFromHome,
-        goHome: appState.goHome,
-        toggleSkill: appState.toggleSkill,
-        toggleAgent: appState.toggleAgent,
-        selectAllSkills: appState.selectAllSkills,
-        clearSkillSelection: appState.clearSkillSelection,
-        selectAllAgents: appState.selectAllAgents,
-        clearAgentSelection: appState.clearAgentSelection,
-        setScope: appState.setScope,
-        setInstallMethod: appState.setInstallMethod,
-        handleExecuteBatch: handleRunAction,
-        handleExecuteUpdate,
-        handleRetry,
-      })}
-      </Suspense>
-      {hostState.policy?.effectiveScopes.length === 0 && (
-        <div className="footer-warning">Lifecycle actions are disabled: {hostState.policy.blockedReason}</div>
-      )}
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }

@@ -359,4 +359,21 @@ describe('SidebarProvider', () => {
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
+
+  it('logs webview error boundary reports from the bridge', async () => {
+    provider.resolveWebviewView(webviewView)
+    await messageHandler({
+      type: 'webviewError',
+      payload: {
+        message: 'render explosion',
+        stack: 'stack trace',
+        componentStack: 'component stack',
+      },
+    })
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Webview error boundary captured: render explosion',
+      'component stack',
+    )
+  })
 })
