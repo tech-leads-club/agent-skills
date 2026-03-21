@@ -99,4 +99,25 @@ describe('InstalledStateStore', () => {
       lastUpdatedAt: expect.any(String),
     })
   })
+
+  it('cleans up subscribers on dispose', async () => {
+    const store = new InstalledStateStore(reconciler, skillLockService, logger)
+    const listener = jest.fn()
+    store.subscribe(listener)
+
+    store.dispose()
+    stateChangedHandler?.(installedSkills)
+    await Promise.resolve()
+
+    expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('skips refresh after dispose', async () => {
+    const store = new InstalledStateStore(reconciler, skillLockService, logger)
+
+    store.dispose()
+    await store.refresh()
+
+    expect(reconciler.reconcile).not.toHaveBeenCalled()
+  })
 })

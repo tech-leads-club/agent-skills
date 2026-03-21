@@ -1,4 +1,5 @@
 import deepEqual from 'fast-deep-equal'
+import * as vscode from 'vscode'
 import type { InstalledScopeHashes, InstalledSkillsMap } from '../shared/types'
 import type { LoggingService } from './logging-service'
 import type { SkillLockService } from './skill-lock-service'
@@ -11,13 +12,14 @@ export interface InstalledStateSnapshot {
 
 type InstalledStateListener = (snapshot: InstalledStateSnapshot) => void
 
-export class InstalledStateStore {
+export class InstalledStateStore implements vscode.Disposable {
   private snapshot: InstalledStateSnapshot = {
     installedSkills: {},
     lastUpdatedAt: null,
   }
 
   private readonly listeners = new Set<InstalledStateListener>()
+  private isDisposed = false
 
   constructor(
     private readonly reconciler: Pick<StateReconciler, 'reconcile' | 'getInstalledSkills' | 'onStateChanged'>,
@@ -25,6 +27,9 @@ export class InstalledStateStore {
     private readonly logger: Pick<LoggingService, 'debug'>,
   ) {
     this.reconciler.onStateChanged((state) => {
+      if (this.isDisposed) {
+        return
+      }
       void this.publishState(state)
     })
   }
@@ -37,6 +42,10 @@ export class InstalledStateStore {
   }
 
   public subscribe(listener: InstalledStateListener): { dispose(): void } {
+    if (this.isDisposed) {
+      return { dispose: () => {} }
+    }
+
     this.listeners.add(listener)
     return {
       dispose: () => {
@@ -46,17 +55,34 @@ export class InstalledStateStore {
   }
 
   public async load(): Promise<void> {
+    if (this.isDisposed) {
+      return
+    }
+
     await this.refresh()
   }
 
   public async refresh(): Promise<void> {
+    if (this.isDisposed) {
+      return
+    }
+
     this.logger.debug('[InstalledStateStore] Refreshing installed state')
     await this.reconciler.reconcile()
     const installedSkills = await this.reconciler.getInstalledSkills()
     await this.publishState(installedSkills)
   }
 
+  public dispose(): void {
+    this.isDisposed = true
+    this.listeners.clear()
+  }
+
   private async publishState(installedSkills: InstalledSkillsMap): Promise<void> {
+    if (this.isDisposed) {
+      return
+    }
+
     const installedHashes = await this.skillLockService.getInstalledHashesByScope()
     const nextSnapshot: InstalledStateSnapshot = {
       installedSkills: this.withInstalledHashes(installedSkills, installedHashes),

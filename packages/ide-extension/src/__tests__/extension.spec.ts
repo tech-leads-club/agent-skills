@@ -24,7 +24,7 @@ const mockRegistryService = {
 }
 
 const mockActionRunner = { dispose: jest.fn<MockableFn<void>>() }
-const mockScanner = {}
+const mockScanner = { dispose: jest.fn<MockableFn<void>>() }
 const mockReconciler = {
   reconcile: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
   updatePolicy: jest.fn<MockableFn<void>>(),
@@ -51,6 +51,7 @@ const mockInstalledStateStore = {
   refresh: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
   getSnapshot: jest.fn<MockableFn>(),
   subscribe: jest.fn<MockableFn<{ dispose: () => void }>>(() => ({ dispose: jest.fn() })),
+  dispose: jest.fn<MockableFn<void>>(),
 }
 
 // ---- ESM Module Mocks (must be before dynamic imports) ----
@@ -155,6 +156,8 @@ describe('Extension Activation', () => {
     expect(vscode.window.createOutputChannel).toHaveBeenCalledWith('Agent Skills', { log: true })
     expect(LoggingService).toHaveBeenCalledTimes(1)
     expect(context.subscriptions).toContain(mockLoggingService)
+    expect(context.subscriptions).toContain(mockScanner)
+    expect(context.subscriptions).toContain(mockInstalledStateStore)
 
     expect(SidebarProvider).toHaveBeenCalledTimes(1)
     expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalledWith('agentSkillsSidebar', expect.anything(), {

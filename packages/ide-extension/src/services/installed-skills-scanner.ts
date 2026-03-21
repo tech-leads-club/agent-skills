@@ -1,6 +1,7 @@
 import type { CorePorts } from '@tech-leads-club/core'
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
+import * as vscode from 'vscode'
 import type { AgentInstallInfo, AvailableAgent, InstalledSkillInfo, InstalledSkillsMap, Skill } from '../shared/types'
 import { getAgentPathConfigs } from './agent-paths'
 import type { LoggingService } from './logging-service'
@@ -36,7 +37,7 @@ export interface ScanOptions {
  * Scans disk to build an InstalledSkillsMap reflecting which skills are installed
  * in which scopes, with per-agent granularity.
  */
-export class InstalledSkillsScanner {
+export class InstalledSkillsScanner implements vscode.Disposable {
   private static readonly scanBatchSize = 20
 
   /**
@@ -232,6 +233,10 @@ export class InstalledSkillsScanner {
       displayName: config.displayName,
       company: config.company,
     }))
+  }
+
+  dispose(): void {
+    this.logger.debug('Disposing installed skills scanner')
   }
 
   /**

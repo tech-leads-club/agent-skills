@@ -108,4 +108,8 @@ describe('InstalledSkillsScanner', () => {
     },
     30000,
   )
+
+  it('should dispose without errors', () => {
+    expect(() => scanner.dispose()).not.toThrow()
+  })
 })

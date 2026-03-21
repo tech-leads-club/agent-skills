@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const installedStateStore = new InstalledStateStore(reconciler, skillLockService, logger)
   const actionRunner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)
 
-  context.subscriptions.push(registryService, actionRunner, reconciler)
+  context.subscriptions.push(registryService, actionRunner, reconciler, scanner, installedStateStore)
 
   const sidebarProvider = new SidebarProvider(
     context,
