@@ -861,3 +861,8 @@ textarea:focus {
 .status-log-entry--warn {
   color: var(--vscode-editorWarning-foreground);
 }
+
+.refreshing-disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
