@@ -4,7 +4,8 @@ import type { InstalledStateSnapshot, InstalledStateStore } from '../services/in
 import type { LoggingService } from '../services/logging-service'
 import type { RegistryStore, RegistryStoreSnapshot } from '../services/registry-store'
 import type { StateReconciler } from '../services/state-reconciler'
-import type { ExtensionMessage, WebviewMessage } from '../shared/messages'
+import { webviewMessageSchema } from '../shared/messages'
+import type { ExtensionMessage } from '../shared/messages'
 import type { ActionRequest, ScopePolicyEvaluation } from '../shared/types'
 import { toPolicyStateMessage, toRegistryUpdateMessage } from './sidebar-provider-messages'
 import { getSidebarWebviewHtml } from './sidebar-webview-html'
@@ -45,7 +46,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = getSidebarWebviewHtml(this.context.extensionUri, webviewView.webview)
 
     this.context.subscriptions.push(
-      webviewView.webview.onDidReceiveMessage((message: WebviewMessage) => this.handleMessage(message)),
+      webviewView.webview.onDidReceiveMessage((message: unknown) => this.handleMessage(message)),
       vscode.workspace.onDidGrantWorkspaceTrust(() => {
         void this.postMessage({ type: 'trustState', payload: { isTrusted: true } })
       }),
@@ -57,7 +58,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     void this.installedStateStore.refresh()
   }
 
-  private async handleMessage(message: WebviewMessage): Promise<void> {
+  private async handleMessage(raw: unknown): Promise<void> {
+    const result = webviewMessageSchema.safeParse(raw)
+    if (!result.success) {
+      const type = raw != null && typeof raw === 'object' && 'type' in raw ? String((raw as Record<string, unknown>).type) : '<none>'
+      this.logger.warn(`Unknown webview message type: ${type}`)
+      return
+    }
+    const message = result.data
     try {
       switch (message.type) {
         case 'webviewDidMount':

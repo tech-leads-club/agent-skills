@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type {
   ActionRequest,
   ActionState,
@@ -7,6 +9,34 @@ import type {
   InstalledSkillsMap,
   SkillRegistry,
 } from './types'
+
+export const webviewMessageSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('webviewDidMount') }),
+  z.object({ type: z.literal('requestRefresh') }),
+  z.object({ type: z.literal('requestRefreshForUpdate') }),
+  z.object({
+    type: z.literal('requestRunAction'),
+    payload: z.object({
+      action: z.enum(['install', 'remove', 'update']),
+      skills: z.array(z.string()),
+      agents: z.array(z.string()),
+      scope: z.enum(['local', 'global', 'all']),
+      method: z.enum(['copy', 'symlink']).optional(),
+    }),
+  }),
+  z.object({
+    type: z.literal('requestPreviewSkill'),
+    payload: z.object({ skillName: z.string() }),
+  }),
+  z.object({
+    type: z.literal('webviewError'),
+    payload: z.object({
+      message: z.string(),
+      stack: z.string().optional(),
+      componentStack: z.string().optional(),
+    }),
+  }),
+])
 
 export type WebviewMessage =
   | { type: 'webviewDidMount' }

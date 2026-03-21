@@ -360,6 +360,14 @@ describe('SidebarProvider', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
   })
 
+  it('discards malformed webview message payloads and does not invoke handlers', async () => {
+    provider.resolveWebviewView(webviewView)
+    await messageHandler({ type: 'requestRunAction', payload: { badField: 'oops' } } as unknown as WebviewMessage)
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown webview message type'))
+    expect(actionRunner.run).not.toHaveBeenCalled()
+  })
+
   it('logs webview error boundary reports from the bridge', async () => {
     provider.resolveWebviewView(webviewView)
     await messageHandler({
