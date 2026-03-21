@@ -23,8 +23,7 @@ const mockRegistryService = {
   dispose: jest.fn<MockableFn<void>>(),
 }
 
-const mockOperationQueue = { dispose: jest.fn<MockableFn<void>>() }
-const mockOrchestrator = { dispose: jest.fn<MockableFn<void>>() }
+const mockActionRunner = { dispose: jest.fn<MockableFn<void>>() }
 const mockScanner = {}
 const mockReconciler = {
   reconcile: jest.fn<MockableFn<Promise<void>>>().mockResolvedValue(undefined),
@@ -75,12 +74,8 @@ jest.unstable_mockModule('../services/installed-state-store', () => ({
   InstalledStateStore: jest.fn<MockableFn<typeof mockInstalledStateStore>>(() => mockInstalledStateStore),
 }))
 
-jest.unstable_mockModule('../services/operation-queue', () => ({
-  OperationQueue: jest.fn<MockableFn<typeof mockOperationQueue>>(() => mockOperationQueue),
-}))
-
-jest.unstable_mockModule('../services/installation-orchestrator', () => ({
-  InstallationOrchestrator: jest.fn<MockableFn<typeof mockOrchestrator>>(() => mockOrchestrator),
+jest.unstable_mockModule('../services/action-runner', () => ({
+  ActionRunner: jest.fn<MockableFn<typeof mockActionRunner>>(() => mockActionRunner),
 }))
 
 jest.unstable_mockModule('../services/installed-skills-scanner', () => ({
@@ -108,6 +103,7 @@ const { RegistryStore } = await import('../services/registry-store')
 const { InstalledStateStore } = await import('../services/installed-state-store')
 const { SidebarProvider } = await import('../providers/sidebar-provider')
 const { StateReconciler } = await import('../services/state-reconciler')
+const { ActionRunner } = await import('../services/action-runner')
 
 describe('Extension Activation', () => {
   let context: vscode.ExtensionContext
@@ -126,6 +122,7 @@ describe('Extension Activation', () => {
       () => mockSidebarProvider,
     )
     ;(StateReconciler as unknown as jest.Mock<() => typeof mockReconciler>).mockImplementation(() => mockReconciler)
+    ;(ActionRunner as unknown as jest.Mock<() => typeof mockActionRunner>).mockImplementation(() => mockActionRunner)
     ;(SkillLockService as unknown as jest.Mock<() => typeof mockSkillLockService>).mockImplementation(
       () => mockSkillLockService,
     )
