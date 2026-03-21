@@ -3,3 +3,5 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+packages/marketplace/src/data/skills.json
+packages/skills-catalog/skills-registry.json

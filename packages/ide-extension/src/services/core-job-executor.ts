@@ -93,7 +93,7 @@ export class CoreJobExecutor {
       skills: skillNames,
     })
 
-    const failedInstall = results.filter((r): r is typeof results[0] & { success: false } => !r.success)
+    const failedInstall = results.filter((r): r is (typeof results)[0] & { success: false } => !r.success)
     if (failedInstall.length > 0) {
       const msg = failedInstall.map((r) => `${r.agent}: ${r.error}`).join('; ')
       onProgress?.(msg, 'error')
