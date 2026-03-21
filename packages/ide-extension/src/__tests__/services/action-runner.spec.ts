@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import type { InstalledStateSnapshot } from '../../services/installed-state-store'
 import type { LoggingService } from '../../services/logging-service'
-import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../../shared/types/job'
 import type { PostInstallVerifier } from '../../services/post-install-verifier'
 import type { RegistryStore, RegistryStoreSnapshot } from '../../services/registry-store'
 import type { VerifyResult } from '../../shared/types'
+import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../../shared/types/job'
 
 const mockVscode = {
   workspace: {
@@ -246,7 +246,13 @@ describe('ActionRunner', () => {
         operation: 'remove',
         skillName: 'accessibility',
         status: 'completed',
-        metadata: { batchId: 'batch', batchSize: 1, skillNames: ['accessibility'], scope: 'global', agents: ['cursor'] },
+        metadata: {
+          batchId: 'batch',
+          batchSize: 1,
+          skillNames: ['accessibility'],
+          scope: 'global',
+          agents: ['cursor'],
+        },
       })
 
       const runner = new ActionRunner(executor, verifier, installedStateStore, registryStore, logger)

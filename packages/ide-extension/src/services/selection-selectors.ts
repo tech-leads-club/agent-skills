@@ -78,7 +78,10 @@ export function getOutdatedSkills({ registry, installedSkills, effectiveScopes }
   })
 }
 
-export function isSkillInstalledForScope(installed: InstalledSkillsMap[string], scope: LifecycleScope | 'all'): boolean {
+export function isSkillInstalledForScope(
+  installed: InstalledSkillsMap[string],
+  scope: LifecycleScope | 'all',
+): boolean {
   if (!installed) {
     return false
   }

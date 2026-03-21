@@ -38,9 +38,9 @@ const mockVscode = {
   Uri: {
     file: jest.fn<SyncMockableFn<{ fsPath: string }, [string]>>((path) => ({ fsPath: path })),
   },
-  RelativePattern: jest.fn<SyncMockableFn<{ baseUri: { fsPath: string }; pattern: string }, [{ fsPath: string }, string]>>(
-    (baseUri, pattern) => ({ baseUri, pattern }),
-  ),
+  RelativePattern: jest.fn<
+    SyncMockableFn<{ baseUri: { fsPath: string }; pattern: string }, [{ fsPath: string }, string]>
+  >((baseUri, pattern) => ({ baseUri, pattern })),
   workspace: {
     workspaceFolders: [{ uri: { fsPath: '/workspace' } }],
     createFileSystemWatcher: jest.fn<SyncMockableFn<typeof mockWatcher, [unknown]>>(() => mockWatcher),

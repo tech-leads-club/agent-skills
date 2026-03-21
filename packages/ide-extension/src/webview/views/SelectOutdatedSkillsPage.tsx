@@ -84,19 +84,9 @@ export function SelectOutdatedSkillsPage({
   }, [onUpdate, selectedSkills])
 
   return (
-    <section
-      className="select-page"
-      aria-label="Update: select outdated skills"
-      aria-busy={isRefreshing}
-    >
+    <section className="select-page" aria-label="Update: select outdated skills" aria-busy={isRefreshing}>
       <header className="select-page-header">
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onCancel}
-          aria-label="Cancel"
-          disabled={isRefreshing}
-        >
+        <button type="button" className="icon-button" onClick={onCancel} aria-label="Cancel" disabled={isRefreshing}>
           <span className="codicon codicon-arrow-left" aria-hidden="true" />
         </button>
         <div>

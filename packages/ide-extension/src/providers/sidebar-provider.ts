@@ -4,8 +4,8 @@ import type { InstalledStateSnapshot, InstalledStateStore } from '../services/in
 import type { LoggingService } from '../services/logging-service'
 import type { RegistryStore, RegistryStoreSnapshot } from '../services/registry-store'
 import type { StateReconciler } from '../services/state-reconciler'
-import { webviewMessageSchema } from '../shared/messages'
 import type { ExtensionMessage } from '../shared/messages'
+import { webviewMessageSchema } from '../shared/messages'
 import type { ActionRequest, ScopePolicyEvaluation } from '../shared/types'
 import { toPolicyStateMessage, toRegistryUpdateMessage } from './sidebar-provider-messages'
 import { getSidebarWebviewHtml } from './sidebar-webview-html'
@@ -61,7 +61,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private async handleMessage(raw: unknown): Promise<void> {
     const result = webviewMessageSchema.safeParse(raw)
     if (!result.success) {
-      const type = raw != null && typeof raw === 'object' && 'type' in raw ? String((raw as Record<string, unknown>).type) : '<none>'
+      const type =
+        raw != null && typeof raw === 'object' && 'type' in raw
+          ? String((raw as Record<string, unknown>).type)
+          : '<none>'
       this.logger.warn(`Unknown webview message type: ${type}`)
       return
     }

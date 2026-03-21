@@ -379,9 +379,6 @@ describe('SidebarProvider', () => {
       },
     })
 
-    expect(logger.error).toHaveBeenCalledWith(
-      'Webview error boundary captured: render explosion',
-      'component stack',
-    )
+    expect(logger.error).toHaveBeenCalledWith('Webview error boundary captured: render explosion', 'component stack')
   })
 })

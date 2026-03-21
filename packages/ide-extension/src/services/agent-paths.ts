@@ -43,4 +43,3 @@ export function findAgentPathConfig(ports: CorePorts, agentId: string): AgentPat
   const configs = getAgentPathConfigs(ports)
   return configs.find((config) => config.agent === agentId)
 }
-

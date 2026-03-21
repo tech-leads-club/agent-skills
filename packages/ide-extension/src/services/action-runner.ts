@@ -8,10 +8,10 @@ import type {
   LifecycleAction,
   LifecycleScope,
 } from '../shared/types'
+import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../shared/types/job'
 import { ActionMutex } from './action-mutex'
 import type { InstalledStateStore } from './installed-state-store'
 import type { LoggingService } from './logging-service'
-import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../shared/types/job'
 import type { PostInstallVerifier } from './post-install-verifier'
 import type { RegistryStore } from './registry-store'
 

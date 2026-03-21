@@ -208,9 +208,7 @@ export function StatusPage({
             disabled={isProcessing}
             title={isProcessing ? 'Wait for the operation to complete' : undefined}
           >
-            {isProcessing && (
-              <span className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
-            )}
+            {isProcessing && <span className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />}
             Back to Dashboard
           </button>
         </div>

@@ -1,17 +1,21 @@
+import { lazy, useEffect } from 'react'
 import {
   getCategoryOptions,
   getOutdatedSkills,
   getSelectableSkills,
   isSkillInstalledForScope,
 } from '../services/selection-selectors'
-import { postMessage } from './lib/vscode-api'
 import { NoRegistryState } from './components/AppStatusViews'
-import { lazy, useEffect } from 'react'
+import { useActionsContext, useAppStateContext, useHostStateContext } from './contexts'
+import { postMessage } from './lib/vscode-api'
 import { HomePage } from './views/HomePage'
-import { useAppStateContext, useHostStateContext, useActionsContext } from './contexts'
 
-const InstallConfigPage = lazy(() => import('./views/InstallConfigPage').then((m) => ({ default: m.InstallConfigPage })))
-const RemoveConfirmPage = lazy(() => import('./views/RemoveConfirmPage').then((m) => ({ default: m.RemoveConfirmPage })))
+const InstallConfigPage = lazy(() =>
+  import('./views/InstallConfigPage').then((m) => ({ default: m.InstallConfigPage })),
+)
+const RemoveConfirmPage = lazy(() =>
+  import('./views/RemoveConfirmPage').then((m) => ({ default: m.RemoveConfirmPage })),
+)
 const SelectAgentsPage = lazy(() => import('./views/SelectAgentsPage').then((m) => ({ default: m.SelectAgentsPage })))
 const SelectOutdatedSkillsPage = lazy(() =>
   import('./views/SelectOutdatedSkillsPage').then((m) => ({ default: m.SelectOutdatedSkillsPage })),

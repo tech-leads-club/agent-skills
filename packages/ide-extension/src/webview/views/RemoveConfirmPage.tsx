@@ -32,8 +32,7 @@ export function RemoveConfirmPage({
   onBack,
   onConfirm,
 }: RemoveConfirmPageProps) {
-  const scopeLabel =
-    scope === 'local' ? 'Local (project)' : scope === 'global' ? 'Global (user)' : 'Local and global'
+  const scopeLabel = scope === 'local' ? 'Local (project)' : scope === 'global' ? 'Global (user)' : 'Local and global'
 
   return (
     <section className="select-page" aria-label="Remove confirmation">

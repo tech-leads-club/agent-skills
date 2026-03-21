@@ -1,18 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { Suspense } from 'react'
-import type { ReactNode } from 'react'
 import jestAxe from 'jest-axe'
+import type { ReactNode } from 'react'
+import { Suspense } from 'react'
+import type { ActionState } from '../../shared/types'
+import type { AppStateContextValue, HostStateContextValue } from '../../webview/contexts'
 import {
+  ActionsProvider,
   AppStateContext,
   HostStateContext,
+  useActionsContext,
   useAppStateContext,
   useHostStateContext,
-  useActionsContext,
 } from '../../webview/contexts'
-import type { AppStateContextValue, HostStateContextValue } from '../../webview/contexts'
-import { ActionsProvider } from '../../webview/contexts'
 import { CurrentView } from '../../webview/render-current-view'
-import type { ActionState } from '../../shared/types'
 
 const { axe } = jestAxe
 

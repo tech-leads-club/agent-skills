@@ -4,12 +4,7 @@
  */
 export function LoadingSkeleton() {
   return (
-    <div
-      className="loading-skeleton"
-      role="status"
-      aria-busy="true"
-      aria-label="Loading view"
-    >
+    <div className="loading-skeleton" role="status" aria-busy="true" aria-label="Loading view">
       <div className="loading-skeleton__header loading-skeleton__pulse" />
       <div className="loading-skeleton__sub loading-skeleton__pulse" />
       <div className="loading-skeleton__rows" aria-hidden="true">

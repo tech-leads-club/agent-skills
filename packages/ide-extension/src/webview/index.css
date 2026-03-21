@@ -18,7 +18,10 @@ body {
   outline-offset: 2px;
 }
 
-a:focus, input:focus, select:focus, textarea:focus {
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
 }
 
@@ -555,7 +558,10 @@ a:focus, input:focus, select:focus, textarea:focus {
   color: var(--vscode-descriptionForeground);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out;
+  transition:
+    opacity 120ms ease-out,
+    color 120ms ease-out,
+    background-color 120ms ease-out;
 }
 
 .skill-select-card:hover .skill-select-card-preview-btn,

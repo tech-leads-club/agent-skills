@@ -131,8 +131,7 @@ export function ScopeSelector({
   const visibleScopes: Array<ActionRequest['scope']> =
     action === 'uninstall' ? [...policyScopeOptions, 'all'] : policyScopeOptions
 
-  const selectedScope =
-    visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
+  const selectedScope = visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
   const isDisabled = disabled
   const selectedIndex = Math.max(visibleScopes.indexOf(selectedScope), 0)
 

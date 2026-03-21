@@ -1,5 +1,10 @@
 import { useEffect, useReducer } from 'react'
-import type { ExtensionMessage, InitializePayload, RegistryUpdatePayload, ScopePolicyStatePayload } from '../../shared/messages'
+import type {
+  ExtensionMessage,
+  InitializePayload,
+  RegistryUpdatePayload,
+  ScopePolicyStatePayload,
+} from '../../shared/messages'
 import type { ActionRequest, ActionState, AvailableAgent, LifecycleScope, SkillRegistry } from '../../shared/types'
 import { onMessage, postMessage } from '../lib/vscode-api'
 
@@ -103,8 +108,7 @@ function hostStateReducer(state: HostState, action: HostStateAction): HostState 
     case 'POLICY_UPDATE':
       return { ...state, policy: action.payload }
     case 'ACTION_STATE': {
-      const batchResult =
-        action.payload.status === 'running' ? null : deriveBatchResult(action.payload)
+      const batchResult = action.payload.status === 'running' ? null : deriveBatchResult(action.payload)
       return { ...state, actionState: action.payload, batchResult }
     }
     case 'REFRESH_FOR_UPDATE_STARTED':
