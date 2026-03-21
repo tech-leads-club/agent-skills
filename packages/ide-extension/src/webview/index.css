@@ -542,7 +542,7 @@ textarea:focus {
 .skill-select-card-tag--installed,
 .agent-select-card-tag--installed {
   background-color: var(--vscode-testing-iconPassed, var(--vscode-terminal-ansiGreen));
-  color: var(--vscode-editorWidget-background, #fff);
+  color: var(--vscode-editorWidget-background);
 }
 
 .skill-select-card-preview-btn {
@@ -820,15 +820,15 @@ textarea:focus {
 }
 
 .status-icon--success {
-  color: var(--vscode-terminal-ansiGreen, #89d185);
+  color: var(--vscode-terminal-ansiGreen);
 }
 
 .status-icon--error {
-  color: var(--vscode-errorForeground, #f48771);
+  color: var(--vscode-errorForeground);
 }
 
 .status-icon--warn {
-  color: var(--vscode-editorWarning-foreground, #cca700);
+  color: var(--vscode-editorWarning-foreground);
 }
 
 .status-icon--info {
@@ -855,9 +855,9 @@ textarea:focus {
 }
 
 .status-log-entry--error {
-  color: var(--vscode-errorForeground, #f48771);
+  color: var(--vscode-errorForeground);
 }
 
 .status-log-entry--warn {
-  color: var(--vscode-editorWarning-foreground, #cca700);
+  color: var(--vscode-editorWarning-foreground);
 }

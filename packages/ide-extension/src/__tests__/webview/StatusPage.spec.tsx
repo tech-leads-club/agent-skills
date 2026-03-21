@@ -5,6 +5,9 @@ import { StatusPage } from '../../webview/views/StatusPage'
 
 const { axe } = jestAxe
 
+// Mock scrollIntoView for tests
+window.HTMLElement.prototype.scrollIntoView = jest.fn()
+
 const emptyLogTimeline: Array<{
   operation: 'install' | 'remove' | 'update'
   skillName: string

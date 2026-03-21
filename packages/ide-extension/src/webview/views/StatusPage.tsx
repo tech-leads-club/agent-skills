@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { LifecycleScope } from '../../shared/types'
 
 /**
@@ -95,6 +96,22 @@ export function StatusPage({
   onRetry,
   onDone,
 }: StatusPageProps) {
+  const timelineEndRef = useRef<HTMLDivElement>(null)
+  const timelineContainerRef = useRef<HTMLDivElement>(null)
+
+  const isNearBottom = () => {
+    const container = timelineContainerRef.current
+    if (!container) return true
+    const threshold = 50
+    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+  }
+
+  useEffect(() => {
+    if (isNearBottom()) {
+      timelineEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [logTimeline])
+
   const hasFailures =
     !isProcessing &&
     batchResult &&
@@ -122,7 +139,7 @@ export function StatusPage({
         )}
 
         {isProcessing && logTimeline.length > 0 && (
-          <div className="status-log-timeline" role="log" aria-live="polite">
+          <div className="status-log-timeline" ref={timelineContainerRef} role="log" aria-live="polite">
             <ul className="status-log-timeline-list">
               {logTimeline.map((entry, idx) => (
                 <li
@@ -145,6 +162,7 @@ export function StatusPage({
                 </li>
               ))}
             </ul>
+            <div ref={timelineEndRef} />
           </div>
         )}
 
