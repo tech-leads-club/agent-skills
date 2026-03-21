@@ -1,9 +1,8 @@
 import { Suspense, useEffect, useMemo } from 'react'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
 import { ErrorBoundary } from './components/error-boundary'
-import { ActionsProvider, AppStateProvider, HostStateProvider, useActionsContext, useAppStateContext, useHostStateContext } from './contexts'
-import { useInstalledState } from './hooks/useInstalledState'
-import { renderCurrentView } from './render-current-view'
+import { ActionsProvider, AppStateProvider, HostStateProvider, useAppStateContext, useHostStateContext } from './contexts'
+import { CurrentView } from './render-current-view'
 
 function getFallbackScope(
   policy: ReturnType<typeof useHostStateContext>['policy'],
@@ -26,8 +25,6 @@ function getFallbackScope(
 function AppContent() {
   const appState = useAppStateContext()
   const hostState = useHostStateContext()
-  const { installedSkills } = useInstalledState()
-  const { handleRunAction, handleExecuteUpdate, handleUpdateFromHome, handleRetry } = useActionsContext()
 
   useEffect(() => {
     const fallbackScope = getFallbackScope(hostState.policy, appState.activeScope)
@@ -84,44 +81,7 @@ function AppContent() {
           )}
         </header>
         <Suspense fallback={null}>
-          {renderCurrentView({
-            currentView: appState.currentView,
-            currentAction: appState.currentAction,
-            registry: hostState.registry,
-            installedSkills,
-            availableAgents: hostState.availableAgents,
-            allAgents: hostState.allAgents,
-            policy: hostState.policy,
-            isTrusted: hostState.isTrusted,
-            isProcessing: hostState.isBatchProcessing,
-            isRefreshingForUpdate: hostState.isRefreshingForUpdate,
-            selectedSkills: appState.selectedSkills,
-            selectedAgents: appState.selectedAgents,
-            activeScope: appState.activeScope,
-            installMethod: appState.installMethod,
-            currentStep: hostState.actionState.currentStep,
-            logTimeline: hostState.actionState.logs,
-            batchResult: hostState.batchResult,
-            rejectionMessage: hostState.actionState.rejectionMessage,
-            goToAgents: appState.goToAgents,
-            goToAgentsView: appState.goToAgentsView,
-            goToSkillsView: appState.goToSkillsView,
-            goToInstallConfig: appState.goToInstallConfig,
-            goToRemoveConfirm: appState.goToRemoveConfirm,
-            goToOutdatedSkills: handleUpdateFromHome,
-            goHome: appState.goHome,
-            toggleSkill: appState.toggleSkill,
-            toggleAgent: appState.toggleAgent,
-            selectAllSkills: appState.selectAllSkills,
-            clearSkillSelection: appState.clearSkillSelection,
-            selectAllAgents: appState.selectAllAgents,
-            clearAgentSelection: appState.clearAgentSelection,
-            setScope: appState.setScope,
-            setInstallMethod: appState.setInstallMethod,
-            handleExecuteBatch: handleRunAction,
-            handleExecuteUpdate,
-            handleRetry,
-          })}
+          <CurrentView />
         </Suspense>
         {hostState.policy?.effectiveScopes.length === 0 && (
           <div className="footer-warning">Lifecycle actions are disabled: {hostState.policy.blockedReason}</div>

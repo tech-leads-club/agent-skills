@@ -4,13 +4,11 @@ import {
   getSelectableSkills,
   isSkillInstalledForScope,
 } from '../services/selection-selectors'
-import type { ScopePolicyStatePayload } from '../shared/messages'
 import { postMessage } from './lib/vscode-api'
-import type { ActionRequest, FlowAction, InstallMethod, InstalledSkillsMap, LifecycleScope, SkillRegistry } from '../shared/types'
 import { NoRegistryState } from './components/AppStatusViews'
-import type { BatchResult } from './hooks/useHostState'
 import { lazy } from 'react'
 import { HomePage } from './views/HomePage'
+import { useAppStateContext, useHostStateContext, useActionsContext } from './contexts'
 
 const InstallConfigPage = lazy(() => import('./views/InstallConfigPage').then((m) => ({ default: m.InstallConfigPage })))
 const RemoveConfirmPage = lazy(() => import('./views/RemoveConfirmPage').then((m) => ({ default: m.RemoveConfirmPage })))
@@ -21,84 +19,23 @@ const SelectOutdatedSkillsPage = lazy(() =>
 const SelectSkillsPage = lazy(() => import('./views/SelectSkillsPage').then((m) => ({ default: m.SelectSkillsPage })))
 const StatusPage = lazy(() => import('./views/StatusPage').then((m) => ({ default: m.StatusPage })))
 
-interface RenderCurrentViewProps {
-  currentView:
-    | 'home'
-    | 'selectSkills'
-    | 'selectAgents'
-    | 'installConfig'
-    | 'removeConfirm'
-    | 'status'
-    | 'selectOutdatedSkills'
-  currentAction: FlowAction | null
-  registry: SkillRegistry | null
-  installedSkills: InstalledSkillsMap
-  availableAgents: Array<{ agent: string; displayName: string; company: string }>
-  allAgents: Array<{ agent: string; displayName: string; company: string }>
-  policy: ScopePolicyStatePayload | null
-  isTrusted: boolean
-  isProcessing: boolean
-  isRefreshingForUpdate: boolean
-  selectedSkills: string[]
-  selectedAgents: string[]
-  activeScope: ActionRequest['scope']
-  installMethod: InstallMethod
-  currentStep: string | null
-  logTimeline: Array<{
-    operation: 'install' | 'remove' | 'update'
-    skillName: string
-    scope?: LifecycleScope
-    message: string
-    severity: 'info' | 'warn' | 'error'
-  }>
-  batchResult: BatchResult | null
-  rejectionMessage: string | null
-  goToAgents: (action: 'install' | 'uninstall') => void
-  goToAgentsView: () => void
-  goToSkillsView: () => void
-  goToInstallConfig: () => void
-  goToRemoveConfirm: () => void
-  goToOutdatedSkills: () => void
-  goHome: () => void
-  toggleSkill: (skillName: string) => void
-  toggleAgent: (agentId: string) => void
-  selectAllSkills: (skills: string[]) => void
-  clearSkillSelection: () => void
-  selectAllAgents: (agents: string[]) => void
-  clearAgentSelection: () => void
-  setScope: (scope: ActionRequest['scope']) => void
-  setInstallMethod: (method: InstallMethod) => void
-  handleExecuteBatch: (method?: 'copy' | 'symlink') => void
-  handleExecuteUpdate: (skills: string[]) => void
-  handleRetry: () => void
-}
-
-export function renderCurrentView(props: RenderCurrentViewProps) {
+/**
+ * Renders the active view by reading all state and actions from context.
+ * Receives no external props — routing is driven by AppStateContext.
+ */
+export function CurrentView() {
   const {
     currentView,
     currentAction,
-    registry,
-    installedSkills,
-    availableAgents,
-    allAgents,
-    policy,
-    isTrusted,
-    isProcessing,
-    isRefreshingForUpdate,
     selectedSkills,
     selectedAgents,
     activeScope,
     installMethod,
-    currentStep,
-    logTimeline,
-    batchResult,
-    rejectionMessage,
     goToAgents,
     goToAgentsView,
     goToSkillsView,
     goToInstallConfig,
     goToRemoveConfirm,
-    goToOutdatedSkills,
     goHome,
     toggleSkill,
     toggleAgent,
@@ -108,23 +45,37 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
     clearAgentSelection,
     setScope,
     setInstallMethod,
-    handleExecuteBatch,
-    handleExecuteUpdate,
-    handleRetry,
-  } = props
+  } = useAppStateContext()
+
+  const {
+    registry,
+    installedSkills,
+    availableAgents,
+    allAgents,
+    policy,
+    isTrusted,
+    isBatchProcessing,
+    isRefreshingForUpdate,
+    actionState,
+    batchResult,
+  } = useHostStateContext()
+
+  const { handleRunAction, handleExecuteUpdate, handleRetry, handleUpdateFromHome } = useActionsContext()
 
   if (currentView !== 'home' && currentView !== 'selectOutdatedSkills' && !registry) return <NoRegistryState />
+
   if (currentView === 'home')
     return (
       <HomePage
         policy={policy}
         isTrusted={isTrusted}
-        isProcessing={isProcessing}
+        isProcessing={isBatchProcessing}
         onInstall={() => goToAgents('install')}
         onUninstall={() => goToAgents('uninstall')}
-        onUpdate={goToOutdatedSkills}
+        onUpdate={handleUpdateFromHome}
       />
     )
+
   if (currentView === 'selectOutdatedSkills')
     return (
       <SelectOutdatedSkillsPage
@@ -142,20 +93,22 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         onUpdate={handleExecuteUpdate}
       />
     )
+
   if (!currentAction || currentAction === 'update' || !registry)
     return currentView === 'status' ? (
       <StatusPage
-        isProcessing={isProcessing}
-        currentStep={currentStep}
-        logTimeline={logTimeline}
+        isProcessing={isBatchProcessing}
+        currentStep={actionState.currentStep}
+        logTimeline={actionState.logs}
         batchResult={batchResult}
-        rejectionMessage={rejectionMessage}
+        rejectionMessage={actionState.rejectionMessage}
         onRetry={handleRetry}
         onDone={goHome}
       />
     ) : (
       <NoRegistryState />
     )
+
   if (currentView === 'selectAgents')
     return (
       <SelectAgentsPage
@@ -165,7 +118,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         selectedSkills={selectedSkills}
         selectedAgents={selectedAgents}
         scope={activeScope}
-        isProcessing={isProcessing}
+        isProcessing={isBatchProcessing}
         onToggleAgent={toggleAgent}
         onSelectAll={selectAllAgents}
         onClear={clearAgentSelection}
@@ -174,6 +127,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         onProceed={goToSkillsView}
       />
     )
+
   if (currentView === 'selectSkills')
     return (
       <SelectSkillsPage
@@ -196,6 +150,7 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         onNext={currentAction === 'install' ? goToInstallConfig : goToRemoveConfirm}
       />
     )
+
   if (currentView === 'installConfig' && currentAction === 'install')
     return (
       <InstallConfigPage
@@ -204,33 +159,35 @@ export function renderCurrentView(props: RenderCurrentViewProps) {
         scope={activeScope}
         method={installMethod}
         effectiveScopes={policy?.effectiveScopes ?? ['global']}
-        isProcessing={isProcessing}
+        isProcessing={isBatchProcessing}
         onMethodChange={setInstallMethod}
         onScopeChange={setScope}
         onCancel={goHome}
         onBack={goToSkillsView}
-        onConfirm={() => handleExecuteBatch(installMethod)}
+        onConfirm={() => handleRunAction(installMethod)}
       />
     )
+
   if (currentView === 'removeConfirm' && currentAction === 'uninstall')
     return (
       <RemoveConfirmPage
         selectedSkills={selectedSkills}
         selectedAgents={selectedAgents}
         scope={activeScope}
-        isProcessing={isProcessing}
+        isProcessing={isBatchProcessing}
         onBack={goToSkillsView}
-        onConfirm={() => handleExecuteBatch()}
+        onConfirm={() => handleRunAction()}
       />
     )
+
   if (currentView === 'status')
     return (
       <StatusPage
-        isProcessing={isProcessing}
-        currentStep={currentStep}
-        logTimeline={logTimeline}
+        isProcessing={isBatchProcessing}
+        currentStep={actionState.currentStep}
+        logTimeline={actionState.logs}
         batchResult={batchResult}
-        rejectionMessage={rejectionMessage}
+        rejectionMessage={actionState.rejectionMessage}
         onRetry={handleRetry}
         onDone={goHome}
       />

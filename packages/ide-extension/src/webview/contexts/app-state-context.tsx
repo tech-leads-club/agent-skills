@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react'
-import type { useAppState } from '../hooks/useAppState'
+import { createContext, useContext, type ReactNode } from 'react'
+import { useAppState } from '../hooks/useAppState'
 
 export type AppStateContextValue = ReturnType<typeof useAppState>
 
@@ -13,4 +13,9 @@ export function useAppStateContext(): AppStateContextValue {
   const ctx = useContext(AppStateContext)
   if (!ctx) throw new Error('useAppStateContext must be used inside AppStateContext.Provider')
   return ctx
+}
+
+export function AppStateProvider({ children }: { children: ReactNode }) {
+  const appState = useAppState()
+  return <AppStateContext.Provider value={appState}>{children}</AppStateContext.Provider>
 }
