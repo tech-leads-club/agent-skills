@@ -37,6 +37,8 @@ export interface ScanOptions {
  * in which scopes, with per-agent granularity.
  */
 export class InstalledSkillsScanner {
+  private static readonly scanBatchSize = 20
+
   /**
    * Creates a scanner instance.
    *
@@ -76,12 +78,18 @@ export class InstalledSkillsScanner {
       })`,
     )
 
-    const map: InstalledSkillsMap = {}
-
-    for (const skill of registrySkills) {
-      const info = await this.scanSkill(skill.name, workspaceRoot, options)
-      map[skill.name] = info.agents.length > 0 ? info : null
+    const entries: Array<[string, InstalledSkillInfo | null]> = []
+    for (let start = 0; start < registrySkills.length; start += InstalledSkillsScanner.scanBatchSize) {
+      const batch = registrySkills.slice(start, start + InstalledSkillsScanner.scanBatchSize)
+      const batchEntries = await Promise.all(
+        batch.map(async (skill): Promise<[string, InstalledSkillInfo | null]> => {
+          const info = await this.scanSkill(skill.name, workspaceRoot, options)
+          return [skill.name, info.agents.length > 0 ? info : null]
+        }),
+      )
+      entries.push(...batchEntries)
     }
+    const map: InstalledSkillsMap = Object.fromEntries(entries)
 
     const installedCount = Object.values(map).filter((v) => v !== null).length
     this.logger.debug(`Scan complete: ${installedCount} skills installed`)

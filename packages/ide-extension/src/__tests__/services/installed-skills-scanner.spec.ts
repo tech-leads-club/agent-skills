@@ -73,4 +73,39 @@ describe('InstalledSkillsScanner', () => {
 
     expect(result['skill']).toBeNull()
   })
+
+  it(
+    'should scan 100+ skills faster than serial baseline while preserving results',
+    async () => {
+      const skillCount = 120
+      const registrySkills = Array.from({ length: skillCount }, (_, index) => ({
+        name: `skill-${index}`,
+        category: 'cat',
+        contentHash: '123',
+        files: [],
+        path: '',
+        description: '',
+      }))
+
+      mockAccess.mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1))
+      })
+
+      const parallelStart = Date.now()
+      const parallelResult = await scanner.scan(registrySkills, '/workspace')
+      const parallelDurationMs = Date.now() - parallelStart
+
+      const serialResult: Record<string, (typeof parallelResult)[string]> = {}
+      const serialStart = Date.now()
+      for (const skill of registrySkills) {
+        const singleSkillResult = await scanner.scan([skill], '/workspace')
+        serialResult[skill.name] = singleSkillResult[skill.name]
+      }
+      const serialDurationMs = Date.now() - serialStart
+
+      expect(parallelResult).toEqual(serialResult)
+      expect(parallelDurationMs).toBeLessThan(serialDurationMs * 0.5)
+    },
+    30000,
+  )
 })
