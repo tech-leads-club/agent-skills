@@ -196,7 +196,6 @@ textarea:focus {
 }
 
 .home-action-button {
-  --home-action-accent-color: var(--vscode-foreground);
   width: 100%;
   text-align: left;
   border: 1px solid var(--vscode-panel-border);
@@ -220,21 +219,10 @@ textarea:focus {
   cursor: default;
 }
 
-.home-action-button--install {
-  --home-action-accent-color: var(--vscode-testing-iconPassed, var(--vscode-foreground));
-}
-
-.home-action-button--uninstall {
-  --home-action-accent-color: var(--vscode-testing-iconFailed, var(--vscode-editorError-foreground, var(--vscode-foreground)));
-}
-
-.home-action-button--update {
-  --home-action-accent-color: var(--vscode-editorInfo-foreground, var(--vscode-textLink-foreground, var(--vscode-foreground)));
-}
 
 .home-action-icon {
   font-size: 16px;
-  color: var(--home-action-accent-color);
+  color: var(--vscode-foreground);
 }
 
 .home-action-copy {
@@ -251,7 +239,7 @@ textarea:focus {
 
 .home-action-chevron {
   font-size: 14px;
-  color: var(--home-action-accent-color);
+  color: var(--vscode-foreground);
 }
 
 .select-page {
@@ -532,8 +520,8 @@ textarea:focus {
 
 .skill-select-card-tag--installed,
 .agent-select-card-tag--installed {
-  background-color: var(--vscode-testing-iconPassed, var(--vscode-badge-background));
-  color: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
 }
 
 .skill-select-card-preview-btn {
@@ -656,10 +644,9 @@ textarea:focus {
 }
 
 .primary-footer-button {
-  --primary-footer-button-foreground: var(--vscode-button-foreground);
   width: 100%;
   background-color: var(--vscode-button-background);
-  color: var(--primary-footer-button-foreground);
+  color: var(--vscode-button-foreground);
   padding: 9px 12px;
   display: flex;
   align-items: center;
@@ -676,13 +663,6 @@ textarea:focus {
   background-color: var(--vscode-button-hoverBackground, var(--vscode-list-hoverBackground));
 }
 
-.primary-footer-button--install {
-  --primary-footer-button-foreground: var(--vscode-testing-iconPassed, var(--vscode-button-foreground));
-}
-
-.primary-footer-button--uninstall {
-  --primary-footer-button-foreground: var(--vscode-testing-iconFailed, var(--vscode-editorError-foreground, var(--vscode-button-foreground)));
-}
 
 .primary-footer-button:disabled {
   opacity: 0.55;
