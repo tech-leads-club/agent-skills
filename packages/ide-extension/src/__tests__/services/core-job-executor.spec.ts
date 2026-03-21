@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import type { CorePorts } from '@tech-leads-club/core'
-import type { JobResult, QueuedJob } from '../../services/operation-queue'
+import type { JobResult, QueuedJob } from '../../shared/types/job'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockCore: any = {

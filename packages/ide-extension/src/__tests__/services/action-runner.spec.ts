@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import type { InstalledStateSnapshot } from '../../services/installed-state-store'
 import type { LoggingService } from '../../services/logging-service'
-import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../../services/operation-queue'
+import type { JobExecutor, JobProgressCallback, JobResult, QueuedJob } from '../../shared/types/job'
 import type { PostInstallVerifier } from '../../services/post-install-verifier'
 import type { RegistryStore, RegistryStoreSnapshot } from '../../services/registry-store'
 import type { VerifyResult } from '../../shared/types'

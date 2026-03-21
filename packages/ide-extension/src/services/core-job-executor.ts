@@ -7,7 +7,7 @@ import {
   installSkills,
   removeSkill,
 } from '@tech-leads-club/core'
-import type { JobProgressCallback, JobResult, QueuedJob } from './operation-queue'
+import type { JobProgressCallback, JobResult, QueuedJob } from '../shared/types/job'
 
 /**
  * Executes queued jobs by calling core services directly (no CLI subprocess).
