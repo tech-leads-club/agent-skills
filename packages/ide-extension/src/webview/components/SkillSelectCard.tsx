@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import type { Skill } from '../../shared/types'
 
 /**
@@ -18,6 +20,31 @@ export interface SkillSelectCardProps {
   onPreview?: () => void
 }
 
+function skillsEqual(a: Skill, b: Skill): boolean {
+  if (a.name !== b.name) return false
+  if (a.description !== b.description) return false
+  if (a.category !== b.category) return false
+  if (a.path !== b.path) return false
+  if (a.contentHash !== b.contentHash) return false
+  if (a.author !== b.author) return false
+  if (a.version !== b.version) return false
+  if (a.files.length !== b.files.length) return false
+  for (let i = 0; i < a.files.length; i++) {
+    if (a.files[i] !== b.files[i]) return false
+  }
+  return true
+}
+
+function areSkillSelectCardPropsEqual(prev: SkillSelectCardProps, next: SkillSelectCardProps): boolean {
+  if (!skillsEqual(prev.skill, next.skill)) return false
+  if (prev.categoryName !== next.categoryName) return false
+  if (prev.isSelected !== next.isSelected) return false
+  if (prev.isInstalled !== next.isInstalled) return false
+  if (prev.onToggle !== next.onToggle) return false
+  if (prev.onPreview !== next.onPreview) return false
+  return true
+}
+
 /**
  * Card row used on Select Skills page.
  *
@@ -36,7 +63,7 @@ export interface SkillSelectCardProps {
  * />
  * ```
  */
-export function SkillSelectCard({
+export const SkillSelectCard = memo(function SkillSelectCard({
   skill,
   categoryName,
   isSelected,
@@ -92,4 +119,4 @@ export function SkillSelectCard({
       </div>
     </label>
   )
-}
+}, areSkillSelectCardPropsEqual)

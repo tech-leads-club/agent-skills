@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import type { AvailableAgent } from '../../shared/types'
 
 /**
@@ -12,6 +14,18 @@ export interface AgentSelectCardProps {
   onToggle: () => void
   /** Whether the agent has skills installed (shows "Installed" tag). */
   isInstalled?: boolean
+}
+
+function agentsEqual(a: AvailableAgent, b: AvailableAgent): boolean {
+  return a.agent === b.agent && a.displayName === b.displayName && a.company === b.company
+}
+
+function areAgentSelectCardPropsEqual(prev: AgentSelectCardProps, next: AgentSelectCardProps): boolean {
+  if (!agentsEqual(prev.agent, next.agent)) return false
+  if (prev.isSelected !== next.isSelected) return false
+  if (prev.isInstalled !== next.isInstalled) return false
+  if (prev.onToggle !== next.onToggle) return false
+  return true
 }
 
 /**
@@ -31,7 +45,12 @@ export interface AgentSelectCardProps {
  * />
  * ```
  */
-export function AgentSelectCard({ agent, isSelected, onToggle, isInstalled = false }: AgentSelectCardProps) {
+export const AgentSelectCard = memo(function AgentSelectCard({
+  agent,
+  isSelected,
+  onToggle,
+  isInstalled = false,
+}: AgentSelectCardProps) {
   const inputId = `agent-select-${agent.agent}`
   const selectLabel = `Select ${agent.displayName}`
 
@@ -53,4 +72,4 @@ export function AgentSelectCard({ agent, isSelected, onToggle, isInstalled = fal
       </div>
     </label>
   )
-}
+}, areAgentSelectCardPropsEqual)
