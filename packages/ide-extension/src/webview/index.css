@@ -221,24 +221,15 @@ textarea:focus {
 }
 
 .home-action-button--install {
-  --home-action-accent-color: var(
-    --vscode-testing-iconPassed,
-    var(--vscode-charts-green, var(--vscode-terminal-ansiGreen, var(--vscode-foreground)))
-  );
+  --home-action-accent-color: var(--vscode-testing-iconPassed, var(--vscode-foreground));
 }
 
 .home-action-button--uninstall {
-  --home-action-accent-color: var(
-    --vscode-testing-iconFailed,
-    var(--vscode-charts-red, var(--vscode-errorForeground, var(--vscode-foreground)))
-  );
+  --home-action-accent-color: var(--vscode-testing-iconFailed, var(--vscode-editorError-foreground, var(--vscode-foreground)));
 }
 
 .home-action-button--update {
-  --home-action-accent-color: var(
-    --vscode-charts-blue,
-    var(--vscode-textLink-foreground, var(--vscode-focusBorder, var(--vscode-foreground)))
-  );
+  --home-action-accent-color: var(--vscode-editorInfo-foreground, var(--vscode-textLink-foreground, var(--vscode-foreground)));
 }
 
 .home-action-icon {
@@ -541,8 +532,8 @@ textarea:focus {
 
 .skill-select-card-tag--installed,
 .agent-select-card-tag--installed {
-  background-color: var(--vscode-testing-iconPassed, var(--vscode-terminal-ansiGreen));
-  color: var(--vscode-editorWidget-background);
+  background-color: var(--vscode-testing-iconPassed, var(--vscode-badge-background));
+  color: var(--vscode-sideBar-background, var(--vscode-editor-background));
 }
 
 .skill-select-card-preview-btn {
@@ -686,17 +677,11 @@ textarea:focus {
 }
 
 .primary-footer-button--install {
-  --primary-footer-button-foreground: var(
-    --vscode-testing-iconPassed,
-    var(--vscode-charts-green, var(--vscode-terminal-ansiGreen, var(--vscode-button-foreground)))
-  );
+  --primary-footer-button-foreground: var(--vscode-testing-iconPassed, var(--vscode-button-foreground));
 }
 
 .primary-footer-button--uninstall {
-  --primary-footer-button-foreground: var(
-    --vscode-testing-iconFailed,
-    var(--vscode-charts-red, var(--vscode-errorForeground, var(--vscode-button-foreground)))
-  );
+  --primary-footer-button-foreground: var(--vscode-testing-iconFailed, var(--vscode-editorError-foreground, var(--vscode-button-foreground)));
 }
 
 .primary-footer-button:disabled {
@@ -820,11 +805,11 @@ textarea:focus {
 }
 
 .status-icon--success {
-  color: var(--vscode-terminal-ansiGreen);
+  color: var(--vscode-testing-iconPassed, var(--vscode-foreground));
 }
 
 .status-icon--error {
-  color: var(--vscode-errorForeground);
+  color: var(--vscode-editorError-foreground, var(--vscode-errorForeground));
 }
 
 .status-icon--warn {
