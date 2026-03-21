@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useMemo } from 'react'
 import { ErrorState, LoadingState } from './components/AppStatusViews'
+import { LoadingSkeleton } from './components/loading-skeleton'
 import { ErrorBoundary } from './components/error-boundary'
 import { ActionsProvider, AppStateProvider, HostStateProvider, useAppStateContext, useHostStateContext } from './contexts'
 import { CurrentView } from './render-current-view'
@@ -80,7 +81,7 @@ function AppContent() {
             </div>
           )}
         </header>
-        <Suspense fallback={null}>
+        <Suspense fallback={<LoadingSkeleton />}>
           <CurrentView />
         </Suspense>
         {hostState.policy?.effectiveScopes.length === 0 && (
