@@ -119,10 +119,13 @@ export function ScopeSelector({
   action,
 }: ScopeSelectorProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeOptionIndex, setActiveOptionIndex] = useState(0)
   const hasAppliedPersistedScopeRef = useRef(false)
   const labelId = useId()
   const menuId = useId()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const policyScopeOptions = SCOPE_OPTIONS_BY_SETTING[allowedScopes]
   const visibleScopes: Array<ActionRequest['scope']> =
@@ -131,6 +134,37 @@ export function ScopeSelector({
   const selectedScope =
     visibleScopes.includes(value) ? value : (visibleScopes[0] ?? 'global')
   const isDisabled = disabled
+  const selectedIndex = Math.max(visibleScopes.indexOf(selectedScope), 0)
+
+  const clampIndex = (index: number): number => {
+    if (visibleScopes.length === 0) {
+      return 0
+    }
+
+    if (index < 0) {
+      return 0
+    }
+
+    if (index >= visibleScopes.length) {
+      return visibleScopes.length - 1
+    }
+
+    return index
+  }
+
+  const closeMenuAndFocusTrigger = () => {
+    setIsMenuOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  const openMenuAtIndex = (index: number) => {
+    if (isDisabled || visibleScopes.length === 0) {
+      return
+    }
+
+    setActiveOptionIndex(clampIndex(index))
+    setIsMenuOpen(true)
+  }
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -166,6 +200,14 @@ export function ScopeSelector({
   }, [isDisabled, isMenuOpen])
 
   useEffect(() => {
+    if (!isMenuOpen) {
+      return
+    }
+
+    optionRefs.current[activeOptionIndex]?.focus()
+  }, [activeOptionIndex, isMenuOpen])
+
+  useEffect(() => {
     if (isDisabled || visibleScopes.length === 0) {
       return
     }
@@ -191,9 +233,21 @@ export function ScopeSelector({
       return
     }
 
-    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'ArrowDown') {
       event.preventDefault()
-      setIsMenuOpen(true)
+      openMenuAtIndex(selectedIndex)
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      openMenuAtIndex(selectedIndex)
+      return
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openMenuAtIndex(selectedIndex)
     }
   }
 
@@ -202,7 +256,51 @@ export function ScopeSelector({
       onChange(nextScope)
     }
 
-    setIsMenuOpen(false)
+    closeMenuAndFocusTrigger()
+  }
+
+  const handleListboxKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (!isMenuOpen || visibleScopes.length === 0) {
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveOptionIndex((previousIndex) => clampIndex(previousIndex + 1))
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveOptionIndex((previousIndex) => clampIndex(previousIndex - 1))
+      return
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault()
+      setActiveOptionIndex(0)
+      return
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault()
+      setActiveOptionIndex(visibleScopes.length - 1)
+      return
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      closeMenuAndFocusTrigger()
+      return
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      const scopeToSelect = visibleScopes[activeOptionIndex]
+      if (scopeToSelect) {
+        handleOptionSelect(scopeToSelect)
+      }
+    }
   }
 
   return (
@@ -222,9 +320,14 @@ export function ScopeSelector({
           aria-haspopup="listbox"
           aria-expanded={isMenuOpen}
           aria-controls={menuId}
+          ref={triggerRef}
           onClick={() => {
             if (!isDisabled) {
-              setIsMenuOpen((open) => !open)
+              if (isMenuOpen) {
+                setIsMenuOpen(false)
+              } else {
+                openMenuAtIndex(selectedIndex)
+              }
             }
           }}
           onKeyDown={handleTriggerKeyDown}
@@ -236,15 +339,29 @@ export function ScopeSelector({
         </button>
 
         {isMenuOpen && !isDisabled && (
-          <div id={menuId} className="scope-selector-menu" role="listbox" aria-label="Installation scope">
-            {visibleScopes.map((scopeOption) => (
+          <div
+            id={menuId}
+            className="scope-selector-menu"
+            role="listbox"
+            aria-label="Installation scope"
+            aria-activedescendant={`${menuId}-option-${activeOptionIndex}`}
+            onKeyDown={handleListboxKeyDown}
+          >
+            {visibleScopes.map((scopeOption, index) => (
               <button
                 key={scopeOption}
+                id={`${menuId}-option-${index}`}
                 type="button"
                 role="option"
+                tabIndex={index === activeOptionIndex ? 0 : -1}
                 aria-selected={scopeOption === selectedScope}
                 className={`scope-selector-option${scopeOption === selectedScope ? ' scope-selector-option--selected' : ''}`}
                 onClick={() => handleOptionSelect(scopeOption)}
+                onFocus={() => setActiveOptionIndex(index)}
+                onMouseMove={() => setActiveOptionIndex(index)}
+                ref={(node) => {
+                  optionRefs.current[index] = node
+                }}
               >
                 {SCOPE_LABELS[scopeOption]}
               </button>

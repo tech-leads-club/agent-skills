@@ -132,8 +132,66 @@ describe('ScopeSelector', () => {
     expect(trigger).toHaveAttribute('title', 'Local scope is unavailable in Restricted Mode')
   })
 
+  it('supports Arrow/Home/End/Escape keyboard navigation', async () => {
+    const user = userEvent.setup()
+    render(<ScopeSelector value="local" onChange={jest.fn()} action="uninstall" />)
+
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    trigger.focus()
+    await user.keyboard('{ArrowDown}')
+
+    expect(screen.getByRole('listbox', { name: /installation scope/i })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Local' })).toHaveFocus()
+
+    await user.keyboard('{End}')
+    expect(screen.getByRole('option', { name: 'Both' })).toHaveFocus()
+
+    await user.keyboard('{Home}')
+    expect(screen.getByRole('option', { name: 'Local' })).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('listbox', { name: /installation scope/i })).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+
+  it('selects option with Enter and Space and closes menu', async () => {
+    const user = userEvent.setup()
+
+    function StatefulWrapper() {
+      const [scope, setScope] = useState<ActionRequest['scope']>('local')
+      return <ScopeSelector value={scope} onChange={setScope} action="uninstall" />
+    }
+
+    render(<StatefulWrapper />)
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+
+    trigger.focus()
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+
+    expect(trigger).toHaveTextContent('Global')
+    expect(screen.queryByRole('listbox', { name: /installation scope/i })).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+
+    trigger.focus()
+    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown} ')
+
+    expect(trigger).toHaveTextContent('Both')
+    expect(screen.queryByRole('listbox', { name: /installation scope/i })).not.toBeInTheDocument()
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = render(<ScopeSelector value="local" onChange={jest.fn()} />)
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+  })
+
+  it('has no accessibility violations when menu is open', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ScopeSelector value="local" onChange={jest.fn()} action="uninstall" />)
+
+    const trigger = screen.getByRole('button', { name: /installation scope/i })
+    await user.click(trigger)
+
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
