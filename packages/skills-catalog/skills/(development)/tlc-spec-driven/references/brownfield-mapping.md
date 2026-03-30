@@ -337,6 +337,29 @@ Examples: [actual constant names]
 **Current:** [if measurable]
 **Goals:** [if documented]
 **Enforcement:** [if automated]
+
+## Test Coverage Matrix
+
+Analyze the codebase to determine which code layers require which test types.
+For each layer, document the required test type, file location pattern, and run command.
+
+| Code Layer | Required Test Type          | Location Pattern       | Run Command |
+| ---------- | --------------------------- | ---------------------- | ----------- |
+| [layer]    | [unit/integration/e2e/none] | [glob or path pattern] | [command]   |
+
+## Parallelism Assessment
+
+| Test Type | Parallel-Safe? | Isolation Model | Evidence                      |
+| --------- | -------------- | --------------- | ----------------------------- |
+| [type]    | [Yes/No]       | [description]   | [file/pattern that proves it] |
+
+## Gate Check Commands
+
+| Gate Level | When to Use                            | Command                     |
+| ---------- | -------------------------------------- | --------------------------- |
+| Quick      | After tasks with unit tests only       | [unit test command]         |
+| Full       | After tasks with e2e/integration tests | [unit + e2e commands]       |
+| Build      | After phase completion                 | [build + lint + unit + e2e] |
 ```
 
 **Instructions:**
@@ -345,6 +368,9 @@ Examples: [actual constant names]
 - Document actual testing patterns observed
 - Note test organization approach
 - Include execution instructions
+- **Test Coverage Matrix:** Sample 5-10 existing test files to identify which layers are tested and how. Look at test file locations relative to source to determine patterns. Extract run commands from `package.json`, `project.json`, `Makefile`, CI config. Mark layers with no existing tests as "none" with a note in CONCERNS.md.
+- **Parallelism Assessment:** NOT parallel-safe signals: shared DB connection (same URL from config), table-level cleanup in `beforeEach`/`afterAll` (`.del()`, `DELETE FROM`, `TRUNCATE`), shared mock state reset on globals. Parallel-safe signals: per-test DB creation (Testcontainers, dynamic schema, SQLite in-memory), data namespacing (all data keyed by unique test ID), no shared mutable state between test files, all deps mocked (`jest.fn()`, `vi.fn()`).
+- **Gate Check Commands:** Extract from actual project commands — do not invent commands.
 
 ---
 

@@ -43,11 +43,23 @@ From spec.md edge cases:
 - [ ] [Edge case 1] handled correctly
 - [ ] [Edge case 2] handled correctly
 
-### 4. Run Tests (if applicable)
+### 4. Run Full Gate Check (MANDATORY)
 
-```bash
-# project test command
-```
+Run the Build-level gate check from TESTING.md. This is NOT optional.
+
+1. Run: `[build gate command from TESTING.md]`
+2. Non-zero exit code = STOP. Do not proceed to Code Quality Check.
+3. Record results:
+   - Total test count: [N]
+   - Passed: [N]
+   - Failed: [list]
+   - Skipped: [list — each skip must be justified]
+
+**Test Integrity Check:**
+
+- Compare current test count against the count before this feature was implemented
+- If test count DECREASED: investigate why. Tests should only be deleted with explicit justification.
+- If assertions were weakened (less specific than before): flag as potential regression
 
 ### 5. Code Quality Check (MANDATORY)
 
@@ -186,9 +198,13 @@ Fix tasks follow the same format as regular tasks and can be executed with the i
 
 ## Tests
 
-- **Ran**: [test command]
-- **Result**: [X] passed, [Y] failed
-- **Failures**: [list]
+- **Gate command**: [full command]
+- **Result**: [X] passed, [Y] failed, [Z] skipped
+- **Test count before feature**: [N]
+- **Test count after feature**: [M]
+- **Delta**: [+N new tests]
+- **Skipped tests**: [list with justification for each]
+- **Failures**: [list with details]
 
 ---
 

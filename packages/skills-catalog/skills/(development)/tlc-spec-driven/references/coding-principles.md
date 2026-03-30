@@ -33,6 +33,15 @@ Behavioral bias, not checklist. Read before every implementation.
 - Remove ONLY imports/variables/functions YOUR changes orphaned
 - Don't remove pre-existing dead code unless asked
 
+### Test Integrity
+
+- NEVER weaken an existing test assertion to make it pass
+- NEVER delete a test to reduce failure count
+- NEVER use the test framework's skip/disable/pending mechanism to bypass a failing test
+- NEVER modify tests written in the RED phase during GREEN phase
+- If a test is genuinely wrong, STOP and confirm with the user before changing it
+- Tests are the spec — implementation conforms to tests, not the other way around
+
 ### Goal-Driven
 
 - Transform vague tasks into verifiable goals

@@ -20,6 +20,12 @@ This is where code gets written. Every task follows the same cycle: plan → imp
 
 ## Process
 
+**Sub-agent context:** When this task is executed by a sub-agent, the sub-agent receives
+the task definition, coding principles, TESTING.md, and relevant spec/design context.
+All steps below apply identically whether running in the main context or a sub-agent.
+The only difference: sub-agents report results back to the orchestrator rather than
+continuing to the next task.
+
 ### 0. List Atomic Steps (MANDATORY when Tasks phase was skipped)
 
 If there is no `tasks.md` for this feature, you MUST list atomic steps before writing any code. This is non-negotiable — it prevents the agent from losing focus and doing too many things at once.
@@ -60,25 +66,78 @@ Approach: [brief description]
 Success: [how to verify]
 ```
 
-### 4. Implement
+### 4. Write Tests First (RED)
 
-- Follow "What" and "Where" exactly
-- Reference "Reuses" for patterns
-- Apply [coding-principles.md](coding-principles.md):
-  - Simplest code that works
-  - Touch ONLY listed files
-  - No scope creep
+If the task includes tests (per the Tests field in tasks.md or TESTING.md coverage matrix):
 
-### 5. Verify "Done When"
+1. Write the test file(s) BEFORE writing any implementation
+2. Tests must encode the expected behavior from the task's "Done when" criteria
+3. Run the test command — confirm tests FAIL (RED state)
+4. If tests pass before implementation exists, the tests are too weak — rewrite them
 
-Check all criteria before marking done.
+**Constraints:**
 
-### 6. Self-Check
+- Tests define correct behavior independently of implementation
+- Each acceptance criterion from "Done when" maps to at least one test assertion
+- Edge cases from spec.md that apply to this task get test cases too
 
-Ask: "Would senior engineer flag this as overcomplicated?"
+If the task does NOT include tests (e.g., entity-only, config-only), skip to Step 4b.
 
-- Yes → Simplify before continuing
-- No → Proceed to git commit
+### 4b. Implement (GREEN)
+
+Write the minimum implementation to make all tests pass.
+
+**HARD CONSTRAINTS:**
+
+- Do NOT modify tests written in Step 4. The tests are the spec — implementation conforms to them.
+- Do NOT weaken assertions (making them less specific to pass more easily)
+- Do NOT delete or skip test cases
+- Do NOT use the test framework's skip/disable/pending mechanism to bypass failing tests
+- Minimum code to pass — save structural improvements for a refactor task
+
+If a test is genuinely wrong (tests the wrong behavior per spec), STOP and ask the user
+before modifying it. Never silently change a test.
+
+Follow [coding-principles.md](coding-principles.md):
+
+- Simplest code that works
+- Touch ONLY listed files
+- No scope creep
+
+### 5. Gate Check (VERIFY)
+
+Run the gate check command from the task definition. This is MANDATORY — not "if applicable."
+
+1. Run the gate check: `[command from task's Gate field]`
+2. Non-zero exit code = STOP. Fix the failure. Re-run. Do not proceed until green.
+3. Confirm the test count matches expectations (no tests were silently deleted or skipped)
+
+**Tiered gates (from TESTING.md Gate Check Commands):**
+
+| Task includes            | Gate level | What runs                |
+| ------------------------ | ---------- | ------------------------ |
+| Unit tests only          | Quick      | Unit test command        |
+| E2E or integration tests | Full       | Unit + E2E commands      |
+| Last task in a phase     | Build      | Build + lint + all tests |
+
+The gate check is deterministic. The test runner decides if the code is correct,
+not the agent's self-assessment.
+
+### 6. Post-Gate Review
+
+After the gate check passes:
+
+1. Verify test count: Are there at least as many test cases as before? (prevents silent deletion)
+2. Verify no SPEC_DEVIATION: If implementation diverged from spec/design, add a marker:
+
+```
+// SPEC_DEVIATION: [what diverged]
+// Reason: [why the deviation was necessary]
+```
+
+3. Quick complexity check: "Would senior engineer flag this as overcomplicated?"
+   - Yes → Simplify, re-run gate
+   - No → Proceed to commit
 
 ### 7. Atomic Git Commit
 
@@ -173,6 +232,8 @@ Mark task complete in tasks.md. Update requirement traceability in spec.md if re
 
 **Reading**: task definition from tasks.md
 **Dependencies**: [All done? ✅ | Blocked by: TY]
+**Tests**: [unit/e2e/integration/none]
+**Gate**: [quick/full/build]
 
 ### Pre-Implementation (MANDATORY)
 
@@ -180,14 +241,28 @@ Mark task complete in tasks.md. Update requirement traceability in spec.md if re
 - **Files to touch**: [list ONLY these]
 - **Success criteria**: [how to verify]
 
-### Implementation
+### RED: Write Tests
 
-[Do the work]
+- Test file(s): [paths]
+- Test count: [N test cases]
+- Confirmed failing: [Yes — all N tests fail as expected]
 
-### Verification
+### GREEN: Implement
 
-- [x] Done when criterion 1
-- [x] Done when criterion 2
+[Write minimum code to pass tests]
+
+- Tests modified: None
+- Tests skipped/deleted: None
+
+### VERIFY: Gate Check
+
+- Command: [gate check command]
+- Result: [X passed, 0 failed]
+- Test count: [N — matches RED phase count]
+
+### Post-Gate
+
+- [x] No SPEC_DEVIATION (or markers added)
 - [x] No unnecessary changes made
 - [x] Matches existing patterns
 

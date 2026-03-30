@@ -97,6 +97,7 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 
 - Codebase docs (when working in existing project)
 - CONCERNS.md (when planning features that touch flagged areas, estimating risk, or modifying fragile components)
+- TESTING.md (when creating tasks or executing — drives test type assignment and gate checks)
 - spec.md (when working on specific feature)
 - context.md (when designing or implementing from user decisions)
 - design.md (when implementing from design)
@@ -111,6 +112,44 @@ Plan and implement projects with precision. Granular tasks. Clear dependencies. 
 **Target:** <40k tokens total context
 **Reserve:** 160k+ tokens for work, reasoning, outputs
 **Monitoring:** Display status when >40k (see [context-limits.md](references/context-limits.md))
+
+## Sub-Agent Delegation
+
+Use sub-agents (the Task tool or equivalent) to keep the main context window lean and enable
+parallel execution. The orchestrating agent plans and coordinates; sub-agents do the heavy lifting.
+
+**When to delegate to a sub-agent:**
+
+| Activity | Delegate? | Why |
+|---|---|---|
+| Research (design phase, brownfield mapping) | Yes | Research output is large; only the summary matters to the main context |
+| Implementing a task | Yes | File reads, edits, test output consume context; only the result matters |
+| Parallel `[P]` tasks | Yes (one per task) | The only way to actually run tasks in parallel |
+| Sequential tasks with no `[P]` | Yes | Keeps implementation artifacts out of the main context |
+| Planning, task creation, validation reports | No | These require the full accumulated context to be coherent |
+| Quick mode tasks | No | Too small to justify the overhead |
+
+**Context each sub-agent receives:**
+
+The orchestrating agent MUST provide each sub-agent with:
+- The specific task definition from tasks.md (What, Where, Depends on, Reuses, Done when, Tests, Gate)
+- Relevant coding principles and conventions (coding-principles.md, CONVENTIONS.md)
+- TESTING.md (for gate check commands and test patterns)
+- Any spec/design context the task references
+
+The sub-agent does NOT receive: other tasks' definitions, accumulated chat history, validation reports
+from other tasks, or STATE.md (unless the task explicitly references a decision/blocker).
+
+**What sub-agents return:**
+
+Each sub-agent reports back:
+- Status: Complete | Blocked | Partial
+- Files changed: [list]
+- Gate check result: [pass/fail + test counts]
+- SPEC_DEVIATION markers (if any)
+- Issues encountered (if any)
+
+The orchestrating agent uses this to update tasks.md status, traceability, and decide next steps.
 
 ## Commands
 
