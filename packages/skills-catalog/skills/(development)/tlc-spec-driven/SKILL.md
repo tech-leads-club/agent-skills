@@ -134,7 +134,7 @@ parallel execution. The orchestrating agent plans and coordinates; sub-agents do
 The orchestrating agent MUST provide each sub-agent with:
 - The specific task definition from tasks.md (What, Where, Depends on, Reuses, Done when, Tests, Gate)
 - Relevant coding principles and conventions (coding-principles.md, CONVENTIONS.md)
-- TESTING.md (for gate check commands and test patterns)
+- TESTING.md, if it exists (for gate check commands and test patterns)
 - Any spec/design context the task references
 
 The sub-agent does NOT receive: other tasks' definitions, accumulated chat history, validation reports

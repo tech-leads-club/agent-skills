@@ -85,7 +85,7 @@ If the task does NOT include tests (e.g., entity-only, config-only), skip to Ste
 
 ### 4b. Implement (GREEN)
 
-Write the minimum implementation to make all tests pass.
+Write the minimum implementation needed to satisfy the task's success criteria: pass all relevant tests (when present) and meet the defined verification/gate checks when there are no direct tests.
 
 **HARD CONSTRAINTS:**
 
@@ -108,17 +108,18 @@ Follow [coding-principles.md](coding-principles.md):
 
 Run the gate check command from the task definition. This is MANDATORY — not "if applicable."
 
-1. Run the gate check: `[command from task's Gate field]`
+1. Look up the command for the task's Gate level (quick/full/build) in TESTING.md's Gate Check Commands section, then run it
 2. Non-zero exit code = STOP. Fix the failure. Re-run. Do not proceed until green.
 3. Confirm the test count matches expectations (no tests were silently deleted or skipped)
 
 **Tiered gates (from TESTING.md Gate Check Commands):**
 
-| Task includes            | Gate level | What runs                |
-| ------------------------ | ---------- | ------------------------ |
-| Unit tests only          | Quick      | Unit test command        |
-| E2E or integration tests | Full       | Unit + E2E commands      |
-| Last task in a phase     | Build      | Build + lint + all tests |
+| Task includes                    | Gate level | What runs                |
+| -------------------------------- | ---------- | ------------------------ |
+| Unit tests only                  | Quick      | Unit test command        |
+| E2E or integration tests         | Full       | Unit + E2E commands      |
+| Last task in a phase             | Build      | Build + lint + all tests |
+| No tests (config, entities, etc) | Build      | Build + lint only        |
 
 The gate check is deterministic. The test runner decides if the code is correct,
 not the agent's self-assessment.

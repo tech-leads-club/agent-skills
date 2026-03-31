@@ -43,11 +43,13 @@ From spec.md edge cases:
 - [ ] [Edge case 1] handled correctly
 - [ ] [Edge case 2] handled correctly
 
-### 4. Run Full Gate Check (MANDATORY)
+### 4. Run Build-Level Gate Check (MANDATORY)
 
 Run the Build-level gate check from TESTING.md. This is NOT optional.
 
-1. Run: `[build gate command from TESTING.md]`
+If TESTING.md does not exist (greenfield project), use the gate command agreed upon with the user during the Tasks phase.
+
+1. Run: `[build gate command from TESTING.md, or the command agreed during planning]`
 2. Non-zero exit code = STOP. Do not proceed to Code Quality Check.
 3. Record results:
    - Total test count: [N]
@@ -202,7 +204,7 @@ Fix tasks follow the same format as regular tasks and can be executed with the i
 - **Result**: [X] passed, [Y] failed, [Z] skipped
 - **Test count before feature**: [N]
 - **Test count after feature**: [M]
-- **Delta**: [+N new tests]
+- **Delta**: [+(M - N) new tests]
 - **Skipped tests**: [list with justification for each]
 - **Failures**: [list with details]
 

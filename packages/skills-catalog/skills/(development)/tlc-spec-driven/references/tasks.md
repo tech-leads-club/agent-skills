@@ -168,7 +168,7 @@ T8 → T9
 - [ ] No TypeScript errors
 
 **Tests**: [unit/e2e/integration/none — from coverage matrix]
-**Gate**: [quick/full — from gate check commands]
+**Gate**: [quick/full/build — from gate check commands]
 
 ---
 
@@ -188,10 +188,11 @@ T8 → T9
 
 - [ ] Implements interface from T1
 - [ ] Handles error cases from design
-- [ ] Unit test passes
+- [ ] Gate check passes: `[quick gate command from TESTING.md]`
+- [ ] Test count: [N] tests pass (no silent deletions)
 
-**Tests**: [unit/e2e/integration/none — from coverage matrix]
-**Gate**: [quick/full — from gate check commands]
+**Tests**: unit
+**Gate**: quick
 
 ---
 
@@ -212,9 +213,11 @@ T8 → T9
 - [ ] Component renders correctly
 - [ ] Handles props from interface
 - [ ] Follows existing component patterns
+- [ ] Gate check passes: `[quick gate command from TESTING.md]`
+- [ ] Test count: [N] tests pass (no silent deletions)
 
-**Tests**: [unit/e2e/integration/none — from coverage matrix]
-**Gate**: [quick/full — from gate check commands]
+**Tests**: unit
+**Gate**: quick
 
 ---
 
@@ -233,10 +236,11 @@ T8 → T9
 **Done when**:
 
 - [ ] Feature works per acceptance criteria
-- [ ] Integration test passes
+- [ ] Gate check passes: `[full gate command from TESTING.md]`
+- [ ] Test count: [N] tests pass (no silent deletions)
 
-**Tests**: [unit/e2e/integration/none — from coverage matrix]
-**Gate**: [quick/full — from gate check commands]
+**Tests**: integration
+**Gate**: full
 
 **Commit**: `feat([scope]): [description]`
 
