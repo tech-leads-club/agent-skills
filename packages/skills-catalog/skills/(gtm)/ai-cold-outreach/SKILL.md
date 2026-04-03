@@ -34,29 +34,9 @@ If the user skips these, ask. Building outreach without ICP clarity wastes send 
 
 The modern cold outreach system is a six-stage pipeline. Each stage has specific tools, metrics, and failure modes.
 
-```
-+------------------+     +------------------+     +---------------------+
-|  1. SIGNAL       |---->|  2. ENRICHMENT   |---->|  3. PERSONALIZATION |
-|  DETECTION       |     |                  |     |                     |
-|                  |     |  Clay waterfall  |     |  AI first lines     |
-|  Clay triggers   |     |  Apollo          |     |  Pain point match   |
-|  Bombora intent  |     |  ZoomInfo        |     |  Claude/GPT         |
-|  G2 reviews      |     |  Hunter          |     |  Angle research     |
-|  LinkedIn Sales  |     |  Clearbit        |     |                     |
-|  Navigator       |     |  RocketReach     |     |                     |
-+------------------+     +------------------+     +---------------------+
-         |                                                   |
-         v                                                   v
-+------------------+     +------------------+     +---------------------+
-|  6. FOLLOW-UP    |<----|  5. SENDING      |<----|  4. SEQUENCING      |
-|                  |     |                  |     |                     |
-|  AI contextual   |     |  Instantly       |     |  Multi-step         |
-|  replies         |     |  Smartlead       |     |  Conditional logic  |
-|  Objection       |     |  Multi-mailbox   |     |  A/B variants       |
-|  handling        |     |  rotation        |     |  Channel mixing     |
-|  Meeting booking |     |  IP sharding     |     |  Timing rules       |
-+------------------+     +------------------+     +---------------------+
-```
+1. **Signal Detection** → 2. **Enrichment** → 3. **AI Personalization** → 4. **Sequencing** → 5. **Sending Infrastructure** → 6. **AI Follow-Up**
+
+**Validation gate after each stage:** Do not advance to the next stage until the current stage's metrics are verified (see per-stage benchmarks below).
 
 ### Stage 1: Signal Detection
 
@@ -78,47 +58,13 @@ Signals tell you WHO to reach out to and WHEN. Cold email without signals is spa
 **Signal layering strategy:**
 Single signals produce 3-5% reply rates. Layer two or more signals and reply rates jump to 8-15%. Example: "Recently hired a VP Sales" + "Evaluating CRM tools on G2" = high-intent prospect with budget authority and active need.
 
-**Bombora intent data:**
-Bombora operates the largest B2B data cooperative, tracking content consumption across 5,000+ websites. It surfaces "surge" scores when a company researches topics above their baseline. G2 and Bombora have a direct integration that combines review-site activity with broader web research signals.
-
-Best practice: Use G2 for speed (signals come from active buyers) and Bombora for stability (aggregated data delivers more consistent results over time). Layer both for full coverage.
-
-**Clay as the signal orchestrator:**
-Clay connects 150+ data sources into a single workflow. Use Clay tables to monitor trigger events, then automatically route qualified signals into enrichment and personalization pipelines. Clay's HTTP request action lets you connect any API as a signal source.
+**Gate:** Confirm at least 2 layered signals per prospect before advancing to enrichment.
 
 ### Stage 2: Enrichment
 
 Enrichment turns a company name + signal into a deliverable contact with context.
 
-**The waterfall enrichment model:**
-
-```
-Lead enters Clay table
-        |
-        v
-  [Provider A: Apollo]
-  Found email? ----YES----> Verified? --YES--> Done
-        |                       |
-       NO                      NO
-        |                       |
-        v                       v
-  [Provider B: Hunter]    [Provider C: ZoomInfo]
-  Found email? ----YES----> Verified? --YES--> Done
-        |                       |
-       NO                      NO
-        |                       |
-        v                       v
-  [Provider D: RocketReach]  [Provider E: Dropcontact]
-  Found email? ----YES----> Verified? --YES--> Done
-        |
-       NO
-        |
-        v
-  Skip or manual research
-```
-
-**Why waterfall beats single-provider:**
-No single provider covers more than 60-70% of B2B contacts. Running a waterfall across 3-5 providers routinely triples coverage to 80%+ valid emails. Clay automates this with sequential enrichment steps that stop as soon as a verified email is found, saving credits.
+**Waterfall enrichment:** Run leads through providers sequentially (Apollo → Hunter → ZoomInfo → RocketReach → Dropcontact), stopping at the first verified email. No single provider covers more than 60-70% — waterfall across 3-5 providers gets 80%+ coverage.
 
 **Enrichment data to collect (in priority order):**
 
@@ -138,22 +84,7 @@ Run every email through verification (ZeroBounce, NeverBounce, or MillionVerifie
 
 Generic cold emails get 1-2% reply rates. AI-personalized emails get 8-12%. The difference is the first two lines.
 
-**The AI personalization pipeline:**
-
-```
-Enriched lead data (company news, tech stack, hiring, social)
-        |
-        v
-  [AI Agent: Claude or GPT]
-        |
-        +---> Research summary (2-3 key findings)
-        +---> Personalization angle (why NOW, why THEM)
-        +---> Custom first line (specific observation)
-        +---> Pain hypothesis (inferred from signals)
-        |
-        v
-  Merge into email template via {{variables}}
-```
+**Gate:** Verify bounce rate < 2% on a 50-email test batch before scaling volume.
 
 **First line frameworks that work:**
 
@@ -298,58 +229,9 @@ Example: 600 emails/day
 
 Authenticated senders are 2.7x more likely to reach the inbox vs. unauthenticated.
 
-**DMARC rollout sequence:**
-1. Week 1-2: `p=none` with reporting (`rua=mailto:dmarc@yourdomain.com`)
-2. Week 3-4: Review reports, fix any alignment issues
-3. Week 5-6: `p=quarantine` (soft enforcement)
-4. Week 7+: `p=reject` (full enforcement)
+**Gate:** Run inbox placement test and confirm >95% inbox rate before cold sends.
 
-Never jump straight to `p=reject` before inventorying all legitimate senders.
-
-**Sending platform comparison: Instantly vs. Smartlead**
-
-| Feature | Instantly | Smartlead |
-|---|---|---|
-| **Best for** | Solo founders, small teams | Agencies, high-volume senders |
-| **Pricing (entry)** | $37/mo | $33/mo |
-| **Pricing (scale)** | $97-358/mo | $94-174/mo |
-| **Email accounts** | Unlimited (Growth+) | Unlimited (all plans) |
-| **Built-in lead database** | Yes (SuperSearch, 450M+) | No (import only) |
-| **Warmup network** | 4.2M+ accounts | Smaller network |
-| **AI reply agent** | Yes (responds in <5 min) | Limited |
-| **Deliverability approach** | IP sharding + rotation (SISR) | Human-mimicking variable volume |
-| **Sending behavior** | Exact daily volume | Variable (sends 22 when set to 25) |
-| **API and webhook support** | Good | Excellent (API-first) |
-| **White-label** | Limited | Full white-label |
-| **CRM integration** | Built-in basic CRM | Via integrations |
-| **Clay integration** | Native | Native |
-| **Inbox rotation** | Automatic | Automatic |
-| **Campaign analytics** | Detailed dashboards | Detailed dashboards |
-| **Multi-channel** | Email + LinkedIn (beta) | Email focused |
-
-**Decision framework:**
-
-```
-Need built-in lead database?
-  YES --> Instantly
-  NO  --> Continue
-
-Running an agency or white-labeling?
-  YES --> Smartlead
-  NO  --> Continue
-
-Need AI auto-replies?
-  YES --> Instantly
-  NO  --> Continue
-
-Sending 1,000+/day and need API control?
-  YES --> Smartlead
-  NO  --> Continue
-
-Want simplest setup and UI?
-  YES --> Instantly
-  NO  --> Smartlead
-```
+**Instantly vs. Smartlead:** Instantly for solo/small teams (built-in lead database, AI reply agent). Smartlead for agencies/high-volume (API-first, white-label, variable sending).
 
 ### Stage 6: AI-Powered Follow-Up
 
