@@ -1,12 +1,6 @@
 ---
 name: letsfg
-description: >-
-  Agent-native flight search and booking via 180+ airline connectors. Returns raw
-  airline prices with zero markup — $20–50 cheaper than OTAs. Use when user asks to
-  "find flights", "search flights", "book a flight", "compare airline prices",
-  "find cheap flights", "fly from X to Y", or any flight-related travel query.
-  Do NOT use for hotel-only searches (use hotel skills), car rentals, or non-flight
-  travel bookings.
+description: Agent-native flight search and booking via 180+ airline connectors. Returns raw airline prices with zero markup — $20–50 cheaper than OTAs. Use when user asks to "find flights", "search flights", "book a flight", "compare airline prices", "find cheap flights", "fly from X to Y", or any flight-related travel query. Do NOT use for hotel-only searches (use hotel skills), car rentals, or non-flight travel bookings.
 license: MIT
 metadata:
   author: LetsFG - github.com/LetsFG
@@ -162,6 +156,16 @@ letsfg unlock off_xxx
 
 ### 4. Book (Ticket Price Only)
 
+**Before your first booking**, attach a payment method:
+
+```bash
+letsfg setup-payment
+```
+
+Or via Python: `bt.setup_payment(token="tok_visa")`
+
+Then book:
+
 ```python
 booking = bt.book(
     offer_id=unlocked.offer_id,
@@ -229,7 +233,8 @@ if candidates:
 | `RATE_LIMITED` (429) | Transient | Wait and retry |
 | `INVALID_IATA` (422) | Validation | Use `resolve_location()` to fix |
 | `OFFER_EXPIRED` (410) | Business | Search again for fresh offers |
-| `PAYMENT_REQUIRED` (402) | Business | Run `letsfg star --github <username>` |
+| `OFFER_NOT_UNLOCKED` (403) | Business | Run `letsfg star --github <username>` |
+| `PAYMENT_REQUIRED` (402) | Business | Run `letsfg setup-payment` to attach a card |
 | `FARE_CHANGED` (409) | Business | Re-unlock to get current price |
 
 ```python
@@ -241,8 +246,10 @@ except OfferExpiredError:
     # Airline sold the seats — search again
     flights = bt.search(origin, dest, date)
 except PaymentRequiredError:
-    # GitHub star not verified
-    print("Star the repo: letsfg star --github <username>")
+    # No payment method attached — run setup-payment
+    print("Attach a card: letsfg setup-payment")
+# HTTP 403 on unlock means GitHub star not verified:
+# Run: letsfg star --github <username>
 ```
 
 ## Search Flags
@@ -265,7 +272,7 @@ except PaymentRequiredError:
 |-----------|------|---------------|------------|
 | `search` | Free | Yes | Yes |
 | `resolve_location` | Free | Yes | Yes |
-| `unlock` | Free | No — may charge fee | No |
+| `unlock` | Free (requires GitHub star) | Yes | No |
 | `book` | Ticket price | Only with `idempotency_key` | With key: yes |
 
 ## Reference Files

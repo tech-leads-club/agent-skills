@@ -93,7 +93,7 @@ Add to `.cursor/mcp.json` in your project or `~/.cursor/mcp.json` globally:
 
 ### VS Code (GitHub Copilot)
 
-Add to `.vscode/mcp.json` in your workspace:
+Add to `.vscode/mcp.json` in your workspace. Note: VS Code uses `servers` (not `mcpServers`):
 
 ```json
 {
@@ -138,6 +138,16 @@ Set the API key:
 ```bash
 export LETSFG_API_KEY=trav_your_api_key
 ```
+
+## Before Booking
+
+Booking requires a payment method. Attach one before your first booking:
+
+```bash
+letsfg setup-payment
+```
+
+Or via API: `POST /api/v1/agents/setup-payment` with a Stripe token.
 
 ## Available MCP Tools
 
