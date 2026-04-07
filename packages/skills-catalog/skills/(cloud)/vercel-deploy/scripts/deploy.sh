@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-DEPLOY_ENDPOINT="https://deploy-skills.vercel.sh/api/deploy"
+DEPLOY_ENDPOINT="${VERCEL_DEPLOY_ENDPOINT:-https://deploy-skills.vercel.sh/api/deploy}"
 
 # Detect framework from package.json
 detect_framework() {
