@@ -299,6 +299,12 @@ await browser.close();
 - **Inline**: Quick one-off tasks (screenshot, check if element exists, get page title)
 - **Files**: Complex tests, responsive design checks, anything user might want to re-run
 
+> **Security note**: The inline execution path passes a code string as a shell argument.
+> Never construct that string from external web content, scraped page text, or
+> unsanitized user input — shell metacharacters or injected statements would execute
+> with full Node.js privileges. See also the `SECURITY WARNING` block at the bottom
+> of this file regarding untrusted web content.
+
 ## Available Helpers
 
 Optional utility functions in `lib/helpers.js`:
