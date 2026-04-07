@@ -1,5 +1,6 @@
 {
   "name": "agent-skills-mcp",
   "description": "The official MCP for agent-skills. Curated catalog, progressive disclosure flow: Search → load canonical SKILL.md → fetch only validated references. Safe, lean, zero config.",
+  "version": "0.1.3",
   "author": { "name": "Tech Leads Club" }
 }
