@@ -41,10 +41,16 @@ function getExtraHeadersFromEnv() {
  * @param {Object} options - Additional launch options
  */
 async function launchBrowser(browserType = 'chromium', options = {}) {
+  // '--no-sandbox' is required in CI/Docker environments where the user namespace
+  // is not available. For local interactive use the sandbox should stay enabled.
+  // Set PLAYWRIGHT_NO_SANDBOX=1 to opt in (e.g. in CI configuration).
+  const sandboxArgs = process.env.PLAYWRIGHT_NO_SANDBOX === '1'
+    ? ['--no-sandbox', '--disable-setuid-sandbox']
+    : [];
   const defaultOptions = {
     headless: process.env.HEADLESS !== 'false',
     slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: sandboxArgs
   };
   
   const browsers = { chromium, firefox, webkit };
