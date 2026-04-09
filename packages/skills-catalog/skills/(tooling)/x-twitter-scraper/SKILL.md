@@ -12,7 +12,7 @@ Read, write, and extract X/Twitter data via the Xquik REST API. 120 endpoints co
 
 ## Setup
 
-Get an API key at [dashboard.xquik.com](https://dashboard.xquik.com) or use pay-per-use MPP mode (no account needed).
+Get an API key at [xquik.com](https://xquik.com) or use pay-per-use MPP mode (no account needed).
 
 ```bash
 # Set API key as environment variable
