@@ -54,5 +54,9 @@
   "(web-automation)": {
     "name": "Web Automation",
     "description": "Skills for browser automation and web testing"
+  },
+  "(erp)": {
+    "name": "ERP",
+    "description": "Skills for enterprise resource planning systems like Odoo"
   }
 }
