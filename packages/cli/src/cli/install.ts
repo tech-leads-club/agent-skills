@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
+import { AGENT_TYPES, ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
 import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
 
 import { ports } from '../ports'
@@ -72,7 +72,14 @@ export async function runCliInstall(options: InstallCliOptions): Promise<void> {
     process.exit(1)
   }
 
-  const agents = (options.agent || ['cursor', 'claude-code', 'windsurf']) as AgentType[]
+  const rawAgents = options.agent || ['cursor', 'claude-code', 'windsurf']
+  const invalidAgents = rawAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
+  if (invalidAgents.length > 0) {
+    console.error(chalk.red(`❌ Unknown agent(s): ${invalidAgents.join(', ')}`))
+    console.error(chalk.dim(`   Valid agents: ${AGENT_TYPES.join(', ')}`))
+    process.exit(1)
+  }
+  const agents = rawAgents as AgentType[]
   const method = options.symlink ? 'symlink' : 'copy'
 
   console.log(chalk.blue(`⏳ Installing ${skills.length} skill(s) to ${agents.length} agent(s)...`))
