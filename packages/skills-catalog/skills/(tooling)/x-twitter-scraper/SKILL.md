@@ -12,7 +12,7 @@ Read, write, and extract X/Twitter data via the Xquik REST API. 120 endpoints co
 
 ## Setup
 
-Get an API key at [xquik.com](https://xquik.com) or use pay-per-use MPP mode (no account needed).
+Get an API key at [xquik.com](https://xquik.com) or use pay-per-use MPP mode (Machine Payments Protocol — pay per call in USDC with no account needed).
 
 ```bash
 # Set API key as environment variable
@@ -44,7 +44,6 @@ All requests use `X-API-Key` header authentication. Base URL: `https://xquik.com
 | `/api/v1/x/notifications` | GET | User's notifications |
 | `/api/v1/x/timeline` | GET | User's home timeline |
 | `/api/v1/x/dm` | GET | DM conversation history |
-| `/api/v1/radar` | GET | Trending topics (free) |
 | `/api/v1/trends` | GET | Extended trends data |
 
 ### Write Operations (2 credits each, subscription required)
