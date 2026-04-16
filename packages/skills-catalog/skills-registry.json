@@ -935,6 +935,39 @@
       "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
     },
     {
+      "name": "modular-decomposition",
+      "description": "Runs a sequenced monolith-to-modular pipeline that sizes and inventories components, finds shared domain duplication, addresses flattening and hierarchy issues, analyzes coupling, then groups components into candidate domain-aligned units, with optional embedded DDD strategic analysis for bounded contexts. Use when asking how to split a monolith, size components before extraction, find duplicated domain logic, clean up module hierarchy, measure coupling between modules, or group components into services. Do NOT use for phased extraction roadmaps or prioritization without the prior analysis steps (use decomposition-planning-roadmap after this pipeline), end-to-end legacy migration strategy writeups (use legacy-migration-planner), pure infrastructure capacity sizing, or when you only need DDD without the structural pipeline (install domain-analysis standalone).",
+      "category": "architecture",
+      "path": "(architecture)/modular-decomposition",
+      "files": [
+        "SKILL.md",
+        "references/domain-analysis-examples.md",
+        "references/domain-analysis-quick-reference.md",
+        "references/domain-analysis.md",
+        "references/pattern-01-identify-and-size-quick-reference.md",
+        "references/pattern-01-identify-and-size.md",
+        "references/pattern-02-common-domain-quick-reference.md",
+        "references/pattern-02-common-domain.md",
+        "references/pattern-03-flattening-quick-reference.md",
+        "references/pattern-03-flattening.md",
+        "references/pattern-04-coupling.md",
+        "references/pattern-05-domain-grouping-quick-reference.md",
+        "references/pattern-05-domain-grouping.md"
+      ],
+      "contentHash": "b536c1851c862516e5fc111502311343b952073a992ea07c9f8f9b42fbbc2a44"
+    },
+    {
+      "name": "modular-design-principles",
+      "description": ">",
+      "category": "architecture",
+      "path": "(architecture)/modular-design-principles",
+      "files": [
+        "SKILL.md",
+        "references/principles.md"
+      ],
+      "contentHash": "d53fdca7ae18205376956c39a3a1729edfae843f63e5f2a6c5dd2c64ccd8a576"
+    },
+    {
       "name": "multi-platform-launch",
       "description": "\"When the user wants to launch a product across multiple platforms, plan a Product Hunt launch, build a waitlist, or execute a multi-channel launch strategy. Also use when the user mentions 'product launch,' 'Product Hunt,' 'launch strategy,' 'waitlist,' 'beta launch,' 'BetaList,' 'Hacker News,' 'launch day,' 'AppSumo,' 'multi-channel launch.' This skill covers multi-platform launch execution from pre-launch through post-launch optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",

@@ -13,7 +13,7 @@
         "referenceFiles": [
           "WCAG.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -30,7 +30,7 @@
           "benchmarks-deliverability-tactics.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -47,7 +47,7 @@
           "implementation-guide.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -64,7 +64,7 @@
           "implementation-guide.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -78,7 +78,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -92,7 +92,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -110,7 +110,7 @@
           "decision-trees.md",
           "mcp-guide.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -124,7 +124,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -138,7 +138,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -460,7 +460,7 @@
           "gotchas.md",
           "patterns.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -477,7 +477,7 @@
           "coding-principles.md",
           "notebook-spec.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -491,7 +491,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -505,7 +505,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -519,7 +519,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -533,7 +533,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -547,7 +547,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -564,7 +564,7 @@
           "podcast-community-cadence.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -580,7 +580,7 @@
         "referenceFiles": [
           "LCP.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -594,7 +594,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -608,7 +608,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -624,7 +624,7 @@
         "referenceFiles": [
           "section-templates.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -638,7 +638,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -652,7 +652,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -668,7 +668,7 @@
         "referenceFiles": [
           "style-guide.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -682,7 +682,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -696,7 +696,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -714,7 +714,7 @@
           "excalidraw-schema.md",
           "icon-libraries.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-11"
       }
     },
     {
@@ -728,7 +728,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -745,7 +745,7 @@
           "figma-mcp-config.md",
           "figma-tools-and-prompts.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -759,7 +759,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -777,7 +777,7 @@
           "design-principles.md",
           "stitch-integration.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -799,7 +799,7 @@
           "typography.md",
           "ux-writing.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -813,7 +813,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -827,7 +827,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -844,7 +844,7 @@
           "implementation-guide.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -858,7 +858,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -872,7 +872,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -888,7 +888,7 @@
         "referenceFiles": [
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -904,7 +904,7 @@
         "referenceFiles": [
           "PRINCIPLES.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -925,7 +925,7 @@
           "strangler-fig-patterns.md",
           "testing-safety-nets.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -946,7 +946,50 @@
           "themes.md",
           "troubleshooting.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
+      }
+    },
+    {
+      "id": "modular-decomposition",
+      "name": "modular-decomposition",
+      "description": "Runs a sequenced monolith-to-modular pipeline that sizes and inventories components, finds shared domain duplication, addresses flattening and hierarchy issues, analyzes coupling, then groups components into candidate domain-aligned units, with optional embedded DDD strategic analysis for bounded contexts. Use when asking how to split a monolith, size components before extraction, find duplicated domain logic, clean up module hierarchy, measure coupling between modules, or group components into services. Do NOT use for phased extraction roadmaps or prioritization without the prior analysis steps (use decomposition-planning-roadmap after this pipeline), end-to-end legacy migration strategy writeups (use legacy-migration-planner), pure infrastructure capacity sizing, or when you only need DDD without the structural pipeline (install domain-analysis standalone).",
+      "category": "architecture",
+      "path": "skills/(architecture)/modular-decomposition/SKILL.md",
+      "content": "# Modular Decomposition\n\nThis skill runs the **Patterns 1–5** analysis pipeline before service extraction. Each pattern is plain markdown under `references/`; load the file for that step and execute it against the user’s codebase.\n\n## How to Use\n\n### Quick start (what users can say)\n\n- **Full pipeline:** “Run modular decomposition Patterns 1 through 5 on this repo,” “Analyze this monolith for splitting—inventory, coupling, and domain grouping.”\n- **Single early step:** “Identify and size components here,” “Find duplicated domain logic across modules,” “Analyze coupling between our packages.”\n- **With DDD lens:** “Group components into domains and check bounded contexts,” “Use DDD strategic design on this codebase before we group services.”\n\nIf the user only wants **extraction order, phases, or migration roadmap** after analysis exists, use **decomposition-planning-roadmap** instead. If they need a **full legacy migration plan** (strangler fig, research, multi-stack), use **legacy-migration-planner** as well or instead of this skill when that is the primary ask.\n\n### How the agent should run it\n\n1. **Scope:** Confirm the task is structural analysis (inventory → coupling → grouping), not roadmap authoring. If unclear, ask once whether they want the full ordered pipeline or a subset.\n2. **Order:** Run patterns **1 → 2 → 3 → 4 → 5** in that order. Do not skip a step unless the user explicitly limits scope; if they do, state which patterns were skipped and how that limits later conclusions.\n3. **Load references:** For each pattern, open the matching `references/pattern-NN-*.md` file and follow its instructions. Use the optional `*-quick-reference.md` for the same number when a short checklist is enough.\n4. **Carry context forward:** Reuse outputs from earlier patterns in later ones (e.g. component inventory from Pattern 1 informs coupling in 4 and grouping in 5). Reference concrete paths, modules, or tables from previous steps.\n5. **Domain language (Pattern 5):** If subdomains or bounded contexts need grounding beyond structure, read `references/domain-analysis.md` **before or alongside** Pattern 5. Optionally open `references/domain-analysis-quick-reference.md` or `references/domain-analysis-examples.md` for condensed rules or illustrations.\n6. **Deliver:** Produce clear, actionable findings per pattern or one consolidated report—always tied to evidence from the repository (files, dependencies, metrics), not generic advice.\n\n### Usage examples\n\n**Example 1 — Full pipeline**\n\n```\nUser: \"We're going to split this monolith—run the full decomposition analysis (Patterns 1–5).\"\n\nAgent: Execute patterns 1→5 in order, loading each references/pattern-NN-*.md, preserving outputs between steps, then summarize cross-cutting recommendations.\n```\n\n**Example 2 — Coupling after inventory**\n\n```\nUser: \"We already have a rough module list—focus on coupling (Pattern 4) and then domain grouping (Pattern 5).\"\n\nAgent: If no prior inventory exists in the thread, either run Pattern 1 briefly or derive an explicit module list from the repo before 4 and 5. State any assumptions.\n```\n\n**Example 3 — DDD before grouping**\n\n```\nUser: \"Map bounded contexts and language, then group components into domains.\"\n\nAgent: Read references/domain-analysis.md (and optional quick reference/examples) in parallel with or immediately before Pattern 5; align Pattern 5 groupings with linguistic boundaries where evidence supports it.\n```\n\n## Prerequisites\n\n- Complete **Pattern N** before starting Pattern N+1 unless the user explicitly narrows scope. Later patterns depend on earlier results (for example, inventory and structure inform coupling and grouping).\n- If business vocabulary, subdomains, or bounded contexts are uncertain, use `references/domain-analysis.md` **before or alongside Pattern 5** (see Bounded contexts below).\n\n## Ordered workflow (Patterns 1–5)\n\n| Step | Pattern                            | Primary reference                                                                                          |\n| ---- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |\n| 1    | Identify and size components       | `references/pattern-01-identify-and-size.md` (optional: `pattern-01-identify-and-size-quick-reference.md`) |\n| 2    | Common domain detection            | `references/pattern-02-common-domain.md` (optional: `pattern-02-common-domain-quick-reference.md`)         |\n| 3    | Flattening / hierarchy             | `references/pattern-03-flattening.md` (optional: `pattern-03-flattening-quick-reference.md`)               |\n| 4    | Coupling analysis                  | `references/pattern-04-coupling.md`                                                                        |\n| 5    | Domain identification and grouping | `references/pattern-05-domain-grouping.md` (optional: `pattern-05-domain-grouping-quick-reference.md`)     |\n\n## Pattern 6 — planning and extraction\n\n**Pattern 6** (_create domain services / extraction_) is not duplicated here. After Pattern 5, switch to **decomposition-planning-roadmap** for phased extraction order, milestones, and migration-style planning. For full legacy migration strategy (strangler-fig, cross-stack rewrites, research-heavy plans), optionally use **legacy-migration-planner** in addition.\n\n## Bounded contexts and DDD strategic design\n\n- **Patterns 1–4** focus on **structural** inventory, duplication, hierarchy, and **coupling** between parts of the codebase.\n- **Pattern 5** produces **candidate** groupings aligned with **solution-space** boundaries (which components belong together as services).\n- **Strategic DDD** (subdomains, bounded contexts, ubiquitous language) is covered in `references/domain-analysis.md`, with optional `domain-analysis-quick-reference.md` and `domain-analysis-examples.md`. Use it when you need to validate or refine boundaries against business language, not only folder structure.",
+      "metadata": {
+        "hasScripts": false,
+        "hasReferences": true,
+        "referenceFiles": [
+          "domain-analysis-examples.md",
+          "domain-analysis-quick-reference.md",
+          "domain-analysis.md",
+          "pattern-01-identify-and-size-quick-reference.md",
+          "pattern-01-identify-and-size.md",
+          "pattern-02-common-domain-quick-reference.md",
+          "pattern-02-common-domain.md",
+          "pattern-03-flattening-quick-reference.md",
+          "pattern-03-flattening.md",
+          "pattern-04-coupling.md",
+          "pattern-05-domain-grouping-quick-reference.md",
+          "pattern-05-domain-grouping.md"
+        ],
+        "lastModified": "2026-04-16"
+      }
+    },
+    {
+      "id": "modular-design-principles",
+      "name": "modular-design-principles",
+      "description": ">",
+      "category": "architecture",
+      "path": "skills/(architecture)/modular-design-principles/SKILL.md",
+      "content": "# Modular Design Principles\n\nUse this skill when reasoning about **structure and boundaries** in any codebase. It intentionally avoids framework names, folder conventions, and tooling — map principles to your stack locally.\n\n## What to load\n\n| Task | Where |\n|------|--------|\n| Principles table + violations + workflows (this file) | `SKILL.md` |\n| Per-principle definition, agent rules, abstract examples | `references/principles.md` |\n\n---\n\n## Layered mental model\n\n- **Composition roots** (applications, hosts, runners): wire modules together; keep orchestration thin.\n- **Modules / bounded contexts**: cohesive units of behavior and data ownership; each should be understandable and testable on its own.\n- **Shared kernels** (use sparingly): only stable, truly cross-cutting concepts; resist turning them into a grab-bag of “everything everyone needs.”\n\nHow you physically lay this out (mono repo, multi repo, packages, libraries) is a **delivery choice**, not the definition of modularity. The principles below still apply.\n\n---\n\n## The ten principles\n\n| # | Principle | Intent |\n|---|-----------|--------|\n| 1 | **Well-defined boundaries** | A small, stable **public surface**; everything else is internal. Consumers depend on contracts, not internals. |\n| 2 | **Composability** | Modules can be used alone or combined without special knowledge of each other’s internals. |\n| 3 | **Independence** | No hidden shared mutable state across boundaries; each module should be testable in isolation (with fakes or test doubles at the edges). |\n| 4 | **Individual scale** | Resources (compute, storage, rate limits, batch size) can be tuned **per module** where it matters, without rewriting others. |\n| 5 | **Explicit communication** | Cross-module interaction uses **documented contracts** (APIs, events, messages, shared types) — not incidental coupling. |\n| 6 | **Replaceability** | Dependencies on other modules are expressed through **interfaces or protocols** so implementations can change. |\n| 7 | **Deployment independence** | Modules do not assume they share a process, host, or release cadence unless that is an explicit architectural decision. |\n| 8 | **State isolation** | Each module **owns** its persistent state and naming; no silent sharing of the same logical data store or ambiguous global names across boundaries. |\n| 9 | **Observability** | Each module can be diagnosed on its own: logs, metrics, traces, health — attributable to the unit that emitted them. |\n| 10 | **Fail independence** | Failures are **contained** (timeouts, bulkheads, circuit breaking, idempotency) so one module’s outage does not blindly cascade. |\n\n**Principle 8** is often the hardest: ambiguous ownership of data or names is a frequent source of “works until it doesn’t” integration bugs.\n\nFor **depth** (rules for agents + abstract examples per principle), load `references/principles.md`.\n\n---\n\n## Typical violations (stated abstractly)\n\n1. **Colliding concepts** — the same name or schema for different things in different modules, or duplicate “global” definitions that diverge over time.\n2. **Reach-through persistence** — one module reading or writing another module’s tables, buckets, or documents **without** going through an agreed contract.\n3. **Centralized data ownership** — a single persistence layer that registers and exposes **all** stores for **all** modules, encouraging hidden coupling.\n4. **Logic at the edge** — business rules in transport adapters (HTTP handlers, UI, CLI) instead of domain/application code.\n5. **Edge talking to storage directly** — adapters depending on low-level persistence APIs instead of use cases or application services.\n6. **Unscoped transactions** — writes that span boundaries without clear transaction ownership and failure semantics.\n7. **Leaky exports** — repositories, internal services, or implementation types exposed as the module’s public API.\n8. **Facades that aren’t thin** — “public” entry points that embed querying, mapping, or policy instead of delegating to the right layer inside the module.\n\n---\n\n## Creating a bounded context (workflow)\n\nUse when introducing a **new** cohesive area of the system (greenfield module or extracted domain).\n\n1. **Scope and language** — Name the context; list core nouns/verbs (**ubiquitous language**). Reject vague names that collide with other contexts.\n2. **Responsibilities** — What decisions happen **only** here? What is explicitly *out* of scope?\n3. **State ownership** — Which facts are **authoritative** in this context? Where are they stored conceptually (even if storage tech is undecided)?\n4. **Public contract** — Operations and/or events other contexts may use. Version or evolve this contract intentionally.\n5. **Integrations** — For each neighbor: sync call, async message, shared read model, or batch sync? Document **consistency** (immediate, eventual) and **failure** behavior.\n6. **Invariants and lifecycles** — What must always be true inside this boundary? What starts/completes a lifecycle?\n7. **Isolation check** — Can you test core behavior **without** spinning up unrelated contexts (fakes at ports)?\n8. **Observability** — How will you trace a request or job through **this** context with clear identifiers?\n\n**Cross-module interaction** (while designing): prefer the **minimal** contract; define **timeouts**, **retries**, **idempotency** for async; avoid “temporary” direct store access as a shortcut.\n\n---\n\n## When to split or merge\n\n**Default:** **fewer boundaries** until real pain appears — “flat is often better” than premature fragmentation. Splitting adds coordination, versioning, and operational cost.\n\n### Six-criteria test (favor split when several are true)\n\n| # | Criterion | Question |\n|---|-----------|----------|\n| 1 | **Language** | Do the sub-areas use **different vocabulary** or conflicting definitions of the same word? |\n| 2 | **Rate of change** | Do parts **change on different cadences** or for unrelated reasons (most edits touch one side)? |\n| 3 | **Scale / SLO** | Do parts need **different** throughput, latency, or availability targets? |\n| 4 | **Consistency** | Do they need **different transaction boundaries** (cannot share one atomic write model cleanly)? |\n| 5 | **Ownership** | Would **different teams** or clear ownership lines reduce conflict and review churn? |\n| 6 | **Pain signal** | Is there **observable** integration pain: ripple effects, fear of change, unclear who owns a bug? |\n\n**Cohesion / coupling (qualitative).** Favor **high cohesion** inside a module and **low, explicit coupling** between modules. If the only motivation is “files got big” or “folder aesthetics,” **merge or wait**.\n\n### When to merge or not split yet\n\n- Boundaries are **artificial** (same language, same lifecycle, constant cross-calls).\n- Splitting would **duplicate** logic or data without a clear **single writer** rule.\n- Team is not ready to **own** contracts, versioning, and ops for extra units.\n\n### Decision prompts (short)\n\n- Would separation **reduce** accidental coupling more than it **increases** coordination cost?\n- Is there a natural **ubiquitous language** boundary, or only a technical seam?\n\n---\n\n## Sub-units inside a bounded context\n\nSometimes one outer boundary is right, but inside it there are **named sub-areas** (subdomains, feature areas). Principles still apply **within** the context.\n\n**Ownership**\n\n- Each sub-unit should **own** its slice of model and persistence concerns where possible — avoid one mega registration layer that wires **every** store and repository for **every** sub-unit in one place (encourages reach-through and hidden coupling).\n\n**Cross-sub-unit access**\n\n- Prefer **internal application APIs** or **thin internal facades** (same context, explicit surface) over peers importing each other’s storage types directly.\n- For async flows, prefer **enriched payloads** so handlers do not **chat** across sub-units for data that could travel with the event/command.\n\n**Shared kernel inside the context**\n\n- Small, stable shared types or enums can live in a **narrow shared area** — but resist a growing “utils” dump that becomes the real coupling point.\n\n**Anti-pattern:** A single “persistence” or “data” sub-module that becomes the **only** place that knows about all tables/documents for all sub-units, and everyone else reaches through it — same problems as cross-context reach-through, **inside** the boundary.\n\n---\n\n## Architecture compliance pass\n\nUse for **reviews** or **audits** without assuming tooling. Treat items as **signals**, not proof — confirm with domain experts.\n\n### Dependency and API signals\n\n- **Inbound vs outbound:** Dependencies should align with your chosen architecture (e.g. domain at the center, adapters outside). **Inward** leaks of infrastructure types into core logic are a smell.\n- **Public surface:** Can you list **exported** operations/events/types without including storage or internal services? If not, boundaries are leaky.\n- **Neighbor imports:** Types or clients from **module A** used in **module B** — are they only **contract** types, or persistence/implementation types?\n\n### Persistence and data signals\n\n- **Reach-through:** References to another context’s **physical** data (schema, collection, bucket name) outside an agreed contract.\n- **Naming collisions:** Same logical name for different things, or shared global IDs without a documented mapping rule.\n- **Transaction ownership:** Writes that span contexts without a clear **saga**, **outbox**, or **single-owner** rule and documented failure cases.\n\n### Operational signals\n\n- **Blame:** Incidents where “we don’t know which module owns this row/behavior” → ownership or observability gap.\n- **Cascades:** One dependency’s slowdown or failure takes down unrelated user journeys → missing **timeouts**, **bulkheads**, or **degradation** paths.\n\n### Severity heuristic (for reporting)\n\n| Tier | Meaning |\n|------|--------|\n| **P0** | Data corruption risk, security boundary violation, or cross-context persistence with no contract |\n| **P1** | Unclear ownership, leaky public API, missing failure semantics at boundaries |\n| **P2** | Observability gaps, composability smells, tech debt that increases future coupling |\n\n**Maturity note:** Scoring is **qualitative** unless the team defines numeric gates. Use trends: fewer P0/P1 over time, clearer contracts.\n\n---\n\n## Quick checklist (before proposing structure)\n\n- [ ] Public API is minimal; internals are not exported casually.\n- [ ] Names and storage ownership are unambiguous per module.\n- [ ] No cross-module persistence shortcuts without an explicit contract.\n- [ ] Business rules sit behind a clear application/domain layer, not only in adapters.\n- [ ] Cross-module calls have explicit failure and timeout behavior.\n- [ ] Observability can answer “which module failed and why?” without spelunking.\n- [ ] If the context has sub-units: each has clear ownership; no monolithic “registers everything” persistence grab-bag.\n\n---\n\n## Relationship to stack-specific skills\n\nWhen a project has **concrete conventions** (framework modules, DI, repository patterns, folder layout, codegen, CI checks), prefer those documents for **how** to implement. Use **this** skill for **why** boundaries exist and **what** good modular design optimizes for — so stack-specific advice stays aligned with the same principles.",
+      "metadata": {
+        "hasScripts": false,
+        "hasReferences": true,
+        "referenceFiles": [
+          "principles.md"
+        ],
+        "lastModified": "2026-04-16"
       }
     },
     {
@@ -963,7 +1006,7 @@
           "directories-timing-mistakes.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -984,7 +1027,7 @@
           "state-isolation.md",
           "testing-patterns.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1002,7 +1045,7 @@
           "deployment-patterns.md",
           "netlify-toml.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1016,7 +1059,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1030,7 +1073,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1044,7 +1087,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1058,7 +1101,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1074,7 +1117,7 @@
         "referenceFiles": [
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1091,7 +1134,7 @@
           "implementation-guide.md",
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1105,7 +1148,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1119,7 +1162,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1137,7 +1180,7 @@
           "core-web-vitals.md",
           "image-optimization.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1151,7 +1194,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1167,7 +1210,7 @@
         "referenceFiles": [
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1181,7 +1224,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1195,7 +1238,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1215,7 +1258,7 @@
           "project-structure.md",
           "storage-patterns.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1240,7 +1283,7 @@
           "service-types.md",
           "troubleshooting-basics.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1256,7 +1299,7 @@
         "referenceFiles": [
           "quick-reference.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1281,7 +1324,7 @@
           "python-fastapi-web-server-security.md",
           "python-flask-web-server-security.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1297,7 +1340,7 @@
         "referenceFiles": [
           "neo4j-import.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1314,7 +1357,7 @@
           "prompt-template.md",
           "security-controls-and-assets.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1328,7 +1371,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1342,7 +1385,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1368,7 +1411,7 @@
           "performance.md",
           "theme-development.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1386,7 +1429,7 @@
           "patterns.md",
           "quality-checklist.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1400,7 +1443,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1414,7 +1457,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1428,7 +1471,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1442,7 +1485,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1464,7 +1507,7 @@
           "red-team-adversarial.md",
           "socratic-questioning.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1495,7 +1538,7 @@
           "tasks.md",
           "validate.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-04-07"
       }
     },
     {
@@ -1509,7 +1552,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1523,7 +1566,7 @@
         "hasScripts": false,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-30"
       }
     },
     {
@@ -1539,7 +1582,7 @@
         "referenceFiles": [
           "guideline.md"
         ],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     },
     {
@@ -1553,7 +1596,7 @@
         "hasScripts": true,
         "hasReferences": false,
         "referenceFiles": [],
-        "lastModified": "2026-04-01"
+        "lastModified": "2026-03-01"
       }
     }
   ],
@@ -1635,7 +1678,7 @@
     }
   ],
   "stats": {
-    "totalSkills": 77,
+    "totalSkills": 79,
     "totalCategories": 15
   }
 }
