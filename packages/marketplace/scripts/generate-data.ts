@@ -1,3 +1,4 @@
+import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import matter from 'gray-matter'
 import * as path from 'path'
@@ -42,6 +43,19 @@ function loadRegistry(): SkillsRegistry {
   return JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf-8'))
 }
 
+function getGitLastModified(filePath: string): string {
+  try {
+    const date = execFileSync('git', ['log', '-1', '--format=%aI', '--', filePath], {
+      cwd: WORKSPACE_ROOT,
+      encoding: 'utf-8',
+    }).trim()
+    if (date) return date.split('T')[0]
+  } catch {
+    // git not available or file not tracked
+  }
+  return new Date().toISOString().split('T')[0]
+}
+
 function readSkillContent(registrySkill: RegistrySkill): { content: string; lastModified: string } {
   const skillFile = path.join(SKILLS_DIR, registrySkill.path, 'SKILL.md')
 
@@ -51,19 +65,16 @@ function readSkillContent(registrySkill: RegistrySkill): { content: string; last
   }
 
   const fileContent = fs.readFileSync(skillFile, 'utf-8')
-  const stats = fs.statSync(skillFile)
-  const lastModified = stats.mtime.toISOString().split('T')[0]
+  const lastModified = getGitLastModified(skillFile)
 
   try {
     const { content } = matter(fileContent)
     return { content: content.trim(), lastModified }
   } catch {
-    // If YAML frontmatter parsing fails, extract content manually
     console.warn(`Failed to parse frontmatter for ${registrySkill.name}, using fallback`)
     const lines = fileContent.split('\n')
     let contentStart = 0
 
-    // Skip frontmatter if it exists (between --- markers)
     if (lines[0] === '---') {
       const endIndex = lines.findIndex((line, idx) => idx > 0 && line === '---')
       contentStart = endIndex > 0 ? endIndex + 1 : 1
@@ -97,7 +108,7 @@ function generateMarketplaceData(): MarketplaceData {
       .filter((f) => f.startsWith('references/') && f.endsWith('.md'))
       .map((f) => path.basename(f))
 
-    // Read content and lastModified from filesystem
+    // Read content and lastModified from git history
     const { content, lastModified } = readSkillContent(registrySkill)
 
     return {
