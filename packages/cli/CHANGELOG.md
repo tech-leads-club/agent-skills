@@ -1,3 +1,13 @@
+## 1.4.7 (2026-04-20)
+
+### 🩹 Fixes
+
+- idea selection ([97f356b29](https://github.com/tech-leads-club/agent-skills/commit/97f356b29))
+
+### ❤️ Thank You
+
+- globsecure @globsecure
+
 ## 1.4.6 (2026-04-01)
 
 This was a version bump only for @tech-leads-club/agent-skills to align it with other projects, there were no code changes.
