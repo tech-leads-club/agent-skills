@@ -1,0 +1,62 @@
+{
+  "name": "Containers",
+  "level": 2,
+  "meta": { "direction": "TB" },
+  "nodes": [
+    { "id": "storefront", "label": "Storefront Web", "meta": { "type": "frontend", "technology": "nextjs" } },
+    { "id": "admin-app", "label": "Admin Web", "meta": { "type": "frontend", "technology": "react" } },
+    {
+      "id": "api-service",
+      "label": "API Service",
+      "subDiagramId": "api-components",
+      "meta": { "type": "service", "technology": "nodedotjs" }
+    },
+    { "id": "postgres", "label": "PostgreSQL", "meta": { "type": "database", "technology": "postgresql" } },
+    { "id": "event-bus", "label": "Event Bus", "meta": { "type": "queue", "technology": "rabbitmq" } },
+    { "id": "worker", "label": "Order Worker", "meta": { "type": "service", "technology": "nodedotjs" } }
+  ],
+  "edges": [
+    {
+      "id": "e-storefront-api",
+      "source": "storefront",
+      "target": "api-service",
+      "label": "REST",
+      "meta": { "type": "calls" }
+    },
+    {
+      "id": "e-admin-api",
+      "source": "admin-app",
+      "target": "api-service",
+      "label": "REST",
+      "meta": { "type": "calls" }
+    },
+    {
+      "id": "e-api-postgres",
+      "source": "api-service",
+      "target": "postgres",
+      "label": "reads/writes",
+      "meta": { "type": "writes" }
+    },
+    {
+      "id": "e-api-eventbus",
+      "source": "api-service",
+      "target": "event-bus",
+      "label": "order.created",
+      "meta": { "type": "publishes" }
+    },
+    {
+      "id": "e-worker-eventbus",
+      "source": "worker",
+      "target": "event-bus",
+      "label": "order.created",
+      "meta": { "type": "subscribes" }
+    },
+    {
+      "id": "e-worker-postgres",
+      "source": "worker",
+      "target": "postgres",
+      "label": "updates",
+      "meta": { "type": "writes" }
+    }
+  ]
+}

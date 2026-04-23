@@ -1,0 +1,34 @@
+{
+  "name": "System Context",
+  "level": 1,
+  "meta": { "direction": "TB" },
+  "nodes": [
+    { "id": "customer", "label": "Customer", "meta": { "type": "external" } },
+    { "id": "store-owner", "label": "Store Owner", "meta": { "type": "external" } },
+    { "id": "ecommerce", "label": "E-Commerce Platform", "subDiagramId": "containers", "meta": { "type": "system" } },
+    { "id": "stripe", "label": "Stripe", "meta": { "type": "external", "technology": "stripe" } }
+  ],
+  "edges": [
+    {
+      "id": "e-customer-ecommerce",
+      "source": "customer",
+      "target": "ecommerce",
+      "label": "browses and buys",
+      "meta": { "type": "calls" }
+    },
+    {
+      "id": "e-store-owner-ecommerce",
+      "source": "store-owner",
+      "target": "ecommerce",
+      "label": "manages catalog",
+      "meta": { "type": "calls" }
+    },
+    {
+      "id": "e-ecommerce-stripe",
+      "source": "ecommerce",
+      "target": "stripe",
+      "label": "processes payments",
+      "meta": { "type": "calls" }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "E-Commerce Platform",
+  "description": "A small e-commerce platform that lets store owners manage a product catalog and customers browse and purchase items.\n\nThe backend is split into a handful of services communicating via REST, with an event bus for order notifications. Data lives in PostgreSQL.\n\nDeployed on a single cloud provider using managed services where possible.",
+  "topDiagram": "system-context",
+  "diagrams": ["system-context", "containers", "api-components"]
+}

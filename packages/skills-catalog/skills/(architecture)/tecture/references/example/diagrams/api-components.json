@@ -1,0 +1,41 @@
+{
+  "name": "API Service — Components",
+  "level": 3,
+  "meta": { "direction": "LR" },
+  "nodes": [
+    { "id": "controllers", "label": "HTTP Controllers", "meta": { "type": "gateway", "isContainer": true } },
+    { "id": "auth-controller", "label": "Auth Controller", "parentId": "controllers", "meta": { "type": "service" } },
+    {
+      "id": "catalog-controller",
+      "label": "Catalog Controller",
+      "parentId": "controllers",
+      "meta": { "type": "service" }
+    },
+    { "id": "order-controller", "label": "Order Controller", "parentId": "controllers", "meta": { "type": "service" } },
+    { "id": "order-service", "label": "Order Service", "meta": { "type": "service" } },
+    { "id": "catalog-repo", "label": "Catalog Repository", "meta": { "type": "database" } }
+  ],
+  "edges": [
+    {
+      "id": "e-order-ctrl-order-svc",
+      "source": "order-controller",
+      "target": "order-service",
+      "label": "invokes",
+      "meta": { "type": "calls" }
+    },
+    {
+      "id": "e-catalog-ctrl-repo",
+      "source": "catalog-controller",
+      "target": "catalog-repo",
+      "label": "reads",
+      "meta": { "type": "reads" }
+    },
+    {
+      "id": "e-order-svc-catalog",
+      "source": "order-service",
+      "target": "catalog-repo",
+      "label": "reads",
+      "meta": { "type": "reads" }
+    }
+  ]
+}

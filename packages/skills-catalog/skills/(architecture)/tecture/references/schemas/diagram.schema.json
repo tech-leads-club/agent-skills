@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tecture://schema/diagram",
+  "title": "C4 Diagram",
+  "description": "One level of a C4 architecture diagram (nodes + edges).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "nodes"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "level": {
+      "type": "integer",
+      "enum": [1, 2, 3],
+      "description": "C4 level: 1=System Context, 2=Container, 3=Component."
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": { "enum": ["TB", "LR"] },
+        "layout": { "type": "string" }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Edge" }
+    }
+  },
+  "$defs": {
+    "Node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Globally unique kebab-case slug. Matches the filename under descriptions/."
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "parentId": {
+          "type": ["string", "null"],
+          "description": "Another node id in this same diagram whose meta.isContainer is true."
+        },
+        "subDiagramId": {
+          "type": ["string", "null"],
+          "description": "Slug of another diagram file (drill-down target)."
+        },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "type": {
+              "enum": [
+                "system",
+                "person",
+                "service",
+                "database",
+                "queue",
+                "gateway",
+                "frontend",
+                "cache",
+                "storage",
+                "external"
+              ]
+            },
+            "technology": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            },
+            "isContainer": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "Edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "label": { "type": "string" },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "type": {
+              "enum": ["calls", "reads", "writes", "publishes", "subscribes", "data-flow"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

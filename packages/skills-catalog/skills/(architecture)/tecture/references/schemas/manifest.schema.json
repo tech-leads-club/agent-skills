@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tecture://schema/manifest",
+  "title": "Architecture Manifest",
+  "description": "Top-level manifest for a file-based Tecture architecture.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "topDiagram", "diagrams"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable architecture name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Plain-text description (2-4 paragraphs, separated by \\n\\n). No markdown."
+    },
+    "topDiagram": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Slug of the entry-point diagram (file name under diagrams/ without .json). Kebab-case."
+    },
+    "diagrams": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "description": "All diagram slugs that belong to this architecture."
+    }
+  }
+}
