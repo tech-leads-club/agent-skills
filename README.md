@@ -112,6 +112,10 @@ A glimpse of what's available in our growing catalog:
   <a href="#-quick-start"><strong>→ Browse all skills</strong></a>
 </p>
 
+<p align="center">
+  Chinese users can also browse and install skills through <a href="https://skilery.com" target="_blank">Skills宝</a>.
+</p>
+
 ## 🚀 Quick Start
 
 ### Install Skills in Your Project
