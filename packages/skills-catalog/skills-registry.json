@@ -1321,6 +1321,21 @@
       "contentHash": "6fec09f7e43bb297ad6097e13469e85aa5b5d671a839b4f7e7871ef8eaa76c4e"
     },
     {
+      "name": "security-champion",
+      "description": "'Senior application security auditor for vulnerability detection in source code and npm dependency CVE audits with educational explanations and mandatory real-time CVE research. Use when: review this code for security issues, run a security audit, check my dependencies for vulnerabilities, is this code secure, npm audit help, CVE research, audit dependencies. Do NOT use for general security best practices guidance, threat modeling, or architecture advice unrelated to vulnerability detection.'",
+      "category": "security",
+      "path": "(security)/security-champion",
+      "files": [
+        "SKILL.md",
+        "references/dependency-ecosystems.md",
+        "references/response-formats.md",
+        "references/vulnerability-patterns.md"
+      ],
+      "author": "edmarpaulino",
+      "version": "1.0.0",
+      "contentHash": "163b0a47e9a0b6e7dd53a9daa0418c8a1c5e435673de89bb9a83078275a09d6a"
+    },
+    {
       "name": "security-ownership-map",
       "description": "'Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Use when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do NOT use for general maintainer lists, non-security ownership questions, or threat modeling (use security-threat-model).'",
       "category": "security",
