@@ -63,7 +63,7 @@
     "@nx/esbuild": "^22.6.3",
     "@nx/eslint": "^22.6.3",
     "@nx/eslint-plugin": "^22.6.3",
-    "@nx/jest": "22.6.3",
+    "@nx/jest": "^22.7.0",
     "@nx/js": "^22.6.3",
     "@nx/next": "^22.6.3",
     "@nx/node": "^22.6.3",
@@ -95,6 +95,14 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.58.0",
     "yaml": "^2.8.3"
+  },
+  "overrides": {
+    "follow-redirects": "^1.16.0",
+    "postcss": "^8.5.10",
+    "nx": {
+      "brace-expansion": "^5.0.5",
+      "yaml": "^2.8.3"
+    }
   },
   "nx": {
     "includedScripts": []
