@@ -193,6 +193,12 @@ agent-skills audit                   # Show recent operations
 agent-skills audit -n 20             # Show last 20 entries
 agent-skills audit --path            # Show audit log location
 
+# Generate audit report (multi-agent integration overview)
+agent-skills report                  # Interactive TUI with expandable sections
+agent-skills report --json           # Raw JSON output for automation
+agent-skills report --no-global      # Exclude global installations
+agent-skills report --threshold 3000 # Custom high-cost token threshold
+
 # Show contributors and credits
 agent-skills credits
 

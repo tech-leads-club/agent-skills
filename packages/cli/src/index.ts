@@ -114,6 +114,23 @@ program
     await runCliAudit(options)
   })
 
+// Report command
+program
+  .command('report')
+  .alias('audit-report')
+  .description('Generate a comprehensive audit report of AI integrations')
+  .option('--no-global', 'Exclude global installations')
+  .option('--threshold <tokens>', 'High-cost token threshold', '5000')
+  .option('--json', 'Output raw JSON instead of formatted report', false)
+  .action(async (options) => {
+    if (shouldUseInteractiveMode(options)) {
+      render(React.createElement(App, { command: 'report' }))
+      return
+    }
+    const { runCliReport } = await import('./cli/report')
+    await runCliReport(options)
+  })
+
 program.parse(process.argv)
 
 function shouldUseInteractiveMode(options: Record<string, unknown>): boolean {
