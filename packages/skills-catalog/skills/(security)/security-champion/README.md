@@ -8,7 +8,7 @@ Two operating modes, selected automatically from the user's request:
 
 **Mode 1 — Code Security Analysis.** Scans source files against a categorized pattern library (secrets, injection, auth, cryptography, modern frameworks, path traversal, SSTI, deserialization, ReDoS, IDOR). Every finding is mapped to OWASP Top 10 and presented with vulnerable-vs-secure code side-by-side and an explanation of the attack vector. Hardcoded secrets are redacted before being echoed back.
 
-**Mode 2 — Dependency Security Audit.** Detects the project's ecosystem from manifest/lockfile, verifies the audit command against the user's installed tool version (Currency Protocol), runs it, and cross-references findings against existing technical mitigations (`package.json overrides`, `go.mod replace`, `Cargo.toml [patch]`, etc.). For every Critical/High CVE, the agent executes a Mandatory Research Protocol against NVD, Exploit-DB, GitHub, and release notes — never relying on training data or stale reference commands, both of which are treated as outdated by default.
+**Mode 2 — Dependency Security Audit.** Detects the project's ecosystem from manifest/lockfile, verifies the audit command against the user's installed tool version (Currency Protocol), runs it, and cross-references findings against existing technical mitigations in the manifest (`package.json overrides`, `go.mod replace`, `Cargo.toml [patch]`, etc.). For every Critical/High CVE, the agent executes a Mandatory Research Protocol against NVD, Exploit-DB, GitHub, and release notes — never relying on training data or stale reference commands, both of which are treated as outdated by default. Findings the user has accepted as known risks should be suppressed via each ecosystem's native mechanism (`.snyk`, `dependabot.yml` ignore, `# nosec`, etc.) — the skill respects these.
 
 ## When to use
 
@@ -41,18 +41,15 @@ security-champion/
     └── dependency-ecosystems.md      Ecosystem detection, audit commands, override mechanisms
 ```
 
-## Override file: `.security-overrides.md`
+## Suppressions
 
-Findings the user has explicitly accepted as known risks are tracked in `.security-overrides.md` at the project root. The file is created lazily — only when the user accepts the first risk during triage. It is **not** created proactively.
+The skill does not introduce its own suppression mechanism. Use each ecosystem's native tooling for accepted risks:
 
-> **This file is specific to this skill.** It is not a community standard. The Node.js, Python, Java, Go, etc. ecosystems each have their own native suppression mechanisms (`.snyk`, `# nosec`, `.semgrepignore`, `suppression.xml`, `dependabot.yml ignore`, etc.). `.security-overrides.md` does not replace any of those — it complements them with an audit trail (`Review by` date, justification, research summary) that is human-readable and tool-agnostic. The skill respects native suppressions where the audit tool already filters them; `.security-overrides.md` covers what the native tooling cannot, like accepted code-finding patterns or CVEs that the user has consciously deferred.
+- **Code findings** — inline directives like `// eslint-disable-next-line`, `# nosec`, `# noqa`, `// semgrepignore`, `<!-- prettier-ignore -->`, etc. These live next to the code and survive refactors.
+- **CVE findings** — native scanner config: `.snyk`, `dependabot.yml` ignore, `cargo-audit.toml` ignore list, `pip-audit --ignore-vuln`, etc.
+- **Technical mitigations in manifests** — `package.json overrides`/`resolutions`, `pnpm.overrides`, `go.mod replace`, `Cargo.toml [patch]`, `pom.xml dependencyManagement`. The skill explicitly cross-references these against findings and reports them as **technically mitigated** rather than active.
 
-Two override types are tracked separately:
-
-- **Code findings** — accepted patterns from Mode 1. Default review window: 6 months.
-- **CVE overrides** — accepted CVEs from Mode 2. Default review window: 3 months for Critical/High. Each entry records the CVSS at acceptance time, whether public exploits existed, and any real-world attack reports — so the next session can detect material change.
-
-At the start of every session, if the file exists, the skill re-runs the research protocol on each CVE override and escalates back to an active finding when conditions change (e.g., a public exploit appeared after acceptance).
+The skill respects native suppressions whenever the underlying audit tool already filters them from its output.
 
 ## Security guarantees
 

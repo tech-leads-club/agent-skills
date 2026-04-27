@@ -21,81 +21,8 @@ Detect the user's language from their first message and respond consistently in 
 - Severity labels: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`
 - OWASP category codes from the current OWASP Top 10 release (e.g. `A05:2025`, `A07:2025`) — the year suffix and category number must reflect the latest release sourced via the Currency Protocol; do not reuse a year stamp from this file's examples without verification
 - CVE IDs, CVSS scores, package names, version strings, ecosystem placeholders (`[eco:audit-cmd]`, `[eco:install-cmd-exact]`, etc.)
-- Section keys in `.security-overrides.md` (`File`, `Reason`, `Accepted`, `Review by`, `CVSS at acceptance`, …)
 
 These are machine-recognizable conventions — translating them breaks tooling that consumes the output.
-
-## Override Management (Both Modes)
-
-At the start of every session, check if `.security-overrides.md` exists in the project root.
-
-- **File does not exist** → skip Override Review entirely and proceed to analysis. Do not create the file proactively. The file is created only when the user explicitly accepts a risk during a finding triage (see Override Creation Rules).
-- **File exists** → read it and run the Override Review before proceeding to analysis.
-
-### Override Review
-
-**For each code finding override:**
-
-1. Check if the suppressed pattern still exists in the referenced file and location.
-   - Pattern no longer present → suggest removing the override (it was fixed).
-   - File changed significantly since override was created → flag for re-evaluation.
-   - `Review by` date has passed → flag as stale, ask user to confirm or update.
-
-**For each CVE override:**
-
-1. Run the Mandatory Research Protocol for the CVE regardless of the existing override.
-2. Evaluate the result:
-   - Public exploits now available (were not when override was created) → escalate: present research, ask for explicit re-confirmation before suppressing. Treat as active finding until user confirms.
-   - Package has been updated past the fixed version → suggest removing the override (CVE is resolved). Treat as already fixed, not as active finding.
-   - `Review by` date has passed → flag as stale: present research, ask "Review by date has passed. Confirm you're still accepting this risk?" Treat as active finding until user re-confirms.
-   - Research unchanged and within `Review by` date → suppress silently, no user action needed.
-
-Report all stale, removable, or escalated overrides before presenting new findings. Continue the audit without waiting for override re-confirmation — present new findings in the same response and note which suppressed items are pending re-confirmation.
-
-### Override Creation Rules
-
-**Code findings** — accept after user confirms risk:
-
-1. Do not re-report the finding in future sessions.
-2. Append an entry to `.security-overrides.md` with: file, pattern category, reason, date, and a `Review by` date (default: 6 months).
-
-**CVE overrides** — require explicit confirmation and completed research:
-
-1. Run the full Mandatory Research Protocol first.
-2. Present research results and ask for explicit confirmation: "You've seen the research above. Confirm you're accepting this risk?"
-3. Only suppress after explicit confirmation.
-4. Append an entry to `.security-overrides.md` with: CVE ID, package, reason, date, and a `Review by` date (default: 3 months for Critical/High). The research summary field must record: CVSS score, whether public exploits existed at acceptance time, and real-world attack reports status.
-
-### Override File Format
-
-`.security-overrides.md` lives in the project root. Create it if it doesn't exist. Use this structure:
-
-```markdown
-# Security Overrides
-
-## Code Findings
-
-### [Pattern Category] — [brief description]
-
-- File: [path]
-- Reason: [why this is acceptable]
-- Accepted: [YYYY-MM-DD]
-- Review by: [YYYY-MM-DD]
-
-## CVE Overrides
-
-### [CVE-ID] ([package-name])
-
-- Reason: [why this is acceptable]
-- CVSS at acceptance: [score]
-- Public exploits at acceptance: [Yes/No]
-- Attack reports at acceptance: [Confirmed/Theoretical only]
-- Explicitly confirmed: Yes
-- Accepted: [YYYY-MM-DD]
-- Review by: [YYYY-MM-DD]
-```
-
----
 
 ## Currency Protocol (NON-NEGOTIABLE)
 
@@ -178,14 +105,12 @@ Rules:
 
 ### Workflow
 
-1. Run Override Management (see above).
-2. Run the Currency Protocol checks for Mode 1: fetch the current OWASP Top 10 categories and (if any cryptographic-parameter finding is anticipated) the current OWASP Password Storage Cheat Sheet thresholds.
-3. Read `references/vulnerability-patterns.md` for the full pattern library before analyzing.
-4. Scan for vulnerabilities across all categories: secrets, injection, auth, cryptography, modern framework issues.
-5. For findings that depend on currency-sensitive thresholds (e.g. bcrypt cost factor, Argon2id memory/time, PBKDF2 iterations), validate the matched value against the live OWASP recommendation captured in step 2 before classifying severity.
-6. Suppress any findings that have a valid, non-stale override in `.security-overrides.md`.
-7. Read `references/response-formats.md` for the exact response structure to use.
-8. Present findings ordered by severity: Critical → High → Medium → Low. Use the year-stamped OWASP category codes from step 2.
+1. Run the Currency Protocol checks for Mode 1: fetch the current OWASP Top 10 categories and (if any cryptographic-parameter finding is anticipated) the current OWASP Password Storage Cheat Sheet thresholds.
+2. Read `references/vulnerability-patterns.md` for the full pattern library before analyzing.
+3. Scan for vulnerabilities across all categories: secrets, injection, auth, cryptography, modern framework issues.
+4. For findings that depend on currency-sensitive thresholds (e.g. bcrypt cost factor, Argon2id memory/time, PBKDF2 iterations), validate the matched value against the live OWASP recommendation captured in step 1 before classifying severity.
+5. Read `references/response-formats.md` for the exact response structure to use.
+6. Present findings ordered by severity: Critical → High → Medium → Low. Use the year-stamped OWASP category codes from step 1.
 
 ### Analysis Rules
 
@@ -201,20 +126,18 @@ Rules:
 
 ### Workflow
 
-1. Run Override Management (see above).
-2. Read `references/dependency-ecosystems.md` to identify **all ecosystems in use** — scan for every matching lockfile/manifest as described in the Detection section of that file. **Monorepos with multiple ecosystems are common; never stop at the first match.** The "Detection" section also defines the audit order (Node.js → Python → Go → Rust → Java → Ruby → PHP) and the rule for resolving same-language conflicts (e.g., both `package-lock.json` and `yarn.lock` present).
-3. For each detected ecosystem, retrieve from `references/dependency-ecosystems.md`: the **reference** audit command, the override/pin mechanism, the manifest/lockfile names, and how to interpret the output. Treat the reference command as a baseline only — see step 4.
-4. Run the Currency Protocol checks for Mode 2 against each detected ecosystem's tooling: capture the installed tool version (`<tool> --version`), verify the audit command against `<tool> --help` (or the relevant subcommand help), and substitute the reference command with the current canonical command when they differ. Record the installed version and the actual command used in the audit report header.
-5. For each detected ecosystem, extract any technical overrides or version pins from its manifest file.
-6. For each detected ecosystem, run the audit command resolved in step 4. Parse the ENTIRETY of each output — no vulnerability may be skipped, in any ecosystem.
-7. For each finding (across all ecosystems), cross-reference against the technical overrides extracted in step 5 **for the same ecosystem**:
+1. Read `references/dependency-ecosystems.md` to identify **all ecosystems in use** — scan for every matching lockfile/manifest as described in the Detection section of that file. **Monorepos with multiple ecosystems are common; never stop at the first match.** The "Detection" section also defines the audit order (Node.js → Python → Go → Rust → Java → Ruby → PHP) and the rule for resolving same-language conflicts (e.g., both `package-lock.json` and `yarn.lock` present).
+2. For each detected ecosystem, retrieve from `references/dependency-ecosystems.md`: the **reference** audit command, the override/pin mechanism, the manifest/lockfile names, and how to interpret the output. Treat the reference command as a baseline only — see step 3.
+3. Run the Currency Protocol checks for Mode 2 against each detected ecosystem's tooling: capture the installed tool version (`<tool> --version`), verify the audit command against `<tool> --help` (or the relevant subcommand help), and substitute the reference command with the current canonical command when they differ. Record the installed version and the actual command used in the audit report header.
+4. For each detected ecosystem, extract any technical overrides or version pins from its manifest file.
+5. For each detected ecosystem, run the audit command resolved in step 3. Parse the ENTIRETY of each output — no vulnerability may be skipped, in any ecosystem.
+6. For each finding (across all ecosystems), cross-reference against the technical overrides extracted in step 4 **for the same ecosystem**:
    - Override/pin present + version resolves the CVE → mark as **technically mitigated**, do not treat as active finding. Report it in a "Mitigated by overrides" summary section, scoped to the ecosystem.
    - Override/pin present + version does NOT resolve the CVE → keep as active finding, flag the override as insufficient and explain why.
    - No override present → treat as active finding and proceed normally.
-8. Classify all active findings (from all ecosystems) using the Priority System below.
-9. For every active Critical/High CVE in any ecosystem: execute the Mandatory Research Protocol — including CVEs that have existing `.security-overrides.md` entries (research is never skipped; only suppression is conditional).
-10. Suppress active findings that have a valid, non-stale, explicitly confirmed override in `.security-overrides.md`.
-11. Read `references/response-formats.md` for the exact response structure to use. **In multi-ecosystem projects, repeat the entire Mode 2 response block once per ecosystem**, in the audit order from step 2.
+7. Classify all active findings (from all ecosystems) using the Priority System below.
+8. For every active Critical/High CVE in any ecosystem: execute the Mandatory Research Protocol below.
+9. Read `references/response-formats.md` for the exact response structure to use. **In multi-ecosystem projects, repeat the entire Mode 2 response block once per ecosystem**, in the audit order from step 1.
 
 ### Priority Classification
 
