@@ -8,22 +8,22 @@ Detection rules, audit commands, and override/pin mechanisms per ecosystem. Read
 
 Scan the project root for ALL of the following lockfiles and manifest files. Collect every match before proceeding — do not stop at the first one found.
 
-| File | Ecosystem |
-|------|-----------|
-| `package-lock.json` | Node.js — npm |
-| `yarn.lock` + `"resolutions"` in `package.json` | Node.js — Yarn |
-| `pnpm-lock.yaml` | Node.js — pnpm |
-| `yarn.lock` (no `resolutions`) | Node.js — Yarn (classic) |
-| `uv.lock` | Python — uv |
-| `poetry.lock` | Python — Poetry |
-| `Pipfile.lock` | Python — Pipenv |
-| `requirements.txt` (no lockfile) | Python — pip |
-| `go.mod` | Go |
-| `Cargo.lock` | Rust |
-| `pom.xml` | Java — Maven |
-| `build.gradle` or `build.gradle.kts` | Java — Gradle |
-| `Gemfile.lock` | Ruby |
-| `composer.lock` | PHP |
+| File                                            | Ecosystem                |
+| ----------------------------------------------- | ------------------------ |
+| `package-lock.json`                             | Node.js — npm            |
+| `yarn.lock` + `"resolutions"` in `package.json` | Node.js — Yarn           |
+| `pnpm-lock.yaml`                                | Node.js — pnpm           |
+| `yarn.lock` (no `resolutions`)                  | Node.js — Yarn (classic) |
+| `uv.lock`                                       | Python — uv              |
+| `poetry.lock`                                   | Python — Poetry          |
+| `Pipfile.lock`                                  | Python — Pipenv          |
+| `requirements.txt` (no lockfile)                | Python — pip             |
+| `go.mod`                                        | Go                       |
+| `Cargo.lock`                                    | Rust                     |
+| `pom.xml`                                       | Java — Maven             |
+| `build.gradle` or `build.gradle.kts`            | Java — Gradle            |
+| `Gemfile.lock`                                  | Ruby                     |
+| `composer.lock`                                 | PHP                      |
 
 When multiple ecosystems are detected (monorepo), audit all of them. Run ecosystems in this order: Node.js → Python → Go → Rust → Java → Ruby → PHP. Present a combined report with a section per ecosystem.
 
@@ -34,12 +34,14 @@ When the same language appears with multiple package managers (e.g. both `packag
 ## Node.js — npm
 
 **Audit command:**
+
 ```bash
 npm audit --json
 npm outdated --json
 ```
 
 **Override mechanism:** `overrides` field in `package.json`
+
 ```json
 { "overrides": { "vulnerable-pkg": "1.2.3" } }
 ```
@@ -51,11 +53,13 @@ npm outdated --json
 ## Node.js — Yarn
 
 **Audit command:**
+
 ```bash
 yarn audit --json
 ```
 
 **Override mechanism:** `resolutions` field in `package.json`
+
 ```json
 { "resolutions": { "vulnerable-pkg": "1.2.3" } }
 ```
@@ -67,11 +71,13 @@ yarn audit --json
 ## Node.js — pnpm
 
 **Audit command:**
+
 ```bash
 pnpm audit --json
 ```
 
 **Override mechanism:** `pnpm.overrides` field in `package.json`
+
 ```json
 { "pnpm": { "overrides": { "vulnerable-pkg": "1.2.3" } } }
 ```
@@ -81,6 +87,7 @@ pnpm audit --json
 ## Python — uv
 
 **Audit command:**
+
 ```bash
 uv pip audit
 ```
@@ -94,6 +101,7 @@ uv pip audit
 ## Python — Poetry
 
 **Audit command:**
+
 ```bash
 pip-audit --json   # install with: pip install pip-audit
 ```
@@ -107,6 +115,7 @@ pip-audit --json   # install with: pip install pip-audit
 ## Python — pip / Pipenv
 
 **Audit command:**
+
 ```bash
 pip-audit --json
 # or
@@ -120,11 +129,13 @@ safety check --json
 ## Go
 
 **Audit command:**
+
 ```bash
 govulncheck ./...
 ```
 
 **Override mechanism:** `replace` directive in `go.mod`
+
 ```
 replace vulnerable-module v1.2.3 => safe-fork v1.2.4
 replace vulnerable-module v1.2.3 => ../local-patched-version
@@ -137,11 +148,13 @@ replace vulnerable-module v1.2.3 => ../local-patched-version
 ## Rust
 
 **Audit command:**
+
 ```bash
 cargo audit --json
 ```
 
 **Override mechanism:** `[patch]` section in `Cargo.toml`
+
 ```toml
 [patch.crates-io]
 vulnerable-crate = { version = "1.2.3" }
@@ -156,11 +169,13 @@ vulnerable-crate = { git = "https://github.com/owner/crate", branch = "fix-branc
 ## Java — Maven
 
 **Audit command:**
+
 ```bash
 mvn org.owasp:dependency-check-maven:check -Dformat=JSON
 ```
 
 **Override mechanism:** `<dependencyManagement>` section in `pom.xml`
+
 ```xml
 <dependencyManagement>
   <dependencies>
@@ -180,11 +195,13 @@ mvn org.owasp:dependency-check-maven:check -Dformat=JSON
 ## Java — Gradle
 
 **Audit command:**
+
 ```bash
 ./gradlew dependencyCheckAnalyze
 ```
 
 **Override mechanism:** `resolutionStrategy` in `build.gradle`
+
 ```groovy
 configurations.all {
   resolutionStrategy {
@@ -194,6 +211,7 @@ configurations.all {
 ```
 
 Kotlin DSL (`build.gradle.kts`):
+
 ```kotlin
 configurations.all {
   resolutionStrategy {
@@ -207,11 +225,13 @@ configurations.all {
 ## Ruby
 
 **Audit command:**
+
 ```bash
 bundle audit check --update
 ```
 
 **Override mechanism:** Direct version pinning in `Gemfile`
+
 ```ruby
 gem 'vulnerable-gem', '1.2.3'
 ```
@@ -223,11 +243,13 @@ No transitive override support — if a transitive dependency is vulnerable, the
 ## PHP
 
 **Audit command:**
+
 ```bash
 composer audit
 ```
 
 **Override mechanism:** Version constraints in `composer.json`
+
 ```json
 {
   "require": {
@@ -237,6 +259,7 @@ composer audit
 ```
 
 For transitive deps: use `conflict` to block vulnerable versions or `replace` to substitute a package:
+
 ```json
 {
   "replace": {
