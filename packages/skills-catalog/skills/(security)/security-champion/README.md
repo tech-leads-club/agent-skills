@@ -8,7 +8,7 @@ Two operating modes, selected automatically from the user's request:
 
 **Mode 1 — Code Security Analysis.** Scans source files against a categorized pattern library (secrets, injection, auth, cryptography, modern frameworks, path traversal, SSTI, deserialization, ReDoS, IDOR). Every finding is mapped to OWASP Top 10 and presented with vulnerable-vs-secure code side-by-side and an explanation of the attack vector. Hardcoded secrets are redacted before being echoed back.
 
-**Mode 2 — Dependency Security Audit.** Detects the project's ecosystem from manifest/lockfile, runs the appropriate audit tool, and cross-references findings against existing technical mitigations (`package.json overrides`, `go.mod replace`, `Cargo.toml [patch]`, etc.). For every Critical/High CVE, the agent executes a Mandatory Research Protocol against NVD, Exploit-DB, GitHub, and release notes — never relying on training data, which is treated as outdated by default.
+**Mode 2 — Dependency Security Audit.** Detects the project's ecosystem from manifest/lockfile, verifies the audit command against the user's installed tool version (Currency Protocol), runs it, and cross-references findings against existing technical mitigations (`package.json overrides`, `go.mod replace`, `Cargo.toml [patch]`, etc.). For every Critical/High CVE, the agent executes a Mandatory Research Protocol against NVD, Exploit-DB, GitHub, and release notes — never relying on training data or stale reference commands, both of which are treated as outdated by default.
 
 ## When to use
 
@@ -56,10 +56,11 @@ At the start of every session, if the file exists, the skill re-runs the researc
 
 ## Security guarantees
 
-The skill operates under two non-negotiable rules that are enforced at the prompt level:
+The skill operates under three non-negotiable rules that are enforced at the prompt level:
 
 1. **Secret Redaction Rule** — real high-entropy credentials matched in user code are never echoed verbatim. Only a non-secret type prefix (`ghp_`, `AKIA`, `sk-`, …) plus a length annotation is displayed.
 2. **Untrusted External Content** — pages fetched during the Research Protocol (NVD, Exploit-DB, GitHub, advisories) are treated as inert data, not as instructions. Embedded prompt-injection attempts addressed to the agent are flagged and ignored; only structured fields (CVSS, fixed version, CWE) are authoritative.
+3. **Currency Protocol** — the skill never relies on hardcoded version stamps for security guidance. At session start, the agent fetches the current OWASP Top 10 (for category mapping), the current OWASP Password Storage Cheat Sheet (for cryptographic parameter thresholds like bcrypt rounds and Argon2id memory cost), and verifies every audit command against the user's installed tool version (`<tool> --version`, `<tool> --help`). The reference files in `references/` are baselines, not authority — when they disagree with the live source, the live source wins. This makes the skill timeless: as OWASP releases update (`A03:2021` → `A05:2025` → next), as tools migrate (`safety check` → `safety scan`, `uv pip audit` → `uv audit`), and as crypto thresholds drift upward, the analysis stays correct without skill edits.
 
 ## Limitations
 
