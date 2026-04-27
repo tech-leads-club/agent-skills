@@ -17,8 +17,9 @@ Detect the user's language from their first message and respond consistently in 
 
 - Redaction markers: `<ghp_... 40 chars>`, `<REDACTED N chars>`, `<RSA PRIVATE KEY redacted, N lines>`
 - Research checklist field names: `NVD Verified`, `Public Exploits`, `Patch Validated`, `Attack Reports`, `Breaking Changes`, `[UNAVAILABLE — source unreachable]`
+- Currency Protocol markers: `[CURRENCY UNVERIFIED — <source> unreachable]`, `[SCANNER ABSENT — <tool> not installed]`
 - Severity labels: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`
-- OWASP category codes: `A03:2021`, `A07:2021`, etc.
+- OWASP category codes from the current OWASP Top 10 release (e.g. `A05:2025`, `A07:2025`) — the year suffix and category number must reflect the latest release sourced via the Currency Protocol; do not reuse a year stamp from this file's examples without verification
 - CVE IDs, CVSS scores, package names, version strings, ecosystem placeholders (`[eco:audit-cmd]`, `[eco:install-cmd-exact]`, etc.)
 - Section keys in `.security-overrides.md` (`File`, `Reason`, `Accepted`, `Review by`, `CVSS at acceptance`, …)
 
@@ -96,6 +97,46 @@ Report all stale, removable, or escalated overrides before presenting new findin
 
 ---
 
+## Currency Protocol (NON-NEGOTIABLE)
+
+Security guidance, audit tooling, and recommended cryptographic parameters change over time. **Internal training data, hardcoded examples in this skill, and any cached content in `references/` are treated as outdated by default.** Verifying the current state of every standard or tool the analysis depends on is mandatory at session start — running an audit against stale guidance is a protocol failure that can give the user false confidence that their code or dependencies are safe when they are not.
+
+### Currency checks per mode
+
+**Mode 1 (Code Security Analysis):**
+
+1. **OWASP Top 10 currency** — fetch the latest OWASP Top 10 release from `owasp.org/Top10/` (primary source) and use the year-stamped category codes from that release for every finding (e.g. `A05:2025`). If `owasp.org` is unreachable or has been reorganized, fall back to the project's source-of-truth GitHub repo at `github.com/OWASP/Top10` (the README and per-category markdown files there are authoritative and more durable to site changes). The category numbering changes between releases (Injection has occupied different positions across the 2017, 2021, and later releases), so always source the codes — both the number and the year — from the current published version, never from this file's illustrative examples.
+2. **Cryptographic parameter currency** — when a finding involves a configurable cost factor (bcrypt rounds, Argon2id memory/time/parallelism, PBKDF2 iterations, scrypt N/r/p), fetch the current **OWASP Password Storage Cheat Sheet** (`cheatsheetseries.owasp.org`) to obtain up-to-date minimum thresholds. The regex bounds in `references/vulnerability-patterns.md` are illustrative starting heuristics only; the live OWASP value is authoritative for severity classification and the recommended fix.
+
+**Mode 2 (Dependency Security Audit):**
+
+1. **Tool version detection** — for each detected ecosystem, run `<tool> --version` to capture the user's installed version (e.g. `uv --version`, `npm --version`, `cargo --version`, `safety --version`). Record it in the audit report header so the user can correlate the recommendation with their installed tooling.
+2. **Command currency verification** — before running any audit command from `references/dependency-ecosystems.md`, verify it against the installed tool version via `<tool> --help` (or `<tool> audit --help` / `<tool> <subcommand> --help`). If the reference command is deprecated, removed, or renamed in the user's version, use the current syntax and note the discrepancy in the report so the reference file can be updated upstream.
+3. **Tool replacement currency** — some auditing tools have been retired or superseded (e.g. `safety check` was replaced by `safety scan` in Safety CLI v3+; ecosystems may migrate from third-party scanners to native subcommands). When the tool listed in the reference is no longer the canonical approach, prefer the current canonical tool, document the migration in the report, and fall back to the reference only if no current alternative exists.
+4. **Tool-absent escalation** — if `<tool> --version` fails because the binary is not installed (`which <tool>` empty, `command not found`), do NOT silently skip the ecosystem and do NOT treat the absence as a clean audit. Instead: (a) record `[SCANNER ABSENT — <tool> not installed]` in the audit report header for that ecosystem, (b) emit the install command for the user's platform (e.g. `npm install -g pnpm`, `cargo install cargo-audit`, `go install golang.org/x/vuln/cmd/govulncheck@latest`, `pip install pip-audit`, `uv tool install pip-audit`), (c) mark the ecosystem's findings count as `UNKNOWN`, and (d) proceed to the next ecosystem. A missing scanner is a finding in itself — surface it to the user so they can install and re-run, never let it look like the ecosystem passed.
+
+### Currency source priority
+
+When sources disagree, resolve in this order:
+
+1. **The user's installed tool** (`--version`, `--help` output) — authoritative for command syntax and the audit that will actually run on their machine.
+2. **Official documentation** (project homepage, OWASP cheat sheets, NVD, ecosystem release notes) — authoritative for recommended values, deprecation status, and security thresholds.
+3. **`references/vulnerability-patterns.md`, `references/dependency-ecosystems.md`** — baseline only; useful when network is unavailable but never preferred over real-time sources for security-critical decisions.
+
+### Currency unavailable
+
+If a currency source is unreachable:
+
+- Proceed with the reference baseline.
+- Mark the affected output with `[CURRENCY UNVERIFIED — <source> unreachable]`.
+- For Mode 1 OWASP categories, use the most recent year stamp from this skill's examples and explicitly note the unverified status in the response.
+- For Mode 2 audit commands, mention that the command was not verified against the installed tool version and may produce errors if the tool has changed.
+- Never silently proceed with stale guidance — the user must know when verification was skipped so they can decide whether to retry or accept the residual risk.
+
+The currency checks above apply **regardless of whether the user explicitly asked for "current" or "latest" guidance** — security analysis without currency verification is a protocol failure on par with reproducing a hardcoded credential.
+
+---
+
 ## Mode 1: Code Security Analysis
 
 **Trigger**: User shares source code files or asks for security review of specific code.
@@ -138,11 +179,13 @@ Rules:
 ### Workflow
 
 1. Run Override Management (see above).
-2. Read `references/vulnerability-patterns.md` for the full pattern library before analyzing.
-3. Scan for vulnerabilities across all categories: secrets, injection, auth, cryptography, modern framework issues.
-4. Suppress any findings that have a valid, non-stale override in `.security-overrides.md`.
-5. Read `references/response-formats.md` for the exact response structure to use.
-6. Present findings ordered by severity: Critical → High → Medium → Low.
+2. Run the Currency Protocol checks for Mode 1: fetch the current OWASP Top 10 categories and (if any cryptographic-parameter finding is anticipated) the current OWASP Password Storage Cheat Sheet thresholds.
+3. Read `references/vulnerability-patterns.md` for the full pattern library before analyzing.
+4. Scan for vulnerabilities across all categories: secrets, injection, auth, cryptography, modern framework issues.
+5. For findings that depend on currency-sensitive thresholds (e.g. bcrypt cost factor, Argon2id memory/time, PBKDF2 iterations), validate the matched value against the live OWASP recommendation captured in step 2 before classifying severity.
+6. Suppress any findings that have a valid, non-stale override in `.security-overrides.md`.
+7. Read `references/response-formats.md` for the exact response structure to use.
+8. Present findings ordered by severity: Critical → High → Medium → Low. Use the year-stamped OWASP category codes from step 2.
 
 ### Analysis Rules
 
@@ -160,17 +203,18 @@ Rules:
 
 1. Run Override Management (see above).
 2. Read `references/dependency-ecosystems.md` to identify **all ecosystems in use** — scan for every matching lockfile/manifest as described in the Detection section of that file. **Monorepos with multiple ecosystems are common; never stop at the first match.** The "Detection" section also defines the audit order (Node.js → Python → Go → Rust → Java → Ruby → PHP) and the rule for resolving same-language conflicts (e.g., both `package-lock.json` and `yarn.lock` present).
-3. For each detected ecosystem, retrieve from `references/dependency-ecosystems.md`: the audit command, the override/pin mechanism, the manifest/lockfile names, and how to interpret the output.
-4. For each detected ecosystem, extract any technical overrides or version pins from its manifest file.
-5. For each detected ecosystem, run its audit command. Parse the ENTIRETY of each output — no vulnerability may be skipped, in any ecosystem.
-6. For each finding (across all ecosystems), cross-reference against the technical overrides extracted in step 4 **for the same ecosystem**:
+3. For each detected ecosystem, retrieve from `references/dependency-ecosystems.md`: the **reference** audit command, the override/pin mechanism, the manifest/lockfile names, and how to interpret the output. Treat the reference command as a baseline only — see step 4.
+4. Run the Currency Protocol checks for Mode 2 against each detected ecosystem's tooling: capture the installed tool version (`<tool> --version`), verify the audit command against `<tool> --help` (or the relevant subcommand help), and substitute the reference command with the current canonical command when they differ. Record the installed version and the actual command used in the audit report header.
+5. For each detected ecosystem, extract any technical overrides or version pins from its manifest file.
+6. For each detected ecosystem, run the audit command resolved in step 4. Parse the ENTIRETY of each output — no vulnerability may be skipped, in any ecosystem.
+7. For each finding (across all ecosystems), cross-reference against the technical overrides extracted in step 5 **for the same ecosystem**:
    - Override/pin present + version resolves the CVE → mark as **technically mitigated**, do not treat as active finding. Report it in a "Mitigated by overrides" summary section, scoped to the ecosystem.
    - Override/pin present + version does NOT resolve the CVE → keep as active finding, flag the override as insufficient and explain why.
    - No override present → treat as active finding and proceed normally.
-7. Classify all active findings (from all ecosystems) using the Priority System below.
-8. For every active Critical/High CVE in any ecosystem: execute the Mandatory Research Protocol — including CVEs that have existing `.security-overrides.md` entries (research is never skipped; only suppression is conditional).
-9. Suppress active findings that have a valid, non-stale, explicitly confirmed override in `.security-overrides.md`.
-10. Read `references/response-formats.md` for the exact response structure to use. **In multi-ecosystem projects, repeat the entire Mode 2 response block once per ecosystem**, in the audit order from step 2.
+8. Classify all active findings (from all ecosystems) using the Priority System below.
+9. For every active Critical/High CVE in any ecosystem: execute the Mandatory Research Protocol — including CVEs that have existing `.security-overrides.md` entries (research is never skipped; only suppression is conditional).
+10. Suppress active findings that have a valid, non-stale, explicitly confirmed override in `.security-overrides.md`.
+11. Read `references/response-formats.md` for the exact response structure to use. **In multi-ecosystem projects, repeat the entire Mode 2 response block once per ecosystem**, in the audit order from step 2.
 
 ### Priority Classification
 

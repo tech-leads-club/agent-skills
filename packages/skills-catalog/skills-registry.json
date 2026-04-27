@@ -1322,7 +1322,7 @@
     },
     {
       "name": "security-champion",
-      "description": "Senior application security auditor for vulnerability detection in source code and dependency CVE audits across 12+ ecosystems (npm, yarn, pnpm, pip, Poetry, uv, Go, Rust, Maven, Gradle, Ruby, PHP) with educational explanations and mandatory real-time CVE research. Use when the user asks to review this code for security issues, run a security audit, check dependencies for vulnerabilities, asks is this code secure, is this code safe, audit dependencies, research a CVE, find CVEs in pyproject.toml, scan go.mod for vulnerabilities, audit Cargo.lock, audit my Gemfile.lock, scan composer.lock, or check pom.xml for known CVEs. Do NOT use for general security best practices guidance, threat modeling, or architecture advice unrelated to vulnerability detection.",
+      "description": "Security auditor for vulnerability detection in source code and dependency CVE audits across 12+ ecosystems with educational explanations and real-time CVE research. Use when the user asks to review code for security issues, run a security audit, check dependencies for vulnerabilities, is this code secure, is this code safe, audit dependencies, research a CVE, find CVEs in lockfiles or manifests. Do NOT use for general security best practices guidance, threat modeling, or architecture advice unrelated to vulnerability detection.",
       "category": "security",
       "path": "(security)/security-champion",
       "files": [
@@ -1332,9 +1332,9 @@
         "references/response-formats.md",
         "references/vulnerability-patterns.md"
       ],
-      "author": "edmarpaulino",
+      "author": "Edmar Paulino - github.com/edmarpaulino",
       "version": "1.0.0",
-      "contentHash": "7288d7bf99ede2c43b9594c663efba998e9867126d97bdabb18f83fc80e76db7"
+      "contentHash": "6d338c941e591238310552092a28e886b9efa090dda0fc4c1c27621b24b2b724"
     },
     {
       "name": "security-ownership-map",
