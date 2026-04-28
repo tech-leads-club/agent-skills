@@ -1,0 +1,80 @@
+name: 'Security Scan Notify'
+description: 'Create or update a GitHub Issue when security scan fails'
+
+runs:
+  using: composite
+  steps:
+    - name: Create/Update GitHub Issue on failure
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          let results;
+          try {
+            results = JSON.parse(fs.readFileSync('.security-scan-results.json', 'utf8'));
+          } catch {
+            results = { summary: { critical: 0, high: 0, medium: 0 }, skills: [] };
+          }
+          const { summary, skills } = results;
+
+          // Group issues by skill
+          const bySkill = {};
+          for (const issue of (skills || [])) {
+            if (!bySkill[issue.skill]) bySkill[issue.skill] = [];
+            bySkill[issue.skill].push(issue);
+          }
+
+          const body = [
+            '## 🔒 Security Scan Failed',
+            '',
+            '| Severity | Count |',
+            '|----------|-------|',
+            `| 🔴 Critical | ${summary.critical} |`,
+            `| 🟠 High | ${summary.high} |`,
+            `| 🟡 Medium | ${summary.medium} |`,
+            '',
+            '### Affected Skills',
+            '',
+            ...Object.entries(bySkill).map(([skill, issues]) =>
+              `#### ${skill}\n` + issues.map(i =>
+                `- **[${i.code}]** (${i.severity}) ${i.extra_data?.reason || i.message}`
+              ).join('\n')
+            ),
+            '',
+            '---',
+            '',
+            '**How to fix:**',
+            '1. Fix the security issue in the skill',
+            '2. If this is a false positive, add an entry to `packages/skills-catalog/security-scan-allowlist.yaml`',
+            '',
+            `[View run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`,
+            '',
+            '_This issue is managed automatically by the security scan pipeline._'
+          ].join('\n');
+
+          // Check for existing open issue to avoid duplicates
+          const existing = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: 'security-scan',
+            state: 'open'
+          });
+
+          if (existing.data.length > 0) {
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existing.data[0].number,
+              body
+            });
+            console.log(`Updated issue #${existing.data[0].number}`);
+          } else {
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Security Scan: Issues Found in Skills',
+              body,
+              labels: ['security-scan', 'automated']
+            });
+            console.log(`Created issue #${created.data.number}`);
+          }

@@ -1,0 +1,69 @@
+{
+  "name": "@tech-leads-club/skills-catalog",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/skills-catalog",
+  "projectType": "library",
+  "tags": [
+    "scope:skills"
+  ],
+  "targets": {
+    "generate-registry": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx packages/skills-catalog/src/generate-registry.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/skills/**/*"
+      ],
+      "outputs": [
+        "{projectRoot}/skills-registry.json"
+      ]
+    },
+    "generate-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx nx run @tech-leads-club/skills-catalog:generate-registry",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "generate-registry"
+      ],
+      "options": {
+        "commands": [
+          "mkdir -p {projectRoot}/dist",
+          "cp {projectRoot}/package.json {projectRoot}/dist/",
+          "cp {projectRoot}/skills-registry.json {projectRoot}/dist/",
+          "cp -r {projectRoot}/skills {projectRoot}/dist/skills"
+        ],
+        "cwd": "{workspaceRoot}",
+        "parallel": false
+      },
+      "inputs": [
+        "{projectRoot}/package.json",
+        "{projectRoot}/skills-registry.json",
+        "{projectRoot}/skills/**/*"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -e \"const fs = require('fs'); const skills = fs.readdirSync('packages/skills-catalog/skills', {withFileTypes: true}).filter(d => d.isDirectory()); console.log('✅ Found', skills.length, 'skill directories');\"",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "security-scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx packages/skills-catalog/src/scan-skills.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

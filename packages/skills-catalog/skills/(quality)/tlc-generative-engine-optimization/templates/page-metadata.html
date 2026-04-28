@@ -1,0 +1,33 @@
+<!-- GEO Page Metadata Template
+     Replace ALL_CAPS placeholders with real values.
+     Place inside <head>. -->
+
+<!-- Primary identity -->
+<title>PAGE_TITLE | SITE_NAME</title>
+<meta name="description" content="BRIEF_DESCRIPTION_150_CHARS_MAX" />
+
+<!-- Canonical URL (required — prevents duplicate content signals) -->
+<link rel="canonical" href="https://example.com/page-path/" />
+
+<!-- Language (required for Understandable pillar) -->
+<!-- Remove hreflang block if page has no translations -->
+<link rel="alternate" hreflang="en" href="https://example.com/page-path/" />
+<link rel="alternate" hreflang="pt-BR" href="https://example.com/pt/page-path/" />
+<link rel="alternate" hreflang="x-default" href="https://example.com/page-path/" />
+
+<!-- Open Graph (used by social previews; also read by some AI agents) -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="PAGE_TITLE" />
+<meta property="og:description" content="BRIEF_DESCRIPTION_150_CHARS_MAX" />
+<meta property="og:url" content="https://example.com/page-path/" />
+<meta property="og:image" content="https://example.com/images/page-og.png" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Article dates (mirrors datePublished/dateModified in JSON-LD) -->
+<meta property="article:published_time" content="YYYY-MM-DDTHH:MM:SSZ" />
+<meta property="article:modified_time" content="YYYY-MM-DDTHH:MM:SSZ" />
+
+<!-- Crawler control (default: allow all) -->
+<!-- Remove or adjust only if you need to restrict specific crawlers. -->
+<!-- To block GPTBot (OpenAI training) but allow OAI-SearchBot (ChatGPT Search): use robots.txt, not meta tags. -->
+<meta name="robots" content="index, follow" />

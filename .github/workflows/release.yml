@@ -1,0 +1,404 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, labeled]
+  # Enables "scan before merge" for fork PRs: when using Merge Queue, this job runs with base repo secrets
+  merge_group:
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  ci:
+    name: CI Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled'
+    concurrency:
+      group: ci-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+      NODE_OPTIONS: '--experimental-vm-modules'
+      PARALLEL_JOBS: 8
+    steps:
+      - name: Generate App Token
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          github-app-token: ${{ steps.app-token.outputs.token || github.token }}
+          app-slug: ${{ steps.app-token.outputs.app-slug }}
+          git-config: true
+
+      - name: Run Affected
+        run: npx nx affected -t lint test build --parallel=3 || NX_NO_CLOUD=true npx nx affected -t lint test build --parallel=3
+        continue-on-error: false
+
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
+      - name: Security Scan
+        id: security-scan
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: ./.github/actions/security-scan
+        with:
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          artifact-name: security-scan-results-pr
+
+      - name: Note (fork PRs)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "Security scan is skipped for PRs from forks (GitHub does not expose secrets to fork workflows)."
+          echo "Maintainers will run the scan before merge or you can run \`npm run scan\` locally with your own SNYK_TOKEN."
+
+      - name: Comment on PR if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: ./.github/actions/security-scan-pr-comment
+        with:
+          github-token: ${{ steps.app-token.outputs.token || github.token }}
+
+      - name: Print Security Scan Results (for forks)
+        if: steps.security-scan.outputs.scan-outcome == 'failure' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: ./.github/actions/security-scan-print-results
+
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
+            "
+          fi
+      - name: Fail if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
+
+      - name: Self-Healing CI
+        if: always()
+        run: npx nx fix-ci || NX_NO_CLOUD=true npx nx fix-ci
+        continue-on-error: true
+
+  # Runs when a PR is added to Merge Queue (including fork PRs). Has access to secrets; blocks merge if scan fails.
+  security-scan-merge-queue:
+    name: Security Scan (merge queue)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'merge_group'
+    env:
+      PARALLEL_JOBS: 8
+    steps:
+      - name: Checkout merge commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
+      - name: Security Scan
+        id: security-scan
+        uses: ./.github/actions/security-scan
+        with:
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          artifact-name: security-scan-results-merge-queue
+
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
+            "
+          fi
+      - name: Fail job if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
+
+  snapshot:
+    name: Snapshot Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: snapshot-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'action: snapshot'
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.NX_CLOUD_ACCESS_TOKEN || '' }}
+      NX_NO_CLOUD: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    steps:
+      - name: Generate App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Verify CI Passed
+        uses: ./.github/actions/check-ci-status
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Publish Snapshot
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          (npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
+            --git-tag=false --git-commit=false --stage-changes=false && \
+          npx nx release publish --tag snapshot --provenance) || \
+          (NX_NO_CLOUD=true npx nx release version 0.0.0-pr${{ github.event.number }}.${SHORT_SHA} \
+            --git-tag=false --git-commit=false --stage-changes=false && \
+          NX_NO_CLOUD=true npx nx release publish --tag snapshot --provenance)
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      - name: Notify PR
+        uses: ./.github/actions/snapshot-notification
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+
+  approve-release:
+    name: Approve Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: publish
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor != 'tech-leads-club-release-bot[bot]' &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+    steps:
+      - name: Approval Gate
+        run: echo "✅ Release approved for publish"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor != 'tech-leads-club-release-bot[bot]' &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+    env:
+      PARALLEL_JOBS: 8
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Validate Skills Structure
+        uses: ./.github/actions/validate-skills
+
+      - name: Security Scan
+        id: security-scan
+        uses: ./.github/actions/security-scan
+        with:
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          artifact-name: security-scan-results
+          retention-days: '30'
+
+      - name: Notify on failure
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        uses: ./.github/actions/security-scan-notify
+
+      - name: Print scan failure summary
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: |
+          echo "::error::Security scan failed. See summary below and the 'Security Scan' step log for details."
+          if [ -f .security-scan-results.json ]; then
+            node -e "
+              const r = require('fs').readFileSync('.security-scan-results.json', 'utf8');
+              const d = JSON.parse(r);
+              const s = d.summary || {};
+              console.log('Critical:', s.critical, '| High:', s.high, '| Medium:', s.medium);
+              (d.skills || []).filter(i => ['critical','high'].includes(i.severity)).forEach(i =>
+                console.log('  -', i.skill + ':', i.code, '(' + i.severity + ')', (i.extra_data?.reason || i.message).slice(0, 100)));
+            "
+          fi
+      - name: Fail job if scan failed
+        if: steps.security-scan.outputs.scan-outcome == 'failure'
+        run: exit 1
+
+  release:
+    name: Production Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [approve-release, security-scan]
+    concurrency:
+      group: publish-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+    steps:
+      - name: Generate App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          github-app-token: ${{ steps.app-token.outputs.token }}
+          app-slug: ${{ steps.app-token.outputs.app-slug }}
+          git-config: true
+
+      - name: Generate Skills Data
+        run: npm run generate:data || NX_NO_CLOUD=true npm run generate:data
+
+      - name: Commit Data if Changed
+        run: |
+          REGISTRY_PATH="packages/skills-catalog/skills-registry.json"
+          MARKETPLACE_DATA_PATH="packages/marketplace/src/data/skills.json"
+          SKILLS_DIR="packages/skills-catalog/skills"
+
+          git add "$REGISTRY_PATH" "$MARKETPLACE_DATA_PATH"
+          git add "$SKILLS_DIR"
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): update generated skills data" || true
+          fi
+
+      - name: Check for Releasable Changes
+        id: check-changes
+        run: |
+          CLI_TAG=$(git tag --sort=-creatordate --list 'v[0-9]*' | head -1)
+          CATALOG_TAG=$(git tag --sort=-creatordate --list 'skills-catalog-v[0-9]*' | head -1)
+          MCP_TAG=$(git tag --sort=-creatordate --list 'mcp-v[0-9]*' | head -1)
+
+          echo "Latest CLI tag: $CLI_TAG"
+          echo "Latest Catalog tag: $CATALOG_TAG"
+          echo "Latest MCP tag: $MCP_TAG"
+
+          GROUPS_TO_RELEASE=""
+
+          # Check CLI changes (packages/cli/ + libs/core/)
+          if [ -n "$CLI_TAG" ]; then
+            CLI_CHANGES=$(git diff --name-only "$CLI_TAG"..HEAD -- packages/cli/ libs/core/ | head -1)
+            if [ -n "$CLI_CHANGES" ]; then
+              echo "✅ CLI has source changes since $CLI_TAG"
+              GROUPS_TO_RELEASE="cli"
+            else
+              echo "⏭️ CLI has no source changes since $CLI_TAG"
+            fi
+          else
+            echo "⚠️ No CLI release tag found, treating as first release"
+            GROUPS_TO_RELEASE="cli"
+          fi
+
+          # Check skills-catalog changes
+          if [ -n "$CATALOG_TAG" ]; then
+            CATALOG_CHANGES=$(git diff --name-only "$CATALOG_TAG"..HEAD -- packages/skills-catalog/ | head -1)
+            if [ -n "$CATALOG_CHANGES" ]; then
+              echo "✅ skills-catalog has source changes since $CATALOG_TAG"
+              GROUPS_TO_RELEASE="${GROUPS_TO_RELEASE:+$GROUPS_TO_RELEASE,}skills-catalog"
+            else
+              echo "⏭️ skills-catalog has no source changes since $CATALOG_TAG"
+            fi
+          else
+            echo "⚠️ No skills-catalog release tag found, treating as first release"
+            GROUPS_TO_RELEASE="${GROUPS_TO_RELEASE:+$GROUPS_TO_RELEASE,}skills-catalog"
+          fi
+
+          # Check MCP changes (packages/mcp/ + libs/core/)
+          if [ -n "$MCP_TAG" ]; then
+            MCP_CHANGES=$(git diff --name-only "$MCP_TAG"..HEAD -- packages/mcp/ libs/core/ | head -1)
+            if [ -n "$MCP_CHANGES" ]; then
+              echo "✅ MCP has source changes since $MCP_TAG"
+              GROUPS_TO_RELEASE="${GROUPS_TO_RELEASE:+$GROUPS_TO_RELEASE,}mcp"
+            else
+              echo "⏭️ MCP has no source changes since $MCP_TAG"
+            fi
+          else
+            echo "⚠️ No MCP release tag found, treating as first release"
+            GROUPS_TO_RELEASE="${GROUPS_TO_RELEASE:+$GROUPS_TO_RELEASE,}mcp"
+          fi
+
+          echo "groups_to_release=$GROUPS_TO_RELEASE" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$GROUPS_TO_RELEASE" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo ""
+            echo "📦 Groups to release: $GROUPS_TO_RELEASE"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo ""
+            echo "⏭️ No groups have releasable changes"
+          fi
+
+      - name: Release Version and Publish
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          npx nx release --yes --groups=${{ steps.check-changes.outputs.groups_to_release }} || \
+          NX_NO_CLOUD=true npx nx release --yes --groups=${{ steps.check-changes.outputs.groups_to_release }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NODE_AUTH_TOKEN: ''
+          NPM_CONFIG_PROVENANCE: true
+          NX_NO_CLOUD: true
+
+      - name: Skip Release (No Changes)
+        if: steps.check-changes.outputs.has_changes != 'true'
+        run: echo "⏭️ No releasable changes detected in release-group projects. Skipping release."

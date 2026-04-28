@@ -1,0 +1,12 @@
+{
+  "name": "@tech-leads-club/skill-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "@nx/devkit": "^22.5.0",
+    "@tech-leads-club/core": "*"
+  },
+  "generators": "./generators.json"
+}

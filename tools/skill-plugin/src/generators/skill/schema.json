@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "Skill",
+  "title": "Create a new skill",
+  "description": "Generates a new skill with SKILL.md template",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Skill name (kebab-case)",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What is the skill name? (kebab-case)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of the skill",
+      "x-prompt": "Briefly describe what the skill does:"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category ID for the skill (kebab-case). If the category doesn't exist, it will be created.",
+      "x-prompt": "Which category should this skill belong to? (e.g., 'development', 'creation')"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author of the skill (e.g. github.com/username)",
+      "default": "TODO"
+    },
+    "skillVersion": {
+      "type": "string",
+      "description": "Initial version of the skill",
+      "default": "1.0.0"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
