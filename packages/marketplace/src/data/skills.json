@@ -1475,6 +1475,20 @@
       }
     },
     {
+      "id": "tactical-ddd",
+      "name": "tactical-ddd",
+      "description": "Detects anemic domain models, validates and refactors them into rich domain models, and enforces tactical DDD patterns (Entities, Value Objects, Aggregates, Domain Services, Domain Events). Use when the user asks to validate, review, or check domain models or DDD code; detect anemia; refactor domain objects; improve encapsulation; or mentions terms like \"anemic model\", \"rich domain\", \"aggregate\", \"value object\", \"domain event\", \"ubiquitous language\", \"is this good DDD\", \"does this follow DDD\", or \"check my domain\". Do NOT use for module/service boundary design or architectural decomposition (use modular-design-principles), strategic DDD context mapping, or non-domain code (DTOs, controllers, infrastructure adapters).",
+      "category": "architecture",
+      "path": "skills/(architecture)/tactical-ddd/SKILL.md",
+      "content": "# Tactical DDD — Rich Domain Modeling\n\n## Workflow\n\nDetermine the user's intent first:\n\n| Intent | Phases to run |\n|--------|--------------|\n| \"validate / review / check / is this correct?\" | Phase 1 + 2 only → report findings, ask before refactoring |\n| \"fix / refactor / improve / clean up\" | Phase 1 + 2 + 3 |\n| \"how should I design / model this?\" | Load [reference.md](reference.md) directly |\n\n### Phase 1 — Detect\nLoad [detection.md](detection.md) and scan the target code for anemia signals. Produce a severity score and list of affected classes.\n\n### Phase 2 — Assess\nFor each affected class, determine the correct building block:\n\n| Has unique identity tracked over time? | Has invariants tying multiple objects? | → Building Block |\n|----------------------------------------|----------------------------------------|-----------------|\n| Yes | — | **Entity** |\n| No | — | **Value Object** |\n| Yes (root) + children with shared invariants | Yes | **Aggregate** |\n| Operation spans multiple Aggregates/doesn't belong to any | — | **Domain Service** |\n\nPrefer Value Objects over Entities. Prefer small Aggregates over large ones.\n\n**If intent was validate/review**: stop here. Report findings using the output format below. Ask \"Would you like me to apply these fixes?\" before proceeding.\n\n### Phase 3 — Refactor\nLoad [refactoring.md](refactoring.md) for step-by-step moves. Apply in this order:\n1. Replace setter chains with a single expressive method\n2. Move service logic into the Aggregate that owns it\n3. Add business guards at the top of each method\n4. Publish a Domain Event after each successful state change\n5. Replace primitive types with Value Objects\n\nFor deep pattern questions (boundary design, event modeling, service vs. entity decision), load [reference.md](reference.md).\n\n---\n\n## Quick Anemia Signals (scan first)\n\n```\npublic setX() / public setY()        → behaviour should be encapsulated\nservice.doX(entity, ...)              → logic likely belongs in entity\nentity.setA(); entity.setB(); ...     → setter chain = missing intent method\nno domain methods beyond getters      → pure data bag\n```\n\n---\n\n## Golden Rules\n\n1. **Behaviour with data** — Objects own both state and the operations that change it\n2. **Ubiquitous Language** — Method names come from the domain, not CRUD (`commitTo`, not `setStatus`)\n3. **Small Aggregates** — Root + Value Objects by default; add child Entities only for true invariants\n4. **One transaction = one Aggregate** — Cross-Aggregate rules use eventual consistency via Domain Events\n5. **Reference by ID** — Never hold object references to other Aggregates\n6. **Value Objects first** — Use Entities only when individual identity is essential\n7. **Domain Services sparingly** — Excessive services → anemic model\n8. **Protect invariants** — The Aggregate is the last line of defence; never trust the caller\n\n---\n\n## Output Format\n\nWhen reviewing code, report:\n\n```\n## Anemia Diagnosis: <ClassName>\n\nSeverity: [None | Mild | Moderate | Severe]\n\nIssues:\n- <description of problem>\n\nRecommended refactoring:\n- <specific move from refactoring.md>\n```\n\nWhen refactoring, show a before/after diff for each class touched.",
+      "metadata": {
+        "hasScripts": false,
+        "hasReferences": false,
+        "referenceFiles": [],
+        "lastModified": "2026-04-28"
+      }
+    },
+    {
       "id": "technical-design-doc-creator",
       "name": "technical-design-doc-creator",
       "description": "Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to \"write a design doc\", \"create a TDD\", \"technical spec\", \"architecture document\", \"RFC\", \"design proposal\", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).",
@@ -1678,7 +1692,7 @@
     }
   ],
   "stats": {
-    "totalSkills": 79,
+    "totalSkills": 80,
     "totalCategories": 15
   }
 }

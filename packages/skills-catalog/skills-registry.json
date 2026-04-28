@@ -1451,6 +1451,19 @@
       "contentHash": "bef6b5a9f23b3186af259c1041c2561e9af15fa94810009d72d775bb217aa3ca"
     },
     {
+      "name": "tactical-ddd",
+      "description": "Detects anemic domain models, validates and refactors them into rich domain models, and enforces tactical DDD patterns (Entities, Value Objects, Aggregates, Domain Services, Domain Events). Use when the user asks to validate, review, or check domain models or DDD code; detect anemia; refactor domain objects; improve encapsulation; or mentions terms like \"anemic model\", \"rich domain\", \"aggregate\", \"value object\", \"domain event\", \"ubiquitous language\", \"is this good DDD\", \"does this follow DDD\", or \"check my domain\". Do NOT use for module/service boundary design or architectural decomposition (use modular-design-principles), strategic DDD context mapping, or non-domain code (DTOs, controllers, infrastructure adapters).",
+      "category": "architecture",
+      "path": "(architecture)/tactical-ddd",
+      "files": [
+        "SKILL.md",
+        "detection.md",
+        "refactoring.md",
+        "reference.md"
+      ],
+      "contentHash": "4a2b9b2a60a75af4703828d802c6ef21072c1de5e9a50db6155d383589044615"
+    },
+    {
       "name": "technical-design-doc-creator",
       "description": "Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to \"write a design doc\", \"create a TDD\", \"technical spec\", \"architecture document\", \"RFC\", \"design proposal\", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).",
       "category": "creation",
