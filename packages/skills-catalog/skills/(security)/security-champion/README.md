@@ -68,3 +68,7 @@ The skill operates under three non-negotiable rules that are enforced at the pro
 ## License
 
 CC-BY-4.0
+
+## Credits
+
+Adapted from the [Security Champion chatmode](https://gist.github.com/felipfr/58d2812aede6284b45762fd09d66e47b) by [@felipfr](https://github.com/felipfr), which established the dual-mode structure (Code Security Analysis + Dependency Audit), the Mandatory Research Protocol, and the educational approach that this skill builds on.
