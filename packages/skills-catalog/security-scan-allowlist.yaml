@@ -250,6 +250,20 @@ entries:
   # Skills for security analysis, threat modeling, and ownership mapping
   # ============================================================================
 
+  - skill: security-champion
+    code: W011
+    reason: >
+      The Currency Protocol and Mandatory Research Protocol are non-negotiable core
+      functionality: the skill fetches from authoritative security sources (OWASP Top 10,
+      OWASP Password Storage Cheat Sheet, NVD, Exploit-DB, GitHub Advisories, and package
+      release notes) to prevent stale CVE data from producing false confidence. The skill
+      includes an explicit "Untrusted External Content" section that treats all fetched
+      payloads as inert data, not instructions, with documented prompt-injection protections.
+      Sources are restricted to known canonical security databases — no arbitrary URL ingestion.
+    allowedBy: github.com/edmarpaulino
+    allowedAt: "2026-04-28"
+    expiresAt: "2027-04-28"
+
   - skill: security-ownership-map
     code: W011
     reason: >
