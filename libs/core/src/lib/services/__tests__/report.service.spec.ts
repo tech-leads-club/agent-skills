@@ -129,7 +129,7 @@ describe('generateAuditReport', () => {
   })
 
   it('generates recommendations for high-cost skills', async () => {
-    const bigContent = 'a'.repeat(40000)
+    const bigContent = 'This is a realistic skill body with varied content for testing. '.repeat(500)
     const ports = createPorts({
       existingPaths: new Set(['/workspace/.cursor/skills']),
       dirEntries: {
@@ -185,7 +185,7 @@ describe('generateAuditReport', () => {
   })
 
   it('sorts recommendations by severity (error > warning > info)', async () => {
-    const bigContent = 'a'.repeat(40000)
+    const bigContent = 'This is a realistic skill body with varied content for testing. '.repeat(500)
     const ports = createPorts({
       existingPaths: new Set(['/workspace/.cursor/skills']),
       dirEntries: {

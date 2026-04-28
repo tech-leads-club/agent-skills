@@ -2,7 +2,13 @@ import { describe, expect, it, jest } from '@jest/globals'
 
 import type { CorePorts, EnvPort, FileSystemPort, HttpPort, LoggerPort, PackageResolverPort, PathsPort, ShellPort } from '../../ports'
 
-import { DEFAULT_PROVIDERS, estimateCosts, estimateSkillTokens, estimateTokensFromChars } from '../token-estimator.service'
+import {
+  DEFAULT_PROVIDERS,
+  estimateCosts,
+  estimateSkillTokens,
+  estimateTokensFromChars,
+  estimateTokensFromText,
+} from '../token-estimator.service'
 
 const createPorts = (fileMap: Record<string, string> = {}): CorePorts => {
   const dirEntries: Record<string, { name: string; isDirectory: () => boolean }[]> = {}
@@ -62,6 +68,23 @@ describe('estimateTokensFromChars', () => {
   })
 })
 
+describe('estimateTokensFromText', () => {
+  it('returns 0 for empty string', () => {
+    expect(estimateTokensFromText('')).toBe(0)
+  })
+
+  it('returns accurate BPE token count for English text', () => {
+    const tokens = estimateTokensFromText('Hello, world!')
+    expect(tokens).toBe(4)
+  })
+
+  it('handles markdown with code blocks', () => {
+    const text = '# Heading\n\nSome paragraph text.\n\n```js\nconst x = 1;\n```'
+    const tokens = estimateTokensFromText(text)
+    expect(tokens).toBeGreaterThan(0)
+  })
+})
+
 describe('estimateSkillTokens', () => {
   it('returns zero tokens for a missing directory', async () => {
     const ports = createPorts({})
@@ -87,14 +110,14 @@ describe('estimateSkillTokens', () => {
 
     const result = await estimateSkillTokens(ports, '/skills/test', 'test', 'cursor', 'local')
 
-    expect(result.descriptionTokens).toBe(estimateTokensFromChars(desc.length))
-    expect(result.bodyTokens).toBe(estimateTokensFromChars(body.length))
-    expect(result.resourceTokens).toBe(estimateTokensFromChars(refContent.length))
+    expect(result.descriptionTokens).toBe(estimateTokensFromText(desc))
+    expect(result.bodyTokens).toBe(estimateTokensFromText(body))
+    expect(result.resourceTokens).toBe(estimateTokensFromText(refContent))
     expect(result.totalTokens).toBe(result.descriptionTokens + result.bodyTokens + result.resourceTokens)
   })
 
   it('flags high-cost skills based on total tokens', async () => {
-    const bigBody = 'a'.repeat(24000)
+    const bigBody = 'This is a realistic skill body with varied content for testing. '.repeat(500)
     const skillMd = `---\nname: big\ndescription: A big skill.\n---\n${bigBody}`
     const ports = createPorts({
       '/skills/big/SKILL.md': skillMd,

@@ -1,7 +1,18 @@
 import { join } from 'node:path'
 
+import { type Tiktoken, getEncoding } from 'js-tiktoken'
+
 import type { CorePorts } from '../ports'
 import type { AgentType, CostEstimate, ProviderPricing, SkillTokenEstimate } from '../types'
+
+let _encoding: Tiktoken | null = null
+
+function getEncoder(): Tiktoken {
+  if (!_encoding) {
+    _encoding = getEncoding('cl100k_base')
+  }
+  return _encoding
+}
 
 export const DEFAULT_PROVIDERS: ProviderPricing[] = [
   { name: 'Anthropic', model: 'Claude Opus', inputCostPerMTok: 15, outputCostPerMTok: 75 },
@@ -11,9 +22,15 @@ export const DEFAULT_PROVIDERS: ProviderPricing[] = [
 
 const HIGH_COST_THRESHOLD_DEFAULT = 5000
 
+/** @deprecated Use `estimateTokensFromText` for accurate BPE token counts. */
 export function estimateTokensFromChars(charCount: number): number {
   if (charCount <= 0) return 0
   return Math.ceil(charCount / 4)
+}
+
+export function estimateTokensFromText(text: string): number {
+  if (!text) return 0
+  return getEncoder().encode(text).length
 }
 
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/
@@ -35,7 +52,7 @@ function extractBody(content: string): string {
 
 async function sumResourceTokens(ports: CorePorts, skillPath: string): Promise<number> {
   const resourceDirs = ['scripts', 'references', 'assets', 'templates']
-  let totalChars = 0
+  let totalTokens = 0
 
   for (const dir of resourceDirs) {
     const dirPath = join(skillPath, dir)
@@ -47,7 +64,7 @@ async function sumResourceTokens(ports: CorePorts, skillPath: string): Promise<n
         if (entry.isDirectory()) continue
         try {
           const content = await ports.fs.readFile(join(dirPath, entry.name), 'utf-8')
-          totalChars += content.length
+          totalTokens += estimateTokensFromText(content)
         } catch {
           // skip unreadable
         }
@@ -57,7 +74,7 @@ async function sumResourceTokens(ports: CorePorts, skillPath: string): Promise<n
     }
   }
 
-  return estimateTokensFromChars(totalChars)
+  return totalTokens
 }
 
 export async function estimateSkillTokens(
@@ -81,8 +98,8 @@ export async function estimateSkillTokens(
     // SKILL.md missing or unreadable
   }
 
-  const descriptionTokens = estimateTokensFromChars(description.length)
-  const bodyTokens = estimateTokensFromChars(body.length)
+  const descriptionTokens = estimateTokensFromText(description)
+  const bodyTokens = estimateTokensFromText(body)
   const resourceTokens = await sumResourceTokens(ports, skillPath)
   const totalTokens = descriptionTokens + bodyTokens + resourceTokens
 
