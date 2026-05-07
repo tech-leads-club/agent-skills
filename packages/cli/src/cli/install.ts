@@ -1,8 +1,16 @@
-import chalk from 'chalk'
-import { AGENT_TYPES, ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
 import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
+import {
+  AGENT_TYPES,
+  detectInstalledAgents,
+  ensureSkillDownloaded,
+  forceDownloadSkill,
+  getRemoteSkills,
+  installSkills,
+} from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
+import { loadConfig } from '../services/config'
 
 interface InstallCliOptions {
   skill?: string[]
@@ -23,7 +31,9 @@ async function downloadSkills(skillNames: string[], forceDownload: boolean): Pro
       continue
     }
 
-    const path = forceDownload ? await forceDownloadSkill(ports, skillName) : await ensureSkillDownloaded(ports, skillName)
+    const path = forceDownload
+      ? await forceDownloadSkill(ports, skillName)
+      : await ensureSkillDownloaded(ports, skillName)
     if (path) {
       selectedSkills.push({ ...skill, path })
     } else {
@@ -32,6 +42,25 @@ async function downloadSkills(skillNames: string[], forceDownload: boolean): Pro
   }
 
   return selectedSkills
+}
+
+async function getTargetAgents(options: InstallCliOptions): Promise<{ agents: AgentType[]; source: string }> {
+  if (options.agent && options.agent.length > 0) {
+    return { agents: options.agent as AgentType[], source: 'CLI flag' }
+  }
+
+  const config = await loadConfig()
+  const userAgents = config.targetAgents
+  if (userAgents && userAgents.length > 0) {
+    return { agents: userAgents, source: 'user configuration' }
+  }
+
+  const detectedAgents = detectInstalledAgents(ports)
+  if (detectedAgents.length > 0) {
+    return { agents: detectedAgents, source: 'auto-detection' }
+  }
+
+  return { agents: [], source: '' }
 }
 
 function showInstallResults(results: Awaited<ReturnType<typeof installSkills>>): void {
@@ -72,14 +101,27 @@ export async function runCliInstall(options: InstallCliOptions): Promise<void> {
     process.exit(1)
   }
 
-  const rawAgents = options.agent || ['cursor', 'claude-code', 'windsurf']
-  const invalidAgents = rawAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
+  const { agents: targetAgents, source } = await getTargetAgents(options)
+  if (targetAgents.length === 0) {
+    console.error(chalk.red('❌ No agents specified and none could be detected or found in configuration.'))
+    console.error(
+      chalk.dim(
+        'You can use the "--agent" flag in the "agent-skills install" command to specify the target agents for this installation.',
+      ),
+    )
+    console.error(chalk.dim('You can also use the "agent-skills agents" command to manage the target agents globally.'))
+    process.exit(1)
+  }
+
+  console.log(chalk.blue(`⏳ Using ${source} to identify target agents: ${targetAgents.join(', ')}`))
+
+  const invalidAgents = targetAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
   if (invalidAgents.length > 0) {
     console.error(chalk.red(`❌ Unknown agent(s): ${invalidAgents.join(', ')}`))
     console.error(chalk.dim(`   Valid agents: ${AGENT_TYPES.join(', ')}`))
     process.exit(1)
   }
-  const agents = rawAgents as AgentType[]
+  const agents = targetAgents as AgentType[]
   const method = options.symlink ? 'symlink' : 'copy'
 
   console.log(chalk.blue(`⏳ Installing ${skills.length} skill(s) to ${agents.length} agent(s)...`))
