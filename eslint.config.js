@@ -9,6 +9,7 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
+
   globalIgnores([
     'dist/**',
     'node_modules/**',
@@ -19,37 +20,90 @@ export default defineConfig([
     '**/next.config.mjs',
     '**/postcss.config.cjs',
   ]),
+
   {
     name: 'tlc-typescript',
+
     files: ['**/*.ts'],
-    languageOptions: { ecmaVersion: 2022, sourceType: 'module' },
+
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+    },
+
     rules: {
+      // JavaScript best practices
       'prefer-const': 'error',
       'no-var': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      eqeqeq: ['error', 'always'],
+      curly: ['error', 'all'],
+      'object-shorthand': ['error', 'always'],
+
+      // TypeScript rules
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+        },
+      ],
+
       '@typescript-eslint/no-explicit-any': 'error',
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+        },
+      ],
+
+      '@typescript-eslint/explicit-function-return-type': [
+        'warn',
+        {
+          allowExpressions: true,
+        },
+      ],
     },
   },
+
   {
     files: ['packages/*/package.json'],
-    plugins: { '@nx': nxPlugin },
-    languageOptions: { parser: jsoncParser },
+
+    plugins: {
+      '@nx': nxPlugin,
+    },
+
+    languageOptions: {
+      parser: jsoncParser,
+    },
+
     rules: {
       '@nx/dependency-checks': [
         'error',
         {
           ignoredDependencies: [
             '@tech-leads-club/core',
-            'react-dom', // Peer dependency of Next.js
-            '@tailwindcss/postcss', // Used in postcss.config.cjs
-            'tailwindcss', // Used in global.css via @import
-            'github-markdown-css', // Used in global.css via @import
-            'highlight.js', // Used in global.css via @import
-            '@jest/globals', // Used in tests only
-            '@testing-library/react', // Used in tests only
-            'fast-check', // Used in tests only
-            '@nx/next', // Used in Next.js apps
-            'zod', // Runtime import in built CLI (from core lockfile); not a direct TS import in packages/cli
+
+            // Peer dependency of Next.js
+            'react-dom',
+
+            // Used in postcss.config.cjs
+            '@tailwindcss/postcss',
+
+            // Used in global.css via @import
+            'tailwindcss',
+            'github-markdown-css',
+            'highlight.js',
+
+            // Used in tests only
+            '@jest/globals',
+            '@testing-library/react',
+            'fast-check',
+
+            // Used in Next.js apps
+            '@nx/next',
+
+            // Runtime import in built CLI
+            'zod',
           ],
         },
       ],
