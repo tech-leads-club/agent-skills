@@ -19,11 +19,12 @@ export function SkillsClient({ data }: SkillsClientProps) {
   const [currentPage, setCurrentPage] = useState(1)
 
   const filteredSkills = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
     return data.skills.filter((skill) => {
       const matchesSearch =
-        searchQuery === '' ||
-        skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        skill.description.toLowerCase().includes(searchQuery.toLowerCase())
+        normalizedQuery === '' ||
+        skill.name.toLowerCase().includes(normalizedQuery) ||
+        skill.description.toLowerCase().includes(normalizedQuery)
 
       const matchesCategory = selectedCategory === null || skill.category === selectedCategory
 
