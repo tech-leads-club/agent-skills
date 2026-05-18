@@ -99,6 +99,10 @@
   "overrides": {
     "follow-redirects": "^1.16.0",
     "postcss": "^8.5.10",
+    "fast-uri": "^3.1.2",
+    "hono": "^4.12.18",
+    "ip-address": "^10.1.1",
+    "ws": "^8.20.1",
     "nx": {
       "brace-expansion": "^5.0.5",
       "yaml": "^2.8.3"
