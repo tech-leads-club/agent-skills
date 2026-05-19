@@ -251,7 +251,7 @@ rm -rf ~/.cache/agent-skills
 }
 ```
 
-→ Full setup for all clients (Cursor, Claude Code, VS Code, etc.), caching, and error reference: **[packages/mcp/README.md](packages/mcp/README.md)**
+→ Full setup for all clients (Cursor, Claude Code, VS Code, etc.), caching, and error-reference details: **[packages/mcp/README.md](packages/mcp/README.md)**
 
 ## 🤝 Contributing
 
