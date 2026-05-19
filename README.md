@@ -98,7 +98,7 @@ Install skills to any of these AI coding agents:
 
 ## 🌟 Featured Skills
 
-A glimpse of what's available in our growing catalog:
+A glimpse of what's available in our growing catalogue:
 
 | Skill                                                                                              | Category    | Description                                                                                                                                                                        |
 | -------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
