@@ -4,15 +4,16 @@
 
 **Never use "OK", "Submit", or "Yes/No".** These are lazy and ambiguous. Use specific verb + object patterns:
 
-| Bad | Good | Why |
-|-----|------|-----|
-| OK | Save changes | Says what will happen |
-| Submit | Create account | Outcome-focused |
-| Yes | Delete message | Confirms the action |
-| Cancel | Keep editing | Clarifies what "cancel" means |
-| Click here | Download PDF | Describes the destination |
+| Bad        | Good           | Why                           |
+| ---------- | -------------- | ----------------------------- |
+| OK         | Save changes   | Says what will happen         |
+| Submit     | Create account | Outcome-focused               |
+| Yes        | Delete message | Confirms the action           |
+| Cancel     | Keep editing   | Clarifies what "cancel" means |
+| Click here | Download PDF   | Describes the destination     |
 
 **For destructive actions**, name the destruction:
+
 - "Delete" not "Remove" (delete is permanent, remove implies recoverable)
 - "Delete 5 items" not "Delete selected" (show the count)
 
@@ -22,13 +23,13 @@ Every error message should answer: (1) What happened? (2) Why? (3) How to fix it
 
 ### Error Message Templates
 
-| Situation | Template |
-|-----------|----------|
-| **Format error** | "[Field] needs to be [format]. Example: [example]" |
-| **Missing required** | "Please enter [what's missing]" |
-| **Permission denied** | "You don't have access to [thing]. [What to do instead]" |
-| **Network error** | "We couldn't reach [thing]. Check your connection and [action]." |
-| **Server error** | "Something went wrong on our end. We're looking into it. [Alternative action]" |
+| Situation             | Template                                                                       |
+| --------------------- | ------------------------------------------------------------------------------ |
+| **Format error**      | "[Field] needs to be [format]. Example: [example]"                             |
+| **Missing required**  | "Please enter [what's missing]"                                                |
+| **Permission denied** | "You don't have access to [thing]. [What to do instead]"                       |
+| **Network error**     | "We couldn't reach [thing]. Check your connection and [action]."               |
+| **Server error**      | "Something went wrong on our end. We're looking into it. [Alternative action]" |
 
 ### Don't Blame the User
 
@@ -43,12 +44,12 @@ Empty states are onboarding moments: (1) Acknowledge briefly, (2) Explain the va
 **Voice** is your brand's personality—consistent everywhere.
 **Tone** adapts to the moment.
 
-| Moment | Tone Shift |
-|--------|------------|
-| Success | Celebratory, brief: "Done! Your changes are live." |
-| Error | Empathetic, helpful: "That didn't work. Here's what to try..." |
-| Loading | Reassuring: "Saving your work..." |
-| Destructive confirm | Serious, clear: "Delete this project? This can't be undone." |
+| Moment              | Tone Shift                                                     |
+| ------------------- | -------------------------------------------------------------- |
+| Success             | Celebratory, brief: "Done! Your changes are live."             |
+| Error               | Empathetic, helpful: "That didn't work. Here's what to try..." |
+| Loading             | Reassuring: "Saving your work..."                              |
+| Destructive confirm | Serious, clear: "Delete this project? This can't be undone."   |
 
 **Never use humor for errors.** Users are already frustrated. Be helpful, not cute.
 
@@ -62,12 +63,12 @@ Empty states are onboarding moments: (1) Acknowledge briefly, (2) Explain the va
 
 German text is ~30% longer than English. Allocate space:
 
-| Language | Expansion |
-|----------|-----------|
-| German | +30% |
-| French | +20% |
-| Finnish | +30-40% |
-| Chinese | -30% (fewer chars, but same width) |
+| Language | Expansion                          |
+| -------- | ---------------------------------- |
+| German   | +30%                               |
+| French   | +20%                               |
+| Finnish  | +30-40%                            |
+| Chinese  | -30% (fewer chars, but same width) |
 
 ### Translation-Friendly Patterns
 
@@ -77,12 +78,12 @@ Keep numbers separate ("New messages: 3" not "You have 3 new messages"). Use ful
 
 Pick one term and stick with it:
 
-| Inconsistent | Consistent |
-|--------------|------------|
-| Delete / Remove / Trash | Delete |
-| Settings / Preferences / Options | Settings |
-| Sign in / Log in / Enter | Sign in |
-| Create / Add / New | Create |
+| Inconsistent                     | Consistent |
+| -------------------------------- | ---------- |
+| Delete / Remove / Trash          | Delete     |
+| Settings / Preferences / Options | Settings   |
+| Sign in / Log in / Enter         | Sign in    |
+| Create / Add / New               | Create     |
 
 Build a terminology glossary and enforce it. Variety creates confusion.
 

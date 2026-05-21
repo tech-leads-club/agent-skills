@@ -2,18 +2,18 @@
 
 ## Quick Reference
 
-| Decision | Framework | Key Metric |
-|---|---|---|
-| Which charge metric? | Consumption / Workflow / Outcome decision tree | Value measurability |
-| Which product archetype? | Copilot / Agent / Service matrix | Degree of human involvement |
-| Hybrid or pure model? | Pure if simple; hybrid if multiple value vectors | Revenue predictability vs. expansion |
-| BYOK or managed? | BYOK decision framework (6 factors) | Customer type + margin goal |
-| How many tiers? | Three (Starter, Pro, Enterprise) | Conversion rate per tier |
-| Where to set price? | 1/3 to 1/10 of human equivalent cost | Willingness to pay vs. competitive set |
-| How to improve margins? | Margin improvement stack (7 levers) | Gross margin trend, CPT |
-| How to migrate pricing? | 6-phase migration playbook | Revenue retention during migration |
-| How to comp sales? | GTM motion map by pricing model | Rep quota attainment, NRR |
-| When to add BYOK? | When enterprise buyers demand it + you can maintain margin | Platform ARR, BYOK adoption % |
+| Decision                 | Framework                                                  | Key Metric                             |
+| ------------------------ | ---------------------------------------------------------- | -------------------------------------- |
+| Which charge metric?     | Consumption / Workflow / Outcome decision tree             | Value measurability                    |
+| Which product archetype? | Copilot / Agent / Service matrix                           | Degree of human involvement            |
+| Hybrid or pure model?    | Pure if simple; hybrid if multiple value vectors           | Revenue predictability vs. expansion   |
+| BYOK or managed?         | BYOK decision framework (6 factors)                        | Customer type + margin goal            |
+| How many tiers?          | Three (Starter, Pro, Enterprise)                           | Conversion rate per tier               |
+| Where to set price?      | 1/3 to 1/10 of human equivalent cost                       | Willingness to pay vs. competitive set |
+| How to improve margins?  | Margin improvement stack (7 levers)                        | Gross margin trend, CPT                |
+| How to migrate pricing?  | 6-phase migration playbook                                 | Revenue retention during migration     |
+| How to comp sales?       | GTM motion map by pricing model                            | Rep quota attainment, NRR              |
+| When to add BYOK?        | When enterprise buyers demand it + you can maintain margin | Platform ARR, BYOK adoption %          |
 
 ## Questions to Ask
 

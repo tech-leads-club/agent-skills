@@ -4,14 +4,14 @@ Hydrogen is Shopify's framework for building custom headless storefronts, powere
 
 ## Overview
 
-| Item | Value |
-|------|-------|
-| Framework | React Router 7 (formerly Remix) |
-| React version | React 19 |
-| API | Storefront API (GraphQL) |
-| Hosting | Shopify Oxygen (default) or any Node.js host |
-| CLI | `npx shopify hydrogen` |
-| Docs | [hydrogen.shopify.dev](https://hydrogen.shopify.dev) |
+| Item          | Value                                                |
+| ------------- | ---------------------------------------------------- |
+| Framework     | React Router 7 (formerly Remix)                      |
+| React version | React 19                                             |
+| API           | Storefront API (GraphQL)                             |
+| Hosting       | Shopify Oxygen (default) or any Node.js host         |
+| CLI           | `npx shopify hydrogen`                               |
+| Docs          | [hydrogen.shopify.dev](https://hydrogen.shopify.dev) |
 
 ## Getting Started
 
@@ -63,41 +63,41 @@ PRIVATE_STOREFRONT_API_TOKEN=your-private-token
 
 Hydrogen uses React Router 7 file-based routing:
 
-| File | URL | Description |
-|------|-----|-------------|
-| `routes/_index.tsx` | `/` | Homepage |
-| `routes/products.$handle.tsx` | `/products/snowboard` | Product page |
-| `routes/collections.$handle.tsx` | `/collections/winter` | Collection page |
-| `routes/collections._index.tsx` | `/collections` | Collections list |
-| `routes/cart.tsx` | `/cart` | Cart page |
-| `routes/search.tsx` | `/search` | Search results |
-| `routes/pages.$handle.tsx` | `/pages/about` | CMS pages |
-| `routes/account.tsx` | `/account` | Customer account (layout) |
-| `routes/account.orders.$id.tsx` | `/account/orders/123` | Order detail |
+| File                             | URL                   | Description               |
+| -------------------------------- | --------------------- | ------------------------- |
+| `routes/_index.tsx`              | `/`                   | Homepage                  |
+| `routes/products.$handle.tsx`    | `/products/snowboard` | Product page              |
+| `routes/collections.$handle.tsx` | `/collections/winter` | Collection page           |
+| `routes/collections._index.tsx`  | `/collections`        | Collections list          |
+| `routes/cart.tsx`                | `/cart`               | Cart page                 |
+| `routes/search.tsx`              | `/search`             | Search results            |
+| `routes/pages.$handle.tsx`       | `/pages/about`        | CMS pages                 |
+| `routes/account.tsx`             | `/account`            | Customer account (layout) |
+| `routes/account.orders.$id.tsx`  | `/account/orders/123` | Order detail              |
 
 ## Data Loading
 
 ### Loader pattern (server-side data fetching)
 
 ```tsx
-import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
+import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
-  const { storefront } = context;
+  const { storefront } = context
 
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle: params.handle },
-  });
+  })
 
   if (!product) {
-    throw new Response('Product not found', { status: 404 });
+    throw new Response('Product not found', { status: 404 })
   }
 
-  return { product };
+  return { product }
 }
 
 export default function ProductPage() {
-  const { product } = useLoaderData<typeof loader>();
+  const { product } = useLoaderData<typeof loader>()
 
   return (
     <div>
@@ -105,7 +105,7 @@ export default function ProductPage() {
       <p>{product.description}</p>
       <ProductPrice price={product.priceRange.minVariantPrice} />
     </div>
-  );
+  )
 }
 
 const PRODUCT_QUERY = `#graphql
@@ -146,26 +146,24 @@ const PRODUCT_QUERY = `#graphql
       }
     }
   }
-`;
+`
 ```
 
 ### Action pattern (form submissions)
 
 ```tsx
-import { type ActionFunctionArgs } from 'react-router';
+import { type ActionFunctionArgs } from 'react-router'
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const variantId = formData.get('variantId') as string;
-  const quantity = parseInt(formData.get('quantity') as string) || 1;
+  const formData = await request.formData()
+  const variantId = formData.get('variantId') as string
+  const quantity = parseInt(formData.get('quantity') as string) || 1
 
-  const { cart } = context;
+  const { cart } = context
 
-  const result = await cart.addLines([
-    { merchandiseId: variantId, quantity },
-  ]);
+  const result = await cart.addLines([{ merchandiseId: variantId, quantity }])
 
-  return { cart: result.cart };
+  return { cart: result.cart }
 }
 ```
 
@@ -178,20 +176,20 @@ Hydrogen provides a typed Storefront API client:
 
 // Usage in loaders:
 export async function loader({ context }: LoaderFunctionArgs) {
-  const { storefront } = context;
+  const { storefront } = context
 
   // Simple query
   const { products } = await storefront.query(PRODUCTS_QUERY, {
     variables: { first: 10 },
-  });
+  })
 
   // With cache control
   const { collection } = await storefront.query(COLLECTION_QUERY, {
     variables: { handle: 'winter' },
-    cache: storefront.CacheLong(),  // Cache for 1 hour
-  });
+    cache: storefront.CacheLong(), // Cache for 1 hour
+  })
 
-  return { products, collection };
+  return { products, collection }
 }
 ```
 
@@ -199,12 +197,12 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 ```tsx
 // Built-in cache strategies
-storefront.CacheNone()     // No caching (default for mutations)
-storefront.CacheShort()    // 1 second stale, 60 seconds max
-storefront.CacheLong()     // 1 hour stale, 1 day max
+storefront.CacheNone() // No caching (default for mutations)
+storefront.CacheShort() // 1 second stale, 60 seconds max
+storefront.CacheLong() // 1 hour stale, 1 day max
 storefront.CacheCustom({
   mode: 'public',
-  maxAge: 60,              // seconds
+  maxAge: 60, // seconds
   staleWhileRevalidate: 300,
 })
 ```
@@ -216,34 +214,34 @@ Hydrogen provides a cart API abstraction:
 ```tsx
 // In loaders/actions, use context.cart
 export async function action({ request, context }: ActionFunctionArgs) {
-  const { cart } = context;
-  const formData = await request.formData();
+  const { cart } = context
+  const formData = await request.formData()
 
   switch (formData.get('action')) {
     case 'add':
-      return cart.addLines([{
-        merchandiseId: formData.get('variantId') as string,
-        quantity: 1,
-      }]);
+      return cart.addLines([
+        {
+          merchandiseId: formData.get('variantId') as string,
+          quantity: 1,
+        },
+      ])
 
     case 'update':
-      return cart.updateLines([{
-        id: formData.get('lineId') as string,
-        quantity: parseInt(formData.get('quantity') as string),
-      }]);
+      return cart.updateLines([
+        {
+          id: formData.get('lineId') as string,
+          quantity: parseInt(formData.get('quantity') as string),
+        },
+      ])
 
     case 'remove':
-      return cart.removeLines([
-        formData.get('lineId') as string,
-      ]);
+      return cart.removeLines([formData.get('lineId') as string])
 
     case 'updateNote':
-      return cart.updateNote(
-        formData.get('note') as string,
-      );
+      return cart.updateNote(formData.get('note') as string)
 
     default:
-      throw new Error('Unknown cart action');
+      throw new Error('Unknown cart action')
   }
 }
 ```
@@ -251,12 +249,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
 ### Cart component
 
 ```tsx
-import { useFetcher } from 'react-router';
-import { CartLineQuantity, CartLinePrice, Money } from '@shopify/hydrogen';
+import { useFetcher } from 'react-router'
+import { CartLineQuantity, CartLinePrice, Money } from '@shopify/hydrogen'
 
 function AddToCartButton({ variantId }: { variantId: string }) {
-  const fetcher = useFetcher();
-  const isAdding = fetcher.state !== 'idle';
+  const fetcher = useFetcher()
+  const isAdding = fetcher.state !== 'idle'
 
   return (
     <fetcher.Form method="post" action="/cart">
@@ -266,7 +264,7 @@ function AddToCartButton({ variantId }: { variantId: string }) {
         {isAdding ? 'Adding...' : 'Add to Cart'}
       </button>
     </fetcher.Form>
-  );
+  )
 }
 ```
 
@@ -308,7 +306,7 @@ import {
 
 ```tsx
 // In root.tsx or individual routes
-import { getSeoMeta } from '@shopify/hydrogen';
+import { getSeoMeta } from '@shopify/hydrogen'
 
 export const meta = ({ data }) => {
   return getSeoMeta({
@@ -316,8 +314,8 @@ export const meta = ({ data }) => {
     description: data.product.description,
     url: `https://store.com/products/${data.product.handle}`,
     image: data.product.images.nodes[0]?.url,
-  });
-};
+  })
+}
 ```
 
 ## Deployment
@@ -349,18 +347,14 @@ npm start
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from 'vite';
-import { hydrogen } from '@shopify/hydrogen/vite';
-import { reactRouter } from '@react-router/dev/vite';
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite'
+import { hydrogen } from '@shopify/hydrogen/vite'
+import { reactRouter } from '@react-router/dev/vite'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    hydrogen(),
-    reactRouter(),
-  ],
-});
+  plugins: [tailwindcss(), hydrogen(), reactRouter()],
+})
 ```
 
 ## Best Practices

@@ -38,15 +38,15 @@ Self-Serve %     -> 30-50% of new ARR (for hybrid)
 
 ## Questions to Ask
 
-| Question                                                    | What It Reveals          |
-|-------------------------------------------------------------|--------------------------|
-| What does a customer do in the first 10 min after sign-up?  | TTFV, activation quality |
-| What % of deals involve someone other than the user?        | Multi-stakeholder need   |
-| What is your current free-to-paid conversion rate?          | Motion-specific benchmark|
-| Can a new user get value without talking to your team?      | PLG viability            |
-| What is your highest-converting acquisition channel?        | Where to double down     |
-| What is your CAC and payback period?                        | Motion efficiency        |
-| What happens when a free user hits a limit?                 | Upgrade pressure design  |
-| Would prospects trust AI-generated email from your company? | Agent-led readiness      |
+| Question                                                    | What It Reveals           |
+| ----------------------------------------------------------- | ------------------------- |
+| What does a customer do in the first 10 min after sign-up?  | TTFV, activation quality  |
+| What % of deals involve someone other than the user?        | Multi-stakeholder need    |
+| What is your current free-to-paid conversion rate?          | Motion-specific benchmark |
+| Can a new user get value without talking to your team?      | PLG viability             |
+| What is your highest-converting acquisition channel?        | Where to double down      |
+| What is your CAC and payback period?                        | Motion efficiency         |
+| What happens when a free user hits a limit?                 | Upgrade pressure design   |
+| Would prospects trust AI-generated email from your company? | Agent-led readiness       |
 
 ---

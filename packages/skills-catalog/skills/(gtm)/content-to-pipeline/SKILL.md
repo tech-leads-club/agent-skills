@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Content-to-Pipeline: Turning Content Into Revenue
@@ -43,13 +42,13 @@ Content-led GTM is not a channel. It is a system. Every piece of content should 
        +----------- feedback loop --------------------+
 ```
 
-| Stage | What Happens | Key Metric |
-|---|---|---|
-| Create | Produce one pillar piece per week (long-form post, video, or podcast episode) | Pillar pieces published per week |
-| Distribute | Repurpose into 8-12 platform-native pieces across channels | Distribution ratio (derivatives per pillar) |
-| Engage | Respond to every comment, DM, and reply within 2 hours | Response rate and time-to-reply |
-| Convert | Move engaged prospects to owned channels (newsletter, DMs, calls) | Email subscribers gained, DMs opened, calls booked |
-| Measure | Track first-touch and multi-touch attribution from content to closed deal | Content-sourced pipeline and revenue |
+| Stage      | What Happens                                                                  | Key Metric                                         |
+| ---------- | ----------------------------------------------------------------------------- | -------------------------------------------------- |
+| Create     | Produce one pillar piece per week (long-form post, video, or podcast episode) | Pillar pieces published per week                   |
+| Distribute | Repurpose into 8-12 platform-native pieces across channels                    | Distribution ratio (derivatives per pillar)        |
+| Engage     | Respond to every comment, DM, and reply within 2 hours                        | Response rate and time-to-reply                    |
+| Convert    | Move engaged prospects to owned channels (newsletter, DMs, calls)             | Email subscribers gained, DMs opened, calls booked |
+| Measure    | Track first-touch and multi-touch attribution from content to closed deal     | Content-sourced pipeline and revenue               |
 
 ### Why Flywheels Beat Funnels
 
@@ -65,37 +64,37 @@ The biggest mistake in content strategy: creating first, then figuring out distr
 
 ### The Reverse Engineering Process
 
-| Step | Action | Tools |
-|---|---|---|
-| 1 | Identify 10-15 accounts in your space with high engagement | SparkToro, Social Blade, manual search |
-| 2 | Export their top 50 performing posts from the last 90 days | Viral Findr, manual scroll, Taplio (LinkedIn) |
-| 3 | Categorize by format (thread, carousel, short video, long-form) | Spreadsheet |
-| 4 | Tag recurring patterns: hooks, structures, topics, CTAs | Manual analysis |
-| 5 | Identify the distribution channels where those posts travel | Check reposts, quote tweets, newsletter mentions |
-| 6 | Build your content templates from the patterns that repeat | Template library |
-| 7 | Test 10 pieces using those templates with your own expertise | Publish and measure |
-| 8 | Double down on the formats and topics that outperform your baseline | Data-driven iteration |
+| Step | Action                                                              | Tools                                            |
+| ---- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| 1    | Identify 10-15 accounts in your space with high engagement          | SparkToro, Social Blade, manual search           |
+| 2    | Export their top 50 performing posts from the last 90 days          | Viral Findr, manual scroll, Taplio (LinkedIn)    |
+| 3    | Categorize by format (thread, carousel, short video, long-form)     | Spreadsheet                                      |
+| 4    | Tag recurring patterns: hooks, structures, topics, CTAs             | Manual analysis                                  |
+| 5    | Identify the distribution channels where those posts travel         | Check reposts, quote tweets, newsletter mentions |
+| 6    | Build your content templates from the patterns that repeat          | Template library                                 |
+| 7    | Test 10 pieces using those templates with your own expertise        | Publish and measure                              |
+| 8    | Double down on the formats and topics that outperform your baseline | Data-driven iteration                            |
 
 ### What to Look For in Top-Performing Content
 
-| Pattern | Why It Works | How to Adapt |
-|---|---|---|
-| Personal story + lesson | Builds trust faster than abstract advice | Use your own founder journey, not hypotheticals |
-| Contrarian takes | Breaks the scroll by challenging assumptions | Only take positions you genuinely hold |
-| Data-backed claims | Creates shareability and perceived authority | Pull from your product data, customer results, or industry reports |
-| Step-by-step frameworks | High save rate because of perceived utility | Turn your actual processes into numbered frameworks |
-| Before/after transformations | Visual proof of value | Use customer screenshots, metric changes, workflow comparisons |
+| Pattern                      | Why It Works                                 | How to Adapt                                                       |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| Personal story + lesson      | Builds trust faster than abstract advice     | Use your own founder journey, not hypotheticals                    |
+| Contrarian takes             | Breaks the scroll by challenging assumptions | Only take positions you genuinely hold                             |
+| Data-backed claims           | Creates shareability and perceived authority | Pull from your product data, customer results, or industry reports |
+| Step-by-step frameworks      | High save rate because of perceived utility  | Turn your actual processes into numbered frameworks                |
+| Before/after transformations | Visual proof of value                        | Use customer screenshots, metric changes, workflow comparisons     |
 
 ### Audience Research Stack
 
-| Tool | What It Reveals | Cost |
-|---|---|---|
-| SparkToro | Which accounts, podcasts, and sites your audience follows | Free tier available |
-| Social Blade | Growth trends for competitor accounts (anomalies signal viral content) | Free |
-| Viral Findr | Aggregated top-performing content by account | Paid |
-| Taplio | LinkedIn-specific analytics and content discovery | Paid |
-| X Advanced Search | Filter by engagement thresholds, date range, account | Free |
-| BuzzSumo | Content performance by topic, domain, and social shares | Paid |
+| Tool              | What It Reveals                                                        | Cost                |
+| ----------------- | ---------------------------------------------------------------------- | ------------------- |
+| SparkToro         | Which accounts, podcasts, and sites your audience follows              | Free tier available |
+| Social Blade      | Growth trends for competitor accounts (anomalies signal viral content) | Free                |
+| Viral Findr       | Aggregated top-performing content by account                           | Paid                |
+| Taplio            | LinkedIn-specific analytics and content discovery                      | Paid                |
+| X Advanced Search | Filter by engagement thresholds, date range, account                   | Free                |
+| BuzzSumo          | Content performance by topic, domain, and social shares                | Paid                |
 
 ---
 
@@ -125,26 +124,26 @@ One pillar piece should become 10+ platform-native derivatives. This is not copy
 
 ### Platform-Specific Adaptation Rules
 
-| Platform | Format | Tone | Algorithm Priority | Posting Cadence |
-|---|---|---|---|---|
-| LinkedIn | Text posts (1200-1500 chars), carousels, newsletters | Professional but personal, story-driven | Dwell time, comments, reposts | 3-5x/week |
-| X (Twitter) | Single posts, threads (3-7 posts), quote tweets | Sharp, concise, opinionated | Replies, bookmarks, reposts | 2-3x/day |
-| YouTube | Long-form (8-15 min) + Shorts (30-60 sec) | Educational, high production value | Watch time, CTR on thumbnails | 1-3x/week |
-| Newsletter | 800-1500 words, one clear takeaway per issue | Conversational, direct, personal | Open rate, click rate | 1-2x/week |
-| Podcast | 20-45 min episodes or guest appearances | Conversational, deep-dive | Completion rate, subscriber growth | 1x/week |
+| Platform    | Format                                               | Tone                                    | Algorithm Priority                 | Posting Cadence |
+| ----------- | ---------------------------------------------------- | --------------------------------------- | ---------------------------------- | --------------- |
+| LinkedIn    | Text posts (1200-1500 chars), carousels, newsletters | Professional but personal, story-driven | Dwell time, comments, reposts      | 3-5x/week       |
+| X (Twitter) | Single posts, threads (3-7 posts), quote tweets      | Sharp, concise, opinionated             | Replies, bookmarks, reposts        | 2-3x/day        |
+| YouTube     | Long-form (8-15 min) + Shorts (30-60 sec)            | Educational, high production value      | Watch time, CTR on thumbnails      | 1-3x/week       |
+| Newsletter  | 800-1500 words, one clear takeaway per issue         | Conversational, direct, personal        | Open rate, click rate              | 1-2x/week       |
+| Podcast     | 20-45 min episodes or guest appearances              | Conversational, deep-dive               | Completion rate, subscriber growth | 1x/week         |
 
 ### The 4-Hour Weekly Content System
 
 Modeled on high-output solo creators who produce consistent, multi-platform content without a team. The system runs on one pillar piece that feeds everything else.
 
-| Time Block | Activity | Output |
-|---|---|---|
-| Monday (90 min) | Write pillar piece (newsletter or long-form post) | 1 pillar piece |
-| Tuesday (30 min) | Extract 3-4 LinkedIn posts from pillar | 3-4 LinkedIn posts scheduled |
-| Tuesday (30 min) | Extract 5-8 X posts and 1-2 threads from pillar | Week of X content scheduled |
+| Time Block         | Activity                                                 | Output                          |
+| ------------------ | -------------------------------------------------------- | ------------------------------- |
+| Monday (90 min)    | Write pillar piece (newsletter or long-form post)        | 1 pillar piece                  |
+| Tuesday (30 min)   | Extract 3-4 LinkedIn posts from pillar                   | 3-4 LinkedIn posts scheduled    |
+| Tuesday (30 min)   | Extract 5-8 X posts and 1-2 threads from pillar          | Week of X content scheduled     |
 | Wednesday (30 min) | Record short video or voice memo riffing on pillar topic | 1 YouTube Short or podcast clip |
-| Thursday (30 min) | Engage: reply to every comment, DM warm prospects | Relationship building |
-| Friday (30 min) | Review analytics, note what performed, plan next pillar | Data for next cycle |
+| Thursday (30 min)  | Engage: reply to every comment, DM warm prospects        | Relationship building           |
+| Friday (30 min)    | Review analytics, note what performed, plan next pillar  | Data for next cycle             |
 
 **Total: 4 hours/week for 15-20 pieces of content across platforms.**
 
@@ -152,13 +151,13 @@ Modeled on high-output solo creators who produce consistent, multi-platform cont
 
 AI accelerates production without replacing the founder's voice and taste. The human provides the insight, experience, and editorial judgment. AI handles the format-shifting grunt work.
 
-| Task | AI Role | Human Role |
-|---|---|---|
-| Draft generation | Produce first draft from outline or voice memo transcript | Edit for voice, accuracy, and insight |
-| Repurposing | Convert long-form to platform-native formats | Approve tone and select final versions |
-| Hook writing | Generate 10 hook variations per post | Pick the one that matches the real message |
-| Analytics summary | Aggregate performance data into weekly report | Interpret trends and adjust strategy |
-| Scheduling | Auto-schedule based on optimal time windows | Override when context demands it |
+| Task              | AI Role                                                   | Human Role                                 |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------ |
+| Draft generation  | Produce first draft from outline or voice memo transcript | Edit for voice, accuracy, and insight      |
+| Repurposing       | Convert long-form to platform-native formats              | Approve tone and select final versions     |
+| Hook writing      | Generate 10 hook variations per post                      | Pick the one that matches the real message |
+| Analytics summary | Aggregate performance data into weekly report             | Interpret trends and adjust strategy       |
+| Scheduling        | Auto-schedule based on optimal time windows               | Override when context demands it           |
 
 **Warning**: AI-generated content without founder editing reads as generic. The value is in the founder's unique perspective, not the format. Use AI for speed, not for thinking.
 
@@ -191,38 +190,38 @@ Email is the only owned distribution channel. Social platforms can change algori
 
 ### Newsletter Monetization Layers
 
-| Revenue Stream | When to Add | Expected Revenue per 1K Subscribers |
-|---|---|---|
-| Sponsorships/Ads | At 2,000+ subscribers with consistent opens | $25-75 per send |
-| Digital products (courses, templates) | At 1,000+ with validated demand | $50-200 per launch cycle |
-| Paid subscriptions | At 5,000+ with strong free engagement | $5-15/month per paid subscriber |
-| Services/consulting | From day one if time permits | Variable, highest per-unit revenue |
-| Affiliate partnerships | At 1,000+ with relevant audience | $10-50 per conversion |
-| Boosts/Paid recommendations | Platform-specific (Beehiiv, Substack) | $1-3 per new subscriber referred |
+| Revenue Stream                        | When to Add                                 | Expected Revenue per 1K Subscribers |
+| ------------------------------------- | ------------------------------------------- | ----------------------------------- |
+| Sponsorships/Ads                      | At 2,000+ subscribers with consistent opens | $25-75 per send                     |
+| Digital products (courses, templates) | At 1,000+ with validated demand             | $50-200 per launch cycle            |
+| Paid subscriptions                    | At 5,000+ with strong free engagement       | $5-15/month per paid subscriber     |
+| Services/consulting                   | From day one if time permits                | Variable, highest per-unit revenue  |
+| Affiliate partnerships                | At 1,000+ with relevant audience            | $10-50 per conversion               |
+| Boosts/Paid recommendations           | Platform-specific (Beehiiv, Substack)       | $1-3 per new subscriber referred    |
 
 ### Platform Comparison for Newsletter Pipeline
 
-| Feature | Beehiiv | ConvertKit (Kit) | Substack |
-|---|---|---|---|
-| Best for | Growth-focused creators, monetization | Automation-heavy creator businesses | Writers prioritizing simplicity |
-| Monetization | Ads, Boosts, subscriptions, 0% platform fee | Commerce, Sponsor Network, tips | Paid subscriptions (10% fee) |
-| Automation | Basic sequences | Advanced workflows and segmentation | Minimal |
-| Audience ownership | Full | Full | Full (with export) |
-| Discovery/network | Beehiiv Boost network | Creator Network | Substack recommendations |
-| Analytics | Strong, built-in | Strong, tag-based | Basic |
-| Pipeline integration | API + Zapier to CRM | Native CRM integrations | Limited |
+| Feature              | Beehiiv                                     | ConvertKit (Kit)                    | Substack                        |
+| -------------------- | ------------------------------------------- | ----------------------------------- | ------------------------------- |
+| Best for             | Growth-focused creators, monetization       | Automation-heavy creator businesses | Writers prioritizing simplicity |
+| Monetization         | Ads, Boosts, subscriptions, 0% platform fee | Commerce, Sponsor Network, tips     | Paid subscriptions (10% fee)    |
+| Automation           | Basic sequences                             | Advanced workflows and segmentation | Minimal                         |
+| Audience ownership   | Full                                        | Full                                | Full (with export)              |
+| Discovery/network    | Beehiiv Boost network                       | Creator Network                     | Substack recommendations        |
+| Analytics            | Strong, built-in                            | Strong, tag-based                   | Basic                           |
+| Pipeline integration | API + Zapier to CRM                         | Native CRM integrations             | Limited                         |
 
 ### Newsletter Growth Tactics
 
-| Tactic | Expected Growth Rate | Effort Level |
-|---|---|---|
-| Lead magnet on every social post CTA | 50-200 subscribers/month | Low |
-| Cross-promotions with similar newsletters | 100-500/month | Medium |
-| Beehiiv Boosts (paid acquisition) | Depends on spend, $1-3/sub | Low |
-| Gated content (PDF, checklist, template) | 100-300/month | Medium |
-| Referral program with tiered rewards | 10-20% monthly growth | Medium |
-| Podcast guest appearances with CTA | 50-200 per appearance | High |
-| LinkedIn newsletter feature | 500-2000 at launch from existing network | Low |
+| Tactic                                    | Expected Growth Rate                     | Effort Level |
+| ----------------------------------------- | ---------------------------------------- | ------------ |
+| Lead magnet on every social post CTA      | 50-200 subscribers/month                 | Low          |
+| Cross-promotions with similar newsletters | 100-500/month                            | Medium       |
+| Beehiiv Boosts (paid acquisition)         | Depends on spend, $1-3/sub               | Low          |
+| Gated content (PDF, checklist, template)  | 100-300/month                            | Medium       |
+| Referral program with tiered rewards      | 10-20% monthly growth                    | Medium       |
+| Podcast guest appearances with CTA        | 50-200 per appearance                    | High         |
+| LinkedIn newsletter feature               | 500-2000 at launch from existing network | Low          |
 
 ---
 
@@ -232,14 +231,14 @@ Social content builds awareness. DMs build pipeline. The bridge between them is 
 
 ### The DM Conversion Playbook
 
-| Stage | Action | Example |
-|---|---|---|
-| 1. Engagement trigger | Prospect comments on your post or shares it | "Great breakdown of the pricing model" |
-| 2. Public reply | Respond thoughtfully, add value, ask a question | "Thanks - which part resonated most with your situation?" |
-| 3. Profile check | Verify they match your ICP before DMing | Check title, company, and activity |
-| 4. Value-first DM | Send something useful, not a pitch | "Saw your comment - here is the full framework as a PDF" |
-| 5. Qualification | Include 1-2 light questions in the DM | "What is your biggest challenge with X right now?" |
-| 6. Bridge to call | If qualified, suggest a 15-min conversation | "Happy to walk through how we solved this for [similar company]" |
+| Stage                 | Action                                          | Example                                                          |
+| --------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| 1. Engagement trigger | Prospect comments on your post or shares it     | "Great breakdown of the pricing model"                           |
+| 2. Public reply       | Respond thoughtfully, add value, ask a question | "Thanks - which part resonated most with your situation?"        |
+| 3. Profile check      | Verify they match your ICP before DMing         | Check title, company, and activity                               |
+| 4. Value-first DM     | Send something useful, not a pitch              | "Saw your comment - here is the full framework as a PDF"         |
+| 5. Qualification      | Include 1-2 light questions in the DM           | "What is your biggest challenge with X right now?"               |
+| 6. Bridge to call     | If qualified, suggest a 15-min conversation     | "Happy to walk through how we solved this for [similar company]" |
 
 ### DM Conversion Rules
 
@@ -252,13 +251,13 @@ Social content builds awareness. DMs build pipeline. The bridge between them is 
 
 ### LinkedIn DM Funnel Metrics
 
-| Metric | Benchmark | Action If Below |
-|---|---|---|
-| Engagement-to-DM rate | 5-10% of qualified engagers | Improve public reply quality |
-| DM open rate | 80%+ | Improve first-line hook |
-| DM response rate | 40-60% | Lead with more specific value |
-| DM-to-call rate | 15-25% of responses | Improve qualification questions |
-| Call-to-opportunity rate | 30-50% | Tighten ICP criteria for who gets DMed |
+| Metric                   | Benchmark                   | Action If Below                        |
+| ------------------------ | --------------------------- | -------------------------------------- |
+| Engagement-to-DM rate    | 5-10% of qualified engagers | Improve public reply quality           |
+| DM open rate             | 80%+                        | Improve first-line hook                |
+| DM response rate         | 40-60%                      | Lead with more specific value          |
+| DM-to-call rate          | 15-25% of responses         | Improve qualification questions        |
+| Call-to-opportunity rate | 30-50%                      | Tighten ICP criteria for who gets DMed |
 
 ---
 
@@ -266,14 +265,14 @@ Social content builds awareness. DMs build pipeline. The bridge between them is 
 
 ### When to Use Each
 
-| Dimension | Founder-Led | Team-Led |
-|---|---|---|
-| Trust level | Highest - buyers want to hear from founders | Lower - perceived as marketing |
-| Scalability | Limited by founder time | Scales with team size |
-| Authenticity | Inherently authentic if genuine | Requires strong brand voice guidelines |
-| Content types | Opinions, lessons, behind-the-scenes, vision | How-tos, tutorials, case studies, SEO content |
-| Pipeline impact | 5-7x higher engagement vs. company pages | Broader coverage, lower per-piece impact |
-| Best platforms | LinkedIn, X, podcast guest spots | Blog, YouTube, documentation, SEO |
+| Dimension       | Founder-Led                                  | Team-Led                                      |
+| --------------- | -------------------------------------------- | --------------------------------------------- |
+| Trust level     | Highest - buyers want to hear from founders  | Lower - perceived as marketing                |
+| Scalability     | Limited by founder time                      | Scales with team size                         |
+| Authenticity    | Inherently authentic if genuine              | Requires strong brand voice guidelines        |
+| Content types   | Opinions, lessons, behind-the-scenes, vision | How-tos, tutorials, case studies, SEO content |
+| Pipeline impact | 5-7x higher engagement vs. company pages     | Broader coverage, lower per-piece impact      |
+| Best platforms  | LinkedIn, X, podcast guest spots             | Blog, YouTube, documentation, SEO             |
 
 ### The Founder Content Leverage Model
 
@@ -288,12 +287,12 @@ Everything else (SEO content, tutorials, product updates, social scheduling) sho
 
 ### Transition Timeline: Solo to Team Content
 
-| Stage | Team Size | Founder Role | Content Volume |
-|---|---|---|---|
-| Solo (0-$500K ARR) | Founder only | Does everything | 4-8 pieces/week |
-| Assisted ($500K-$2M) | Founder + 1 content person | Creates pillar, delegates repurposing | 12-20 pieces/week |
-| Team ($2M-$10M) | Founder + 2-3 content people | Creates 1-2 pillar pieces, reviews team output | 25-40 pieces/week |
-| Scaled ($10M+) | Founder + content team + agency | Thought leadership only, monthly cadence | 50+ pieces/week |
+| Stage                | Team Size                       | Founder Role                                   | Content Volume    |
+| -------------------- | ------------------------------- | ---------------------------------------------- | ----------------- |
+| Solo (0-$500K ARR)   | Founder only                    | Does everything                                | 4-8 pieces/week   |
+| Assisted ($500K-$2M) | Founder + 1 content person      | Creates pillar, delegates repurposing          | 12-20 pieces/week |
+| Team ($2M-$10M)      | Founder + 2-3 content people    | Creates 1-2 pillar pieces, reviews team output | 25-40 pieces/week |
+| Scaled ($10M+)       | Founder + content team + agency | Thought leadership only, monthly cadence       | 50+ pieces/week   |
 
 ---
 
@@ -303,34 +302,34 @@ Building in public means sharing your journey transparently: the wins, the losse
 
 ### What to Share (and What to Keep Private)
 
-| Share Publicly | Keep Private |
-|---|---|
-| Revenue milestones (MRR, ARR growth) | Specific customer names (without permission) |
-| Product development decisions and tradeoffs | Proprietary algorithms or unique IP |
-| Hiring challenges and team growth | Internal team conflicts |
-| Customer feedback and how you responded | Confidential customer data |
-| Failed experiments and lessons learned | Financial details that could hurt fundraising |
-| Strategic pivots and why you made them | Plans competitors could directly copy |
+| Share Publicly                              | Keep Private                                  |
+| ------------------------------------------- | --------------------------------------------- |
+| Revenue milestones (MRR, ARR growth)        | Specific customer names (without permission)  |
+| Product development decisions and tradeoffs | Proprietary algorithms or unique IP           |
+| Hiring challenges and team growth           | Internal team conflicts                       |
+| Customer feedback and how you responded     | Confidential customer data                    |
+| Failed experiments and lessons learned      | Financial details that could hurt fundraising |
+| Strategic pivots and why you made them      | Plans competitors could directly copy         |
 
 ### Building in Public Content Calendar
 
-| Day | Content Type | Example |
-|---|---|---|
-| Monday | Metric Monday - share one number from last week | "Last week: 47 demos booked from LinkedIn alone" |
-| Tuesday | Behind the scenes - show how something gets built | Screenshot of product iteration with context |
-| Wednesday | Lesson learned - share a mistake and what you took from it | "We spent 3 months on a feature nobody asked for" |
-| Thursday | Customer story - share a win (with permission) | "How [Company] cut onboarding time by 60% using our tool" |
-| Friday | Founder reflection - personal insight about the journey | "Week 47 of building this company. Here is what changed." |
+| Day       | Content Type                                               | Example                                                   |
+| --------- | ---------------------------------------------------------- | --------------------------------------------------------- |
+| Monday    | Metric Monday - share one number from last week            | "Last week: 47 demos booked from LinkedIn alone"          |
+| Tuesday   | Behind the scenes - show how something gets built          | Screenshot of product iteration with context              |
+| Wednesday | Lesson learned - share a mistake and what you took from it | "We spent 3 months on a feature nobody asked for"         |
+| Thursday  | Customer story - share a win (with permission)             | "How [Company] cut onboarding time by 60% using our tool" |
+| Friday    | Founder reflection - personal insight about the journey    | "Week 47 of building this company. Here is what changed." |
 
 ### Measuring Build-in-Public Impact
 
-| Metric | Target | Tracking Method |
-|---|---|---|
-| Follower growth rate | 5-10% monthly | Platform analytics |
-| Inbound DMs per week | 10-20+ | Manual count |
+| Metric                                                   | Target            | Tracking Method         |
+| -------------------------------------------------------- | ----------------- | ----------------------- |
+| Follower growth rate                                     | 5-10% monthly     | Platform analytics      |
+| Inbound DMs per week                                     | 10-20+            | Manual count            |
 | "How did you hear about us?" responses mentioning social | 30%+ of new leads | CRM self-reported field |
-| Newsletter signups from social | 50-200/month | UTM tracking |
-| Press/podcast inbounds | 1-2/month | Inbox tracking |
+| Newsletter signups from social                           | 50-200/month      | UTM tracking            |
+| Press/podcast inbounds                                   | 1-2/month         | Inbox tracking          |
 
 ---
 
@@ -342,32 +341,32 @@ The hardest part of content-led GTM is proving it works. Traditional analytics m
 
 Run both models simultaneously. Neither is complete alone.
 
-| Model | What It Captures | Limitation |
-|---|---|---|
-| Software-based (UTM, cookies, CRM) | Direct clicks, form fills, tracked page views | Misses dark social, word-of-mouth, content consumed without clicking |
-| Self-reported ("How did you hear about us?") | The buyer's own perception of what influenced them | Subject to recency bias, may not name specific content |
+| Model                                        | What It Captures                                   | Limitation                                                           |
+| -------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| Software-based (UTM, cookies, CRM)           | Direct clicks, form fills, tracked page views      | Misses dark social, word-of-mouth, content consumed without clicking |
+| Self-reported ("How did you hear about us?") | The buyer's own perception of what influenced them | Subject to recency bias, may not name specific content               |
 
 ### Attribution Implementation Checklist
 
-| Step | Action | Tool |
-|---|---|---|
-| 1 | Add "How did you hear about us?" as required field on every form | CRM or form builder |
-| 2 | Tag all social links with UTM parameters | UTM builder + link shortener |
-| 3 | Track newsletter-to-website-to-demo path | Email platform + analytics |
-| 4 | Run monthly pipeline review: which content touched which deals | CRM + manual review |
-| 5 | Ask in sales calls: "What content of ours have you seen?" | Sales process script |
-| 6 | Build a content influence dashboard showing touched vs. sourced pipeline | CRM reporting |
+| Step | Action                                                                   | Tool                         |
+| ---- | ------------------------------------------------------------------------ | ---------------------------- |
+| 1    | Add "How did you hear about us?" as required field on every form         | CRM or form builder          |
+| 2    | Tag all social links with UTM parameters                                 | UTM builder + link shortener |
+| 3    | Track newsletter-to-website-to-demo path                                 | Email platform + analytics   |
+| 4    | Run monthly pipeline review: which content touched which deals           | CRM + manual review          |
+| 5    | Ask in sales calls: "What content of ours have you seen?"                | Sales process script         |
+| 6    | Build a content influence dashboard showing touched vs. sourced pipeline | CRM reporting                |
 
 ### Content Pipeline Metrics
 
-| Metric | Definition | Benchmark |
-|---|---|---|
-| Content-sourced pipeline | Deals where content was the first touch | 20-40% of total pipeline for content-led companies |
-| Content-influenced pipeline | Deals where content touched the buyer at any stage | 50-70% of total pipeline |
-| Content-to-lead conversion rate | Visitors from content who become leads | 1-3% |
-| Newsletter-to-pipeline rate | Subscribers who enter the sales pipeline | 2-5% annually |
-| Social-to-newsletter conversion | Social followers who subscribe to email | 0.5-2% monthly |
-| Time from first content touch to deal close | Average duration of content-influenced deals | 30-90 days (varies by ACV) |
+| Metric                                      | Definition                                         | Benchmark                                          |
+| ------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| Content-sourced pipeline                    | Deals where content was the first touch            | 20-40% of total pipeline for content-led companies |
+| Content-influenced pipeline                 | Deals where content touched the buyer at any stage | 50-70% of total pipeline                           |
+| Content-to-lead conversion rate             | Visitors from content who become leads             | 1-3%                                               |
+| Newsletter-to-pipeline rate                 | Subscribers who enter the sales pipeline           | 2-5% annually                                      |
+| Social-to-newsletter conversion             | Social followers who subscribe to email            | 0.5-2% monthly                                     |
+| Time from first content touch to deal close | Average duration of content-influenced deals       | 30-90 days (varies by ACV)                         |
 
 ### Dark Social and Unmeasurable Influence
 
@@ -382,7 +381,6 @@ Proxy signals for dark social influence:
 - Branded search volume increases correlated with content publishing cadence
 
 ---
-
 
 For podcast/video as pipeline, community-led distribution, and content cadence framework read `references/podcast-community-cadence.md`.
 
@@ -400,22 +398,21 @@ For podcast/video as pipeline, community-led distribution, and content cadence f
 
 ---
 
-
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 
 ---
 
 ## Related Skills
 
-| Skill | When to Cross-Reference |
-|---|---|
-| social-selling | When building DM conversion workflows and LinkedIn engagement systems |
-| ai-seo | When creating SEO-optimized pillar content, blog posts, and competitor alternative pages |
-| multi-platform-launch | When coordinating content across platforms for a product launch |
-| ai-ugc-ads | When repurposing organic content into paid ad creative |
-| positioning-icp | When defining the audience and messaging that content should target |
-| solo-founder-gtm | When a solo founder needs to prioritize content activities with limited time |
-| paid-creative-ai | When amplifying top-performing organic content with paid distribution |
-| partner-affiliate | When building newsletter cross-promotions and affiliate content partnerships |
-| gtm-metrics | When setting up content attribution dashboards and pipeline tracking |
-| lead-enrichment | When qualifying DM prospects and enriching newsletter subscriber data |
+| Skill                 | When to Cross-Reference                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| social-selling        | When building DM conversion workflows and LinkedIn engagement systems                    |
+| ai-seo                | When creating SEO-optimized pillar content, blog posts, and competitor alternative pages |
+| multi-platform-launch | When coordinating content across platforms for a product launch                          |
+| ai-ugc-ads            | When repurposing organic content into paid ad creative                                   |
+| positioning-icp       | When defining the audience and messaging that content should target                      |
+| solo-founder-gtm      | When a solo founder needs to prioritize content activities with limited time             |
+| paid-creative-ai      | When amplifying top-performing organic content with paid distribution                    |
+| partner-affiliate     | When building newsletter cross-promotions and affiliate content partnerships             |
+| gtm-metrics           | When setting up content attribution dashboards and pipeline tracking                     |
+| lead-enrichment       | When qualifying DM prospects and enriching newsletter subscriber data                    |

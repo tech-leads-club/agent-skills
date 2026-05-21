@@ -9,7 +9,7 @@ metadata:
 
 # ADR Creator
 
-You are an expert in creating Architecture Decision Records (ADRs) — concise, durable documents that capture the context, decision, and consequences of significant architectural choices so future team members understand *why* things are the way they are.
+You are an expert in creating Architecture Decision Records (ADRs) — concise, durable documents that capture the context, decision, and consequences of significant architectural choices so future team members understand _why_ things are the way they are.
 
 ## When to Use This Skill
 
@@ -30,14 +30,14 @@ Do NOT use for:
 
 ## ADR vs RFC — Critical Distinction
 
-| Aspect | ADR | RFC |
-|--------|-----|-----|
-| **Timing** | Decision already made (or being finalized) | Before the decision (seeking input) |
-| **Purpose** | Record for future team members | Proposal seeking approval |
-| **Audience** | Engineers joining months or years later | Current stakeholders |
-| **Length** | Short — 200–500 words | Long — thorough comparison |
-| **Mutability** | Immutable — superseded, never edited | Iterative — evolves during review |
-| **Tone** | Historical record | Deliberative proposal |
+| Aspect         | ADR                                        | RFC                                 |
+| -------------- | ------------------------------------------ | ----------------------------------- |
+| **Timing**     | Decision already made (or being finalized) | Before the decision (seeking input) |
+| **Purpose**    | Record for future team members             | Proposal seeking approval           |
+| **Audience**   | Engineers joining months or years later    | Current stakeholders                |
+| **Length**     | Short — 200–500 words                      | Long — thorough comparison          |
+| **Mutability** | Immutable — superseded, never edited       | Iterative — evolves during review   |
+| **Tone**       | Historical record                          | Deliberative proposal               |
 
 If the user says "I need to decide whether to do X" → use `create-rfc`.
 If the user says "We decided to do X, let me document it" → use this skill.
@@ -54,11 +54,11 @@ If the user says "We decided to do X, let me document it" → use this skill.
 
 Three formats are widely used. Detect the right one from context, or ask:
 
-| Format | Best For | Length |
-|--------|----------|--------|
-| **MADR** (Markdown ADR) | Teams that want structured options comparison | Medium |
-| **Nygard** (original) | Minimal, fast recording; obvious decisions | Short |
-| **Y-Statement** | Inline documentation, very compact contexts | One paragraph |
+| Format                  | Best For                                      | Length        |
+| ----------------------- | --------------------------------------------- | ------------- |
+| **MADR** (Markdown ADR) | Teams that want structured options comparison | Medium        |
+| **Nygard** (original)   | Minimal, fast recording; obvious decisions    | Short         |
+| **Y-Statement**         | Inline documentation, very compact contexts   | One paragraph |
 
 Default to **MADR** unless the user specifies otherwise or the decision is very simple.
 
@@ -77,9 +77,7 @@ If the user provides minimal context, use **AskQuestion** to collect essential i
     {
       "id": "adr_decision",
       "prompt": "What was the decision made? (e.g., 'Use PostgreSQL for primary storage')",
-      "options": [
-        { "id": "free_text", "label": "I'll describe it in my next message" }
-      ]
+      "options": [{ "id": "free_text", "label": "I'll describe it in my next message" }]
     },
     {
       "id": "adr_format",
@@ -124,6 +122,7 @@ If the user provides minimal context, use **AskQuestion** to collect essential i
 - **Consequences** — what becomes easier, harder, or different as a result
 
 **RECOMMENDED fields**:
+
 - **Decision drivers** — the key criteria or constraints
 - **Options considered** — what alternatives were evaluated
 - **Pros/cons per option** — honest trade-off assessment
@@ -289,7 +288,7 @@ Before finalizing, verify:
 - [ ] **Title** is a noun phrase describing the decision (not a question, not a vague label)
 - [ ] **Date** is included (decisions without dates lose context quickly)
 - [ ] **Status** is set correctly — Accepted, Proposed, Deprecated, or Superseded
-- [ ] **Context** explains the *forces* that made this decision necessary, not just what was done
+- [ ] **Context** explains the _forces_ that made this decision necessary, not just what was done
 - [ ] **Decision** is stated directly and tied to the context
 - [ ] **Consequences** include honest trade-offs — not just positives
 - [ ] **Options** (MADR format) include at least 2 alternatives actually considered
@@ -324,18 +323,20 @@ docs/adr/
 
 **GOOD**: `# ADR-001: Use PostgreSQL for Primary Storage`
 
-Titles should record the decision, not the question. Future readers need to know *what was decided*, not what was considered.
+Titles should record the decision, not the question. Future readers need to know _what was decided_, not what was considered.
 
 ---
 
 ### Vague Context
 
 **BAD**:
+
 ```
 We needed a database and chose PostgreSQL.
 ```
 
 **GOOD**:
+
 ```
 Our application requires a relational database with strong ACID guarantees.
 The team has deep PostgreSQL experience. MySQL was evaluated but lacks
@@ -343,19 +344,21 @@ native support for JSONB columns, which our schema design requires.
 Our cloud provider (AWS) offers managed PostgreSQL via RDS at acceptable cost.
 ```
 
-Context should explain the *forces* — why wasn't the alternative obviously better?
+Context should explain the _forces_ — why wasn't the alternative obviously better?
 
 ---
 
 ### Consequences Without Trade-offs
 
 **BAD**:
+
 ```
 ## Consequences
 PostgreSQL is fast and reliable.
 ```
 
 **GOOD**:
+
 ```
 ## Consequences
 - Enables JSONB columns and advanced indexing for our query patterns
@@ -374,19 +377,21 @@ Honest trade-offs are what make ADRs valuable years later.
 
 **GOOD**: Creating a new ADR with `Status: Superseded by ADR-{NNN}` on the old one and linking back.
 
-ADRs are historical records. The old decision was correct *given what was known at the time*. Superseding preserves that context.
+ADRs are historical records. The old decision was correct _given what was known at the time_. Superseding preserves that context.
 
 ---
 
 ### Missing the "Why Not" Rationale
 
 **BAD**:
+
 ```
 ## Decision
 We will use Redis for session storage.
 ```
 
 **GOOD**:
+
 ```
 ## Decision
 We will use Redis for session storage. We considered storing sessions in PostgreSQL
@@ -395,7 +400,7 @@ make it significantly better suited for high-frequency session reads. The operat
 cost of an additional service is justified by the simplified session expiry logic.
 ```
 
-The rationale is *why this option and not the others* — not just what was chosen.
+The rationale is _why this option and not the others_ — not just what was chosen.
 
 ---
 
@@ -412,6 +417,7 @@ The rationale is *why this option and not the others* — not just what was chos
 ## Example Prompts that Trigger This Skill
 
 ### English
+
 - "Write an ADR for using PostgreSQL as our primary database"
 - "Document our decision to adopt GraphQL"
 - "Create an ADR for moving our frontend to Next.js"
@@ -419,11 +425,13 @@ The rationale is *why this option and not the others* — not just what was chos
 - "Add an architecture decision record for our authentication approach"
 
 ### Portuguese
+
 - "Escreva um ADR sobre a decisão de usar PostgreSQL"
 - "Documente a decisão de adotar GraphQL no projeto"
 - "Crie um ADR explicando por que escolhemos Kafka"
 
 ### Spanish
+
 - "Escribe un ADR sobre la decisión de usar PostgreSQL"
 - "Documenta la decisión de adoptar microservicios"
 - "Crea un ADR explicando por qué elegimos Next.js"

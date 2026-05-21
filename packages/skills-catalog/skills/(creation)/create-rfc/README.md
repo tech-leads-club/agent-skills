@@ -18,11 +18,11 @@ The skill automatically adapts to:
 
 ## RFC vs TDD — Which One Do You Need?
 
-| Question | Use |
-|----------|-----|
-| Should we do X at all? Which option? | **RFC** |
-| We've decided on X — how do we build it? | **TDD** |
-| Need alignment from leadership or multiple teams before acting | **RFC** |
+| Question                                                              | Use     |
+| --------------------------------------------------------------------- | ------- |
+| Should we do X at all? Which option?                                  | **RFC** |
+| We've decided on X — how do we build it?                              | **TDD** |
+| Need alignment from leadership or multiple teams before acting        | **RFC** |
 | Need to document implementation architecture for the engineering team | **TDD** |
 
 When an RFC is approved, you often create a TDD next to plan the implementation.
@@ -34,16 +34,19 @@ When an RFC is approved, you often create a TDD next to plan the implementation.
 Just ask the agent to write an RFC:
 
 **English:**
+
 ```
 Write an RFC for migrating our database from MySQL to PostgreSQL
 ```
 
 **Portuguese:**
+
 ```
 Escreva um RFC para migrar nosso banco de dados para PostgreSQL
 ```
 
 **Spanish:**
+
 ```
 Escribe un RFC para migrar nuestra base de datos a PostgreSQL
 ```
@@ -71,17 +74,20 @@ Then it validates mandatory fields before generating the document.
 ### Example 1: Vendor/Tool Selection
 
 **Your request:**
+
 ```
 Write an RFC comparing self-hosted Kafka vs Amazon MSK vs Confluent Cloud for our event streaming needs
 ```
 
 **What happens:**
+
 1. Agent asks for decision deadline and who approves
 2. Agent identifies this as a Vendor Selection RFC → adds cost comparison and lock-in risk focus
 3. Agent ensures Decision Criteria are defined before listing options
 4. Agent generates RFC with comparison matrix across all three options
 
 **Result:** An RFC with:
+
 - Background (current event streaming setup and why it needs to change)
 - Assumptions (e.g., "traffic will not exceed 50k events/sec in 12 months")
 - Decision Criteria (cost, operational burden, vendor lock-in, team expertise — with weights)
@@ -93,16 +99,19 @@ Write an RFC comparing self-hosted Kafka vs Amazon MSK vs Confluent Cloud for ou
 ### Example 2: Process Change
 
 **Your request:**
+
 ```
 I need an RFC to propose changing our on-call rotation from weekly to bi-weekly shifts
 ```
 
 **What happens:**
+
 1. Agent identifies this as a Process/Workflow RFC
 2. Agent asks for data backing the proposal (e.g., burnout reports, incident patterns)
 3. Agent generates RFC focused on team impact and adoption plan
 
 **Result:** An RFC with:
+
 - Background (current rotation pain points with data)
 - Assumptions (e.g., "team size stays at 8 engineers")
 - Decision Criteria (engineer wellbeing, response time SLA, coverage gaps)
@@ -112,16 +121,19 @@ I need an RFC to propose changing our on-call rotation from weekly to bi-weekly 
 ### Example 3: Architecture Decision
 
 **Your request:**
+
 ```
 Draft an RFC for moving from our monolith to microservices
 ```
 
 **What happens:**
+
 1. Agent identifies HIGH impact → ensures Approvers are named
 2. Agent asks for data: What specific pain points does the monolith cause?
 3. Agent enforces "Do Nothing" option to honestly assess the cost of not changing
 
 **Result:** An RFC with:
+
 - Background (scaling limits, deployment coupling, team velocity data)
 - Assumptions (e.g., "we have budget for platform engineering investment in H2")
 - Decision Criteria (scalability, team autonomy, time to market, operational complexity)
@@ -131,24 +143,29 @@ Draft an RFC for moving from our monolith to microservices
 ## What the Agent Will Ask (if context is missing)
 
 **About the proposal:**
+
 - What are you proposing and why now?
 - What happens if you don't make this decision?
 
 **About assumptions:**
+
 - What are you taking for granted for this proposal to work?
 - What would need to be true for your preferred option to succeed?
 
 **About decision criteria:**
+
 - What matters most when choosing between options?
 - Are there any hard requirements that would disqualify an option?
 - How do you weigh speed vs cost vs risk?
 
 **About stakeholders:**
+
 - Who is driving this proposal?
 - Who must approve before anything moves forward?
 - Who should be consulted vs just kept informed?
 
 **About options:**
+
 - What alternatives did you consider?
 - Have you thought about keeping the status quo?
 
@@ -159,7 +176,7 @@ Every RFC includes:
 1. **Header & Metadata** — Impact (HIGH/MEDIUM/LOW), Status, Driver, Approver, Contributors, Informed, Due Date
 2. **Background** — Current state, problem/opportunity, why now, cost of inaction
 3. **Assumptions** — Explicit assumptions with confidence levels (High/Medium/Low) and invalidation triggers
-4. **Decision Criteria** — Prioritized criteria with weights (Must-have / High / Medium / Low), defined *before* options
+4. **Decision Criteria** — Prioritized criteria with weights (Must-have / High / Medium / Low), defined _before_ options
 5. **Options Considered** — Each option with description, pros, cons, and effort/risk/cost estimate
 6. **Options Comparison Matrix** — Side-by-side view across all options and criteria
 7. **Action Items** — Concrete tasks with owners and due dates for after the decision
@@ -211,11 +228,11 @@ The skill detects your language automatically:
 
 ## Language Support
 
-| Language   | Example Trigger                                      |
-|------------|------------------------------------------------------|
-| English    | "Write an RFC for migrating to PostgreSQL"           |
-| Portuguese | "Escreva um RFC para migrar para PostgreSQL"         |
-| Spanish    | "Escribe un RFC para migrar a PostgreSQL"            |
+| Language   | Example Trigger                              |
+| ---------- | -------------------------------------------- |
+| English    | "Write an RFC for migrating to PostgreSQL"   |
+| Portuguese | "Escreva um RFC para migrar para PostgreSQL" |
+| Spanish    | "Escribe un RFC para migrar a PostgreSQL"    |
 
 All section headers and content are automatically generated in the detected language.
 
@@ -223,7 +240,7 @@ All section headers and content are automatically generated in the detected lang
 
 ### 1. Decision Criteria Before Options
 
-Most RFC templates list options first and criteria last — which makes it easy to pick criteria that justify the preferred option after the fact. This skill enforces criteria *before* options, which produces decisions that hold up to scrutiny.
+Most RFC templates list options first and criteria last — which makes it easy to pick criteria that justify the preferred option after the fact. This skill enforces criteria _before_ options, which produces decisions that hold up to scrutiny.
 
 ### 2. Explicit Assumptions with Invalidation Triggers
 
@@ -265,43 +282,52 @@ The RFC tracks status (NOT STARTED → IN PROGRESS → COMPLETE) and the Outcome
 ```markdown
 # RFC: Adopt OpenTelemetry for Distributed Tracing
 
-| Field        | Value                        |
-|--------------|------------------------------|
-| Impact       | HIGH                         |
-| Status       | IN PROGRESS                  |
-| Driver       | @platform-lead               |
-| Approver     | @vp-engineering, @sre-lead   |
-| Contributors | @backend-lead, @frontend-lead|
-| Informed     | @engineering-all             |
-| Due Date     | 2026-04-15                   |
+| Field        | Value                         |
+| ------------ | ----------------------------- |
+| Impact       | HIGH                          |
+| Status       | IN PROGRESS                   |
+| Driver       | @platform-lead                |
+| Approver     | @vp-engineering, @sre-lead    |
+| Contributors | @backend-lead, @frontend-lead |
+| Informed     | @engineering-all              |
+| Due Date     | 2026-04-15                    |
 
 ## Background
+
 [Current observability gaps, cost of incidents without tracing...]
 
 ## Assumptions
-| # | Assumption | Confidence | Invalidation Trigger |
-|---|------------|------------|----------------------|
-| 1 | Team can dedicate 2 sprints to migration | Medium | If Q2 roadmap changes |
+
+| #   | Assumption                               | Confidence | Invalidation Trigger  |
+| --- | ---------------------------------------- | ---------- | --------------------- |
+| 1   | Team can dedicate 2 sprints to migration | Medium     | If Q2 roadmap changes |
 
 ## Decision Criteria
+
 | Priority | Criterion        | Weight    |
-|----------|-----------------|-----------|
-| 1        | Vendor-neutral  | Must-have |
-| 2        | Cost < $3k/mo   | High      |
-| 3        | Team familiarity| Medium    |
+| -------- | ---------------- | --------- |
+| 1        | Vendor-neutral   | Must-have |
+| 2        | Cost < $3k/mo    | High      |
+| 3        | Team familiarity | Medium    |
 
 ## Options Considered
+
 ### Option 1: OpenTelemetry + Grafana Tempo ⭐ (Recommended)
+
 ### Option 2: Datadog APM
+
 ### Option 3: Do Nothing
 
 ## Options Comparison
+
 [Matrix across all options and criteria]
 
 ## Action Items
+
 [Tasks with owners and due dates]
 
 ## Outcome
+
 [To be filled after decision]
 ```
 

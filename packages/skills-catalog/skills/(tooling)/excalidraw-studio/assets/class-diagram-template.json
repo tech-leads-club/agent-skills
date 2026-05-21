@@ -6,7 +6,10 @@
     {
       "id": "class-base",
       "type": "rectangle",
-      "x": 100, "y": 120, "width": 280, "height": 200,
+      "x": 100,
+      "y": 120,
+      "width": 280,
+      "height": 200,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "#a5d8ff",
@@ -26,14 +29,15 @@
       "versionNonce": 4002,
       "updated": 1706659200000,
       "roundness": { "type": 3 },
-      "boundElements": [
-        { "type": "arrow", "id": "arrow-inherit" }
-      ]
+      "boundElements": [{ "type": "arrow", "id": "arrow-inherit" }]
     },
     {
       "id": "class-child",
       "type": "rectangle",
-      "x": 500, "y": 120, "width": 280, "height": 200,
+      "x": 500,
+      "y": 120,
+      "width": 280,
+      "height": 200,
       "angle": 0,
       "strokeColor": "#7048e8",
       "backgroundColor": "#d0bfff",
@@ -53,14 +57,15 @@
       "versionNonce": 4004,
       "updated": 1706659200000,
       "roundness": { "type": 3 },
-      "boundElements": [
-        { "type": "arrow", "id": "arrow-inherit" }
-      ]
+      "boundElements": [{ "type": "arrow", "id": "arrow-inherit" }]
     },
     {
       "id": "sep-base-1",
       "type": "line",
-      "x": 100, "y": 168, "width": 280, "height": 0,
+      "x": 100,
+      "y": 168,
+      "width": 280,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -81,12 +86,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [280, 0]]
+      "points": [
+        [0, 0],
+        [280, 0]
+      ]
     },
     {
       "id": "sep-base-2",
       "type": "line",
-      "x": 100, "y": 258, "width": 280, "height": 0,
+      "x": 100,
+      "y": 258,
+      "width": 280,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -107,12 +118,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [280, 0]]
+      "points": [
+        [0, 0],
+        [280, 0]
+      ]
     },
     {
       "id": "sep-child-1",
       "type": "line",
-      "x": 500, "y": 168, "width": 280, "height": 0,
+      "x": 500,
+      "y": 168,
+      "width": 280,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#7048e8",
       "backgroundColor": "transparent",
@@ -133,12 +150,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [280, 0]]
+      "points": [
+        [0, 0],
+        [280, 0]
+      ]
     },
     {
       "id": "sep-child-2",
       "type": "line",
-      "x": 500, "y": 258, "width": 280, "height": 0,
+      "x": 500,
+      "y": 258,
+      "width": 280,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#7048e8",
       "backgroundColor": "transparent",
@@ -159,12 +182,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [280, 0]]
+      "points": [
+        [0, 0],
+        [280, 0]
+      ]
     },
     {
       "id": "arrow-inherit",
       "type": "arrow",
-      "x": 380, "y": 220, "width": 120, "height": 0,
+      "x": 380,
+      "y": 220,
+      "width": 120,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -185,7 +214,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-inherit-label" }],
-      "points": [[0, 0], [120, 0]],
+      "points": [
+        [0, 0],
+        [120, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "triangle",
@@ -195,8 +227,10 @@
     {
       "id": "title",
       "type": "text",
-      "x": 200, "y": 60,
-      "width": 480, "height": 35,
+      "x": 200,
+      "y": 60,
+      "width": 480,
+      "height": 35,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -229,8 +263,10 @@
     {
       "id": "text-base-name",
       "type": "text",
-      "x": 120, "y": 126,
-      "width": 240, "height": 25,
+      "x": 120,
+      "y": 126,
+      "width": 240,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -263,8 +299,10 @@
     {
       "id": "text-base-fields",
       "type": "text",
-      "x": 112, "y": 176,
-      "width": 260, "height": 72,
+      "x": 112,
+      "y": 176,
+      "width": 260,
+      "height": 72,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -297,8 +335,10 @@
     {
       "id": "text-base-methods",
       "type": "text",
-      "x": 112, "y": 266,
-      "width": 260, "height": 45,
+      "x": 112,
+      "y": 266,
+      "width": 260,
+      "height": 45,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -331,8 +371,10 @@
     {
       "id": "text-child-name",
       "type": "text",
-      "x": 520, "y": 126,
-      "width": 240, "height": 25,
+      "x": 520,
+      "y": 126,
+      "width": 240,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -365,8 +407,10 @@
     {
       "id": "text-child-fields",
       "type": "text",
-      "x": 512, "y": 176,
-      "width": 260, "height": 72,
+      "x": 512,
+      "y": 176,
+      "width": 260,
+      "height": 72,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -399,8 +443,10 @@
     {
       "id": "text-child-methods",
       "type": "text",
-      "x": 512, "y": 266,
-      "width": 260, "height": 45,
+      "x": 512,
+      "y": 266,
+      "width": 260,
+      "height": 45,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -433,8 +479,10 @@
     {
       "id": "text-inherit-label",
       "type": "text",
-      "x": 400, "y": 202,
-      "width": 80, "height": 18,
+      "x": 400,
+      "y": 202,
+      "width": 80,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",

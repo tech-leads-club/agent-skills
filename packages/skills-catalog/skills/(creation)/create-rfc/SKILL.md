@@ -23,6 +23,7 @@ Use this skill when:
 - User needs to compare options and record the chosen direction with rationale
 
 Do NOT use for:
+
 - Technical Design Documents focused on implementation (use `technical-design-doc-creator`)
 - Simple meeting notes or summaries
 - README files or API documentation
@@ -37,13 +38,13 @@ Do NOT use for:
 
 ## RFC vs TDD
 
-| Aspect | RFC | TDD |
-|--------|-----|-----|
-| **Purpose** | Propose + decide | Design + plan implementation |
-| **Audience** | Broad stakeholders, leadership | Engineering team |
-| **Focus** | Should we do X? Which option? | How do we build X? |
-| **Output** | Decision + rationale | Architecture + implementation plan |
-| **Timing** | Before committing to a direction | After direction is decided |
+| Aspect       | RFC                              | TDD                                |
+| ------------ | -------------------------------- | ---------------------------------- |
+| **Purpose**  | Propose + decide                 | Design + plan implementation       |
+| **Audience** | Broad stakeholders, leadership   | Engineering team                   |
+| **Focus**    | Should we do X? Which option?    | How do we build X?                 |
+| **Output**   | Decision + rationale             | Architecture + implementation plan |
+| **Timing**   | Before committing to a direction | After direction is decided         |
 
 Use RFC when the **decision itself** needs alignment. Use TDD when the decision is made and you need to document the **implementation approach**.
 
@@ -60,9 +61,7 @@ If the user provides no context, use **AskQuestion** to collect basic informatio
     {
       "id": "rfc_topic",
       "prompt": "What is the topic or change you want to propose?",
-      "options": [
-        { "id": "free_text", "label": "I'll describe it below" }
-      ]
+      "options": [{ "id": "free_text", "label": "I'll describe it below" }]
     },
     {
       "id": "rfc_impact",
@@ -113,13 +112,13 @@ If any of these are missing, ask IN THE USER'S LANGUAGE before generating the do
 
 ### Step 3: Detect RFC Type and Tailor Sections
 
-| RFC Type | Additional Focus Areas |
-|----------|----------------------|
-| **Technical/Architecture** | System impact, migration path, technical risks |
-| **Process/Workflow** | Team impact, adoption plan, rollback if process fails |
-| **Product/Feature** | User impact, metrics, go/no-go criteria |
-| **Vendor/Tool Selection** | Cost comparison, lock-in risk, evaluation criteria |
-| **Policy/Compliance** | Regulatory requirements, audit trail, enforcement |
+| RFC Type                   | Additional Focus Areas                                |
+| -------------------------- | ----------------------------------------------------- |
+| **Technical/Architecture** | System impact, migration path, technical risks        |
+| **Process/Workflow**       | Team impact, adoption plan, rollback if process fails |
+| **Product/Feature**        | User impact, metrics, go/no-go criteria               |
+| **Vendor/Tool Selection**  | Cost comparison, lock-in risk, evaluation criteria    |
+| **Policy/Compliance**      | Regulatory requirements, audit trail, enforcement     |
 
 ### Step 4: Generate RFC Document
 
@@ -183,7 +182,7 @@ Before finalizing, verify:
 - [ ] **Impact**: Assessed as HIGH / MEDIUM / LOW with justification
 - [ ] **Background**: Current state + problem + why now + cost of inaction
 - [ ] **Assumptions**: Explicit, with confidence levels and invalidation triggers
-- [ ] **Decision Criteria**: Defined *before* options, with weights; Must-haves identified
+- [ ] **Decision Criteria**: Defined _before_ options, with weights; Must-haves identified
 - [ ] **Data**: At least some evidence supporting the need for change
 - [ ] **Options**: Minimum 2 options (including "do nothing" for significant changes)
 - [ ] **Options evaluated against criteria**: Not just pros/cons in isolation
@@ -200,11 +199,13 @@ Before finalizing, verify:
 ### Predetermined Conclusion Disguised as RFC
 
 **BAD**:
+
 ```
 We should use Kubernetes. Here are some reasons. Option 2 is to not use Kubernetes (obviously wrong).
 ```
 
 **GOOD**:
+
 ```
 Option 1: Adopt Kubernetes — [genuine pros and cons]
 Option 2: Stick with Docker Compose — [genuine pros and cons]
@@ -214,11 +215,13 @@ Option 3: Move to managed container platform (ECS/Cloud Run) — [genuine pros a
 ### Vague Background
 
 **BAD**:
+
 ```
 Our current deployment process has some issues.
 ```
 
 **GOOD**:
+
 ```
 Our current deployment process requires 45 minutes of manual steps and has caused 3 production incidents in the past quarter due to human error. The team spends ~8 hours/week on deployment-related tasks.
 ```
@@ -231,16 +234,18 @@ Always include the status quo as an option for significant changes — it forces
 
 **BAD**: Presenting options first, then listing criteria — which looks like the criteria were chosen to justify a preferred option.
 
-**GOOD**: Define criteria with weights *before* listing options. Then evaluate each option against them explicitly. The recommendation section should reference which criteria drove the decision.
+**GOOD**: Define criteria with weights _before_ listing options. Then evaluate each option against them explicitly. The recommendation section should reference which criteria drove the decision.
 
 ### Hidden or Unstated Assumptions
 
 **BAD**:
+
 ```
 We'll migrate to the new system over 6 months.
 ```
 
 **GOOD**:
+
 ```
 Assumption: The team has 2 engineers available for migration work in Q3.
 Confidence: Medium. Invalidated if Q3 headcount changes.
@@ -291,6 +296,7 @@ Would you like me to add anything else?
 ## Example Prompts that Trigger This Skill
 
 ### English
+
 - "Write an RFC for migrating our database from MySQL to PostgreSQL"
 - "I need an RFC to propose moving from monolith to microservices"
 - "Create a request for comments on our on-call rotation policy"
@@ -298,12 +304,14 @@ Would you like me to add anything else?
 - "I need to get approval to adopt a new design system"
 
 ### Portuguese
+
 - "Escreva um RFC para migrar nosso banco de dados"
 - "Preciso de um RFC para propor a adoção de uma nova ferramenta"
 - "Crie um Request for Comments sobre nossa política de on-call"
 - "Quero documentar a decisão de trocar de provedor de cloud"
 
 ### Spanish
+
 - "Escribe un RFC para migrar nuestra infraestructura a la nube"
 - "Necesito un RFC para proponer un cambio en el proceso de deploy"
 - "Crea un Request for Comments sobre la adopción de un nuevo framework"

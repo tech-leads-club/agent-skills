@@ -10,11 +10,11 @@ Red teaming asks: **"If someone wanted to break, exploit, or game this, how woul
 
 The U.S. Army Applied Critical Thinking Handbook's RED model provides a generalizable three-step checklist applicable to any adversarial analysis:
 
-| Step | Action | Key Questions |
-|------|--------|---------------|
-| **R — Recognize Assumptions** | What are we taking for granted? | What would have to be true for this to be secure? What are we assuming about the adversary? |
-| **E — Evaluate Arguments** | What is the evidence quality? | Are there logical fallacies? What alternative attack paths exist? |
-| **D — Draw Conclusions** | What do the data actually support? | What conclusions are we NOT entitled to draw about our security posture? |
+| Step                          | Action                             | Key Questions                                                                               |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| **R — Recognize Assumptions** | What are we taking for granted?    | What would have to be true for this to be secure? What are we assuming about the adversary? |
+| **E — Evaluate Arguments**    | What is the evidence quality?      | Are there logical fallacies? What alternative attack paths exist?                           |
+| **D — Draw Conclusions**      | What do the data actually support? | What conclusions are we NOT entitled to draw about our security posture?                    |
 
 Apply RED before constructing adversary personas to ensure the analysis is grounded.
 
@@ -34,51 +34,51 @@ Generic "attackers" produce generic findings. Specific personas produce actionab
 
 ### Persona Template
 
-| Field | Description |
-|-------|-------------|
-| **Role** | Who is this adversary? |
-| **Motivation** | Why would they attack? |
-| **Capability** | What resources and skills do they have? |
-| **Access** | What do they already have access to? |
-| **Constraints** | What limits them? |
+| Field           | Description                             |
+| --------------- | --------------------------------------- |
+| **Role**        | Who is this adversary?                  |
+| **Motivation**  | Why would they attack?                  |
+| **Capability**  | What resources and skills do they have? |
+| **Access**      | What do they already have access to?    |
+| **Constraints** | What limits them?                       |
 
 ### Common Adversary Personas
 
-| Persona | Motivation | Typical Vectors |
-|---------|-----------|----------------|
-| **External Attacker** | Financial gain, data theft | API exploitation, credential stuffing, injection attacks |
-| **Competitor** | Market advantage | Feature copying, talent poaching, FUD campaigns |
-| **Disgruntled Insider** | Revenge, financial gain | Privilege escalation, data exfiltration, sabotage |
-| **Careless User** | None (accidental) | Misconfiguration, weak passwords, sharing credentials |
-| **Regulator** | Compliance enforcement | Audit findings, data handling violations, accessibility gaps |
-| **Opportunistic Gamer** | Personal benefit | Exploiting loopholes in business logic, referral fraud |
-| **Activist** | Ideological goals | Public embarrassment, data leaks, service disruption |
-| **AI Agent** | Automated exploitation | Prompt injection, API abuse at scale, automated vulnerability scanning |
+| Persona                 | Motivation                 | Typical Vectors                                                        |
+| ----------------------- | -------------------------- | ---------------------------------------------------------------------- |
+| **External Attacker**   | Financial gain, data theft | API exploitation, credential stuffing, injection attacks               |
+| **Competitor**          | Market advantage           | Feature copying, talent poaching, FUD campaigns                        |
+| **Disgruntled Insider** | Revenge, financial gain    | Privilege escalation, data exfiltration, sabotage                      |
+| **Careless User**       | None (accidental)          | Misconfiguration, weak passwords, sharing credentials                  |
+| **Regulator**           | Compliance enforcement     | Audit findings, data handling violations, accessibility gaps           |
+| **Opportunistic Gamer** | Personal benefit           | Exploiting loopholes in business logic, referral fraud                 |
+| **Activist**            | Ideological goals          | Public embarrassment, data leaks, service disruption                   |
+| **AI Agent**            | Automated exploitation     | Prompt injection, API abuse at scale, automated vulnerability scanning |
 
 ### Domain-Specific Personas
 
-| Domain | Key Adversary | Focus |
-|--------|--------------|-------|
-| E-commerce | Fraudster | Payment bypass, coupon abuse, fake returns |
-| SaaS | Free-tier abuser | Rate limit evasion, multi-accounting, resource hoarding |
-| Marketplace | Bad-faith seller | Fake listings, review manipulation, escrow games |
-| API Platform | Scraper | Rate limit bypass, data harvesting, reverse engineering |
-| Social Platform | Troll/bot farm | Spam, manipulation, fake engagement |
-| AI/ML System | Adversarial attacker | Data poisoning, model extraction, prompt injection |
+| Domain          | Key Adversary        | Focus                                                   |
+| --------------- | -------------------- | ------------------------------------------------------- |
+| E-commerce      | Fraudster            | Payment bypass, coupon abuse, fake returns              |
+| SaaS            | Free-tier abuser     | Rate limit evasion, multi-accounting, resource hoarding |
+| Marketplace     | Bad-faith seller     | Fake listings, review manipulation, escrow games        |
+| API Platform    | Scraper              | Rate limit bypass, data harvesting, reverse engineering |
+| Social Platform | Troll/bot farm       | Spam, manipulation, fake engagement                     |
+| AI/ML System    | Adversarial attacker | Data poisoning, model extraction, prompt injection      |
 
 ## Attack Vector Identification
 
 ### By Category
 
-| Category | Vectors | Example |
-|----------|---------|---------|
-| **Technical** | Injection, auth bypass, race conditions, SSRF | SQL injection in search parameter |
-| **Business Logic** | Workflow bypass, state manipulation, price tampering | Applying expired coupon via API replay |
-| **Social** | Phishing, pretexting, authority exploitation | "I'm the CEO, I need access now" |
-| **Operational** | Supply chain, dependency poisoning, insider threat | Compromised npm package in build pipeline |
-| **Information** | Data leakage, metadata exposure, timing attacks | User enumeration via login error messages |
-| **Economic** | Resource exhaustion, denial of wallet, asymmetric cost | Lambda invocation flood causing $50K bill |
-| **AI-Specific** | Prompt injection, training data extraction, model manipulation | Injecting instructions via user-controlled content |
+| Category           | Vectors                                                        | Example                                            |
+| ------------------ | -------------------------------------------------------------- | -------------------------------------------------- |
+| **Technical**      | Injection, auth bypass, race conditions, SSRF                  | SQL injection in search parameter                  |
+| **Business Logic** | Workflow bypass, state manipulation, price tampering           | Applying expired coupon via API replay             |
+| **Social**         | Phishing, pretexting, authority exploitation                   | "I'm the CEO, I need access now"                   |
+| **Operational**    | Supply chain, dependency poisoning, insider threat             | Compromised npm package in build pipeline          |
+| **Information**    | Data leakage, metadata exposure, timing attacks                | User enumeration via login error messages          |
+| **Economic**       | Resource exhaustion, denial of wallet, asymmetric cost         | Lambda invocation flood causing $50K bill          |
+| **AI-Specific**    | Prompt injection, training data extraction, model manipulation | Injecting instructions via user-controlled content |
 
 ### Attack Tree Construction
 
@@ -121,37 +121,37 @@ Systems create incentives. Sometimes those incentives reward the wrong behavior.
 
 ### Questions to Surface Perverse Incentives
 
-| Question | What It Reveals |
-|----------|----------------|
-| "How will people game this?" | Loopholes in business logic |
-| "What behavior does this reward that we don't want?" | Misaligned incentives |
-| "What's the cheapest way to get the reward without the effort?" | Shortcut exploitation |
-| "If we measure X, what Y gets sacrificed?" | Goodhart's Law in action |
-| "Who benefits from this failing?" | Adversaries with motive |
-| "What would a lazy but clever person do?" | Path of least resistance exploits |
+| Question                                                        | What It Reveals                   |
+| --------------------------------------------------------------- | --------------------------------- |
+| "How will people game this?"                                    | Loopholes in business logic       |
+| "What behavior does this reward that we don't want?"            | Misaligned incentives             |
+| "What's the cheapest way to get the reward without the effort?" | Shortcut exploitation             |
+| "If we measure X, what Y gets sacrificed?"                      | Goodhart's Law in action          |
+| "Who benefits from this failing?"                               | Adversaries with motive           |
+| "What would a lazy but clever person do?"                       | Path of least resistance exploits |
 
 ### Common Perverse Incentive Patterns
 
-| Pattern | Example | Consequence |
-|---------|---------|-------------|
-| Metric gaming | "Lines of code" as productivity metric | Verbose, unmaintainable code |
-| Reward hacking | Referral bonus with no verification | Fake accounts for self-referral |
-| Race to the bottom | "Fastest response time" as SLA | Teams avoid taking complex tickets |
-| Cobra effect | Bounty for reporting bugs | Team introduces bugs to claim bounties |
-| Information asymmetry | Users know more than the system | Adverse selection in marketplace pricing |
-| Goodhart's Law | Any target metric becomes the optimization goal | Metric improves, actual outcome deteriorates |
+| Pattern               | Example                                         | Consequence                                  |
+| --------------------- | ----------------------------------------------- | -------------------------------------------- |
+| Metric gaming         | "Lines of code" as productivity metric          | Verbose, unmaintainable code                 |
+| Reward hacking        | Referral bonus with no verification             | Fake accounts for self-referral              |
+| Race to the bottom    | "Fastest response time" as SLA                  | Teams avoid taking complex tickets           |
+| Cobra effect          | Bounty for reporting bugs                       | Team introduces bugs to claim bounties       |
+| Information asymmetry | Users know more than the system                 | Adverse selection in marketplace pricing     |
+| Goodhart's Law        | Any target metric becomes the optimization goal | Metric improves, actual outcome deteriorates |
 
 ## Competitive Response Analysis
 
 When the "adversary" is a competitor.
 
-| Scenario | Analysis Framework |
-|----------|-------------------|
-| Feature parity | What can they copy? How fast? What's our defensible moat? |
-| Price war | Can they sustain lower prices? What's their cost structure? |
+| Scenario        | Analysis Framework                                                         |
+| --------------- | -------------------------------------------------------------------------- |
+| Feature parity  | What can they copy? How fast? What's our defensible moat?                  |
+| Price war       | Can they sustain lower prices? What's their cost structure?                |
 | Talent poaching | Which roles are critical? How replaceable? What's our retention advantage? |
-| Platform risk | Are we dependent on their platform? What's the switch cost? |
-| FUD campaign | What claims could they make? Which are hardest to refute? |
+| Platform risk   | Are we dependent on their platform? What's the switch cost?                |
+| FUD campaign    | What claims could they make? Which are hardest to refute?                  |
 
 ## Output Template
 
@@ -160,11 +160,11 @@ When the "adversary" is a competitor.
 
 ### RED Model Assessment
 
-| Step | Finding |
-|------|---------|
+| Step                      | Finding                                     |
+| ------------------------- | ------------------------------------------- |
 | **Recognize Assumptions** | [Key assumptions about security/resilience] |
-| **Evaluate Arguments** | [Quality of evidence for current defenses] |
-| **Draw Conclusions** | [Honest assessment of actual posture] |
+| **Evaluate Arguments**    | [Quality of evidence for current defenses]  |
+| **Draw Conclusions**      | [Honest assessment of actual posture]       |
 
 ### Asset Under Assessment
 
@@ -173,34 +173,36 @@ When the "adversary" is a competitor.
 ### Adversary Profiles
 
 #### Adversary 1: [Name/Role]
+
 - **Motivation:** [Why they attack]
 - **Capability:** [What they can do]
 - **Access:** [What they start with]
 
 #### Adversary 2: [Name/Role]
+
 - **Motivation:** [Why they attack]
 - **Capability:** [What they can do]
 - **Access:** [What they start with]
 
 ### Attack Vectors (Ranked)
 
-| # | Vector | Adversary | Likelihood | Impact | Risk Score |
-|---|--------|-----------|-----------|--------|------------|
-| 1 | [Specific attack] | [Who] | High/Med/Low | High/Med/Low | [L x I] |
-| 2 | [Specific attack] | [Who] | High/Med/Low | High/Med/Low | [L x I] |
-| 3 | [Specific attack] | [Who] | High/Med/Low | High/Med/Low | [L x I] |
+| #   | Vector            | Adversary | Likelihood   | Impact       | Risk Score |
+| --- | ----------------- | --------- | ------------ | ------------ | ---------- |
+| 1   | [Specific attack] | [Who]     | High/Med/Low | High/Med/Low | [L x I]    |
+| 2   | [Specific attack] | [Who]     | High/Med/Low | High/Med/Low | [L x I]    |
+| 3   | [Specific attack] | [Who]     | High/Med/Low | High/Med/Low | [L x I]    |
 
 ### Perverse Incentives
 
-| Incentive Created | Unintended Behavior | Severity |
-|-------------------|-------------------|----------|
+| Incentive Created         | Unintended Behavior | Severity     |
+| ------------------------- | ------------------- | ------------ |
 | [What the system rewards] | [How it gets gamed] | High/Med/Low |
 
 ### Recommended Defenses
 
-| Attack Vector | Defense | Effort | Priority |
-|--------------|---------|--------|----------|
-| #1 | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
-| #2 | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
-| #3 | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
+| Attack Vector | Defense                   | Effort       | Priority                      |
+| ------------- | ------------------------- | ------------ | ----------------------------- |
+| #1            | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
+| #2            | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
+| #3            | [Specific countermeasure] | Low/Med/High | Immediate/Next sprint/Backlog |
 ```

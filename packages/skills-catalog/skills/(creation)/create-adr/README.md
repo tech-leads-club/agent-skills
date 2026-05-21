@@ -1,6 +1,6 @@
 # ADR Creator
 
-A skill for AI coding agents that creates Architecture Decision Records (ADRs) — concise, durable documents that capture the context, decision, and consequences of significant architectural choices so future engineers understand *why* things are the way they are.
+A skill for AI coding agents that creates Architecture Decision Records (ADRs) — concise, durable documents that capture the context, decision, and consequences of significant architectural choices so future engineers understand _why_ things are the way they are.
 
 ## What It Does
 
@@ -20,12 +20,12 @@ The skill automatically:
 
 ## ADR vs RFC — Which One Do You Need?
 
-| Question | Use |
-|----------|-----|
-| Should we do X? Which option? | **RFC** |
+| Question                                         | Use     |
+| ------------------------------------------------ | ------- |
+| Should we do X? Which option?                    | **RFC** |
 | We've decided — document it for future engineers | **ADR** |
-| Need approval from leadership before acting | **RFC** |
-| Need to preserve the rationale of a past choice | **ADR** |
+| Need approval from leadership before acting      | **RFC** |
+| Need to preserve the rationale of a past choice  | **ADR** |
 
 **Rule of thumb**: RFC drives the decision. ADR records it. A common flow is RFC → decision meeting → ADR.
 
@@ -36,16 +36,19 @@ The skill automatically:
 Just tell the agent you want an ADR:
 
 **English:**
+
 ```
 Write an ADR for using PostgreSQL as our primary database
 ```
 
 **Portuguese:**
+
 ```
 Escreva um ADR para documentar a decisão de usar PostgreSQL
 ```
 
 **Spanish:**
+
 ```
 Escribe un ADR sobre la decisión de usar microservicios
 ```
@@ -82,25 +85,31 @@ Best for decisions where multiple options were seriously evaluated. Includes a s
 - **Status**: Accepted
 
 ## Context and Problem Statement
+
 Our API requires fast session lookups at high concurrency...
 
 ## Decision Drivers
+
 - Must support 50k concurrent sessions
 - TTL-based expiry required
 
 ## Considered Options
+
 - Redis (chosen)
 - PostgreSQL session table
 - JWT stateless tokens
 
 ## Decision Outcome
+
 Chosen: **Redis**, because TTL support and in-memory performance...
 
 ### Positive Consequences
+
 - Sub-millisecond session reads
 - Built-in expiry without cron jobs
 
 ### Negative Consequences
+
 - Additional service to operate
 - Session data lost on Redis restart without persistence config
 ```
@@ -113,15 +122,19 @@ Best for quick recording of straightforward decisions.
 # ADR-003: Use Redis for Session Storage
 
 ## Status
+
 Accepted
 
 ## Context
+
 Our API needs fast, expirable session storage at scale...
 
 ## Decision
+
 We will use Redis for session storage, managed via AWS ElastiCache...
 
 ## Consequences
+
 Fast reads with native TTL. Adds operational complexity.
 ```
 
@@ -140,22 +153,27 @@ accepting **the operational overhead of an additional managed service**.
 ## What the Agent Will Ask (if context is missing)
 
 **About the decision:**
+
 - What was decided? (noun phrase — e.g., "Use PostgreSQL for primary storage")
 - What is the current status — Accepted, Proposed, Deprecated, or Superseded?
 
 **About the context:**
+
 - What situation or forces led to this decision?
 - What constraints existed (technical, business, team)?
 
 **About alternatives:**
+
 - What other options were considered?
 - Why were they rejected?
 
 **About consequences:**
+
 - What becomes easier or better as a result?
 - What trade-offs or downsides are you accepting?
 
 **About history:**
+
 - Does this supersede a previous ADR?
 
 ## The Generated ADR
@@ -195,7 +213,7 @@ Common directory locations: `docs/adr/`, `docs/decisions/`, `adr/`, `.adr/`
 ✅ Use Redis for Session Storage
 ```
 
-### 2. Context explains the *forces*, not just the facts
+### 2. Context explains the _forces_, not just the facts
 
 ```
 ❌ We needed a session store.
@@ -216,7 +234,7 @@ Common directory locations: `docs/adr/`, `docs/decisions/`, `adr/`, `.adr/`
 
 ### 4. Always supersede, never edit
 
-When a decision changes, create a new ADR and mark the old one as superseded. This preserves the historical context — the old decision was correct *given what was known at the time*.
+When a decision changes, create a new ADR and mark the old one as superseded. This preserves the historical context — the old decision was correct _given what was known at the time_.
 
 ### 5. Keep it short
 
@@ -243,11 +261,11 @@ Target 200–500 words. If the decision needs extensive explanation, link to the
 
 ## Language Support
 
-| Language | Example Trigger |
-|----------|-----------------|
-| English | "Write an ADR for using PostgreSQL" |
-| Portuguese | "Escreva um ADR para documentar o uso do PostgreSQL" |
-| Spanish | "Escribe un ADR sobre la decisión de usar PostgreSQL" |
+| Language   | Example Trigger                                       |
+| ---------- | ----------------------------------------------------- |
+| English    | "Write an ADR for using PostgreSQL"                   |
+| Portuguese | "Escreva um ADR para documentar o uso do PostgreSQL"  |
+| Spanish    | "Escribe un ADR sobre la decisión de usar PostgreSQL" |
 
 All section headers and content are automatically generated in the detected language.
 

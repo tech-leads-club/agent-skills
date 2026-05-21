@@ -22,12 +22,12 @@ Steel manning is the opposite of straw manning. Restate the user's position in i
 
 ### How to Steelman
 
-| Step | Action | Example |
-|------|--------|---------|
-| 1. Identify the core claim | Strip away weak framing | "We should use microservices" → "Independent deployment and scaling of components will accelerate team velocity" |
-| 2. Add the strongest evidence | Supply what the user implied | "...especially given 4 teams working on different release cycles" |
-| 3. Acknowledge real benefits | Name what's genuinely good | "This would eliminate the current deploy queue bottleneck" |
-| 4. Confirm with user | "Is this a fair restatement?" | Ensures you're attacking the real position, not a fabrication |
+| Step                          | Action                        | Example                                                                                                          |
+| ----------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 1. Identify the core claim    | Strip away weak framing       | "We should use microservices" → "Independent deployment and scaling of components will accelerate team velocity" |
+| 2. Add the strongest evidence | Supply what the user implied  | "...especially given 4 teams working on different release cycles"                                                |
+| 3. Acknowledge real benefits  | Name what's genuinely good    | "This would eliminate the current deploy queue bottleneck"                                                       |
+| 4. Confirm with user          | "Is this a fair restatement?" | Ensures you're attacking the real position, not a fabrication                                                    |
 
 ### Steelman Checklist
 
@@ -44,24 +44,24 @@ Before proceeding to the antithesis, verify:
 
 Build the antithesis by asking: "If a smart, informed person disagreed, what would their best argument be?"
 
-| Source of Counter-Arguments | Example |
-|----------------------------|---------|
-| Opposing trade-off | "Speed now vs. maintainability later" |
-| Hidden cost | "The migration cost exceeds the projected savings for 18 months" |
-| Alternative that solves the same problem | "A modular monolith gets 80% of the benefit at 20% of the cost" |
-| Precedent from similar situations | "Company X tried this and reverted after 2 years" |
-| Stakeholder the thesis doesn't serve | "The junior developers will struggle with the added complexity" |
-| The null hypothesis | "Doing nothing and investing the effort elsewhere yields higher ROI" |
+| Source of Counter-Arguments              | Example                                                              |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| Opposing trade-off                       | "Speed now vs. maintainability later"                                |
+| Hidden cost                              | "The migration cost exceeds the projected savings for 18 months"     |
+| Alternative that solves the same problem | "A modular monolith gets 80% of the benefit at 20% of the cost"      |
+| Precedent from similar situations        | "Company X tried this and reverted after 2 years"                    |
+| Stakeholder the thesis doesn't serve     | "The junior developers will struggle with the added complexity"      |
+| The null hypothesis                      | "Doing nothing and investing the effort elsewhere yields higher ROI" |
 
 ### Reductio ad Absurdum (Supporting Technique)
 
 Take the thesis to its logical extreme to reveal hidden limits.
 
-| Thesis | Reductio | Reveals |
-|--------|----------|---------|
+| Thesis                                        | Reductio                                                      | Reveals                              |
+| --------------------------------------------- | ------------------------------------------------------------- | ------------------------------------ |
 | "We should optimize for developer experience" | "Then we should never ship to production, since bugs hurt DX" | DX must be balanced against delivery |
-| "More tests are always better" | "Then we should have 100% coverage including getters/setters" | Test value has diminishing returns |
-| "We should move fast" | "Then skip code review and testing" | Speed has a quality floor |
+| "More tests are always better"                | "Then we should have 100% coverage including getters/setters" | Test value has diminishing returns   |
+| "We should move fast"                         | "Then skip code review and testing"                           | Speed has a quality floor            |
 
 Use sparingly. Reductio highlights the boundary of a principle, not its invalidity.
 
@@ -113,23 +113,23 @@ Example: "Use the microservices deployment model (independent containers) but ke
 
 Rate the synthesis outcome honestly.
 
-| Level | Meaning | Action |
-|-------|---------|--------|
-| **HIGH** | Synthesis clearly stronger than either side alone | Proceed with synthesis |
-| **MEDIUM** | Synthesis is plausible but untested | Identify the riskiest assumption and suggest an experiment |
-| **LOW** | Both sides have strong, irreconcilable claims | Name the genuine trade-off; let the user decide based on priorities |
-| **PIVOT** | The antithesis is stronger than the thesis | Recommend the user reconsider their original position |
+| Level      | Meaning                                           | Action                                                              |
+| ---------- | ------------------------------------------------- | ------------------------------------------------------------------- |
+| **HIGH**   | Synthesis clearly stronger than either side alone | Proceed with synthesis                                              |
+| **MEDIUM** | Synthesis is plausible but untested               | Identify the riskiest assumption and suggest an experiment          |
+| **LOW**    | Both sides have strong, irreconcilable claims     | Name the genuine trade-off; let the user decide based on priorities |
+| **PIVOT**  | The antithesis is stronger than the thesis        | Recommend the user reconsider their original position               |
 
 ## Anti-Patterns
 
-| Anti-Pattern | Problem | Fix |
-|-------------|---------|-----|
-| False synthesis | "Just do both!" without resolving the tension | Name the specific trade-off being resolved |
-| Weak antithesis | Counter-argument is a strawman | Apply steel manning to the counter too |
-| Thesis bias | Synthesis suspiciously close to original position | Check if antithesis was genuinely engaged |
-| Complexity creep | Synthesis is more complex than either original | Simpler synthesis is usually better |
-| Fence-sitting | "It depends" without specifying on what | Name the exact conditions for each path |
-| Resulting bias | Judging decision quality by outcome | Evaluate the process, not the result (Duke) |
+| Anti-Pattern     | Problem                                           | Fix                                         |
+| ---------------- | ------------------------------------------------- | ------------------------------------------- |
+| False synthesis  | "Just do both!" without resolving the tension     | Name the specific trade-off being resolved  |
+| Weak antithesis  | Counter-argument is a strawman                    | Apply steel manning to the counter too      |
+| Thesis bias      | Synthesis suspiciously close to original position | Check if antithesis was genuinely engaged   |
+| Complexity creep | Synthesis is more complex than either original    | Simpler synthesis is usually better         |
+| Fence-sitting    | "It depends" without specifying on what           | Name the exact conditions for each path     |
+| Resulting bias   | Judging decision quality by outcome               | Evaluate the process, not the result (Duke) |
 
 ## Output Template
 
@@ -149,10 +149,10 @@ Rate the synthesis outcome honestly.
 
 ## Points of Genuine Conflict
 
-| Dimension | Thesis Says | Antithesis Says |
-|-----------|------------|-----------------|
-| [e.g., Speed] | [Position] | [Counter-position] |
-| [e.g., Cost] | [Position] | [Counter-position] |
+| Dimension     | Thesis Says | Antithesis Says    |
+| ------------- | ----------- | ------------------ |
+| [e.g., Speed] | [Position]  | [Counter-position] |
+| [e.g., Cost]  | [Position]  | [Counter-position] |
 
 ## Proposed Synthesis
 

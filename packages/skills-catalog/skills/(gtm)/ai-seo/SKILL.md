@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # AI SEO Skill
@@ -29,15 +28,15 @@ You are an AI-powered SEO strategist specializing in programmatic content genera
 
 ### Core Tool Comparison
 
-| Tool | Primary Function | Best For | Pricing (2025) | AI Overviews |
-|------|-----------------|----------|----------------|--------------|
-| Surfer SEO | Content optimization scoring | SERP-based intent matching | $99-219/mo | Limited |
-| Frase AI | Intent analysis + AI writing | Dual SEO + GEO scoring, 100+ languages | $45-115/mo | Yes (GEO score) |
-| AirOps | AI content ops at scale | Workflow automation, bulk production | Free-$9/1k tasks | Via workflows |
-| SE Ranking | AI Overviews + AI Mode tracking | AI search visibility monitoring | $65-119/mo | Yes (dedicated) |
-| Rankability | Content scoring + optimization | Agency-scale content audits | $49-149/mo | Yes |
-| DataForSEO | Raw SEO data API | Developer/agent integrations, MCP | Pay-per-use | Via SERP API |
-| Clay + Webflow | Programmatic page generation | Personalized ABM landing pages | $149+/mo | N/A |
+| Tool           | Primary Function                | Best For                               | Pricing (2025)   | AI Overviews    |
+| -------------- | ------------------------------- | -------------------------------------- | ---------------- | --------------- |
+| Surfer SEO     | Content optimization scoring    | SERP-based intent matching             | $99-219/mo       | Limited         |
+| Frase AI       | Intent analysis + AI writing    | Dual SEO + GEO scoring, 100+ languages | $45-115/mo       | Yes (GEO score) |
+| AirOps         | AI content ops at scale         | Workflow automation, bulk production   | Free-$9/1k tasks | Via workflows   |
+| SE Ranking     | AI Overviews + AI Mode tracking | AI search visibility monitoring        | $65-119/mo       | Yes (dedicated) |
+| Rankability    | Content scoring + optimization  | Agency-scale content audits            | $49-149/mo       | Yes             |
+| DataForSEO     | Raw SEO data API                | Developer/agent integrations, MCP      | Pay-per-use      | Via SERP API    |
+| Clay + Webflow | Programmatic page generation    | Personalized ABM landing pages         | $149+/mo         | N/A             |
 
 ### Decision Matrix
 
@@ -62,14 +61,15 @@ NEED: Raw data for custom workflows
 
 ### MCP Server Integration Stack
 
-| MCP Server | Data Source | Key Capabilities |
-|-----------|-----------|-----------------|
-| DataForSEO MCP | SERP data, keywords, backlinks | Real-time rankings, keyword research, competitor analysis |
-| Google Search Console MCP | GSC performance data | Query analytics, index status, crawl diagnostics |
-| Semrush MCP | Keyword + domain analytics | Domain comparison, keyword gaps, traffic estimates |
-| FireSEO MCP | GSC + on-page analysis | SEO audits, competitor analysis via natural language |
+| MCP Server                | Data Source                    | Key Capabilities                                          |
+| ------------------------- | ------------------------------ | --------------------------------------------------------- |
+| DataForSEO MCP            | SERP data, keywords, backlinks | Real-time rankings, keyword research, competitor analysis |
+| Google Search Console MCP | GSC performance data           | Query analytics, index status, crawl diagnostics          |
+| Semrush MCP               | Keyword + domain analytics     | Domain comparison, keyword gaps, traffic estimates        |
+| FireSEO MCP               | GSC + on-page analysis         | SEO audits, competitor analysis via natural language      |
 
 **DataForSEO MCP setup:**
+
 ```bash
 # Use env var or secret manager for credentials; never paste real keys into prompts or code.
 claude mcp add dataforseo --transport sse \
@@ -78,6 +78,7 @@ claude mcp add dataforseo --transport sse \
 ```
 
 **GSC MCP setup:**
+
 ```bash
 git clone https://github.com/AminForou/mcp-gsc
 cd mcp-gsc && pip install -r requirements.txt
@@ -85,6 +86,7 @@ claude mcp add gsc -- python /path/to/mcp-gsc/server.py
 ```
 
 **Agent workflow pattern:**
+
 1. DataForSEO MCP: find top 50 keywords for [competitor] with volume > 500
 2. GSC MCP: show current rankings for those keywords
 3. Identify gaps where competitor ranks top 10 but you do not
@@ -106,14 +108,14 @@ BOFU keywords target buyers actively comparing solutions. "[Competitor] alternat
 
 ### Target Keyword Patterns (Priority Order)
 
-| Pattern | Example | Intent | Difficulty |
-|---------|---------|--------|-----------|
-| [Competitor] alternatives | "Mailchimp alternatives" | Very High | Medium |
-| [Competitor] vs [Your Product] | "Mailchimp vs ConvertKit" | Very High | Low-Medium |
-| Best [category] for [wedge] | "Best email tool for creators" | High | Medium |
-| [Competitor] pricing | "Mailchimp pricing 2026" | High | Low |
-| Switch from [Competitor] | "Switch from Mailchimp" | Very High | Low |
-| [Competitor] vs [Competitor] | "Mailchimp vs Constant Contact" | High | Medium |
+| Pattern                        | Example                         | Intent    | Difficulty |
+| ------------------------------ | ------------------------------- | --------- | ---------- |
+| [Competitor] alternatives      | "Mailchimp alternatives"        | Very High | Medium     |
+| [Competitor] vs [Your Product] | "Mailchimp vs ConvertKit"       | Very High | Low-Medium |
+| Best [category] for [wedge]    | "Best email tool for creators"  | High      | Medium     |
+| [Competitor] pricing           | "Mailchimp pricing 2026"        | High      | Low        |
+| Switch from [Competitor]       | "Switch from Mailchimp"         | Very High | Low        |
+| [Competitor] vs [Competitor]   | "Mailchimp vs Constant Contact" | High      | Medium     |
 
 ### Page Template Structure
 
@@ -148,6 +150,7 @@ H2: FAQ (with schema markup)
 ClickUp systematically creates "replaces [competitor]" pages after every major acquisition in their space. When Salesforce acquired Slack, ClickUp launched replacement pages targeting users evaluating options during the 3-6 month peak search window.
 
 **Replicable framework:**
+
 1. Set Google Alerts for acquisitions in your category
 2. Within 48 hours: draft "[Acquired Tool] alternatives" page
 3. Within 2 weeks: publish full comparison + migration guide
@@ -159,14 +162,14 @@ ClickUp systematically creates "replaces [competitor]" pages after every major a
 
 ### Proven Page Patterns
 
-| Pattern | Example | Data Source | Scale |
-|---------|---------|------------|-------|
-| [Tool] for [Industry] | "CRM for real estate" | Industry list + features | 50-500 |
-| [Tool] vs [Competitor] | "Airtable vs Notion" | Competitor matrix | 20-200 |
-| [Service] in [City] | "Plumber in Austin TX" | City database | 500-5,000 |
-| [Metric] for [Company] | "Revenue of Stripe" | Company database | 1,000-30,000 |
-| [Template] for [Use Case] | "Invoice for freelancers" | Template library | 100-1,000 |
-| [Integration] + [Integration] | "Slack + Salesforce" | Integration pairs | 500-10,000 |
+| Pattern                       | Example                   | Data Source              | Scale        |
+| ----------------------------- | ------------------------- | ------------------------ | ------------ |
+| [Tool] for [Industry]         | "CRM for real estate"     | Industry list + features | 50-500       |
+| [Tool] vs [Competitor]        | "Airtable vs Notion"      | Competitor matrix        | 20-200       |
+| [Service] in [City]           | "Plumber in Austin TX"    | City database            | 500-5,000    |
+| [Metric] for [Company]        | "Revenue of Stripe"       | Company database         | 1,000-30,000 |
+| [Template] for [Use Case]     | "Invoice for freelancers" | Template library         | 100-1,000    |
+| [Integration] + [Integration] | "Slack + Salesforce"      | Integration pairs        | 500-10,000   |
 
 ### Architecture
 
@@ -216,6 +219,7 @@ Key capabilities: custom multi-agent workflows, direct CMS publish (WordPress/We
 ### Clay + Webflow for ABM Pages
 
 For account-based marketing at scale:
+
 - Clay enriches company data (logo, industry, pain points, current tools)
 - Webflow CMS template maps Clay columns to dynamic fields
 - Auto-generated slugs: /for/[company-name]
@@ -224,12 +228,12 @@ For account-based marketing at scale:
 
 ### Timeline
 
-| Milestone | Timeline |
-|-----------|----------|
-| Pages indexed | 2-4 weeks |
-| Initial traffic | 4-8 weeks |
-| Meaningful organic growth | 3-6 months |
-| ROI positive | 6-12 months |
+| Milestone                 | Timeline    |
+| ------------------------- | ----------- |
+| Pages indexed             | 2-4 weeks   |
+| Initial traffic           | 4-8 weeks   |
+| Meaningful organic growth | 3-6 months  |
+| ROI positive              | 6-12 months |
 
 ---
 
@@ -262,12 +266,12 @@ Traditional SEO                     GEO (AI Search Optimization)
 
 ### GEO Platform Coverage
 
-| Platform | Scale | Citation Behavior |
-|----------|-------|-------------------|
-| Google AI Overviews | 15%+ of all queries | Cites top-ranking pages with clear answers |
-| ChatGPT | 800M+ weekly users | References authoritative, structured content |
-| Perplexity | 100M+ monthly | Explicitly cites sources with links |
-| Gemini | 750M+ monthly | Pulls from Google index + Knowledge Graph |
+| Platform            | Scale               | Citation Behavior                            |
+| ------------------- | ------------------- | -------------------------------------------- |
+| Google AI Overviews | 15%+ of all queries | Cites top-ranking pages with clear answers   |
+| ChatGPT             | 800M+ weekly users  | References authoritative, structured content |
+| Perplexity          | 100M+ monthly       | Explicitly cites sources with links          |
+| Gemini              | 750M+ monthly       | Pulls from Google index + Knowledge Graph    |
 
 ### GEO Content Audit
 
@@ -315,13 +319,13 @@ Layer 1: BOFU (Convert)           Layer 2: MOFU (Evaluate)        Layer 3: TOFU 
 **Step 3:** SE Ranking - which target keywords trigger AI Overviews, flag "ranked but not cited" gaps
 **Step 4:** Prioritize content calendar:
 
-| Priority | Criteria | Action |
-|----------|---------|--------|
-| P0 | BOFU, volume > 200, KD < 40 | Create this week |
-| P1 | BOFU, volume > 200, KD 40-60 | Create this month |
-| P2 | MOFU, volume > 500, KD < 50 | Create next month |
-| P3 | AI Overview gap (ranked, not cited) | Optimize existing page |
-| P4 | TOFU, volume > 2000, KD < 40 | Backlog |
+| Priority | Criteria                            | Action                 |
+| -------- | ----------------------------------- | ---------------------- |
+| P0       | BOFU, volume > 200, KD < 40         | Create this week       |
+| P1       | BOFU, volume > 200, KD 40-60        | Create this month      |
+| P2       | MOFU, volume > 500, KD < 50         | Create next month      |
+| P3       | AI Overview gap (ranked, not cited) | Optimize existing page |
+| P4       | TOFU, volume > 2000, KD < 40        | Backlog                |
 
 ---
 
@@ -369,6 +373,7 @@ Schema: [FAQ / Product / Review / HowTo]
 **Speed:** SSG preferred (Next.js, Astro, Webflow). Lazy-load below-fold. Core Web Vitals: LCP < 2.5s, CLS < 0.1, INP < 200ms. CDN for all assets.
 
 **Internal linking mesh:**
+
 ```
 "CRM for Real Estate" links to:
   - "CRM for Small Business" (related)
@@ -382,15 +387,15 @@ Schema: [FAQ / Product / Review / HowTo]
 
 ## 8. Measurement and Iteration
 
-| Metric | Tool | Cadence | Target |
-|--------|------|---------|--------|
-| Organic traffic | GSC / GA4 | Weekly | MoM growth |
-| Rankings (top 10) | DataForSEO / SE Ranking | Weekly | 20%+ of targets |
-| AI Overview citations | SE Ranking AI Tracker | Weekly | 30%+ of ranked keywords |
-| Indexed pages | GSC Coverage | Weekly | 95%+ published |
-| Content score | Surfer / Frase | Per publish | 80+ |
-| BOFU conversion rate | GA4 | Monthly | 3-8% alternative pages |
-| LLM mention rate | SE Ranking LLM Tracker | Bi-weekly | Growing share of voice |
+| Metric                | Tool                    | Cadence     | Target                  |
+| --------------------- | ----------------------- | ----------- | ----------------------- |
+| Organic traffic       | GSC / GA4               | Weekly      | MoM growth              |
+| Rankings (top 10)     | DataForSEO / SE Ranking | Weekly      | 20%+ of targets         |
+| AI Overview citations | SE Ranking AI Tracker   | Weekly      | 30%+ of ranked keywords |
+| Indexed pages         | GSC Coverage            | Weekly      | 95%+ published          |
+| Content score         | Surfer / Frase          | Per publish | 80+                     |
+| BOFU conversion rate  | GA4                     | Monthly     | 3-8% alternative pages  |
+| LLM mention rate      | SE Ranking LLM Tracker  | Bi-weekly   | Growing share of voice  |
 
 ### Monthly Iteration Cycle
 

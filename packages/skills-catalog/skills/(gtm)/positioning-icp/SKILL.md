@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Positioning, ICP & Messaging Architecture for AI Products
@@ -54,12 +53,12 @@ Build positioning from the bottom up. Each layer must hold before the next one w
 
 ### Layer Definitions
 
-| Layer | Purpose | AI Product Example |
-|---|---|---|
-| Category | Anchors the buyer in a known market | "AI-powered customer support automation" |
-| Wedge | The specific gap between what exists and what you do | "Resolves billing disputes end-to-end without human handoff" |
-| Proof Vector | Evidence that the wedge works | "47% reduction in support escalations at Series B+ fintechs" |
-| Alternative Framing | Captures high-intent search traffic | "The Intercom alternative for AI-first support teams" |
+| Layer               | Purpose                                              | AI Product Example                                           |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------ |
+| Category            | Anchors the buyer in a known market                  | "AI-powered customer support automation"                     |
+| Wedge               | The specific gap between what exists and what you do | "Resolves billing disputes end-to-end without human handoff" |
+| Proof Vector        | Evidence that the wedge works                        | "47% reduction in support escalations at Series B+ fintechs" |
+| Alternative Framing | Captures high-intent search traffic                  | "The Intercom alternative for AI-first support teams"        |
 
 ### Positioning Statement Template
 
@@ -67,13 +66,13 @@ For [target ICP segment] who [situation or trigger], [product name] is the [cate
 
 ### Common Positioning Mistakes in AI
 
-| Mistake | Why It Fails | Fix |
-|---|---|---|
-| Leading with the model | "Powered by GPT-4o" tells buyers nothing about outcomes | Lead with the business result the model enables |
-| Category creation too early | Pre-revenue companies burning cash educating a market | Anchor in an existing category, then differentiate |
-| Feature parity claims | "We also have AI" is not a position | Find the wedge where you are 10x better on one axis |
-| Positioning for engineers when selling to business | Technical jargon in messaging to VP-level buyers | If the pitch includes a model name, you are selling to the wrong audience |
-| Static positioning in a dynamic market | Set-and-forget positioning from 6+ months ago | Revalidate every 90 days minimum |
+| Mistake                                            | Why It Fails                                            | Fix                                                                       |
+| -------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Leading with the model                             | "Powered by GPT-4o" tells buyers nothing about outcomes | Lead with the business result the model enables                           |
+| Category creation too early                        | Pre-revenue companies burning cash educating a market   | Anchor in an existing category, then differentiate                        |
+| Feature parity claims                              | "We also have AI" is not a position                     | Find the wedge where you are 10x better on one axis                       |
+| Positioning for engineers when selling to business | Technical jargon in messaging to VP-level buyers        | If the pitch includes a model name, you are selling to the wrong audience |
+| Static positioning in a dynamic market             | Set-and-forget positioning from 6+ months ago           | Revalidate every 90 days minimum                                          |
 
 ---
 
@@ -83,11 +82,11 @@ Build your ICP from three signal layers, not gut feel. Modern ICP definition com
 
 ### The Three Signal Layers
 
-| Signal Layer | What It Tells You | Example Signals | Tools |
-|---|---|---|---|
-| Firmographic | Company shape and context | Employee count, revenue range, industry vertical, geography, funding stage | Clay, Apollo, ZoomInfo, Clearbit |
-| Technographic | Technical readiness and stack fit | Current tools, API usage, cloud provider, data infrastructure maturity | BuiltWith, Wappalyzer, HG Insights, Slintel |
-| Intent | Active buying behavior | Content consumption, job postings, funding events, competitor research, G2 visits | Bombora, G2 Buyer Intent, Clay signals, LinkedIn Sales Navigator |
+| Signal Layer  | What It Tells You                 | Example Signals                                                                   | Tools                                                            |
+| ------------- | --------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Firmographic  | Company shape and context         | Employee count, revenue range, industry vertical, geography, funding stage        | Clay, Apollo, ZoomInfo, Clearbit                                 |
+| Technographic | Technical readiness and stack fit | Current tools, API usage, cloud provider, data infrastructure maturity            | BuiltWith, Wappalyzer, HG Insights, Slintel                      |
+| Intent        | Active buying behavior            | Content consumption, job postings, funding events, competitor research, G2 visits | Bombora, G2 Buyer Intent, Clay signals, LinkedIn Sales Navigator |
 
 ### ICP Scoring Model
 
@@ -99,11 +98,11 @@ Keep firmographic/technographic fit and intent as separate dimensions. Collapsin
 Fit Score = (Firmographic Match * 0.4) + (Technographic Match * 0.35) + (Behavioral Fit * 0.25)
 ```
 
-| Component | Weight | Scoring Criteria |
-|---|---|---|
-| Firmographic Match | 40% | Industry vertical (25pts), employee range (25pts), revenue range (25pts), geography (15pts), funding stage (10pts) |
-| Technographic Match | 35% | Uses complementary tools (30pts), has API/integration infrastructure (25pts), cloud-native stack (25pts), data maturity (20pts) |
-| Behavioral Fit | 25% | Historical deal velocity (30pts), expansion rate (30pts), retention rate (25pts), NPS/satisfaction (15pts) |
+| Component           | Weight | Scoring Criteria                                                                                                                |
+| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Firmographic Match  | 40%    | Industry vertical (25pts), employee range (25pts), revenue range (25pts), geography (15pts), funding stage (10pts)              |
+| Technographic Match | 35%    | Uses complementary tools (30pts), has API/integration infrastructure (25pts), cloud-native stack (25pts), data maturity (20pts) |
+| Behavioral Fit      | 25%    | Historical deal velocity (30pts), expansion rate (30pts), retention rate (25pts), NPS/satisfaction (15pts)                      |
 
 **Intent Score (0-100)**
 
@@ -111,11 +110,11 @@ Fit Score = (Firmographic Match * 0.4) + (Technographic Match * 0.35) + (Behavio
 Intent Score = (Third-Party Intent * 0.35) + (First-Party Signals * 0.40) + (Trigger Events * 0.25)
 ```
 
-| Component | Weight | Scoring Criteria |
-|---|---|---|
-| Third-Party Intent | 35% | Bombora topic surges (30pts), G2 category research (30pts), competitor page visits (20pts), review site activity (20pts) |
-| First-Party Signals | 40% | Website visits to pricing/demo pages (30pts), content downloads (20pts), email engagement (25pts), product signup/trial (25pts) |
-| Trigger Events | 25% | New funding round (30pts), key hire in target dept (25pts), tech stack change (25pts), competitor churn signal (20pts) |
+| Component           | Weight | Scoring Criteria                                                                                                                |
+| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Third-Party Intent  | 35%    | Bombora topic surges (30pts), G2 category research (30pts), competitor page visits (20pts), review site activity (20pts)        |
+| First-Party Signals | 40%    | Website visits to pricing/demo pages (30pts), content downloads (20pts), email engagement (25pts), product signup/trial (25pts) |
+| Trigger Events      | 25%    | New funding round (30pts), key hire in target dept (25pts), tech stack change (25pts), competitor churn signal (20pts)          |
 
 ### ICP Prioritization Matrix
 
@@ -175,12 +174,12 @@ Step 4: BetterContact (verification layer)
 
 **Confidence Thresholds**
 
-| Score Range | Action | Expected Deliverability |
-|---|---|---|
-| 0.85 - 1.00 | Accept, route to outreach | 95%+ deliverable |
-| 0.70 - 0.84 | Accept with verification flag | 85-94% deliverable |
-| 0.50 - 0.69 | Accept for nurture only, do not cold email | 70-84% deliverable |
-| Below 0.50 | Reject, do not use | Below 70%, high bounce risk |
+| Score Range | Action                                     | Expected Deliverability     |
+| ----------- | ------------------------------------------ | --------------------------- |
+| 0.85 - 1.00 | Accept, route to outreach                  | 95%+ deliverable            |
+| 0.70 - 0.84 | Accept with verification flag              | 85-94% deliverable          |
+| 0.50 - 0.69 | Accept for nurture only, do not cold email | 70-84% deliverable          |
+| Below 0.50  | Reject, do not use                         | Below 70%, high bounce risk |
 
 ### ICP Definition Workflow
 
@@ -202,14 +201,14 @@ Step 4: BetterContact (verification layer)
 
 **Execution Checklist**
 
-| Step | Action | Tool |
-|---|---|---|
-| 1 | List top 10 direct competitors and adjacent tools | Manual + G2 category pages |
-| 2 | Build keyword set: "[competitor] alternative," "[competitor] vs [you]," "[competitor] pricing," "switch from [competitor]" | Ahrefs, Semrush, or SEO agent |
-| 3 | Create dedicated landing pages for top 5 competitors | CMS or static site |
-| 4 | Structure each page: pain point, feature comparison table, proof vector, CTA | Template below |
-| 5 | Build supporting content: migration guides, comparison blog posts | Content team or AI-assisted |
-| 6 | Track rankings weekly and iterate copy based on conversion data | Search console + analytics |
+| Step | Action                                                                                                                     | Tool                          |
+| ---- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 1    | List top 10 direct competitors and adjacent tools                                                                          | Manual + G2 category pages    |
+| 2    | Build keyword set: "[competitor] alternative," "[competitor] vs [you]," "[competitor] pricing," "switch from [competitor]" | Ahrefs, Semrush, or SEO agent |
+| 3    | Create dedicated landing pages for top 5 competitors                                                                       | CMS or static site            |
+| 4    | Structure each page: pain point, feature comparison table, proof vector, CTA                                               | Template below                |
+| 5    | Build supporting content: migration guides, comparison blog posts                                                          | Content team or AI-assisted   |
+| 6    | Track rankings weekly and iterate copy based on conversion data                                                            | Search console + analytics    |
 
 **Competitor Landing Page Structure**
 
@@ -224,22 +223,22 @@ Step 4: BetterContact (verification layer)
 
 ### Competitive Intelligence Cadence
 
-| Frequency | Action | Owner |
-|---|---|---|
-| Weekly | Monitor competitor pricing pages, changelog, job postings | GTM Ops or AI agent |
-| Monthly | Review G2/Capterra new reviews for competitor sentiment shifts | Product Marketing |
-| Quarterly | Full competitive audit: positioning, messaging, new features, pricing changes | Product Marketing + Sales |
-| Trigger-based | Competitor raises funding, launches major feature, changes pricing | Alert-driven, immediate response |
+| Frequency     | Action                                                                        | Owner                            |
+| ------------- | ----------------------------------------------------------------------------- | -------------------------------- |
+| Weekly        | Monitor competitor pricing pages, changelog, job postings                     | GTM Ops or AI agent              |
+| Monthly       | Review G2/Capterra new reviews for competitor sentiment shifts                | Product Marketing                |
+| Quarterly     | Full competitive audit: positioning, messaging, new features, pricing changes | Product Marketing + Sales        |
+| Trigger-based | Competitor raises funding, launches major feature, changes pricing            | Alert-driven, immediate response |
 
 ### Positioning Against Different Competitor Types
 
-| Competitor Type | Positioning Strategy | Key Message |
-|---|---|---|
-| Incumbent (enterprise) | Speed and simplicity | "Get results in days, not months of implementation" |
-| Direct AI competitor | Depth on your wedge | "We do [specific thing] 10x better because [proof]" |
-| DIY/internal tools | Total cost of ownership | "Your team spends 40hrs/month maintaining what we do automatically" |
-| Open-source | Support, reliability, compliance | "Production-ready with SOC2, SLA, and dedicated support" |
-| Platform bundling AI | Specialization | "We are purpose-built for [use case], not a checkbox feature" |
+| Competitor Type        | Positioning Strategy             | Key Message                                                         |
+| ---------------------- | -------------------------------- | ------------------------------------------------------------------- |
+| Incumbent (enterprise) | Speed and simplicity             | "Get results in days, not months of implementation"                 |
+| Direct AI competitor   | Depth on your wedge              | "We do [specific thing] 10x better because [proof]"                 |
+| DIY/internal tools     | Total cost of ownership          | "Your team spends 40hrs/month maintaining what we do automatically" |
+| Open-source            | Support, reliability, compliance | "Production-ready with SOC2, SLA, and dedicated support"            |
+| Platform bundling AI   | Specialization                   | "We are purpose-built for [use case], not a checkbox feature"       |
 
 ---
 
@@ -254,12 +253,12 @@ AI products chronically over-index on technical capabilities in their messaging.
 If your messaging includes a model name, you are selling to engineers.
 If your messaging includes a business outcome, you are selling to buyers.
 
-| Technical Capability | Business Outcome | Buyer Cares About |
-|---|---|---|
-| "Uses RAG with vector embeddings" | "Answers customer questions with 94% accuracy using your own docs" | Accuracy, self-service deflection |
-| "Fine-tuned LLM on your data" | "New reps ramp 40% faster with AI coaching trained on your top performers" | Time-to-productivity, revenue per rep |
-| "Real-time inference at 50ms latency" | "Fraud blocked before the transaction completes" | Loss prevention, customer trust |
-| "Multi-modal AI pipeline" | "Process invoices, receipts, and contracts without manual data entry" | Time savings, error reduction |
+| Technical Capability                  | Business Outcome                                                           | Buyer Cares About                     |
+| ------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------- |
+| "Uses RAG with vector embeddings"     | "Answers customer questions with 94% accuracy using your own docs"         | Accuracy, self-service deflection     |
+| "Fine-tuned LLM on your data"         | "New reps ramp 40% faster with AI coaching trained on your top performers" | Time-to-productivity, revenue per rep |
+| "Real-time inference at 50ms latency" | "Fraud blocked before the transaction completes"                           | Loss prevention, customer trust       |
+| "Multi-modal AI pipeline"             | "Process invoices, receipts, and contracts without manual data entry"      | Time savings, error reduction         |
 
 ### Three-Tier Messaging Architecture
 
@@ -281,23 +280,23 @@ Build messaging at three altitudes. Each tier serves a different audience and co
 +----------------------------------------------------------+
 ```
 
-| Tier | Audience | Length | Content | Where Used |
-|---|---|---|---|---|
-| Tier 1 | C-suite, press, investors | 1 paragraph | Market shift + your role in it | Homepage hero, pitch deck slide 1, PR |
-| Tier 2 | VP/Director buyers | 3-5 bullets | Business outcomes + proof points | Sales deck, product pages, case studies |
-| Tier 3 | Evaluators, champions | Detailed | Features, architecture, integrations | Docs, comparison pages, technical blog |
+| Tier   | Audience                  | Length      | Content                              | Where Used                              |
+| ------ | ------------------------- | ----------- | ------------------------------------ | --------------------------------------- |
+| Tier 1 | C-suite, press, investors | 1 paragraph | Market shift + your role in it       | Homepage hero, pitch deck slide 1, PR   |
+| Tier 2 | VP/Director buyers        | 3-5 bullets | Business outcomes + proof points     | Sales deck, product pages, case studies |
+| Tier 3 | Evaluators, champions     | Detailed    | Features, architecture, integrations | Docs, comparison pages, technical blog  |
 
 ### Messaging Validation Checklist
 
 Run every piece of messaging through these five checks:
 
-| Check | Question | Pass Criteria |
-|---|---|---|
-| Specificity | Does it include a number or named outcome? | "Reduces support tickets by 40%" passes. "Improves efficiency" fails. |
-| Differentiation | Could a competitor say the exact same thing? | If yes, rewrite until only you can claim it. |
-| Buyer language | Does it use words your buyers actually say? | Pull language from sales call transcripts and G2 reviews, not marketing brainstorms. |
-| Proof | Is there evidence backing the claim? | Customer quote, case study metric, or third-party validation required. |
-| Altitude match | Is the message at the right tier for the audience? | Tier 1 messages in a technical doc fail. Tier 3 messages in a board deck fail. |
+| Check           | Question                                           | Pass Criteria                                                                        |
+| --------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Specificity     | Does it include a number or named outcome?         | "Reduces support tickets by 40%" passes. "Improves efficiency" fails.                |
+| Differentiation | Could a competitor say the exact same thing?       | If yes, rewrite until only you can claim it.                                         |
+| Buyer language  | Does it use words your buyers actually say?        | Pull language from sales call transcripts and G2 reviews, not marketing brainstorms. |
+| Proof           | Is there evidence backing the claim?               | Customer quote, case study metric, or third-party validation required.               |
+| Altitude match  | Is the message at the right tier for the audience? | Tier 1 messages in a technical doc fail. Tier 3 messages in a board deck fail.       |
 
 ---
 
@@ -307,26 +306,26 @@ Run every piece of messaging through these five checks:
 
 AI purchasing has shifted decisively from IT departments to business function leaders. Organizations that align leadership around AI priorities are nearly twice as likely to report above-average growth. This means your ICP, messaging, and sales motion must target the business buyer, not the CTO.
 
-| Signal | 2022-2023 | 2025-2026 |
-|---|---|---|
-| Primary buyer | CTO / VP Engineering | VP Ops, VP Sales, VP CX, CFO |
-| Evaluation criteria | Technical architecture, model benchmarks | Time-to-value, ROI, workflow fit |
-| Purchase justification | "Innovation budget" | "Headcount savings" or "revenue lift" |
-| Decision timeline | 6-12 month evaluation | 30-90 day pilot-to-purchase |
-| Success metric | Model accuracy, uptime | Pipeline generated, tickets deflected, hours saved |
-| Procurement involvement | Minimal | Heavy, focused on measurable ROI |
+| Signal                  | 2022-2023                                | 2025-2026                                          |
+| ----------------------- | ---------------------------------------- | -------------------------------------------------- |
+| Primary buyer           | CTO / VP Engineering                     | VP Ops, VP Sales, VP CX, CFO                       |
+| Evaluation criteria     | Technical architecture, model benchmarks | Time-to-value, ROI, workflow fit                   |
+| Purchase justification  | "Innovation budget"                      | "Headcount savings" or "revenue lift"              |
+| Decision timeline       | 6-12 month evaluation                    | 30-90 day pilot-to-purchase                        |
+| Success metric          | Model accuracy, uptime                   | Pipeline generated, tickets deflected, hours saved |
+| Procurement involvement | Minimal                                  | Heavy, focused on measurable ROI                   |
 
 ### Implications for GTM
 
-| GTM Element | Old Approach (Selling to IT) | New Approach (Selling to Business) |
-|---|---|---|
-| Demo | Show the architecture diagram | Show the workflow before/after |
-| Case study | "Reduced inference latency by 3x" | "Sales team closes 28% more deals" |
-| Pricing page | Per-API-call pricing | Outcome-based or per-workflow pricing |
-| Sales deck | Technical deep-dive | Business case with ROI calculator |
-| Champion | Senior engineer | Director/VP in the buying department |
-| Content | Technical blog posts, docs | ROI guides, industry benchmarks, playbooks |
-| Trial | API sandbox | Pre-configured workflow template |
+| GTM Element  | Old Approach (Selling to IT)      | New Approach (Selling to Business)         |
+| ------------ | --------------------------------- | ------------------------------------------ |
+| Demo         | Show the architecture diagram     | Show the workflow before/after             |
+| Case study   | "Reduced inference latency by 3x" | "Sales team closes 28% more deals"         |
+| Pricing page | Per-API-call pricing              | Outcome-based or per-workflow pricing      |
+| Sales deck   | Technical deep-dive               | Business case with ROI calculator          |
+| Champion     | Senior engineer                   | Director/VP in the buying department       |
+| Content      | Technical blog posts, docs        | ROI guides, industry benchmarks, playbooks |
+| Trial        | API sandbox                       | Pre-configured workflow template           |
 
 ### Mapping Your Messaging to the New Buyer
 
@@ -346,45 +345,45 @@ The data confirms this: only 5% of generative AI projects deliver real business 
 
 Run this cycle every quarter. Each component takes 1-2 weeks. Total cycle: 4-6 weeks, leaving buffer before the next one starts.
 
-| Week | Action | Method | Output |
-|---|---|---|---|
-| 1 | Sean Ellis Survey | Survey active users: "How disappointed would you be without this product?" | PMF score (target: 40%+ "very disappointed") |
-| 2 | Cohort Retention Analysis | Compare Day 7/30/90 retention across monthly cohorts | Retention trend (improving, flat, declining) |
-| 3 | Competitive Audit | Review top 5 competitors for positioning, pricing, feature changes | Competitive delta report |
-| 4 | ICP Refresh | Analyze last quarter's wins/losses for ICP drift | Updated ICP scoring weights |
-| 5-6 | Synthesis + Action | Combine all signals into positioning/messaging/ICP updates | Updated positioning doc, revised ICP, new messaging |
+| Week | Action                    | Method                                                                     | Output                                              |
+| ---- | ------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------- |
+| 1    | Sean Ellis Survey         | Survey active users: "How disappointed would you be without this product?" | PMF score (target: 40%+ "very disappointed")        |
+| 2    | Cohort Retention Analysis | Compare Day 7/30/90 retention across monthly cohorts                       | Retention trend (improving, flat, declining)        |
+| 3    | Competitive Audit         | Review top 5 competitors for positioning, pricing, feature changes         | Competitive delta report                            |
+| 4    | ICP Refresh               | Analyze last quarter's wins/losses for ICP drift                           | Updated ICP scoring weights                         |
+| 5-6  | Synthesis + Action        | Combine all signals into positioning/messaging/ICP updates                 | Updated positioning doc, revised ICP, new messaging |
 
 ### Sean Ellis Score Benchmarks for AI Products
 
-| Score | Interpretation | Action |
-|---|---|---|
-| Below 20% | No PMF. The product is not solving a real problem yet. | Pivot or narrow the ICP dramatically. |
-| 20-30% | Weak signal. Some users get value, most do not. | Identify the segment where score is highest and focus there. |
-| 30-40% | Approaching PMF. Close but the wedge needs sharpening. | Double down on the highest-scoring use case. |
-| 40-50% | PMF achieved. Growth investments are justified. | Scale the sales motion, expand the team. |
-| 50-60% | Strong PMF. Best-in-class for early stage. | Optimize unit economics, begin adjacent expansion. |
-| 60%+ | Exceptional. Rare even among successful companies. | Defend the position, expand the category. |
+| Score     | Interpretation                                         | Action                                                       |
+| --------- | ------------------------------------------------------ | ------------------------------------------------------------ |
+| Below 20% | No PMF. The product is not solving a real problem yet. | Pivot or narrow the ICP dramatically.                        |
+| 20-30%    | Weak signal. Some users get value, most do not.        | Identify the segment where score is highest and focus there. |
+| 30-40%    | Approaching PMF. Close but the wedge needs sharpening. | Double down on the highest-scoring use case.                 |
+| 40-50%    | PMF achieved. Growth investments are justified.        | Scale the sales motion, expand the team.                     |
+| 50-60%    | Strong PMF. Best-in-class for early stage.             | Optimize unit economics, begin adjacent expansion.           |
+| 60%+      | Exceptional. Rare even among successful companies.     | Defend the position, expand the category.                    |
 
 ### PMF Decay Warning Signs
 
-| Signal | What It Means | Response |
-|---|---|---|
-| Sean Ellis score drops 5+ points quarter-over-quarter | Core value perception weakening | Re-interview churned users, check competitor launches |
-| Day-30 retention drops below previous cohort | New users getting less value | Audit onboarding flow, check if ICP shifted |
-| Win rate declining while pipeline grows | Positioning attracting wrong audience | Tighten ICP definition, update qualification criteria |
-| Sales cycle lengthening | Buyer confidence dropping or competition increasing | Update proof vectors, add new case studies |
-| NPS drops while usage stays flat | Users staying out of switching cost, not satisfaction | Urgent: interview detractors, ship fixes |
+| Signal                                                | What It Means                                         | Response                                              |
+| ----------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| Sean Ellis score drops 5+ points quarter-over-quarter | Core value perception weakening                       | Re-interview churned users, check competitor launches |
+| Day-30 retention drops below previous cohort          | New users getting less value                          | Audit onboarding flow, check if ICP shifted           |
+| Win rate declining while pipeline grows               | Positioning attracting wrong audience                 | Tighten ICP definition, update qualification criteria |
+| Sales cycle lengthening                               | Buyer confidence dropping or competition increasing   | Update proof vectors, add new case studies            |
+| NPS drops while usage stays flat                      | Users staying out of switching cost, not satisfaction | Urgent: interview detractors, ship fixes              |
 
 ### AI Pricing Model Landscape (Context for PMF)
 
 Pricing directly affects PMF signals. The wrong model creates churn even when the product delivers value.
 
-| Model | When to Use | Risk | 2025-2026 Trend |
-|---|---|---|---|
-| Per-seat | Simple products, predictable usage | 40% lower margins, 2.3x higher churn vs. usage-based | Declining (dropped from 21% to 15% in 12 months) |
-| Usage-based | API products, variable workloads | Revenue unpredictability, customer budget anxiety | Growing (59% of software companies increasing usage share) |
-| Outcome-based | High-confidence ROI delivery | Hard to measure, requires attribution infrastructure | Emerging (30%+ enterprise SaaS incorporating outcome components) |
-| Hybrid (base + usage) | Most AI products in 2025-2026 | Complexity in pricing page and sales conversations | Dominant (surged from 27% to 41%) |
+| Model                 | When to Use                        | Risk                                                 | 2025-2026 Trend                                                  |
+| --------------------- | ---------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
+| Per-seat              | Simple products, predictable usage | 40% lower margins, 2.3x higher churn vs. usage-based | Declining (dropped from 21% to 15% in 12 months)                 |
+| Usage-based           | API products, variable workloads   | Revenue unpredictability, customer budget anxiety    | Growing (59% of software companies increasing usage share)       |
+| Outcome-based         | High-confidence ROI delivery       | Hard to measure, requires attribution infrastructure | Emerging (30%+ enterprise SaaS incorporating outcome components) |
+| Hybrid (base + usage) | Most AI products in 2025-2026      | Complexity in pricing page and sales conversations   | Dominant (surged from 27% to 41%)                                |
 
 > Cross-reference: See **ai-pricing** skill for detailed pricing strategy frameworks, willingness-to-pay research methods, and pricing page optimization.
 
@@ -396,18 +395,18 @@ The "Obviously Awesome" methodology provides the most battle-tested positioning 
 
 ### The 10-Step Process (AI-Adapted)
 
-| Step | Action | AI-Specific Consideration |
-|---|---|---|
-| 1 | List your competitive alternatives | Include "doing nothing" and "building internally with open-source models" |
-| 2 | List features unique to your product | Focus on workflow-level differences, not model-level differences |
-| 3 | Map features to value themes | Translate every technical feature to a business outcome |
-| 4 | Identify who cares most about that value | Business function leaders, not IT, in most cases |
-| 5 | Find the market context that makes your value obvious | Category must be one the buyer already budgets for |
-| 6 | Layer in relevant trends | AI adoption in their function, competitor AI moves, regulatory changes |
-| 7 | Capture positioning in a document | Use the four-layer stack (Category, Wedge, Proof, Alternative) |
-| 8 | Test with sales team | If sales cannot repeat the positioning naturally, simplify |
-| 9 | Test with 5 prospects | Watch for confusion, misattribution, or "so what?" reactions |
-| 10 | Set 90-day review date | AI markets shift too fast for annual positioning cycles |
+| Step | Action                                                | AI-Specific Consideration                                                 |
+| ---- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1    | List your competitive alternatives                    | Include "doing nothing" and "building internally with open-source models" |
+| 2    | List features unique to your product                  | Focus on workflow-level differences, not model-level differences          |
+| 3    | Map features to value themes                          | Translate every technical feature to a business outcome                   |
+| 4    | Identify who cares most about that value              | Business function leaders, not IT, in most cases                          |
+| 5    | Find the market context that makes your value obvious | Category must be one the buyer already budgets for                        |
+| 6    | Layer in relevant trends                              | AI adoption in their function, competitor AI moves, regulatory changes    |
+| 7    | Capture positioning in a document                     | Use the four-layer stack (Category, Wedge, Proof, Alternative)            |
+| 8    | Test with sales team                                  | If sales cannot repeat the positioning naturally, simplify                |
+| 9    | Test with 5 prospects                                 | Watch for confusion, misattribution, or "so what?" reactions              |
+| 10   | Set 90-day review date                                | AI markets shift too fast for annual positioning cycles                   |
 
 ---
 
@@ -462,22 +461,21 @@ The "Obviously Awesome" methodology provides the most battle-tested positioning 
 
 ---
 
-
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 
 ---
 
 ## Related Skills
 
-| Skill | When to Cross-Reference |
-|---|---|
-| ai-pricing | When building pricing models, willingness-to-pay analysis, or packaging tiers |
-| sales-motion-design | When designing the sales process that operationalizes your positioning |
-| ai-cold-outreach | When translating positioning into cold email/LinkedIn sequences |
-| ai-sdr | When building AI-powered SDR workflows that use ICP scoring |
-| lead-enrichment | When implementing enrichment waterfalls and data quality workflows |
-| multi-platform-launch | When launching across channels and need consistent positioning |
-| ai-seo | When building competitor alternative pages and bottom-funnel content |
-| gtm-engineering | When automating ICP scoring, enrichment, and routing in your stack |
-| solo-founder-gtm | When a solo founder needs to prioritize positioning work with limited resources |
-| gtm-metrics | When measuring the downstream impact of positioning and ICP changes on pipeline |
+| Skill                 | When to Cross-Reference                                                         |
+| --------------------- | ------------------------------------------------------------------------------- |
+| ai-pricing            | When building pricing models, willingness-to-pay analysis, or packaging tiers   |
+| sales-motion-design   | When designing the sales process that operationalizes your positioning          |
+| ai-cold-outreach      | When translating positioning into cold email/LinkedIn sequences                 |
+| ai-sdr                | When building AI-powered SDR workflows that use ICP scoring                     |
+| lead-enrichment       | When implementing enrichment waterfalls and data quality workflows              |
+| multi-platform-launch | When launching across channels and need consistent positioning                  |
+| ai-seo                | When building competitor alternative pages and bottom-funnel content            |
+| gtm-engineering       | When automating ICP scoring, enrichment, and routing in your stack              |
+| solo-founder-gtm      | When a solo founder needs to prioritize positioning work with limited resources |
+| gtm-metrics           | When measuring the downstream impact of positioning and ICP changes on pipeline |

@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Social Selling Skill
@@ -33,16 +32,16 @@ Your profile is your storefront. Prospects evaluate credibility within seconds.
 
 ### Profile Audit Checklist
 
-| Element        | Optimization Target                                                        |
-|---------------|---------------------------------------------------------------------------|
-| Photo          | Professional headshot, good lighting. Profiles with photos get 14x views. |
-| Banner         | Brand graphic with value prop, social proof, or CTA.                      |
-| Headline       | Outcome-driven. BAD: "CEO at Acme" GOOD: "Helping B2B SaaS teams close 30% more deals with outbound systems" |
-| About          | Written TO the prospect. Structure: Problem > Solution > Proof > CTA. First 3 lines must hook before fold. |
-| Featured       | Pin best content, lead magnet, case study, or booking link. Max 3. Rotate quarterly. |
-| Experience     | Outcomes, not duties. Include metrics.                                     |
-| Skills         | Top 3 match ICP searches. Get endorsements from clients.                  |
-| Recommendations| 3-5 from clients (not colleagues). ICP recommendations carry the most weight. |
+| Element         | Optimization Target                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| Photo           | Professional headshot, good lighting. Profiles with photos get 14x views.                                    |
+| Banner          | Brand graphic with value prop, social proof, or CTA.                                                         |
+| Headline        | Outcome-driven. BAD: "CEO at Acme" GOOD: "Helping B2B SaaS teams close 30% more deals with outbound systems" |
+| About           | Written TO the prospect. Structure: Problem > Solution > Proof > CTA. First 3 lines must hook before fold.   |
+| Featured        | Pin best content, lead magnet, case study, or booking link. Max 3. Rotate quarterly.                         |
+| Experience      | Outcomes, not duties. Include metrics.                                                                       |
+| Skills          | Top 3 match ICP searches. Get endorsements from clients.                                                     |
+| Recommendations | 3-5 from clients (not colleagues). ICP recommendations carry the most weight.                                |
 
 ### Headline Formulas
 
@@ -65,14 +64,14 @@ Sales Navigator provides 36 lead filters and 16 account filters vs. 18 in basic 
 
 ### Key Filter Combinations
 
-| Filter Stack                              | Use Case                                          |
-|------------------------------------------|--------------------------------------------------|
-| Title + Seniority + Company Size + Industry | Core ICP targeting. Start here.                  |
-| Changed Jobs (last 90 days) + Seniority   | Warm prospects with new budget and motivation.   |
-| Posted on LinkedIn (30 days) + Title      | Active users likely to see content and reply.     |
-| Past Company + Current Company            | Alumni targeting. Shared experience = rapport.    |
-| Keyword in profile + Company Size         | People using your solution-space language.        |
-| Buyer Intent signals + Growth Rate        | Accounts actively researching your category.      |
+| Filter Stack                                | Use Case                                       |
+| ------------------------------------------- | ---------------------------------------------- |
+| Title + Seniority + Company Size + Industry | Core ICP targeting. Start here.                |
+| Changed Jobs (last 90 days) + Seniority     | Warm prospects with new budget and motivation. |
+| Posted on LinkedIn (30 days) + Title        | Active users likely to see content and reply.  |
+| Past Company + Current Company              | Alumni targeting. Shared experience = rapport. |
+| Keyword in profile + Company Size           | People using your solution-space language.     |
+| Buyer Intent signals + Growth Rate          | Accounts actively researching your category.   |
 
 ### Boolean Search Patterns
 
@@ -106,13 +105,13 @@ POST (attract) --> ENGAGE (warm up) --> DM (open) --> CALL (close)
 
 ### Stage 1: Post (Attract)
 
-| Content Type        | Purpose                   | Frequency   |
-|--------------------|---------------------------|-------------|
-| Problem-aware posts | Show you understand pain   | 2x/week     |
-| Framework posts     | Demonstrate methodology    | 1x/week     |
-| Case study snippets | Social proof in feed       | 1x/week     |
-| Contrarian takes    | Pattern interrupt, reach    | 1x/2 weeks  |
-| Personal stories    | Build trust and likability  | 1x/week     |
+| Content Type        | Purpose                    | Frequency  |
+| ------------------- | -------------------------- | ---------- |
+| Problem-aware posts | Show you understand pain   | 2x/week    |
+| Framework posts     | Demonstrate methodology    | 1x/week    |
+| Case study snippets | Social proof in feed       | 1x/week    |
+| Contrarian takes    | Pattern interrupt, reach   | 1x/2 weeks |
+| Personal stories    | Build trust and likability | 1x/week    |
 
 ### Stage 2: Engage (Warm Up)
 
@@ -184,13 +183,13 @@ Voice notes get 2-3x higher response rates. Use for Tier 1 prospects. Keep 30-60
 
 ### Tool Comparison
 
-| Tool       | Best For           | Key Feature              | Safety  | Price/mo  |
-|-----------|--------------------|--------------------------|---------|-----------|
-| Taplio     | Content creators   | AI content from 500M+ posts | Moderate | $32-149  |
-| Shield     | Analytics          | Deep stats, 100% safe (read-only) | Highest | $25-50  |
-| AuthoredUp | Content writers   | Post formatting, preview  | Highest | $15-19   |
-| Dripify    | Sales teams        | Visual drip campaigns     | High    | $59-99   |
-| Expandi    | High-vol outreach  | Cloud-based, dedicated IPs | Highest | $99     |
+| Tool       | Best For          | Key Feature                       | Safety   | Price/mo |
+| ---------- | ----------------- | --------------------------------- | -------- | -------- |
+| Taplio     | Content creators  | AI content from 500M+ posts       | Moderate | $32-149  |
+| Shield     | Analytics         | Deep stats, 100% safe (read-only) | Highest  | $25-50   |
+| AuthoredUp | Content writers   | Post formatting, preview          | Highest  | $15-19   |
+| Dripify    | Sales teams       | Visual drip campaigns             | High     | $59-99   |
+| Expandi    | High-vol outreach | Cloud-based, dedicated IPs        | Highest  | $99      |
 
 ### Tool Selection by Role
 
@@ -214,26 +213,26 @@ Voice notes get 2-3x higher response rates. Use for Tier 1 prospects. Keep 30-60
 
 ### SSI Score (0-100, four pillars at 25 pts each)
 
-| Pillar                    | How to Improve                                    |
-|--------------------------|--------------------------------------------------|
-| Professional brand        | Complete profile, publish content, endorsements   |
-| Find the right people     | Sales Navigator, connect with ICP, view targets  |
-| Engage with insights      | Comment on industry content, share with commentary|
-| Build relationships       | Message regularly, grow network with decision-makers |
+| Pillar                | How to Improve                                       |
+| --------------------- | ---------------------------------------------------- |
+| Professional brand    | Complete profile, publish content, endorsements      |
+| Find the right people | Sales Navigator, connect with ICP, view targets      |
+| Engage with insights  | Comment on industry content, share with commentary   |
+| Build relationships   | Message regularly, grow network with decision-makers |
 
 **Benchmarks:** Average user: 40-50. Active seller: 60-70. Top performer: 75+. SSI above 70 = 45% more opportunities, 51% more likely to hit quota. Check at linkedin.com/sales/ssi
 
 ### Core Metrics Dashboard
 
-| Metric                      | Good      | Great   |
-|-----------------------------|-----------|---------|
-| Connection acceptance rate   | 30-40%   | 50%+    |
-| DM reply rate (cold)         | 7-15%    | 25%+    |
-| DM reply rate (warm)         | 25-40%   | 50%+    |
-| Content engagement rate      | 2-3%     | 5%+     |
-| Profile views/week           | 100-200  | 300+    |
-| Meetings booked/month        | 4-8      | 12+     |
-| InMail response rate         | 10-15%   | 25%+    |
+| Metric                     | Good    | Great |
+| -------------------------- | ------- | ----- |
+| Connection acceptance rate | 30-40%  | 50%+  |
+| DM reply rate (cold)       | 7-15%   | 25%+  |
+| DM reply rate (warm)       | 25-40%  | 50%+  |
+| Content engagement rate    | 2-3%    | 5%+   |
+| Profile views/week         | 100-200 | 300+  |
+| Meetings booked/month      | 4-8     | 12+   |
+| InMail response rate       | 10-15%  | 25%+  |
 
 ### Attribution
 
@@ -247,12 +246,12 @@ LinkedIn is home base. Multi-platform amplifies reach and deepens trust.
 
 ### Platform Roles
 
-| Platform   | Role                     | Content Focus                                  |
-|-----------|--------------------------|------------------------------------------------|
-| LinkedIn   | Primary pipeline         | Frameworks, case studies, DMs                  |
-| X/Twitter  | Thought leadership       | Hot takes, threads, real-time commentary       |
-| YouTube    | Deep trust               | Long-form tutorials, interviews, case studies  |
-| Newsletter | Owned audience           | Weekly insights, deeper frameworks             |
+| Platform   | Role               | Content Focus                                 |
+| ---------- | ------------------ | --------------------------------------------- |
+| LinkedIn   | Primary pipeline   | Frameworks, case studies, DMs                 |
+| X/Twitter  | Thought leadership | Hot takes, threads, real-time commentary      |
+| YouTube    | Deep trust         | Long-form tutorials, interviews, case studies |
+| Newsletter | Owned audience     | Weekly insights, deeper frameworks            |
 
 ### Content Multiplication
 
@@ -274,8 +273,8 @@ One core idea becomes 5+ pieces: YouTube long-form > LinkedIn post (key takeaway
 
 ### Content Tiers
 
-| Tier   | Content Type                   | Effort | Impact  |
-|-------|-------------------------------|--------|---------|
+| Tier   | Content Type                  | Effort | Impact  |
+| ------ | ----------------------------- | ------ | ------- |
 | Tier 1 | Original research / data      | High   | Highest |
 | Tier 2 | Contrarian POV with evidence  | Medium | High    |
 | Tier 3 | Framework / methodology posts | Medium | High    |
@@ -372,15 +371,15 @@ Fri: Publish + review weekly metrics
 
 ### Target Benchmarks
 
-| Metric                 | Target |
-|-----------------------|--------|
-| SSI Score              | 70+    |
-| Posts per week         | 3-5    |
-| Connection acceptance  | 40%+   |
-| DM reply rate (warm)   | 30%+   |
-| Meetings from social/mo| 8+     |
-| Engagement rate        | 3%+    |
-| Profile views/week     | 200+   |
+| Metric                  | Target |
+| ----------------------- | ------ |
+| SSI Score               | 70+    |
+| Posts per week          | 3-5    |
+| Connection acceptance   | 40%+   |
+| DM reply rate (warm)    | 30%+   |
+| Meetings from social/mo | 8+     |
+| Engagement rate         | 3%+    |
+| Profile views/week      | 200+   |
 
 ---
 

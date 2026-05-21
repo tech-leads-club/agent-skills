@@ -174,8 +174,8 @@ class Analysis:
 ```typescript
 // Service B consuming Service A's internal model via API
 interface CustomerFromServiceA {
-  internalAccountCode: string; // internal detail exposed
-  legacyId: number; // unnecessary internal field
+  internalAccountCode: string // internal detail exposed
+  legacyId: number // unnecessary internal field
   // ... many fields Service B doesn't need
 }
 ```

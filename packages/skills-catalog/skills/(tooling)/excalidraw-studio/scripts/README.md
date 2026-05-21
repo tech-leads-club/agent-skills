@@ -122,7 +122,7 @@ python add-icon-to-diagram.py <diagram-path> <icon-name> <x> <y> [OPTIONS]
 
 - `--library-path PATH` : Path to the icon library directory (default: `aws-architecture-icons`)
 - `--label TEXT` : Add a text label below the icon
--- `--use-edit-suffix` : Edit via `.excalidraw.edit` to avoid editor overwrite issues (enabled by default; pass `--no-use-edit-suffix` to disable)
+  -- `--use-edit-suffix` : Edit via `.excalidraw.edit` to avoid editor overwrite issues (enabled by default; pass `--no-use-edit-suffix` to disable)
 
 ### Examples
 
@@ -173,7 +173,7 @@ python add-arrow.py <diagram-path> <from-x> <from-y> <to-x> <to-y> [OPTIONS]
 - `--style {solid|dashed|dotted}` : Line style (default: `solid`)
 - `--color HEX` : Arrow color (default: `#1e1e1e`)
 - `--label TEXT` : Add a text label on the arrow
--- `--use-edit-suffix` : Edit via `.excalidraw.edit` to avoid editor overwrite issues (enabled by default; pass `--no-use-edit-suffix` to disable)
+  -- `--use-edit-suffix` : Edit via `.excalidraw.edit` to avoid editor overwrite issues (enabled by default; pass `--no-use-edit-suffix` to disable)
 
 ### Examples
 

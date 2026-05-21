@@ -2,27 +2,27 @@
 
 ## Quick Reference
 
-| Concept | Key Number or Rule |
-|---|---|
-| Instruction stack layers | ICP scoring, Messaging framework, Personalization rules, Sequence logic |
-| Architecture principle | Instruction stacks + persistent context + feedback loops beat any single tool |
-| n8n sweet spot | Complex AI workflows, high volume, self-hosting, data sovereignty |
-| Make sweet spot | Visual workflow design, moderate complexity, budget-conscious teams |
-| Zapier sweet spot | Simple integrations, non-technical teams, fastest setup |
-| Enterprise iPaaS | Tray.io (mid-market), Workato (enterprise compliance) |
-| Enrichment waterfall threshold | 0.85+ confidence to accept, 0.50+ to accept with flag, below 0.50 reject |
-| Hot lead SLA | Respond in under 1 hour (ideally under 5 minutes for inbound) |
-| Warm lead SLA | Respond in under 4 hours |
-| Scoring formula (fit) | Firmographic 40% + Technographic 35% + Behavioral 25% |
-| Scoring formula (intent) | First-Party 40% + Third-Party 35% + Triggers 25% |
-| Workflow success rate alert | Alert if below 95% |
-| Enrichment hit rate alert | Alert if below 60% |
-| Email bounce rate alert | Alert if above 5% |
-| LLM cost optimization | Haiku for classification, Sonnet/Opus for writing |
-| Enrichment caching TTL | 30-90 days depending on data volatility |
-| Version control | Export workflows as JSON to Git after every change |
-| GTM Engineer job market | 1,400+ active postings on LinkedIn as of mid-2025 |
-| Agent adoption | 57% of organizations deploy agents for multi-stage workflows in 2026 |
+| Concept                        | Key Number or Rule                                                            |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| Instruction stack layers       | ICP scoring, Messaging framework, Personalization rules, Sequence logic       |
+| Architecture principle         | Instruction stacks + persistent context + feedback loops beat any single tool |
+| n8n sweet spot                 | Complex AI workflows, high volume, self-hosting, data sovereignty             |
+| Make sweet spot                | Visual workflow design, moderate complexity, budget-conscious teams           |
+| Zapier sweet spot              | Simple integrations, non-technical teams, fastest setup                       |
+| Enterprise iPaaS               | Tray.io (mid-market), Workato (enterprise compliance)                         |
+| Enrichment waterfall threshold | 0.85+ confidence to accept, 0.50+ to accept with flag, below 0.50 reject      |
+| Hot lead SLA                   | Respond in under 1 hour (ideally under 5 minutes for inbound)                 |
+| Warm lead SLA                  | Respond in under 4 hours                                                      |
+| Scoring formula (fit)          | Firmographic 40% + Technographic 35% + Behavioral 25%                         |
+| Scoring formula (intent)       | First-Party 40% + Third-Party 35% + Triggers 25%                              |
+| Workflow success rate alert    | Alert if below 95%                                                            |
+| Enrichment hit rate alert      | Alert if below 60%                                                            |
+| Email bounce rate alert        | Alert if above 5%                                                             |
+| LLM cost optimization          | Haiku for classification, Sonnet/Opus for writing                             |
+| Enrichment caching TTL         | 30-90 days depending on data volatility                                       |
+| Version control                | Export workflows as JSON to Git after every change                            |
+| GTM Engineer job market        | 1,400+ active postings on LinkedIn as of mid-2025                             |
+| Agent adoption                 | 57% of organizations deploy agents for multi-stage workflows in 2026          |
 
 ---
 

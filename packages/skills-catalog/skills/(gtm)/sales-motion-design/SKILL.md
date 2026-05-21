@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Sales Motion Design
@@ -63,18 +62,18 @@ Choose your primary motion based on two axes: price and complexity.
 
 ### Decision criteria beyond price x complexity
 
-| Signal                              | Points to PLG     | Points to Sales-Led |
-|-------------------------------------|--------------------|--------------------|
-| Buyer can self-evaluate product     | Yes                | No                 |
-| Time to first value < 15 min        | Yes                | No                 |
-| Multiple stakeholders in decision   | No                 | Yes                |
-| Compliance/security review needed   | No                 | Yes                |
-| Product requires config/integration | No                 | Yes                |
-| Network effects drive adoption      | Yes                | No                 |
-| User and buyer are same person      | Yes                | No                 |
-| Average deal cycle > 30 days        | No                 | Yes                |
-| Product is horizontal (broad use)   | Yes                | No                 |
-| Product is vertical (niche use)     | No                 | Yes                |
+| Signal                              | Points to PLG | Points to Sales-Led |
+| ----------------------------------- | ------------- | ------------------- |
+| Buyer can self-evaluate product     | Yes           | No                  |
+| Time to first value < 15 min        | Yes           | No                  |
+| Multiple stakeholders in decision   | No            | Yes                 |
+| Compliance/security review needed   | No            | Yes                 |
+| Product requires config/integration | No            | Yes                 |
+| Network effects drive adoption      | Yes           | No                  |
+| User and buyer are same person      | Yes           | No                  |
+| Average deal cycle > 30 days        | No            | Yes                 |
+| Product is horizontal (broad use)   | Yes           | No                  |
+| Product is vertical (niche use)     | No            | Yes                 |
 
 **Scoring**: 7+ PLG signals = pure PLG. 4-6 = hybrid. 0-3 = sales-led.
 
@@ -89,6 +88,7 @@ Choose your primary motion based on two axes: price and complexity.
 **Examples**: Notion, Canva, Calendly, Loom, Figma early days.
 
 **Conversion funnel**:
+
 ```
 Visit -> Sign up -> Activate -> Engage -> Convert -> Expand
                                                       |
@@ -96,15 +96,15 @@ Visit -> Sign up -> Activate -> Engage -> Convert -> Expand
 ```
 
 **Key metrics and benchmarks**:
-| Metric                        | Median         | Top Quartile   |
+| Metric | Median | Top Quartile |
 |-------------------------------|----------------|----------------|
-| Visitor to sign-up            | 2-5%           | 8-12%          |
-| Free to paid (freemium)       | 3-5%           | 6-8%           |
-| Free to paid (opt-in trial)   | 18%            | 25%+           |
-| Free to paid (opt-out trial)  | 49%            | 60%+           |
-| Time to first value           | < 5 min        | < 2 min        |
-| Net revenue retention         | 110%           | 120%+          |
-| CAC payback (months)          | 6-9            | < 6            |
+| Visitor to sign-up | 2-5% | 8-12% |
+| Free to paid (freemium) | 3-5% | 6-8% |
+| Free to paid (opt-in trial) | 18% | 25%+ |
+| Free to paid (opt-out trial) | 49% | 60%+ |
+| Time to first value | < 5 min | < 2 min |
+| Net revenue retention | 110% | 120%+ |
+| CAC payback (months) | 6-9 | < 6 |
 
 **Opt-in vs opt-out**: Opt-out (card required) shows 49% conversion but fewer
 sign-ups. Opt-in (no card) shows 18% but higher volume. Use opt-out only when
@@ -124,6 +124,7 @@ onboarding to unlock value. Most common motion in 2025-2026.
 **Examples**: Slack, Datadog, Twilio, Vercel, Linear.
 
 **Conversion funnel**:
+
 ```
 Visit -> Sign up -> Activate -> PQL trigger -> Sales touch -> Close
                         |                          |
@@ -131,6 +132,7 @@ Visit -> Sign up -> Activate -> PQL trigger -> Sales touch -> Close
 ```
 
 **What triggers the sales touch (PQL signals)**:
+
 - Seats/usage exceeds free tier by 20%+
 - Second team or department added
 - Admin/billing page visited 3+ times
@@ -141,10 +143,10 @@ Visit -> Sign up -> Activate -> PQL trigger -> Sales touch -> Close
 **PQL vs MQL performance comparison**:
 | Lead Type | Avg Conversion to Paid | Relative Efficiency |
 |-----------|----------------------|---------------------|
-| MQL       | 5-10%                | Baseline            |
-| PQL       | 25-30%               | 3-5x better         |
-| PQL (ACV $1-5K)  | 30%          | 4x better           |
-| PQL (ACV $5-10K) | 39%          | 5-6x better         |
+| MQL | 5-10% | Baseline |
+| PQL | 25-30% | 3-5x better |
+| PQL (ACV $1-5K) | 30% | 4x better |
+| PQL (ACV $5-10K) | 39% | 5-6x better |
 
 **Requirements**: Product analytics (Amplitude/Mixpanel/PostHog), PQL scoring
 model, CRM integration to surface PQLs, clear product-to-sales handoff.
@@ -170,12 +172,12 @@ procurement team reaching out, enterprise workflow patterns.
 committee, security/compliance review required.
 **Examples**: Salesforce, Workday, Snowflake (enterprise), Palantir.
 
-| Metric                   | Median      | Top Quartile |
-|--------------------------|-------------|--------------|
-| Lead to opportunity      | 13-15%      | 20%+         |
-| Opportunity to close     | 20-25%      | 30%+         |
-| Average sales cycle      | 90-180 days | 60-90 days   |
-| CAC payback (months)     | 18-24       | 12-15        |
+| Metric               | Median      | Top Quartile |
+| -------------------- | ----------- | ------------ |
+| Lead to opportunity  | 13-15%      | 20%+         |
+| Opportunity to close | 20-25%      | 30%+         |
+| Average sales cycle  | 90-180 days | 60-90 days   |
+| CAC payback (months) | 18-24       | 12-15        |
 
 Even sales-led motions benefit from interactive demos, sandboxes, and POCs.
 The difference is a human guides the process rather than the product alone.
@@ -187,15 +189,15 @@ and meeting scheduling. Humans handle discovery calls, demos, negotiation, and
 closing.
 
 **Current reality check (2026 data)**:
-| Metric                              | Current State        |
+| Metric | Current State |
 |-------------------------------------|----------------------|
-| Pipeline growth (well-implemented)  | 3-8x                |
-| CAC reduction (best case)           | 30-42% lower         |
-| Failure rate within 6 months        | 85% of deployments   |
-| AI outreach response rate           | 0.5-1% (generic)     |
-| AI-assisted human response rate     | 3-5% (personalized)  |
-| Human-written response rate         | 3-5% (baseline)      |
-| Time savings per SDR                | 4-7 hrs/week         |
+| Pipeline growth (well-implemented) | 3-8x |
+| CAC reduction (best case) | 30-42% lower |
+| Failure rate within 6 months | 85% of deployments |
+| AI outreach response rate | 0.5-1% (generic) |
+| AI-assisted human response rate | 3-5% (personalized) |
+| Human-written response rate | 3-5% (baseline) |
+| Time savings per SDR | 4-7 hrs/week |
 
 **Why 85% fail**: Generic AI copy (90% lower response), no human review layer,
 treating AI as replacement not amplifier, poor ICP targeting at scale.
@@ -206,13 +208,13 @@ all live conversations.
 
 **Implementation tiers**:
 
-| Tier | Risk   | What AI Does                              | Lift    |
-|------|--------|-------------------------------------------|---------|
-| 1    | Low    | Drafts, enrichment, scheduling            | 2-3x    |
-| 2    | Medium | Approved templates, lead scoring, follow-up| 3-5x   |
-| 3    | High   | Full sequences, booking, qualification    | 5-8x*   |
+| Tier | Risk   | What AI Does                                | Lift   |
+| ---- | ------ | ------------------------------------------- | ------ |
+| 1    | Low    | Drafts, enrichment, scheduling              | 2-3x   |
+| 2    | Medium | Approved templates, lead scoring, follow-up | 3-5x   |
+| 3    | High   | Full sequences, booking, qualification      | 5-8x\* |
 
-*Tier 3 has 85% failure rate. Only viable with tight ICP, simple product, low ACV.
+\*Tier 3 has 85% failure rate. Only viable with tight ICP, simple product, low ACV.
 
 **Recommendation**: Start Tier 1. Move to Tier 2 after 90+ days of positive
 reply rates. Avoid Tier 3 unless ACV < $1K.
@@ -226,15 +228,15 @@ rates than cold pitching. This applies across all motion types.
 
 ### Value-before-purchase tactics ranked by conversion lift
 
-| Tactic                    | Conversion Lift vs Cold Pitch | Best For              |
-|---------------------------|------------------------------|-----------------------|
-| Free audit/scan           | 4-7x                        | Security, SEO, ops    |
-| Interactive demo          | 3-5x                        | Complex UI products   |
-| Prebuilt workflow/template| 2-4x                        | Workflow tools        |
-| Sandbox environment       | 2-3x                        | Developer tools, APIs |
-| Live workshop/webinar     | 2-3x                        | Education-heavy sale  |
-| ROI calculator            | 1.5-2x                      | High-ACV products     |
-| Free tier/freemium        | 1.5-2x                      | Horizontal SaaS       |
+| Tactic                     | Conversion Lift vs Cold Pitch | Best For              |
+| -------------------------- | ----------------------------- | --------------------- |
+| Free audit/scan            | 4-7x                          | Security, SEO, ops    |
+| Interactive demo           | 3-5x                          | Complex UI products   |
+| Prebuilt workflow/template | 2-4x                          | Workflow tools        |
+| Sandbox environment        | 2-3x                          | Developer tools, APIs |
+| Live workshop/webinar      | 2-3x                          | Education-heavy sale  |
+| ROI calculator             | 1.5-2x                        | High-ACV products     |
+| Free tier/freemium         | 1.5-2x                        | Horizontal SaaS       |
 
 ### Implementation notes
 
@@ -271,14 +273,14 @@ any product-led or hybrid motion.
 
 ### TTFV benchmarks by product type
 
-| Product Type        | Target TTFV    | Tolerable Max  | What "Value" Means             |
-|---------------------|----------------|----------------|--------------------------------|
-| API/Developer tool  | < 5 min        | 15 min         | First successful API call      |
-| Workflow/automation | < 15 min       | 30 min         | First workflow runs            |
-| Analytics/BI        | < 30 min       | 2 hours        | First insight from own data    |
-| AI agent/assistant  | < 1 hour       | 4 hours        | First task completed by agent  |
-| Enterprise platform | < 1 day        | 1 week         | First team using core feature  |
-| Infrastructure      | < 1 day        | 3 days         | First production deployment    |
+| Product Type        | Target TTFV | Tolerable Max | What "Value" Means            |
+| ------------------- | ----------- | ------------- | ----------------------------- |
+| API/Developer tool  | < 5 min     | 15 min        | First successful API call     |
+| Workflow/automation | < 15 min    | 30 min        | First workflow runs           |
+| Analytics/BI        | < 30 min    | 2 hours       | First insight from own data   |
+| AI agent/assistant  | < 1 hour    | 4 hours       | First task completed by agent |
+| Enterprise platform | < 1 day     | 1 week        | First team using core feature |
+| Infrastructure      | < 1 day     | 3 days        | First production deployment   |
 
 ### TTFV optimization steps
 
@@ -290,13 +292,13 @@ any product-led or hybrid motion.
 
 ### TTFV anti-patterns
 
-| Anti-pattern                      | Fix                                        |
-|-----------------------------------|--------------------------------------------|
-| Mandatory 10-field sign-up form   | Email-only, progressive profiling later     |
-| Feature tour before any action    | Skip tour, guide first meaningful action    |
-| Empty dashboard on first load     | Pre-loaded sample data or template          |
-| "Contact sales" before trial      | Give trial access, trigger sales on usage   |
-| Configuration wizard with 20 steps| 3-step wizard, defer the rest               |
+| Anti-pattern                       | Fix                                       |
+| ---------------------------------- | ----------------------------------------- |
+| Mandatory 10-field sign-up form    | Email-only, progressive profiling later   |
+| Feature tour before any action     | Skip tour, guide first meaningful action  |
+| Empty dashboard on first load      | Pre-loaded sample data or template        |
+| "Contact sales" before trial       | Give trial access, trigger sales on usage |
+| Configuration wizard with 20 steps | 3-step wizard, defer the rest             |
 
 ---
 
@@ -323,48 +325,49 @@ EXPANSION (Product+CS)        -> CS monitors expansion signals, product drives u
 
 Do not hire sales too early. Add sales only when you see these signals:
 
-| Signal                                    | Why It Matters                    |
-|-------------------------------------------|-----------------------------------|
-| Free users asking for enterprise features | Demand pull, not push             |
-| 10+ users from same company on free tier  | Bottom-up adoption happening      |
-| Deals stalling at procurement/legal       | Human needed to navigate process  |
-| Average deal size exceeding $5K ACV       | ROI justifies sales involvement   |
-| Free-to-paid conversion plateauing        | Product alone hit its ceiling     |
+| Signal                                    | Why It Matters                   |
+| ----------------------------------------- | -------------------------------- |
+| Free users asking for enterprise features | Demand pull, not push            |
+| 10+ users from same company on free tier  | Bottom-up adoption happening     |
+| Deals stalling at procurement/legal       | Human needed to navigate process |
+| Average deal size exceeding $5K ACV       | ROI justifies sales involvement  |
+| Free-to-paid conversion plateauing        | Product alone hit its ceiling    |
 
 ### Hybrid team structure
 
-| ARR Stage   | Team Composition                                          |
-|-------------|-----------------------------------------------------------|
-| $1-5M       | 1-2 AEs (PQL/inbound), 0-1 SDR (high-value outbound), 1 CS|
-| $5-20M      | 3-5 AEs by segment, 1-2 SDRs, 2-3 CS/AMs, 1 RevOps      |
+| ARR Stage | Team Composition                                           |
+| --------- | ---------------------------------------------------------- |
+| $1-5M     | 1-2 AEs (PQL/inbound), 0-1 SDR (high-value outbound), 1 CS |
+| $5-20M    | 3-5 AEs by segment, 1-2 SDRs, 2-3 CS/AMs, 1 RevOps         |
 
 First sales hire must be product-savvy, able to do technical demos. Not a
 traditional AE running MEDDIC on cold prospects.
 
 ### Hybrid metrics
 
-| Metric                         | Target           | Red Flag          |
-|--------------------------------|------------------|-------------------|
-| PQL-to-close rate              | 25-30%           | < 15%             |
-| Sales-assisted CAC payback     | 12-15 months     | > 20 months       |
-| Self-serve % of new revenue    | 30-50%           | < 15%             |
-| Expansion revenue % of total   | 25-40%           | < 15%             |
-| Free-to-paid conversion        | 5-8% (freemium)  | < 2%              |
-| TTFV for new sign-ups          | < 15 min         | > 60 min          |
+| Metric                       | Target          | Red Flag    |
+| ---------------------------- | --------------- | ----------- |
+| PQL-to-close rate            | 25-30%          | < 15%       |
+| Sales-assisted CAC payback   | 12-15 months    | > 20 months |
+| Self-serve % of new revenue  | 30-50%          | < 15%       |
+| Expansion revenue % of total | 25-40%          | < 15%       |
+| Free-to-paid conversion      | 5-8% (freemium) | < 2%        |
+| TTFV for new sign-ups        | < 15 min        | > 60 min    |
 
 ---
 
 ## 6. CAC Benchmarks and Efficiency
 
-| Motion               | Median CAC   | CAC Payback (months) | LTV:CAC Target |
-|----------------------|-------------|----------------------|----------------|
-| Pure PLG             | $200-800     | 4-9                  | 5:1+           |
-| PLG + Sales Hybrid   | $800-3,000   | 9-15                 | 4:1+           |
-| Sales-Assisted PLG   | $2,000-8,000 | 12-18                | 3.5:1+         |
-| Sales-Led            | $5,000-25K+  | 18-24                | 3:1+           |
-| Agent-Led Discovery  | $1,000-5,000 | 8-14                 | 4:1+           |
+| Motion              | Median CAC   | CAC Payback (months) | LTV:CAC Target |
+| ------------------- | ------------ | -------------------- | -------------- |
+| Pure PLG            | $200-800     | 4-9                  | 5:1+           |
+| PLG + Sales Hybrid  | $800-3,000   | 9-15                 | 4:1+           |
+| Sales-Assisted PLG  | $2,000-8,000 | 12-18                | 3.5:1+         |
+| Sales-Led           | $5,000-25K+  | 18-24                | 3:1+           |
+| Agent-Led Discovery | $1,000-5,000 | 8-14                 | 4:1+           |
 
 **CAC reduction by timeline**:
+
 - Weeks: interactive demo on site, PQL scoring, self-serve onboarding
 - Months: free tier/trial, content engine, product analytics, referral program
 - Quarters: shift to inbound/PLG mix, viral loops, community/ecosystem
@@ -374,24 +377,26 @@ traditional AE running MEDDIC on cold prospects.
 ## 7. Motion Migration Paths
 
 **PLG to Hybrid** (trigger: enterprise users stalling at procurement):
+
 1. Instrument PQL signals (seats, usage, feature gates)
 2. Define threshold (e.g., 5+ active users from same domain)
 3. Hire product-savvy AE, build enterprise tier (SSO, admin, compliance)
 4. CRM integration to surface PQLs. Target: 25%+ PQL-to-close rate
 
 **Sales-Led to Hybrid** (trigger: CAC payback > 20 months):
+
 1. Build free/trial tier for self-qualification
 2. Interactive demo on website, usage tracking in free tier
 3. Train AEs to leverage usage data. Target: 20-30% CAC reduction in 2 quarters
 
 **Pricing alignment**:
 
-| Stage            | Pricing Model                                    |
-|------------------|--------------------------------------------------|
-| Pure PLG         | Freemium or usage-based, self-serve billing      |
-| Adding Sales     | Add annual contract with volume discount          |
-| Full Hybrid      | Self-serve (monthly) + sales-negotiated (annual) |
-| Moving Upmarket  | Enterprise tier with custom pricing               |
+| Stage           | Pricing Model                                    |
+| --------------- | ------------------------------------------------ |
+| Pure PLG        | Freemium or usage-based, self-serve billing      |
+| Adding Sales    | Add annual contract with volume discount         |
+| Full Hybrid     | Self-serve (monthly) + sales-negotiated (annual) |
+| Moving Upmarket | Enterprise tier with custom pricing              |
 
 ---
 
@@ -408,37 +413,37 @@ low friction with urgency. Works when premium features are clearly valuable.
 
 ### Industry-specific trial-to-paid rates
 
-| Industry             | Rate  | Industry            | Rate    |
-|----------------------|-------|---------------------|---------|
-| CRM                  | 29%   | Project Management  | 18%     |
-| AdTech               | 24%   | Developer Tools     | 15%     |
-| HR Software          | 23%   | Enterprise SaaS     | 10-15%  |
+| Industry    | Rate | Industry           | Rate   |
+| ----------- | ---- | ------------------ | ------ |
+| CRM         | 29%  | Project Management | 18%    |
+| AdTech      | 24%  | Developer Tools    | 15%    |
+| HR Software | 23%  | Enterprise SaaS    | 10-15% |
 
 ---
 
 ## 9. Stage-Specific Playbooks
 
-| Stage               | Key Actions                                                |
-|---------------------|------------------------------------------------------------|
-| Solo founder (<$500K)| Pure PLG, opt-in trial, TTFV < 5 min, no sales hire       |
-| Seed ($500K-$2M)    | Add PQL scoring, first AE when 10+ PQLs/month, enterprise tier |
-| Series A+ ($2M+)    | Formalize hybrid, segment by ACV, RevOps, agent-led Tier 1|
+| Stage                 | Key Actions                                                    |
+| --------------------- | -------------------------------------------------------------- |
+| Solo founder (<$500K) | Pure PLG, opt-in trial, TTFV < 5 min, no sales hire            |
+| Seed ($500K-$2M)      | Add PQL scoring, first AE when 10+ PQLs/month, enterprise tier |
+| Series A+ ($2M+)      | Formalize hybrid, segment by ACV, RevOps, agent-led Tier 1     |
 
 ---
 
 ## 10. Common Mistakes
 
-| Motion  | Mistake                             | Impact                         |
-|---------|-------------------------------------|--------------------------------|
-| PLG     | Free tier too generous              | < 1% conversion                |
-| PLG     | No activation onboarding            | 70%+ sign-up churn             |
-| PLG     | Measuring sign-ups, not activations | Vanity metrics                 |
-| Sales   | Hiring AEs before demand exists     | Burn rate spikes               |
-| Sales   | No interactive demo on website      | 40% fewer qualified leads      |
-| Sales   | Same process for $5K and $500K deals| Over/under-serving             |
-| Hybrid  | Sales calling PQLs too early        | Kills product-led trust        |
-| Hybrid  | PQL definition too loose            | Sales wastes time              |
-| Hybrid  | Pricing gap between tiers too large | Conversion dead zone           |
+| Motion | Mistake                              | Impact                    |
+| ------ | ------------------------------------ | ------------------------- |
+| PLG    | Free tier too generous               | < 1% conversion           |
+| PLG    | No activation onboarding             | 70%+ sign-up churn        |
+| PLG    | Measuring sign-ups, not activations  | Vanity metrics            |
+| Sales  | Hiring AEs before demand exists      | Burn rate spikes          |
+| Sales  | No interactive demo on website       | 40% fewer qualified leads |
+| Sales  | Same process for $5K and $500K deals | Over/under-serving        |
+| Hybrid | Sales calling PQLs too early         | Kills product-led trust   |
+| Hybrid | PQL definition too loose             | Sales wastes time         |
+| Hybrid | Pricing gap between tiers too large  | Conversion dead zone      |
 
 ---
 
@@ -455,7 +460,6 @@ low friction with urgency. Works when premium features are clearly valuable.
 - **Conversion dead zone** → **Cause:** Pricing gap between tiers too large. **Fix:** Add mid tier or usage-based step; aim for &gt;25% PQL conversion; test price sensitivity.
 
 ---
-
 
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 

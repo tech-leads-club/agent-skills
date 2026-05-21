@@ -43,15 +43,15 @@ creates noise and distraction.
 
 ### Font Selection by Project Mood
 
-| Mood | Heading direction | Body direction | Example pair |
-|------|------------------|---------------|-------------|
-| Corporate / Trustworthy | Clean geometric sans | Readable humanist sans | Outfit + Nunito |
-| Editorial / Sophisticated | High-contrast serif | Elegant serif or clean sans | Playfair Display + Source Serif |
-| Technical / Developer | Monospace or geometric | Clean sans | JetBrains Mono + Inter |
-| Playful / Creative | Rounded or display | Friendly sans | Fredoka + Quicksand |
-| Luxury / Premium | Thin serif or elegant sans | Light-weight readable | Cormorant Garamond + Montserrat |
-| Brutalist / Bold | Heavy grotesque | Neutral sans | Anton + Work Sans |
-| Startup / Modern | Geometric sans | Same family or neutral | General Sans + Cabinet Grotesk |
+| Mood                      | Heading direction          | Body direction              | Example pair                    |
+| ------------------------- | -------------------------- | --------------------------- | ------------------------------- |
+| Corporate / Trustworthy   | Clean geometric sans       | Readable humanist sans      | Outfit + Nunito                 |
+| Editorial / Sophisticated | High-contrast serif        | Elegant serif or clean sans | Playfair Display + Source Serif |
+| Technical / Developer     | Monospace or geometric     | Clean sans                  | JetBrains Mono + Inter          |
+| Playful / Creative        | Rounded or display         | Friendly sans               | Fredoka + Quicksand             |
+| Luxury / Premium          | Thin serif or elegant sans | Light-weight readable       | Cormorant Garamond + Montserrat |
+| Brutalist / Bold          | Heavy grotesque            | Neutral sans                | Anton + Work Sans               |
+| Startup / Modern          | Geometric sans             | Same family or neutral      | General Sans + Cabinet Grotesk  |
 
 ### Typography Scale
 
@@ -311,7 +311,9 @@ ALWAYS include a `prefers-reduced-motion` media query:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
@@ -324,15 +326,15 @@ ALWAYS include a `prefers-reduced-motion` media query:
 
 ### Popular Libraries and Their Personalities
 
-| Library | Style | Best for |
-|---------|-------|----------|
-| Lucide | Clean, geometric outlines | Modern apps, dashboards |
-| Phosphor | Versatile, 6 weights | Design systems, flexibility needed |
-| Heroicons | Two styles (outline/solid) | Tailwind projects, clean UI |
-| Tabler Icons | Consistent stroke width | Developer tools, admin panels |
-| Radix Icons | Minimal, 15x15 grid | Compact UIs, toolbars |
-| Font Awesome | Comprehensive, varied | Legacy projects, icon variety |
-| Material Symbols | Google's design language | Material Design projects |
+| Library          | Style                      | Best for                           |
+| ---------------- | -------------------------- | ---------------------------------- |
+| Lucide           | Clean, geometric outlines  | Modern apps, dashboards            |
+| Phosphor         | Versatile, 6 weights       | Design systems, flexibility needed |
+| Heroicons        | Two styles (outline/solid) | Tailwind projects, clean UI        |
+| Tabler Icons     | Consistent stroke width    | Developer tools, admin panels      |
+| Radix Icons      | Minimal, 15x15 grid        | Compact UIs, toolbars              |
+| Font Awesome     | Comprehensive, varied      | Legacy projects, icon variety      |
+| Material Symbols | Google's design language   | Material Design projects           |
 
 ### Icon Usage Rules
 

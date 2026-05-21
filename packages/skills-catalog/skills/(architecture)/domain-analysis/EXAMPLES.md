@@ -7,12 +7,14 @@ This document provides practical examples of applying subdomain identification a
 ### Discovered Concepts
 
 **Entities**:
+
 - Product, Category, Inventory, SKU
 - Order, OrderItem, Cart, CartItem
 - Customer, Address, PaymentMethod
 - Shipment, Tracking, Warehouse
 
 **Services**:
+
 - ProductCatalogService, InventoryService
 - OrderProcessingService, CartService
 - PaymentService, ShippingService
@@ -29,6 +31,7 @@ This document provides practical examples of applying subdomain identification a
 ### Identified Subdomains
 
 #### 1. Product Catalog (Core Domain)
+
 - **Type**: Core (if differentiation is product discovery)
 - **Ubiquitous Language**: product, category, catalog, search, browse
 - **Concepts**: Product, Category, ProductCatalogService
@@ -36,6 +39,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: CatalogContext
 
 #### 2. Inventory Management (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: stock, inventory, SKU, warehouse, allocation
 - **Concepts**: Inventory, SKU, InventoryService, Warehouse
@@ -43,6 +47,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: InventoryContext
 
 #### 3. Order Processing (Core Domain)
+
 - **Type**: Core (if differentiation is checkout experience)
 - **Ubiquitous Language**: order, cart, checkout, fulfillment
 - **Concepts**: Order, Cart, OrderProcessingService
@@ -50,6 +55,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: OrderContext
 
 #### 4. Payment Processing (Generic)
+
 - **Type**: Generic (standard payment gateway)
 - **Ubiquitous Language**: payment, transaction, charge, refund
 - **Concepts**: Payment, PaymentService, PaymentGateway
@@ -57,6 +63,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: PaymentContext
 
 #### 5. Shipping (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: shipment, tracking, delivery, carrier
 - **Concepts**: Shipment, Tracking, ShippingService
@@ -65,22 +72,24 @@ This document provides practical examples of applying subdomain identification a
 
 ### Cohesion Analysis
 
-| Domain A | Domain B | Cohesion | Relationship |
-|----------|----------|----------|--------------|
-| Catalog | Inventory | 6/10 | ⚠️ Product availability check |
-| Order | Catalog | 5/10 | ⚠️ Product reference in order |
-| Order | Payment | 7/10 | ✅ Order triggers payment |
-| Order | Shipping | 7/10 | ✅ Order triggers shipment |
-| Customer | Order | 3/10 | ❌ Direct entity reference |
+| Domain A | Domain B  | Cohesion | Relationship                  |
+| -------- | --------- | -------- | ----------------------------- |
+| Catalog  | Inventory | 6/10     | ⚠️ Product availability check |
+| Order    | Catalog   | 5/10     | ⚠️ Product reference in order |
+| Order    | Payment   | 7/10     | ✅ Order triggers payment     |
+| Order    | Shipping  | 7/10     | ✅ Order triggers shipment    |
+| Customer | Order     | 3/10     | ❌ Direct entity reference    |
 
 ### Low Cohesion Issues
 
 **Issue 1**: Customer entity directly referenced in Order
+
 - **Problem**: Different contexts (Identity vs Order)
 - **Recommendation**: Use CustomerId value object, not entity reference
 - **Pattern**: Published Language
 
 **Issue 2**: Catalog service checks Inventory directly
+
 - **Problem**: Core Domain depends on Supporting
 - **Recommendation**: Use event-based inventory updates
 - **Pattern**: Domain Events
@@ -92,6 +101,7 @@ This document provides practical examples of applying subdomain identification a
 ### Discovered Concepts
 
 **Entities**:
+
 - Patient, MedicalRecord, Diagnosis
 - Appointment, Schedule, Availability
 - Prescription, Medication, Dosage
@@ -109,6 +119,7 @@ This document provides practical examples of applying subdomain identification a
 ### Identified Subdomains
 
 #### 1. Patient Care (Core Domain)
+
 - **Type**: Core
 - **Ubiquitous Language**: patient, diagnosis, treatment, care plan
 - **Concepts**: Patient, MedicalRecord, Diagnosis, CareService
@@ -116,6 +127,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: ClinicalContext
 
 #### 2. Appointment Management (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: appointment, schedule, availability, booking
 - **Concepts**: Appointment, Schedule, SchedulingService
@@ -123,6 +135,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: SchedulingContext
 
 #### 3. Pharmacy (Supporting)
+
 - **Type**: Supporting (or Core if pharmacy is differentiator)
 - **Ubiquitous Language**: prescription, medication, dosage, drug interaction
 - **Concepts**: Prescription, Medication, PharmacyService
@@ -130,6 +143,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: PharmacyContext
 
 #### 4. Medical Billing (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: claim, insurance, billing, reimbursement
 - **Concepts**: Claim, Insurance, BillingService
@@ -140,11 +154,11 @@ This document provides practical examples of applying subdomain identification a
 
 **"Patient" Concept Has Different Meanings**:
 
-| Context | Patient Meaning | Properties |
-|---------|-----------------|------------|
-| Clinical | Medical subject | Diagnosis, vitals, allergies |
-| Scheduling | Appointment holder | Availability, preferences |
-| Billing | Payer/beneficiary | Insurance, balance, claims |
+| Context    | Patient Meaning    | Properties                   |
+| ---------- | ------------------ | ---------------------------- |
+| Clinical   | Medical subject    | Diagnosis, vitals, allergies |
+| Scheduling | Appointment holder | Availability, preferences    |
+| Billing    | Payer/beneficiary  | Insurance, balance, claims   |
 
 → These are different bounded contexts despite sharing the term "Patient"
 
@@ -155,6 +169,7 @@ This document provides practical examples of applying subdomain identification a
 ### Discovered Concepts
 
 **Entities**:
+
 - Project, Task, Milestone, Sprint
 - User, Team, Role, Permission
 - Comment, Attachment, Activity
@@ -172,6 +187,7 @@ This document provides practical examples of applying subdomain identification a
 ### Identified Subdomains
 
 #### 1. Project Management (Core Domain)
+
 - **Type**: Core
 - **Ubiquitous Language**: project, task, milestone, workflow
 - **Concepts**: Project, Task, Milestone, ProjectService
@@ -179,6 +195,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: ProjectContext
 
 #### 2. Collaboration (Core/Supporting)
+
 - **Type**: Core if differentiator, Supporting otherwise
 - **Ubiquitous Language**: comment, discussion, activity, collaboration
 - **Concepts**: Comment, Activity, CollaborationService
@@ -186,6 +203,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: CollaborationContext
 
 #### 3. Identity & Access (Generic)
+
 - **Type**: Generic
 - **Ubiquitous Language**: user, authentication, authorization, role
 - **Concepts**: User, Role, Permission, AuthService
@@ -193,6 +211,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: IdentityContext
 
 #### 4. Billing (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: subscription, plan, invoice, billing
 - **Concepts**: Subscription, Invoice, BillingService
@@ -200,6 +219,7 @@ This document provides practical examples of applying subdomain identification a
 - **Bounded Context**: BillingContext
 
 #### 5. Notifications (Generic)
+
 - **Type**: Generic
 - **Ubiquitous Language**: notification, alert, message, reminder
 - **Concepts**: Notification, NotificationService
@@ -209,42 +229,44 @@ This document provides practical examples of applying subdomain identification a
 ### Low Cohesion Issue
 
 **Issue**: User entity used everywhere
+
 ```typescript
 // Project domain
 class Project {
-  owner: User;        // ❌ Direct reference
-  members: User[];    // ❌ Direct reference
+  owner: User // ❌ Direct reference
+  members: User[] // ❌ Direct reference
 }
 
 // Collaboration domain
 class Comment {
-  author: User;       // ❌ Direct reference
+  author: User // ❌ Direct reference
 }
 
 // Billing domain
 class Subscription {
-  subscriber: User;   // ❌ Direct reference
+  subscriber: User // ❌ Direct reference
 }
 ```
 
 **Problem**: Identity context concept leaked into all domains
 
 **Recommendation**: Use context-specific concepts
+
 ```typescript
 // Project domain
 class Project {
-  ownerId: OwnerId;           // ✅ Value object
-  members: MemberId[];        // ✅ Value object
+  ownerId: OwnerId // ✅ Value object
+  members: MemberId[] // ✅ Value object
 }
 
 // Collaboration domain
 class Comment {
-  authorId: ParticipantId;    // ✅ Context-specific
+  authorId: ParticipantId // ✅ Context-specific
 }
 
 // Billing domain
 class Subscription {
-  subscriberId: CustomerId;   // ✅ Context-specific
+  subscriberId: CustomerId // ✅ Context-specific
 }
 ```
 
@@ -255,6 +277,7 @@ class Subscription {
 ### Discovered Concepts
 
 **Entities**:
+
 - Movie, TVShow, Episode, Season
 - Video, Stream, Encoding, Quality
 - Watchlist, Viewing, Progress
@@ -272,6 +295,7 @@ class Subscription {
 ### Identified Subdomains
 
 #### 1. Content Catalog (Supporting)
+
 - **Type**: Supporting (unless unique content is differentiator)
 - **Ubiquitous Language**: movie, show, episode, catalog, metadata
 - **Concepts**: Movie, TVShow, Episode, CatalogService
@@ -279,6 +303,7 @@ class Subscription {
 - **Bounded Context**: CatalogContext
 
 #### 2. Video Streaming (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: video, stream, encoding, playback, quality
 - **Concepts**: Video, Stream, StreamingService
@@ -286,6 +311,7 @@ class Subscription {
 - **Bounded Context**: StreamingContext
 
 #### 3. User Engagement (Supporting)
+
 - **Type**: Supporting
 - **Ubiquitous Language**: watchlist, viewing, progress, rating
 - **Concepts**: Watchlist, Viewing, EngagementService
@@ -293,6 +319,7 @@ class Subscription {
 - **Bounded Context**: EngagementContext
 
 #### 4. Recommendation Engine (Core Domain)
+
 - **Type**: Core (if algorithm is competitive advantage)
 - **Ubiquitous Language**: recommendation, preference, algorithm, personalization
 - **Concepts**: Recommendation, RecommendationEngine
@@ -300,6 +327,7 @@ class Subscription {
 - **Bounded Context**: RecommendationContext
 
 #### 5. Video Processing (Generic)
+
 - **Type**: Generic
 - **Ubiquitous Language**: transcoding, encoding, compression
 - **Concepts**: VideoProcessor, EncodingService
@@ -329,6 +357,7 @@ Engagement Context → publishes → UserWatched event
 **Problem**: User/Identity entities used directly everywhere
 
 **Solution**: Context-specific identifiers
+
 - Project context: OwnerId, MemberId
 - Billing context: CustomerId, SubscriberId
 - Content context: CreatorId, ViewerId
@@ -338,12 +367,14 @@ Engagement Context → publishes → UserWatched event
 **Problem**: Large shared models used everywhere
 
 **Solution**: Minimal shared kernel, mostly value objects
+
 - Share: UserId (as string/UUID), Email (as value object)
 - Don't share: User entity, Customer entity
 
 ### Pattern 3: Core vs Supporting Confusion
 
 **Key Question**: "Is this our competitive advantage?"
+
 - If YES → Core Domain (best team, most attention)
 - If NO but business-specific → Supporting
 - If NO and standard → Generic
@@ -351,6 +382,7 @@ Engagement Context → publishes → UserWatched event
 ### Pattern 4: Bounded Context Size
 
 **Too Small**:
+
 ```
 OrderContext
 OrderItemContext        ❌ Gaping holes
@@ -358,6 +390,7 @@ OrderStatusContext      ❌ Fragmented
 ```
 
 **Right Size**:
+
 ```
 OrderContext            ✅ Complete language
 ├── Order
@@ -366,6 +399,7 @@ OrderContext            ✅ Complete language
 ```
 
 **Too Large**:
+
 ```
 SalesContext            ❌ Mixed concerns
 ├── Order
@@ -377,14 +411,17 @@ SalesContext            ❌ Mixed concerns
 ### Pattern 5: Integration Types
 
 **Synchronous** (use sparingly):
+
 - When immediate consistency required
 - Example: Order → Payment (need immediate response)
 
 **Asynchronous** (prefer):
+
 - When eventual consistency acceptable
 - Example: Order → Shipping (can be delayed)
 
 **Event-Driven** (best for decoupling):
+
 - When multiple contexts need to react
 - Example: OrderPlaced → [Billing, Shipping, Analytics]
 
@@ -398,16 +435,19 @@ Use this template when analyzing any codebase:
 ## Codebase: {Name}
 
 ### Step 1: Concepts Extracted
+
 - Entities: [list]
 - Services: [list]
 - Use Cases: [list]
 - Controllers: [list]
 
 ### Step 2: Language Groups
+
 - Group 1: {name} - terms: [list]
 - Group 2: {name} - terms: [list]
 
 ### Step 3: Subdomains Identified
+
 1. {Subdomain} (Core/Supporting/Generic)
    - Language: [terms]
    - Concepts: [list]
@@ -415,16 +455,19 @@ Use this template when analyzing any codebase:
    - Bounded Context: {Name}Context
 
 ### Step 4: Cohesion Matrix
+
 | Domain A | Domain B | Cohesion | Issue |
-|----------|----------|----------|-------|
-| ... | ... | X/10 | ... |
+| -------- | -------- | -------- | ----- |
+| ...      | ...      | X/10     | ...   |
 
 ### Step 5: Issues Found
+
 - Priority High: [list]
 - Priority Medium: [list]
 - Priority Low: [list]
 
 ### Step 6: Recommendations
+
 1. [recommendation]
 2. [recommendation]
 ```

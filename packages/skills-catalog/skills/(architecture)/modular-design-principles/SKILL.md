@@ -19,9 +19,9 @@ Use this skill when reasoning about **structure and boundaries** in any codebase
 
 ## What to load
 
-| Task | Where |
-|------|--------|
-| Principles table + violations + workflows (this file) | `SKILL.md` |
+| Task                                                     | Where                      |
+| -------------------------------------------------------- | -------------------------- |
+| Principles table + violations + workflows (this file)    | `SKILL.md`                 |
 | Per-principle definition, agent rules, abstract examples | `references/principles.md` |
 
 ---
@@ -38,18 +38,18 @@ How you physically lay this out (mono repo, multi repo, packages, libraries) is 
 
 ## The ten principles
 
-| # | Principle | Intent |
-|---|-----------|--------|
-| 1 | **Well-defined boundaries** | A small, stable **public surface**; everything else is internal. Consumers depend on contracts, not internals. |
-| 2 | **Composability** | Modules can be used alone or combined without special knowledge of each other’s internals. |
-| 3 | **Independence** | No hidden shared mutable state across boundaries; each module should be testable in isolation (with fakes or test doubles at the edges). |
-| 4 | **Individual scale** | Resources (compute, storage, rate limits, batch size) can be tuned **per module** where it matters, without rewriting others. |
-| 5 | **Explicit communication** | Cross-module interaction uses **documented contracts** (APIs, events, messages, shared types) — not incidental coupling. |
-| 6 | **Replaceability** | Dependencies on other modules are expressed through **interfaces or protocols** so implementations can change. |
-| 7 | **Deployment independence** | Modules do not assume they share a process, host, or release cadence unless that is an explicit architectural decision. |
-| 8 | **State isolation** | Each module **owns** its persistent state and naming; no silent sharing of the same logical data store or ambiguous global names across boundaries. |
-| 9 | **Observability** | Each module can be diagnosed on its own: logs, metrics, traces, health — attributable to the unit that emitted them. |
-| 10 | **Fail independence** | Failures are **contained** (timeouts, bulkheads, circuit breaking, idempotency) so one module’s outage does not blindly cascade. |
+| #   | Principle                   | Intent                                                                                                                                              |
+| --- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Well-defined boundaries** | A small, stable **public surface**; everything else is internal. Consumers depend on contracts, not internals.                                      |
+| 2   | **Composability**           | Modules can be used alone or combined without special knowledge of each other’s internals.                                                          |
+| 3   | **Independence**            | No hidden shared mutable state across boundaries; each module should be testable in isolation (with fakes or test doubles at the edges).            |
+| 4   | **Individual scale**        | Resources (compute, storage, rate limits, batch size) can be tuned **per module** where it matters, without rewriting others.                       |
+| 5   | **Explicit communication**  | Cross-module interaction uses **documented contracts** (APIs, events, messages, shared types) — not incidental coupling.                            |
+| 6   | **Replaceability**          | Dependencies on other modules are expressed through **interfaces or protocols** so implementations can change.                                      |
+| 7   | **Deployment independence** | Modules do not assume they share a process, host, or release cadence unless that is an explicit architectural decision.                             |
+| 8   | **State isolation**         | Each module **owns** its persistent state and naming; no silent sharing of the same logical data store or ambiguous global names across boundaries. |
+| 9   | **Observability**           | Each module can be diagnosed on its own: logs, metrics, traces, health — attributable to the unit that emitted them.                                |
+| 10  | **Fail independence**       | Failures are **contained** (timeouts, bulkheads, circuit breaking, idempotency) so one module’s outage does not blindly cascade.                    |
 
 **Principle 8** is often the hardest: ambiguous ownership of data or names is a frequent source of “works until it doesn’t” integration bugs.
 
@@ -75,7 +75,7 @@ For **depth** (rules for agents + abstract examples per principle), load `refere
 Use when introducing a **new** cohesive area of the system (greenfield module or extracted domain).
 
 1. **Scope and language** — Name the context; list core nouns/verbs (**ubiquitous language**). Reject vague names that collide with other contexts.
-2. **Responsibilities** — What decisions happen **only** here? What is explicitly *out* of scope?
+2. **Responsibilities** — What decisions happen **only** here? What is explicitly _out_ of scope?
 3. **State ownership** — Which facts are **authoritative** in this context? Where are they stored conceptually (even if storage tech is undecided)?
 4. **Public contract** — Operations and/or events other contexts may use. Version or evolve this contract intentionally.
 5. **Integrations** — For each neighbor: sync call, async message, shared read model, or batch sync? Document **consistency** (immediate, eventual) and **failure** behavior.
@@ -93,14 +93,14 @@ Use when introducing a **new** cohesive area of the system (greenfield module or
 
 ### Six-criteria test (favor split when several are true)
 
-| # | Criterion | Question |
-|---|-----------|----------|
-| 1 | **Language** | Do the sub-areas use **different vocabulary** or conflicting definitions of the same word? |
-| 2 | **Rate of change** | Do parts **change on different cadences** or for unrelated reasons (most edits touch one side)? |
-| 3 | **Scale / SLO** | Do parts need **different** throughput, latency, or availability targets? |
-| 4 | **Consistency** | Do they need **different transaction boundaries** (cannot share one atomic write model cleanly)? |
-| 5 | **Ownership** | Would **different teams** or clear ownership lines reduce conflict and review churn? |
-| 6 | **Pain signal** | Is there **observable** integration pain: ripple effects, fear of change, unclear who owns a bug? |
+| #   | Criterion          | Question                                                                                          |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------- |
+| 1   | **Language**       | Do the sub-areas use **different vocabulary** or conflicting definitions of the same word?        |
+| 2   | **Rate of change** | Do parts **change on different cadences** or for unrelated reasons (most edits touch one side)?   |
+| 3   | **Scale / SLO**    | Do parts need **different** throughput, latency, or availability targets?                         |
+| 4   | **Consistency**    | Do they need **different transaction boundaries** (cannot share one atomic write model cleanly)?  |
+| 5   | **Ownership**      | Would **different teams** or clear ownership lines reduce conflict and review churn?              |
+| 6   | **Pain signal**    | Is there **observable** integration pain: ripple effects, fear of change, unclear who owns a bug? |
 
 **Cohesion / coupling (qualitative).** Favor **high cohesion** inside a module and **low, explicit coupling** between modules. If the only motivation is “files got big” or “folder aesthetics,” **merge or wait**.
 
@@ -161,11 +161,11 @@ Use for **reviews** or **audits** without assuming tooling. Treat items as **sig
 
 ### Severity heuristic (for reporting)
 
-| Tier | Meaning |
-|------|--------|
+| Tier   | Meaning                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------------ |
 | **P0** | Data corruption risk, security boundary violation, or cross-context persistence with no contract |
-| **P1** | Unclear ownership, leaky public API, missing failure semantics at boundaries |
-| **P2** | Observability gaps, composability smells, tech debt that increases future coupling |
+| **P1** | Unclear ownership, leaky public API, missing failure semantics at boundaries                     |
+| **P2** | Observability gaps, composability smells, tech debt that increases future coupling               |
 
 **Maturity note:** Scoring is **qualitative** unless the team defines numeric gates. Use trends: fewer P0/P1 over time, clearer contracts.
 

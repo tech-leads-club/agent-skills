@@ -9,9 +9,9 @@ Methods for mapping dependencies, scoring risks, identifying domains, and evalua
 Before identifying domains, you need a complete module inventory. For each module:
 
 ```markdown
-| Module Path | Responsibility | Internal Imports | External Imports | Data Stores | Lines of Code |
-|-------------|---------------|-----------------|-----------------|-------------|--------------|
-| `src/orders/` | Order lifecycle | payments, inventory | Stripe API | orders, order_items | 1,200 |
+| Module Path   | Responsibility  | Internal Imports    | External Imports | Data Stores         | Lines of Code |
+| ------------- | --------------- | ------------------- | ---------------- | ------------------- | ------------- |
+| `src/orders/` | Order lifecycle | payments, inventory | Stripe API       | orders, order_items | 1,200         |
 ```
 
 Every cell must reference specific `file:line` evidence.
@@ -62,14 +62,14 @@ For each candidate domain, produce a scorecard:
 ```markdown
 ## Domain Scorecard: {Name}
 
-| Metric | Value | Rating |
-|--------|-------|--------|
-| Cohesion | 0.85 | Good |
-| Coupling | 0.22 | Good |
-| DB Coupling | 0.10 | Good |
-| Lines of Code | 3,200 | Medium complexity |
-| Test Coverage | 45% | Needs improvement before migration |
-| Change Frequency | 12 commits/month | Active — high business value |
+| Metric           | Value            | Rating                             |
+| ---------------- | ---------------- | ---------------------------------- |
+| Cohesion         | 0.85             | Good                               |
+| Coupling         | 0.22             | Good                               |
+| DB Coupling      | 0.10             | Good                               |
+| Lines of Code    | 3,200            | Medium complexity                  |
+| Test Coverage    | 45%              | Needs improvement before migration |
+| Change Frequency | 12 commits/month | Active — high business value       |
 
 **Verdict**: Ready for migration / Needs boundary adjustment / Too coupled to migrate independently
 ```
@@ -106,12 +106,12 @@ Evaluate every migration domain against these risk categories:
 
 For each risk:
 
-| Field | Values |
-|-------|--------|
-| **Impact** | Critical (system down) / High (degraded) / Medium (workaround exists) / Low (cosmetic) |
-| **Probability** | High (> 50%) / Medium (20-50%) / Low (< 20%) |
-| **Risk Score** | Impact x Probability: Critical=4, High=3, Medium=2, Low=1. Score = impact_val x probability_val |
-| **Severity** | Score >= 12: CRITICAL / >= 8: HIGH / >= 4: MEDIUM / < 4: LOW |
+| Field           | Values                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| **Impact**      | Critical (system down) / High (degraded) / Medium (workaround exists) / Low (cosmetic)          |
+| **Probability** | High (> 50%) / Medium (20-50%) / Low (< 20%)                                                    |
+| **Risk Score**  | Impact x Probability: Critical=4, High=3, Medium=2, Low=1. Score = impact_val x probability_val |
+| **Severity**    | Score >= 12: CRITICAL / >= 8: HIGH / >= 4: MEDIUM / < 4: LOW                                    |
 
 ### Risk Documentation Format
 
@@ -135,13 +135,13 @@ Sort all risks by score (descending). The top 3-5 risks must be addressed in the
 
 ### Debt Categories
 
-| Category | Indicators | How to Detect |
-|----------|-----------|---------------|
-| **Dependency debt** | Outdated/deprecated packages | Compare versions in dependency files against latest via web search |
-| **Architecture debt** | Circular deps, god classes, scattered data access | Import analysis, module size, SQL-in-controllers |
-| **Test debt** | Low coverage, no integration tests | Test file count vs source file count, coverage config presence |
-| **Infrastructure debt** | Manual deployments, no CI/CD, no containerization | Check for Dockerfile, CI config, deployment scripts |
-| **Documentation debt** | No API docs, no architecture diagrams | Check for docs/, README content, OpenAPI specs |
+| Category                | Indicators                                        | How to Detect                                                      |
+| ----------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| **Dependency debt**     | Outdated/deprecated packages                      | Compare versions in dependency files against latest via web search |
+| **Architecture debt**   | Circular deps, god classes, scattered data access | Import analysis, module size, SQL-in-controllers                   |
+| **Test debt**           | Low coverage, no integration tests                | Test file count vs source file count, coverage config presence     |
+| **Infrastructure debt** | Manual deployments, no CI/CD, no containerization | Check for Dockerfile, CI config, deployment scripts                |
+| **Documentation debt**  | No API docs, no architecture diagrams             | Check for docs/, README content, OpenAPI specs                     |
 
 ### Debt Impact Assessment
 
@@ -163,14 +163,14 @@ Classification:
 
 Rate each domain/module on a 1-10 scale across these dimensions:
 
-| Dimension | 1-3 (Low) | 4-6 (Medium) | 7-10 (High) |
-|-----------|-----------|--------------|-------------|
-| **Size** | < 500 LOC | 500-2000 LOC | > 2000 LOC |
-| **Dependencies** | 0-2 external | 3-5 external | > 5 external |
-| **Data coupling** | Own tables only | 1-2 shared tables | 3+ shared tables |
-| **Test coverage** | > 70% | 40-70% | < 40% |
-| **Change frequency** | < 2 commits/month | 2-10 commits/month | > 10 commits/month |
-| **Business criticality** | Internal tools | Customer-facing non-critical | Revenue/auth/payment |
+| Dimension                | 1-3 (Low)         | 4-6 (Medium)                 | 7-10 (High)          |
+| ------------------------ | ----------------- | ---------------------------- | -------------------- |
+| **Size**                 | < 500 LOC         | 500-2000 LOC                 | > 2000 LOC           |
+| **Dependencies**         | 0-2 external      | 3-5 external                 | > 5 external         |
+| **Data coupling**        | Own tables only   | 1-2 shared tables            | 3+ shared tables     |
+| **Test coverage**        | > 70%             | 40-70%                       | < 40%                |
+| **Change frequency**     | < 2 commits/month | 2-10 commits/month           | > 10 commits/month   |
+| **Business criticality** | Internal tools    | Customer-facing non-critical | Revenue/auth/payment |
 
 **Composite score** = average of all dimensions.
 

@@ -1,6 +1,7 @@
 # Core Web Vitals Optimization
 
 ## Table of Contents
+
 - [LCP (Largest Contentful Paint)](#lcp-largest-contentful-paint)
 - [CLS (Cumulative Layout Shift)](#cls-cumulative-layout-shift)
 - [INP (Interaction to Next Paint)](#inp-interaction-to-next-paint)
@@ -12,6 +13,7 @@
 Target: < 2.5s
 
 ### Common Causes
+
 - Large unoptimized images
 - Slow server response (TTFB)
 - Render-blocking resources
@@ -21,14 +23,13 @@ Target: < 2.5s
 
 ```html
 <!-- Preload in <head> -->
-<link rel="preload" as="image" href="/hero.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/hero.webp" fetchpriority="high" />
 
 <!-- Image tag -->
 <picture>
-  <source srcset="/hero.avif" type="image/avif">
-  <source srcset="/hero.webp" type="image/webp">
-  <img src="/hero.jpg" alt="Hero" width="1200" height="600"
-       loading="eager" fetchpriority="high" decoding="async">
+  <source srcset="/hero.avif" type="image/avif" />
+  <source srcset="/hero.webp" type="image/webp" />
+  <img src="/hero.jpg" alt="Hero" width="1200" height="600" loading="eager" fetchpriority="high" decoding="async" />
 </picture>
 ```
 
@@ -37,8 +38,8 @@ Target: < 2.5s
 ```javascript
 // Next.js: Use static generation when possible
 export async function getStaticProps() {
-  const data = await fetchData();
-  return { props: { data }, revalidate: 60 };
+  const data = await fetchData()
+  return { props: { data }, revalidate: 60 }
 }
 
 // Add stale-while-revalidate for dynamic content
@@ -52,6 +53,7 @@ export async function getStaticProps() {
 Target: < 0.1
 
 ### Common Causes
+
 - Images without dimensions
 - Ads/embeds without reserved space
 - Web fonts causing FOIT/FOUT
@@ -61,10 +63,10 @@ Target: < 0.1
 
 ```html
 <!-- Always specify dimensions -->
-<img src="/photo.jpg" alt="Photo" width="800" height="600">
+<img src="/photo.jpg" alt="Photo" width="800" height="600" />
 
 <!-- Or use aspect-ratio -->
-<img src="/photo.jpg" alt="Photo" style="aspect-ratio: 4/3; width: 100%;">
+<img src="/photo.jpg" alt="Photo" style="aspect-ratio: 4/3; width: 100%;" />
 ```
 
 ### Fix: Reserve Space for Dynamic Content
@@ -100,6 +102,7 @@ Target: < 0.1
 Target: < 200ms
 
 ### Common Causes
+
 - Long JavaScript tasks (>50ms)
 - Heavy event handlers
 - Layout thrashing
@@ -109,16 +112,16 @@ Target: < 200ms
 
 ```javascript
 // Before: blocks main thread
-items.forEach(item => processItem(item));
+items.forEach((item) => processItem(item))
 
 // After: yield to main thread
 async function processWithYield(items) {
   for (const item of items) {
-    processItem(item);
+    processItem(item)
     // Yield every 5ms
     if (performance.now() - start > 5) {
-      await new Promise(r => setTimeout(r, 0));
-      start = performance.now();
+      await new Promise((r) => setTimeout(r, 0))
+      start = performance.now()
     }
   }
 }
@@ -129,10 +132,10 @@ async function processWithYield(items) {
 ```javascript
 // Debounce search input
 const search = debounce((query) => {
-  fetchResults(query);
-}, 300);
+  fetchResults(query)
+}, 300)
 
-input.addEventListener('input', (e) => search(e.target.value));
+input.addEventListener('input', (e) => search(e.target.value))
 ```
 
 ### Fix: Use CSS Instead of JS

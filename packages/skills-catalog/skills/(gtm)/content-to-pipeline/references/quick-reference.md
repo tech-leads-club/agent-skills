@@ -2,26 +2,26 @@
 
 ## Quick Reference
 
-| Concept | Key Number or Rule |
-|---|---|
-| Pillar-to-derivative ratio | 1 pillar piece produces 10-15 derivatives |
-| Weekly content time budget | 4 hours/week for solo founder (15-20 pieces) |
-| Newsletter first-dollar timeline | Median 66 days in 2025 |
-| Content-sourced pipeline target | 20-40% of total pipeline |
-| Content-influenced pipeline target | 50-70% of total pipeline |
-| DM response rate benchmark | 40-60% when value-led |
-| DM-to-call conversion | 15-25% of qualified conversations |
-| LinkedIn posting cadence | 3-5x/week optimal |
-| X posting cadence | 2-3x/day including replies |
-| Newsletter growth rate | 50-200 subscribers/month from social CTAs |
-| Founder content vs. company page | 5-7x higher engagement from founder accounts |
-| Content consistency threshold | 90 days minimum before evaluating ROI |
-| Self-reported attribution capture | Required field on every form |
-| Community CAC reduction | Up to 60% lower than paid channels |
-| AI content role | Speed the format, not the thinking |
-| Build-in-public trust impact | 81% of buyers require brand trust before purchase |
-| Podcast derivative content | 30+ pieces per episode |
-| Newsletter revenue streams | Run 2-4 simultaneously for maximum monetization |
+| Concept                            | Key Number or Rule                                |
+| ---------------------------------- | ------------------------------------------------- |
+| Pillar-to-derivative ratio         | 1 pillar piece produces 10-15 derivatives         |
+| Weekly content time budget         | 4 hours/week for solo founder (15-20 pieces)      |
+| Newsletter first-dollar timeline   | Median 66 days in 2025                            |
+| Content-sourced pipeline target    | 20-40% of total pipeline                          |
+| Content-influenced pipeline target | 50-70% of total pipeline                          |
+| DM response rate benchmark         | 40-60% when value-led                             |
+| DM-to-call conversion              | 15-25% of qualified conversations                 |
+| LinkedIn posting cadence           | 3-5x/week optimal                                 |
+| X posting cadence                  | 2-3x/day including replies                        |
+| Newsletter growth rate             | 50-200 subscribers/month from social CTAs         |
+| Founder content vs. company page   | 5-7x higher engagement from founder accounts      |
+| Content consistency threshold      | 90 days minimum before evaluating ROI             |
+| Self-reported attribution capture  | Required field on every form                      |
+| Community CAC reduction            | Up to 60% lower than paid channels                |
+| AI content role                    | Speed the format, not the thinking                |
+| Build-in-public trust impact       | 81% of buyers require brand trust before purchase |
+| Podcast derivative content         | 30+ pieces per episode                            |
+| Newsletter revenue streams         | Run 2-4 simultaneously for maximum monetization   |
 
 ---
 
