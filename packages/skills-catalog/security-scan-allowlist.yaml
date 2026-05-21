@@ -364,6 +364,16 @@ entries:
     allowedBy: felipefr
     allowedAt: '2026-03-13'
 
+  - skill: ai-seo
+    code: E004
+    reason: >
+      False positive caused by scanner classification drift on existing approved content.
+      The optional MCP/setup snippets document SEO data integrations for DataForSEO and
+      Google Search Console; they are scoped to AI SEO workflows, not generic software
+      implementation or instruction override behavior.
+    allowedBy: edmarpaulino
+    allowedAt: '2026-05-21'
+
   - skill: ai-cold-outreach
     code: W011
     reason: >
