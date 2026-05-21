@@ -12,7 +12,6 @@ Outputs Mermaid syntax that can be rendered.
 import argparse
 import sys
 import json
-import re
 
 # Architecture patterns with Mermaid templates
 PATTERNS = {

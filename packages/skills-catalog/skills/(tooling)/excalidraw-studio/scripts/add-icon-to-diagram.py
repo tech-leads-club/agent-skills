@@ -296,7 +296,6 @@ def add_icon_to_diagram(
     if label and transformed_elements:
         min_x, min_y, max_x, max_y = calculate_bounding_box(transformed_elements)
         icon_width = max_x - min_x
-        icon_height = max_y - min_y
         
         # Position label below icon, centered
         label_x = min_x + (icon_width / 2) - (len(label) * 5)
@@ -320,7 +319,7 @@ def add_icon_to_diagram(
     print(f"  Added {len(transformed_elements)} elements (total: {original_count} -> {len(diagram['elements'])})")
     
     # Save diagram
-    print(f"Saving diagram")
+    print("Saving diagram")
     with open(diagram_path, 'w', encoding='utf-8') as f:
         json.dump(diagram, f, indent=2, ensure_ascii=False)
     
@@ -401,4 +400,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

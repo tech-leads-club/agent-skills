@@ -22,7 +22,6 @@ import json
 import sys
 import uuid
 from pathlib import Path
-from typing import Dict, Any
 
 
 def generate_unique_id() -> str:
@@ -224,11 +223,11 @@ def add_arrow_to_diagram(
     print(f"  Added {len(arrow_elements)} elements (total: {original_count} -> {len(diagram['elements'])})")
     
     # Save diagram
-    print(f"Saving diagram")
+    print("Saving diagram")
     with open(diagram_path, 'w', encoding='utf-8') as f:
         json.dump(diagram, f, indent=2, ensure_ascii=False)
     
-    print(f"✓ Successfully added arrow to diagram")
+    print("✓ Successfully added arrow to diagram")
 
 
 def main():

@@ -308,7 +308,7 @@ def main():
         print(json.dumps(review, indent=2))
     else:
         print(f"\n{'='*60}")
-        print(f"WELL-ARCHITECTED REVIEW")
+        print("WELL-ARCHITECTED REVIEW")
         print(f"Services: {', '.join(services)}")
         print(f"{'='*60}\n")
         
