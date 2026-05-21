@@ -323,6 +323,17 @@ entries:
     allowedBy: felipefr
     allowedAt: '2026-02-17'
 
+  - skill: render-deploy
+    code: E005
+    reason: >
+      False positive caused by scanner classification drift on existing approved content.
+      The Render CLI installer URL points to the official render-oss/cli repository, and
+      the Git provider URLs are placeholders used to build Render Blueprint deeplinks for
+      user-owned repositories. This is scoped to Render deployment setup, not arbitrary
+      untrusted downloads.
+    allowedBy: edmarpaulino
+    allowedAt: '2026-05-21'
+
   - skill: vercel-deploy
     code: W013
     reason: >
