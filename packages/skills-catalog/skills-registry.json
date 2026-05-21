@@ -88,7 +88,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "7a2ca1d3f443357b96f22ffce9fb6d5e19134bb5d723ea55ca939873b3777c12"
+      "contentHash": "d9b812e4ed9549bfc9aba7a3ceafb6d0d37d15b414ceded7159da882a1124f4b"
     },
     {
       "name": "ai-pricing",
@@ -102,7 +102,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "642a42cf94b8061aad642d84363bb4f60712af858c093bed6f2ec6135a3e7937"
+      "contentHash": "67d8f77f6625b7515ff2f0c5437cf271da101af1f007385be211564a118f2226"
     },
     {
       "name": "ai-sdr",
@@ -116,7 +116,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3f36a4b65cb1fc97722341b9fb1849fcecf320be8a1d8892028fa45663719786"
+      "contentHash": "ca62ff560bb4b25d993cf32fcf11cebc2857c125f54fc06072aeda38ac09e8d9"
     },
     {
       "name": "ai-seo",
@@ -128,7 +128,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "8ff9c7d6181c37c92fb225a8559d50ee5413c20e6a7ae240e05bb6a532d64f9b"
+      "contentHash": "053e85660bc5fcca0876873409b462de843cbe318d50ac7554870ad7c33afd63"
     },
     {
       "name": "ai-ugc-ads",
@@ -140,7 +140,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "92f981122d6add656bd10cae4404fa94a79db93f3cad2cd978ef12a4eea51b83"
+      "contentHash": "b507bc1b3cf8058e63db64f322692b926e636e8839fc4e3a313300b6be688b35"
     },
     {
       "name": "aws-advisor",
@@ -160,7 +160,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "959d64baef88617c3cd3273250de4eef5e0954d627a2c01708b23fd0f6e0f050"
+      "contentHash": "e6db89af38337e7ec4eb99045a98ce62d85981f85181c047f332c1d6fb00fd86"
     },
     {
       "name": "best-practices",
@@ -516,7 +516,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "23ac05b7f2d8df8311129d41432eba248bdcf14e9ace3f17c581976f7d888ada"
+      "contentHash": "87bf4a5308d87fb9fdd63a734a9ec98e3f836ff3de4ee6a4ff0c03e7477924db"
     },
     {
       "name": "coding-guidelines",
@@ -590,7 +590,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "925f769a4c601ea7fac8cab4d3ee00f799921eb0600427d18f458eb35db2e2ed"
+      "contentHash": "5459417957d807a06601092a59ab47999dbb1c786ec6d6591ca873422409c658"
     },
     {
       "name": "core-web-vitals",
@@ -613,7 +613,7 @@
       "files": [
         "SKILL.md"
       ],
-      "contentHash": "a33a142a73ac2e6b8db300acb3d13dba5077e225cbfad7599b0ac431290ab5c7"
+      "contentHash": "dc4e546cf73cfe35a7bdecaedd1ddcde340f2e76cf267e8ca5a0200f9825bc2b"
     },
     {
       "name": "create-adr",
@@ -626,7 +626,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "47ec663c849e8c1620c6f33a7be0055acdcf838c27ab7c16f44260244b80195a"
+      "contentHash": "e3680fb32b76ab8f4cf51facdd3d0ded5a472e5ec2a2d162c65297626ed3e1cc"
     },
     {
       "name": "create-rfc",
@@ -640,7 +640,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "3f391b6c4397bb1590bbad511eca95c297dd0467e65385fa28b3724851c42ea8"
+      "contentHash": "e2e483650fb9497b9c6a01b1c4b3fae742ab222cf069770999c8a242ffa82256"
     },
     {
       "name": "cursor-subagent-creator",
@@ -686,7 +686,7 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "5914beeaf1aa1fe57cd95cf0afb60ee1cccc58eedaddd123a43cad32d6a70077"
+      "contentHash": "c95591aa790449afce2b3da2e95733b90f14346107044b00cfd75fbf8ccb3c29"
     },
     {
       "name": "domain-identification-grouping",
@@ -725,7 +725,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
-      "contentHash": "08f4964859a421cccfc52314f2e5b3484b1163ecf558ccdbb6746127229b9399"
+      "contentHash": "0c624b7a92640d93f173bcd57e538639a9c3a877d0b47202c26733899b50ee94"
     },
     {
       "name": "expansion-retention",
@@ -737,7 +737,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "e5420a123058969e8e5014d74120daf7a1c598e1fb44e6d152c6b60a71a81e95"
+      "contentHash": "28473cb2d312d8df355f2d39b865cb573bcf87eaf3dbdc0c28cdf547562cc98e"
     },
     {
       "name": "figma",
@@ -780,7 +780,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "c79c5acbf69e88e1b0c848e64afb671f33091e32b6dcb1b2e6f9c78213a10ec3"
+      "contentHash": "5a503532da0cc1f37309661e4975c5fd0a63b0e5e244dd5207c103ef0ae28de0"
     },
     {
       "name": "frontend-design",
@@ -799,7 +799,7 @@
       ],
       "author": "Impeccable (Paul Bakaus), based on Anthropic frontend-design",
       "version": "1.0.0",
-      "contentHash": "b20162c8d6bcdd9137c4afceaeb4f9dce2c1ba3ccb57a96a3228b8cb33104ec4"
+      "contentHash": "48c8d5e126edca65e1241a98e1b84da9d20493cc2486ef31ddf311152e3ceda5"
     },
     {
       "name": "gh-address-comments",
@@ -841,7 +841,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "b2cfbea2da9f2a52527f6c41f128df2dba76c33df90692357a5533c06b78223f"
+      "contentHash": "6727ff7eea07903d85b6d7174348de4b074ce130a1f9a7cd373e0cb885456cca"
     },
     {
       "name": "gtm-metrics",
@@ -853,7 +853,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "9f2afa96826b0456cf79f05b43ab4470fd6802990e301bb898c2cbaa6f01cf5c"
+      "contentHash": "a295034897e16147ca7ee4333a8f0be95e2cd26da92f58f90167a4dda4cbb23c"
     },
     {
       "name": "jira-assistant",
@@ -864,7 +864,7 @@
         "README.md",
         "SKILL.md"
       ],
-      "contentHash": "fa63880889d2206548e33489a0ac1aa849c4e6ab879ea769c2715521a8231c8a"
+      "contentHash": "765c33ada37c8b92082cd14a1123170d8cb34b868da480d8f83020d37d0b2946"
     },
     {
       "name": "lead-enrichment",
@@ -877,7 +877,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "c062dadf96d7a1500457c222b95baff7f5aade66486044be360a13268b251940"
+      "contentHash": "fb48350f46cd074ea929634e2f6b1d7b88116101464034ca0a4d49ab87ed9d52"
     },
     {
       "name": "learning-opportunities",
@@ -908,7 +908,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
+      "contentHash": "dea33225547121f05b3582d3b7e085a3fcf9790b910b1e5dbc6cc262691e95b8"
     },
     {
       "name": "mermaid-studio",
@@ -932,7 +932,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
-      "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
+      "contentHash": "bc2d1103cda0bdf0f6ee5707b7770099d2f6705af6fa82a671cc94d628719536"
     },
     {
       "name": "modular-decomposition",
@@ -954,7 +954,7 @@
         "references/pattern-05-domain-grouping-quick-reference.md",
         "references/pattern-05-domain-grouping.md"
       ],
-      "contentHash": "b536c1851c862516e5fc111502311343b952073a992ea07c9f8f9b42fbbc2a44"
+      "contentHash": "22799429bd337d9eddc47da36505ca94a663494b50885fc7d51cf9533b809474"
     },
     {
       "name": "modular-design-principles",
@@ -965,7 +965,7 @@
         "SKILL.md",
         "references/principles.md"
       ],
-      "contentHash": "d53fdca7ae18205376956c39a3a1729edfae843f63e5f2a6c5dd2c64ccd8a576"
+      "contentHash": "6a6d1d8428b9dce6e25091b291f97a297a8e788454f815ed9ed98e65c1af1b0c"
     },
     {
       "name": "multi-platform-launch",
@@ -979,7 +979,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "22552e0a3fde93c57715295f52b31d0695ad78d10512e5793ea93c7b138c79ee"
+      "contentHash": "7d7a0d1622ad0114fdc7ab3e61505228fba15e72e53e4ea654765b675a28f1ed"
     },
     {
       "name": "nestjs-modular-monolith",
@@ -1058,7 +1058,7 @@
         "reference/commands.md",
         "reference/configuration.md"
       ],
-      "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
+      "contentHash": "84cd823507b0a45f4b1c12fc6387a2d643809043de56b622deb7cb2426c2df23"
     },
     {
       "name": "paid-creative-ai",
@@ -1071,7 +1071,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "89328ab72ff4336917031a217f43bd19b133a7d17202bf70d8d8d7f59d69ce29"
+      "contentHash": "9d00e20c9e8c298a5407f4c522a6e80cc055de0006906b22b5846adae99d709d"
     },
     {
       "name": "partner-affiliate",
@@ -1085,7 +1085,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3ff5e89d89da30e46eef1d6fa4379aa1b41c30be16e2ca761a5581267c41561e"
+      "contentHash": "1452c16403678a0314eebaa6ffe702ba0130d2814b75cac68ee59f598f95d8e2"
     },
     {
       "name": "perf-astro",
@@ -1118,7 +1118,7 @@
         "references/core-web-vitals.md",
         "references/image-optimization.md"
       ],
-      "contentHash": "864bb35d6ec7e7755181886b57709b76d8b5da5181a6d8480cd412dd772f1ffb"
+      "contentHash": "97bd991a2513d4e171f2e9e09446338f35d65c6143e60f4563452f40335dcfe8"
     },
     {
       "name": "playwright-skill",
@@ -1132,7 +1132,7 @@
         "package.json",
         "run.js"
       ],
-      "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
+      "contentHash": "34c1e06dcb3663b35cd55158210aaffa97cc17e75b3b320408eed3e66e43fa3b"
     },
     {
       "name": "positioning-icp",
@@ -1145,7 +1145,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "3b940bcd8ad2035177bffb04e34d52fe038f669a2d466e8d67e73135044373a5"
+      "contentHash": "babec5f0b78a4bb0c782f30e0cc5242e2a4bc2187456f7be34619bba898931c8"
     },
     {
       "name": "react-best-practices",
@@ -1218,7 +1218,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "e96f99e13dc2acc75efc1793aee08fe244802a97a4e190af38bd5a871a5c9636"
+      "contentHash": "0715a0c348c42b5403b83a9fb40b7964479a38a147e4caf6ab74a4b39adeff06"
     },
     {
       "name": "react-composition-patterns",
@@ -1242,7 +1242,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "171c6a35a0a74a6b37facf2a6e3883a02f53e3f2d429e6aa5834412c65d38dc7"
+      "contentHash": "8cbb577874989133256f309b9787988ac5577aa0e2214dc3ceb447f7cc052669"
     },
     {
       "name": "react-native-expert",
@@ -1259,7 +1259,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "9da108258c0a93cd04b57d94a5a7788e6c37c704ca4322ca9b6bedce8e3ff683"
+      "contentHash": "fe86bbee9242897c735e0f3e7eb12a7cc40b77dc3b4b66a789c704db7c238d66"
     },
     {
       "name": "render-deploy",
@@ -1295,7 +1295,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "8f9829a2107c994a3a4d2fcaec73def4bcc1a7fac20c64b452093a4e7018e93f"
+      "contentHash": "3838ac7762928e509debe10e8389493554043065f3849fe0175afc840648958e"
     },
     {
       "name": "security-best-practices",
@@ -1398,7 +1398,7 @@
         "references/performance.md",
         "references/theme-development.md"
       ],
-      "contentHash": "10dd4806c0061bb9e89914557f6aec6badcef893e601293711ba3e8993527e9f"
+      "contentHash": "e0332008f0d7ffc64d776f9005a29c158212373da5d8723de5356fe27da1c569"
     },
     {
       "name": "skill-architect",
@@ -1414,7 +1414,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
+      "contentHash": "ce628b980646694dc98cd75791cbb95e067a197cdc7131c9d5b89d270faea6c1"
     },
     {
       "name": "social-selling",
@@ -1426,7 +1426,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "7cc6fba77aff372c64d8e2b97b2b645ef641ef78a266b602e5e6fdd74231460e"
+      "contentHash": "f464e571fa6c1be3a03c8ab9abee64c0f27e0c24415ef8fa56f2d345ac80c828"
     },
     {
       "name": "solo-founder-gtm",
@@ -1438,7 +1438,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "95d71f10ea8a48767cb871ad72c09745cb6ecd822ed71be659cbd960b6503445"
+      "contentHash": "76d0a67d3e0cb49e479a35a24ed360e6d521d48aca1291284be109867c62c761"
     },
     {
       "name": "subagent-creator",
@@ -1461,7 +1461,7 @@
         "refactoring.md",
         "reference.md"
       ],
-      "contentHash": "c3dfaf45e8cb784f18d9c460c7f005c4ee9dbb430f21ee8af6913bbfea66a75b"
+      "contentHash": "f39023952dd97be4923e1bacfea7b791d38cd6d427bb10d562731bfc41d6a5a2"
     },
     {
       "name": "technical-design-doc-creator",
@@ -1491,7 +1491,7 @@
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
-      "contentHash": "b761f983e21e00173ac42760f478095a3e8c733862c20d9f711d10d962f407cc"
+      "contentHash": "fd38643a85c773554f86019f43083467186d25f6d3b2840e4c3fdf9e4ebd1fea"
     },
     {
       "name": "tlc-spec-driven",
@@ -1520,7 +1520,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "2.0.0",
-      "contentHash": "69867b0e19be1fb556d2e697f0f18f1de0363d1aa2de9d36754d5b107156357c"
+      "contentHash": "7df6e3011d1d87080b87bfbeaafbba726caafedc846867c971b699755cb944bf"
     },
     {
       "name": "vercel-deploy",
@@ -1546,7 +1546,7 @@
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
-      "contentHash": "b918e2c62adf317b82ac43e4731e300ff4f163383aebe7ae8532f7ea69c24c29"
+      "contentHash": "a66f3692d30020e9d6f42eaf9209203f23277ebfb5729d5ef28ee7d607dca545"
     },
     {
       "name": "web-design-guidelines",
@@ -1559,7 +1559,7 @@
       ],
       "author": "vercel",
       "version": "1.0.0",
-      "contentHash": "213a23fff251b12ddfec648bda148bf10704ef6617e162eb9329cc83963dd138"
+      "contentHash": "9ee66dc780a2ff757d769b179fd38e2ed02dfa2c470ebf561c7ab54a9f64abf1"
     },
     {
       "name": "web-quality-audit",
