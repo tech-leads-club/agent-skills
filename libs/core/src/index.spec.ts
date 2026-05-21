@@ -86,13 +86,19 @@ describe('core library', () => {
       method: 'copy',
       skills: [],
     }
-    const ports = {} as CorePorts
-    
+    const paths: PathsPort = {
+      getWorkspaceRoot: () => '/workspace',
+      getSkillsCatalogPath: () => '/workspace/packages/skills-catalog/skills',
+      getLocalSkillsDirectory: () => null,
+    }
+    const ports = { paths } satisfies Pick<CorePorts, 'paths'>
+
     // Runtime validation that the types work correctly
     expect(agent).toBe('cursor')
     expect(options.method).toBe('copy')
     expect(options.global).toBe(false)
     expect(options.skills).toEqual([])
+    expect(ports.paths.getWorkspaceRoot()).toBe('/workspace')
   })
 
   it('exports the lockfile service functions', () => {
