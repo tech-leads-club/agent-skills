@@ -2,6 +2,7 @@ import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import matter from 'gray-matter'
 import * as path from 'path'
+import { format, resolveConfig } from 'prettier'
 import { fileURLToPath } from 'url'
 
 import type { Category, MarketplaceData, Skill } from '../src/types'
@@ -143,7 +144,14 @@ function generateMarketplaceData(): MarketplaceData {
   }
 }
 
-function main() {
+async function formatMarketplaceData(data: MarketplaceData): Promise<string> {
+  return format(JSON.stringify(data), {
+    ...((await resolveConfig(OUTPUT_FILE)) ?? {}),
+    filepath: OUTPUT_FILE,
+  })
+}
+
+async function main(): Promise<void> {
   console.log('Generating marketplace data...')
 
   const data = generateMarketplaceData()
@@ -155,10 +163,10 @@ function main() {
   }
 
   // Write JSON file
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2))
+  fs.writeFileSync(OUTPUT_FILE, await formatMarketplaceData(data))
 
   console.log(`✓ Generated data for ${data.stats.totalSkills} skills`)
   console.log(`✓ Output: ${OUTPUT_FILE}`)
 }
 
-main()
+await main()

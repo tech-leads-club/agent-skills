@@ -3,6 +3,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { format, resolveConfig } from 'prettier'
 import YAML from 'yaml'
 
 import {
@@ -174,12 +175,22 @@ function fixSkillNameInFile(skillMdPath: string, rawName: string, slugName: stri
   console.log(`   "${rawName}" → "${slugName}"`)
 }
 
-// Main execution
-const registry = generateRegistry()
-writeFileSync(OUTPUT_FILE, JSON.stringify(registry, null, 2))
+async function formatRegistry(registry: SkillsRegistry): Promise<string> {
+  return format(JSON.stringify(registry), {
+    ...((await resolveConfig(OUTPUT_FILE)) ?? {}),
+    filepath: OUTPUT_FILE,
+  })
+}
 
-console.log(`✅ Generated skills-registry.json`)
-console.log(`   📦 ${registry.skills.length} skills`)
-console.log(`   📁 ${Object.keys(registry.categories).length} categories`)
-if (registry.deprecated?.length) console.log(`   ⚠️  ${registry.deprecated.length} deprecated`)
-console.log(`   📍 ${OUTPUT_FILE}`)
+async function main(): Promise<void> {
+  const registry = generateRegistry()
+  writeFileSync(OUTPUT_FILE, await formatRegistry(registry))
+
+  console.log(`✅ Generated skills-registry.json`)
+  console.log(`   📦 ${registry.skills.length} skills`)
+  console.log(`   📁 ${Object.keys(registry.categories).length} categories`)
+  if (registry.deprecated?.length) console.log(`   ⚠️  ${registry.deprecated.length} deprecated`)
+  console.log(`   📍 ${OUTPUT_FILE}`)
+}
+
+await main()
