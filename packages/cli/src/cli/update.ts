@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import {
   fetchRegistry,
   forceDownloadSkill,
@@ -8,6 +7,7 @@ import {
   needsUpdate,
   readSkillLock,
 } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
 

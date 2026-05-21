@@ -2,10 +2,7 @@
   "mcpServers": {
     "agent-skills": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@tech-leads-club/agent-skills-mcp@latest"
-      ]
+      "args": ["-y", "@tech-leads-club/agent-skills-mcp@latest"]
     }
   }
 }

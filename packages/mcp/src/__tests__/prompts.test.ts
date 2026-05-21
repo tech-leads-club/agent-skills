@@ -1,4 +1,9 @@
-import { buildCatalogPromptMessages, buildSkillPromptMessages, buildUsePromptNotFoundMessages, registerPrompts } from '../prompts'
+import {
+  buildCatalogPromptMessages,
+  buildSkillPromptMessages,
+  buildUsePromptNotFoundMessages,
+  registerPrompts,
+} from '../prompts'
 import type { SkillEntry } from '../types'
 
 describe('buildCatalogPromptMessages', () => {
@@ -58,11 +63,15 @@ describe('buildUsePromptNotFoundMessages', () => {
 
 describe('registerPrompts', () => {
   it('registers simple entrypoint prompts and handles missing args', async () => {
-    const promptDefs: Array<{ name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> }> = []
+    const promptDefs: Array<{
+      name: string
+      load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown>
+    }> = []
     const server = {
-      addPrompt: (
-        prompt: { name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> },
-      ) => {
+      addPrompt: (prompt: {
+        name: string
+        load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown>
+      }) => {
         promptDefs.push(prompt)
       },
     }
@@ -78,7 +87,9 @@ describe('registerPrompts', () => {
 
     registerPrompts(server as never, () => ({ fuse: {} as never, map: new Map([[skill.name, skill]]) }))
 
-    expect(promptDefs.map((entry) => entry.name)).toEqual(expect.arrayContaining(['skills', 'find-skill', 'use', 'skills-help']))
+    expect(promptDefs.map((entry) => entry.name)).toEqual(
+      expect.arrayContaining(['skills', 'find-skill', 'use', 'skills-help']),
+    )
 
     const usePrompt = promptDefs.find((entry) => entry.name === 'use')
     expect(usePrompt).toBeDefined()

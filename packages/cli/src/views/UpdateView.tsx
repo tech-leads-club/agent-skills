@@ -1,9 +1,9 @@
+import type { AgentType, DeprecatedEntry, SkillInfo } from '@tech-leads-club/core'
+import { getUpdatableSkills } from '@tech-leads-club/core'
 import { Box, Text, useInput } from 'ink'
 import Spinner from 'ink-spinner'
 import { useAtomValue } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
-import { getUpdatableSkills } from '@tech-leads-club/core'
-import type { AgentType, DeprecatedEntry, SkillInfo } from '@tech-leads-club/core'
 
 import { deprecatedSkillsAtom } from '../atoms/deprecatedSkills'
 import { installedSkillsAtom } from '../atoms/installedSkills'

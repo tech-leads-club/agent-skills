@@ -3,9 +3,9 @@ import { Box, Text, useInput, useStdout } from 'ink'
 import Spinner from 'ink-spinner'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { parseMarkdown, type MarkdownToken } from '@tech-leads-club/core'
 import { useSkillContent } from '../hooks/useSkillContent'
 import { getColorForCategory } from '../services/category-colors'
-import { parseMarkdown, type MarkdownToken } from '@tech-leads-club/core'
 import { colors, symbols } from '../theme'
 import type { SkillInfo } from '../types'
 

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import { CACHE_FILE, UPDATE_CHECK_CACHE_TTL_MS, CONFIG_DIR } from '../utils/constants'
+import { CACHE_FILE, CONFIG_DIR, UPDATE_CHECK_CACHE_TTL_MS } from '../utils/constants'
 
 export interface UpdateCache {
   lastUpdateCheck: number

@@ -5,14 +5,8 @@
     "module": "ESNext",
     "moduleResolution": "node16",
     "allowImportingTsExtensions": false,
-    "lib": [
-      "dom",
-      "esnext"
-    ],
-    "types": [
-      "jest",
-      "node"
-    ]
+    "lib": ["dom", "esnext"],
+    "types": ["jest", "node"]
   },
   "include": [
     "jest.config.ts",
