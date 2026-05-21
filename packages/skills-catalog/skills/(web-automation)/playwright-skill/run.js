@@ -24,7 +24,7 @@ function checkPlaywrightInstalled() {
   try {
     require.resolve('playwright');
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -93,12 +93,12 @@ function cleanupOldTempFiles() {
         const filePath = path.join(__dirname, file);
         try {
           fs.unlinkSync(filePath);
-        } catch (e) {
+        } catch (_e) {
           // Ignore errors - file might be in use or already deleted
         }
       });
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore directory read errors
   }
 }

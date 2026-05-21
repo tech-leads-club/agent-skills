@@ -203,8 +203,6 @@ const BEAUTIFUL_MERMAID_THEMES = new Set([
   "one-dark",
 ]);
 
-const MMDC_THEMES = new Set(["default", "forest", "dark", "neutral", "base"]);
-
 // --- Rendering engines ---
 
 async function renderWithMmdc(mmdcPath, inputFile, outputFile, opts) {

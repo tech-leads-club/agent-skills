@@ -100,7 +100,7 @@ function detectDiagramType(content) {
   return null;
 }
 
-function basicValidation(content, filename) {
+function basicValidation(content) {
   const errors = [];
   const warnings = [];
 
@@ -205,7 +205,7 @@ function basicValidation(content, filename) {
   }
 
   // Node count warning
-  const nodePattern = /\b\w+[\[({]/g;
+  const nodePattern = /\b\w+(?:\[|\(|\{)/g;
   const nodeMatches = cleaned.match(nodePattern) || [];
   if (nodeMatches.length > 25) {
     warnings.push(
@@ -276,9 +276,6 @@ function printResult(filename, basicResult, parserResult) {
   }
 
   if (!hasErrors) {
-    const diagramType = detectDiagramType(
-      readFileSync ? "" : ""
-    );
     console.log(`\n✅ Valid${parserResult?.available ? " (parser verified)" : " (basic checks only)"}`);
     if (hasWarnings) {
       console.log("   (warnings above are non-blocking suggestions)");
@@ -311,7 +308,7 @@ Exit codes:
 
   if (args.includes("--stdin")) {
     const content = await readFromStdin();
-    const basicResult = basicValidation(content, "stdin");
+    const basicResult = basicValidation(content);
     const parserResult = await mermaidParserValidation(content);
     if (!printResult("stdin", basicResult, parserResult)) {
       allValid = false;
@@ -328,7 +325,7 @@ Exit codes:
       }
 
       const content = readFileSync(filepath, "utf-8");
-      const basicResult = basicValidation(content, filepath);
+      const basicResult = basicValidation(content);
       const parserResult = await mermaidParserValidation(content);
       if (!printResult(basename(filepath), basicResult, parserResult)) {
         allValid = false;

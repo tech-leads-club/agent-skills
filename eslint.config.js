@@ -5,12 +5,32 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import jsoncParser from 'jsonc-eslint-parser'
 import tseslint from 'typescript-eslint'
 
+const nodeScriptGlobals = {
+  Buffer: 'readonly',
+  console: 'readonly',
+  process: 'readonly',
+  setTimeout: 'readonly',
+}
+
+const commonJsScriptGlobals = {
+  ...nodeScriptGlobals,
+  __dirname: 'readonly',
+  module: 'readonly',
+  require: 'readonly',
+}
+
+const browserEvalGlobals = {
+  document: 'readonly',
+  window: 'readonly',
+}
+
 export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   globalIgnores([
     'dist/**',
+    '**/dist/**',
     'node_modules/**',
     '**/*.js',
     '**/*.d.ts',
@@ -19,6 +39,34 @@ export default defineConfig([
     '**/next.config.mjs',
     '**/postcss.config.cjs',
   ]),
+  {
+    name: 'tlc-skill-node-mjs-scripts',
+    files: ['packages/skills-catalog/skills/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...nodeScriptGlobals, ...browserEvalGlobals },
+    },
+  },
+  {
+    name: 'tlc-playwright-skill-cjs-scripts',
+    files: ['packages/skills-catalog/skills/(web-automation)/playwright-skill/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: { ...commonJsScriptGlobals, ...browserEvalGlobals },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
   {
     name: 'tlc-typescript',
     files: ['**/*.ts'],
