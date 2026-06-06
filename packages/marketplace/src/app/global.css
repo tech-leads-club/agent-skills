@@ -48,6 +48,37 @@
   background-color: transparent;
 }
 
+/* Hero section */
+.hero-gradient {
+  background: linear-gradient(160deg, #f0f7ff 0%, #e0eeff 50%, #fafbfc 100%);
+}
+.dark .hero-gradient {
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.hero-dots {
+  background-image: radial-gradient(circle, rgba(59, 130, 246, 0.12) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dark .hero-dots {
+  background-image: radial-gradient(circle, rgba(96, 165, 250, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Skill card hover lift */
+.skill-card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.skill-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.dark .skill-card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
 /* Dark mode for highlight.js code blocks */
 .dark .hljs {
   background: theme(--color-gray-800);

@@ -15,10 +15,10 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
       <button
         onClick={() => onSelectCategory(null)}
         className={clsx(
-          'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
+          'px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors cursor-pointer',
           selectedCategory === null
             ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700',
+            : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500',
         )}
       >
         All
@@ -28,10 +28,10 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
           key={category.id}
           onClick={() => onSelectCategory(category.id)}
           className={clsx(
-            'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
+            'px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors cursor-pointer',
             selectedCategory === category.id
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700',
+              : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500',
           )}
         >
           {category.name}
