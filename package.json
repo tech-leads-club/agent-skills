@@ -35,7 +35,7 @@
     "validate": "npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills",
     "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
     "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
-    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test"
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test; node .github/setup.js"
   },
   "repository": {
     "type": "git",

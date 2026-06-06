@@ -1,5 +1,5 @@
-import type { Metadata } from 'next'
 import { readFileSync } from 'fs'
+import type { Metadata } from 'next'
 import { join } from 'path'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'

@@ -76,7 +76,6 @@ If no configuration is found, the skill will:
 When the skill is activated, it follows this detection order:
 
 1. **Check workspace context** - Looks for Jira configuration in:
-
    - `.cursor/rules/jira-config.mdc` (Cursor)
    - `AGENTS.md` (any IDE)
    - Other workspace documentation files

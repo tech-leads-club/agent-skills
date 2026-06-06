@@ -48,6 +48,7 @@ session, so every byte counts.
 
 ```markdown
 # .notebook
+
 > Project intelligence — read before every mission
 
 Last updated: 2026-02-22
@@ -78,16 +79,19 @@ Notes are telegraphic. Think field notes, not documentation.
 
 ```markdown
 # Auth Flow
+
 > OAuth2 with refresh token rotation
 
 Entry: `src/middleware/auth.ts:authMiddleware()` (L12)
 Flow: middleware → `services/auth/jwt.ts:verify()` → `services/user/find.ts:findById()`
 
 Refresh: `services/auth/refresh.ts:rotateToken()`
+
 - Single-use tokens — consumed on refresh, new pair issued
 - Stored in Redis with TTL (see `lib/redis.ts:sessionStore`)
 
 OAuth providers: `config/oauth.ts` — Google, GitHub
+
 - Each provider maps to `services/auth/oauth/[provider].ts`
 
 Session: Redis-backed via `lib/redis.ts` (L45-62)
@@ -101,8 +105,8 @@ Updated: 2026-02-22
    - `file/path.ts:functionName()` for functions
    - `file/path.ts` (L10-25) for specific line ranges
    - `file/path.ts:ClassName.method()` for class methods
-   Never paste code blocks into notes. Code changes; pointers
-   can be re-checked. Pasted code becomes stale lies.
+     Never paste code blocks into notes. Code changes; pointers
+     can be re-checked. Pasted code becomes stale lies.
 
 2. **One concept per note.** If it needs scrolling, split it.
    A note about auth flow should not also cover session management
@@ -135,6 +139,7 @@ When `.notebook/` doesn't exist yet:
 
    ```markdown
    # .notebook
+
    > Project intelligence — read before every mission
 
    Last updated: [today]

@@ -31,16 +31,16 @@ $50K+         -> Full stack. Dedicated creative strategist.
 
 ### Key Formulas
 
-| Metric | Formula |
-|--------|---------|
-| ROAS | Revenue / Ad Spend |
-| CPA | Ad Spend / Conversions |
-| CPM | (Ad Spend / Impressions) x 1,000 |
-| CTR | Clicks / Impressions |
-| Hook rate | Views past 3s / Total impressions |
-| Hold rate | Views past 50% / Total views |
-| Creative hit rate | Winners / Total creatives tested |
-| Break-even ROAS | 1 / Profit margin (e.g., 50% margin = 2.0x) |
+| Metric            | Formula                                     |
+| ----------------- | ------------------------------------------- |
+| ROAS              | Revenue / Ad Spend                          |
+| CPA               | Ad Spend / Conversions                      |
+| CPM               | (Ad Spend / Impressions) x 1,000            |
+| CTR               | Clicks / Impressions                        |
+| Hook rate         | Views past 3s / Total impressions           |
+| Hold rate         | Views past 50% / Total views                |
+| Creative hit rate | Winners / Total creatives tested            |
+| Break-even ROAS   | 1 / Profit margin (e.g., 50% margin = 2.0x) |
 
 ## Questions to Ask
 

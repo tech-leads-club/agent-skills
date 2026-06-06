@@ -1,6 +1,6 @@
+import { isGloballyInstalled } from '@tech-leads-club/core'
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
-import { isGloballyInstalled } from '@tech-leads-club/core'
 
 import { ports } from '../ports'
 import { getCachedUpdate, setCachedUpdate } from '../services/update-cache'

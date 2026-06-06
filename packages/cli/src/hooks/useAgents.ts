@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { detectInstalledAgents, getAllAgentTypes } from '@tech-leads-club/core'
 import type { AgentType } from '@tech-leads-club/core'
+import { detectInstalledAgents, getAllAgentTypes } from '@tech-leads-club/core'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ports } from '../ports'
 

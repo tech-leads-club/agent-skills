@@ -37,15 +37,15 @@ Budget > $5,000/mo?
 
 ### Key Metrics to Track
 
-| Metric | Target | Frequency |
-|---|---|---|
-| Email coverage after waterfall | >85% | Per batch |
-| Verified email rate | >90% of found | Per batch |
-| Bounce rate on sends | <2% | Per campaign |
-| ICP qualification rate | >50% of enriched | Per batch |
-| Credits per qualified lead | <50 credits | Monthly |
-| Cost per verified lead | <$1.00 | Monthly |
-| Enrichment-to-meeting rate | >2% | Monthly |
+| Metric                         | Target           | Frequency    |
+| ------------------------------ | ---------------- | ------------ |
+| Email coverage after waterfall | >85%             | Per batch    |
+| Verified email rate            | >90% of found    | Per batch    |
+| Bounce rate on sends           | <2%              | Per campaign |
+| ICP qualification rate         | >50% of enriched | Per batch    |
+| Credits per qualified lead     | <50 credits      | Monthly      |
+| Cost per verified lead         | <$1.00           | Monthly      |
+| Enrichment-to-meeting rate     | >2%              | Monthly      |
 
 ---
 

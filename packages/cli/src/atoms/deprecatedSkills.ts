@@ -1,7 +1,7 @@
+import type { DeprecatedEntry } from '@tech-leads-club/core'
+import { getDeprecatedMap } from '@tech-leads-club/core'
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
-import { getDeprecatedMap } from '@tech-leads-club/core'
-import type { DeprecatedEntry } from '@tech-leads-club/core'
 
 import { ports } from '../ports'
 

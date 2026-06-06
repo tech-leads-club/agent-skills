@@ -111,19 +111,23 @@ marketplace/
 ## Features
 
 ### Dark Mode
+
 The site includes a fully functional dark mode with:
+
 - System preference detection
 - Manual toggle control
 - Theme persistence in localStorage
 - Smooth transitions between themes
 
 ### SEO Optimization
+
 - JSON-LD structured data for all pages
 - OpenGraph and Twitter Card metadata
 - Canonical URLs and proper meta tags
 - Sitemap generation support
 
 ### Performance
+
 - Static site generation (SSG)
 - Optimized build output
 - Responsive images

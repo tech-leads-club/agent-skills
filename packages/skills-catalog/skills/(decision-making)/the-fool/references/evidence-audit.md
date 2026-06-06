@@ -21,14 +21,14 @@ Proposals contain claims — often implicit. Extract them before evaluating.
 
 ### Types of Claims
 
-| Type | Example | Hidden In |
-|------|---------|-----------|
-| **Causal** | "X causes Y" | "Our refactor improved performance" |
-| **Predictive** | "X will happen" | "Users will adopt this feature" |
-| **Comparative** | "X is better than Y" | "React is the better choice for us" |
-| **Existential** | "X exists/doesn't exist" | "There's no alternative that meets our needs" |
-| **Universal** | "X is always true" | "Microservices always improve team velocity" |
-| **Quantitative** | "X is N" | "This will save 200 hours per quarter" |
+| Type             | Example                  | Hidden In                                     |
+| ---------------- | ------------------------ | --------------------------------------------- |
+| **Causal**       | "X causes Y"             | "Our refactor improved performance"           |
+| **Predictive**   | "X will happen"          | "Users will adopt this feature"               |
+| **Comparative**  | "X is better than Y"     | "React is the better choice for us"           |
+| **Existential**  | "X exists/doesn't exist" | "There's no alternative that meets our needs" |
+| **Universal**    | "X is always true"       | "Microservices always improve team velocity"  |
+| **Quantitative** | "X is N"                 | "This will save 200 hours per quarter"        |
 
 ### Extraction Method
 
@@ -55,24 +55,24 @@ Claims extracted:
 
 For each claim, design a test that would disprove it.
 
-| Claim | Falsification Criterion | Test |
-|-------|------------------------|------|
-| "Users want feature X" | Fewer than 10% of users engage with X within 30 days | Feature flag, measure adoption |
-| "This will scale to 100K users" | Response time exceeds 500ms at 50K users | Load test at target scale |
-| "Migration will take 3 months" | More than 2 unknown-unknowns discovered in month 1 | Track surprise count during initial phase |
-| "Framework X is faster" | Benchmark shows less than 5% difference | Controlled benchmark on representative workload |
-| "This will reduce costs" | Total cost of ownership exceeds current cost within 12 months | TCO analysis including migration, training, operations |
+| Claim                           | Falsification Criterion                                       | Test                                                   |
+| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| "Users want feature X"          | Fewer than 10% of users engage with X within 30 days          | Feature flag, measure adoption                         |
+| "This will scale to 100K users" | Response time exceeds 500ms at 50K users                      | Load test at target scale                              |
+| "Migration will take 3 months"  | More than 2 unknown-unknowns discovered in month 1            | Track surprise count during initial phase              |
+| "Framework X is faster"         | Benchmark shows less than 5% difference                       | Controlled benchmark on representative workload        |
+| "This will reduce costs"        | Total cost of ownership exceeds current cost within 12 months | TCO analysis including migration, training, operations |
 
 ### Unfalsifiable Claims (Red Flag)
 
 Some claims cannot be falsified. These are red flags that require immediate attention.
 
-| Pattern | Example | Problem |
-|---------|---------|---------|
-| Vague outcome | "This will improve things" | No measurable criterion |
-| Moving goalposts | "It'll work eventually" | No time boundary |
-| Circular reasoning | "This is the best because it's what experts recommend" | Evidence is the claim restated |
-| Unfalsifiable hedge | "This might help in some cases" | True by definition |
+| Pattern             | Example                                                | Problem                        |
+| ------------------- | ------------------------------------------------------ | ------------------------------ |
+| Vague outcome       | "This will improve things"                             | No measurable criterion        |
+| Moving goalposts    | "It'll work eventually"                                | No time boundary               |
+| Circular reasoning  | "This is the best because it's what experts recommend" | Evidence is the claim restated |
+| Unfalsifiable hedge | "This might help in some cases"                        | True by definition             |
 
 When you encounter unfalsifiable claims, ask: "What specific, measurable outcome would tell us this worked or didn't work, and by when?"
 
@@ -96,35 +96,35 @@ Apply these 9 questions to any proposal:
 
 ### Evidence Quality Matrix
 
-| Dimension | Strong | Weak |
-|-----------|--------|------|
-| **Sample size** | Large, representative sample | Single case, anecdote |
-| **Recency** | Current data (within 12 months) | Outdated (2+ years) |
-| **Relevance** | Same domain, same scale | Different domain or scale |
-| **Independence** | Multiple independent sources | Single source or vendor-provided |
-| **Methodology** | Controlled, reproducible | Ad hoc, unreproducible |
-| **Specificity** | Precise metrics and conditions | Vague or qualitative |
+| Dimension        | Strong                          | Weak                             |
+| ---------------- | ------------------------------- | -------------------------------- |
+| **Sample size**  | Large, representative sample    | Single case, anecdote            |
+| **Recency**      | Current data (within 12 months) | Outdated (2+ years)              |
+| **Relevance**    | Same domain, same scale         | Different domain or scale        |
+| **Independence** | Multiple independent sources    | Single source or vendor-provided |
+| **Methodology**  | Controlled, reproducible        | Ad hoc, unreproducible           |
+| **Specificity**  | Precise metrics and conditions  | Vague or qualitative             |
 
 ### Evidence Grading Scale
 
-| Grade | Description | Reliability |
-|-------|-------------|------------|
-| **A** | Controlled experiment, large sample, reproducible | High confidence — proceed |
-| **B** | Observational data, reasonable sample, consistent with other evidence | Moderate confidence — proceed with monitoring |
-| **C** | Case study, small sample, or single source | Low confidence — needs corroboration before deciding |
-| **D** | Anecdote, opinion, or vendor marketing material | Insufficient — do not base decisions on this alone |
-| **F** | No evidence cited | Claim is unsupported — flag immediately |
+| Grade | Description                                                           | Reliability                                          |
+| ----- | --------------------------------------------------------------------- | ---------------------------------------------------- |
+| **A** | Controlled experiment, large sample, reproducible                     | High confidence — proceed                            |
+| **B** | Observational data, reasonable sample, consistent with other evidence | Moderate confidence — proceed with monitoring        |
+| **C** | Case study, small sample, or single source                            | Low confidence — needs corroboration before deciding |
+| **D** | Anecdote, opinion, or vendor marketing material                       | Insufficient — do not base decisions on this alone   |
+| **F** | No evidence cited                                                     | Claim is unsupported — flag immediately              |
 
 ### Common Weak Evidence Patterns
 
-| Pattern | Example | Why It's Weak |
-|---------|---------|---------------|
-| Survivorship bias | "Companies using X are successful" | Ignores companies using X that failed |
-| Cherry-picked metrics | "Response time improved 40%" | Other metrics (error rate, throughput) may have worsened |
-| Vendor benchmarks | "Our tool is 3x faster" | Benchmarks optimized for vendor's strengths |
-| Appeal to authority | "Google does it this way" | Google's constraints are not your constraints |
-| Anchoring | "Industry average is X, we're at Y" | The average may not be the right benchmark |
-| N=1 generalization | "It worked at my last company" | Different context, team, scale, constraints |
+| Pattern               | Example                             | Why It's Weak                                            |
+| --------------------- | ----------------------------------- | -------------------------------------------------------- |
+| Survivorship bias     | "Companies using X are successful"  | Ignores companies using X that failed                    |
+| Cherry-picked metrics | "Response time improved 40%"        | Other metrics (error rate, throughput) may have worsened |
+| Vendor benchmarks     | "Our tool is 3x faster"             | Benchmarks optimized for vendor's strengths              |
+| Appeal to authority   | "Google does it this way"           | Google's constraints are not your constraints            |
+| Anchoring             | "Industry average is X, we're at Y" | The average may not be the right benchmark               |
+| N=1 generalization    | "It worked at my last company"      | Different context, team, scale, constraints              |
 
 ## Competing Explanations (Abductive Reasoning)
 
@@ -158,36 +158,36 @@ Alternative explanations:
 
 ### Claims Extracted
 
-| # | Claim | Type | Evidence Cited | Falsifiable? |
-|---|-------|------|---------------|-------------|
-| 1 | [Specific claim] | Causal/Predictive/etc. | [What evidence supports it] | Yes/No |
-| 2 | [Specific claim] | Causal/Predictive/etc. | [What evidence supports it] | Yes/No |
+| #   | Claim            | Type                   | Evidence Cited              | Falsifiable? |
+| --- | ---------------- | ---------------------- | --------------------------- | ------------ |
+| 1   | [Specific claim] | Causal/Predictive/etc. | [What evidence supports it] | Yes/No       |
+| 2   | [Specific claim] | Causal/Predictive/etc. | [What evidence supports it] | Yes/No       |
 
 ### Falsification Criteria
 
-| Claim | What Would Disprove It | How to Test | Effort |
-|-------|----------------------|-------------|--------|
-| #1 | [Specific criterion] | [Concrete test] | Low/Med/High |
-| #2 | [Specific criterion] | [Concrete test] | Low/Med/High |
+| Claim | What Would Disprove It | How to Test     | Effort       |
+| ----- | ---------------------- | --------------- | ------------ |
+| #1    | [Specific criterion]   | [Concrete test] | Low/Med/High |
+| #2    | [Specific criterion]   | [Concrete test] | Low/Med/High |
 
 ### Evidence Quality
 
-| Claim | Evidence Grade | Key Weakness | GRADE Assessment |
-|-------|--------------|--------------|-----------------|
-| #1 | A/B/C/D/F | [Primary concern] | [Which of the 9 questions is most concerning] |
-| #2 | A/B/C/D/F | [Primary concern] | [Which of the 9 questions is most concerning] |
+| Claim | Evidence Grade | Key Weakness      | GRADE Assessment                              |
+| ----- | -------------- | ----------------- | --------------------------------------------- |
+| #1    | A/B/C/D/F      | [Primary concern] | [Which of the 9 questions is most concerning] |
+| #2    | A/B/C/D/F      | [Primary concern] | [Which of the 9 questions is most concerning] |
 
 ### Bias Check
 
-| Bias Detected | Where | Impact |
-|--------------|-------|--------|
-| [Bias name] | Claim #X | [How it affects the conclusion] |
+| Bias Detected | Where    | Impact                          |
+| ------------- | -------- | ------------------------------- |
+| [Bias name]   | Claim #X | [How it affects the conclusion] |
 
 ### Competing Explanations
 
-| Evidence | Proposed Explanation | Alternative Explanations |
-|----------|---------------------|------------------------|
-| [Data point] | [Original claim] | 1. [Alternative] 2. [Alternative] |
+| Evidence     | Proposed Explanation | Alternative Explanations          |
+| ------------ | -------------------- | --------------------------------- |
+| [Data point] | [Original claim]     | 1. [Alternative] 2. [Alternative] |
 
 ### Verdict
 
@@ -196,6 +196,7 @@ Alternative explanations:
 **Confidence level:** [X%] — this forces probabilistic rather than binary thinking
 
 **Recommendations:**
+
 1. [Specific action to strengthen the weakest claim]
 2. [Specific action to test the riskiest assumption]
 3. [What would change this verdict — the Magic Question]

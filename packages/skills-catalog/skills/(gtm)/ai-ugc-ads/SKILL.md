@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # AI UGC Ads
@@ -16,6 +15,7 @@ You are a UGC growth strategist who builds repeatable systems for creator recrui
 ## Before Starting
 
 Ask the user:
+
 1. What product or service are you promoting?
 2. What is your current monthly ad budget (or are you starting at $0)?
 3. Which platforms are you targeting (TikTok, Meta Reels, YouTube Shorts, all)?
@@ -49,14 +49,14 @@ Validate creative organically before spending a dollar on ads. Platform algorith
 
 ### Platform Selection Matrix
 
-| Platform | Best For | Creator Pool | Avg Cost/Video | Turnaround |
-|----------|----------|-------------|----------------|------------|
-| Billo | Quick UGC videos, product demos | 5,000+ vetted (US, CA, UK, AU) | $100-$300 | 5-7 days |
-| Insense | Paid social UGC, whitelisting | 68,500+ nano/micro creators | $100-$500 | 7-14 days |
-| TikTok Creator Marketplace | TikTok-native, Spark Ads | Millions (varies by market) | $50-$500 | 7-14 days |
-| JoinBrands | Budget UGC, high volume | 50,000+ | $50-$200 | 5-10 days |
-| Collabstr | Vetted influencer UGC | 30,000+ | $150-$500 | 7-14 days |
-| Trend.io | Premium brand UGC | Curated network | $200-$600 | 10-14 days |
+| Platform                   | Best For                        | Creator Pool                   | Avg Cost/Video | Turnaround |
+| -------------------------- | ------------------------------- | ------------------------------ | -------------- | ---------- |
+| Billo                      | Quick UGC videos, product demos | 5,000+ vetted (US, CA, UK, AU) | $100-$300      | 5-7 days   |
+| Insense                    | Paid social UGC, whitelisting   | 68,500+ nano/micro creators    | $100-$500      | 7-14 days  |
+| TikTok Creator Marketplace | TikTok-native, Spark Ads        | Millions (varies by market)    | $50-$500       | 7-14 days  |
+| JoinBrands                 | Budget UGC, high volume         | 50,000+                        | $50-$200       | 5-10 days  |
+| Collabstr                  | Vetted influencer UGC           | 30,000+                        | $150-$500      | 7-14 days  |
+| Trend.io                   | Premium brand UGC               | Curated network                | $200-$600      | 10-14 days |
 
 ### Direct Outreach Strategy
 
@@ -67,13 +67,13 @@ Validate creative organically before spending a dollar on ads. Platform algorith
 
 ### Rate Benchmarks by Tier (2025-2026)
 
-| Creator Tier | Followers | Rate/Video | With Usage Rights | With Whitelisting |
-|-------------|-----------|-----------|-------------------|-------------------|
-| Entry-level | < 1K | $50-$100 | $75-$150 | $100-$200 |
-| Nano | 1K-10K | $100-$200 | $150-$300 | $200-$400 |
-| Micro | 10K-100K | $200-$500 | $300-$750 | $400-$900 |
-| Mid-tier | 100K-500K | $500-$1,500 | $750-$2,250 | $1,000-$3,000 |
-| Established | 500K+ | $1,500+ | $2,000+ | $2,500+ |
+| Creator Tier | Followers | Rate/Video  | With Usage Rights | With Whitelisting |
+| ------------ | --------- | ----------- | ----------------- | ----------------- |
+| Entry-level  | < 1K      | $50-$100    | $75-$150          | $100-$200         |
+| Nano         | 1K-10K    | $100-$200   | $150-$300         | $200-$400         |
+| Micro        | 10K-100K  | $200-$500   | $300-$750         | $400-$900         |
+| Mid-tier     | 100K-500K | $500-$1,500 | $750-$2,250       | $1,000-$3,000     |
+| Established  | 500K+     | $1,500+     | $2,000+           | $2,500+           |
 
 **Cost multipliers:** Usage rights +30-50%. Whitelisting +30%/month. Raw footage +30-50%. Rush delivery (<48h) +25-50%. Bundle discount (3-10 videos) -10-25%.
 
@@ -113,14 +113,14 @@ COMPENSATION: $[amount] via [method] | DEADLINE: [date] | USAGE RIGHTS: [duratio
 
 ### Tool Comparison (2025-2026)
 
-| Tool | Best For | Price/Month | Key Strength |
-|------|----------|-------------|-------------|
-| Arcads | Conversion-focused UGC ads | $110-$220 | Most authentic talking-head UGC, gestures |
-| Creatify | All-in-one ad creation | $33-$69 | 1,000+ avatars, URL-to-video, batch creation |
-| HeyGen | Corporate/professional video | $29+ | API access, 200+ avatars, multi-language |
-| Argil | Personal avatar cloning | $27-$104 | Hyperrealistic lip-sync, full editing suite |
-| Opus Clip | Long-form to short clips | $15-$29 | AI Virality Score, auto-subtitles |
-| CapCut | Editing and templates | Free-$8 | TikTok-native editing, templates |
+| Tool      | Best For                     | Price/Month | Key Strength                                 |
+| --------- | ---------------------------- | ----------- | -------------------------------------------- |
+| Arcads    | Conversion-focused UGC ads   | $110-$220   | Most authentic talking-head UGC, gestures    |
+| Creatify  | All-in-one ad creation       | $33-$69     | 1,000+ avatars, URL-to-video, batch creation |
+| HeyGen    | Corporate/professional video | $29+        | API access, 200+ avatars, multi-language     |
+| Argil     | Personal avatar cloning      | $27-$104    | Hyperrealistic lip-sync, full editing suite  |
+| Opus Clip | Long-form to short clips     | $15-$29     | AI Virality Score, auto-subtitles            |
+| CapCut    | Editing and templates        | Free-$8     | TikTok-native editing, templates             |
 
 ### AI vs Human UGC Decision
 
@@ -145,6 +145,7 @@ COMPENSATION: $[amount] via [method] | DEADLINE: [date] | USAGE RIGHTS: [duratio
 All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewer scrolls.
 
 ### Format 1: Problem-Solution
+
 - [0-3s] State the pain point your audience feels daily
 - [3-8s] Agitate: make it worse ("and the worst part is...")
 - [8-20s] Introduce product as the fix
@@ -153,6 +154,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: direct response, all platforms
 
 ### Format 2: Testimonial
+
 - [0-3s] "I was skeptical but..." or "3 months later..."
 - [3-10s] Before state: what life looked like
 - [10-20s] Discovery: how they found the product
@@ -161,6 +163,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: mid-funnel, Meta Reels and YouTube Shorts
 
 ### Format 3: Unboxing
+
 - [0-3s] Package arrival or "This just came in..."
 - [3-10s] Open and react authentically
 - [10-20s] First use on camera
@@ -169,6 +172,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: product launches, TikTok
 
 ### Format 4: Tutorial
+
 - [0-3s] "Here is how I [desired outcome]"
 - [3-15s] Walk through 3-4 steps using product
 - [15-25s] Show the finished result
@@ -176,6 +180,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: SaaS, beauty, fitness on YouTube Shorts and Reels
 
 ### Format 5: Comparison
+
 - [0-3s] "Stop using [old way], try this instead"
 - [3-12s] Show the frustrating old way
 - [12-22s] Show your product solving it better
@@ -184,6 +189,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: competitive positioning, TikTok and Reels
 
 ### Format 6: Day-in-the-Life
+
 - [0-3s] "A day using [product] as a [role]"
 - [3-10s] Morning routine integration
 - [10-18s] Key product moment with genuine reaction
@@ -192,6 +198,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: lifestyle products, all platforms
 
 ### Format 7: Green Screen React
+
 - [0-3s] React to trending clip, headline, or stat
 - [3-10s] Add context: "This is wild because..."
 - [10-20s] Tie to your product naturally
@@ -200,6 +207,7 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 - Best for: trend-jacking, TikTok
 
 ### Format 8: TikTok Shop
+
 - [0-3s] Product-first visual with trending sound
 - [3-10s] Demo the product in action
 - [10-20s] Value justification: why worth the price
@@ -209,25 +217,25 @@ All formats follow vertical 9:16. Hook must land in first 3 seconds or the viewe
 
 ### Format Selection Guide
 
-| Goal | Primary Format | Secondary |
-|------|---------------|-----------|
-| Cold traffic conversion | Problem-Solution | Comparison |
-| Trust building | Testimonial | Tutorial |
-| Product launch | Unboxing | Day-in-the-Life |
-| Trend riding | Green Screen React | Problem-Solution |
-| Direct commerce | TikTok Shop | Unboxing |
-| Retargeting | Tutorial | Testimonial |
+| Goal                    | Primary Format     | Secondary        |
+| ----------------------- | ------------------ | ---------------- |
+| Cold traffic conversion | Problem-Solution   | Comparison       |
+| Trust building          | Testimonial        | Tutorial         |
+| Product launch          | Unboxing           | Day-in-the-Life  |
+| Trend riding            | Green Screen React | Problem-Solution |
+| Direct commerce         | TikTok Shop        | Unboxing         |
+| Retargeting             | Tutorial           | Testimonial      |
 
 ## Section 6: Platform Strategy
 
 ### Specs and Sweet Spots
 
-| Spec | TikTok | Instagram Reels | Facebook Reels | YouTube Shorts |
-|------|--------|----------------|---------------|---------------|
-| Max length | 10 min | 90s | 90s | 60s |
-| Sweet spot | 15-30s | 15-30s | 15-45s | 30-60s |
-| Captions | Required | Recommended | Required | Recommended |
-| Hashtags | 3-5 | 5-10 | 3-5 | 3-5 |
+| Spec       | TikTok   | Instagram Reels | Facebook Reels | YouTube Shorts |
+| ---------- | -------- | --------------- | -------------- | -------------- |
+| Max length | 10 min   | 90s             | 90s            | 60s            |
+| Sweet spot | 15-30s   | 15-30s          | 15-45s         | 30-60s         |
+| Captions   | Required | Recommended     | Required       | Recommended    |
+| Hashtags   | 3-5      | 5-10            | 3-5            | 3-5            |
 
 All platforms: 9:16 vertical orientation.
 
@@ -258,11 +266,11 @@ All platforms: 9:16 vertical orientation.
 ### Whitelisting Scale
 
 | Monthly Ad Spend | Active Whitelisted Creatives | Refresh Cadence |
-|-----------------|------------------------------|-----------------|
-| $1K-$5K | 3-5 | Every 2-3 weeks |
-| $5K-$15K | 5-10 | Weekly |
-| $15K-$50K | 10-20 | 2x per week |
-| $50K+ | 20+ | Daily rotation |
+| ---------------- | ---------------------------- | --------------- |
+| $1K-$5K          | 3-5                          | Every 2-3 weeks |
+| $5K-$15K         | 5-10                         | Weekly          |
+| $15K-$50K        | 10-20                        | 2x per week     |
+| $50K+            | 20+                          | Daily rotation  |
 
 ### Spark Ads Performance Edge
 
@@ -292,13 +300,13 @@ Total: 27 unique ad variations.
 
 ### Test Budget
 
-| Phase | Daily | Days | Total |
-|-------|-------|------|-------|
-| Hook | $60-$90 | 3 | $180-$270 |
-| Body | $60-$90 | 3 | $180-$270 |
-| CTA | $60-$90 | 3 | $180-$270 |
-| Scale | $100-$200 | 7 | $700-$1,400 |
-| **Full cycle** | | **16** | **$1,240-$2,210** |
+| Phase          | Daily     | Days   | Total             |
+| -------------- | --------- | ------ | ----------------- |
+| Hook           | $60-$90   | 3      | $180-$270         |
+| Body           | $60-$90   | 3      | $180-$270         |
+| CTA            | $60-$90   | 3      | $180-$270         |
+| Scale          | $100-$200 | 7      | $700-$1,400       |
+| **Full cycle** |           | **16** | **$1,240-$2,210** |
 
 For $10K+/month: use Meta Dynamic Creative or TikTok Smart Creative. Load 3 hooks, 2 bodies, 2 CTAs into one ad set. Platform auto-optimizes. Review after 50K impressions per cell.
 
@@ -306,23 +314,23 @@ For $10K+/month: use Meta Dynamic Creative or TikTok Smart Creative. Load 3 hook
 
 ### Kill Criteria
 
-| Timeframe | Kill If |
-|-----------|---------|
-| 24 hours | CTR < 0.5% with 2K+ impressions |
-| 48 hours | CPA > 2x target with $50+ spend |
-| 72 hours | Hook rate < 20% |
-| 7 days | ROAS < 1.0 for e-commerce |
-| 14 days | CPA trending up 3 consecutive days |
+| Timeframe | Kill If                            |
+| --------- | ---------------------------------- |
+| 24 hours  | CTR < 0.5% with 2K+ impressions    |
+| 48 hours  | CPA > 2x target with $50+ spend    |
+| 72 hours  | Hook rate < 20%                    |
+| 7 days    | ROAS < 1.0 for e-commerce          |
+| 14 days   | CPA trending up 3 consecutive days |
 
 ### Scaling Rules
 
-| Condition | Action |
-|-----------|--------|
-| CPA < target for 48h | Increase budget 20% |
-| CPA < 50% target for 72h | Increase budget 50% |
-| CPA holds after 3 increases | Duplicate to new audience |
-| 100K impressions on creative | Commission 3 variations |
-| 500K impressions | Test new hooks on same structure |
+| Condition                    | Action                           |
+| ---------------------------- | -------------------------------- |
+| CPA < target for 48h         | Increase budget 20%              |
+| CPA < 50% target for 72h     | Increase budget 50%              |
+| CPA holds after 3 increases  | Duplicate to new audience        |
+| 100K impressions on creative | Commission 3 variations          |
+| 500K impressions             | Test new hooks on same structure |
 
 ### Fatigue Signals
 
@@ -334,12 +342,12 @@ Typical lifespans: TikTok Spark Ads 2-4 weeks, Meta Reels 2-3 weeks, static UGC 
 
 ### Platform Performance
 
-| Metric | TikTok | Meta (Reels) | Facebook (Feed) | YouTube Shorts |
-|--------|--------|-------------|----------------|---------------|
-| Avg CPM | $2.62 | $7.91 | $7.19 | $4-$8 |
-| Avg CTR | 0.84% | 0.9-1.5% | 1.57% | 0.5-1.2% |
-| Avg CVR | 0.46% | 0.5-1.2% | 0.8-1.5% | 0.3-0.8% |
-| Hook rate target | >30% | >25% | >20% | >25% |
+| Metric           | TikTok | Meta (Reels) | Facebook (Feed) | YouTube Shorts |
+| ---------------- | ------ | ------------ | --------------- | -------------- |
+| Avg CPM          | $2.62  | $7.91        | $7.19           | $4-$8          |
+| Avg CTR          | 0.84%  | 0.9-1.5%     | 1.57%           | 0.5-1.2%       |
+| Avg CVR          | 0.46%  | 0.5-1.2%     | 0.8-1.5%        | 0.3-0.8%       |
+| Hook rate target | >30%   | >25%         | >20%            | >25%           |
 
 ### UGC vs Brand Creative
 
@@ -347,15 +355,15 @@ UGC delivers 37% lower CPA, 2x engagement, 134% higher completion (Spark Ads). N
 
 ### Benchmarks by Vertical
 
-| Vertical | Target CPA | Target ROAS | UGC Cost/Video |
-|----------|-----------|-------------|----------------|
-| E-com (< $50 AOV) | $15-$30 | 2.5-4x | $100-$200 |
-| E-com ($50-$150 AOV) | $25-$60 | 3-5x | $150-$300 |
-| SaaS / Apps | $30-$80 | N/A (LTV) | $200-$400 |
-| Health / Wellness | $20-$50 | 2.5-4x | $150-$350 |
-| Beauty / Skincare | $15-$35 | 3-5x | $100-$250 |
-| Finance / Fintech | $40-$100 | N/A (LTV) | $250-$500 |
-| Education / Courses | $20-$60 | 3-6x | $150-$300 |
+| Vertical             | Target CPA | Target ROAS | UGC Cost/Video |
+| -------------------- | ---------- | ----------- | -------------- |
+| E-com (< $50 AOV)    | $15-$30    | 2.5-4x      | $100-$200      |
+| E-com ($50-$150 AOV) | $25-$60    | 3-5x        | $150-$300      |
+| SaaS / Apps          | $30-$80    | N/A (LTV)   | $200-$400      |
+| Health / Wellness    | $20-$50    | 2.5-4x      | $150-$350      |
+| Beauty / Skincare    | $15-$35    | 3-5x        | $100-$250      |
+| Finance / Fintech    | $40-$100   | N/A (LTV)   | $250-$500      |
+| Education / Courses  | $20-$60    | 3-6x        | $150-$300      |
 
 ## Section 11: TikTok Shop UGC Integration
 
@@ -411,13 +419,13 @@ $10K+         -> Full program (10-20 creators) + AI at scale + testing budget
 
 ### Key Metrics
 
-| Metric | Formula | Target |
-|--------|---------|--------|
-| Hook rate | Views past 3s / Impressions | >30% |
-| Hold rate | Views past 50% / Total views | >15% |
-| CTR | Clicks / Impressions | >1% |
-| Creative hit rate | Winners / Total tested | >15% |
-| Creator ROI | Revenue / (Creator cost + ad spend) | >3x |
+| Metric            | Formula                             | Target |
+| ----------------- | ----------------------------------- | ------ |
+| Hook rate         | Views past 3s / Impressions         | >30%   |
+| Hold rate         | Views past 50% / Total views        | >15%   |
+| CTR               | Clicks / Impressions                | >1%    |
+| Creative hit rate | Winners / Total tested              | >15%   |
+| Creator ROI       | Revenue / (Creator cost + ad spend) | >3x    |
 
 ## Questions to Ask
 

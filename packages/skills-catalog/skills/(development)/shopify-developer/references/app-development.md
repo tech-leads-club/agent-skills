@@ -111,21 +111,15 @@ DATABASE_URL=postgresql://...
 
 Modern Shopify app using React Router 7 framework.
 
-**app/routes/app._index.jsx (Home Page):**
+**app/routes/app.\_index.jsx (Home Page):**
 
 ```javascript
-import { useLoaderData } from "react-router";
-import { authenticate } from "../shopify.server";
-import {
-  Page,
-  Layout,
-  Card,
-  DataTable,
-  Button,
-} from "@shopify/polaris";
+import { useLoaderData } from 'react-router'
+import { authenticate } from '../shopify.server'
+import { Page, Layout, Card, DataTable, Button } from '@shopify/polaris'
 
 export async function loader({ request }) {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request)
 
   // Fetch products using GraphQL
   const response = await admin.graphql(`
@@ -141,24 +135,20 @@ export async function loader({ request }) {
         }
       }
     }
-  `);
+  `)
 
-  const { data } = await response.json();
+  const { data } = await response.json()
 
   return {
-    products: data.products.edges.map(e => e.node),
+    products: data.products.edges.map((e) => e.node),
     shop: session.shop,
-  };
+  }
 }
 
 export default function Index() {
-  const { products, shop } = useLoaderData();
+  const { products, shop } = useLoaderData()
 
-  const rows = products.map((product) => [
-    product.title,
-    product.handle,
-    product.status,
-  ]);
+  const rows = products.map((product) => [product.title, product.handle, product.status])
 
   return (
     <Page title="Products">
@@ -166,39 +156,32 @@ export default function Index() {
         <Layout.Section>
           <Card>
             <DataTable
-              columnContentTypes={["text", "text", "text"]}
-              headings={["Title", "Handle", "Status"]}
+              columnContentTypes={['text', 'text', 'text']}
+              headings={['Title', 'Handle', 'Status']}
               rows={rows}
             />
           </Card>
         </Layout.Section>
       </Layout>
     </Page>
-  );
+  )
 }
 ```
 
 **app/routes/app.product.$id.jsx (Product Detail):**
 
 ```javascript
-import { data } from "react-router";
-import { useLoaderData, useSubmit } from "react-router";
-import { authenticate } from "../shopify.server";
-import {
-  Page,
-  Layout,
-  Card,
-  Form,
-  FormLayout,
-  TextField,
-  Button,
-} from "@shopify/polaris";
-import { useState } from "react";
+import { data } from 'react-router'
+import { useLoaderData, useSubmit } from 'react-router'
+import { authenticate } from '../shopify.server'
+import { Page, Layout, Card, Form, FormLayout, TextField, Button } from '@shopify/polaris'
+import { useState } from 'react'
 
 export async function loader({ request, params }) {
-  const { admin } = await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request)
 
-  const response = await admin.graphql(`
+  const response = await admin.graphql(
+    `
     query GetProduct($id: ID!) {
       product(id: $id) {
         id
@@ -208,23 +191,26 @@ export async function loader({ request, params }) {
         vendor
       }
     }
-  `, {
-    variables: { id: `gid://shopify/Product/${params.id}` },
-  });
+  `,
+    {
+      variables: { id: `gid://shopify/Product/${params.id}` },
+    },
+  )
 
-  const { data: responseData } = await response.json();
+  const { data: responseData } = await response.json()
 
-  return data({ product: responseData.product });
+  return data({ product: responseData.product })
 }
 
 export async function action({ request, params }) {
-  const { admin } = await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request)
 
-  const formData = await request.formData();
-  const title = formData.get("title");
-  const description = formData.get("description");
+  const formData = await request.formData()
+  const title = formData.get('title')
+  const description = formData.get('description')
 
-  const response = await admin.graphql(`
+  const response = await admin.graphql(
+    `
     mutation UpdateProduct($input: ProductInput!) {
       productUpdate(input: $input) {
         product {
@@ -237,52 +223,49 @@ export async function action({ request, params }) {
         }
       }
     }
-  `, {
-    variables: {
-      input: {
-        id: `gid://shopify/Product/${params.id}`,
-        title,
-        description,
+  `,
+    {
+      variables: {
+        input: {
+          id: `gid://shopify/Product/${params.id}`,
+          title,
+          description,
+        },
       },
     },
-  });
+  )
 
-  const { data: responseData } = await response.json();
+  const { data: responseData } = await response.json()
 
   if (responseData.productUpdate.userErrors.length > 0) {
-    return data({ errors: responseData.productUpdate.userErrors }, { status: 400 });
+    return data({ errors: responseData.productUpdate.userErrors }, { status: 400 })
   }
 
-  return data({ success: true });
+  return data({ success: true })
 }
 
 export default function ProductDetail() {
-  const { product } = useLoaderData();
-  const submit = useSubmit();
+  const { product } = useLoaderData()
+  const submit = useSubmit()
 
-  const [title, setTitle] = useState(product.title);
-  const [description, setDescription] = useState(product.description);
+  const [title, setTitle] = useState(product.title)
+  const [description, setDescription] = useState(product.description)
 
   const handleSubmit = () => {
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
+    const formData = new FormData()
+    formData.append('title', title)
+    formData.append('description', description)
 
-    submit(formData, { method: "post" });
-  };
+    submit(formData, { method: 'post' })
+  }
 
   return (
-    <Page title="Edit Product" backAction={{ url: "/app" }}>
+    <Page title="Edit Product" backAction={{ url: '/app' }}>
       <Layout>
         <Layout.Section>
           <Card>
             <FormLayout>
-              <TextField
-                label="Title"
-                value={title}
-                onChange={setTitle}
-                autoComplete="off"
-              />
+              <TextField label="Title" value={title} onChange={setTitle} autoComplete="off" />
               <TextField
                 label="Description"
                 value={description}
@@ -298,7 +281,7 @@ export default function ProductDetail() {
         </Layout.Section>
       </Layout>
     </Page>
-  );
+  )
 }
 ```
 
@@ -320,31 +303,31 @@ shopify app generate extension
 **extensions/export-product/src/index.jsx:**
 
 ```javascript
-import { extend, AdminAction } from "@shopify/admin-ui-extensions";
+import { extend, AdminAction } from '@shopify/admin-ui-extensions'
 
-extend("Admin::Product::SubscriptionAction", (root, { data }) => {
-  const { id, title } = data.selected[0];
+extend('Admin::Product::SubscriptionAction', (root, { data }) => {
+  const { id, title } = data.selected[0]
 
   const button = root.createComponent(AdminAction, {
-    title: "Export Product",
+    title: 'Export Product',
     onPress: async () => {
       // Call your app API
-      const response = await fetch("/api/export", {
-        method: "POST",
+      const response = await fetch('/api/export', {
+        method: 'POST',
         body: JSON.stringify({ productId: id }),
-        headers: { "Content-Type": "application/json" },
-      });
+        headers: { 'Content-Type': 'application/json' },
+      })
 
       if (response.ok) {
-        root.toast.show("Product exported successfully!");
+        root.toast.show('Product exported successfully!')
       } else {
-        root.toast.show("Export failed", { isError: true });
+        root.toast.show('Export failed', { isError: true })
       }
     },
-  });
+  })
 
-  root.append(button);
-});
+  root.append(button)
+})
 ```
 
 **Theme App Extension:**
@@ -437,48 +420,48 @@ Handle Shopify events in your app.
 **app/routes/webhooks.jsx:**
 
 ```javascript
-import { authenticate } from "../shopify.server";
-import db from "../db.server";
+import { authenticate } from '../shopify.server'
+import db from '../db.server'
 
 export async function action({ request }) {
-  const { topic, shop, session, admin, payload } = await authenticate.webhook(request);
+  const { topic, shop, session, admin, payload } = await authenticate.webhook(request)
 
-  console.log(`Webhook received: ${topic} from ${shop}`);
+  console.log(`Webhook received: ${topic} from ${shop}`)
 
   switch (topic) {
-    case "APP_UNINSTALLED":
+    case 'APP_UNINSTALLED':
       // Clean up app data
-      await db.session.deleteMany({ where: { shop } });
-      break;
+      await db.session.deleteMany({ where: { shop } })
+      break
 
-    case "PRODUCTS_CREATE":
+    case 'PRODUCTS_CREATE':
       // Handle new product
-      console.log("New product created:", payload.id, payload.title);
-      await handleProductCreated(payload);
-      break;
+      console.log('New product created:', payload.id, payload.title)
+      await handleProductCreated(payload)
+      break
 
-    case "PRODUCTS_UPDATE":
+    case 'PRODUCTS_UPDATE':
       // Handle product update
-      console.log("Product updated:", payload.id);
-      await handleProductUpdated(payload);
-      break;
+      console.log('Product updated:', payload.id)
+      await handleProductUpdated(payload)
+      break
 
-    case "ORDERS_CREATE":
+    case 'ORDERS_CREATE':
       // Handle new order
-      console.log("New order:", payload.id, payload.email);
-      await handleOrderCreated(payload);
-      break;
+      console.log('New order:', payload.id, payload.email)
+      await handleOrderCreated(payload)
+      break
 
-    case "CUSTOMERS_CREATE":
+    case 'CUSTOMERS_CREATE':
       // Handle new customer
-      await handleCustomerCreated(payload);
-      break;
+      await handleCustomerCreated(payload)
+      break
 
     default:
-      console.log("Unhandled webhook topic:", topic);
+      console.log('Unhandled webhook topic:', topic)
   }
 
-  return new Response("OK", { status: 200 });
+  return new Response('OK', { status: 200 })
 }
 
 async function handleProductCreated(product) {
@@ -489,32 +472,27 @@ async function handleProductCreated(product) {
       title: product.title,
       handle: product.handle,
     },
-  });
+  })
 }
 
 async function handleOrderCreated(order) {
   // Send email notification, update inventory, etc.
-  console.log(`Order ${order.id} received for ${order.email}`);
+  console.log(`Order ${order.id} received for ${order.email}`)
 }
 ```
 
 **Register Webhooks (app/shopify.server.js):**
 
 ```javascript
-import "@shopify/shopify-app-remix/adapters/node";
-import {
-  ApiVersion,
-  AppDistribution,
-  shopifyApp,
-  DeliveryMethod,
-} from "@shopify/shopify-app-remix/server";
+import '@shopify/shopify-app-remix/adapters/node'
+import { ApiVersion, AppDistribution, shopifyApp, DeliveryMethod } from '@shopify/shopify-app-remix/server'
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET,
-  scopes: process.env.SCOPES?.split(","),
+  scopes: process.env.SCOPES?.split(','),
   appUrl: process.env.SHOPIFY_APP_URL,
-  authPathPrefix: "/auth",
+  authPathPrefix: '/auth',
   sessionStorage: new SQLiteSessionStorage(),
   distribution: AppDistribution.AppStore,
   apiVersion: ApiVersion.January26,
@@ -522,25 +500,25 @@ const shopify = shopifyApp({
   webhooks: {
     APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
+      callbackUrl: '/webhooks',
     },
     PRODUCTS_CREATE: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
+      callbackUrl: '/webhooks',
     },
     PRODUCTS_UPDATE: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
+      callbackUrl: '/webhooks',
     },
     ORDERS_CREATE: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
+      callbackUrl: '/webhooks',
     },
   },
-});
+})
 
-export default shopify;
-export const authenticate = shopify.authenticate;
+export default shopify
+export const authenticate = shopify.authenticate
 ```
 
 ### 6. App Proxy
@@ -564,36 +542,36 @@ https://store.com/apps/reviews → proxies to → https://your-app.com/api/proxy
 **Handle Proxy Requests (app/routes/api.proxy.jsx):**
 
 ```javascript
-import { data } from "react-router";
+import { data } from 'react-router'
 
 export async function loader({ request }) {
-  const url = new URL(request.url);
+  const url = new URL(request.url)
 
   // Verify proxy request
-  const signature = url.searchParams.get("signature");
-  const shop = url.searchParams.get("shop");
+  const signature = url.searchParams.get('signature')
+  const shop = url.searchParams.get('shop')
 
   if (!verifyProxySignature(signature, request)) {
-    return data({ error: "Invalid signature" }, { status: 401 });
+    return data({ error: 'Invalid signature' }, { status: 401 })
   }
 
   // Handle different paths
-  const path = url.searchParams.get("path_prefix");
+  const path = url.searchParams.get('path_prefix')
 
-  if (path === "/apps/reviews/product") {
-    const productId = url.searchParams.get("product_id");
-    const reviews = await getProductReviews(productId);
+  if (path === '/apps/reviews/product') {
+    const productId = url.searchParams.get('product_id')
+    const reviews = await getProductReviews(productId)
 
-    return data({ reviews });
+    return data({ reviews })
   }
 
-  return data({ message: "App Proxy" });
+  return data({ message: 'App Proxy' })
 }
 
 function verifyProxySignature(signature, request) {
   // Verify HMAC signature
   // Implementation depends on your setup
-  return true;
+  return true
 }
 ```
 
@@ -618,39 +596,31 @@ import {
   Modal,
   Toast,
   Frame,
-} from "@shopify/polaris";
+} from '@shopify/polaris'
 
 export default function MyPage() {
   return (
     <Page
       title="Settings"
-      primaryAction={{ content: "Save", onAction: handleSave }}
-      secondaryActions={[{ content: "Cancel", onAction: handleCancel }]}
+      primaryAction={{ content: 'Save', onAction: handleSave }}
+      secondaryActions={[{ content: 'Cancel', onAction: handleCancel }]}
     >
       <Layout>
         <Layout.Section>
           <Card title="General Settings" sectioned>
-            <TextField
-              label="App Name"
-              value={name}
-              onChange={setName}
-            />
+            <TextField label="App Name" value={name} onChange={setName} />
 
             <Select
               label="Status"
               options={[
-                { label: "Active", value: "active" },
-                { label: "Draft", value: "draft" },
+                { label: 'Active', value: 'active' },
+                { label: 'Draft', value: 'draft' },
               ]}
               value={status}
               onChange={setStatus}
             />
 
-            <Checkbox
-              label="Enable notifications"
-              checked={notifications}
-              onChange={setNotifications}
-            />
+            <Checkbox label="Enable notifications" checked={notifications} onChange={setNotifications} />
           </Card>
         </Layout.Section>
 
@@ -661,7 +631,7 @@ export default function MyPage() {
         </Layout.Section>
       </Layout>
     </Page>
-  );
+  )
 }
 ```
 

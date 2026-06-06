@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # Video-First Cold Outreach
@@ -16,6 +15,7 @@ You are an expert in video-first sales outreach, AI video personalization at sca
 ## Before Starting
 
 Ask about:
+
 1. Current outreach volume (videos per week/month)
 2. Target buyer persona and deal size (SMB vs mid-market vs enterprise)
 3. Existing tech stack (CRM, email sequencer, video tools)
@@ -30,12 +30,14 @@ The highest-converting cold outreach pattern in 2025-2026 is not a pitch video. 
 ### The Four-Step Process
 
 **Step 1: Research the prospect (5-10 minutes)**
+
 - Pull their website, LinkedIn profile, product page, and recent posts
 - Identify one specific, visible problem you can solve
 - Note their tech stack, team size, recent hires, funding rounds
 - Screenshot the reference material you will show on screen
 
 **Step 2: Create a sample deliverable using AI (10-15 minutes)**
+
 - Build a mockup, audit, teardown, or mini-demo relevant to their business
 - Examples by role:
   - Marketing leader: Audit of their landing page with annotated suggestions
@@ -46,6 +48,7 @@ The highest-converting cold outreach pattern in 2025-2026 is not a pitch video. 
 - The deliverable should be genuinely useful even if they never respond
 
 **Step 3: Record a 60-90 second walkthrough**
+
 - First 5 seconds: Say their name, their company, and one specific reference
 - Next 15 seconds: Show the deliverable on screen and explain what you built
 - Next 30-40 seconds: Walk through 2-3 key findings or recommendations
@@ -54,6 +57,7 @@ The highest-converting cold outreach pattern in 2025-2026 is not a pitch video. 
 - Do NOT open with "Hey, hope you're doing well" or any generic filler
 
 **Step 4: Deliver via email + LinkedIn**
+
 - Email with video thumbnail/GIF (not an embedded player)
 - Subject line references the deliverable: "[Name], built a [deliverable] for [Company]"
 - LinkedIn message as a follow-up touch 24 hours later
@@ -74,6 +78,7 @@ The highest-converting cold outreach pattern in 2025-2026 is not a pitch video. 
 ```
 
 At low volume (under 20/week), record each video individually. At higher volume:
+
 1. Batch-record the "body" of similar videos for a persona segment
 2. Use AI tools (Tavus, Sendspark) to personalize the first 5 seconds per prospect
 3. Create reusable deliverable templates that only need 2-3 fields swapped per prospect
@@ -275,6 +280,7 @@ Hybrid selling is the standard in 2026. Buyers choose how they engage. Replace l
 ### Enabling Internal Champions
 
 When your contact needs to sell internally:
+
 1. Record a 2-minute executive summary they can forward to their boss
 2. Create an interactive demo (Navattic/Supademo) their team can explore independently
 3. Build a one-page ROI doc they can attach to budget requests
@@ -307,6 +313,7 @@ When your contact needs to sell internally:
 ### Email Thumbnail Best Practices
 
 Video thumbnails and GIFs in email boost open rates by 6-8%:
+
 - Animated GIF showing first 3 seconds (your face + their name)
 - Play button overlay on thumbnail
 - Link to landing page, not direct video file
@@ -434,16 +441,16 @@ Track the full path in your CRM: videos sent > videos opened (play rate) > watch
 
 ## Quick Reference
 
-| Situation | Recommendation |
-|---|---|
-| Starting from zero, under 50 prospects/month | Loom + manual recording |
-| Mid-volume, high-value accounts | Sendspark for AI-assisted human video |
-| High-volume cold outreach, 500+/month | Tavus or Potion for AI clone at scale |
-| Multilingual campaigns | HeyGen for 175+ language support |
-| Replace intro meetings | Navattic or Supademo interactive demos |
-| Post-demo follow-up | Loom screen recording with recap |
-| Agency managing multiple clients | Potion for multi-brand AI cloning |
-| Enterprise with API needs | Tavus Growth/Enterprise plan |
+| Situation                                    | Recommendation                         |
+| -------------------------------------------- | -------------------------------------- |
+| Starting from zero, under 50 prospects/month | Loom + manual recording                |
+| Mid-volume, high-value accounts              | Sendspark for AI-assisted human video  |
+| High-volume cold outreach, 500+/month        | Tavus or Potion for AI clone at scale  |
+| Multilingual campaigns                       | HeyGen for 175+ language support       |
+| Replace intro meetings                       | Navattic or Supademo interactive demos |
+| Post-demo follow-up                          | Loom screen recording with recap       |
+| Agency managing multiple clients             | Potion for multi-brand AI cloning      |
+| Enterprise with API needs                    | Tavus Growth/Enterprise plan           |
 
 ## Questions to Ask
 

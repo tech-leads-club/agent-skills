@@ -287,6 +287,7 @@ Sequential tasks (no `[P]`) are also delegated to sub-agents, but one at a time.
 implementation artifacts (file reads, test output, gate check logs) out of the main context.
 
 **The orchestrating agent's role during Execute:**
+
 1. Pick the next task(s) to execute
 2. Provide each sub-agent with its task definition + context
 3. Monitor sub-agent completion
@@ -320,9 +321,9 @@ Before approving tasks, verify the execution diagram is consistent with the task
 
 For each task, check:
 
-| Task | Depends On (task body) | Diagram Shows | Status |
-| ---- | ---------------------- | ------------- | ------ |
-| T[N] | [deps from body] | [deps from diagram arrows] | ✅ Match or ❌ Mismatch |
+| Task | Depends On (task body) | Diagram Shows              | Status                  |
+| ---- | ---------------------- | -------------------------- | ----------------------- |
+| T[N] | [deps from body]       | [deps from diagram arrows] | ✅ Match or ❌ Mismatch |
 
 **Rules:**
 
@@ -339,9 +340,9 @@ Before approving tasks, verify EVERY task's `Tests` field is consistent with the
 
 For each task, check: does the task create or modify a code layer that has a required test type in the coverage matrix? If yes, the task's `Tests` field MUST match.
 
-| Task | Code Layer Created/Modified | Matrix Requires | Task Says | Status |
-| ---- | --------------------------- | --------------- | --------- | ------ |
-| T[N]: [name] | [layer from coverage matrix] | [test type] | [task's Tests field] | ✅ OK or ❌ VIOLATION |
+| Task         | Code Layer Created/Modified  | Matrix Requires | Task Says            | Status                |
+| ------------ | ---------------------------- | --------------- | -------------------- | --------------------- |
+| T[N]: [name] | [layer from coverage matrix] | [test type]     | [task's Tests field] | ✅ OK or ❌ VIOLATION |
 
 **Rules:**
 

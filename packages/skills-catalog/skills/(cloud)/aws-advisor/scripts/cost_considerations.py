@@ -289,7 +289,7 @@ def main():
         print(f"Generated: {report['generated_at']}")
         print(f"Services: {', '.join(services)}")
         print(f"Total factors to evaluate: {report['total_factors']}")
-        print(f"\n⚠️  This report lists WHAT to consider, not actual costs.")
+        print("\n⚠️  This report lists WHAT to consider, not actual costs.")
         print(f"    Use AWS Pricing Calculator: {report['calculator_link']}")
         
         for service_data in report["service_details"]:
@@ -300,13 +300,13 @@ def main():
             if service_data.get('free_tier'):
                 print(f"   Free Tier: {service_data['free_tier']}")
             
-            print(f"\n   📊 Cost Factors to Evaluate:")
+            print("\n   📊 Cost Factors to Evaluate:")
             for factor in service_data['factors']:
                 impact_icon = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "🟢"}[factor["impact"]]
                 note = f" ({factor['note']})" if factor.get('note') else ""
                 print(f"      {impact_icon} {factor['factor']} [{factor['unit']}]{note}")
             
-            print(f"\n   💡 Optimization Tips:")
+            print("\n   💡 Optimization Tips:")
             for tip in service_data['optimization_tips']:
                 print(f"      • {tip}")
             

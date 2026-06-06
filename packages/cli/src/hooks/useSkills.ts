@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { discoverSkillsAsync, groupSkillsByCategory } from '@tech-leads-club/core'
 import type { SkillInfo } from '@tech-leads-club/core'
+import { discoverSkillsAsync, groupSkillsByCategory } from '@tech-leads-club/core'
+import { useEffect, useState } from 'react'
 
 import { ports } from '../ports'
 import type { GroupedSkills } from '../types'

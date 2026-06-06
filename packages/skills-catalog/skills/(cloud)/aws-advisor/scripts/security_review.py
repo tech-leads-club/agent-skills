@@ -223,7 +223,7 @@ def main():
         print(json.dumps(checklist, indent=2))
     else:
         print(f"\n{'='*70}")
-        print(f"SECURITY REVIEW CHECKLIST")
+        print("SECURITY REVIEW CHECKLIST")
         print(f"Generated: {checklist['generated_at']}")
         print(f"Services: {', '.join(services)}")
         print(f"Total Checks: {checklist['total_checks']} (HIGH: {checklist['by_severity']['HIGH']}, MEDIUM: {checklist['by_severity']['MEDIUM']}, LOW: {checklist['by_severity']['LOW']})")

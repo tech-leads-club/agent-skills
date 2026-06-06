@@ -6,7 +6,10 @@
     {
       "id": "actor-client",
       "type": "rectangle",
-      "x": 80, "y": 80, "width": 160, "height": 60,
+      "x": 80,
+      "y": 80,
+      "width": 160,
+      "height": 60,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "#a5d8ff",
@@ -31,7 +34,10 @@
     {
       "id": "actor-server",
       "type": "rectangle",
-      "x": 380, "y": 80, "width": 160, "height": 60,
+      "x": 380,
+      "y": 80,
+      "width": 160,
+      "height": 60,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "#b2f2bb",
@@ -56,7 +62,10 @@
     {
       "id": "actor-db",
       "type": "rectangle",
-      "x": 680, "y": 80, "width": 160, "height": 60,
+      "x": 680,
+      "y": 80,
+      "width": 160,
+      "height": 60,
       "angle": 0,
       "strokeColor": "#7048e8",
       "backgroundColor": "#d0bfff",
@@ -81,7 +90,10 @@
     {
       "id": "lifeline-client",
       "type": "line",
-      "x": 160, "y": 140, "width": 0, "height": 440,
+      "x": 160,
+      "y": 140,
+      "width": 0,
+      "height": 440,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -102,12 +114,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [0, 440]]
+      "points": [
+        [0, 0],
+        [0, 440]
+      ]
     },
     {
       "id": "lifeline-server",
       "type": "line",
-      "x": 460, "y": 140, "width": 0, "height": 440,
+      "x": 460,
+      "y": 140,
+      "width": 0,
+      "height": 440,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -128,12 +146,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [0, 440]]
+      "points": [
+        [0, 0],
+        [0, 440]
+      ]
     },
     {
       "id": "lifeline-db",
       "type": "line",
-      "x": 760, "y": 140, "width": 0, "height": 440,
+      "x": 760,
+      "y": 140,
+      "width": 0,
+      "height": 440,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -154,12 +178,18 @@
       "updated": 1706659200000,
       "roundness": null,
       "boundElements": [],
-      "points": [[0, 0], [0, 440]]
+      "points": [
+        [0, 0],
+        [0, 440]
+      ]
     },
     {
       "id": "activation-server",
       "type": "rectangle",
-      "x": 452, "y": 200, "width": 16, "height": 200,
+      "x": 452,
+      "y": 200,
+      "width": 16,
+      "height": 200,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "#b2f2bb",
@@ -184,7 +214,10 @@
     {
       "id": "msg1",
       "type": "arrow",
-      "x": 160, "y": 200, "width": 300, "height": 0,
+      "x": 160,
+      "y": 200,
+      "width": 300,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -205,7 +238,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-msg1" }],
-      "points": [[0, 0], [300, 0]],
+      "points": [
+        [0, 0],
+        [300, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -215,7 +251,10 @@
     {
       "id": "msg2",
       "type": "arrow",
-      "x": 460, "y": 280, "width": 300, "height": 0,
+      "x": 460,
+      "y": 280,
+      "width": 300,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -236,7 +275,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-msg2" }],
-      "points": [[0, 0], [300, 0]],
+      "points": [
+        [0, 0],
+        [300, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -246,7 +288,10 @@
     {
       "id": "msg3",
       "type": "arrow",
-      "x": 760, "y": 340, "width": 300, "height": 0,
+      "x": 760,
+      "y": 340,
+      "width": 300,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -267,7 +312,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-msg3" }],
-      "points": [[0, 0], [-300, 0]],
+      "points": [
+        [0, 0],
+        [-300, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -277,7 +325,10 @@
     {
       "id": "msg4",
       "type": "arrow",
-      "x": 460, "y": 400, "width": 300, "height": 0,
+      "x": 460,
+      "y": 400,
+      "width": 300,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -298,7 +349,10 @@
       "updated": 1706659200000,
       "roundness": { "type": 2 },
       "boundElements": [{ "type": "text", "id": "text-msg4" }],
-      "points": [[0, 0], [-300, 0]],
+      "points": [
+        [0, 0],
+        [-300, 0]
+      ],
       "lastCommittedPoint": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
@@ -308,8 +362,10 @@
     {
       "id": "title",
       "type": "text",
-      "x": 200, "y": 30,
-      "width": 520, "height": 35,
+      "x": 200,
+      "y": 30,
+      "width": 520,
+      "height": 35,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -342,8 +398,10 @@
     {
       "id": "text-actor-client",
       "type": "text",
-      "x": 100, "y": 100,
-      "width": 120, "height": 25,
+      "x": 100,
+      "y": 100,
+      "width": 120,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -376,8 +434,10 @@
     {
       "id": "text-actor-server",
       "type": "text",
-      "x": 400, "y": 100,
-      "width": 120, "height": 25,
+      "x": 400,
+      "y": 100,
+      "width": 120,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -410,8 +470,10 @@
     {
       "id": "text-actor-db",
       "type": "text",
-      "x": 700, "y": 100,
-      "width": 120, "height": 25,
+      "x": 700,
+      "y": 100,
+      "width": 120,
+      "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -444,8 +506,10 @@
     {
       "id": "text-msg1",
       "type": "text",
-      "x": 220, "y": 182,
-      "width": 180, "height": 18,
+      "x": 220,
+      "y": 182,
+      "width": 180,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -478,8 +542,10 @@
     {
       "id": "text-msg2",
       "type": "text",
-      "x": 520, "y": 262,
-      "width": 180, "height": 18,
+      "x": 520,
+      "y": 262,
+      "width": 180,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -512,8 +578,10 @@
     {
       "id": "text-msg3",
       "type": "text",
-      "x": 520, "y": 322,
-      "width": 180, "height": 18,
+      "x": 520,
+      "y": 322,
+      "width": 180,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -546,8 +614,10 @@
     {
       "id": "text-msg4",
       "type": "text",
-      "x": 220, "y": 382,
-      "width": 180, "height": 18,
+      "x": 220,
+      "y": 382,
+      "width": 180,
+      "height": 18,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",

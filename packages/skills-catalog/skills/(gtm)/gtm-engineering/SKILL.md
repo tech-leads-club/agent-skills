@@ -6,7 +6,6 @@ metadata:
   modified_by: Felipe Rodrigues - github.com/felipfr
   source: https://github.com/chadboyda/agent-gtm-skills
   version: '1.0.0'
-
 ---
 
 # GTM Engineering: Automation, Architecture & Agent Orchestration
@@ -36,24 +35,24 @@ GTM engineering emerged as a named discipline in 2024-2025 and has rapidly becom
 
 ### What GTM Engineers Build
 
-| Domain | Examples | Technical Skills |
-|---|---|---|
-| Lead infrastructure | Enrichment waterfalls, scoring models, routing logic | API integration, data pipelines, SQL |
-| Outreach automation | Multi-channel sequences, personalization engines, response classification | Webhook architecture, NLP/LLM integration |
-| CRM automation | Deal stage progression, activity logging, alert systems | Salesforce/HubSpot APIs, event-driven design |
-| Data pipelines | Enrichment flows, deduplication, hygiene scoring | ETL patterns, data validation, error handling |
-| Internal tools | Sales dashboards, territory mapping, quota calculators | Frontend basics, charting libraries, database design |
-| AI agent workflows | Autonomous research agents, email drafters, call summarizers | LLM APIs, prompt engineering, agent orchestration |
+| Domain              | Examples                                                                  | Technical Skills                                     |
+| ------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Lead infrastructure | Enrichment waterfalls, scoring models, routing logic                      | API integration, data pipelines, SQL                 |
+| Outreach automation | Multi-channel sequences, personalization engines, response classification | Webhook architecture, NLP/LLM integration            |
+| CRM automation      | Deal stage progression, activity logging, alert systems                   | Salesforce/HubSpot APIs, event-driven design         |
+| Data pipelines      | Enrichment flows, deduplication, hygiene scoring                          | ETL patterns, data validation, error handling        |
+| Internal tools      | Sales dashboards, territory mapping, quota calculators                    | Frontend basics, charting libraries, database design |
+| AI agent workflows  | Autonomous research agents, email drafters, call summarizers              | LLM APIs, prompt engineering, agent orchestration    |
 
 ### GTM Engineer vs Adjacent Roles
 
-| Dimension | GTM Engineer | RevOps | Sales Ops | Marketing Ops | Software Engineer |
-|---|---|---|---|---|---|
-| Primary output | Automated workflows + custom tools | Process design + reporting | Territory/quota management | Campaign ops + attribution | Product features |
-| Technical depth | Writes code, builds APIs, deploys infra | Configures tools, writes formulas | Configures CRM, manages data | Configures MAP, manages integrations | Full-stack engineering |
-| Revenue proximity | Direct: builds pipeline-generating systems | Indirect: designs processes | Indirect: enables sales team | Indirect: enables marketing team | None unless product-led |
-| Tool relationship | Builds on top of and between tools | Selects and configures tools | Uses tools as provided | Uses tools as provided | Builds the tools |
-| Typical background | Engineering + sales/marketing exposure | Ops + analytics | Sales + analytics | Marketing + analytics | Computer science |
+| Dimension          | GTM Engineer                               | RevOps                            | Sales Ops                    | Marketing Ops                        | Software Engineer       |
+| ------------------ | ------------------------------------------ | --------------------------------- | ---------------------------- | ------------------------------------ | ----------------------- |
+| Primary output     | Automated workflows + custom tools         | Process design + reporting        | Territory/quota management   | Campaign ops + attribution           | Product features        |
+| Technical depth    | Writes code, builds APIs, deploys infra    | Configures tools, writes formulas | Configures CRM, manages data | Configures MAP, manages integrations | Full-stack engineering  |
+| Revenue proximity  | Direct: builds pipeline-generating systems | Indirect: designs processes       | Indirect: enables sales team | Indirect: enables marketing team     | None unless product-led |
+| Tool relationship  | Builds on top of and between tools         | Selects and configures tools      | Uses tools as provided       | Uses tools as provided               | Builds the tools        |
+| Typical background | Engineering + sales/marketing exposure     | Ops + analytics                   | Sales + analytics            | Marketing + analytics                | Computer science        |
 
 ### Career Trajectory
 
@@ -149,24 +148,24 @@ Prospect Record (CRM or custom DB)
 
 The system must learn from outcomes. Without feedback loops, automations repeat the same mistakes at scale.
 
-| Signal | Action | System Update |
-|---|---|---|
-| Positive reply | Tag attributes of the responder (industry, title, signals present) | Refine ICP scoring weights toward this profile |
-| Negative reply | Analyze messaging that triggered the rejection | Adjust templates, update objection handling |
-| No reply after full sequence | Compare against positive responders | Identify differentiating signals, update targeting |
-| Meeting booked | Log which sequence step and message variant converted | Weight that variant higher in future sends |
-| Deal closed-won | Full attribution: which enrichment, sequence, and personalization drove the deal | Update scoring model, replicate the pattern |
-| Deal closed-lost | Analyze where the process broke down | Update disqualification criteria, fix the gap |
+| Signal                       | Action                                                                           | System Update                                      |
+| ---------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Positive reply               | Tag attributes of the responder (industry, title, signals present)               | Refine ICP scoring weights toward this profile     |
+| Negative reply               | Analyze messaging that triggered the rejection                                   | Adjust templates, update objection handling        |
+| No reply after full sequence | Compare against positive responders                                              | Identify differentiating signals, update targeting |
+| Meeting booked               | Log which sequence step and message variant converted                            | Weight that variant higher in future sends         |
+| Deal closed-won              | Full attribution: which enrichment, sequence, and personalization drove the deal | Update scoring model, replicate the pattern        |
+| Deal closed-lost             | Analyze where the process broke down                                             | Update disqualification criteria, fix the gap      |
 
 ### Architecture vs Tools: Decision Framework
 
-| Question | Architecture Answer | Tool Answer |
-|---|---|---|
-| "Why did this lead get this message?" | Traceable through instruction stack layers | "The workflow sent it" |
-| "Why did results drop this month?" | Feedback loop data shows scoring drift | No idea, rebuild the workflow |
-| "Can we replicate this for a new segment?" | Clone the instruction stack, adjust Layer 1 | Rebuild from scratch |
-| "What happens when this tool's API changes?" | Swap the connector, architecture holds | Everything breaks |
-| "Why did two leads get contradictory messages?" | Persistent context prevents this | Race condition in parallel workflows |
+| Question                                        | Architecture Answer                         | Tool Answer                          |
+| ----------------------------------------------- | ------------------------------------------- | ------------------------------------ |
+| "Why did this lead get this message?"           | Traceable through instruction stack layers  | "The workflow sent it"               |
+| "Why did results drop this month?"              | Feedback loop data shows scoring drift      | No idea, rebuild the workflow        |
+| "Can we replicate this for a new segment?"      | Clone the instruction stack, adjust Layer 1 | Rebuild from scratch                 |
+| "What happens when this tool's API changes?"    | Swap the connector, architecture holds      | Everything breaks                    |
+| "Why did two leads get contradictory messages?" | Persistent context prevents this            | Race condition in parallel workflows |
 
 ---
 
@@ -176,37 +175,37 @@ Choosing the right platform depends on team technical depth, lead volume, budget
 
 ### n8n vs Make vs Zapier: Detailed Comparison
 
-| Dimension | n8n | Make (Integromat) | Zapier |
-|---|---|---|---|
-| **Architecture** | Self-hosted or cloud, node-based | Cloud-native, visual scenario builder | Cloud-native, trigger-action model |
-| **Technical depth required** | Medium-High (JSON, expressions, code nodes) | Medium (visual data mapping, some formulas) | Low (point-and-click, templates) |
-| **AI/LLM integration** | Best-in-class: 70+ AI nodes, LangChain native | Good: HTTP module + AI modules | Good: built-in AI actions, ChatGPT plugin |
-| **Self-hosting** | Yes (Docker, Kubernetes) | No | No |
-| **Pricing model** | Execution-based (self-host: free/paid tiers) | Operation-based (per data operation) | Task-based (per trigger + action) |
-| **Price at 10K ops/month** | ~$20-50 (self-hosted) or ~$50 (cloud) | ~$30-60 | ~$100-200 |
-| **Price at 100K ops/month** | ~$50-100 (self-hosted) or ~$200 (cloud) | ~$150-300 | ~$500-1,500+ |
-| **Max integrations** | 400+ (plus HTTP/webhook for anything) | 1,500+ | 7,000+ |
-| **Error handling** | Native retry, error workflows, manual replay | Built-in retry, error routes, break modules | Basic retry, error paths on paid plans |
-| **Version control** | JSON export, Git-friendly | Scenario export (JSON) | Limited (no native Git support) |
-| **Data sovereignty** | Full control (self-hosted) | EU/US cloud regions | US cloud (enterprise: custom) |
-| **Branching/routing** | If/Switch nodes, merge nodes | Routers, filters, iterators | Paths (paid), Filters |
-| **Code execution** | JavaScript, Python nodes built-in | JavaScript in some modules | Limited (Code by Zapier, basic JS/Python) |
-| **Webhook support** | Full (trigger + respond) | Full (trigger + respond) | Full (trigger + respond) |
-| **Best for GTM** | Complex multi-step AI workflows, data pipelines | Visual workflow design, moderate complexity | Simple integrations, non-technical teams |
+| Dimension                    | n8n                                             | Make (Integromat)                           | Zapier                                    |
+| ---------------------------- | ----------------------------------------------- | ------------------------------------------- | ----------------------------------------- |
+| **Architecture**             | Self-hosted or cloud, node-based                | Cloud-native, visual scenario builder       | Cloud-native, trigger-action model        |
+| **Technical depth required** | Medium-High (JSON, expressions, code nodes)     | Medium (visual data mapping, some formulas) | Low (point-and-click, templates)          |
+| **AI/LLM integration**       | Best-in-class: 70+ AI nodes, LangChain native   | Good: HTTP module + AI modules              | Good: built-in AI actions, ChatGPT plugin |
+| **Self-hosting**             | Yes (Docker, Kubernetes)                        | No                                          | No                                        |
+| **Pricing model**            | Execution-based (self-host: free/paid tiers)    | Operation-based (per data operation)        | Task-based (per trigger + action)         |
+| **Price at 10K ops/month**   | ~$20-50 (self-hosted) or ~$50 (cloud)           | ~$30-60                                     | ~$100-200                                 |
+| **Price at 100K ops/month**  | ~$50-100 (self-hosted) or ~$200 (cloud)         | ~$150-300                                   | ~$500-1,500+                              |
+| **Max integrations**         | 400+ (plus HTTP/webhook for anything)           | 1,500+                                      | 7,000+                                    |
+| **Error handling**           | Native retry, error workflows, manual replay    | Built-in retry, error routes, break modules | Basic retry, error paths on paid plans    |
+| **Version control**          | JSON export, Git-friendly                       | Scenario export (JSON)                      | Limited (no native Git support)           |
+| **Data sovereignty**         | Full control (self-hosted)                      | EU/US cloud regions                         | US cloud (enterprise: custom)             |
+| **Branching/routing**        | If/Switch nodes, merge nodes                    | Routers, filters, iterators                 | Paths (paid), Filters                     |
+| **Code execution**           | JavaScript, Python nodes built-in               | JavaScript in some modules                  | Limited (Code by Zapier, basic JS/Python) |
+| **Webhook support**          | Full (trigger + respond)                        | Full (trigger + respond)                    | Full (trigger + respond)                  |
+| **Best for GTM**             | Complex multi-step AI workflows, data pipelines | Visual workflow design, moderate complexity | Simple integrations, non-technical teams  |
 
 ### Enterprise iPaaS: Tray.io vs Workato
 
 For larger organizations with complex integration needs, enterprise iPaaS platforms provide governance, compliance, and scale.
 
-| Dimension | Tray.io | Workato |
-|---|---|---|
-| **Target** | Mid-market to enterprise | Enterprise |
-| **Pricing** | Custom (typically $10K+/year) | Custom (typically $10K+/year) |
-| **Strength** | Low-code visual builder for "citizen developers" | Enterprise-grade governance + AI copilots |
-| **Integrations** | 600+ connectors | 1,000+ connectors |
-| **AI features** | Merlin AI for building workflows | Copilot suite for building, mapping, documenting |
-| **Compliance** | SOC2, GDPR, HIPAA | SOC2, GDPR, HIPAA, FedRAMP |
-| **GTM use** | Marketing ops, sales ops, RevOps automation | Full GTM + finance + HR + IT automation |
+| Dimension          | Tray.io                                                          | Workato                                                             |
+| ------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Target**         | Mid-market to enterprise                                         | Enterprise                                                          |
+| **Pricing**        | Custom (typically $10K+/year)                                    | Custom (typically $10K+/year)                                       |
+| **Strength**       | Low-code visual builder for "citizen developers"                 | Enterprise-grade governance + AI copilots                           |
+| **Integrations**   | 600+ connectors                                                  | 1,000+ connectors                                                   |
+| **AI features**    | Merlin AI for building workflows                                 | Copilot suite for building, mapping, documenting                    |
+| **Compliance**     | SOC2, GDPR, HIPAA                                                | SOC2, GDPR, HIPAA, FedRAMP                                          |
+| **GTM use**        | Marketing ops, sales ops, RevOps automation                      | Full GTM + finance + HR + IT automation                             |
 | **When to choose** | Teams that need enterprise features but want accessible building | Organizations requiring full audit trails and enterprise compliance |
 
 ### Platform Selection Decision Tree
@@ -249,7 +248,6 @@ START: What is your team's technical depth?
 
 ---
 
-
 For API-first stack design, data pipelines, GTM agents, event-driven architecture, monitoring, cost optimization, patterns, and internal tools read `references/implementation-guide.md`.
 
 ## Examples
@@ -266,24 +264,23 @@ For API-first stack design, data pipelines, GTM agents, event-driven architectur
 
 ---
 
-
 For checklists, benchmarks, and discovery questions read `references/quick-reference.md` when you need detailed reference.
 
 ---
 
 ## Related Skills
 
-| Skill | When to Cross-Reference |
-|---|---|
-| ai-cold-outreach | When building automated outreach sequences, email personalization, and response handling |
-| ai-sdr | When designing AI-powered SDR workflows, qualification logic, and handoff processes |
-| lead-enrichment | When implementing enrichment waterfalls, data quality scoring, and provider selection |
-| solo-founder-gtm | When a solo founder needs to build GTM automation with minimal resources and budget |
-| gtm-metrics | When defining KPIs, building dashboards, and measuring automation ROI |
-| ai-seo | When building content-to-pipeline automation, competitor monitoring, and organic lead generation |
-| positioning-icp | When ICP scoring models need to be defined or updated before automation can be built |
-| sales-motion-design | When designing the end-to-end sales process that automation supports |
-| expansion-retention | When building usage-based expansion triggers and churn prevention workflows |
-| content-to-pipeline | When automating content distribution, engagement tracking, and content-driven lead scoring |
-| partner-affiliate | When building partner lead routing, co-selling workflows, and affiliate tracking automation |
-| ai-pricing | When implementing dynamic pricing, usage metering, or outcome-based pricing infrastructure |
+| Skill               | When to Cross-Reference                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| ai-cold-outreach    | When building automated outreach sequences, email personalization, and response handling         |
+| ai-sdr              | When designing AI-powered SDR workflows, qualification logic, and handoff processes              |
+| lead-enrichment     | When implementing enrichment waterfalls, data quality scoring, and provider selection            |
+| solo-founder-gtm    | When a solo founder needs to build GTM automation with minimal resources and budget              |
+| gtm-metrics         | When defining KPIs, building dashboards, and measuring automation ROI                            |
+| ai-seo              | When building content-to-pipeline automation, competitor monitoring, and organic lead generation |
+| positioning-icp     | When ICP scoring models need to be defined or updated before automation can be built             |
+| sales-motion-design | When designing the end-to-end sales process that automation supports                             |
+| expansion-retention | When building usage-based expansion triggers and churn prevention workflows                      |
+| content-to-pipeline | When automating content distribution, engagement tracking, and content-driven lead scoring       |
+| partner-affiliate   | When building partner lead routing, co-selling workflows, and affiliate tracking automation      |
+| ai-pricing          | When implementing dynamic pricing, usage metering, or outcome-based pricing infrastructure       |

@@ -44,11 +44,11 @@ Analyze the user's description to determine:
 
 **Visual mode** — decide upfront and apply consistently to all elements:
 
-| Mode       | `roughness` | `fontFamily` | When to use                                          |
-| ---------- | ----------- | ------------ | ---------------------------------------------------- |
-| **Sketch** | `1`         | `5`          | Default — informal, approachable, Excalidraw-native  |
-| **Clean**  | `0`         | `2`          | Executive presentations, formal specs                |
-| **Mixed**  | zones: `0`, shapes: `1` | `5` | Architecture diagrams (structural zones + sketchy shapes) |
+| Mode       | `roughness`             | `fontFamily` | When to use                                               |
+| ---------- | ----------------------- | ------------ | --------------------------------------------------------- |
+| **Sketch** | `1`                     | `5`          | Default — informal, approachable, Excalidraw-native       |
+| **Clean**  | `0`                     | `2`          | Executive presentations, formal specs                     |
+| **Mixed**  | zones: `0`, shapes: `1` | `5`          | Architecture diagrams (structural zones + sketchy shapes) |
 
 ### Step 3: Extract Structured Information
 
@@ -74,17 +74,28 @@ Key rules for generation:
      {
        "id": "step-1",
        "type": "rectangle",
-       "x": 100, "y": 100, "width": 200, "height": 80,
+       "x": 100,
+       "y": 100,
+       "width": 200,
+       "height": 80,
        "boundElements": [{ "type": "text", "id": "text-step-1" }]
      },
      {
        "id": "text-step-1",
        "type": "text",
-       "x": 130, "y": 128, "width": 140, "height": 24,
-       "text": "My Step", "originalText": "My Step",
-       "fontSize": 20, "fontFamily": 5,
-       "textAlign": "center", "verticalAlign": "middle",
-       "containerId": "step-1", "lineHeight": 1.25, "roundness": null
+       "x": 130,
+       "y": 128,
+       "width": 140,
+       "height": 24,
+       "text": "My Step",
+       "originalText": "My Step",
+       "fontSize": 20,
+       "fontFamily": 5,
+       "textAlign": "center",
+       "verticalAlign": "middle",
+       "containerId": "step-1",
+       "lineHeight": 1.25,
+       "roundness": null
      }
    ]
    ```
@@ -96,18 +107,30 @@ Key rules for generation:
      {
        "id": "arrow-1",
        "type": "arrow",
-       "x": 100, "y": 150,
-       "points": [[0, 0], [200, 0]],
+       "x": 100,
+       "y": 150,
+       "points": [
+         [0, 0],
+         [200, 0]
+       ],
        "boundElements": [{ "type": "text", "id": "text-arrow-1" }]
      },
      {
        "id": "text-arrow-1",
        "type": "text",
-       "x": 160, "y": 132, "width": 80, "height": 18,
-       "text": "sends data", "originalText": "sends data",
-       "fontSize": 14, "fontFamily": 5,
-       "textAlign": "center", "verticalAlign": "middle",
-       "containerId": "arrow-1", "lineHeight": 1.25, "roundness": null
+       "x": 160,
+       "y": 132,
+       "width": 80,
+       "height": 18,
+       "text": "sends data",
+       "originalText": "sends data",
+       "fontSize": 14,
+       "fontFamily": 5,
+       "textAlign": "center",
+       "verticalAlign": "middle",
+       "containerId": "arrow-1",
+       "lineHeight": 1.25,
+       "roundness": null
      }
    ]
    ```
@@ -123,6 +146,7 @@ Key rules for generation:
      ]
    }
    ```
+
    ```json
    {
      "id": "arrow-1",
@@ -140,14 +164,14 @@ Key rules for generation:
 
 7. **Colors** — Use a consistent palette:
 
-   | Role | Color | Hex |
-   |------|-------|-----|
-   | Primary entities | Light blue | `#a5d8ff` |
-   | Process steps | Light green | `#b2f2bb` |
-   | Important/Central | Yellow | `#ffd43b` |
-   | Warnings/Errors | Light red | `#ffc9c9` |
-   | Secondary | Cyan | `#96f2d7` |
-   | Default stroke | Dark | `#1e1e1e` |
+   | Role              | Color       | Hex       |
+   | ----------------- | ----------- | --------- |
+   | Primary entities  | Light blue  | `#a5d8ff` |
+   | Process steps     | Light green | `#b2f2bb` |
+   | Important/Central | Yellow      | `#ffd43b` |
+   | Warnings/Errors   | Light red   | `#ffc9c9` |
+   | Secondary         | Cyan        | `#96f2d7` |
+   | Default stroke    | Dark        | `#1e1e1e` |
 
 ### Step 5: Save and Present
 
@@ -170,16 +194,16 @@ Key rules for generation:
 
 Pre-built templates are available in `assets/` for quick starting points. Use these when the diagram type matches — they provide correct structure and styling:
 
-| Template         | File                                                   |
-| ---------------- | ------------------------------------------------------ |
-| Flowchart        | `assets/flowchart-template.json`                    |
-| Relationship     | `assets/relationship-template.json`                 |
-| Mind Map         | `assets/mindmap-template.json`                      |
-| Data Flow (DFD)  | `assets/data-flow-diagram-template.json`            |
-| Swimlane         | `assets/business-flow-swimlane-template.json`       |
-| Class Diagram    | `assets/class-diagram-template.json`                |
-| Sequence Diagram | `assets/sequence-diagram-template.json`             |
-| ER Diagram       | `assets/er-diagram-template.json`                   |
+| Template         | File                                          |
+| ---------------- | --------------------------------------------- |
+| Flowchart        | `assets/flowchart-template.json`              |
+| Relationship     | `assets/relationship-template.json`           |
+| Mind Map         | `assets/mindmap-template.json`                |
+| Data Flow (DFD)  | `assets/data-flow-diagram-template.json`      |
+| Swimlane         | `assets/business-flow-swimlane-template.json` |
+| Class Diagram    | `assets/class-diagram-template.json`          |
+| Sequence Diagram | `assets/sequence-diagram-template.json`       |
+| ER Diagram       | `assets/er-diagram-template.json`             |
 
 Read a template when creating that diagram type for the first time. Use its structure as a base, then modify elements to match the user's request.
 
@@ -256,16 +280,16 @@ Before delivering the diagram, verify:
 
 ## Troubleshooting
 
-| Issue                         | Solution                                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------------------------- |
-| Text not showing in shapes    | Use `boundElements` + separate text element with `containerId`, `originalText`, `lineHeight`  |
+| Issue                         | Solution                                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------------------- |
+| Text not showing in shapes    | Use `boundElements` + separate text element with `containerId`, `originalText`, `lineHeight` |
 | Text hidden behind arrows     | Move text elements to end of `elements` array (after all arrows)                             |
 | Arrows don't move with shapes | Use `startBinding`/`endBinding` with `elementId`, `focus: 0`, `gap: 1`                       |
-| Shape not moving with arrows  | Add the arrow to the shape's `boundElements` array                                            |
-| Elements overlap              | Increase spacing between coordinates                                                          |
-| Text doesn't fit              | Increase shape width or reduce font size                                                      |
-| Too many elements             | Break into multiple diagrams                                                                  |
-| Colors look inconsistent      | Define color palette upfront, apply consistently                                              |
+| Shape not moving with arrows  | Add the arrow to the shape's `boundElements` array                                           |
+| Elements overlap              | Increase spacing between coordinates                                                         |
+| Text doesn't fit              | Increase shape width or reduce font size                                                     |
+| Too many elements             | Break into multiple diagrams                                                                 |
+| Colors look inconsistent      | Define color palette upfront, apply consistently                                             |
 
 ## Limitations
 

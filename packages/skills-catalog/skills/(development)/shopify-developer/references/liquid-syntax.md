@@ -17,6 +17,7 @@
 ```
 
 **Operators:**
+
 - `==` - equals
 - `!=` - not equals
 - `>` - greater than
@@ -28,6 +29,7 @@
 - `or` - logical OR
 
 **Examples:**
+
 ```liquid
 {% if product.price > 100 and product.available %}
   Premium item in stock

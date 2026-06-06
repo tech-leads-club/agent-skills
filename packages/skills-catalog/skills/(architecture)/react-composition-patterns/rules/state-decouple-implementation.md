@@ -21,10 +21,7 @@ function ChannelComposer({ channelId }: { channelId: string }) {
 
   return (
     <Composer.Frame>
-      <Composer.Input
-        value={state.input}
-        onChange={(text) => sync.updateInput(text)}
-      />
+      <Composer.Input value={state.input} onChange={(text) => sync.updateInput(text)} />
       <Composer.Submit onPress={() => sync.submit()} />
     </Composer.Frame>
   )
@@ -35,22 +32,12 @@ function ChannelComposer({ channelId }: { channelId: string }) {
 
 ```tsx
 // Provider handles all state management details
-function ChannelProvider({
-  channelId,
-  children,
-}: {
-  channelId: string
-  children: React.ReactNode
-}) {
+function ChannelProvider({ channelId, children }: { channelId: string; children: React.ReactNode }) {
   const { state, update, submit } = useGlobalChannel(channelId)
   const inputRef = useRef(null)
 
   return (
-    <Composer.Provider
-      state={state}
-      actions={{ update, submit }}
-      meta={{ inputRef }}
-    >
+    <Composer.Provider state={state} actions={{ update, submit }} meta={{ inputRef }}>
       {children}
     </Composer.Provider>
   )
@@ -88,10 +75,7 @@ function ForwardMessageProvider({ children }) {
   const forwardMessage = useForwardMessage()
 
   return (
-    <Composer.Provider
-      state={state}
-      actions={{ update: setState, submit: forwardMessage }}
-    >
+    <Composer.Provider state={state} actions={{ update: setState, submit: forwardMessage }}>
       {children}
     </Composer.Provider>
   )

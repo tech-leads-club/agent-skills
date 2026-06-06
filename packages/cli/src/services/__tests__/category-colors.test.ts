@@ -5,36 +5,33 @@ describe('category-colors service', () => {
   describe('getColorForCategory', () => {
     /**
      * **Validates: Requirements 3.5.1, 3.5.2**
-     * 
+     *
      * Property 9: Category color consistency
-     * 
+     *
      * For any category, the same color should be returned regardless of
      * which view or component requests it
      */
     it('should return consistent color for the same category across multiple calls', () => {
       fc.assert(
-        fc.property(
-          fc.constantFrom(...Object.keys(categoryColors)),
-          (categoryId) => {
-            const color1 = getColorForCategory(categoryId)
-            const color2 = getColorForCategory(categoryId)
-            const color3 = getColorForCategory(categoryId)
-            
-            // All calls should return the same color
-            expect(color1).toBe(color2)
-            expect(color2).toBe(color3)
-            expect(color1).toBe(color3)
-          }
-        ),
-        { numRuns: 100 }
+        fc.property(fc.constantFrom(...Object.keys(categoryColors)), (categoryId) => {
+          const color1 = getColorForCategory(categoryId)
+          const color2 = getColorForCategory(categoryId)
+          const color3 = getColorForCategory(categoryId)
+
+          // All calls should return the same color
+          expect(color1).toBe(color2)
+          expect(color2).toBe(color3)
+          expect(color1).toBe(color3)
+        }),
+        { numRuns: 100 },
       )
     })
 
     /**
      * **Validates: Requirements 3.5.5**
-     * 
+     *
      * Property 11: Unknown category fallback
-     * 
+     *
      * For any category ID not in the color mapping, the service should
      * return the default color
      */
@@ -42,62 +39,54 @@ describe('category-colors service', () => {
       fc.assert(
         fc.property(
           // Generate random strings that are NOT in the known categories
-          fc.string({ minLength: 1, maxLength: 20 }).filter(
-            (str) => !Object.keys(categoryColors).includes(str)
-          ),
+          fc.string({ minLength: 1, maxLength: 20 }).filter((str) => !Object.keys(categoryColors).includes(str)),
           (unknownCategoryId) => {
             const color = getColorForCategory(unknownCategoryId)
-            
+
             // Should return the default color
             expect(color).toBe(categoryColors.default)
-          }
+          },
         ),
-        { numRuns: 100 }
+        { numRuns: 100 },
       )
     })
 
     /**
      * **Validates: Requirements 3.5.3**
-     * 
+     *
      * Property 10: Color contrast accessibility
-     * 
+     *
      * For any category color, the contrast ratio against the background
      * should be at least 4.5:1 (WCAG AA)
-     * 
+     *
      * Note: This test verifies the color format is valid hex.
      * Actual contrast ratios have been manually verified in the design doc.
      */
     it('should return valid hex color codes for all categories', () => {
       fc.assert(
-        fc.property(
-          fc.constantFrom(...Object.keys(categoryColors)),
-          (categoryId) => {
-            const color = getColorForCategory(categoryId)
-            
-            // Should be a valid hex color code
-            expect(color).toMatch(/^#[0-9a-f]{6}$/i)
-          }
-        )
+        fc.property(fc.constantFrom(...Object.keys(categoryColors)), (categoryId) => {
+          const color = getColorForCategory(categoryId)
+
+          // Should be a valid hex color code
+          expect(color).toMatch(/^#[0-9a-f]{6}$/i)
+        }),
       )
     })
 
     /**
      * Additional property: Color immutability
-     * 
+     *
      * Validates that the returned color is always a string and doesn't
      * change the internal state
      */
     it('should always return a string value', () => {
       fc.assert(
-        fc.property(
-          fc.string({ minLength: 0, maxLength: 50 }),
-          (categoryId) => {
-            const color = getColorForCategory(categoryId)
-            
-            expect(typeof color).toBe('string')
-            expect(color.length).toBeGreaterThan(0)
-          }
-        )
+        fc.property(fc.string({ minLength: 0, maxLength: 50 }), (categoryId) => {
+          const color = getColorForCategory(categoryId)
+
+          expect(typeof color).toBe('string')
+          expect(color.length).toBeGreaterThan(0)
+        }),
       )
     })
 
@@ -122,11 +111,11 @@ describe('category-colors service', () => {
       it('should handle edge cases', () => {
         // Empty string
         expect(getColorForCategory('')).toBe(categoryColors.default)
-        
+
         // Special characters
         expect(getColorForCategory('web-dev')).toBe(categoryColors.default)
         expect(getColorForCategory('web/dev')).toBe(categoryColors.default)
-        
+
         // Case sensitivity
         expect(getColorForCategory('WEB')).toBe(categoryColors.default)
         expect(getColorForCategory('Web')).toBe(categoryColors.default)
@@ -141,12 +130,12 @@ describe('category-colors service', () => {
   describe('getAllCategoryColors', () => {
     /**
      * Property: Complete color mapping
-     * 
+     *
      * Validates that getAllCategoryColors returns all defined categories
      */
     it('should return all category color mappings', () => {
       const colors = getAllCategoryColors()
-      
+
       // Should contain all known categories
       expect(colors).toHaveProperty('web')
       expect(colors).toHaveProperty('devops')
@@ -156,74 +145,71 @@ describe('category-colors service', () => {
       expect(colors).toHaveProperty('ai')
       expect(colors).toHaveProperty('security')
       expect(colors).toHaveProperty('default')
-      
+
       // Should have exactly the expected number of categories
       expect(Object.keys(colors).length).toBe(8)
     })
 
     /**
      * Property: Immutability
-     * 
+     *
      * Validates that modifying the returned object doesn't affect
      * the internal color mapping
      */
     it('should return a copy that does not affect internal state', () => {
       const colors1 = getAllCategoryColors()
       const colors2 = getAllCategoryColors()
-      
+
       // Modify the first copy
       colors1['web'] = '#000000'
-      
+
       // Second copy should be unaffected
       expect(colors2['web']).toBe('#3b82f6')
-      
+
       // Original function should still return correct color
       expect(getColorForCategory('web')).toBe('#3b82f6')
     })
 
     /**
      * Property: Consistency with getColorForCategory
-     * 
+     *
      * Validates that colors from getAllCategoryColors match
      * those from getColorForCategory
      */
     it('should return colors consistent with getColorForCategory', () => {
       fc.assert(
-        fc.property(
-          fc.constantFrom(...Object.keys(categoryColors)),
-          (categoryId) => {
-            const allColors = getAllCategoryColors()
-            const individualColor = getColorForCategory(categoryId)
-            
-            expect(allColors[categoryId]).toBe(individualColor)
-          }
-        )
+        fc.property(fc.constantFrom(...Object.keys(categoryColors)), (categoryId) => {
+          const allColors = getAllCategoryColors()
+          const individualColor = getColorForCategory(categoryId)
+
+          expect(allColors[categoryId]).toBe(individualColor)
+        }),
       )
     })
 
     describe('specific examples', () => {
       it('should return object with all expected colors', () => {
         const colors = getAllCategoryColors()
-        
+
         expect(colors).toEqual({
-          'web': '#3b82f6',
-          'devops': '#10b981',
-          'data': '#8b5cf6',
-          'mobile': '#f59e0b',
-          'testing': '#ef4444',
-          'ai': '#06b6d4',
-          'security': '#ec4899',
-          'default': '#64748b',
+          web: '#3b82f6',
+          devops: '#10b981',
+          data: '#8b5cf6',
+          mobile: '#f59e0b',
+          testing: '#ef4444',
+          ai: '#06b6d4',
+          security: '#ec4899',
+          default: '#64748b',
         })
       })
 
       it('should return a new object on each call', () => {
         const colors1 = getAllCategoryColors()
         const colors2 = getAllCategoryColors()
-        
+
         // Should be equal in content
         expect(colors1).toEqual(colors2)
-        
+
         // But not the same reference
         expect(colors1).not.toBe(colors2)
       })
@@ -244,7 +230,7 @@ describe('category-colors service', () => {
 
     it('should have valid hex color codes for all categories', () => {
       const hexColorPattern = /^#[0-9a-f]{6}$/i
-      
+
       for (const color of Object.values(categoryColors)) {
         expect(color).toMatch(hexColorPattern)
       }

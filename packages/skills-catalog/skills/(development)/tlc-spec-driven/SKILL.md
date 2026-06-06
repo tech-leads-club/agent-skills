@@ -120,18 +120,19 @@ parallel execution. The orchestrating agent plans and coordinates; sub-agents do
 
 **When to delegate to a sub-agent:**
 
-| Activity | Delegate? | Why |
-|---|---|---|
-| Research (design phase, brownfield mapping) | Yes | Research output is large; only the summary matters to the main context |
-| Implementing a task | Yes | File reads, edits, test output consume context; only the result matters |
-| Parallel `[P]` tasks | Yes (one per task) | The only way to actually run tasks in parallel |
-| Sequential tasks with no `[P]` | Yes | Keeps implementation artifacts out of the main context |
-| Planning, task creation, validation reports | No | These require the full accumulated context to be coherent |
-| Quick mode tasks | No | Too small to justify the overhead |
+| Activity                                    | Delegate?          | Why                                                                     |
+| ------------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
+| Research (design phase, brownfield mapping) | Yes                | Research output is large; only the summary matters to the main context  |
+| Implementing a task                         | Yes                | File reads, edits, test output consume context; only the result matters |
+| Parallel `[P]` tasks                        | Yes (one per task) | The only way to actually run tasks in parallel                          |
+| Sequential tasks with no `[P]`              | Yes                | Keeps implementation artifacts out of the main context                  |
+| Planning, task creation, validation reports | No                 | These require the full accumulated context to be coherent               |
+| Quick mode tasks                            | No                 | Too small to justify the overhead                                       |
 
 **Context each sub-agent receives:**
 
 The orchestrating agent MUST provide each sub-agent with:
+
 - The specific task definition from tasks.md (What, Where, Depends on, Reuses, Done when, Tests, Gate)
 - Relevant coding principles and conventions (coding-principles.md, CONVENTIONS.md)
 - TESTING.md, if it exists (for gate check commands and test patterns)
@@ -143,6 +144,7 @@ from other tasks, or STATE.md (unless the task explicitly references a decision/
 **What sub-agents return:**
 
 Each sub-agent reports back:
+
 - Status: Complete | Blocked | Partial
 - Files changed: [list]
 - Gate check result: [pass/fail + test counts]
