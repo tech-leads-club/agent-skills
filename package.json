@@ -99,8 +99,12 @@
   "overrides": {
     "follow-redirects": "^1.16.0",
     "postcss": "^8.5.10",
+    "axios": "^1.17.0",
+    "tmp": "^0.2.6",
+    "uuid": "^11.1.1",
     "nx": {
-      "brace-expansion": "^5.0.5",
+      "axios": "^1.17.0",
+      "brace-expansion": "^5.0.6",
       "yaml": "^2.8.3"
     }
   },
