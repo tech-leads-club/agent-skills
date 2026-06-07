@@ -12,6 +12,17 @@
   max-width: 980px;
   margin: 0 auto;
   padding: 45px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+}
+
+.markdown-body pre {
+  overflow-x: auto;
 }
 
 @media (max-width: 767px) {
