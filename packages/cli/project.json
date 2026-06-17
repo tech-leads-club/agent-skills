@@ -1,0 +1,74 @@
+{
+  "name": "@tech-leads-club/agent-skills",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/cli/src",
+  "projectType": "library",
+  "tags": ["scope:cli"],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "inputs": ["production", "^production"],
+      "options": {
+        "platform": "node",
+        "outputPath": "packages/cli/dist",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "packages/cli/src/index.ts",
+        "tsConfig": "packages/cli/tsconfig.json",
+        "assets": [
+          {
+            "glob": "README.md",
+            "input": ".",
+            "output": "."
+          },
+          {
+            "glob": "LICENSE",
+            "input": ".",
+            "output": "."
+          },
+          {
+            "glob": "package.json",
+            "input": ".",
+            "output": "."
+          },
+          {
+            "glob": "**/*.mp3",
+            "input": "packages/cli/src/assets",
+            "output": "assets"
+          }
+        ],
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          },
+          "banner": {
+            "js": "#!/usr/bin/env node"
+          },
+          "platform": "node",
+          "jsx": "automatic",
+          "loader": {
+            ".tsx": "tsx"
+          }
+        }
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      }
+    },
+    "post-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "chmod +x packages/cli/dist/index.js"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

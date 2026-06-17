@@ -1,0 +1,48 @@
+name: 'Setup Environment'
+description: 'Reusable setup for Node.js, NPM, Nx Cloud, and Git config'
+
+inputs:
+  github-app-token:
+    description: 'GitHub App token for git operations'
+    required: false
+  app-slug:
+    description: 'GitHub App slug for git user config (e.g. my-app-bot)'
+    required: false
+  git-config:
+    description: 'Configure git user for commits'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Start Nx Cloud
+      shell: bash
+      run: npx --yes nx-cloud@19.1.0 start-ci-run --no-distribution
+      env:
+        NX_CLOUD_ACCESS_TOKEN: ${{ env.NX_CLOUD_ACCESS_TOKEN }}
+        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
+      continue-on-error: true
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        registry-url: 'https://registry.npmjs.org'
+        scope: '@tech-leads-club'
+        cache: 'npm'
+
+    - name: Upgrade npm
+      shell: bash
+      run: npm install -g npm@latest
+
+    - name: Install Dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Git Config
+      if: inputs.git-config == 'true' && inputs.app-slug != '' && inputs.github-app-token != ''
+      shell: bash
+      run: |
+        git config user.name "${{ inputs.app-slug }}[bot]"
+        git config user.email "${{ inputs.app-slug }}[bot]@users.noreply.github.com"
+        git remote set-url origin "https://x-access-token:${{ inputs.github-app-token }}@github.com/${{ github.repository }}.git"

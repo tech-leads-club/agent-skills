@@ -1,0 +1,110 @@
+{
+  "name": "@tech-leads-club/agent-skills-monorepo",
+  "version": "0.0.0",
+  "author": "Tech Leads Club",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "AI agent skills CLI and toolkit",
+  "workspaces": [
+    "packages/*",
+    "libs/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "bugs": {
+    "url": "https://github.com/tech-leads-club/agent-skills/issues"
+  },
+  "homepage": "https://github.com/tech-leads-club/agent-skills#readme",
+  "scripts": {
+    "build": "nx run-many -t build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "generate:skill": "nx g @tech-leads-club/skill-plugin:skill",
+    "generate:data": "nx run-many -t generate-data --output-style=stream",
+    "generate:registry": "nx run @tech-leads-club/skills-catalog:generate-registry",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "npm run scan",
+    "release": "npm run scan && nx release",
+    "release:beta": "npm run scan && nx release --preid beta",
+    "release:beta:dry": "nx release --preid beta --dry-run",
+    "release:dry": "nx release --dry-run",
+    "scan": "npx nx run @tech-leads-club/skills-catalog:security-scan",
+    "validate": "npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills",
+    "start:dev:cli": "npm run dev --workspace=@tech-leads-club/agent-skills",
+    "start:dev:mcp": "npm run start:dev --workspace=@tech-leads-club/agent-skills-mcp",
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' nx run-many -t test; node .github/setup.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tech-leads-club/agent-skills.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "agents",
+    "ai",
+    "antigravity",
+    "claude-code",
+    "cli",
+    "copilot",
+    "cursor",
+    "opencode",
+    "skills"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@modelcontextprotocol/inspector": "^0.21.1",
+    "@nx/devkit": "^22.6.3",
+    "@nx/esbuild": "^22.6.3",
+    "@nx/eslint": "^22.6.3",
+    "@nx/eslint-plugin": "^22.6.3",
+    "@nx/jest": "^22.7.0",
+    "@nx/js": "^22.6.3",
+    "@nx/next": "^22.6.3",
+    "@nx/node": "^22.6.3",
+    "@nx/plugin": "^22.6.3",
+    "@swc-node/register": "^1.11.1",
+    "@swc/core": "1.15.21",
+    "@swc/helpers": "~0.5.20",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24",
+    "cross-env": "^10.1.0",
+    "esbuild": "^0.27.4",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "fast-check": "^4.6.0",
+    "jest": "^30.3.0",
+    "jest-environment-node": "^30.3.0",
+    "jest-util": "^30.3.0",
+    "jsonc-eslint-parser": "^2.4.2",
+    "next": "~16.2.2",
+    "nx": "^22.6.3",
+    "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.0",
+    "yaml": "^2.8.3"
+  },
+  "overrides": {
+    "follow-redirects": "^1.16.0",
+    "postcss": "^8.5.10",
+    "nx": {
+      "brace-expansion": "^5.0.5",
+      "yaml": "^2.8.3"
+    }
+  },
+  "nx": {
+    "includedScripts": []
+  }
+}
