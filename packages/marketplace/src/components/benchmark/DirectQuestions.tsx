@@ -12,7 +12,7 @@ export function DirectQuestions({ questions }: DirectQuestionsProps) {
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
       <div className="flex items-center justify-between gap-3 mb-1">
         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-          The three direct questions
+          Head-to-head: the questions that matter
         </h3>
         <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
           TLC: {wins} wins · {ties} tie

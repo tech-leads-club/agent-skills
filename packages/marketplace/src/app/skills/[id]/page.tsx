@@ -4,14 +4,11 @@ import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
-import { SpecDrivenBenchmark } from '../../../components/benchmark/SpecDrivenBenchmark'
 import { CategoryBadge } from '../../../components/CategoryBadge'
 import { CopyButton } from '../../../components/CopyButton'
 import { JsonLd } from '../../../components/JsonLd'
 import { ShareButton } from '../../../components/ShareButton'
 import marketplaceData from '../../../data/skills.json'
-
-const BENCHMARK_SKILL_ID = 'tlc-spec-driven'
 
 export function generateStaticParams() {
   return marketplaceData.skills.map((skill) => ({
@@ -126,9 +123,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 />
               </div>
             </div>
-
-            {/* Flagship benchmark section (only for the spec-driven skill) */}
-            {skill.id === BENCHMARK_SKILL_ID && <SpecDrivenBenchmark skillId={skill.id} />}
 
             {/* Markdown content */}
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">

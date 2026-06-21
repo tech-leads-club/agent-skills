@@ -97,6 +97,21 @@ export function SpecDrivenBenchmark({ skillId }: SpecDrivenBenchmarkProps) {
 
       {/* Verdict + CTA */}
       <VerdictCTA verdict={verdict} skillId={skillId} />
+
+      {/* Methodology footnote */}
+      <p className="mt-6 text-[12px] text-gray-400 dark:text-gray-600 leading-relaxed">
+        Benchmark methodology: each framework ran end-to-end 3× on the same non-trivial PRD using {planningModel} for
+        planning and {implementationModel} for implementation. Quality was scored by an auditable binary-check LLM
+        judge.{' '}
+        <a
+          href="https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-400"
+        >
+          View skill source →
+        </a>
+      </p>
     </section>
   )
 }
