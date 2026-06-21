@@ -1,3 +1,19 @@
+## 0.14.4 (2026-06-19)
+
+### 🚀 Features
+
+- **skills-catalog:** add spec-driven-eval skill ([4b22b2edd](https://github.com/tech-leads-club/agent-skills/commit/4b22b2edd))
+
+### 🩹 Fixes
+
+- **skills:** correct web best practices HTML examples ([5f9b25d83](https://github.com/tech-leads-club/agent-skills/commit/5f9b25d83))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Lucas Martins @lucassena
+- Waldemar Neto @waldemarnt
+
 ## 0.14.3 (2026-04-28)
 
 ### 🚀 Features

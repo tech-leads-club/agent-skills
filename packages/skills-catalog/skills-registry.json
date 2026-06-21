@@ -172,7 +172,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "2abba650ba22a819e67f8c2fb09d0f5f33a24d66d945ee2ef824751bc97151ce"
+      "contentHash": "e22b6d3e9c7d29cc5f92a89a1a393aa2686aa5c0cd70b7159a7fc9a2bc779461"
     },
     {
       "name": "chrome-devtools",
@@ -1439,6 +1439,20 @@
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "95d71f10ea8a48767cb871ad72c09745cb6ecd822ed71be659cbd960b6503445"
+    },
+    {
+      "name": "spec-driven-eval",
+      "description": "Scores how completely an implementation fulfills a PRD/spec, case by case, and produces a single comparable final grade. Invoke only when explicitly named (e.g. run spec-driven-eval); do not auto-trigger. Use when benchmarking spec-driven implementations, grading acceptance criteria, evaluating whether a feature was 100% implemented, comparing multiple implementations of the same PRD, or auditing implementation and test coverage (unit and e2e) against product requirements. Do NOT use for planning or building features (use tlc-spec-driven), writing PRDs, or general code review unrelated to a spec.",
+      "category": "development",
+      "path": "(development)/spec-driven-eval",
+      "files": [
+        "SKILL.md",
+        "references/quickstart.md",
+        "references/reference.md"
+      ],
+      "author": "Waldemar Neto - github.com/waldemarnt",
+      "version": "1.0.0",
+      "contentHash": "168d6860c6e84809a02c2abface032a4a625bdd81fec6131615e00a2cf87e311"
     },
     {
       "name": "subagent-creator",

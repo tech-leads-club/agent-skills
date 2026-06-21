@@ -163,12 +163,20 @@ Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Strict; Path=/
 
 ```html
 <!-- ❌ Missing or invalid doctype -->
-<html>
-  <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+  <head>
+    <title>Page</title>
+  </head>
+  <body></body>
+</html>
 
-  <!-- ✅ HTML5 doctype -->
-  <!DOCTYPE html>
-  <html lang="en"></html>
+<!-- ✅ HTML5 doctype -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Page</title>
+  </head>
+  <body></body>
 </html>
 ```
 
@@ -176,19 +184,23 @@ Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Strict; Path=/
 
 ```html
 <!-- ❌ Missing or late charset -->
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>Page</title>
     <meta charset="UTF-8" />
   </head>
+  <body></body>
+</html>
 
-  <!-- ✅ Charset as first element in head -->
-  <html>
-    <head>
-      <meta charset="UTF-8" />
-      <title>Page</title>
-    </head>
-  </html>
+<!-- ✅ Charset as first element in head -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page</title>
+  </head>
+  <body></body>
 </html>
 ```
 
@@ -459,25 +471,25 @@ controller.abort()
 <div id="header">
   <div id="header">
     <!-- Duplicate ID -->
-
-    <ul>
-      <div>Item</div>
-      <!-- Invalid child -->
-    </ul>
-
-    <a href="/"><button>Click</button></a>
-    <!-- Invalid nesting -->
-
-    <!-- ✅ Valid HTML -->
-    <header id="site-header"></header>
-
-    <ul>
-      <li>Item</li>
-    </ul>
-
-    <a href="/" class="button">Click</a>
   </div>
+
+  <ul>
+    <div>Item</div>
+    <!-- Invalid child -->
+  </ul>
+
+  <a href="/"><button>Click</button></a>
+  <!-- Invalid nesting -->
 </div>
+
+<!-- ✅ Valid HTML -->
+<header id="site-header"></header>
+
+<ul>
+  <li>Item</li>
+</ul>
+
+<a href="/" class="button">Click</a>
 ```
 
 ### Semantic HTML

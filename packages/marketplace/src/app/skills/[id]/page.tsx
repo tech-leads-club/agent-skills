@@ -101,9 +101,9 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           <span className="text-gray-600 dark:text-gray-300 font-medium">{skill.name}</span>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-10 items-start">
+        <div className="flex flex-col lg:flex-row gap-10 items-stretch lg:items-start">
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             {/* Title section */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-3">
