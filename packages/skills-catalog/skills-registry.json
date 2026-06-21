@@ -911,6 +911,30 @@
       "contentHash": "e73e55256768767436943c8948da0d6a0667282c7195a47119841b5e76263d02"
     },
     {
+      "name": "megabrain",
+      "description": "Feature planning and implementation with 4 adaptive phases — Specify, Design, Tasks, Execute. Auto-sizes depth by complexity. Creates atomic tasks with verification criteria, atomic git commits, and requirement traceability. Features an independent Verifier (author != verifier, evidence-or-zero), persistent decision log (STATE.md), and test-coverage-matrix-driven tests. Stack-agnostic. Use when (1) Planning features (requirements, design, task breakdown), (2) Implementing with verification and atomic commits, (3) Validating or verifying an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for architecture decomposition analysis (use architecture skills) or technical design docs (use create-technical-design-doc).",
+      "category": "development",
+      "path": "(development)/megabrain",
+      "files": [
+        "README.md",
+        "SKILL.md",
+        "references/code-analysis.md",
+        "references/coding-principles.md",
+        "references/context-limits.md",
+        "references/design.md",
+        "references/discuss.md",
+        "references/implement.md",
+        "references/memory.md",
+        "references/specify.md",
+        "references/sub-agents.md",
+        "references/tasks.md",
+        "references/validate.md"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "3.0.0",
+      "contentHash": "fc0151f890877d8b57ad6fed98aa2818d7ee7ce3faaf0cd1071b2da6fba9a9c2"
+    },
+    {
       "name": "mermaid-studio",
       "description": "Expert Mermaid diagram creation, validation, and rendering with dual-engine output (SVG/PNG/ASCII). Supports all 20+ diagram types including C4 architecture, AWS architecture-beta with service icons, flowcharts, sequence, ERD, state, class, mindmap, timeline, git graph, sankey, and more. Features code-to-diagram analysis, batch rendering, 15+ themes, and syntax validation. Use when users ask to create diagrams, visualize architecture, render mermaid files, generate ASCII diagrams, document system flows, model databases, draw AWS infrastructure, analyze code structure, or anything involving \"mermaid\", \"diagram\", \"flowchart\", \"architecture diagram\", \"sequence diagram\", \"ERD\", \"C4\", \"ASCII diagram\". Do NOT use for non-Mermaid image generation, data plotting with chart libraries, or general documentation writing.",
       "category": "tooling",
