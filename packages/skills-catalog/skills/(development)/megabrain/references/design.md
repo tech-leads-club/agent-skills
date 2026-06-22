@@ -17,6 +17,8 @@ Read `.specs/features/[feature]/spec.md` before designing. If `.specs/features/[
 
 Silently ignoring an active decision is not an option — it creates invisible inconsistency across features.
 
+**Also load confirmed lessons** relevant to this feature: `python3 scripts/lessons.py list --status confirmed` (filter with `--scope`/`--query`). These are past verification failures distilled into guidance — apply them while designing. Load only `confirmed`. Skip silently if no store or no code tool. See [lessons.md](lessons.md).
+
 ### 1.5. Research (Optional but Recommended)
 
 If the feature involves unfamiliar technology, patterns, or integrations, research before designing. Document findings briefly in the design doc or as inline notes. This prevents incorrect assumptions from propagating into tasks.
