@@ -182,7 +182,7 @@ Before showing tasks to the user, run ALL three pre-approval checks. These are N
 
 ## Execution Protocol (MANDATORY -- do not skip)
 
-Implement these tasks with the `tlc-spec-driven` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, adequacy review, Verifier, discrimination sensor).
+Implement these tasks with the `megabrain` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, adequacy review, Verifier, discrimination sensor).
 
 **If the skill cannot be activated, STOP and tell the user — do not proceed without it.**
 
