@@ -1,10 +1,10 @@
 ---
 name: megabrain
-description: Feature planning and implementation with 4 adaptive phases — Specify, Design, Tasks, Execute. Auto-sizes depth by complexity. Creates atomic tasks with verification criteria, atomic git commits, and requirement traceability. Features an independent Verifier (author != verifier, evidence-or-zero), persistent decision log (STATE.md), and test-coverage-matrix-driven tests. Stack-agnostic. Use when (1) Planning features (requirements, design, task breakdown), (2) Implementing with verification and atomic commits, (3) Validating or verifying an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for architecture decomposition analysis (use architecture skills) or technical design docs (use create-technical-design-doc).
+description: Feature planning and implementation with 4 adaptive phases — Specify, Design, Tasks, Execute. Auto-sizes depth by complexity. Creates atomic tasks with verification criteria, atomic git commits, and requirement traceability. Features an independent Verifier (author != verifier, evidence-or-zero), persistent decision log (STATE.md), and test-coverage-matrix-driven tests, plus a self-improving lessons layer that turns verification failures into reusable project-local guidance. Stack-agnostic. Use when (1) Planning features (requirements, design, task breakdown), (2) Implementing with verification and atomic commits, (3) Validating or verifying an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for architecture decomposition analysis (use architecture skills) or technical design docs (use create-technical-design-doc).
 license: CC-BY-4.0
 metadata:
   author: Felipe Rodrigues - github.com/felipfr
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # Tech Lead's Club - Spec-Driven Development
@@ -59,6 +59,8 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 ```
 .specs/
 ├── STATE.md            # Project memory: Decisions log (AD-NNN) + Handoff snapshot
+├── LESSONS.md          # Self-improving lessons playbook (rendered by scripts/lessons.py — do not hand-edit)
+├── lessons.json        # Canonical lessons state (machine-owned)
 └── features/           # Feature specifications
     └── [feature]/
         ├── spec.md         # Requirements with traceable IDs
@@ -83,6 +85,7 @@ Read `.specs/STATE.md` — Handoff section for in-flight state, Decisions sectio
 **On-demand load (only what the current task needs):**
 
 - `.specs/STATE.md` — Decisions section (read at Design, re-read on resume); Handoff section (read on resume only)
+- confirmed lessons — load at Specify and Design via `python3 scripts/lessons.py list --status confirmed` ([lessons.md](references/lessons.md)); confirmed only, never candidates
 - spec.md (when working on a specific feature)
 - context.md (when designing or implementing from user decisions)
 - design.md (when implementing from design)
@@ -105,7 +108,7 @@ Read `.specs/STATE.md` — Handoff section for in-flight state, Decisions sectio
 
 **One worker per phase:** Each phase worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Workers never spawn further sub-agents.
 
-**Verifier (always-on, never prompted):** After the final task is committed, the orchestrator dispatches a fresh Verifier sub-agent automatically — regardless of phase count. Validation never requires a user prompt; it is the closing step of Execute. **Author ≠ verifier**: the Verifier re-derives coverage independently using evidence-or-zero; it does not inherit the author's mental model. The Verifier: (1) performs a **spec-anchored outcome check** — confirms each test's asserted value matches the spec-defined expected outcome, flags spec-precision gaps; (2) runs a **discrimination sensor** — injects behavior-level faults in scratch state, confirms tests kill them, discards mutations, surviving mutants become fix tasks; (3) writes `.specs/features/[feature]/validation.md` (PASS/FAIL, per-AC evidence, sensor result, diff range); (4) returns a compact verdict + ranked gap list to the orchestrator in chat. Gaps become fix tasks; the fix→re-verify loop is bounded to 3 iterations before escalating.
+**Verifier (always-on, never prompted):** After the final task is committed, the orchestrator dispatches a fresh Verifier sub-agent automatically — regardless of phase count. Validation never requires a user prompt; it is the closing step of Execute. **Author ≠ verifier**: the Verifier re-derives coverage independently using evidence-or-zero; it does not inherit the author's mental model. The Verifier: (1) performs a **spec-anchored outcome check** — confirms each test's asserted value matches the spec-defined expected outcome, flags spec-precision gaps; (2) runs a **discrimination sensor** — injects behavior-level faults in scratch state, confirms tests kill them, discards mutations, surviving mutants become fix tasks; (3) writes `.specs/features/[feature]/validation.md` (PASS/FAIL, per-AC evidence, sensor result, diff range); (4) returns a compact verdict + ranked gap list to the orchestrator in chat. Gaps become fix tasks; the fix→re-verify loop is bounded to 3 iterations before escalating. (5) **distills lessons** — turns each grounded failure (surviving mutant, spec-precision gap, failed AC, SPEC_DEVIATION) into a reusable project-local lesson via `scripts/lessons.py`; a clean PASS records nothing (see [lessons.md](references/lessons.md)).
 
 **Standalone fallback:** Without sub-agents, run `validate.md` as an independent fresh-eyes pass after the final commit — including the spec-anchored check and discrimination sensor.
 
@@ -129,6 +132,8 @@ Full mechanics (worker payload, compact summary format, failure handling, contex
 | Record decision, this is a project-level decision | [memory.md](references/memory.md) |
 | Pause work, end session, I need to stop | [memory.md](references/memory.md) |
 | Resume work, continue, pick up where we left off | [memory.md](references/memory.md) |
+| Load lessons, what have we learned, apply past lessons | [lessons.md](references/lessons.md) |
+| Record lesson, distill lessons (auto-runs after validation) | [lessons.md](references/lessons.md) |
 
 ## Knowledge Verification Chain
 
