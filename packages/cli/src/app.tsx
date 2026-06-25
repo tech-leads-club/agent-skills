@@ -2,7 +2,7 @@ import { Box, useApp } from 'ink'
 import { useEffect, useState } from 'react'
 
 import { useKonamiCode } from './hooks'
-import { ArcadeMenu, CreditsView, InstallWizard, ListView, RemoveWizard, UpdateView } from './views'
+import { ArcadeMenu, CreditsView, InstallWizard, ListView, RemoveWizard, ReportView, UpdateView } from './views'
 
 interface AppProps {
   command?: string
@@ -50,6 +50,7 @@ export const App = ({ command = 'install' }: AppProps) => {
       {command === 'list' && <ListView onExit={exit} />}
       {command === 'remove' && <RemoveWizard onExit={exit} />}
       {command === 'update' && <UpdateView onExit={exit} />}
+      {command === 'report' && <ReportView onExit={exit} />}
       {(command === 'install' || !command) && <InstallWizard onExit={exit} />}
     </Box>
   )

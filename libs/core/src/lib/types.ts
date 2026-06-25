@@ -500,3 +500,133 @@ export interface DeprecatedEntry {
   /** Suggested replacement skills. */
   alternatives?: string[]
 }
+
+// ---------------------------------------------------------------------------
+// Audit Report Types
+// ---------------------------------------------------------------------------
+
+/** A skill found on disk or in a lockfile during the report scan. */
+export interface DiscoveredSkill {
+  name: string
+  agent: AgentType
+  location: 'local' | 'global'
+  path: string
+  inLockfile: boolean
+  lockEntry?: SkillLockEntry
+  physicallyPresent: boolean
+}
+
+/** Token cost estimation for a single skill installation. */
+export interface SkillTokenEstimate {
+  skillName: string
+  agent: AgentType
+  location: 'local' | 'global'
+  /** Tokens from the description field — always loaded at startup for all skills. */
+  descriptionTokens: number
+  /** Tokens from the full SKILL.md body — loaded only when the skill is activated. */
+  bodyTokens: number
+  /** Tokens from referenced files (scripts/, references/, assets/) — loaded on demand. */
+  resourceTokens: number
+  /** Total tokens if everything were loaded (description + body + resources). */
+  totalTokens: number
+  isHighCost: boolean
+}
+
+/** Provider pricing definition for cost estimation. */
+export interface ProviderPricing {
+  name: string
+  model: string
+  inputCostPerMTok: number
+  outputCostPerMTok: number
+}
+
+/** Aggregated cost estimate for a single provider. */
+export interface CostEstimate {
+  provider: ProviderPricing
+  totalInputTokens: number
+  estimatedInputCost: number
+}
+
+/** An MCP server entry detected in agent configuration. */
+export interface McpServerEntry {
+  name: string
+  agent: AgentType
+  command: string
+  args?: string[]
+  env?: Record<string, string>
+  sourceFile: string
+  location: 'local' | 'global'
+}
+
+/** A conflict where the same MCP server name is configured differently across agents. */
+export interface McpServerConflict {
+  serverName: string
+  entries: McpServerEntry[]
+}
+
+/** A skill installed to multiple agents. */
+export interface SkillDuplicate {
+  skillName: string
+  agents: { agent: AgentType; location: 'local' | 'global'; path: string }[]
+}
+
+/** A skill present on disk but missing from the lockfile. */
+export interface OrphanedSkill {
+  skillName: string
+  agent: AgentType
+  location: 'local' | 'global'
+  path: string
+}
+
+/** A recommendation generated from the report analysis. */
+export interface ReportRecommendation {
+  type: 'orphaned' | 'high-cost' | 'duplicate' | 'mcp-conflict' | 'unused'
+  severity: 'info' | 'warning' | 'error'
+  message: string
+  details?: string
+}
+
+/** Per-agent summary within the report. */
+export interface AgentReportSummary {
+  agent: AgentType
+  displayName: string
+  isInstalled: boolean
+  localSkillCount: number
+  globalSkillCount: number
+  totalTokens: number
+  mcpServerCount: number
+}
+
+/** The complete audit report. */
+export interface AuditReport {
+  generatedAt: string
+  projectRoot: string
+  agents: AgentReportSummary[]
+  skills: DiscoveredSkill[]
+  tokenEstimates: SkillTokenEstimate[]
+  costEstimates: CostEstimate[]
+  duplicates: SkillDuplicate[]
+  orphans: OrphanedSkill[]
+  mcpServers: McpServerEntry[]
+  mcpConflicts: McpServerConflict[]
+  recommendations: ReportRecommendation[]
+  summary: {
+    totalAgentsDetected: number
+    totalSkillsInstalled: number
+    /** Tokens from description fields only — always loaded at startup. */
+    alwaysOnTokens: number
+    /** Total tokens if all skills fully activated (description + body + resources). */
+    totalTokens: number
+    totalMcpServers: number
+    highCostSkillCount: number
+    orphanedSkillCount: number
+    duplicateSkillCount: number
+  }
+}
+
+/** Options for generating the report. */
+export interface ReportOptions {
+  includeGlobal: boolean
+  highCostThreshold: number
+  providers?: ProviderPricing[]
+}
