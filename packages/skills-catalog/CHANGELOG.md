@@ -1,3 +1,25 @@
+## 0.14.7 (2026-06-25)
+
+### 🚀 Features
+
+- ⚠️  **skills-catalog:** promote tlc-spec-driven to v3, retire megabrain alias ([9b3ec067a](https://github.com/tech-leads-club/agent-skills/commit/9b3ec067a))
+
+### ⚠️  Breaking Changes
+
+- **skills-catalog:** promote tlc-spec-driven to v3, retire megabrain alias  ([9b3ec067a](https://github.com/tech-leads-club/agent-skills/commit/9b3ec067a))
+  The megabrain skill is removed (use tlc-spec-driven).
+  tlc-spec-driven v3 removes Quick mode, brownfield mapping, the
+  project/roadmap/state-handoff layer, and test-first RED/GREEN; .specs/
+  is now STATE.md + LESSONS.md/lessons.json + features/ with per-feature
+  validation.md. Triggers removed: map codebase, quick fix, quick task;
+  added: record decision, pause work, resume work, load/record lessons.
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Waldemar Neto @waldemarnt
+
 ## 0.14.6 (2026-06-22)
 
 ### 🚀 Features
