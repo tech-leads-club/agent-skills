@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-lessons.py — deterministic bookkeeping for the megabrain lessons layer.
+lessons.py — deterministic bookkeeping for the tlc-spec-driven lessons layer.
 
 The LLM supplies judgment (which failure happened, how to phrase the lesson, what
 signal grounds it). This script owns everything mechanical: IDs, distinct-feature
@@ -330,7 +330,7 @@ def cmd_status(root, args):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for megabrain.")
+    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for tlc-spec-driven.")
     p.add_argument("--root", default=".", help="Project root containing .specs/ (default: current dir)")
     sub = p.add_subparsers(dest="cmd", required=True)
 

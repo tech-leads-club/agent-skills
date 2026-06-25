@@ -34,3 +34,8 @@
   message: Use excalidraw-studio instead
   alternatives:
     - excalidraw-studio
+
+- name: megabrain
+  message: megabrain was a temporary name for tlc-spec-driven v3. Use tlc-spec-driven instead.
+  alternatives:
+    - tlc-spec-driven

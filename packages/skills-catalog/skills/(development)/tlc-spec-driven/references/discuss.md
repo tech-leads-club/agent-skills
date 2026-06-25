@@ -6,7 +6,7 @@
 
 **When to trigger (auto-detect):** The spec contains user-facing behavior that could go multiple ways AND the user hasn't expressed a preference. If the spec is clear and unambiguous, skip this entirely.
 
-**When NOT to trigger:** Infrastructure work, CRUD operations, well-defined API contracts, anything where the "how" is obvious from the "what".
+**When NOT to trigger:** Genuinely trivial features — a pure read endpoint, a config tweak, features with no [implicit-requirement dimensions](specify.md#implicit-requirement-dimensions) present (no persistence/state, external calls, auth, payments, concurrency, or state transitions). When any dimension is present, trigger discuss.
 
 ## Why This Phase Exists
 
@@ -30,12 +30,15 @@ Read `.specs/features/[feature]/spec.md` and identify the domain:
 | Something users **RUN** (CLI)  | Output format, flags, modes, error handling, verbosity        |
 | Something users **READ**       | Structure, tone, depth, flow, navigation                      |
 | Something being **ORGANIZED**  | Grouping criteria, naming, duplicates, exceptions             |
+| Something with **backend / state / contract** | Failure & partial-failure states, idempotency/retry/dedup, auth boundaries & rate limits, data lifecycle/expiry, concurrency/ordering — see [implicit-requirement dimensions](specify.md#implicit-requirement-dimensions) |
 
 Generate 3-4 **feature-specific** gray areas. Not generic categories, but concrete decisions for THIS feature.
 
 ### 2. Present Gray Areas
 
 Present the feature boundary (from spec.md) and the gray areas to the user. Let them choose which to discuss. Do NOT include a "skip all" option — the user invoked this phase to discuss.
+
+Any gray area the user **declines** to discuss, or that goes undiscussed, is written to the spec's **Assumptions & Open Questions** section (agent's chosen default + rationale) — never silently dropped. This ensures the spec's closure gate can pass: every gray area is either resolved through discussion or recorded as a signed-off assumption.
 
 ### 3. Deep-Dive Each Area
 
@@ -100,6 +103,10 @@ When user suggests scope creep: "That sounds like a separate feature. I'll note 
 ### Agent's Discretion
 
 [Areas where user explicitly said "you decide" — agent has flexibility here during design/implementation]
+
+### Declined / Undiscussed Gray Areas → Assumptions
+
+[Gray areas the user declined to discuss or that were not covered. Each entry is written to the spec's Assumptions & Open Questions section with the agent's chosen default and rationale — not left silently unresolved.]
 
 ---
 

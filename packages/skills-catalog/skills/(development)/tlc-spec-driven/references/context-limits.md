@@ -2,20 +2,11 @@
 
 ## File Size Limits
 
-| File            | Max Tokens | ~Words | Warning At  |
-| --------------- | ---------- | ------ | ----------- |
-| PROJECT.md      | 2,000      | 1,200  | 1,600 (80%) |
-| ROADMAP.md      | 3,000      | 1,800  | 2,400       |
-| STATE.md        | 10,000     | 6,000  | 7,000 (70%) |
-| spec.md         | 5,000      | 3,000  | 4,000       |
-| design.md       | 8,000      | 4,800  | 6,400       |
-| tasks.md        | 10,000     | 6,000  | 8,000       |
-| STACK.md        | 2,000      | 1,200  | 1,600       |
-| ARCHITECTURE.md | 4,000      | 2,400  | 3,200       |
-| CONVENTIONS.md  | 3,000      | 1,800  | 2,400       |
-| STRUCTURE.md    | 2,000      | 1,200  | 1,600       |
-| TESTING.md      | 4,000      | 2,400  | 3,200       |
-| INTEGRATIONS.md | 5,000      | 3,000  | 4,000       |
+| File      | Max Tokens | ~Words | Warning At |
+| --------- | ---------- | ------ | ---------- |
+| spec.md   | 5,000      | 3,000  | 4,000      |
+| design.md | 8,000      | 4,800  | 6,400      |
+| tasks.md  | 10,000     | 6,000  | 8,000      |
 
 ## Context Zones
 
@@ -29,8 +20,8 @@ Display context status in footer when >40k:
 
 ```
 📊 Context: 52k tokens (moderate)
-  - STATE.md: 8k (yellow zone)
   - tasks.md: 11k (ok)
+  - design.md: 6k (ok)
   - Total: 52k / 200k (26%)
 ```
 
