@@ -1,3 +1,55 @@
+## 0.14.7 (2026-06-25)
+
+### 🚀 Features
+
+- ⚠️  **skills-catalog:** promote tlc-spec-driven to v3, retire megabrain alias ([9b3ec067a](https://github.com/tech-leads-club/agent-skills/commit/9b3ec067a))
+
+### ⚠️  Breaking Changes
+
+- **skills-catalog:** promote tlc-spec-driven to v3, retire megabrain alias  ([9b3ec067a](https://github.com/tech-leads-club/agent-skills/commit/9b3ec067a))
+  The megabrain skill is removed (use tlc-spec-driven).
+  tlc-spec-driven v3 removes Quick mode, brownfield mapping, the
+  project/roadmap/state-handoff layer, and test-first RED/GREEN; .specs/
+  is now STATE.md + LESSONS.md/lessons.json + features/ with per-feature
+  validation.md. Triggers removed: map codebase, quick fix, quick task;
+  added: record decision, pause work, resume work, load/record lessons.
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Waldemar Neto @waldemarnt
+
+## 0.14.6 (2026-06-22)
+
+### 🚀 Features
+
+- **megabrain:** implement lessons management script for deterministic bookkeeping ([123ecd254](https://github.com/tech-leads-club/agent-skills/commit/123ecd254))
+- **megabrain:** update specify.md to include guidance on loading confirmed lessons ([685928325](https://github.com/tech-leads-club/agent-skills/commit/685928325))
+- **megabrain:** introduce lessons documentation for self-improving layer ([d6360e79c](https://github.com/tech-leads-club/agent-skills/commit/d6360e79c))
+- **megabrain:** add guidance for loading confirmed lessons in design documentation ([df32b92d2](https://github.com/tech-leads-club/agent-skills/commit/df32b92d2))
+- **megabrain:** enhance skill description and add lessons functionality ([df99c83de](https://github.com/tech-leads-club/agent-skills/commit/df99c83de))
+- **validate:** add mandatory lesson distillation step after validation report ([8cc430ff6](https://github.com/tech-leads-club/agent-skills/commit/8cc430ff6))
+
+### 🩹 Fixes
+
+- **megabrain:** update task implementation guidance to use megabrain skill ([018f8e034](https://github.com/tech-leads-club/agent-skills/commit/018f8e034))
+
+### ❤️ Thank You
+
+- felipfr
+
+## 0.14.5 (2026-06-21)
+
+### 🚀 Features
+
+- **skills-catalog:** add megabrain skill (tlc-spec-driven v3.0.0 alias) ([481772786](https://github.com/tech-leads-club/agent-skills/commit/481772786))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Waldemar Neto @waldemarnt
+
 ## 0.14.4 (2026-06-19)
 
 ### 🚀 Features
