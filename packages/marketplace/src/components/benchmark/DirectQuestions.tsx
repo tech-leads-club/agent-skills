@@ -15,11 +15,11 @@ export function DirectQuestions({ questions }: DirectQuestionsProps) {
           Head-to-head: the questions that matter
         </h3>
         <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-          TLC: {wins} wins · {ties} tie
+          TLC 3.*: {wins} wins{ties > 0 ? ` · ${ties} tie` : ''}
         </span>
       </div>
       <p className="text-[13px] text-gray-500 dark:text-gray-400 mb-4">
-        Beyond a single number — where each framework actually lands.
+        Beyond a single number: where each framework actually lands.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {questions.map((q) => (

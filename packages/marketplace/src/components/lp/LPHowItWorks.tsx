@@ -2,29 +2,36 @@ const phases = [
   {
     tag: 'SPECIFY',
     color: 'bg-blue-600',
-    title: 'Define what to build',
-    body: 'Requirements, constraints, scope. Always required. The agent generates a spec with requirement IDs that every downstream task traces back to.',
+    title: 'Map the full scope',
+    body: 'Requirements, edge cases, and an explicit out-of-scope table. Always required. The agent generates testable requirement IDs that every downstream task traces back to.',
     required: true,
   },
   {
     tag: 'DESIGN',
     color: 'bg-violet-500',
-    title: 'Architecture decisions',
-    body: "Component design, data flow, integration points. Auto-skipped for straightforward changes — no boilerplate when there's nothing to decide.",
+    title: 'Architecture & reuse',
+    body: 'Component design, data flow, code reuse, and risk mitigation for fragile areas. Auto-skipped for straightforward changes, with no boilerplate when there\'s nothing to decide.',
     required: false,
   },
   {
     tag: 'TASKS',
     color: 'bg-amber-500',
     title: 'Atomic breakdown',
-    body: 'Full task list with dependencies and verification criteria. Auto-skipped when there are ≤3 obvious steps — they become implicit in Execute.',
+    body: 'Atomic tasks with dependencies, co-located tests, and binary verification criteria. Auto-skipped when there are ≤3 obvious steps, so they become implicit in Execute.',
     required: false,
   },
   {
     tag: 'EXECUTE',
     color: 'bg-emerald-500',
-    title: 'Implement and verify',
-    body: 'Atomic commits, one task at a time. Every task is verified against its criterion before moving on. Always required.',
+    title: 'Implement',
+    body: 'One task at a time, gated by the test runner before every atomic commit. Tests derive from the spec and each task passes an adequacy review before moving on. Always required.',
+    required: true,
+  },
+  {
+    tag: 'VERIFY',
+    color: 'bg-rose-500',
+    title: 'Independent verification',
+    body: 'A fresh read-only sub-agent (never the author) checks outcomes against the spec and injects faults to confirm the tests catch them. Always on, every feature.',
     required: true,
   },
 ]
@@ -38,15 +45,15 @@ export function LPHowItWorks() {
             How it works
           </h2>
           <p className="text-[15px] text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            The 4-phase pipeline. Only the phases you need — never more.
+            A flow that auto-sizes to complexity: scope mapped up front, quality verified independently at the end.
           </p>
         </div>
 
         <div className="relative">
           {/* Connector line (desktop) */}
-          <div className="hidden sm:block absolute top-7 left-[calc(12.5%+1rem)] right-[calc(12.5%+1rem)] h-px bg-gray-200 dark:bg-gray-800" />
+          <div className="hidden sm:block absolute top-7 left-[calc(10%+1rem)] right-[calc(10%+1rem)] h-px bg-gray-200 dark:bg-gray-800" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 sm:gap-4">
             {phases.map((phase, i) => (
               <div key={phase.tag} className="relative flex flex-col items-center text-center sm:items-start sm:text-left">
                 <div className="flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2 w-full mb-3">

@@ -33,7 +33,8 @@ export function FinalScoreChart({ data }: FinalScoreChartProps) {
         <BarChart data={chartData} margin={{ top: 24, right: 12, left: -12, bottom: 4 }}>
           <XAxis
             dataKey="name"
-            tick={{ fill: theme.axis, fontSize: 12 }}
+            interval={0}
+            tick={{ fill: theme.axis, fontSize: 11 }}
             axisLine={{ stroke: theme.grid }}
             tickLine={false}
           />

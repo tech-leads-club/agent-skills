@@ -12,18 +12,19 @@ export function LPHero() {
         <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-full px-4 py-1.5 mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 tracking-wide">
-            Spec-Driven Development · Agent Skill
+            Spec-Driven Development · Built for complex codebases
           </span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-gray-900 dark:text-gray-50 tracking-tight leading-[1.1] mb-5">
-          Spec-driven development
-          <br className="hidden sm:block" /> that actually works.
+          The spec-driven framework for
+          <br className="hidden sm:block" /> scope precision and quality.
         </h1>
 
         <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto mb-10">
-          4 adaptive phases that auto-size to complexity. Atomic tasks with verification criteria. Requirement
-          traceability from spec to commit. Works with any stack and any agent.
+          Built for complex, high-quality codebases. Every requirement is mapped to a traceable, atomically-committed
+          task and proven by an independent verifier. In our 4-framework benchmark, the most consistent, with the
+          highest average score and the best test completeness. Works with any stack and any agent.
         </p>
 
         <div className="max-w-xl mx-auto">

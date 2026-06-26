@@ -65,7 +65,8 @@ export function ConsistencyChart({ data }: ConsistencyChartProps) {
             type="category"
             dataKey="name"
             allowDuplicatedCategory={false}
-            tick={{ fill: theme.axis, fontSize: 12 }}
+            interval={0}
+            tick={{ fill: theme.axis, fontSize: 11 }}
             axisLine={{ stroke: theme.grid }}
             tickLine={false}
           />
@@ -80,13 +81,13 @@ export function ConsistencyChart({ data }: ConsistencyChartProps) {
           />
           <ZAxis range={[70, 70]} />
           <Tooltip cursor={{ strokeDasharray: '3 3', stroke: theme.muted }} content={<TooltipContent />} />
-          {/* Individual runs — semi-transparent */}
+          {/* Individual runs, semi-transparent */}
           <Scatter data={runPoints} fillOpacity={0.45}>
             {runPoints.map((p, i) => (
               <Cell key={`run-${p.name}-${i}`} fill={p.highlight ? theme.highlight : theme.muted} />
             ))}
           </Scatter>
-          {/* 3-run mean — solid, larger emphasis via ZAxis-independent shape color */}
+          {/* 3-run mean: solid, larger emphasis via ZAxis-independent shape color */}
           <Scatter data={meanPoints} shape="diamond">
             {meanPoints.map((p) => (
               <Cell key={`mean-${p.name}`} fill={p.highlight ? theme.highlight : theme.axis} />

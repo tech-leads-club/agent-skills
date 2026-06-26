@@ -1,4 +1,4 @@
-export type FrameworkName = 'TLC' | 'Speckit' | 'OpenSpec' | 'Superpowers'
+export type FrameworkName = 'TLC 3.*' | 'TLC 2.*' | 'Speckit' | 'OpenSpec' | 'Superpowers'
 
 export interface FrameworkResult {
   name: FrameworkName
@@ -67,97 +67,205 @@ export interface BenchmarkData {
 }
 
 export const benchmark: BenchmarkData = {
-  planningModel: 'Opus Reasoning (High)',
+  planningModel: 'Opus 4.8',
   implementationModel: 'Sonnet 4.6',
   frameworks: [
     {
-      name: 'TLC',
-      final: 0.94,
-      runs: [0.94, 0.91, 0.91],
-      implementation: 0.94,
-      tests: 0.91,
-      eRecall: 0.89,
+      name: 'TLC 3.*',
+      final: 0.95,
+      runs: [0.95, 0.93, 0.95],
+      implementation: 1.0,
+      tests: 0.9,
+      eRecall: 0.82,
       scope: 'pass',
-      testCount: 69,
-      tokensM: 30,
+      testCount: 43,
+      tokensM: 31,
       highlight: true,
     },
     {
-      name: 'Speckit',
-      final: 0.95,
-      runs: [0.95, 0.89, 0.9],
-      implementation: 1.0,
-      tests: 0.9,
-      eRecall: 0.78,
+      name: 'TLC 2.*',
+      final: 0.9,
+      runs: [0.88, 0.9, 0.88],
+      implementation: 0.92,
+      tests: 0.72,
+      eRecall: 0.82,
       scope: 'partial',
       testCount: 43,
-      tokensM: 37,
+      tokensM: 31,
+    },
+    {
+      name: 'Speckit',
+      final: 0.88,
+      runs: [0.85, 0.88, 0.87],
+      implementation: 0.96,
+      tests: 0.63,
+      eRecall: 0.85,
+      scope: 'partial',
+      testCount: 38,
+      tokensM: 36,
     },
     {
       name: 'OpenSpec',
-      final: 0.83,
-      runs: [0.83, 0.79, 0.81],
-      implementation: 1.0,
-      tests: 0.62,
-      eRecall: 0.89,
-      scope: 'partial',
-      testCount: 29,
+      final: 0.93,
+      runs: [0.84, 0.79, 0.93],
+      implementation: 0.96,
+      tests: 0.65,
+      eRecall: 0.71,
+      scope: 'pass',
+      testCount: 32,
       tokensM: 24,
     },
     {
       name: 'Superpowers',
-      final: 0.76,
-      runs: [0.79, 0.76, 0.78],
-      implementation: 0.92,
-      tests: 0.61,
-      eRecall: 1.0,
+      final: 0.86,
+      runs: [0.86, 0.81, 0.84],
+      implementation: 0.94,
+      tests: 0.58,
+      eRecall: 0.89,
       scope: 'partial',
-      testCount: 24,
-      tokensM: 39,
+      testCount: 20,
+      tokensM: 31,
     },
   ],
   highlights: [
     {
       label: '3-run average',
-      value: '0.92',
-      detail: 'Highest mean across runs — above Speckit (0.91). Peak run 0.94.',
+      value: '0.94',
+      detail: 'Top mean Final of the four frameworks, well ahead of the next best (0.87). Peak run 0.95.',
     },
     {
       label: 'Consistency',
-      value: '±0.03',
-      detail: 'Tightest spread; floor of 0.91 vs Speckit’s 0.89. Quality you can repeat.',
+      value: '0.93–0.95',
+      detail: 'The most consistent framework: highest floor in the field, tight 0.02 range. Repeatable, not a lucky peak.',
     },
     {
-      label: 'Scope adherence',
-      value: 'pass',
-      detail: 'The only framework with a clean scope — zero plan drift.',
+      label: 'Test completeness',
+      value: '0.90',
+      detail: 'Best test completeness (T) in the field. Asserts behavior, never just exercises it.',
     },
     {
-      label: 'Token efficiency',
-      value: '~30M',
-      detail: '~7M fewer than Speckit, the slowest framework. Most meaningful tests (≈49).',
+      label: 'Outcome tests',
+      value: '12/12',
+      detail: 'Perfect on real persisted-state checks: the only framework to assert the actual DB row after every webhook.',
     },
   ],
   directQuestions: [
     {
-      question: 'Who adds the most meaningful tests?',
-      winner: 'TLC',
+      question: 'Who tests most rigorously?',
+      winner: 'TLC 3.*',
       tlcWins: true,
-      detail: '≈49 tests mapped to criteria (of 69) — the most — and proves more of them (T = 0.91).',
+      detail: 'Best test completeness (T = 0.90) and a perfect 12/12 on outcome tests. Asserts real state, not just calls.',
     },
     {
-      question: 'Who adheres best to requirements?',
-      winner: 'TLC',
+      question: 'Who is the most consistent?',
+      winner: 'TLC 3.*',
       tlcWins: true,
-      detail: 'The only framework with Scope = pass — every build traces to a sanctioned requirement.',
+      detail: 'Range 0.93–0.95 across three runs: the highest floor in the field. OpenSpec swings 0.79–0.93.',
     },
     {
-      question: 'Who delivers the best overall solution?',
-      winner: 'TLC & Speckit — tie',
-      tlcWins: false,
-      detail: 'Co-leaders in the Spec-complete band: Speckit 0.95, TLC 0.94. TLC gets there cleaner and cheaper.',
+      question: 'Who delivers the best overall result?',
+      winner: 'TLC 3.*',
+      tlcWins: true,
+      detail: 'Top mean (0.94) and the best single run (0.95): TLC 3.* leads on both the repeatable average and the peak, with a clean Scope = pass.',
     },
   ],
   verdict:
-    'Reading only the saved-run score (0.95 vs 0.94) undersells TLC. Across three independent runs TLC posts the higher average (0.92 vs 0.91) with the tightest spread, is the only framework with clean scope adherence, ships the most meaningful tests, and does it with ~7M fewer tokens than Speckit — the slowest framework. TLC wins two of the three direct questions and ties the third: the high-value, repeatable pick.',
+    'Across three independent runs on a real, non-trivial PRD, TLC 3.* (Opus plans, Sonnet implements) posts the highest average Final (0.94) and the most consistent results (0.93–0.95) of four spec-driven frameworks, powered by the best test completeness in the field (T = 0.90), a perfect 12/12 on real outcome assertions, and a clean Scope = pass. v3 raises the bar with an independent verifier, a requirement-closure gate, and a self-improving lessons layer, and it stays harness-friendly across most strong models.',
+}
+
+// ---------------------------------------------------------------------------
+// Model ablation: TLC 3.* on the same PRD, varying the model.
+// "Is the harness friendly across models?" Same framework, the model is the
+// variable. Most strong models land Spec-complete (>=0.90); Gemini is the
+// outlier (green gates, but ignores the spec).
+// ---------------------------------------------------------------------------
+
+export type Band = 'Spec-complete' | 'Solid' | 'Weak'
+
+export interface ModelResult {
+  /** Display name of the model (or role-split config) */
+  model: string
+  /** Final scores of each independent run, 0..1 */
+  finals: number[]
+  /** Mean Final across runs, 0..1 */
+  mean: number
+  band: Band
+  /** Short note shown in the table */
+  note: string
+  /** Highlight the recommended config (Opus plans, Sonnet implements) */
+  recommended?: boolean
+  /** Planner != implementer (role-split) rather than same-model */
+  roleSplit?: boolean
+  /** Flag a model that is a poor fit for spec-driven development */
+  warn?: boolean
+  /** Flag the best value-for-money model */
+  value?: boolean
+}
+
+export interface ModelBenchmarkData {
+  /** Framework held constant across every model run */
+  framework: string
+  models: ModelResult[]
+  /** Spec-complete threshold (Final >= this) */
+  specCompleteThreshold: number
+}
+
+export const modelBenchmark: ModelBenchmarkData = {
+  framework: 'tlc-spec-driven (v3)',
+  specCompleteThreshold: 0.9,
+  models: [
+    {
+      model: 'Opus → Sonnet',
+      finals: [0.95],
+      mean: 0.95,
+      band: 'Spec-complete',
+      note: 'Role-split: Opus plans, Sonnet implements. A strong plan let the cheaper implementer keep quality, matching the best single-model run.',
+      recommended: true,
+      roleSplit: true,
+    },
+    {
+      model: 'Composer 2.5',
+      finals: [0.98, 0.91],
+      mean: 0.945,
+      band: 'Spec-complete',
+      note: 'Best value for money: top single-model mean (peak 0.98, green gates on both runs) at a fraction of the cost of the frontier models.',
+      value: true,
+    },
+    {
+      model: 'Claude Opus 4.8',
+      finals: [0.95, 0.91],
+      mean: 0.93,
+      band: 'Spec-complete',
+      note: 'Spec-complete on both runs, perfect precision.',
+    },
+    {
+      model: 'GPT-5.5 (high)',
+      finals: [0.91, 0.94],
+      mean: 0.925,
+      band: 'Spec-complete',
+      note: 'Tightest spread (0.03); spec-complete on both runs.',
+    },
+    {
+      model: 'GLM 5.2 (high)',
+      finals: [0.82, 0.92, 0.97, 0.94],
+      mean: 0.9125,
+      band: 'Spec-complete',
+      note: 'Capable but variable (n=4): runs 2–4 average 0.94 with the richest robustness layers measured.',
+    },
+    {
+      model: 'Claude Sonnet 4.6',
+      finals: [0.89, 0.85],
+      mean: 0.87,
+      band: 'Solid',
+      note: 'Just below the spec-complete line: thinner test coverage, not missing behavior (I ≈ 0.97).',
+    },
+    {
+      model: 'Gemini 3.1 Pro',
+      finals: [0.51, 0.56],
+      mean: 0.535,
+      band: 'Weak',
+      note: 'Ignores the spec: green gates but green-but-wrong, with un-wired endpoints, dropped requirements, missing state transitions. Stays Weak on every framework tested, so the limitation is model-driven, not framework-driven.',
+      warn: true,
+    },
+  ],
 }

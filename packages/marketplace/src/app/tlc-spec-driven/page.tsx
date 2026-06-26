@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { LPFinalCTA } from '../../components/lp/LPFinalCTA'
 import { LPHero } from '../../components/lp/LPHero'
 import { LPHowItWorks } from '../../components/lp/LPHowItWorks'
+import { LPQuality } from '../../components/lp/LPQuality'
+import { LPSimplicity } from '../../components/lp/LPSimplicity'
 import { LPValueProps } from '../../components/lp/LPValueProps'
 import { SpecDrivenBenchmark } from '../../components/benchmark/SpecDrivenBenchmark'
 
@@ -32,6 +34,8 @@ export default function TLCSpecDrivenLandingPage() {
       <LPHero />
       <LPValueProps />
       <LPHowItWorks />
+      <LPQuality />
+      <LPSimplicity />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <SpecDrivenBenchmark skillId="tlc-spec-driven" />
       </div>

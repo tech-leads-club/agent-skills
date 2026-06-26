@@ -10,10 +10,10 @@ export function LPFinalCTA() {
     <section className="bg-gray-50 dark:bg-gray-900/50 py-16 sm:py-20">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight mb-3">
-          Ready to ship right?
+          Ready to build with precision?
         </h2>
         <p className="text-[15px] text-gray-500 dark:text-gray-400 mb-8">
-          One command. Works with your agent today.
+          Scope mapped, quality proven. One command, works with your agent today.
         </p>
 
         <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-4 flex items-center justify-between gap-3 mb-6 shadow-md">

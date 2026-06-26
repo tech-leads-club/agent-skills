@@ -51,7 +51,7 @@ export function ValueScatter({ data }: ValueScatterProps) {
             axisLine={{ stroke: theme.grid }}
             tickLine={false}
             label={{
-              value: 'Tokens (M) — lower is cheaper',
+              value: 'Tokens (M), lower is cheaper',
               position: 'insideBottom',
               offset: -16,
               fill: theme.label,
