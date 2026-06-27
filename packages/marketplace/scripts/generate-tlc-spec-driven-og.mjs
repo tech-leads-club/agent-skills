@@ -32,13 +32,17 @@ const benchmarkItems = [
 
 const CONTENT_X = 120
 const BADGE_Y = 118
-const BADGE_H = 34
+const BADGE_H = 36
 const BADGE_CY = BADGE_Y + BADGE_H / 2
 const BADGE_LABEL = 'SPEC-DRIVEN DEVELOPMENT'
-const BADGE_PAD_X = 16
-const BADGE_TEXT_X = CONTENT_X + BADGE_PAD_X + 10
-const BADGE_TEXT_W = BADGE_LABEL.length * 9.5
-const BADGE_W = BADGE_PAD_X + 10 + BADGE_TEXT_W + BADGE_PAD_X
+const BADGE_FONT_SIZE = 16
+const BADGE_PAD_X = 18
+const BADGE_DOT_R = 4
+const BADGE_DOT_GAP = 10
+const BADGE_TEXT_W = Math.ceil(BADGE_LABEL.length * 12.2 + BADGE_FONT_SIZE * 0.8) + 56
+const BADGE_W = BADGE_PAD_X * 2 + BADGE_DOT_R * 2 + BADGE_DOT_GAP + BADGE_TEXT_W
+const BADGE_DOT_CX = CONTENT_X + BADGE_PAD_X + BADGE_DOT_R
+const BADGE_TEXT_X = BADGE_DOT_CX + BADGE_DOT_R + BADGE_DOT_GAP
 
 const PHASE_Y = 352
 const PHASE_H = 28
@@ -126,9 +130,9 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     ${logoInner}
   </g>
 
-  <rect x="${CONTENT_X}" y="${BADGE_Y}" width="${BADGE_W}" height="${BADGE_H}" rx="17" fill="#1D4ED8" fill-opacity="0.18" stroke="#3B82F6" stroke-opacity="0.35"/>
-  <circle cx="${CONTENT_X + BADGE_PAD_X + 4}" cy="${BADGE_CY}" r="4" fill="#10B981"/>
-  <text x="${BADGE_TEXT_X}" y="${BADGE_CY}" dominant-baseline="middle" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
+  <rect x="${CONTENT_X}" y="${BADGE_Y}" width="${BADGE_W}" height="${BADGE_H}" rx="${BADGE_H / 2}" fill="#1D4ED8" fill-opacity="0.18" stroke="#3B82F6" stroke-opacity="0.35"/>
+  <circle cx="${BADGE_DOT_CX}" cy="${BADGE_CY}" r="${BADGE_DOT_R}" fill="#10B981"/>
+  <text x="${BADGE_TEXT_X}" y="${BADGE_CY}" dominant-baseline="middle" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${BADGE_FONT_SIZE}" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
 
   <text x="${CONTENT_X}" y="210" fill="#F8FAFC" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">TLC Spec-Driven</text>
   <text x="${CONTENT_X}" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">AI agents that ship right, every time</text>
