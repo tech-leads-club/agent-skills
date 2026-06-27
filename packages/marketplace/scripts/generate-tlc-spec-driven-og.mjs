@@ -95,9 +95,8 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <g opacity="0.07" stroke="#64748B" stroke-width="1">
     <path d="M80 520 C260 420, 420 500, 560 390"/>
     <path d="M640 390 C780 280, 920 360, 1120 260"/>
-    <path d="M120 560 L1080 560"/>
-    <path d="M120 560 L120 120"/>
-    <path d="M1080 560 L1080 120"/>
+    <path d="M120 120 L120 520"/>
+    <path d="M1080 120 L1080 520"/>
   </g>
 
   <rect x="80" y="80" width="1040" height="470" rx="28" stroke="#334155" stroke-opacity="0.55" stroke-width="1.5"/>
@@ -124,7 +123,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <text x="804" y="322" fill="#94A3B8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="700" letter-spacing="0.1em">BENCHMARK</text>
   ${benchmarkList}
 
-  <text x="120" y="548" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" font-weight="500">agent-skills.techleads.club/tlc-spec-driven</text>
+  <text x="600" y="532" text-anchor="middle" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="500">agent-skills.techleads.club/tlc-spec-driven</text>
 </svg>`
 
 const resvg = new Resvg(svg, {
