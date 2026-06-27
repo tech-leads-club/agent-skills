@@ -122,8 +122,6 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <rect x="780" y="290" width="300" height="198" rx="16" fill="#0F172A" fill-opacity="0.72" stroke="#334155" stroke-opacity="0.8"/>
   <text x="804" y="322" fill="#94A3B8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="700" letter-spacing="0.1em">BENCHMARK</text>
   ${benchmarkList}
-
-  <text x="120" y="528" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="500">agent-skills.techleads.club/tlc-spec-driven</text>
 </svg>`
 
 const resvg = new Resvg(svg, {
