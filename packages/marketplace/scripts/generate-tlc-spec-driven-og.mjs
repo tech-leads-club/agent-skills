@@ -36,10 +36,10 @@ const BADGE_H = 36
 const BADGE_CY = BADGE_Y + BADGE_H / 2
 const BADGE_LABEL = 'SPEC-DRIVEN DEVELOPMENT'
 const BADGE_FONT_SIZE = 16
-const BADGE_PAD_X = 18
+const BADGE_PAD_X = 26
 const BADGE_DOT_R = 4
-const BADGE_DOT_GAP = 10
-const BADGE_TEXT_W = Math.ceil(BADGE_LABEL.length * 12.2 + BADGE_FONT_SIZE * 0.8) + 56
+const BADGE_DOT_GAP = 12
+const BADGE_TEXT_W = Math.ceil(BADGE_LABEL.length * 12.2 + BADGE_FONT_SIZE * 0.8) + 40
 const BADGE_W = BADGE_PAD_X * 2 + BADGE_DOT_R * 2 + BADGE_DOT_GAP + BADGE_TEXT_W
 const BADGE_DOT_CX = CONTENT_X + BADGE_PAD_X + BADGE_DOT_R
 const BADGE_TEXT_X = BADGE_DOT_CX + BADGE_DOT_R + BADGE_DOT_GAP
@@ -47,8 +47,11 @@ const BADGE_TEXT_X = BADGE_DOT_CX + BADGE_DOT_R + BADGE_DOT_GAP
 const PHASE_Y = 352
 const PHASE_H = 28
 const PHASE_CY = PHASE_Y + PHASE_H / 2
-const PHASE_GAP = 18
+const PHASE_GAP = 28
 const PHASE_PILL_W = 104
+
+const ADAPTIVE_Y = 430
+const FEATURES_Y = 474
 
 const phaseFlow = phases
   .map((phase, i) => {
@@ -75,7 +78,7 @@ const featureChecks = features
     const col = i % 2
     const row = Math.floor(i / 2)
     const x = CONTENT_X + col * 290
-    const y = 462 + row * 34
+    const y = FEATURES_Y + row * 34
     return `<g transform="translate(${x}, ${y})">
       <circle cx="8" cy="8" r="8" fill="#10B981" fill-opacity="0.15"/>
       <path d="M4 8 L7 11 L13 5" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -141,7 +144,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   ${phaseFlow}
   ${phaseArrows}
 
-  <text x="${CONTENT_X}" y="418" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="15" font-weight="600" letter-spacing="0.06em">ADAPTIVE BY COMPLEXITY</text>
+  <text x="${CONTENT_X}" y="${ADAPTIVE_Y}" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="15" font-weight="600" letter-spacing="0.06em">ADAPTIVE BY COMPLEXITY</text>
 
   ${featureChecks}
 
