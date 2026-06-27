@@ -51,8 +51,9 @@ const BADGE_TEXT_X = BADGE_DOT_CX + BADGE_DOT_R + BADGE_DOT_GAP
 const PHASE_Y = 352
 const PHASE_H = 28
 const PHASE_CY = PHASE_Y + PHASE_H / 2
-const PHASE_GAP = 28
+const PHASE_GAP = 40
 const PHASE_PILL_W = 104
+const PHASE_ARROW_INSET = 10
 const PHASE_DOT_R = 4
 const PHASE_PAD_LEFT = 12
 const PHASE_DOT_TEXT_GAP = 8
@@ -81,8 +82,8 @@ const phaseArrows = phases
   .slice(0, -1)
   .map((_, i) => {
     const pillEnd = CONTENT_X + i * (PHASE_PILL_W + PHASE_GAP) + PHASE_PILL_W
-    const x1 = pillEnd + 3
-    const x2 = pillEnd + PHASE_GAP - 3
+    const x1 = pillEnd + PHASE_ARROW_INSET
+    const x2 = pillEnd + PHASE_GAP - PHASE_ARROW_INSET
     return `<path d="M${x1} ${PHASE_CY} L${x2} ${PHASE_CY}" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/>
       <path d="M${x2 - 4} ${PHASE_CY - 4} L${x2} ${PHASE_CY} L${x2 - 4} ${PHASE_CY + 4}" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
   })
