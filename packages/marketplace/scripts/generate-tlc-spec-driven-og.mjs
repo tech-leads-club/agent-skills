@@ -123,7 +123,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <text x="804" y="322" fill="#94A3B8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="700" letter-spacing="0.1em">BENCHMARK</text>
   ${benchmarkList}
 
-  <text x="600" y="532" text-anchor="middle" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="500">agent-skills.techleads.club/tlc-spec-driven</text>
+  <text x="120" y="528" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="500">agent-skills.techleads.club/tlc-spec-driven</text>
 </svg>`
 
 const resvg = new Resvg(svg, {
