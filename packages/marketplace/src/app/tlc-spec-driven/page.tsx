@@ -19,12 +19,20 @@ export const metadata: Metadata = {
     description:
       '4 adaptive phases. Atomic tasks with verification criteria. Requirement traceability from spec to commit.',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [
+      {
+        url: '/og-tlc-spec-driven.png',
+        width: 1200,
+        height: 630,
+        alt: 'TLC Spec-Driven — AI agents that ship right, every time',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'TLC Spec-Driven — AI agents that ship right, every time',
     description: '4 adaptive phases. Atomic tasks. Requirement traceability. Benchmarked best-in-class.',
+    images: ['/og-tlc-spec-driven.png'],
   },
 }
 
