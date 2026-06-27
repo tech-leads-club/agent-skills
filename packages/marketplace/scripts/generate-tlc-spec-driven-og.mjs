@@ -30,6 +30,10 @@ const benchmarkItems = [
   'Requirement Traceability',
 ]
 
+function textBaselineY(centerY, fontSize) {
+  return centerY + Math.round(fontSize * 0.36)
+}
+
 const CONTENT_X = 120
 const BADGE_Y = 118
 const BADGE_H = 36
@@ -49,16 +53,27 @@ const PHASE_H = 28
 const PHASE_CY = PHASE_Y + PHASE_H / 2
 const PHASE_GAP = 28
 const PHASE_PILL_W = 104
+const PHASE_DOT_R = 4
+const PHASE_PAD_LEFT = 12
+const PHASE_DOT_TEXT_GAP = 8
+const PHASE_FONT_SIZE = 11
 
 const ADAPTIVE_Y = 430
 const FEATURES_Y = 474
+const FEATURE_FONT_SIZE = 17
+const FEATURE_ICON_CY = 10
+const FEATURE_ICON_R = 8
+const FEATURE_TEXT_X = 26
 
 const phaseFlow = phases
   .map((phase, i) => {
     const x = CONTENT_X + i * (PHASE_PILL_W + PHASE_GAP)
+    const dotCx = x + PHASE_PAD_LEFT + PHASE_DOT_R
+    const textX = dotCx + PHASE_DOT_R + PHASE_DOT_TEXT_GAP
+    const textY = textBaselineY(PHASE_CY, PHASE_FONT_SIZE)
     return `<rect x="${x}" y="${PHASE_Y}" width="${PHASE_PILL_W}" height="${PHASE_H}" rx="14" fill="${phase.color}" fill-opacity="0.18" stroke="${phase.color}" stroke-opacity="0.55"/>
-      <circle cx="${x + 14}" cy="${PHASE_CY}" r="4" fill="${phase.color}"/>
-      <text x="${x + 24}" y="${PHASE_CY}" dominant-baseline="middle" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" font-weight="700" letter-spacing="0.06em">${phase.label}</text>`
+      <circle cx="${dotCx}" cy="${PHASE_CY}" r="${PHASE_DOT_R}" fill="${phase.color}"/>
+      <text x="${textX}" y="${textY}" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${PHASE_FONT_SIZE}" font-weight="700" letter-spacing="0.06em">${phase.label}</text>`
   })
   .join('\n')
 
@@ -80,9 +95,9 @@ const featureChecks = features
     const x = CONTENT_X + col * 290
     const y = FEATURES_Y + row * 34
     return `<g transform="translate(${x}, ${y})">
-      <circle cx="8" cy="8" r="8" fill="#10B981" fill-opacity="0.15"/>
-      <path d="M4 8 L7 11 L13 5" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <text x="24" y="12" fill="#94A3B8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" font-weight="500">${feature}</text>
+      <circle cx="${FEATURE_ICON_R}" cy="${FEATURE_ICON_CY}" r="${FEATURE_ICON_R}" fill="#10B981" fill-opacity="0.15"/>
+      <path d="M${FEATURE_ICON_R - 4} ${FEATURE_ICON_CY} L${FEATURE_ICON_R - 1} ${FEATURE_ICON_CY + 3} L${FEATURE_ICON_R + 5} ${FEATURE_ICON_CY - 3}" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="${FEATURE_TEXT_X}" y="${textBaselineY(FEATURE_ICON_CY, FEATURE_FONT_SIZE)}" fill="#94A3B8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${FEATURE_FONT_SIZE}" font-weight="500">${feature}</text>
     </g>`
   })
   .join('\n')
@@ -90,9 +105,11 @@ const featureChecks = features
 const benchmarkList = benchmarkItems
   .map((item, i) => {
     const y = 338 + i * 30
+    const iconCy = 8
+    const fontSize = 16
     return `<g transform="translate(804, ${y})">
-      <path d="M0 6 L3 9 L9 3" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <text x="18" y="11" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="600">${item}</text>
+      <path d="M0 ${iconCy} L3 ${iconCy + 3} L9 ${iconCy - 3}" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="18" y="${textBaselineY(iconCy, fontSize)}" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${fontSize}" font-weight="600">${item}</text>
     </g>`
   })
   .join('\n')
@@ -135,7 +152,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
 
   <rect x="${CONTENT_X}" y="${BADGE_Y}" width="${BADGE_W}" height="${BADGE_H}" rx="${BADGE_H / 2}" fill="#1D4ED8" fill-opacity="0.18" stroke="#3B82F6" stroke-opacity="0.35"/>
   <circle cx="${BADGE_DOT_CX}" cy="${BADGE_CY}" r="${BADGE_DOT_R}" fill="#10B981"/>
-  <text x="${BADGE_TEXT_X}" y="${BADGE_CY}" dominant-baseline="middle" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${BADGE_FONT_SIZE}" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
+  <text x="${BADGE_TEXT_X}" y="${textBaselineY(BADGE_CY, BADGE_FONT_SIZE)}" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${BADGE_FONT_SIZE}" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
 
   <text x="${CONTENT_X}" y="210" fill="#F8FAFC" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">TLC Spec-Driven</text>
   <text x="${CONTENT_X}" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">AI agents that ship right, every time</text>
