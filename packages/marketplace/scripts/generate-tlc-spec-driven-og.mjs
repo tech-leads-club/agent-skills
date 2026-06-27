@@ -35,16 +35,22 @@ function textBaselineY(centerY, fontSize) {
 }
 
 const CONTENT_X = 120
-const BADGE_Y = 118
-const BADGE_H = 36
-const BADGE_CY = BADGE_Y + BADGE_H / 2
 const BADGE_LABEL = 'SPEC-DRIVEN DEVELOPMENT'
 const BADGE_FONT_SIZE = 16
-const BADGE_PAD_X = 26
+const BADGE_LETTER_SPACING = 0.04
+const BADGE_PAD_X = 14
+const BADGE_PAD_Y = 9
 const BADGE_DOT_R = 4
-const BADGE_DOT_GAP = 12
-const BADGE_TEXT_W = Math.ceil(BADGE_LABEL.length * 12.2 + BADGE_FONT_SIZE * 0.8) + 40
+const BADGE_DOT_GAP = 8
+const BADGE_TEXT_W = Math.ceil(
+  BADGE_LABEL.length * BADGE_FONT_SIZE * 0.62 +
+    BADGE_LABEL.length * BADGE_FONT_SIZE * BADGE_LETTER_SPACING +
+    8,
+)
 const BADGE_W = BADGE_PAD_X * 2 + BADGE_DOT_R * 2 + BADGE_DOT_GAP + BADGE_TEXT_W
+const BADGE_H = BADGE_PAD_Y * 2 + BADGE_FONT_SIZE
+const BADGE_Y = 118
+const BADGE_CY = BADGE_Y + BADGE_H / 2
 const BADGE_DOT_CX = CONTENT_X + BADGE_PAD_X + BADGE_DOT_R
 const BADGE_TEXT_X = BADGE_DOT_CX + BADGE_DOT_R + BADGE_DOT_GAP
 
