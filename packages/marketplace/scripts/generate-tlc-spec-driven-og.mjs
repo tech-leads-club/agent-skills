@@ -30,18 +30,39 @@ const benchmarkItems = [
   'Requirement Traceability',
 ]
 
+const CONTENT_X = 120
+const BADGE_Y = 118
+const BADGE_H = 34
+const BADGE_CY = BADGE_Y + BADGE_H / 2
+const BADGE_LABEL = 'SPEC-DRIVEN DEVELOPMENT'
+const BADGE_PAD_X = 16
+const BADGE_TEXT_X = CONTENT_X + BADGE_PAD_X + 10
+const BADGE_TEXT_W = BADGE_LABEL.length * 9.5
+const BADGE_W = BADGE_PAD_X + 10 + BADGE_TEXT_W + BADGE_PAD_X
+
+const PHASE_Y = 352
+const PHASE_H = 28
+const PHASE_CY = PHASE_Y + PHASE_H / 2
+const PHASE_GAP = 18
+const PHASE_PILL_W = 104
+
 const phaseFlow = phases
   .map((phase, i) => {
-    const x = 120 + i * 148
-    const arrow =
-      i < phases.length - 1
-        ? `<path d="M${x + 108} 372 L${x + 132} 372" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/>
-           <path d="M${x + 128} 368 L${x + 132} 372 L${x + 128} 376" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>`
-        : ''
-    return `${arrow}
-      <rect x="${x}" y="352" width="100" height="28" rx="14" fill="${phase.color}" fill-opacity="0.18" stroke="${phase.color}" stroke-opacity="0.55"/>
-      <circle cx="${x + 14}" cy="366" r="4" fill="${phase.color}"/>
-      <text x="${x + 24}" y="371" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" font-weight="700" letter-spacing="0.06em">${phase.label}</text>`
+    const x = CONTENT_X + i * (PHASE_PILL_W + PHASE_GAP)
+    return `<rect x="${x}" y="${PHASE_Y}" width="${PHASE_PILL_W}" height="${PHASE_H}" rx="14" fill="${phase.color}" fill-opacity="0.18" stroke="${phase.color}" stroke-opacity="0.55"/>
+      <circle cx="${x + 14}" cy="${PHASE_CY}" r="4" fill="${phase.color}"/>
+      <text x="${x + 24}" y="${PHASE_CY}" dominant-baseline="middle" fill="#E2E8F0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" font-weight="700" letter-spacing="0.06em">${phase.label}</text>`
+  })
+  .join('\n')
+
+const phaseArrows = phases
+  .slice(0, -1)
+  .map((_, i) => {
+    const pillEnd = CONTENT_X + i * (PHASE_PILL_W + PHASE_GAP) + PHASE_PILL_W
+    const x1 = pillEnd + 3
+    const x2 = pillEnd + PHASE_GAP - 3
+    return `<path d="M${x1} ${PHASE_CY} L${x2} ${PHASE_CY}" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M${x2 - 4} ${PHASE_CY - 4} L${x2} ${PHASE_CY} L${x2 - 4} ${PHASE_CY + 4}" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
   })
   .join('\n')
 
@@ -49,7 +70,7 @@ const featureChecks = features
   .map((feature, i) => {
     const col = i % 2
     const row = Math.floor(i / 2)
-    const x = 120 + col * 290
+    const x = CONTENT_X + col * 290
     const y = 462 + row * 34
     return `<g transform="translate(${x}, ${y})">
       <circle cx="8" cy="8" r="8" fill="#10B981" fill-opacity="0.15"/>
@@ -101,21 +122,22 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
 
   <rect x="80" y="80" width="1040" height="470" rx="28" stroke="#334155" stroke-opacity="0.55" stroke-width="1.5"/>
 
-  <g transform="translate(1040, 98) scale(0.19)" clip-path="url(#tlc-icon)">
+  <g transform="translate(1040, ${BADGE_CY - 19}) scale(0.19)" clip-path="url(#tlc-icon)">
     ${logoInner}
   </g>
 
-  <rect x="120" y="118" width="260" height="34" rx="17" fill="#1D4ED8" fill-opacity="0.18" stroke="#3B82F6" stroke-opacity="0.35"/>
-  <circle cx="142" cy="135" r="4" fill="#10B981"/>
-  <text x="158" y="140" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="600" letter-spacing="0.04em">SPEC-DRIVEN DEVELOPMENT</text>
+  <rect x="${CONTENT_X}" y="${BADGE_Y}" width="${BADGE_W}" height="${BADGE_H}" rx="17" fill="#1D4ED8" fill-opacity="0.18" stroke="#3B82F6" stroke-opacity="0.35"/>
+  <circle cx="${CONTENT_X + BADGE_PAD_X + 4}" cy="${BADGE_CY}" r="4" fill="#10B981"/>
+  <text x="${BADGE_TEXT_X}" y="${BADGE_CY}" dominant-baseline="middle" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
 
-  <text x="120" y="210" fill="#F8FAFC" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">TLC Spec-Driven</text>
-  <text x="120" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">AI agents that ship right, every time</text>
-  <rect x="120" y="278" width="420" height="3" rx="1.5" fill="url(#accent)"/>
+  <text x="${CONTENT_X}" y="210" fill="#F8FAFC" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">TLC Spec-Driven</text>
+  <text x="${CONTENT_X}" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">AI agents that ship right, every time</text>
+  <rect x="${CONTENT_X}" y="278" width="420" height="3" rx="1.5" fill="url(#accent)"/>
 
   ${phaseFlow}
+  ${phaseArrows}
 
-  <text x="120" y="418" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="15" font-weight="600" letter-spacing="0.06em">ADAPTIVE BY COMPLEXITY</text>
+  <text x="${CONTENT_X}" y="418" fill="#64748B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="15" font-weight="600" letter-spacing="0.06em">ADAPTIVE BY COMPLEXITY</text>
 
   ${featureChecks}
 
