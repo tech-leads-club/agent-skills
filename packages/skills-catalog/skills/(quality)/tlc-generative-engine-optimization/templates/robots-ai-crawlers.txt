@@ -1,0 +1,53 @@
+# robots.txt — AI crawler controls template
+# Place at: https://example.com/robots.txt
+#
+# KEY DISTINCTION:
+#   OAI-SearchBot = OpenAI's SEARCH INDEXER (controls ChatGPT Search citations)
+#   GPTBot        = OpenAI's TRAINING crawler (controls training data inclusion)
+#   These are separate bots. You can block training without blocking search indexing.
+#
+# OPTION A — Allow all crawlers (default; recommended for most sites wanting GEO visibility)
+
+User-agent: *
+Allow: /
+Sitemap: https://example.com/sitemap.xml
+
+# OPTION B — Allow search crawlers, block training crawlers
+# (Use this if you want ChatGPT Search citations but not training data inclusion)
+
+# User-agent: GPTBot
+# Disallow: /
+
+# User-agent: OAI-SearchBot
+# Allow: /
+
+# User-agent: PerplexityBot
+# Allow: /
+
+# User-agent: BingBot
+# Allow: /
+
+# User-agent: Googlebot
+# Allow: /
+
+# User-agent: *
+# Allow: /
+
+# Sitemap: https://example.com/sitemap.xml
+
+# OPTION C — Block all AI crawlers (use only if you explicitly do NOT want GEO visibility)
+
+# User-agent: GPTBot
+# Disallow: /
+
+# User-agent: OAI-SearchBot
+# Disallow: /
+
+# User-agent: PerplexityBot
+# Disallow: /
+
+# User-agent: CCBot
+# Disallow: /
+
+# User-agent: *
+# Allow: /

@@ -1,0 +1,14 @@
+# SITE_NAME
+
+> BRIEF_ONE_OR_TWO_SENTENCE_DESCRIPTION_OF_WHAT_THIS_SITE_OFFERS_AND_WHO_IT_IS_FOR.
+
+## Key pages
+
+- [Page Title](https://example.com/page-path/): One sentence describing what this page covers and what an AI agent would use it for.
+- [Page Title](https://example.com/another-page/): One sentence description.
+- [Page Title](https://example.com/guide/): One sentence description.
+
+## Technical files
+
+- [OpenAPI spec](https://example.com/openapi.json): Machine-readable API definition.
+- [Sitemap](https://example.com/sitemap.xml): Full list of indexed pages.
