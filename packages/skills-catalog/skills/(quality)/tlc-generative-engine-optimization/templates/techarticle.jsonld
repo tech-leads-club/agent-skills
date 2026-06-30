@@ -1,0 +1,29 @@
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "PAGE_TITLE_MATCHING_H1",
+  "description": "BRIEF_DESCRIPTION_MATCHING_META_DESCRIPTION",
+  "datePublished": "YYYY-MM-DD",
+  "dateModified": "YYYY-MM-DD",
+  "author": {
+    "@type": "Person",
+    "name": "AUTHOR_FULL_NAME",
+    "url": "https://example.com/about/author-name/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SITE_OR_COMPANY_NAME",
+    "url": "https://example.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://example.com/images/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://example.com/page-path/"
+  },
+  "image": "https://example.com/images/page-og.png",
+  "articleSection": "TOPIC_CATEGORY",
+  "inLanguage": "en"
+}

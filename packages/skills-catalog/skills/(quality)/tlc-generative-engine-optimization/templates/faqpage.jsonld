@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "QUESTION_ONE_EXACTLY_AS_VISIBLE_ON_PAGE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ANSWER_ONE_EXACTLY_AS_VISIBLE_ON_PAGE. Must match visible text — do not add hidden or extra content here."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "QUESTION_TWO_EXACTLY_AS_VISIBLE_ON_PAGE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ANSWER_TWO_EXACTLY_AS_VISIBLE_ON_PAGE."
+      }
+    }
+  ]
+}
