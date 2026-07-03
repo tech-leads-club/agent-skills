@@ -38,6 +38,7 @@ This table is an index, not the content. The conventions live in the reference f
 | Authentication, authorization, sessions, IDOR scoping | `references/auth.md` |
 | Database migrations | `references/migration.md` |
 | Minitest, fixtures, testing | `references/test.md` |
+| Views, ERB, partials, helpers, presentation logic | `references/view.md` |
 | Turbo Frames, Turbo Streams, real-time | `references/turbo.md` |
 | Stimulus controllers, JS sprinkles | `references/stimulus.md` |
 | Background jobs, Solid Queue | `references/jobs.md` |
