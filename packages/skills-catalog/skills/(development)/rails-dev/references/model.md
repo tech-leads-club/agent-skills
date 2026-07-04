@@ -280,19 +280,6 @@ def resume  = update!(status: ACTIVE)
 
 ---
 
-## Money and amounts
-
-Store money as **integer cents** in a `bigint`/`integer` column (`price_cents`, `amount_cents`), never `decimal` or `float`. Integer cents avoid floating-point drift and are the universal convention across billing systems.
-
-```ruby
-# t.integer :price_cents, null: false
-validates :price_cents, numericality: { greater_than: 0 }
-```
-
-Convert at the boundary: divide by 100 for display, multiply by 100 (rounding) when reading input. Reach for `money-rails` only when you need a real `Money` object with currency arithmetic, not just a stored amount.
-
----
-
 ## Callbacks
 
 Use `_commit` callbacks for anything touching external services or broadcasts: a non-`_commit` callback runs inside the transaction and can fire on work that later rolls back. Keep callbacks to broadcasting, tracking, and defaults. Complex logic goes in named methods, not callbacks.
@@ -498,7 +485,6 @@ Every seeded record must represent a state the domain can actually reach through
 - Defaults via lambdas (`Current.user`, parent association); tenant scoping (`account_id`) only when the app is multi-tenant
 - `_commit` callbacks for external side effects
 - Status values named as constants or enums, never raw strings
-- Money stored as integer cents (`price_cents`), never decimal/float
 - Tests cover the behavior with fixtures, asserting outcomes
 - A new model ships development seeds; multi-state models seed an example of each state, and every seed is a state the domain can actually reach
 - Domain errors live inline with the model under an inline base; concretes extend the base; extract a flat `error.rb` only for shared behavior or a shared rescue point
