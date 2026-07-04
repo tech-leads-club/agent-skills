@@ -282,22 +282,14 @@ def resume  = update!(status: ACTIVE)
 
 ## Money and amounts
 
-Store money as **integer cents** in a `bigint`/`integer` column (`price_cents`, `amount_cents`), never `decimal` or `float`. Expose a virtual `amount` accessor so forms bind to a human value while the column stays in cents.
+Store money as **integer cents** in a `bigint`/`integer` column (`price_cents`, `amount_cents`), never `decimal` or `float`. Integer cents avoid floating-point drift and are the universal convention across billing systems.
 
 ```ruby
-# Column: t.integer :price_cents, null: false
+# t.integer :price_cents, null: false
 validates :price_cents, numericality: { greater_than: 0 }
-
-def amount = price_cents&.fdiv(100)
-
-def amount=(value)
-  self.price_cents = value.present? ? (BigDecimal(value.to_s.tr(",", ".")) * 100).round : nil
-rescue ArgumentError
-  self.price_cents = nil
-end
 ```
 
-`tr(",", ".")` accepts the pt-BR decimal comma; `BigDecimal` avoids float drift. The form binds to `amount` (`<input type="text" inputmode="decimal">`), never to `price_cents`. No money gem is needed for this; reach for `money-rails` only when you need a real `Money` object with currency arithmetic, not just a stored amount.
+Convert at the boundary: divide by 100 for display, multiply by 100 (rounding) when reading input. Reach for `money-rails` only when you need a real `Money` object with currency arithmetic, not just a stored amount.
 
 ---
 
@@ -506,7 +498,7 @@ Every seeded record must represent a state the domain can actually reach through
 - Defaults via lambdas (`Current.user`, parent association); tenant scoping (`account_id`) only when the app is multi-tenant
 - `_commit` callbacks for external side effects
 - Status values named as constants or enums, never raw strings
-- Money stored as integer cents; a virtual `amount` accessor converts for forms
+- Money stored as integer cents (`price_cents`), never decimal/float
 - Tests cover the behavior with fixtures, asserting outcomes
 - A new model ships development seeds; multi-state models seed an example of each state, and every seed is a state the domain can actually reach
 - Domain errors live inline with the model under an inline base; concretes extend the base; extract a flat `error.rb` only for shared behavior or a shared rescue point
