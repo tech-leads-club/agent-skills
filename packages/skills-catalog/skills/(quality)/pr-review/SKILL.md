@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Reviews a GitHub pull request and posts inline comments plus one consolidated summary, adapting to any codebase by discovering the project's own test runner, requirement specs, and architecture conventions before running six specialized review agents in parallel. Stack-agnostic across language and framework; targets GitHub PRs via the gh CLI. Use when the user says "review PR #N", "review this PR", "code review this PR", or "check this pull request". Do NOT use for creating PRs or responding to review comments (use gh-address-comments), or debugging failing CI checks (use gh-fix-ci).
+description: Reviews a GitHub pull request and posts inline comments plus one consolidated summary, adapting to any codebase by discovering the project's own test runner, requirement specs, and architecture conventions before running six specialized review agents in parallel. Stack-agnostic across language and framework; targets GitHub PRs via the gh CLI. Use when the user says "review PR 128", "review this PR", "code review this PR", or "check this pull request". Do NOT use for creating PRs or responding to review comments (use gh-address-comments), or debugging failing CI checks (use gh-fix-ci).
 license: CC-BY-4.0
 disable-model-invocation: true
 metadata:
