@@ -1549,8 +1549,8 @@
         "scripts/lessons.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "3.1.0",
-      "contentHash": "76e50c2dc0ec574d959e54cd084c725eb8b2faaf7638d432dc95045e3d4eec5f"
+      "version": "3.2.0",
+      "contentHash": "e3d5c4dec38bff044207b31229fb28114d5fdb79f2c7200f3ec49a13a70024e1"
     },
     {
       "name": "vercel-deploy",

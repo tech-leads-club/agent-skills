@@ -20,18 +20,19 @@ This is where code gets written. Every task follows the same cycle: plan → imp
 
 ## Process
 
-**Phase worker context:** When this task is executed as part of a phase sub-agent, the worker
-receives the full phase task definitions, coding principles, the generated Test Coverage Matrix
-and Gate Check Commands from tasks.md, and relevant spec/design context. The worker executes ALL
-tasks in its assigned phase in order — each task follows every step below (implement → gate →
-atomic commit) before moving to the next task in the phase. After all tasks in the phase are
-complete, the worker reports a compact phase summary (tasks done, commit hashes, test counts,
-deviations/blockers) to the orchestrator. See [sub-agents.md](sub-agents.md) for the full
-model.
+**Batch worker context:** When this task is executed as part of a phase-batch sub-agent, the worker
+receives the task definitions for every phase in its batch, coding principles, the generated Test
+Coverage Matrix and Gate Check Commands from tasks.md, and relevant spec/design context. A batch is
+one or more consecutive whole phases packed to ~7 tasks. The worker executes ALL tasks in its
+assigned batch in order — finishing every task in one phase before starting the next phase in the
+batch — and each task follows every step below (implement → gate → atomic commit) before moving to
+the next. After all tasks in the batch are complete, the worker reports a compact summary (tasks
+done, commit hashes, test counts, deviations/blockers) to the orchestrator. See
+[sub-agents.md](sub-agents.md) for the full model.
 
 ### Before implementing: assess sub-agent delegation (MANDATORY — before the first task)
 
-Before implementing anything, if a formal `tasks.md` with an Execution Plan exists, **count its phases**. If there are **more than 3 phases**, you MUST present the per-phase sub-agent offer to the user (see [sub-agents.md](sub-agents.md)) and wait for their choice before starting Execute — do not silently proceed inline. For 3 or fewer phases (or if the user declines), execute inline. Skip this check only when you are already a phase worker executing a delegated phase (the orchestrator already made the delegation decision).
+Before implementing anything, if a formal `tasks.md` with an Execution Plan exists, **count its total tasks** and pack the phases into task-budgeted batches (~7 tasks per worker, whole phases — see [sub-agents.md](sub-agents.md)). If that yields **more than one batch** (> ~8 tasks), you MUST present the sub-agent offer to the user and wait for their choice before starting Execute — do not silently proceed inline. If the feature fits a single batch (≤ ~8 tasks, or the user declines), execute inline. Skip this check only when you are already a batch worker executing a delegated batch (the orchestrator already made the delegation decision).
 
 ### 0. List Atomic Steps (MANDATORY when Tasks phase was skipped)
 
@@ -303,7 +304,7 @@ Mark task complete in tasks.md. Update requirement traceability in spec.md if re
 
 When the task you just completed is the **last task of the feature** (or of a priority group being delivered on its own, e.g. all P1 tasks), you MUST run feature-level validation before reporting the work as done. **This is not optional and is never prompted — it runs automatically.** Do not stop at the final task's commit.
 
-**Author ≠ verifier rationale.** The implementer (you, or the phase worker) is the author of the code and tests. An author checking their own work applies the same mental model that may have produced any gaps. The Verifier is a fresh sub-agent that re-derives coverage from the spec independently — it does not inherit the author's assumptions. This separation is the quality gate, not just a style preference.
+**Author ≠ verifier rationale.** The implementer (you, or the batch worker) is the author of the code and tests. An author checking their own work applies the same mental model that may have produced any gaps. The Verifier is a fresh sub-agent that re-derives coverage from the spec independently — it does not inherit the author's assumptions. This separation is the quality gate, not just a style preference.
 
 **Layering:**
 - Per-task adequacy self-check (steps 5–6): cheap, always runs, author does it, confirms each task in isolation.

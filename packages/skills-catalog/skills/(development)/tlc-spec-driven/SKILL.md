@@ -4,7 +4,7 @@ description: Feature planning and implementation with 4 adaptive phases — Spec
 license: CC-BY-4.0
 metadata:
   author: Felipe Rodrigues - github.com/felipfr
-  version: 3.1.0
+  version: 3.2.0
 ---
 
 # Tech Lead's Club - Spec-Driven Development
@@ -31,7 +31,7 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 3. One atomic commit per task. Never batch tasks; never weaken, skip, or delete tests to make them pass.
 4. After the LAST task, a fresh **Verifier always runs automatically** (author ≠ verifier) — spec-anchored outcome check + discrimination sensor. It is never optional and never prompted. See Sub-Agent Delegation.
 
-**Before Execute:** read [implement.md](references/implement.md) completely; if a formal `tasks.md` has more than 3 phases, present the sub-agent offer first (see Sub-Agent Delegation).
+**Before Execute:** read [implement.md](references/implement.md) completely; if a formal `tasks.md` packs into more than one task-budgeted batch (> ~8 tasks), present the sub-agent offer first (see Sub-Agent Delegation).
 
 ## Auto-Sizing: The Core Principle
 
@@ -42,7 +42,7 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 | **Small**   | ≤3 files, one sentence   | One-liner spec (inline)                                 | Skip                                            | Skip                          | Implement + verify inline                             |
 | **Medium**  | Clear feature, <10 tasks | Spec (brief)                                            | Skip — design inline                            | Skip — tasks implicit         | Implement + verify                                    |
 | **Large**   | Multi-component feature  | Full spec + requirement IDs                             | Architecture + components                       | Full breakdown + dependencies | Implement + verify per task                           |
-| **Complex** | Ambiguity, new domain    | Full spec + [discuss gray areas](references/discuss.md) | [Research](references/design.md) + architecture | Breakdown + parallel plan     | Implement + [interactive UAT](references/validate.md) |
+| **Complex** | Ambiguity, new domain    | Full spec + [discuss gray areas](references/discuss.md) | [Research](references/design.md) + architecture | Breakdown + phase plan        | Implement + [interactive UAT](references/validate.md) |
 
 **Rules:**
 
@@ -102,11 +102,11 @@ Read `.specs/STATE.md` — Handoff section for in-flight state, Decisions sectio
 
 ## Sub-Agent Delegation
 
-**Trigger:** >3 phases → offer one worker per phase (sequential); ≤3 phases → execute inline.
+**Trigger:** count total tasks. If the feature packs into more than one task-budgeted batch (> ~8 tasks) → offer sub-agents; if it fits a single batch (≤ ~8 tasks) → execute inline.
 
 **Offer-then-confirm** — never auto-spawn. The user must accept before any sub-agent is dispatched.
 
-**One worker per phase:** Each phase worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Workers never spawn further sub-agents.
+**One worker per task-budgeted batch (~7 tasks, whole phases):** Phases stay the semantic/dependency unit; a **batch** is the execution unit — one or more *consecutive whole phases* packed to ~7 tasks. Walk phases in order, accumulate whole phases into the current batch until it reaches the budget, then start the next — **never split a phase** across workers. ~20 tasks → ~3 workers; scales linearly (40 → ~6). Each worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Batches run sequentially — a batch never starts until the previous one reports all tasks complete. Workers never spawn further sub-agents.
 
 **Verifier (always-on, never prompted):** After the final task is committed, the orchestrator dispatches a fresh Verifier sub-agent automatically — regardless of phase count. Validation never requires a user prompt; it is the closing step of Execute. **Author ≠ verifier**: the Verifier re-derives coverage independently using evidence-or-zero; it does not inherit the author's mental model. The Verifier: (1) performs a **spec-anchored outcome check** — confirms each test's asserted value matches the spec-defined expected outcome, flags spec-precision gaps; (2) runs a **discrimination sensor** — injects behavior-level faults in scratch state, confirms tests kill them, discards mutations, surviving mutants become fix tasks; (3) writes `.specs/features/[feature]/validation.md` (PASS/FAIL, per-AC evidence, sensor result, diff range); (4) returns a compact verdict + ranked gap list to the orchestrator in chat. Gaps become fix tasks; the fix→re-verify loop is bounded to 3 iterations before escalating. (5) **distills lessons** — turns each grounded failure (surviving mutant, spec-precision gap, failed AC, SPEC_DEVIATION) into a reusable project-local lesson via `scripts/lessons.py`; a clean PASS records nothing (see [lessons.md](references/lessons.md)).
 
