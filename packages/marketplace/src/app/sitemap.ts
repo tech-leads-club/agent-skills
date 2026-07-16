@@ -7,7 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://agent-skills.techleads.club'
 
   const skillEntries: MetadataRoute.Sitemap = marketplaceData.skills.map((skill) => ({
-    url: `${baseUrl}/skills/${skill.id}`,
+    url: `${baseUrl}/skills/${skill.id}/`,
     lastModified: skill.metadata.lastModified,
     changeFrequency: 'weekly',
     priority: 0.8,
@@ -15,16 +15,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: baseUrl,
+      url: `${baseUrl}/`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/skills`,
+      url: `${baseUrl}/skills/`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/about/`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/tlc-spec-driven/`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.95,
     },
     ...skillEntries,
   ]
