@@ -114,17 +114,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </div>
               <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">{skill.description}</p>
 
-              {skill.id === 'tlc-spec-driven' && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                  <Link
-                    href="/tlc-spec-driven"
-                    className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                  >
-                    See the full Spec-Driven landing page →
-                  </Link>
-                </p>
-              )}
-
               {/* Install command */}
               <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-3.5 flex items-center justify-between mt-5">
                 <code className="text-sm text-sky-400 font-mono truncate">{installCommand}</code>
@@ -207,14 +196,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
               {/* Actions */}
               <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5 space-y-3">
-                {skill.id === 'tlc-spec-driven' && (
-                  <Link
-                    href="/tlc-spec-driven"
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-semibold shadow-md shadow-blue-600/20"
-                  >
-                    Spec-Driven overview →
-                  </Link>
-                )}
                 <ShareButton skillId={skill.id} variant="full" />
                 <a
                   href={`https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`}

@@ -143,13 +143,7 @@ export default function HomePage() {
                       href="/tlc-spec-driven"
                       className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5 text-sm"
                     >
-                      Learn more →
-                    </Link>
-                    <Link
-                      href={`/skills/${heroSkill.id}`}
-                      className="px-5 py-2.5 text-blue-600 dark:text-blue-400 font-semibold rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors text-sm"
-                    >
-                      View skill details
+                      View Skill →
                     </Link>
                     <ShareButton skillId={heroSkill.id} variant="icon" />
                   </div>
