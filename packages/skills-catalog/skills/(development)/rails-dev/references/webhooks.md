@@ -62,7 +62,7 @@ end
 
 ## Inbound: the inbox
 
-**One inbox per integration.** Each provider gets its own table (`Billing::Kiwify::WebhookEvent`, a separate one for Zoom, Make, ...), not a shared generic `WebhookEvent`: the natural key, schema, and per-type handlers differ per provider.
+**One inbox per integration.** Each provider gets its own table (`Billing::Stripe::WebhookEvent`, a separate one for Zoom, Make, ...), not a shared generic `WebhookEvent`: the natural key, schema, and per-type handlers differ per provider.
 
 An inbound webhook is untrusted, may arrive more than once, and may arrive out of order, and must be acknowledged fast. Don't process it in the request. Verify it, store it in an **inbox** table, ack `200`, and process in the background. This makes redelivery idempotent and processing at-least-once.
 
@@ -70,7 +70,7 @@ Receive, verify, store, ack:
 
 ```ruby
 def create
-  event = Billing::Kiwify::WebhookEvent.ingest(
+  event = Billing::Stripe::WebhookEvent.ingest(
     raw_post: request.raw_post, params: webhook_params, signature: params[:signature]
   )
   head event ? :ok : :unprocessable_entity
@@ -166,7 +166,7 @@ end
 
 # Inbound: bad signature rejected, valid event stored + acked, redelivery dedupes
 test "redelivery dedupes to the same inbox row" do
-  assert_no_difference -> { Billing::Kiwify::WebhookEvent.count } do
+  assert_no_difference -> { Billing::Stripe::WebhookEvent.count } do
     post webhooks_inbound_kiwify_path, params: existing_event_params, headers: signed_headers
   end
   assert_response :ok

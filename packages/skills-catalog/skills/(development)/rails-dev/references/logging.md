@@ -149,7 +149,7 @@ Rails.logger.debug { "Full payload: #{payload.inspect}" }
 ## Exceptions: use `Rails.error.report`
 
 Don't log exceptions manually. The error reporter handles class, message,
-backtrace, and forwards to Sentry. Full conventions are in
+backtrace, and forwards to the observability platform (e.g. Sentry). Full conventions are in
 `references/error-handling.md`.
 
 ```ruby
@@ -189,7 +189,7 @@ JSON payload, which is the whole reason to use a structured event.
 Log at **system boundaries** and at the **point of decision**: webhooks, API
 calls, payment processing, throttling, external sync. In this codebase that
 point is usually a rich model (`RateLimit::Throttle`,
-`Billing::Kiwify::WebhookEvent`, `Attendance::Zoom::Sync`). Domain logic lives
+`Billing::Stripe::WebhookEvent`, `Attendance::Zoom::Sync`). Domain logic lives
 in models, so the event that records its outcome fires there too. Don't push a
 log up to a controller just to keep the model "clean": log where the decision is
 made.

@@ -63,7 +63,7 @@ Keep it contained: tuples live between a model method and its immediate caller, 
 
 ## Report through `Rails.error`, with context
 
-Every caught error goes through `Rails.error`, never a bare `Rails.logger` string. It reaches Sentry in production and the log subscriber in dev/test, with the entry point and metadata inferred for free.
+Every caught error goes through `Rails.error`, never a bare `Rails.logger` string. It reaches the observability platform (e.g. Sentry) in production and the log subscriber in dev/test, with the entry point and metadata inferred for free.
 
 ```ruby
 # certificate_generation_job.rb — recovered, so handled: true
@@ -109,7 +109,7 @@ rescue Agenda::Zoom::Error => e
 
 A failure has two distinct audiences, and they use different reporters:
 
-- **`Rails.error.*`** — the exception itself → Sentry. For engineers debugging *why* it broke. Always report a caught exception here.
+- **`Rails.error.*`** — the exception itself → the observability platform. For engineers debugging *why* it broke. Always report a caught exception here.
 - **`Rails.event.notify("domain.fact", ...)`** — the *outcome* as a business event → telemetry. For operators querying or alerting on *how often* and *which* outcomes happen.
 
 These are not redundant: a recovered failure is usually both — you `Rails.error.report` the exception **and** notify the outcome.
