@@ -28,22 +28,30 @@ Avoid binding context-specific values (like `org`) to the constructor. Pass them
 
 ### API Response Validation
 
-- **Always define dry-schema contracts** for expected API responses
-- Create schema definitions in the same file as the client code
-- Validate all external API responses before processing
-- Use dry-schema's type coercion and validation features to ensure data integrity
+- **Always validate expected API responses** before processing
+- Define the validation object in the same file as the client code
+- Default to `ActiveModel::Model` + `ActiveModel::Attributes` — built into Rails, with type casting and validations
 
 ```ruby
-module SomeClient
-  private
+class SomeClient
+  class OrderResponse
+    include ActiveModel::Model
+    include ActiveModel::Attributes
 
-  OrderSchema = Dry::Schema.JSON do
-    required(:id).filled(:string)
-    required(:status).filled(:string)
+    attribute :id, :string
+    attribute :status, :string
     # ... other fields
+
+    validates :id, presence: true
+    validates :status, presence: true
   end
 end
+
+order = SomeClient::OrderResponse.new(JSON.parse(payload))
+order.valid? # => true/false, order.errors for details
 ```
+
+If the project already uses the Dry ecosystem, `Dry::Schema.JSON` contracts are a fine alternative — but don't add the dependency just for this.
 
 ### Error Handling
 
@@ -80,7 +88,7 @@ into one inheritance tree.
 
 **Include it on the errors that wrap a response** (`ApiError`, and an auth error
 raised from a 401), not on the client base or on a `ValidationError`, whose shape
-(schema errors, not status plus body) is different.
+(validation errors, not status plus body) is different.
 
 Apply it consistently across every client that wraps an HTTP response, so
 failures surface the same structured detail regardless of which API they hit.
