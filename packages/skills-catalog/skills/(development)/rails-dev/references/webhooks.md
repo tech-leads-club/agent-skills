@@ -131,7 +131,7 @@ end
 
 # Do: the webhook says 'subscription X changed'; fetch the truth and reconcile
 def process
-  current = Kiwify::AdminClient.new.subscription(subscription_id)
+  current = Stripe::AdminClient.new.subscription(subscription_id)
   member.reconcile_access(current)   # idempotent, order-independent
 end
 ```
@@ -142,11 +142,11 @@ When you can't re-fetch (no API, or the payload *is* the event), converge regard
 - **Tombstone** — on a delete/cancel, don't hard-destroy: that drops the watermark and lets a stale older update *resurrect* the entity. Soft-delete instead — keep the row marked deleted at `event_at`, so the same watermark check rejects the late event. Reap tombstones on a retention sweep once past the provider's delivery window.
 
 ```ruby
-return if member.kiwify_synced_at&.>= event_at        # watermark: older event, drop
+return if member.stripe_synced_at&.>= event_at        # watermark: older event, drop
 
 case event.type
-when :cancelled then member.update!(status: :cancelled, kiwify_synced_at: event_at)  # tombstone, not destroy
-else                 member.update!(status: payload[:status], kiwify_synced_at: event_at)
+when :cancelled then member.update!(status: :cancelled, stripe_synced_at: event_at)  # tombstone, not destroy
+else                 member.update!(status: payload[:status], stripe_synced_at: event_at)
 end
 ```
 
@@ -167,7 +167,7 @@ end
 # Inbound: bad signature rejected, valid event stored + acked, redelivery dedupes
 test "redelivery dedupes to the same inbox row" do
   assert_no_difference -> { Billing::Stripe::WebhookEvent.count } do
-    post webhooks_inbound_kiwify_path, params: existing_event_params, headers: signed_headers
+    post webhooks_inbound_stripe_path, params: existing_event_params, headers: signed_headers
   end
   assert_response :ok
 end

@@ -39,7 +39,7 @@ the outcome, so the line is actionable without stitching together others.
 Rails.logger.error "Record not found"
 
 # Good: actionable on its own
-Rails.logger.error "Member not found for kiwify email=#{payload['email']} order=#{payload['order_id']}"
+Rails.logger.error "Member not found for stripe email=#{payload['email']} order=#{payload['order_id']}"
 ```
 
 ### Name events as facts, and attach a metric
@@ -126,7 +126,7 @@ the codebase, that is the signal to promote it to a `Rails.event.notify` call.
 
 ```ruby
 Rails.logger.info "Received event=#{event_type} product_id=#{product_id}"
-Rails.logger.warn "Unknown kiwify event type: #{event_type}, ignoring"
+Rails.logger.warn "Unknown stripe event type: #{event_type}, ignoring"
 ```
 
 Keep plain messages scannable with key=value pairs:
@@ -174,7 +174,7 @@ raise
 | `error` | Something broke |
 
 ```ruby
-Rails.logger.warn "Unknown kiwify event type: #{event_type}, ignoring"
+Rails.logger.warn "Unknown stripe event type: #{event_type}, ignoring"
 Rails.logger.warn "Member #{member.id} has no active plan but received renewal webhook"
 ```
 
@@ -201,7 +201,7 @@ data has nothing to say: log the decision, not every `save`.
 
 - **No `[ClassName]` prefix in the message.** The logger already records where
   the line came from (`source_location` on structured events); a hand-written
-  `[Kiwify::Webhook] ...` prefix is redundant noise. Log the fact, not the
+  `[Stripe::Webhook] ...` prefix is redundant noise. Log the fact, not the
   origin.
 - **No `Rails.logger.info(event: "...", key: value)`.** That was the old
   pattern. It lands with `message: "nil"` and the keys flattened at the JSON

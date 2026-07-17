@@ -124,7 +124,7 @@ The same noun discipline applies to machine and infra endpoints.
 # Inbound webhooks: a singular resource, fixed controller
 namespace :webhooks do
   namespace :inbound do
-    resource :kiwify, only: [ :create ], controller: "kiwify"
+    resource :stripe, only: [ :create ], controller: "stripe"
     resource :zoom,   only: [ :create ], controller: "zoom"
   end
 end

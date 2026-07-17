@@ -114,12 +114,12 @@ A failure has two distinct audiences, and they use different reporters:
 
 These are not redundant: a recovered failure is usually both — you `Rails.error.report` the exception **and** notify the outcome.
 
-When to notify (and when not to) is `references/logging.md`'s call, not this file's. The short version: notify an outcome an operator would want to query, aggregate, or alert on (`payment.failed`, `billing.kiwify.webhook_rejected`) — not every rescue. Don't notify a failure that carries no operational signal; just report the exception.
+When to notify (and when not to) is `references/logging.md`'s call, not this file's. The short version: notify an outcome an operator would want to query, aggregate, or alert on (`payment.failed`, `billing.stripe.webhook_rejected`) — not every rescue. Don't notify a failure that carries no operational signal; just report the exception.
 
 ```ruby
-rescue Billing::Kiwify::Error => e
+rescue Billing::Stripe::Error => e
   Rails.error.report(e, handled: true, context: { event_id: event.id })   # for engineers
-  Rails.event.notify("billing.kiwify.webhook_rejected", event_id: event.id, reason: reason)  # for operators
+  Rails.event.notify("billing.stripe.webhook_rejected", event_id: event.id, reason: reason)  # for operators
 ```
 
 ## Don't

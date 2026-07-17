@@ -154,8 +154,8 @@ Schedule in `config/recurring.yml`. Reference the **job class** (`class:`), not 
 
 ```yaml
 production:
-  kiwify_access_audit:
-    class: NotifyKiwifyAccessAuditJob
+  stripe_access_audit:
+    class: NotifyStripeAccessAuditJob
     schedule: every 14 days at 9:00am
   heartbeat:
     class: HeartbeatJob

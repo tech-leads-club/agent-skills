@@ -16,7 +16,7 @@ Real POROs in this codebase, all under `app/models/`:
 ```ruby
 class Member::Signup        # multi-record creation flow (form object)
 class Catalog::Search       # a query/operation over embeddings
-class KiwifyAccessAudit     # an analysis that produces a report
+class StripeAccessAudit     # an analysis that produces a report
 class Member::Import
 class Catalog::Chunking
 ```
@@ -58,7 +58,7 @@ class CalculateChurn;    def run; end; end
 # Do: name the noun, put the verb on it
 class Card;              def close; end; end       # the verb is a method
 class Card::Archival < ApplicationRecord; end       # the state is a noun
-class Kiwify::ChurnForecast; def self.for(member); end; end
+class Stripe::ChurnForecast; def self.for(member); end; end
 ```
 
 This is why state records are nouns (`Closure`, not `Closer`; `Archival`, not `Archiver`; `Publication`, not `Activator`) and why extracted flows are nouns (`Member::Signup`, not `SignupService`). The noun is the thing; the verb is what you do to it.

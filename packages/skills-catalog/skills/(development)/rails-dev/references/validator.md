@@ -7,7 +7,7 @@ A validator is a validation rule written once as a class and reused across model
 ## Where validators live
 
 - **Cross-domain rules** (reusable across unrelated models) are classes in `app/validators/`, named `XxxValidator < ActiveModel::EachValidator` and used via `validates :attr, xxx: true`.
-- **Module-specific rules** live under `app/validators/<module>/`, namespaced to that module (`app/validators/kiwify/subscription_status_validator.rb` → `Kiwify::SubscriptionStatusValidator`). Keep a validator here when its rule only makes sense inside one domain.
+- **Module-specific rules** live under `app/validators/<module>/`, namespaced to that module (`app/validators/stripe/subscription_status_validator.rb` → `Stripe::SubscriptionStatusValidator`). Keep a validator here when its rule only makes sense inside one domain.
 - **A rule specific to one model** stays a private `validate :method` on that model (see `references/model.md`). Don't promote it to `app/validators/` until a second model needs the same rule.
 
 ## Search before you write
