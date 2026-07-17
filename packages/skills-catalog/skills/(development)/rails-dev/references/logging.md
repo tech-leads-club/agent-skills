@@ -86,25 +86,20 @@ Do not pass ActiveRecord instances; pass their ids.
 Examples in use: `mailer.delivered`, `mailer.failed`, `mailer.smtp_busy_retry`,
 `rate_limit.acquired`, `rate_limit.throttled`, `rate_limit.block_started`.
 
-### 2. Cross-cutting context: `Logtail.with_context`
+### 2. Cross-cutting context: `Rails.event.set_context`
 
 Use for "who is doing this" and "in which trace" attributes that should apply
-to every log line emitted inside a scope, including Rails-native events and
-SQL queries. Lands under `context.*` as first-class fields, so
-`context.user.id:42 status:>=500` works as a structured filter.
+to every structured event emitted inside a scope. Lands under `context.*` as
+first-class fields, so `context.user_id:42 status:>=500` works as a structured
+filter. Context is reset automatically at the end of each request and job.
 
-Wire the request path with an `around_action` in `ApplicationController`:
+Wire the request path with a `before_action` in `ApplicationController`:
 
 ```ruby
-around_action :with_user_context
+before_action :set_log_context
 
-def with_user_context
-  user = Current.user
-  if user
-    Logtail.with_context(Logtail::Contexts::User.new(id: user.id)) { yield }
-  else
-    yield
-  end
+def set_log_context
+  Rails.event.set_context(user_id: Current.user.id) if Current.user
 end
 ```
 
@@ -114,15 +109,13 @@ from it gets tracing for free. Jobs that bypass `ApplicationJob` (such as mailer
 delivery jobs inheriting from `ActionMailer::MailDeliveryJob`) include the
 concern explicitly.
 
-**Available context shapes:**
-
-- `Logtail::Contexts::User.new(id:, name:, email:)` lands as `context.user.{id,name,email}`
-- `Logtail.with_context(trace_id: "...")` lands as `context.trace_id`
-- Any single-root-key hash lands at `context.<key>`
+If the project's log shipper provides its own context API that also covers
+plain `Rails.logger` lines and SQL queries, wire it at these same two points
+instead — the pattern (request callback + job concern) is what matters.
 
 **Do not use `Rails.logger.tagged` for actor or tenant context.** It produces
 a string inside the `tags` array, which is only substring-greppable. Use
-`Logtail.with_context` so the field is typed.
+`Rails.event.set_context` so the field is typed.
 
 ### 3. Plain messages: `Rails.logger.info` / `warn` / `error`
 
@@ -215,10 +208,9 @@ data has nothing to say: log the decision, not every `save`.
   root, which is inconsistent with Rails-native events. Use `Rails.event.notify`
   instead.
 - **No `Rails.logger.tagged("user_id=#{id}")`** for actor context. Use
-  `Logtail.with_context(Logtail::Contexts::User.new(id: id))` so the field is
-  typed.
+  `Rails.event.set_context(user_id: id)` so the field is typed.
 - **No custom logger wrappers** or service objects around logging. Call
-  `Rails.event.notify`, `Logtail.with_context`, and `Rails.logger.*`
+  `Rails.event.notify`, `Rails.event.set_context`, and `Rails.logger.*`
   directly.
 - **No `Lograge`.** Rails 8.1 subscribers already structure Rails-native
   request logs.
