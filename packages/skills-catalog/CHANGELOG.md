@@ -1,3 +1,19 @@
+## 0.17.0 (2026-07-18)
+
+### 🚀 Features
+
+- add pr-review skill for adaptive multi-agent PR review ([14ec09a8e](https://github.com/tech-leads-club/agent-skills/commit/14ec09a8e))
+
+### 🩹 Fixes
+
+- add non-negotiable execution contract to enforce subagent orchestration ([6a691b723](https://github.com/tech-leads-club/agent-skills/commit/6a691b723))
+- quote-safe description so negative-scope validation passes ([efed9b44a](https://github.com/tech-leads-club/agent-skills/commit/efed9b44a))
+
+### ❤️ Thank You
+
+- augusto-dmh
+- Claude Fable 5
+
 ## 0.16.0 (2026-07-17)
 
 ### 🚀 Features

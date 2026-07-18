@@ -1148,6 +1148,18 @@
       "contentHash": "3b940bcd8ad2035177bffb04e34d52fe038f669a2d466e8d67e73135044373a5"
     },
     {
+      "name": "pr-review",
+      "description": "Reviews a GitHub pull request and posts inline comments plus one consolidated summary, adapting to any codebase by discovering the project's own test runner, requirement specs, and architecture conventions before running six specialized review agents in parallel. Stack-agnostic across language and framework; targets GitHub PRs via the gh CLI. Use when the user says \"review PR 128\", \"review this PR\", \"code review this PR\", or \"check this pull request\". Do NOT use for creating PRs or responding to review comments (use gh-address-comments), or debugging failing CI checks (use gh-fix-ci).",
+      "category": "quality",
+      "path": "(quality)/pr-review",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "github.com/augusto-dmh",
+      "version": "1.0.0",
+      "contentHash": "5eea41261c6c595a095e905e7608fc8c7f038301067a93c49a7cc98201500601"
+    },
+    {
       "name": "rails-dev",
       "description": "\"Opinionated Rails conventions: rich models, concerns, CRUD-everything, state-as-records, minimal dependencies, Minitest with fixtures. Load this skill BEFORE any code-level thinking, not only before editing a file. It is required the moment a task touches Rails code in ANY way: designing or even just discussing a data model, schema, migration, entity, association, field, validation, class, or method name; writing, planning, reviewing, analyzing, testing, debugging, or refactoring; or proposing any model, table, column, route, or code snippet inline in chat. If you are about to name a model or sketch a column you are already in scope, even in an exploratory back-and-forth where no file is written yet. Do not let a \\\"we're just discussing\\\" framing defer it. Do NOT use for non-Rails backends, NestJS, or general architecture (use nestjs-modular-monolith or coding-guidelines).\"",
       "category": "development",
