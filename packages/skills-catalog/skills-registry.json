@@ -68,7 +68,10 @@
       "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\". Do NOT use for SEO (use seo), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-accessibility",
-      "files": ["references/WCAG.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/WCAG.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "706129400c8c91a9264582940b36007116faffcaf27bb0780bdab87337b4f881"
@@ -78,7 +81,11 @@
       "description": "\"When the user wants to build an AI-powered outreach system, write cold emails, improve deliverability, or scale personalized outreach. Also use when the user mentions 'cold email,' 'cold outreach,' 'outreach automation,' 'Instantly,' 'Smartlead,' 'Clay,' 'email sequences,' 'deliverability,' 'personalization at scale,' 'reply rate,' or 'outreach stack.' This skill covers the complete AI cold outreach system from signal detection through conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-cold-outreach",
-      "files": ["references/benchmarks-deliverability-tactics.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/benchmarks-deliverability-tactics.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "7a2ca1d3f443357b96f22ffce9fb6d5e19134bb5d723ea55ca939873b3777c12"
@@ -88,7 +95,11 @@
       "description": "\"When the user wants to price an AI product, choose a charge metric, design pricing tiers, or optimize margins. Also use when the user mentions 'AI pricing,' 'usage-based pricing,' 'consumption pricing,' 'outcome pricing,' 'BYOK,' 'bring your own key,' 'per-seat pricing,' 'pricing tiers,' 'AI margins,' 'cost per token,' or 'pricing model.' This skill covers pricing strategy, packaging, and margin management for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-pricing",
-      "files": ["references/implementation-guide.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "642a42cf94b8061aad642d84363bb4f60712af858c093bed6f2ec6135a3e7937"
@@ -98,7 +109,11 @@
       "description": "\"When the user wants to deploy AI sales development reps, automate sales qualification, build signal-to-action routing, or design AI agent architecture for sales. Also use when the user mentions 'AI SDR,' 'AI sales agent,' 'automated qualification,' 'signal routing,' 'sales automation,' '11x,' 'Artisan,' 'AiSDR,' 'AI BDR,' or 'autonomous sales.' This skill covers AI SDR deployment, qualification automation, and agent architecture for sales development. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-sdr",
-      "files": ["references/implementation-guide.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "3f36a4b65cb1fc97722341b9fb1849fcecf320be8a1d8892028fa45663719786"
@@ -108,7 +123,9 @@
       "description": "\"When the user wants to build programmatic SEO with AI, create competitor alternative pages, optimize for AI Overviews, or scale content production. Also use when the user mentions 'SEO,' 'programmatic SEO,' 'AI content,' 'competitor alternative pages,' 'AI Overviews,' 'search optimization,' 'DataForSEO,' 'content at scale,' 'keyword strategy,' or 'organic traffic.' This skill covers AI-powered SEO strategy from keyword research through programmatic page generation. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-seo",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "8ff9c7d6181c37c92fb225a8559d50ee5413c20e6a7ae240e05bb6a532d64f9b"
@@ -118,7 +135,9 @@
       "description": "\"When the user wants to create UGC ad campaigns, recruit UGC creators, generate AI UGC content, or scale with user-generated content. Also use when the user mentions 'UGC,' 'user-generated content,' 'creator ads,' 'Spark Ads,' 'whitelisting,' 'AI UGC,' 'Arcads,' 'Creatify,' 'creator brief,' or 'UGC testing.' This skill covers the UGC growth framework from creator recruitment through AI-powered scaling. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/ai-ugc-ads",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "92f981122d6add656bd10cae4404fa94a79db93f3cad2cd978ef12a4eea51b83"
@@ -129,6 +148,7 @@
       "category": "cloud",
       "path": "(cloud)/aws-advisor",
       "files": [
+        "SKILL.md",
         "references/checklists.md",
         "references/decision-trees.md",
         "references/mcp-guide.md",
@@ -136,8 +156,7 @@
         "scripts/cost_considerations.py",
         "scripts/generate_diagram.py",
         "scripts/security_review.py",
-        "scripts/well_architected_review.py",
-        "SKILL.md"
+        "scripts/well_architected_review.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -148,7 +167,9 @@
       "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when asked to \"apply best practices\", \"security audit\", \"modernize code\", \"code quality review\", or \"check for vulnerabilities\". Do NOT use for accessibility (use web-accessibility), SEO (use seo), performance (use core-web-vitals), or comprehensive multi-area audits (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/web-best-practices",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "e22b6d3e9c7d29cc5f92a89a1a393aa2686aa5c0cd70b7159a7fc9a2bc779461"
@@ -158,7 +179,9 @@
       "description": "Browser debugging, performance profiling, and automation via Chrome DevTools MCP. Use when user says \"debug this page\", \"take a screenshot\", \"check network requests\", \"profile performance\", \"inspect console errors\", or \"analyze page load\". Do NOT use for full E2E test suites (use playwright-skill) or non-browser debugging.",
       "category": "tooling",
       "path": "(tooling)/chrome-devtools",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "249d0fb724d83a9dc1b81f5812b894d471b36e6e629407cd43f9b8135fe4630a"
     },
     {
@@ -168,314 +191,314 @@
       "path": "(cloud)/cloudflare-deploy",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
+        "references/agents-sdk/README.md",
         "references/agents-sdk/api.md",
         "references/agents-sdk/configuration.md",
         "references/agents-sdk/gotchas.md",
         "references/agents-sdk/patterns.md",
-        "references/agents-sdk/README.md",
+        "references/ai-gateway/README.md",
         "references/ai-gateway/configuration.md",
         "references/ai-gateway/dynamic-routing.md",
         "references/ai-gateway/features.md",
-        "references/ai-gateway/README.md",
         "references/ai-gateway/sdk-integration.md",
         "references/ai-gateway/troubleshooting.md",
+        "references/ai-search/README.md",
         "references/ai-search/api.md",
         "references/ai-search/configuration.md",
         "references/ai-search/gotchas.md",
         "references/ai-search/patterns.md",
-        "references/ai-search/README.md",
+        "references/analytics-engine/README.md",
         "references/analytics-engine/api.md",
         "references/analytics-engine/configuration.md",
         "references/analytics-engine/gotchas.md",
         "references/analytics-engine/patterns.md",
-        "references/analytics-engine/README.md",
+        "references/api/README.md",
         "references/api/api.md",
         "references/api/configuration.md",
         "references/api/gotchas.md",
         "references/api/patterns.md",
-        "references/api/README.md",
+        "references/api-shield/README.md",
         "references/api-shield/api.md",
         "references/api-shield/configuration.md",
         "references/api-shield/gotchas.md",
         "references/api-shield/patterns.md",
-        "references/api-shield/README.md",
+        "references/argo-smart-routing/README.md",
         "references/argo-smart-routing/api.md",
         "references/argo-smart-routing/configuration.md",
         "references/argo-smart-routing/gotchas.md",
         "references/argo-smart-routing/patterns.md",
-        "references/argo-smart-routing/README.md",
+        "references/bindings/README.md",
         "references/bindings/api.md",
         "references/bindings/configuration.md",
         "references/bindings/gotchas.md",
         "references/bindings/patterns.md",
-        "references/bindings/README.md",
+        "references/bot-management/README.md",
         "references/bot-management/api.md",
         "references/bot-management/configuration.md",
         "references/bot-management/gotchas.md",
         "references/bot-management/patterns.md",
-        "references/bot-management/README.md",
+        "references/browser-rendering/README.md",
         "references/browser-rendering/api.md",
         "references/browser-rendering/configuration.md",
         "references/browser-rendering/gotchas.md",
         "references/browser-rendering/patterns.md",
-        "references/browser-rendering/README.md",
+        "references/c3/README.md",
         "references/c3/api.md",
         "references/c3/configuration.md",
         "references/c3/gotchas.md",
         "references/c3/patterns.md",
-        "references/c3/README.md",
+        "references/cache-reserve/README.md",
         "references/cache-reserve/api.md",
         "references/cache-reserve/configuration.md",
         "references/cache-reserve/gotchas.md",
         "references/cache-reserve/patterns.md",
-        "references/cache-reserve/README.md",
+        "references/containers/README.md",
         "references/containers/api.md",
         "references/containers/configuration.md",
         "references/containers/gotchas.md",
         "references/containers/patterns.md",
-        "references/containers/README.md",
+        "references/cron-triggers/README.md",
         "references/cron-triggers/api.md",
         "references/cron-triggers/configuration.md",
         "references/cron-triggers/gotchas.md",
         "references/cron-triggers/patterns.md",
-        "references/cron-triggers/README.md",
+        "references/d1/README.md",
         "references/d1/api.md",
         "references/d1/configuration.md",
         "references/d1/gotchas.md",
         "references/d1/patterns.md",
-        "references/d1/README.md",
+        "references/ddos/README.md",
         "references/ddos/api.md",
         "references/ddos/configuration.md",
         "references/ddos/gotchas.md",
         "references/ddos/patterns.md",
-        "references/ddos/README.md",
+        "references/do-storage/README.md",
         "references/do-storage/api.md",
         "references/do-storage/configuration.md",
         "references/do-storage/gotchas.md",
         "references/do-storage/patterns.md",
-        "references/do-storage/README.md",
         "references/do-storage/testing.md",
+        "references/durable-objects/README.md",
         "references/durable-objects/api.md",
         "references/durable-objects/configuration.md",
         "references/durable-objects/gotchas.md",
         "references/durable-objects/patterns.md",
-        "references/durable-objects/README.md",
+        "references/email-routing/README.md",
         "references/email-routing/api.md",
         "references/email-routing/configuration.md",
         "references/email-routing/gotchas.md",
         "references/email-routing/patterns.md",
-        "references/email-routing/README.md",
+        "references/email-workers/README.md",
         "references/email-workers/api.md",
         "references/email-workers/configuration.md",
         "references/email-workers/gotchas.md",
         "references/email-workers/patterns.md",
-        "references/email-workers/README.md",
+        "references/hyperdrive/README.md",
         "references/hyperdrive/api.md",
         "references/hyperdrive/configuration.md",
         "references/hyperdrive/gotchas.md",
         "references/hyperdrive/patterns.md",
-        "references/hyperdrive/README.md",
+        "references/images/README.md",
         "references/images/api.md",
         "references/images/configuration.md",
         "references/images/gotchas.md",
         "references/images/patterns.md",
-        "references/images/README.md",
+        "references/kv/README.md",
         "references/kv/api.md",
         "references/kv/configuration.md",
         "references/kv/gotchas.md",
         "references/kv/patterns.md",
-        "references/kv/README.md",
+        "references/miniflare/README.md",
         "references/miniflare/api.md",
         "references/miniflare/configuration.md",
         "references/miniflare/gotchas.md",
         "references/miniflare/patterns.md",
-        "references/miniflare/README.md",
+        "references/network-interconnect/README.md",
         "references/network-interconnect/api.md",
         "references/network-interconnect/configuration.md",
         "references/network-interconnect/gotchas.md",
         "references/network-interconnect/patterns.md",
-        "references/network-interconnect/README.md",
+        "references/observability/README.md",
         "references/observability/api.md",
         "references/observability/configuration.md",
         "references/observability/gotchas.md",
         "references/observability/patterns.md",
-        "references/observability/README.md",
+        "references/pages/README.md",
         "references/pages/api.md",
         "references/pages/configuration.md",
         "references/pages/gotchas.md",
         "references/pages/patterns.md",
-        "references/pages/README.md",
+        "references/pages-functions/README.md",
         "references/pages-functions/api.md",
         "references/pages-functions/configuration.md",
         "references/pages-functions/gotchas.md",
         "references/pages-functions/patterns.md",
-        "references/pages-functions/README.md",
+        "references/pipelines/README.md",
         "references/pipelines/api.md",
         "references/pipelines/configuration.md",
         "references/pipelines/gotchas.md",
         "references/pipelines/patterns.md",
-        "references/pipelines/README.md",
+        "references/pulumi/README.md",
         "references/pulumi/api.md",
         "references/pulumi/configuration.md",
         "references/pulumi/gotchas.md",
         "references/pulumi/patterns.md",
-        "references/pulumi/README.md",
+        "references/queues/README.md",
         "references/queues/api.md",
         "references/queues/configuration.md",
         "references/queues/gotchas.md",
         "references/queues/patterns.md",
-        "references/queues/README.md",
+        "references/r2/README.md",
         "references/r2/api.md",
         "references/r2/configuration.md",
         "references/r2/gotchas.md",
         "references/r2/patterns.md",
-        "references/r2/README.md",
+        "references/r2-data-catalog/README.md",
         "references/r2-data-catalog/api.md",
         "references/r2-data-catalog/configuration.md",
         "references/r2-data-catalog/gotchas.md",
         "references/r2-data-catalog/patterns.md",
-        "references/r2-data-catalog/README.md",
+        "references/r2-sql/README.md",
         "references/r2-sql/api.md",
         "references/r2-sql/configuration.md",
         "references/r2-sql/gotchas.md",
         "references/r2-sql/patterns.md",
-        "references/r2-sql/README.md",
+        "references/realtime-sfu/README.md",
         "references/realtime-sfu/api.md",
         "references/realtime-sfu/configuration.md",
         "references/realtime-sfu/gotchas.md",
         "references/realtime-sfu/patterns.md",
-        "references/realtime-sfu/README.md",
+        "references/realtimekit/README.md",
         "references/realtimekit/api.md",
         "references/realtimekit/configuration.md",
         "references/realtimekit/gotchas.md",
         "references/realtimekit/patterns.md",
-        "references/realtimekit/README.md",
+        "references/sandbox/README.md",
         "references/sandbox/api.md",
         "references/sandbox/configuration.md",
         "references/sandbox/gotchas.md",
         "references/sandbox/patterns.md",
-        "references/sandbox/README.md",
+        "references/secrets-store/README.md",
         "references/secrets-store/api.md",
         "references/secrets-store/configuration.md",
         "references/secrets-store/gotchas.md",
         "references/secrets-store/patterns.md",
-        "references/secrets-store/README.md",
+        "references/smart-placement/README.md",
         "references/smart-placement/api.md",
         "references/smart-placement/configuration.md",
         "references/smart-placement/gotchas.md",
         "references/smart-placement/patterns.md",
-        "references/smart-placement/README.md",
+        "references/snippets/README.md",
         "references/snippets/api.md",
         "references/snippets/configuration.md",
         "references/snippets/gotchas.md",
         "references/snippets/patterns.md",
-        "references/snippets/README.md",
+        "references/spectrum/README.md",
         "references/spectrum/api.md",
         "references/spectrum/configuration.md",
         "references/spectrum/gotchas.md",
         "references/spectrum/patterns.md",
-        "references/spectrum/README.md",
+        "references/static-assets/README.md",
         "references/static-assets/api.md",
         "references/static-assets/configuration.md",
         "references/static-assets/gotchas.md",
         "references/static-assets/patterns.md",
-        "references/static-assets/README.md",
+        "references/stream/README.md",
         "references/stream/api-live.md",
         "references/stream/api.md",
         "references/stream/configuration.md",
         "references/stream/gotchas.md",
         "references/stream/patterns.md",
-        "references/stream/README.md",
+        "references/tail-workers/README.md",
         "references/tail-workers/api.md",
         "references/tail-workers/configuration.md",
         "references/tail-workers/gotchas.md",
         "references/tail-workers/patterns.md",
-        "references/tail-workers/README.md",
+        "references/terraform/README.md",
         "references/terraform/api.md",
         "references/terraform/configuration.md",
         "references/terraform/gotchas.md",
         "references/terraform/patterns.md",
-        "references/terraform/README.md",
+        "references/tunnel/README.md",
         "references/tunnel/api.md",
         "references/tunnel/configuration.md",
         "references/tunnel/gotchas.md",
         "references/tunnel/networking.md",
         "references/tunnel/patterns.md",
-        "references/tunnel/README.md",
+        "references/turn/README.md",
         "references/turn/api.md",
         "references/turn/configuration.md",
         "references/turn/gotchas.md",
         "references/turn/patterns.md",
-        "references/turn/README.md",
+        "references/turnstile/README.md",
         "references/turnstile/api.md",
         "references/turnstile/configuration.md",
         "references/turnstile/gotchas.md",
         "references/turnstile/patterns.md",
-        "references/turnstile/README.md",
+        "references/vectorize/README.md",
         "references/vectorize/api.md",
         "references/vectorize/configuration.md",
         "references/vectorize/gotchas.md",
         "references/vectorize/patterns.md",
-        "references/vectorize/README.md",
+        "references/waf/README.md",
         "references/waf/api.md",
         "references/waf/configuration.md",
         "references/waf/gotchas.md",
         "references/waf/patterns.md",
-        "references/waf/README.md",
+        "references/web-analytics/README.md",
         "references/web-analytics/configuration.md",
         "references/web-analytics/gotchas.md",
         "references/web-analytics/integration.md",
         "references/web-analytics/patterns.md",
-        "references/web-analytics/README.md",
+        "references/workerd/README.md",
         "references/workerd/api.md",
         "references/workerd/configuration.md",
         "references/workerd/gotchas.md",
         "references/workerd/patterns.md",
-        "references/workerd/README.md",
+        "references/workers/README.md",
         "references/workers/api.md",
         "references/workers/configuration.md",
         "references/workers/frameworks.md",
         "references/workers/gotchas.md",
         "references/workers/patterns.md",
-        "references/workers/README.md",
+        "references/workers-ai/README.md",
         "references/workers-ai/api.md",
         "references/workers-ai/configuration.md",
         "references/workers-ai/gotchas.md",
         "references/workers-ai/patterns.md",
-        "references/workers-ai/README.md",
+        "references/workers-for-platforms/README.md",
         "references/workers-for-platforms/api.md",
         "references/workers-for-platforms/configuration.md",
         "references/workers-for-platforms/gotchas.md",
         "references/workers-for-platforms/patterns.md",
-        "references/workers-for-platforms/README.md",
+        "references/workers-playground/README.md",
         "references/workers-playground/api.md",
         "references/workers-playground/configuration.md",
         "references/workers-playground/gotchas.md",
         "references/workers-playground/patterns.md",
-        "references/workers-playground/README.md",
+        "references/workers-vpc/README.md",
         "references/workers-vpc/api.md",
         "references/workers-vpc/configuration.md",
         "references/workers-vpc/gotchas.md",
         "references/workers-vpc/patterns.md",
-        "references/workers-vpc/README.md",
+        "references/workflows/README.md",
         "references/workflows/api.md",
         "references/workflows/configuration.md",
         "references/workflows/gotchas.md",
         "references/workflows/patterns.md",
-        "references/workflows/README.md",
+        "references/wrangler/README.md",
         "references/wrangler/api.md",
         "references/wrangler/auth.md",
         "references/wrangler/configuration.md",
         "references/wrangler/gotchas.md",
         "references/wrangler/patterns.md",
-        "references/wrangler/README.md",
+        "references/zaraz/IMPLEMENTATION_SUMMARY.md",
+        "references/zaraz/README.md",
         "references/zaraz/api.md",
         "references/zaraz/configuration.md",
         "references/zaraz/gotchas.md",
-        "references/zaraz/IMPLEMENTATION_SUMMARY.md",
-        "references/zaraz/patterns.md",
-        "references/zaraz/README.md",
-        "SKILL.md"
+        "references/zaraz/patterns.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -486,7 +509,11 @@
       "description": "Your pathfinder for navigating unknown codebases. Investigates with precision, implements surgically, and never assumes — if it doesn't know, it says so. Maintains a .notebook/ knowledge base that grows across sessions, turning every discovery into lasting intelligence. Summons available skills, MCPs, and docs when the mission demands. Use when fixing bugs, implementing features, refactoring, investigating flows, or any development task in unfamiliar territory. Triggers on \"fix this\", \"implement this\", \"how does this work\", \"investigate this flow\", \"help me with this code\". Do NOT use for greenfield scaffolding, CI/CD, or infrastructure provisioning.",
       "category": "development",
       "path": "(development)/codenavi",
-      "files": ["references/coding-principles.md", "references/notebook-spec.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/coding-principles.md",
+        "references/notebook-spec.md"
+      ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
       "contentHash": "23ac05b7f2d8df8311129d41432eba248bdcf14e9ace3f17c581976f7d888ada"
@@ -496,7 +523,9 @@
       "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, modifying, or reviewing code — implementation tasks, code changes, refactoring, bug fixes, or feature development. Do NOT use for architecture design, documentation, or non-code tasks.",
       "category": "development",
       "path": "(development)/coding-guidelines",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "ale",
       "version": "1.0.0",
       "contentHash": "28a414c715d3c41aae28a25e2f109813ec3f246f76b5567c1e7d6a128cd289ff"
@@ -506,7 +535,11 @@
       "description": "Finds duplicate business logic spread across multiple components and suggests consolidation. Use when asking \"where is this logic duplicated?\", \"find common code between services\", \"what can be consolidated?\", \"detect shared domain logic\", or analyzing component overlap before refactoring. Do NOT use for code-level duplication detection (use linters) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/component-common-domain-detection",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "58c72d63eaf387cf11ae36b223ff80478ba861f53265e42a3c4fbcb3bc739208"
     },
     {
@@ -514,7 +547,11 @@
       "description": "Detects misplaced classes and fixes component hierarchy problems — finds code that should belong inside a component but sits at the root level. Use when asking \"clean up component structure\", \"find orphaned classes\", \"fix module hierarchy\", \"flatten nested components\", or analyzing why namespaces have misplaced code. Do NOT use for dependency analysis (use coupling-analysis) or domain grouping (use domain-identification-grouping).",
       "category": "architecture",
       "path": "(architecture)/component-flattening-analysis",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "085696b944897a2d8c96efb6e0a3faab00f910a62a49a45c3293c32458962411"
     },
     {
@@ -522,7 +559,11 @@
       "description": "Maps architectural components in a codebase and measures their size to identify what should be extracted first. Use when asking \"how big is each module?\", \"what components do I have?\", \"which service is too large?\", \"analyze codebase structure\", \"size my monolith\", or planning where to start decomposing. Do NOT use for runtime performance sizing or infrastructure capacity planning.",
       "category": "architecture",
       "path": "(architecture)/component-identification-sizing",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "8ec5eb90e86cc84a346f15f50c86960d8f4ba6876f6fe27d687a1ba43a2448a0"
     },
     {
@@ -530,7 +571,9 @@
       "description": "Expert in Confluence operations using Atlassian MCP. Use when the user says \"search Confluence\", \"create a Confluence page\", \"update a page\", \"find documentation in Confluence\", \"list spaces\", or \"add a comment to a page\". Do NOT use for Jira issues, general web search, or local file creation.",
       "category": "development",
       "path": "(development)/confluence-assistant",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Waldemar Neto - github.com/waldemarnt",
       "version": "1.0.0",
       "contentHash": "b9f019173a7d864db1d0a9eca13ee920d294806ea4c5cabfb626ccaedbaaeae7"
@@ -540,7 +583,11 @@
       "description": "\"When the user wants to turn content into revenue, build a content-led GTM motion, reverse engineer distribution, or repurpose content across platforms. Also use when the user mentions 'content marketing,' 'content-led growth,' 'content to pipeline,' 'distribution,' 'content repurposing,' 'content strategy,' 'thought leadership,' 'newsletter,' 'content flywheel,' 'organic growth.' This skill covers content-to-revenue systems from creation through pipeline attribution. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/content-to-pipeline",
-      "files": ["references/podcast-community-cadence.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/podcast-community-cadence.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "925f769a4c601ea7fac8cab4d3ee00f799921eb0600427d18f458eb35db2e2ed"
@@ -550,7 +597,10 @@
       "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when asked to \"improve Core Web Vitals\", \"fix LCP\", \"reduce CLS\", \"optimize INP\", \"page experience optimization\", or \"fix layout shifts\". Focuses specifically on the three Core Web Vitals metrics. Do NOT use for general web performance (use perf-web-optimization), Lighthouse audits (use perf-lighthouse), or Astro-specific optimization (use perf-astro).",
       "category": "performance",
       "path": "(performance)/core-web-vitals",
-      "files": ["references/LCP.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/LCP.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "3a67190e1dea1f2573d4fbb17071bbdac5ff4fd087d8cb5271094851c2acd559"
@@ -560,7 +610,9 @@
       "description": "Analyzes coupling between modules using the three-dimensional model (strength, distance, volatility) from \"Balancing Coupling in Software Design\". Use when asking \"are these modules too coupled?\", \"show me dependencies\", \"analyze integration quality\", \"which modules should I decouple?\", \"coupling report\", or evaluating architectural health. Do NOT use for domain boundary analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/coupling-analysis",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "a33a142a73ac2e6b8db300acb3d13dba5077e225cbfad7599b0ac431290ab5c7"
     },
     {
@@ -568,7 +620,10 @@
       "description": "Creates Architecture Decision Records (ADRs) to document significant architectural choices and their rationale for future team members. Use when the user says \"write an ADR\", \"document this decision\", \"record why we chose X\", \"add an architecture decision record\", \"create an ADR for\", or wants to capture the reasoning behind a technical choice so the team understands it later. Do NOT use when the decision hasn't been made yet (use create-rfc instead), for implementation planning (use technical-design-doc-creator), or for general documentation.",
       "category": "creation",
       "path": "(creation)/create-adr",
-      "files": ["README.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
       "contentHash": "47ec663c849e8c1620c6f33a7be0055acdcf838c27ab7c16f44260244b80195a"
@@ -578,7 +633,11 @@
       "description": "Creates structured Request for Comments (RFC) documents for proposing and deciding on significant changes. Use when the user says \"write an RFC\", \"create a proposal\", \"I need to propose a change\", \"draft an RFC\", \"document a decision\", or needs stakeholder alignment before making a major technical or process decision. Do NOT use for TDDs/implementation docs (use technical-design-doc-creator instead), README files, or general documentation.",
       "category": "creation",
       "path": "(creation)/create-rfc",
-      "files": ["README.md", "references/section-templates.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md",
+        "references/section-templates.md"
+      ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
       "contentHash": "3f391b6c4397bb1590bbad511eca95c297dd0467e65385fa28b3724851c42ea8"
@@ -588,7 +647,9 @@
       "description": "Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows. Use when creating subagents for Cursor editor specifically, following Cursor's patterns and directories (.cursor/agents/). Triggers on \"cursor subagent\", \"cursor agent\". Do NOT use for generic subagent creation outside Cursor (use subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/cursor-subagent-creator",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "658a170d783a694e638814bed35a738184795da2d0f0b36489cac94a478cd8d7"
     },
     {
@@ -596,7 +657,11 @@
       "description": "Creates step-by-step decomposition plans and migration roadmaps for breaking apart monolithic applications. Use when asking \"what order should I extract services?\", \"plan my migration\", \"create a decomposition roadmap\", \"prioritize what to split\", \"monolith to microservices strategy\", or tracking decomposition progress. Do NOT use for domain analysis (use domain-analysis) or component sizing (use component-identification-sizing).",
       "category": "architecture",
       "path": "(architecture)/decomposition-planning-roadmap",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "8de88d993b2556a6b38c26fd79c863f06bf7746faf87c0c9fd1b9a198a49e1ac"
     },
     {
@@ -604,7 +669,10 @@
       "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
       "category": "development",
       "path": "(development)/docs-writer",
-      "files": ["references/style-guide.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/style-guide.md"
+      ],
       "contentHash": "c49827c59d2e27d313731dfd36314cfde0e8dbf15be0e8f813d2f8b751546b0c"
     },
     {
@@ -612,7 +680,12 @@
       "description": "Maps business domains and suggests service boundaries in any codebase using DDD Strategic Design. Use when asking \"what are the domains in this codebase?\", \"where should I draw service boundaries?\", \"identify bounded contexts\", \"classify subdomains\", \"DDD analysis\", or analyzing domain cohesion. Do NOT use for grouping existing components into domains (use domain-identification-grouping) or dependency analysis (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-analysis",
-      "files": ["EXAMPLES.md", "QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "EXAMPLES.md",
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "5914beeaf1aa1fe57cd95cf0afb60ee1cccc58eedaddd123a43cad32d6a70077"
     },
     {
@@ -620,7 +693,11 @@
       "description": "Groups existing components into logical business domains to plan service-based architecture. Use when asking \"which components belong together?\", \"group these into services\", \"organize by domain\", \"component-to-domain mapping\", or planning service extraction from an existing codebase. Do NOT use for identifying new domains from scratch (use domain-analysis) or analyzing coupling (use coupling-analysis).",
       "category": "architecture",
       "path": "(architecture)/domain-identification-grouping",
-      "files": ["QUICK-REFERENCE.md", "README.md", "SKILL.md"],
+      "files": [
+        "QUICK-REFERENCE.md",
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "ac3c94d9910a75aa6a61f7866507d16a3c646ff17e86b79667d1a19c6fa6c659"
     },
     {
@@ -629,6 +706,7 @@
       "category": "tooling",
       "path": "(tooling)/excalidraw-studio",
       "files": [
+        "SKILL.md",
         "assets/business-flow-swimlane-template.json",
         "assets/class-diagram-template.json",
         "assets/data-flow-diagram-template.json",
@@ -640,11 +718,10 @@
         "references/element-types.md",
         "references/excalidraw-schema.md",
         "references/icon-libraries.md",
+        "scripts/README.md",
         "scripts/add-arrow.py",
         "scripts/add-icon-to-diagram.py",
-        "scripts/README.md",
-        "scripts/split-excalidraw-library.py",
-        "SKILL.md"
+        "scripts/split-excalidraw-library.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
@@ -655,7 +732,9 @@
       "description": "\"When the user wants to reduce churn, build expansion revenue, automate customer success, or optimize net revenue retention. Also use when the user mentions 'churn,' 'retention,' 'expansion revenue,' 'upsell,' 'NRR,' 'net revenue retention,' 'customer success,' 'land and expand,' 'closed-lost,' or 'renewal.' This skill covers expansion and retention systems from usage triggers through automated customer success. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/expansion-retention",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "e5420a123058969e8e5014d74120daf7a1c598e1fb44e6d152c6b60a71a81e95"
@@ -665,7 +744,12 @@
       "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Use when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting. Covers general Figma data fetching and exploration. Do NOT use when the goal is specifically pixel-perfect code implementation from a Figma design (use figma-implement-design instead).",
       "category": "design",
       "path": "(design)/figma",
-      "files": ["LICENSE.txt", "references/figma-mcp-config.md", "references/figma-tools-and-prompts.md", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "references/figma-mcp-config.md",
+        "references/figma-tools-and-prompts.md"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "5da2000639e7aee302556408a161168b8955758da0da3305842e14a93a40a7b7"
@@ -675,7 +759,10 @@
       "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Use when the user provides Figma URLs or node IDs and asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection. Do NOT use for general Figma data fetching, variable exploration, or MCP troubleshooting (use figma instead).",
       "category": "design",
       "path": "(design)/figma-implement-design",
-      "files": ["LICENSE.txt", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "6177778eac45026cf58d1f86447fa730e39389e54a99df2c5f35cd6905371b1d"
@@ -686,10 +773,10 @@
       "category": "architecture",
       "path": "(architecture)/frontend-blueprint",
       "files": [
+        "SKILL.md",
         "references/collection-guide.md",
         "references/design-principles.md",
-        "references/stitch-integration.md",
-        "SKILL.md"
+        "references/stitch-integration.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -701,14 +788,14 @@
       "category": "design",
       "path": "(design)/frontend-design",
       "files": [
+        "SKILL.md",
         "references/color-and-contrast.md",
         "references/interaction-design.md",
         "references/motion-design.md",
         "references/responsive-design.md",
         "references/spatial-design.md",
         "references/typography.md",
-        "references/ux-writing.md",
-        "SKILL.md"
+        "references/ux-writing.md"
       ],
       "author": "Impeccable (Paul Bakaus), based on Anthropic frontend-design",
       "version": "1.0.0",
@@ -719,7 +806,11 @@
       "description": "Address review and issue comments on the open GitHub PR for the current branch using gh CLI. Use when user says \"address PR comments\", \"fix review feedback\", \"respond to PR review\", or \"handle PR comments\". Verifies gh auth first and prompts to authenticate if not logged in. Do NOT use for creating PRs, CI debugging (use gh-fix-ci), or general Git operations.",
       "category": "development",
       "path": "(development)/gh-address-comments",
-      "files": ["LICENSE.txt", "scripts/fetch_comments.py", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/fetch_comments.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "a1808fb136b7118a7bdac65415e9a40a7982953f8b3339c97087fc0807865d88"
@@ -729,7 +820,11 @@
       "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions. Uses `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treats external providers (for example Buildkite) as out of scope and reports only the details URL. Do NOT use for addressing PR review comments (use gh-address-comments) or general CI outside GitHub Actions.",
       "category": "tooling",
       "path": "(tooling)/gh-fix-ci",
-      "files": ["LICENSE.txt", "scripts/inspect_pr_checks.py", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/inspect_pr_checks.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "f032610bcbf7f7a7b6b13d20de360608c10328b7a9e507610323e843d613f1f4"
@@ -739,7 +834,11 @@
       "description": "\"When the user wants to build GTM automation with code, design workflow architectures, use AI agents for GTM tasks, or implement the 'architecture over tools' principle. Also use when the user mentions 'GTM engineering,' 'GTM automation,' 'n8n,' 'Make,' 'Zapier,' 'workflow automation,' 'Clay API,' 'instruction stacks,' 'AI agents for GTM,' or 'revenue automation.' This skill covers technical GTM infrastructure from workflow design through agent orchestration. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/gtm-engineering",
-      "files": ["references/implementation-guide.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "b2cfbea2da9f2a52527f6c41f128df2dba76c33df90692357a5533c06b78223f"
@@ -749,7 +848,9 @@
       "description": "\"When the user wants to define GTM metrics, build a metrics dashboard, measure pipeline efficiency, or track AI product performance. Also use when the user mentions 'GTM metrics,' 'revenue latency,' 'pipeline metrics,' 'TTFV,' 'time-to-first-value,' 'data health,' 'attribution,' 'conversion rate,' 'CAC,' 'LTV,' 'NRR,' 'GTM dashboard,' 'magic number,' 'pipeline velocity,' or 'funnel metrics.' This skill covers GTM measurement from metric selection through dashboard design, including AI-specific cost metrics, attribution models, and weekly review cadences. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/gtm-metrics",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "9f2afa96826b0456cf79f05b43ab4470fd6802990e301bb898c2cbaa6f01cf5c"
@@ -759,7 +860,10 @@
       "description": "Manage Jira issues via Atlassian MCP — search, create, update, transition status, and handle sprint tasks. Auto-detects workspace configuration. Use when user says \"create a Jira ticket\", \"update my sprint\", \"check Jira status\", \"transition this issue\", \"search Jira\", or \"move ticket to done\". Do NOT use for Confluence pages (use confluence-assistant).",
       "category": "development",
       "path": "(development)/jira-assistant",
-      "files": ["README.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "fa63880889d2206548e33489a0ac1aa849c4e6ab879ea769c2715521a8231c8a"
     },
     {
@@ -767,7 +871,10 @@
       "description": "\"When the user wants to build data enrichment workflows, score leads against ICP, set up Clay waterfalls, or improve contact data quality. Also use when the user mentions 'enrichment,' 'data enrichment,' 'Clay,' 'waterfall enrichment,' 'ICP scoring,' 'lead scoring,' 'intent data,' 'contact verification,' 'Apollo,' 'ZoomInfo,' or 'data quality.' This skill covers lead enrichment waterfalls, ICP scoring frameworks, and contact verification systems. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/lead-enrichment",
-      "files": ["references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "c062dadf96d7a1500457c222b95baff7f5aade66486044be360a13268b251940"
@@ -777,7 +884,10 @@
       "description": "Facilitates deliberate skill development during AI-assisted coding. Offers interactive learning exercises after architectural work (new files, schema changes, refactors). Use when completing features, making design decisions, or when user asks to understand code better. Triggers on \"learning exercise\", \"help me understand\", \"teach me\", \"why does this work\", or after creating new files/modules. Do NOT use for urgent debugging, quick fixes, or when user says \"just ship it\".",
       "category": "learning",
       "path": "(learning)/learning-opportunities",
-      "files": ["references/PRINCIPLES.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/PRINCIPLES.md"
+      ],
       "author": "Chris Hicks",
       "version": "1.1.0",
       "contentHash": "47c4d62eebf29a61477c1b611c6ae360b028e1e23e09df1f6a33b5ff32b020f7"
@@ -788,13 +898,13 @@
       "category": "architecture",
       "path": "(architecture)/legacy-migration-planner",
       "files": [
+        "SKILL.md",
         "references/assessment-framework.md",
         "references/frontend-backend-strategies.md",
         "references/plan-phase.md",
         "references/research-phase.md",
         "references/strangler-fig-patterns.md",
-        "references/testing-safety-nets.md",
-        "SKILL.md"
+        "references/testing-safety-nets.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -806,6 +916,7 @@
       "category": "tooling",
       "path": "(tooling)/mermaid-studio",
       "files": [
+        "SKILL.md",
         "assets/puppeteer-config.json",
         "references/aws-architecture.md",
         "references/c4-architecture.md",
@@ -817,8 +928,7 @@
         "scripts/render-ascii.mjs",
         "scripts/render.mjs",
         "scripts/setup.sh",
-        "scripts/validate.mjs",
-        "SKILL.md"
+        "scripts/validate.mjs"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
@@ -830,6 +940,7 @@
       "category": "architecture",
       "path": "(architecture)/modular-decomposition",
       "files": [
+        "SKILL.md",
         "references/domain-analysis-examples.md",
         "references/domain-analysis-quick-reference.md",
         "references/domain-analysis.md",
@@ -841,8 +952,7 @@
         "references/pattern-03-flattening.md",
         "references/pattern-04-coupling.md",
         "references/pattern-05-domain-grouping-quick-reference.md",
-        "references/pattern-05-domain-grouping.md",
-        "SKILL.md"
+        "references/pattern-05-domain-grouping.md"
       ],
       "contentHash": "b536c1851c862516e5fc111502311343b952073a992ea07c9f8f9b42fbbc2a44"
     },
@@ -851,7 +961,10 @@
       "description": ">",
       "category": "architecture",
       "path": "(architecture)/modular-design-principles",
-      "files": ["references/principles.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/principles.md"
+      ],
       "contentHash": "d53fdca7ae18205376956c39a3a1729edfae843f63e5f2a6c5dd2c64ccd8a576"
     },
     {
@@ -859,7 +972,11 @@
       "description": "\"When the user wants to launch a product across multiple platforms, plan a Product Hunt launch, build a waitlist, or execute a multi-channel launch strategy. Also use when the user mentions 'product launch,' 'Product Hunt,' 'launch strategy,' 'waitlist,' 'beta launch,' 'BetaList,' 'Hacker News,' 'launch day,' 'AppSumo,' 'multi-channel launch.' This skill covers multi-platform launch execution from pre-launch through post-launch optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/multi-platform-launch",
-      "files": ["references/directories-timing-mistakes.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/directories-timing-mistakes.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "22552e0a3fde93c57715295f52b31d0695ad78d10512e5793ea93c7b138c79ee"
@@ -870,14 +987,14 @@
       "category": "development",
       "path": "(development)/nestjs-modular-monolith",
       "files": [
+        "SKILL.md",
         "references/architecture-patterns.md",
         "references/authentication.md",
         "references/module-communication.md",
         "references/stack-configuration.md",
         "references/state-isolation.md",
         "references/testing-patterns.md",
-        "scripts/validate-isolation.sh",
-        "SKILL.md"
+        "scripts/validate-isolation.sh"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -890,10 +1007,10 @@
       "path": "(cloud)/netlify-deploy",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
         "references/cli-commands.md",
         "references/deployment-patterns.md",
-        "references/netlify-toml.md",
-        "SKILL.md"
+        "references/netlify-toml.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -904,7 +1021,9 @@
       "description": "Monitor Nx Cloud CI pipeline status and handle self-healing fixes automatically. Use when user says \"watch CI\", \"monitor pipeline\", \"check CI status\", \"fix CI failures\", or \"self-heal CI\". Requires Nx Cloud connection. Do NOT use for local task execution (use nx-run-tasks) or general CI debugging outside Nx Cloud.",
       "category": "tooling",
       "path": "(tooling)/nx-ci-monitor",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "ddb5bf9bd2a5ca0eac8fa01632a19569baed922201b2cc501975edd77697f75c"
     },
     {
@@ -912,7 +1031,9 @@
       "description": "Generate code using Nx generators — scaffold projects, libraries, features, or run workspace-specific generators with proper discovery, validation, and verification. Use when user says \"create a new library\", \"scaffold a component\", \"generate code with Nx\", \"run a generator\", \"nx generate\", or any code scaffolding task in a monorepo. Prefers local workspace-plugin generators over external plugins. Do NOT use for running build/test/lint tasks (use nx-run-tasks) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-generate",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "b975e1a0caa6cc9922ba941e0746a2f141c708e41c8bbddb395d40e3efecf2a0"
     },
     {
@@ -920,7 +1041,9 @@
       "description": "Execute build, test, lint, serve, and other tasks in an Nx workspace using single runs, run-many, and affected commands. Use when user says \"run tests\", \"build my app\", \"lint affected\", \"serve the project\", \"run all tasks\", or \"nx affected\". Do NOT use for code generation (use nx-generate) or workspace configuration (use nx-workspace).",
       "category": "tooling",
       "path": "(tooling)/nx-run-tasks",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "3c4d49d795b02e6a4a82606891a7da4773c3bc1ef883c1b980ac17596883397f"
     },
     {
@@ -929,11 +1052,11 @@
       "category": "tooling",
       "path": "(tooling)/nx-workspace",
       "files": [
+        "SKILL.md",
         "reference/best-practices.md",
         "reference/ci-cd.md",
         "reference/commands.md",
-        "reference/configuration.md",
-        "SKILL.md"
+        "reference/configuration.md"
       ],
       "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
     },
@@ -942,7 +1065,10 @@
       "description": "\"When the user wants to create AI-generated ad creative, test performance creative, manage creative fatigue, or optimize paid media with AI tools. Also use when the user mentions 'ad creative,' 'performance creative,' 'creative testing,' 'creative fatigue,' 'Meta ads,' 'Google ads,' 'TikTok ads,' 'AI ads,' 'ad budget,' 'ROAS,' 'Advantage+,' or 'Performance Max.' This skill covers AI-powered paid creative from generation through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/paid-creative-ai",
-      "files": ["references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "89328ab72ff4336917031a217f43bd19b133a7d17202bf70d8d8d7f59d69ce29"
@@ -952,7 +1078,11 @@
       "description": "\"When the user wants to build a partner program, launch an affiliate program, design integration partnerships, or create distribution partnerships. Also use when the user mentions 'partnerships,' 'affiliate program,' 'referral program,' 'partner ecosystem,' 'integration partner,' 'reseller,' 'co-marketing,' 'PartnerStack,' or 'revenue share.' This skill covers partner and affiliate program design from recruitment through performance optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/partner-affiliate",
-      "files": ["references/implementation-guide.md", "references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/implementation-guide.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "3ff5e89d89da30e46eef1d6fa4379aa1b41c30be16e2ca761a5581267c41561e"
@@ -962,7 +1092,9 @@
       "description": "'Astro-specific performance optimizations for 95+ Lighthouse scores. Covers critical CSS inlining, compression, font loading, and LCP optimization. Use when optimizing Astro site performance, improving Astro Lighthouse scores, or configuring astro-critters. Do NOT use for non-Astro sites (use perf-web-optimization or core-web-vitals) or running Lighthouse audits (use perf-lighthouse).'",
       "category": "performance",
       "path": "(performance)/perf-astro",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "11b50b27564085d9bff6d558bd4e9f31e5bce3c9a82af4c7203d9a4cd1ff43e4"
     },
     {
@@ -970,7 +1102,9 @@
       "description": "'Run Lighthouse audits locally via CLI or Node API, parse and interpret reports, and set performance budgets. Use when measuring site performance, understanding Lighthouse scores, setting up budgets, or integrating audits into CI. Triggers on: lighthouse, run lighthouse, lighthouse score, performance audit, performance budget. Do NOT use for fixing specific performance issues (use perf-web-optimization or core-web-vitals) or Astro-specific optimization (use perf-astro).'",
       "category": "performance",
       "path": "(performance)/perf-lighthouse",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "2ef96cebc94fda975a7bba9e37511bff65739c91e61b950be0bd3048b8c9760d"
     },
     {
@@ -979,10 +1113,10 @@
       "category": "performance",
       "path": "(performance)/perf-web-optimization",
       "files": [
+        "SKILL.md",
         "references/bundle-optimization.md",
         "references/core-web-vitals.md",
-        "references/image-optimization.md",
-        "SKILL.md"
+        "references/image-optimization.md"
       ],
       "contentHash": "864bb35d6ec7e7755181886b57709b76d8b5da5181a6d8480cd412dd772f1ffb"
     },
@@ -991,7 +1125,13 @@
       "description": "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login flows, check links, automate any browser task. Use when user wants to test websites, automate browser interactions, validate web functionality, or perform any browser-based testing. Do NOT use for quick page debugging or network inspection (use chrome-devtools instead).",
       "category": "web-automation",
       "path": "(web-automation)/playwright-skill",
-      "files": ["API_REFERENCE.md", "lib/helpers.js", "package.json", "run.js", "SKILL.md"],
+      "files": [
+        "API_REFERENCE.md",
+        "SKILL.md",
+        "lib/helpers.js",
+        "package.json",
+        "run.js"
+      ],
       "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
     },
     {
@@ -999,10 +1139,49 @@
       "description": "\"When the user wants to define their ideal customer profile, position an AI product, build messaging architecture, or validate product-market fit. Also use when the user mentions 'ICP,' 'ideal customer profile,' 'positioning,' 'PMF,' 'product-market fit,' 'messaging,' 'buyer persona,' 'enrichment signals,' 'market positioning,' or 'competitive positioning.' This skill covers market positioning, ICP definition, messaging architecture, and PMF validation for AI-native products. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/positioning-icp",
-      "files": ["references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "3b940bcd8ad2035177bffb04e34d52fe038f669a2d466e8d67e73135044373a5"
+    },
+    {
+      "name": "rails-dev",
+      "description": "\"Opinionated Rails conventions: rich models, concerns, CRUD-everything, state-as-records, minimal dependencies, Minitest with fixtures. Load this skill BEFORE any code-level thinking, not only before editing a file. It is required the moment a task touches Rails code in ANY way: designing or even just discussing a data model, schema, migration, entity, association, field, validation, class, or method name; writing, planning, reviewing, analyzing, testing, debugging, or refactoring; or proposing any model, table, column, route, or code snippet inline in chat. If you are about to name a model or sketch a column you are already in scope, even in an exploratory back-and-forth where no file is written yet. Do not let a \\\"we're just discussing\\\" framing defer it. Do NOT use for non-Rails backends, NestJS, or general architecture (use nestjs-modular-monolith or coding-guidelines).\"",
+      "category": "development",
+      "path": "(development)/rails-dev",
+      "files": [
+        "SKILL.md",
+        "references/api.md",
+        "references/async.md",
+        "references/auth.md",
+        "references/caching.md",
+        "references/concerns.md",
+        "references/crud.md",
+        "references/error-handling.md",
+        "references/events.md",
+        "references/http-client.md",
+        "references/jobs.md",
+        "references/logging.md",
+        "references/mailer.md",
+        "references/migration.md",
+        "references/model.md",
+        "references/multi-tenant.md",
+        "references/review.md",
+        "references/routes.md",
+        "references/state-records.md",
+        "references/stimulus.md",
+        "references/test.md",
+        "references/turbo.md",
+        "references/validator.md",
+        "references/view.md",
+        "references/webhooks.md"
+      ],
+      "author": "William Calderipe - github.com/wcalderipe",
+      "version": "1.0.0",
+      "contentHash": "472d78e9b2b7a55d696be5c96196ec8ecb8967e12469456b79acbe84c1db8098"
     },
     {
       "name": "react-best-practices",
@@ -1012,6 +1191,9 @@
       "files": [
         "AGENTS.md",
         "README.md",
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
         "rules/advanced-event-handler-refs.md",
         "rules/advanced-init-once.md",
         "rules/advanced-use-latest.md",
@@ -1068,10 +1250,7 @@
         "rules/server-cache-react.md",
         "rules/server-dedup-props.md",
         "rules/server-parallel-fetching.md",
-        "rules/server-serialization.md",
-        "rules/_sections.md",
-        "rules/_template.md",
-        "SKILL.md"
+        "rules/server-serialization.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
@@ -1085,6 +1264,9 @@
       "files": [
         "AGENTS.md",
         "README.md",
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
         "rules/architecture-avoid-boolean-props.md",
         "rules/architecture-compound-components.md",
         "rules/patterns-children-over-render-props.md",
@@ -1092,10 +1274,7 @@
         "rules/react19-no-forwardref.md",
         "rules/state-context-interface.md",
         "rules/state-decouple-implementation.md",
-        "rules/state-lift-state.md",
-        "rules/_sections.md",
-        "rules/_template.md",
-        "SKILL.md"
+        "rules/state-lift-state.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
@@ -1107,12 +1286,12 @@
       "category": "development",
       "path": "(development)/react-native-expert",
       "files": [
+        "SKILL.md",
         "references/expo-router.md",
         "references/performance-rules.md",
         "references/platform-handling.md",
         "references/project-structure.md",
-        "references/storage-patterns.md",
-        "SKILL.md"
+        "references/storage-patterns.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1125,6 +1304,7 @@
       "path": "(cloud)/render-deploy",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
         "references/blueprint-spec.md",
         "references/codebase-analysis.md",
         "references/configuration-guide.md",
@@ -1134,8 +1314,7 @@
         "references/post-deploy-checks.md",
         "references/runtimes.md",
         "references/service-types.md",
-        "references/troubleshooting-basics.md",
-        "SKILL.md"
+        "references/troubleshooting-basics.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1146,7 +1325,10 @@
       "description": "\"When the user wants to choose between PLG and sales-led, design a sales motion, optimize time-to-first-value, or build a value-before-purchase experience. Also use when the user mentions 'PLG,' 'product-led growth,' 'sales-led,' 'sales motion,' 'free trial,' 'freemium,' 'self-serve,' 'demo-first,' 'time-to-first-value,' 'TTFV,' or 'agent-led sales.' This skill covers sales motion selection, value delivery design, and go-to-market motion architecture. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/sales-motion-design",
-      "files": ["references/quick-reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/quick-reference.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "8f9829a2107c994a3a4d2fcaec73def4bcc1a7fac20c64b452093a4e7018e93f"
@@ -1158,6 +1340,7 @@
       "path": "(security)/security-best-practices",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
         "references/golang-general-backend-security.md",
         "references/javascript-express-web-server-security.md",
         "references/javascript-general-web-frontend-security.md",
@@ -1167,8 +1350,7 @@
         "references/javascript-typescript-vue-web-frontend-security.md",
         "references/python-django-web-server-security.md",
         "references/python-fastapi-web-server-security.md",
-        "references/python-flask-web-server-security.md",
-        "SKILL.md"
+        "references/python-flask-web-server-security.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1181,12 +1363,12 @@
       "path": "(security)/security-ownership-map",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
         "references/neo4j-import.md",
         "scripts/build_ownership_map.py",
         "scripts/community_maintainers.py",
         "scripts/query_ownership.py",
-        "scripts/run_ownership_map.py",
-        "SKILL.md"
+        "scripts/run_ownership_map.py"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1199,9 +1381,9 @@
       "path": "(security)/security-threat-model",
       "files": [
         "LICENSE.txt",
+        "SKILL.md",
         "references/prompt-template.md",
-        "references/security-controls-and-assets.md",
-        "SKILL.md"
+        "references/security-controls-and-assets.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1212,7 +1394,11 @@
       "description": "Inspect Sentry issues, summarize production errors, and pull health data via the Sentry API (read-only). Use when user says \"check Sentry\", \"what errors in production?\", \"summarize Sentry issues\", \"recent crashes\", or \"production error report\". Requires SENTRY_AUTH_TOKEN. Do NOT use for setting up Sentry SDK, configuring alerts, or non-Sentry error monitoring.",
       "category": "monitoring",
       "path": "(monitoring)/sentry",
-      "files": ["LICENSE.txt", "scripts/sentry_api.py", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/sentry_api.py"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "aa0e533aff9a319b0aef86ad3e543f61b812bf159c27fc9ebb1c7ad97d5db937"
@@ -1222,7 +1408,9 @@
       "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\". Do NOT use for accessibility (use web-accessibility), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
       "category": "quality",
       "path": "(quality)/seo",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "fc9897a3923b5e23e00545ac67f4c8c2b6903113bd5f046cda259c98a0f3cd40"
@@ -1233,6 +1421,7 @@
       "category": "development",
       "path": "(development)/shopify-developer",
       "files": [
+        "SKILL.md",
         "references/api-admin.md",
         "references/api-storefront.md",
         "references/app-development.md",
@@ -1243,8 +1432,7 @@
         "references/liquid-objects.md",
         "references/liquid-syntax.md",
         "references/performance.md",
-        "references/theme-development.md",
-        "SKILL.md"
+        "references/theme-development.md"
       ],
       "contentHash": "10dd4806c0061bb9e89914557f6aec6badcef893e601293711ba3e8993527e9f"
     },
@@ -1254,11 +1442,11 @@
       "category": "creation",
       "path": "(creation)/skill-architect",
       "files": [
+        "SKILL.md",
         "references/examples.md",
         "references/patterns.md",
         "references/quality-checklist.md",
-        "scripts/validate_skill.py",
-        "SKILL.md"
+        "scripts/validate_skill.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1269,7 +1457,9 @@
       "description": "\"When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also use when the user mentions 'social selling,' 'LinkedIn selling,' 'LinkedIn DMs,' 'social prospecting,' 'LinkedIn Sales Navigator,' 'DM sequences,' 'LinkedIn outreach,' 'social pipeline,' or 'LinkedIn optimization.' This skill covers social selling strategy from profile optimization through DM-to-deal conversion. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/social-selling",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "7cc6fba77aff372c64d8e2b97b2b645ef641ef78a266b602e5e6fdd74231460e"
@@ -1279,7 +1469,9 @@
       "description": "\"When the user is a solo founder building their GTM motion, wants to scale without hiring, or needs to design an AI agent team for go-to-market. Also use when the user mentions 'solo founder,' 'one-person startup,' 'solopreneur,' 'bootstrapped,' 'no team,' 'AI agents as team,' 'scaling without hiring,' 'founder-led sales,' 'lean GTM,' 'one-person company,' or 'no employees.' This skill covers the complete solo founder GTM playbook from stack selection through agent team design, revenue-stage transitions, time allocation, and when to finally hire. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/solo-founder-gtm",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "95d71f10ea8a48767cb871ad72c09745cb6ecd822ed71be659cbd960b6503445"
@@ -1289,7 +1481,11 @@
       "description": "Scores how completely an implementation fulfills a PRD/spec, case by case, and produces a single comparable final grade. Invoke only when explicitly named (e.g. run spec-driven-eval); do not auto-trigger. Use when benchmarking spec-driven implementations, grading acceptance criteria, evaluating whether a feature was 100% implemented, comparing multiple implementations of the same PRD, or auditing implementation and test coverage (unit and e2e) against product requirements. Do NOT use for planning or building features (use tlc-spec-driven), writing PRDs, or general code review unrelated to a spec.",
       "category": "development",
       "path": "(development)/spec-driven-eval",
-      "files": ["references/quickstart.md", "references/reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/quickstart.md",
+        "references/reference.md"
+      ],
       "author": "Waldemar Neto - github.com/waldemarnt",
       "version": "1.0.0",
       "contentHash": "168d6860c6e84809a02c2abface032a4a625bdd81fec6131615e00a2cf87e311"
@@ -1299,7 +1495,9 @@
       "description": "Guide for creating AI subagents with isolated context for complex multi-step workflows. Use when users want to create a subagent, specialized agent, verifier, debugger, or orchestrator that requires isolated context and deep specialization. Works with any agent that supports subagent delegation. Triggers on \"create subagent\", \"new agent\", \"specialized assistant\", \"create verifier\". Do NOT use for Cursor-specific subagents (use cursor-subagent-creator instead).",
       "category": "creation",
       "path": "(creation)/subagent-creator",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "contentHash": "bef6b5a9f23b3186af259c1041c2561e9af15fa94810009d72d775bb217aa3ca"
     },
     {
@@ -1307,7 +1505,12 @@
       "description": "Detects anemic domain models, validates and refactors them into rich domain models, and enforces tactical DDD patterns (Entities, Value Objects, Aggregates, Domain Services, Domain Events). Use when the user asks to validate, review, or check domain models or DDD code; detect anemia; refactor domain objects; improve encapsulation; or mentions terms like \"anemic model\", \"rich domain\", \"aggregate\", \"value object\", \"domain event\", \"ubiquitous language\", \"is this good DDD\", \"does this follow DDD\", or \"check my domain\". Do NOT use for module or service boundary design, architectural decomposition, strategic DDD context mapping, or code outside the domain layer (DTOs, controllers, infrastructure adapters).",
       "category": "architecture",
       "path": "(architecture)/tactical-ddd",
-      "files": ["detection.md", "refactoring.md", "reference.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "detection.md",
+        "refactoring.md",
+        "reference.md"
+      ],
       "contentHash": "c3dfaf45e8cb784f18d9c460c7f005c4ee9dbb430f21ee8af6913bbfea66a75b"
     },
     {
@@ -1315,7 +1518,10 @@
       "description": "Creates comprehensive Technical Design Documents (TDD) with mandatory and optional sections through interactive discovery. Use when user asks to \"write a design doc\", \"create a TDD\", \"technical spec\", \"architecture document\", \"RFC\", \"design proposal\", or needs to document a technical decision before implementation. Do NOT use for README files, API docs, or general documentation (use docs-writer instead).",
       "category": "creation",
       "path": "(creation)/create-technical-design-doc",
-      "files": ["README.md", "SKILL.md"],
+      "files": [
+        "README.md",
+        "SKILL.md"
+      ],
       "contentHash": "d05974df076f695f96b4e4c263ad19f2aaffe8ee6248c1b07a634dd9ed0ea51e"
     },
     {
@@ -1324,14 +1530,14 @@
       "category": "decision-making",
       "path": "(decision-making)/the-fool",
       "files": [
+        "SKILL.md",
         "references/cognitive-bias-inventory.md",
         "references/dialectic-synthesis.md",
         "references/evidence-audit.md",
         "references/mode-selection-guide.md",
         "references/pre-mortem-analysis.md",
         "references/red-team-adversarial.md",
-        "references/socratic-questioning.md",
-        "SKILL.md"
+        "references/socratic-questioning.md"
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
@@ -1343,9 +1549,9 @@
       "category": "quality",
       "path": "(quality)/tlc-generative-engine-optimization",
       "files": [
+        "SKILL.md",
         "references/measurement-and-tools.md",
         "references/pillars-and-workflow.md",
-        "SKILL.md",
         "templates/faqpage.jsonld",
         "templates/llms.txt",
         "templates/page-metadata.html",
@@ -1355,7 +1561,7 @@
       ],
       "author": "Fernando Paladini - github.com/paladini",
       "version": "1.0.0",
-      "contentHash": "dae5b030b1833ad894f5afd3ba0c2026fea73f484bd19bc2f78d7dc8cfe55014"
+      "contentHash": "0ffb82a6d58cbb4f7f265a29601971bd302322ef89c4392f25278376200596df"
     },
     {
       "name": "tlc-spec-driven",
@@ -1363,6 +1569,7 @@
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
+        "SKILL.md",
         "references/code-analysis.md",
         "references/coding-principles.md",
         "references/context-limits.md",
@@ -1375,19 +1582,22 @@
         "references/sub-agents.md",
         "references/tasks.md",
         "references/validate.md",
-        "scripts/lessons.py",
-        "SKILL.md"
+        "scripts/lessons.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "3.1.0",
-      "contentHash": "76e50c2dc0ec574d959e54cd084c725eb8b2faaf7638d432dc95045e3d4eec5f"
+      "version": "3.2.0",
+      "contentHash": "e3d5c4dec38bff044207b31229fb28114d5fdb79f2c7200f3ec49a13a70024e1"
     },
     {
       "name": "vercel-deploy",
       "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\". Do NOT use for deploying to Netlify, Cloudflare, or Render (use their respective skills).",
       "category": "cloud",
       "path": "(cloud)/vercel-deploy",
-      "files": ["LICENSE.txt", "scripts/deploy.sh", "SKILL.md"],
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "scripts/deploy.sh"
+      ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "53985dad8a6cf5571b8eb796668502f2e82f0574ab15d31609486de8317f0ec5"
@@ -1397,7 +1607,9 @@
       "description": "\"When the user wants to build video-first cold outreach, create personalized video at scale, implement async selling, or use AI demo generation for prospecting. Also use when the user mentions 'video outreach,' 'personalized video,' 'video prospecting,' 'Tavus,' 'Sendspark,' 'HeyGen,' 'video email,' 'async selling,' 'video demo,' or 'made this for you.' This skill covers video-first outreach systems from personalization through conversion optimization. Do NOT use for technical implementation, code review, or software architecture.\"",
       "category": "gtm",
       "path": "(gtm)/video-outreach",
-      "files": ["SKILL.md"],
+      "files": [
+        "SKILL.md"
+      ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
       "contentHash": "b918e2c62adf317b82ac43e4731e300ff4f163383aebe7ae8532f7ea69c24c29"
@@ -1407,7 +1619,10 @@
       "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\". Focuses on visual design and interaction patterns. Do NOT use for performance audits (use core-web-vitals), SEO (use seo), or comprehensive site audits (use web-quality-audit).",
       "category": "design",
       "path": "(design)/web-design-guidelines",
-      "files": ["references/guideline.md", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "references/guideline.md"
+      ],
       "author": "vercel",
       "version": "1.0.0",
       "contentHash": "213a23fff251b12ddfec648bda148bf10704ef6617e162eb9329cc83963dd138"
@@ -1417,7 +1632,10 @@
       "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices in a single review. Use when asked to \"audit my site\", \"review web quality\", \"run lighthouse audit\", \"check page quality\", or \"optimize my website\" across multiple areas at once. Orchestrates specialized skills for depth. Do NOT use for single-area audits — prefer core-web-vitals, web-accessibility, seo, or web-best-practices for focused work.",
       "category": "quality",
       "path": "(quality)/web-quality-audit",
-      "files": ["scripts/analyze.sh", "SKILL.md"],
+      "files": [
+        "SKILL.md",
+        "scripts/analyze.sh"
+      ],
       "author": "web-quality-skills",
       "version": "1.0",
       "contentHash": "8af5bd3453984bdcef903709b6ef0606b12ae1badb6dd5b5b382b930d2594d7c"
@@ -1427,32 +1645,44 @@
     {
       "name": "react-native-skills",
       "message": "Use react-native-expert instead",
-      "alternatives": ["react-native-expert"]
+      "alternatives": [
+        "react-native-expert"
+      ]
     },
     {
       "name": "cursor-skill-creator",
       "message": "Use skill-architect instead",
-      "alternatives": ["skill-architect"]
+      "alternatives": [
+        "skill-architect"
+      ]
     },
     {
       "name": "skill-creator",
       "message": "Use skill-architect instead",
-      "alternatives": ["skill-architect"]
+      "alternatives": [
+        "skill-architect"
+      ]
     },
     {
       "name": "run-nx-generator",
       "message": "Use nx-generate instead",
-      "alternatives": ["nx-generate"]
+      "alternatives": [
+        "nx-generate"
+      ]
     },
     {
       "name": "excalidraw-diagram-generator",
       "message": "Use excalidraw-studio instead",
-      "alternatives": ["excalidraw-studio"]
+      "alternatives": [
+        "excalidraw-studio"
+      ]
     },
     {
       "name": "megabrain",
       "message": "megabrain was a temporary name for tlc-spec-driven v3. Use tlc-spec-driven instead.",
-      "alternatives": ["tlc-spec-driven"]
+      "alternatives": [
+        "tlc-spec-driven"
+      ]
     }
   ]
 }

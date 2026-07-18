@@ -1,3 +1,52 @@
+## 0.16.0 (2026-07-17)
+
+### 🚀 Features
+
+- add rails-dev skill to catalog ([cfe8dbcac](https://github.com/tech-leads-club/agent-skills/commit/cfe8dbcac))
+
+### 🩹 Fixes
+
+- quote rails-dev frontmatter description to fix YAML parse ([6e56a72d8](https://github.com/tech-leads-club/agent-skills/commit/6e56a72d8))
+
+### 📖 Documentation
+
+- replace Kiwify examples with Stripe across rails-dev refs ([0335f3808](https://github.com/tech-leads-club/agent-skills/commit/0335f3808))
+- genericize vendor mentions in rails-dev references ([d3e919f08](https://github.com/tech-leads-club/agent-skills/commit/d3e919f08))
+- replace Logtail with Rails.event.set_context in logging ref ([7f6bd66c3](https://github.com/tech-leads-club/agent-skills/commit/7f6bd66c3))
+- default response validation to ActiveModel over dry-schema ([c8b8ff653](https://github.com/tech-leads-club/agent-skills/commit/c8b8ff653))
+- remove money storage note from rails-dev ([44d0c7c92](https://github.com/tech-leads-club/agent-skills/commit/44d0c7c92))
+- trim money note to integer-cents storage only ([a9460c490](https://github.com/tech-leads-club/agent-skills/commit/a9460c490))
+- add money storage note to rails-dev model ref ([bc19631e4](https://github.com/tech-leads-club/agent-skills/commit/bc19631e4))
+- add view conventions to rails-dev skill ([c16eedcec](https://github.com/tech-leads-club/agent-skills/commit/c16eedcec))
+- broaden rails-dev trigger to design discussion ([f77960688](https://github.com/tech-leads-club/agent-skills/commit/f77960688))
+
+### ❤️ Thank You
+
+- Claude Fable 5
+- Claude Opus 4.8 (1M context)
+- William Calderipe @wcalderipe
+
+## 0.15.1 (2026-07-07)
+
+### 🚀 Features
+
+- **tlc-spec-driven:** pack sub-agent workers by task budget instead of phase count ([bad8eeccd](https://github.com/tech-leads-club/agent-skills/commit/bad8eeccd))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.15.0 (2026-07-04)
+
+### 🚀 Features
+
+- add tlc-generative-engine-optimization skill ([902616480](https://github.com/tech-leads-club/agent-skills/commit/902616480))
+
+### ❤️ Thank You
+
+- Claude Sonnet 4.6
+- Fernando Paladini @paladini
+
 ## 0.14.7 (2026-06-25)
 
 ### 🚀 Features

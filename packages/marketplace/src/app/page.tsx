@@ -125,7 +125,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
                     <Link
-                      href={`/skills/${heroSkill.id}`}
+                      href="/tlc-spec-driven"
                       className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       {heroSkill.name}
@@ -140,7 +140,7 @@ export default function HomePage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <CopyButton text={heroInstallCommand} />
                     <Link
-                      href={`/skills/${heroSkill.id}`}
+                      href="/tlc-spec-driven"
                       className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5 text-sm"
                     >
                       View Skill →

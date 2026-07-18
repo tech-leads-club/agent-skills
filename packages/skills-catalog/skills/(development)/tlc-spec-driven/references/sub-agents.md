@@ -1,38 +1,66 @@
 # Sub-Agent Delegation
 
-Full mechanics for phase workers and the Verifier sub-agent used during Execute.
+Full mechanics for phase-batch workers and the Verifier sub-agent used during Execute.
 
-## Phase Workers
+## Phase-Batch Workers
 
-**Trigger:** When the execution plan has **more than 3 phases**, offer the user per-phase sub-agents before starting Execute. For 3 or fewer phases, execute inline in the main window — no sub-agents spawned.
+**Two layers — keep them distinct:**
+
+- **Phase** = the semantic / dependency unit (Foundation → Core → Integration), authored during Tasks. Indivisible.
+- **Batch** = the execution / logistics unit — one or more *consecutive whole phases* assigned to a single worker.
+
+Conflating the two (one worker per phase) is what fragments execution: a feature's dependency-layer count has nothing to do with the ideal per-worker workload. Batching by task budget separates the two concerns without breaking phases.
+
+**Trigger:** Count total tasks across all phases. If the feature packs into **more than one batch** (> ~8 tasks), offer the user phase-batch sub-agents before starting Execute. If it fits a single batch (≤ ~8 tasks), execute inline in the main window — no sub-agents spawned.
+
+**Batching algorithm (task budget ≈ 7 tasks/worker, phase-aligned):**
+
+The benchmarked sweet spot is ~7 tasks of context per worker (~20 tasks → 3 workers). Pack whole phases into that budget:
+
+1. Count total tasks `T`.
+2. If `T ≤ ~8` → inline, no sub-agents.
+3. Otherwise walk phases **in order**, accumulating whole phases into the current batch. When the batch's running task count reaches ~7 **and** phases remain, close the batch and start the next.
+4. **Never split a phase** across workers — the cut only ever lands on a phase boundary. This preserves dependency ordering and keeps a phase's tasks + shared context in one worker.
+5. If the final batch is a lone tail (1–2 tasks), fold it into the previous batch.
+
+Result ≈ `ceil(T / 7)` workers, scaling linearly. Unevenness is absorbed by greedy packing — phases never need to divide evenly. Worked examples (20 tasks):
+
+- Phases `[3,3,3,3,4,4]` → `{P1+P2=6, P3+P4=6, P5+P6=8}` = **3 workers**
+- Phases `[8,2,2,8]` → `{P1=8, P2+P3=4, P4=8}` = **3 workers** (no even split needed)
+- Phases `[5,5,5,5]` → `{P1+P2=10, P3+P4=10}` = **2 workers** (phases too coarse to hit 3 — see below)
+
+**Coarse-phase caveat:** Because the cut lands only on phase boundaries, very coarse phases limit how finely you can pack. If a single phase alone exceeds ~1.5× the budget (~10+ tasks), that is a Tasks-authoring smell — split it into real sub-phases during Tasks (at a genuine dependency/cohesion boundary), never at dispatch time.
 
 **Offer-then-confirm (never auto-spawn):**
 
-> "This feature has [N] phases. I can run one sub-agent per phase — each worker executes its full phase in order, reports a compact summary, and the orchestrator advances. This keeps the main window lean. Want to proceed that way?"
+> "This feature has [T] tasks across [N] phases. I can pack them into [K] sub-agents (~7 tasks each, whole phases per worker) — every worker runs its phases in order, reports a compact summary, and the orchestrator advances to the next batch. This keeps the main window lean without over-fragmenting. Want to proceed that way?"
 
-The user must explicitly accept. If they decline (or if the feature has ≤3 phases), execute inline.
+The user must explicitly accept. If they decline (or if the feature fits one batch), execute inline.
 
-**Execution model — one worker per phase, sequential:**
+**Execution model — one worker per task-budgeted batch, sequential:**
 
 ```
-Phase 1 ──→ Phase Worker 1 ──→ compact summary ──→ orchestrator updates tasks.md
-Phase 2 ──→ Phase Worker 2 ──→ compact summary ──→ orchestrator updates tasks.md
+Phases 1+2 (7 tasks)  ──→ Batch Worker 1 ──→ compact summary ──→ orchestrator updates tasks.md
+Phases 3+4 (6 tasks)  ──→ Batch Worker 2 ──→ compact summary ──→ orchestrator updates tasks.md
+Phase 5    (7 tasks)  ──→ Batch Worker 3 ──→ compact summary ──→ orchestrator updates tasks.md
 ...
 ```
 
-**What a phase worker receives:**
+Batches run strictly sequentially: a batch never starts until the previous batch's summary shows all its tasks complete.
 
-- The phase's task definitions (from `tasks.md`)
+**What a batch worker receives:**
+
+- The task definitions for **every** phase in its batch (from `tasks.md`)
 - The Test Coverage Matrix and Gate Check Commands (from `tasks.md`)
 - `references/coding-principles.md`
 - Relevant `spec.md` and `design.md` context for the feature (not all specs)
 
-**What a phase worker does:**
+**What a batch worker does:**
 
-Executes ALL tasks in its assigned phase **in order**, following the `implement.md` cycle for each task (implement → gate → atomic commit). It does NOT spawn further sub-agents for individual tasks — `[P]` marks tasks with no inter-task dependency (order-free within the phase) and is informational only; it is not a spawn directive. After completing all tasks in the phase, the worker reports a **compact summary** to the orchestrator:
+Executes ALL tasks in its assigned batch **in order** — finishing every task in one phase before starting the next phase in the batch — following the `implement.md` cycle for each task (implement → gate → atomic commit). It does NOT spawn further sub-agents. After completing all tasks in the batch, the worker reports a **compact summary** to the orchestrator:
 
 ```
-Phase [N] complete:
+Batch (phases [N]–[M]) complete:
 - Tasks done: [list with commit hashes]
 - Tests: [N passed, 0 failed]
 - Deviations/blockers: [none | description]
@@ -40,28 +68,28 @@ Phase [N] complete:
 
 No raw logs, no full test output — only the above fields keep the main context clean.
 
-**No intra-phase nesting:** Phase workers execute their tasks themselves. They never spawn sub-sub-agents. Intra-phase parallelism is explicitly dropped for simplicity.
+**No nesting:** Batch workers execute their tasks themselves. They never spawn sub-sub-agents. Execution is strictly sequential within and across batches — there is no intra-phase or intra-batch parallelism.
 
 **The orchestrating agent's role during Execute:**
 
-1. Assess phase count — offer sub-agents if >3 phases and user accepts
-2. Dispatch the next phase to a worker (or execute inline if not using sub-agents)
+1. Count total tasks and pack phases into task-budgeted batches (~7 tasks each) — if that yields more than one batch, offer batch sub-agents and wait for the user to accept
+2. Dispatch the next batch to a worker (or execute inline if not using sub-agents)
 3. Receive the compact summary
 4. Update `tasks.md` with results
-5. If all tasks in the summary show complete: proceed to the next phase
-6. If a task failed: the worker has already stopped; decide fix/escalate before dispatching the next phase
+5. If all tasks in the summary show complete: dispatch the next batch
+6. If a task failed: the worker has already stopped; decide fix/escalate before dispatching the next batch
 
-**Failure handling:** If a task in a phase fails (gate does not pass, blocker hit), the worker stops and includes the failure in its summary. The next phase does not start until the current phase's summary shows all tasks complete. The orchestrator decides: fix and re-run, or escalate to the user.
+**Failure handling:** If a task in a batch fails (gate does not pass, blocker hit), the worker stops and includes the failure in its summary. The next batch does not start until the current batch's summary shows all tasks complete. The orchestrator decides: fix and re-run, or escalate to the user.
 
-**Context sizing signal:** If a single phase's task list would likely push the worker's context beyond ~40k tokens, that signals the phase should be split into smaller phases — use the granularity guidance in `references/tasks.md`.
+**Context sizing signal:** If a batch's task list would likely push the worker's context beyond ~40k tokens, close the batch at an earlier phase boundary (fewer phases per worker). If a *single* phase alone would blow the budget, that phase is too coarse — split it during Tasks per the granularity guidance in `references/tasks.md`.
 
 ---
 
 ## Verifier Sub-Agent
 
-**Always-on, never prompted — one per feature completion.** The Verifier is a separate role from the phase worker. It runs once — after the last task of the feature is committed — as an independent quality gate, dispatched automatically by the orchestrator. It is **not** gated behind the >3-phase offer; it always runs. Do NOT ask the user whether to run validation; it is mandatory.
+**Always-on, never prompted — one per feature completion.** The Verifier is a separate role from the batch worker. It runs once — after the last task of the feature is committed — as an independent quality gate, dispatched automatically by the orchestrator. It is **not** gated behind the batching offer; it always runs. Do NOT ask the user whether to run validation; it is mandatory.
 
-**Author ≠ verifier:** The agent (or phase worker) that wrote the code and tests is the author. The Verifier is a fresh sub-agent dispatched by the orchestrator after the final commit. It does not inherit the author's context, mental model, or assumptions. This separation is what makes the gate trustworthy.
+**Author ≠ verifier:** The agent (or batch worker) that wrote the code and tests is the author. The Verifier is a fresh sub-agent dispatched by the orchestrator after the final commit. It does not inherit the author's context, mental model, or assumptions. This separation is what makes the gate trustworthy.
 
 **What the Verifier receives:**
 - `spec.md` for the feature (ACs = source of truth)
