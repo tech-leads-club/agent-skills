@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 
 import {
   CACHE_BASE_DIR,
@@ -131,6 +131,87 @@ function readCachedSkillMeta(ports: CorePorts, skillName: string): CachedSkillMe
   }
 }
 
+function toPosixRelative(root: string, absolutePath: string): string {
+  return relative(root, absolutePath).split('\\').join('/')
+}
+
+function collectCachedFiles(ports: CorePorts, dir: string, root: string): string[] {
+  const result: string[] = []
+  let entries: { name: string; isDirectory(): boolean }[]
+  try {
+    entries = ports.fs.readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return result
+  }
+
+  for (const entry of entries) {
+    const absolute = join(dir, entry.name)
+    if (!isPathSafe(root, absolute)) continue
+
+    if (entry.isDirectory()) {
+      result.push(...collectCachedFiles(ports, absolute, root))
+    } else {
+      result.push(toPosixRelative(root, absolute))
+    }
+  }
+
+  return result
+}
+
+function pruneEmptyDirectories(ports: CorePorts, dir: string, root: string): void {
+  let entries: { name: string; isDirectory(): boolean }[]
+  try {
+    entries = ports.fs.readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+    const absolute = join(dir, entry.name)
+    if (!isPathSafe(root, absolute)) continue
+    pruneEmptyDirectories(ports, absolute, root)
+  }
+
+  if (dir === root) return
+
+  try {
+    const remaining = ports.fs.readdirSync(dir, { withFileTypes: true })
+    if (remaining.length === 0) {
+      ports.fs.rmSync(dir, { recursive: true, force: true })
+    }
+  } catch {
+    // best-effort cleanup
+  }
+}
+
+/**
+ * Removes cached files that are no longer listed in the skill's registry file set.
+ * Keeps `.skill-meta.json`. Runs only after a successful download so a failed
+ * refresh never deletes the previous cache.
+ */
+function pruneOrphanedSkillCacheFiles(
+  ports: CorePorts,
+  skillCachePath: string,
+  keepFiles: readonly string[],
+): void {
+  const keep = new Set<string>([...keepFiles, SKILL_META_FILE])
+  const cachedFiles = collectCachedFiles(ports, skillCachePath, skillCachePath)
+
+  for (const relativePath of cachedFiles) {
+    if (keep.has(relativePath)) continue
+    const absolute = join(skillCachePath, relativePath)
+    if (!isPathSafe(skillCachePath, absolute)) continue
+    try {
+      ports.fs.rmSync(absolute, { force: true })
+    } catch {
+      // best-effort cleanup
+    }
+  }
+
+  pruneEmptyDirectories(ports, skillCachePath, skillCachePath)
+}
+
 async function downloadSkillFile(
   ports: CorePorts,
   skill: SkillMetadata,
@@ -243,6 +324,9 @@ export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Pro
         downloadedAt: Date.now(),
       })
     }
+
+    // Drop files removed from the skill so install does not copy orphans.
+    pruneOrphanedSkillCacheFiles(ports, skillCachePath, files)
 
     return skillCachePath
   } catch (error) {
@@ -427,12 +511,14 @@ export function isSkillCached(ports: CorePorts, skillName: string): boolean {
  * callers like `install` pick up newer published versions without requiring
  * `--force` or a separate `update` invocation.
  *
- * Stale caches are overwritten in place — never cleared before a successful
- * download — so a failed refresh leaves the previous usable cache intact.
+ * Stale caches are overwritten in place and pruned after a successful download —
+ * never cleared beforehand — so a failed refresh leaves the previous usable
+ * cache intact.
  *
  * @param ports - Core ports used for cache checks, metadata lookup, and downloads.
  * @param skillName - Canonical skill name.
- * @returns Absolute cached skill directory path or `null` when metadata/download fails.
+ * @returns Absolute cached skill directory path or `null` when download fails
+ *          (or when the skill is missing from both cache and registry).
  *
  * @example
  * ```ts
@@ -440,15 +526,27 @@ export function isSkillCached(ports: CorePorts, skillName: string): boolean {
  * ```
  */
 export async function ensureSkillDownloaded(ports: CorePorts, skillName: string): Promise<string | null> {
-  if (isSkillCached(ports, skillName) && !(await needsUpdate(ports, skillName))) {
-    return getSkillCachePath(ports, skillName)
+  const cached = isSkillCached(ports, skillName)
+  const metadata = await getSkillMetadata(ports, skillName)
+
+  // Offline / registry miss: keep a usable local cache when present.
+  if (!metadata) {
+    return cached ? getSkillCachePath(ports, skillName) : null
   }
 
-  const metadata = await getSkillMetadata(ports, skillName)
-  if (!metadata) return null
+  if (cached) {
+    // Mirror needsUpdate(): no remote hash means we cannot prove staleness.
+    if (!metadata.contentHash) {
+      return getSkillCachePath(ports, skillName)
+    }
 
-  // Overwrite in place. Do not clear first: if the download fails, the previous
-  // cache remains available for offline use and a later retry.
+    const cachedMeta = readCachedSkillMeta(ports, skillName)
+    if (cachedMeta?.contentHash === metadata.contentHash) {
+      return getSkillCachePath(ports, skillName)
+    }
+  }
+
+  // Overwrite in place (no clear-first). downloadSkill prunes orphans on success.
   return downloadSkill(ports, metadata)
 }
 
