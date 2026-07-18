@@ -33,6 +33,8 @@ import {
   needsUpdate,
 } from '../registry.service'
 
+type DirEntry = { name: string; isDirectory(): boolean }
+
 type TestPorts = {
   ports: CorePorts
   existsSyncMock: jest.MockedFunction<(path: string) => boolean>
@@ -40,6 +42,7 @@ type TestPorts = {
   rmSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
   writeFileSyncMock: jest.MockedFunction<(path: string, content: string, encoding: string) => void>
+  readdirSyncMock: jest.MockedFunction<(path: string, options?: { withFileTypes: true }) => DirEntry[]>
   getWithFallbackMock: jest.MockedFunction<
     (
       url: string,
@@ -57,6 +60,7 @@ const createPorts = (): TestPorts => {
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
   const rmSyncMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>()
   const writeFileSyncMock = jest.fn<(path: string, content: string, encoding: string) => void>()
+  const readdirSyncMock = jest.fn<(path: string, options?: { withFileTypes: true }) => DirEntry[]>()
   const getWithFallbackMock =
     jest.fn<
       (
@@ -70,6 +74,7 @@ const createPorts = (): TestPorts => {
 
   existsSyncMock.mockReturnValue(false)
   mkdirSyncMock.mockReturnValue(undefined)
+  readdirSyncMock.mockReturnValue([])
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
   getLatestVersionMock.mockResolvedValue('9.9.9')
 
@@ -79,6 +84,7 @@ const createPorts = (): TestPorts => {
     rmSync: rmSyncMock,
     readFileSync: readFileSyncMock,
     writeFileSync: writeFileSyncMock,
+    readdirSync: readdirSyncMock,
   } as unknown as FileSystemPort
 
   const http = {
@@ -124,6 +130,7 @@ const createPorts = (): TestPorts => {
     rmSyncMock,
     readFileSyncMock,
     writeFileSyncMock,
+    readdirSyncMock,
     getWithFallbackMock,
     getEnvMock,
     getLatestVersionMock,
@@ -311,6 +318,57 @@ describe('downloadSkill', () => {
 
     expect(cachedPath).toBeNull()
     expect(loggerErrorMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('prunes cached files that are no longer listed in skill metadata', async () => {
+    const { ports, existsSyncMock, getWithFallbackMock, readdirSyncMock, rmSyncMock } = createPorts()
+    const skillDir = '/home/tester/.cache/agent-skills/skills/accessibility'
+    const deleted = new Set<string>()
+
+    existsSyncMock.mockImplementation(
+      (path) =>
+        !deleted.has(path) &&
+        (path === '/home/tester/.cache/agent-skills' ||
+          path === '/home/tester/.cache/agent-skills/skills' ||
+          path === skillDir ||
+          path.startsWith(`${skillDir}/`)),
+    )
+    rmSyncMock.mockImplementation((path) => {
+      deleted.add(path)
+    })
+    readdirSyncMock.mockImplementation((path) => {
+      const entries =
+        path === skillDir
+          ? [
+              { name: 'SKILL.md', isDirectory: () => false },
+              { name: 'orphan.md', isDirectory: () => false },
+              { name: 'scripts', isDirectory: () => true },
+              { name: '.skill-meta.json', isDirectory: () => false },
+            ]
+          : path === `${skillDir}/scripts`
+            ? [{ name: 'old.sh', isDirectory: () => false }]
+            : []
+
+      return entries.filter((entry) => !deleted.has(`${path}/${entry.name}`))
+    })
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+      text: async () => '# Skill content',
+    })
+
+    const cachedPath = await downloadSkill(ports, {
+      ...registryFixture.skills[0],
+      files: ['SKILL.md'],
+    })
+
+    expect(cachedPath).toBe(skillDir)
+    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/orphan.md`, { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/scripts/old.sh`, { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/scripts`, { recursive: true, force: true })
+    expect(rmSyncMock).not.toHaveBeenCalledWith(`${skillDir}/SKILL.md`, expect.anything())
+    expect(rmSyncMock).not.toHaveBeenCalledWith(`${skillDir}/.skill-meta.json`, expect.anything())
   })
 })
 
@@ -684,6 +742,23 @@ describe('cache management', () => {
     const path = await ensureSkillDownloaded(ports, 'missing-skill')
 
     expect(path).toBeNull()
+  })
+
+  it('keeps the local cache when registry metadata is unavailable', async () => {
+    const { ports, existsSyncMock, getWithFallbackMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+    )
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ...registryFixture, skills: [] }),
+      text: async () => '',
+    })
+
+    const path = await ensureSkillDownloaded(ports, 'accessibility')
+
+    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
   })
 
   it('forces redownload by clearing skill cache first', async () => {
