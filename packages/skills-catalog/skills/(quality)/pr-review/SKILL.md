@@ -12,6 +12,15 @@ metadata:
 
 Coordinates 6 specialized subagents (via the Task tool), then consolidates their findings into one summary. This skill is **stack-agnostic**: it owns no rules of its own. Instead it discovers what the project already documents — test runner, requirement specs, architecture conventions, project-local review skills — and each subagent loads and applies **whatever that project actually has**. It never invents stack-specific rules and never duplicates project docs.
 
+## Execution Contract (NON-NEGOTIABLE)
+
+This skill is an **orchestration-only** protocol. Read these rules before anything else:
+
+1. You are the **orchestrator**. You MUST NOT analyze the diff, read source files, or write any review finding yourself. Your only jobs are gathering context (Step 1), launching subagents (Step 2), and spawning the consolidation subagent (Step 3).
+2. The six reviews MUST run as **six separate, general-purpose subagents** (no restricted toolset), launched **in parallel in a single batch**. Use whatever subagent / parallel-task mechanism your harness provides (in Claude Code, the Task tool).
+3. Doing the review inline — even partially, even "to save time", even for a small diff — is a FAILURE of this skill. There are no exceptions for diff size.
+4. Each subagent prompt MUST be self-contained: it receives `{REPO}`, `{PR}`, `{SHA}`, the diff, the PR intent, the existing comment locations, and the DISCOVERY MAP. Subagents do not share your context.
+
 **Host prerequisite:** operates on GitHub pull requests via the `gh` CLI — every fetch and post below uses `gh`. "Stack-agnostic" means language- and framework-agnostic, **not** host-agnostic: a GitLab/Bitbucket-hosted repo (which has MRs, not PRs) is out of scope.
 
 Explicit invocation only (`disable-model-invocation: true`). Never auto-trigger during coding.
