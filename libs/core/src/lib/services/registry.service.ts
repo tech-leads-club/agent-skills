@@ -420,7 +420,15 @@ export function isSkillCached(ports: CorePorts, skillName: string): boolean {
 }
 
 /**
- * Ensures a skill exists in local cache, downloading it when needed.
+ * Ensures a skill exists in local cache with current registry content.
+ *
+ * Returns the existing cache path when the skill is present and its content hash
+ * matches the registry. Re-downloads when the skill is missing or stale so
+ * callers like `install` pick up newer published versions without requiring
+ * `--force` or a separate `update` invocation.
+ *
+ * Stale caches are overwritten in place — never cleared before a successful
+ * download — so a failed refresh leaves the previous usable cache intact.
  *
  * @param ports - Core ports used for cache checks, metadata lookup, and downloads.
  * @param skillName - Canonical skill name.
@@ -432,13 +440,15 @@ export function isSkillCached(ports: CorePorts, skillName: string): boolean {
  * ```
  */
 export async function ensureSkillDownloaded(ports: CorePorts, skillName: string): Promise<string | null> {
-  if (isSkillCached(ports, skillName)) {
+  if (isSkillCached(ports, skillName) && !(await needsUpdate(ports, skillName))) {
     return getSkillCachePath(ports, skillName)
   }
 
   const metadata = await getSkillMetadata(ports, skillName)
   if (!metadata) return null
 
+  // Overwrite in place. Do not clear first: if the download fails, the previous
+  // cache remains available for offline use and a later retry.
   return downloadSkill(ports, metadata)
 }
 

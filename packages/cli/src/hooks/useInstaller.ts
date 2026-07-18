@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { forceDownloadSkill, getSkillWithPath, installSkills } from '@tech-leads-club/core'
+import { ensureSkillDownloaded, fetchRegistry, forceDownloadSkill, installSkills } from '@tech-leads-club/core'
 import type { InstallOptions, InstallResult, SkillInfo } from '@tech-leads-club/core'
 
 import { ports } from '../ports'
@@ -15,17 +15,18 @@ export function useInstaller() {
     setError(null)
     setProgress({ current: 0, total: skills.length * options.agents.length, skill: 'Downloading...' })
 
+    // Bypass the 24h registry TTL so install/update see newly published content hashes.
+    await fetchRegistry(ports, true)
+
     const resolvedSkills: SkillInfo[] = []
     for (const skill of skills) {
-      if (options.isUpdate) {
-        // Force a fresh download so the agent directory receives the new content,
-        // not the stale cache that was downloaded during the original install.
-        const freshPath = await forceDownloadSkill(ports, skill.name)
-        if (freshPath) resolvedSkills.push({ ...skill, path: freshPath })
-      } else {
-        const resolved = skill.path ? skill : await getSkillWithPath(ports, skill.name)
-        if (resolved) resolvedSkills.push(resolved)
-      }
+      // Never reuse skill.path from getRemoteSkills — it points at the local cache
+      // whenever SKILL.md exists, even when the registry has a newer contentHash.
+      // ensureSkillDownloaded refreshes stale cache; isUpdate always redownloads.
+      const path = options.isUpdate
+        ? await forceDownloadSkill(ports, skill.name)
+        : await ensureSkillDownloaded(ports, skill.name)
+      if (path) resolvedSkills.push({ ...skill, path })
     }
 
     setProgress({ current: 0, total: resolvedSkills.length * options.agents.length, skill: 'Installing...' })

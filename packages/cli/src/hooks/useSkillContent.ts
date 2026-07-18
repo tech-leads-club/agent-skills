@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { useEffect, useState } from 'react'
-import { ensureSkillDownloaded, getSkillCachePath, getSkillMetadata, type SkillMetadata } from '@tech-leads-club/core'
+import {
+  ensureSkillDownloaded,
+  getSkillCachePath,
+  getSkillMetadata,
+  isSkillCached,
+  type SkillMetadata,
+} from '@tech-leads-club/core'
 
 import { ports } from '../ports'
 
@@ -33,9 +39,15 @@ export function useSkillContent(skillName: string | null): SkillContent {
 
     const load = async () => {
       try {
+        // Preview should not refresh stale cache — only download when missing.
+        // Install/update own the freshness path via ensureSkillDownloaded.
+        const cachePathPromise = isSkillCached(ports, skillName)
+          ? Promise.resolve(getSkillCachePath(ports, skillName))
+          : ensureSkillDownloaded(ports, skillName).catch(() => null)
+
         const [meta, cachePath] = await Promise.all([
           getSkillMetadata(ports, skillName).catch(() => null),
-          ensureSkillDownloaded(ports, skillName).catch(() => null),
+          cachePathPromise,
         ])
 
         if (!mounted) return

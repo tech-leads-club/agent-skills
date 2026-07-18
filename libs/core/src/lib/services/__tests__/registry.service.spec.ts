@@ -583,16 +583,92 @@ describe('cache management', () => {
     expect(isSkillCached(ports, 'missing')).toBe(false)
   })
 
-  it('returns cached path without download when skill already exists', async () => {
-    const { ports, existsSyncMock, getWithFallbackMock } = createPorts()
+  it('returns cached path when content hash matches registry', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      (path) =>
+        path === '/home/tester/.cache/agent-skills' ||
+        path === '/home/tester/.cache/agent-skills/skills' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
     )
+    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => JSON.stringify(registryFixture),
+    })
 
     const path = await ensureSkillDownloaded(ports, 'accessibility')
 
     expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
-    expect(getWithFallbackMock).not.toHaveBeenCalled()
+    const skillFileDownloads = getWithFallbackMock.mock.calls.filter(([url]) =>
+      String(url).includes('/skills/(quality)/accessibility/'),
+    )
+    expect(skillFileDownloads).toHaveLength(0)
+  })
+
+  it('redownloads when cached content hash differs from registry', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock, rmSyncMock, writeFileSyncMock } =
+      createPorts()
+
+    existsSyncMock.mockImplementation((path) => {
+      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility') return true
+      return false
+    })
+    readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
+    getWithFallbackMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => registryFixture,
+      text: async () => '# Skill content',
+    })
+
+    const path = await ensureSkillDownloaded(ports, 'accessibility')
+
+    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    // Overwrite in place — never wipe the cache before a successful refresh.
+    expect(rmSyncMock).not.toHaveBeenCalled()
+    expect(writeFileSyncMock).toHaveBeenCalled()
+  })
+
+  it('preserves existing cache when a stale refresh download fails', async () => {
+    const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock, rmSyncMock } = createPorts()
+
+    existsSyncMock.mockImplementation((path) => {
+      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json') return true
+      if (path === '/home/tester/.cache/agent-skills/skills/accessibility') return true
+      return false
+    })
+    readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
+    getWithFallbackMock.mockImplementation(async (url) => {
+      if (String(url).includes('skills-registry.json')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => registryFixture,
+          text: async () => JSON.stringify(registryFixture),
+        }
+      }
+      return {
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+        text: async () => 'unavailable',
+      }
+    })
+
+    const path = await ensureSkillDownloaded(ports, 'accessibility')
+
+    expect(path).toBeNull()
+    expect(rmSyncMock).not.toHaveBeenCalled()
+    expect(isSkillCached(ports, 'accessibility')).toBe(true)
   })
 
   it('returns null when ensureSkillDownloaded cannot resolve metadata', async () => {

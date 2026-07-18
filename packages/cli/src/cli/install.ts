@@ -1,5 +1,12 @@
 import chalk from 'chalk'
-import { AGENT_TYPES, ensureSkillDownloaded, forceDownloadSkill, getRemoteSkills, installSkills } from '@tech-leads-club/core'
+import {
+  AGENT_TYPES,
+  ensureSkillDownloaded,
+  fetchRegistry,
+  forceDownloadSkill,
+  getRemoteSkills,
+  installSkills,
+} from '@tech-leads-club/core'
 import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
 
 import { ports } from '../ports'
@@ -13,6 +20,8 @@ interface InstallCliOptions {
 }
 
 async function downloadSkills(skillNames: string[], forceDownload: boolean): Promise<SkillInfo[]> {
+  // Bypass the 24h registry TTL so re-install can see newly published content hashes.
+  await fetchRegistry(ports, true)
   const allSkills = await getRemoteSkills(ports)
   const selectedSkills: SkillInfo[] = []
 
