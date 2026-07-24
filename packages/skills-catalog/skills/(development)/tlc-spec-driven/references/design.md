@@ -2,22 +2,22 @@
 
 **Goal**: Define HOW to build it. Architecture, components, what to reuse.
 
-**Skip this phase when:** The change is straightforward — no architectural decisions, no new patterns, no component interactions to plan. For simple features, design happens inline during Execute.
+**Skip this phase when:** The change is straightforward - no architectural decisions, no new patterns, no component interactions to plan. For simple features, design happens inline during Execute.
 
 ## Process
 
 ### 1. Load Context
 
-Read `.specs/features/[feature]/spec.md` before designing. If `.specs/features/[feature]/context.md` exists, load it too — it contains implementation decisions that constrain the design (layout choices, behavior preferences, interaction patterns). Decisions marked as "Agent's Discretion" are yours to decide.
+Read `.specs/features/[feature]/spec.md` before designing. If `.specs/features/[feature]/context.md` exists, load it too - it contains implementation decisions that constrain the design (layout choices, behavior preferences, interaction patterns). Decisions marked as "Agent's Discretion" are yours to decide.
 
-**Mandatory: read `.specs/STATE.md` `## Decisions` now.** This MUST happen before any architectural choices are made. Every `active` `AD-NNN` entry is a project-level constraint this design must conform to. If a decision from a prior feature conflicts with what is best for this feature, you have two options — both require an explicit choice:
+**Mandatory: read `.specs/STATE.md` `## Decisions` now.** This MUST happen before any architectural choices are made. Every `active` `AD-NNN` entry is a project-level constraint this design must conform to. If a decision from a prior feature conflicts with what is best for this feature, you have two options - both require an explicit choice:
 
-1. **Conform** — Design within the active constraint.
-2. **Supersede** — Append a new `AD-NNN` entry to `.specs/STATE.md` `## Decisions` that supersedes the old one (set the old entry's `status` to `superseded by AD-NNN`) and document the reason. The new decision becomes the project standard going forward.
+1. **Conform** - Design within the active constraint.
+2. **Supersede** - Append a new `AD-NNN` entry to `.specs/STATE.md` `## Decisions` that supersedes the old one (set the old entry's `status` to `superseded by AD-NNN`) and document the reason. The new decision becomes the project standard going forward.
 
-Silently ignoring an active decision is not an option — it creates invisible inconsistency across features.
+Silently ignoring an active decision is not an option - it creates invisible inconsistency across features.
 
-**Also load confirmed lessons** relevant to this feature: `python3 scripts/lessons.py list --status confirmed` (filter with `--scope`/`--query`). These are past verification failures distilled into guidance — apply them while designing. Load only `confirmed`. Skip silently if no store or no code tool. See [lessons.md](lessons.md).
+**Also load confirmed lessons** relevant to this feature: `python3 scripts/lessons.py list --status confirmed` (filter with `--scope`/`--query`). These are past verification failures distilled into guidance - apply them while designing. Load only `confirmed`. Skip silently if no store or no code tool. See [lessons.md](lessons.md).
 
 ### 1.5. Research (Optional but Recommended)
 
@@ -35,17 +35,17 @@ Good triggers for research: new libraries, unfamiliar APIs, performance-sensitiv
 
 **Concern flagging (MUST do while reading code):** While walking the codebase via the Knowledge Verification Chain, flag any concerns you encounter in the areas this feature touches. Capture each finding in the `## Risks & Concerns` section of `design.md`:
 
-- **Fragile code** — tight coupling, large functions, implicit state
-- **Tech debt** — hacks, workarounds, deprecated APIs
-- **Security risks** — unvalidated input, auth gaps, exposed secrets
-- **Performance bottlenecks** — N+1 queries, unbounded loops, missing indexes
-- **Test coverage gaps** — untested paths the feature depends on
+- **Fragile code** - tight coupling, large functions, implicit state
+- **Tech debt** - hacks, workarounds, deprecated APIs
+- **Security risks** - unvalidated input, auth gaps, exposed secrets
+- **Performance bottlenecks** - N+1 queries, unbounded loops, missing indexes
+- **Test coverage gaps** - untested paths the feature depends on
 
-Every flagged concern MUST include a mitigation — how the design (or a follow-up task) addresses it.
+Every flagged concern MUST include a mitigation - how the design (or a follow-up task) addresses it.
 
 ### 2. Define Architecture
 
-**Large/Complex only — approach exploration:** Before committing to a single architecture, present 2–3 viable approaches with trade-offs and a recommendation. Lead with the recommendation to avoid analysis paralysis. All approaches must deliver the same scoped thing (no alternative scopes). Confirm the chosen approach with the user before detailing components. Medium features: skip — design inline.
+**Large/Complex only - approach exploration:** Before committing to a single architecture, present 2-3 viable approaches with trade-offs and a recommendation. Lead with the recommendation to avoid analysis paralysis. All approaches must deliver the same scoped thing (no alternative scopes). Confirm the chosen approach with the user before detailing components. Medium features: skip - design inline.
 
 Overview of how components interact. Use mermaid diagrams when helpful.
 
@@ -173,7 +173,7 @@ interface AnotherModel {
 | ------- | -------------------- | ------ | ---------- |
 | [Fragile code / tech debt / security / perf / test gap] | `src/path/file.ts:42` | [What breaks or degrades] | [How the design or a follow-up task addresses it] |
 
-> None found — is a valid entry.
+> None found - is a valid entry.
 
 ---
 
@@ -189,11 +189,11 @@ interface AnotherModel {
 
 ## Tips
 
-- **Load context first** — If context.md exists, decisions there are locked
-- **Research when uncertain** — 5 minutes of research prevents hours of rework
-- **Reuse is king** — Every component should reference existing patterns
-- **Interfaces first** — Define contracts before implementation
-- **Keep it visual** — Diagrams save 1000 words
-- **Small components** — If component does 3+ things, split it
-- **Flag concerns inline** — Risks found during research go in Risks & Concerns with a mitigation
-- **Confirm before Tasks** — User approves design before breaking into tasks
+- **Load context first** - If context.md exists, decisions there are locked
+- **Research when uncertain** - 5 minutes of research prevents hours of rework
+- **Reuse is king** - Every component should reference existing patterns
+- **Interfaces first** - Define contracts before implementation
+- **Keep it visual** - Diagrams save 1000 words
+- **Small components** - If component does 3+ things, split it
+- **Flag concerns inline** - Risks found during research go in Risks & Concerns with a mitigation
+- **Confirm before Tasks** - User approves design before breaking into tasks
