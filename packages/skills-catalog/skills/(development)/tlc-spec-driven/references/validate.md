@@ -1,13 +1,13 @@
 # Execute: Validate & Verify
 
-**Goal**: Verify implementation meets spec AND coding principles. This is NOT a separate phase — verification is part of every task's completion within Execute.
+**Goal**: Verify implementation meets spec AND coding principles. This is NOT a separate phase - verification is part of every task's completion within Execute.
 
 **Three levels of verification:**
 
 1. **Per-task verification (always, author self-check):** After implementing each task, verify its "Done when" criteria before committing. This is mandatory and automatic. The implementer runs it.
 
-2. **Feature-level validation (independent Verifier sub-agent, always-on, never prompted):** After all tasks for a feature (or priority group) are done, validation runs automatically — the orchestrator dispatches a **fresh Verifier sub-agent** (see [sub-agents.md](sub-agents.md)). Do NOT ask the user whether to run it; it is the safety net, not an opt-in. User interaction is limited to interactive UAT (for user-facing features) and acting on a FAIL verdict ("fix these gaps now?"). The Verifier:
-   - Runs **read-only** over the real implementation and tests — mutations run in a scratch/throwaway state only (see Discrimination Sensor section)
+2. **Feature-level validation (independent Verifier sub-agent, always-on, never prompted):** After all tasks for a feature (or priority group) are done, validation runs automatically - the orchestrator dispatches a **fresh Verifier sub-agent** (see [sub-agents.md](sub-agents.md)). Do NOT ask the user whether to run it; it is the safety net, not an opt-in. User interaction is limited to interactive UAT (for user-facing features) and acting on a FAIL verdict ("fix these gaps now?"). The Verifier:
+   - Runs **read-only** over the real implementation and tests - mutations run in a scratch/throwaway state only (see Discrimination Sensor section)
    - Scopes coverage to the feature's **git diff surface** (not the full repository)
    - Re-derives coverage independently using **evidence-or-zero**: every AC must be traced to a `file:line` + assertion expression; a criterion with no `file:line` citation counts as NOT covered
    - Runs the **spec-anchored outcome check** and the **discrimination sensor** (both described below)
@@ -41,12 +41,12 @@ For each acceptance criterion in `spec.md`, the Verifier re-derives the **spec-d
 
 | Criterion (WHEN X THEN Y) | Spec-defined outcome | `file:line` + assertion expression | Result |
 | ------------------------- | -------------------- | ---------------------------------- | ------ |
-| WHEN [X] THEN [Y]         | [precise value/state from spec] | `path/to/test.ts:42` — `expect(result.field).toBe(expected)` | ✅ PASS / ❌ GAP / ⚠️ Spec-precision gap |
+| WHEN [X] THEN [Y]         | [precise value/state from spec] | `path/to/test.ts:42` - `expect(result.field).toBe(expected)` | ✅ PASS / ❌ GAP / ⚠️ Spec-precision gap |
 ```
 
 **Rules:**
 
-- Where the spec defines a precise outcome (specific status code, field value, error message, state), the test assertion MUST target that exact outcome — not just that an assertion exists.
+- Where the spec defines a precise outcome (specific status code, field value, error message, state), the test assertion MUST target that exact outcome - not just that an assertion exists.
 - Where the spec does NOT define a precise outcome, mark as **⚠️ Spec-precision gap** and flag it in the report. Do NOT silently pass a vague assertion.
 - Evidence-or-zero: a criterion with no `file:line` citation counts as NOT covered.
 
@@ -67,7 +67,7 @@ Run the Build-level gate check from the **Gate Check Commands** section in tasks
    - Total test count: [N]
    - Passed: [N]
    - Failed: [list]
-   - Skipped: [list — each skip must be justified]
+   - Skipped: [list - each skip must be justified]
 
 **Test Integrity Check:**
 
@@ -75,9 +75,9 @@ Run the Build-level gate check from the **Gate Check Commands** section in tasks
 - If test count DECREASED: investigate why. Tests should only be deleted with explicit justification.
 - If assertions were weakened (less specific than before): flag as potential regression
 
-### 5. Discrimination Sensor (MANDATORY — always runs after gate check passes)
+### 5. Discrimination Sensor (MANDATORY - always runs after gate check passes)
 
-The sensor provides the empirical guarantee that the tests can actually detect regressions. It runs in a scratch/throwaway state — the real working tree is never modified.
+The sensor provides the empirical guarantee that the tests can actually detect regressions. It runs in a scratch/throwaway state - the real working tree is never modified.
 
 **How it works:**
 
@@ -91,13 +91,13 @@ The sensor provides the empirical guarantee that the tests can actually detect r
    - Remove a required side effect (delete a method call that the spec requires)
 3. **Run the tests** that cover the mutated code. Use the Quick or Full gate command from tasks.md.
 4. **Confirm the mutant is killed** (tests FAIL). Then discard the mutation (restore the scratch state).
-5. **If a mutant survives** (tests still pass after the fault), the tests are not discriminating for that behavior — add a fix task to strengthen the assertion.
+5. **If a mutant survives** (tests still pass after the fault), the tests are not discriminating for that behavior - add a fix task to strengthen the assertion.
 
 **Tiering (proportional, not optional):**
 
 | Context | Sensor depth |
 | ------- | ------------ |
-| Default (all features) | Lightweight fault-injection: 1–3 targeted behavior-level mutations per feature, focused on the highest-risk new code |
+| Default (all features) | Lightweight fault-injection: 1-3 targeted behavior-level mutations per feature, focused on the highest-risk new code |
 | P0 / critical paths (payment, auth, data integrity) | Full mutation run: use language-appropriate mutation tooling if available (e.g., Stryker, mutmut, cargo-mutants, pitest); otherwise increase the number of manual fault-injection mutations to ≥5 covering all branches |
 
 **Stack-agnostic:** The sensor targets behavior-level semantics (what the code does), not a specific tool. Any language, any framework.
@@ -121,7 +121,7 @@ For each changed file, verify against [coding-principles.md](coding-principles.m
 | Spec-anchored outcome check: each test's asserted value matches the spec-defined outcome (or gap flagged) | |
 | Per-layer Coverage Expectation met: domain logic has 1:1 AC mapping; routes/e2e cover happy + edge + error paths for every route in scope | |
 | Every test in scope maps to a spec AC, listed edge case, or Done-when criterion (no unclaimed tests) | |
-| Documented project quality/testing guidelines followed (cite guideline file, or "none — strong defaults applied") | |
+| Documented project quality/testing guidelines followed (cite guideline file, or "none - strong defaults applied") | |
 
 ❌ Any "No"? → Fix before marking complete.
 
@@ -132,7 +132,7 @@ For each testable deliverable, present one test at a time:
 ```
 Test [N]: [Test Name]
 
-Expected: [What should happen — specific and observable]
+Expected: [What should happen - specific and observable]
 
 → Does this work? Describe what you see.
 ```
@@ -143,7 +143,7 @@ Wait for user response:
 | ------------------------------ | ----------------------- |
 | "yes", "pass", "works", "next" | ✅ Pass                 |
 | "skip", "can't test", "n/a"    | ⏭️ Skip                 |
-| Anything else                  | ❌ Issue — log verbatim |
+| Anything else                  | ❌ Issue - log verbatim |
 
 **Severity inference (never ask the user for severity):**
 
@@ -159,13 +159,13 @@ Wait for user response:
 
 For each issue found during UAT or from the Verifier:
 
-1. **Diagnose** — Analyze the codebase to find root cause
-2. **Create fix task** — Write a task definition with:
+1. **Diagnose** - Analyze the codebase to find root cause
+2. **Create fix task** - Write a task definition with:
    - What: The specific fix
    - Where: File paths
    - Verify: How to prove the fix works
    - Done when: Acceptance criteria for the fix
-3. **Present fix plan** — Show all fix tasks to user for approval
+3. **Present fix plan** - Show all fix tasks to user for approval
 
 Fix tasks follow the same format as regular tasks and can be executed with the implement phase.
 
@@ -175,12 +175,14 @@ Fix tasks follow the same format as regular tasks and can be executed with the i
 
 After all checks complete, the Verifier MUST:
 
-1. **Write the persisted report** to `.specs/features/[feature]/validation.md` (see template below). This file is the evidence artifact — it survives the session and can be referenced by CI, reviewers, or future agents.
+1. **Write the persisted report** to `.specs/features/[feature]/validation.md` (see template below). This file is the evidence artifact - it survives the session and can be referenced by CI, reviewers, or future agents.
 2. **Return a compact summary in chat** to the orchestrator (see Compact Chat Summary section below). The orchestrator surfaces it to the user and routes any ranked gaps to fix tasks.
+
+**Deterministic backing (run it, do not eyeball it).** After writing the report, run `python3 scripts/validate_state.py <feature>`. It confirms the report is real - present, verdict filled to PASS, and backed by at least one `file:line` evidence citation - so a missing, hollow, placeholder, or FAIL report cannot slip through as done. A non-zero exit means the feature is NOT done: repair the report or route the FAIL gaps to fix tasks, then re-run. This is the closing gate of Execute and runs automatically, the same way the lessons layer runs at distillation; it is never a manual step. If no code-execution tool is available, confirm the same by reading `validation.md`.
 
 ### 10. Distill Lessons (MANDATORY when validation.md has signal)
 
-This is the closing action of validation — not a separate phase. Immediately after the report is written, turn its grounded failures into reusable, project-local guidance by following [lessons.md](lessons.md). In short: for each surviving mutant, spec-precision gap, failed/uncovered AC, or `// SPEC_DEVIATION`, record one terse general lesson via `python3 scripts/lessons.py add` (the script enforces grounding and owns all bookkeeping). A clean PASS with no signal → record nothing. Run the self-check: if there was signal but no lesson was recorded, say so in chat. See [lessons.md](lessons.md) for the exact commands, phrasing rules, scope discipline, and the no-script fallback.
+This is the closing action of validation - not a separate phase. Immediately after the report is written, turn its grounded failures into reusable, project-local guidance by following [lessons.md](lessons.md). In short: for each surviving mutant, spec-precision gap, failed/uncovered AC, or `// SPEC_DEVIATION`, record one terse general lesson via `python3 scripts/lessons.py add` (the script enforces grounding and owns all bookkeeping). A clean PASS with no signal → record nothing. Run the self-check: if there was signal but no lesson was recorded, say so in chat. See [lessons.md](lessons.md) for the exact commands, phrasing rules, scope discipline, and the no-script fallback.
 
 ---
 
@@ -189,7 +191,7 @@ This is the closing action of validation — not a separate phase. Immediately a
 The Verifier returns this block to the orchestrator after completing all checks:
 
 ```markdown
-## Validation: [Feature] — [PASS ✅ | FAIL ❌]
+## Validation: [Feature] - [PASS ✅ | FAIL ❌]
 
 **Spec-anchored check**: [N/N ACs matched spec outcome | M spec-precision gaps flagged]
 **Gate**: [X passed, 0 failed]
@@ -197,7 +199,7 @@ The Verifier returns this block to the orchestrator after completing all checks:
 **Report**: `.specs/features/[feature]/validation.md`
 
 **Ranked gaps** (if FAIL):
-1. [Gap description] — [AC or criterion] — [file:line or "no evidence"]
+1. [Gap description] - [AC or criterion] - [file:line or "no evidence"]
 2. ...
 ```
 
@@ -229,9 +231,9 @@ The Verifier returns this block to the orchestrator after completing all checks:
 
 | Criterion (WHEN X THEN Y) | Spec-defined outcome | `file:line` + assertion | Result |
 | ------------------------- | -------------------- | ----------------------- | ------ |
-| WHEN X THEN Y             | [precise value/state from spec] | `path/to/test.ts:42` — `expect(result.field).toBe(expected)` | ✅ PASS |
-| WHEN A THEN B             | [expected value]     | `path/to/test.ts:88` — `expect(res.status).toBe(400)` | ✅ PASS |
-| WHEN C THEN D             | not precisely defined in spec | — | ⚠️ Spec-precision gap |
+| WHEN X THEN Y             | [precise value/state from spec] | `path/to/test.ts:42` - `expect(result.field).toBe(expected)` | ✅ PASS |
+| WHEN A THEN B             | [expected value]     | `path/to/test.ts:88` - `expect(res.status).toBe(400)` | ✅ PASS |
+| WHEN C THEN D             | not precisely defined in spec | - | ⚠️ Spec-precision gap |
 
 **Status**: ✅ All ACs covered / ❌ Gaps present / ⚠️ Spec-precision gaps flagged
 
@@ -246,7 +248,7 @@ The Verifier returns this block to the orchestrator after completing all checks:
 | 3        | `src/handler.ts:15` | Removed side-effect call to `notify()` | ❌ Survived → fix task created |
 
 **Sensor depth**: [lightweight / P0-full]
-**Result**: [N/N killed] — [PASS ✅ | FAIL ❌]
+**Result**: [N/N killed] - [PASS ✅ | FAIL ❌]
 
 ---
 
@@ -255,7 +257,7 @@ The Verifier returns this block to the orchestrator after completing all checks:
 | #   | Test        | Result   | Details                                         |
 | --- | ----------- | -------- | ----------------------------------------------- |
 | 1   | [Test name] | ✅ Pass  | -                                               |
-| 2   | [Test name] | ❌ Issue | [Verbatim user response] — Severity: [inferred] |
+| 2   | [Test name] | ❌ Issue | [Verbatim user response] - Severity: [inferred] |
 | 3   | [Test name] | ⏭️ Skip  | [Reason]                                        |
 
 ---
@@ -270,8 +272,8 @@ The Verifier returns this block to the orchestrator after completing all checks:
 | Matches patterns | ✅     |
 | Spec-anchored outcome check (asserted values match spec) | ✅ |
 | Per-layer Coverage Expectation met (domain 1:1 ACs; routes happy+edge+error) | ✅ |
-| Every test maps to a spec requirement — no unclaimed tests | ✅ |
-| Documented guidelines followed: [file(s) or "none — strong defaults applied"] | ✅ |
+| Every test maps to a spec requirement - no unclaimed tests | ✅ |
+| Documented guidelines followed: [file(s) or "none - strong defaults applied"] | ✅ |
 
 ---
 
@@ -334,17 +336,17 @@ Update spec.md requirement statuses:
 
 ## Tips
 
-- **Validation is never prompted** — it always runs after the last task; do not ask the user whether to run it
-- **Spec-anchored, not just covered** — "there is an assertion" is not enough; the assertion must target the spec-defined outcome
-- **Sensor in scratch only** — never mutate the real tree; stash/worktree/temp copy, run, discard
-- **Surviving mutants are fix tasks** — do not mark the feature done if the sensor found weak tests
-- **P1 first** — MVP must work before P2/P3
-- **WHEN/THEN = Test** — Each criterion is a test case
-- **Be specific** — "Doesn't work" isn't helpful
-- **Recommend fixes** — Don't just report problems, create fix tasks
-- **Quality check is mandatory** — Not optional
-- **Infer severity** — Never ask the user "how bad is this?"
-- **Max 3 diagnostic iterations** — Prevents infinite investigation loops
-- **Update traceability** — Every verified requirement updates spec.md status
-- **Always write the report file** — `.specs/features/[feature]/validation.md` is the persisted evidence artifact
-- **Distill after writing** — turn grounded failures into lessons via `scripts/lessons.py` ([lessons.md](lessons.md)); clean PASS → no lesson
+- **Validation is never prompted** - it always runs after the last task; do not ask the user whether to run it
+- **Spec-anchored, not just covered** - "there is an assertion" is not enough; the assertion must target the spec-defined outcome
+- **Sensor in scratch only** - never mutate the real tree; stash/worktree/temp copy, run, discard
+- **Surviving mutants are fix tasks** - do not mark the feature done if the sensor found weak tests
+- **P1 first** - MVP must work before P2/P3
+- **WHEN/THEN = Test** - Each criterion is a test case
+- **Be specific** - "Doesn't work" isn't helpful
+- **Recommend fixes** - Don't just report problems, create fix tasks
+- **Quality check is mandatory** - Not optional
+- **Infer severity** - Never ask the user "how bad is this?"
+- **Max 3 diagnostic iterations** - Prevents infinite investigation loops
+- **Update traceability** - Every verified requirement updates spec.md status
+- **Always write the report file** - `.specs/features/[feature]/validation.md` is the persisted evidence artifact
+- **Distill after writing** - turn grounded failures into lessons via `scripts/lessons.py` ([lessons.md](lessons.md)); clean PASS → no lesson
