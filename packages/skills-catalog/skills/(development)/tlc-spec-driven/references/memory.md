@@ -2,18 +2,26 @@
 
 **File:** `.specs/STATE.md`
 
-A single file with two section-scoped parts. Each section has its own lifecycle; writes are always targeted — never whole-file overwrites.
+A single file with two section-scoped parts. Each section has its own lifecycle; writes are always targeted - never whole-file overwrites.
 
 ---
 
 ## Sections
 
-### `## Decisions` — append-only log
+### `## Decisions` - append-only log
 
 Records **project-level** decisions only: conventions, patterns, constraints, or cross-cutting technology choices that future features must follow or supersede.
 
 **Not project-level → stays in the feature's `design.md` Tech Decisions table.**  
 Heuristic: would a different feature need to know about this? If yes → project-level. If no → feature-local.
+
+**Record sparingly - the log stays useful only by staying small.** Even a project-level decision earns an `AD-NNN` entry only when all three hold:
+
+1. **Hard to reverse** - changing course later carries real cost.
+2. **Surprising without context** - a future reader will look at the result and wonder "why did they do it this way?"
+3. **The product of a real trade-off** - there were genuine alternatives and you chose one for specific reasons.
+
+If any one is missing, skip it: an easily-reversed choice you will just reverse; an unsurprising one nobody questions; a no-alternative choice records nothing beyond "we did the obvious thing." What typically qualifies: architectural shape, integration patterns between areas, technology choices that carry lock-in, boundary and ownership decisions, and deliberate deviations from the obvious path. A choice that clears all three but is only feature-local still stays in `design.md`.
 
 **Format** (one entry per decision):
 
@@ -21,7 +29,7 @@ Heuristic: would a different feature need to know about this? If yes → project
 ## Decisions
 
 ### AD-001
-- **Decision**: [what was decided — one sentence]
+- **Decision**: [what was decided - one sentence]
 - **Reason**: [why this option was chosen]
 - **Trade-off**: [what was given up]
 - **Scope**: [which features / packages / layers this governs]
@@ -29,11 +37,11 @@ Heuristic: would a different feature need to know about this? If yes → project
 - **Status**: active | superseded by AD-NNN
 ```
 
-**Supersession rule:** When a new decision replaces an old one, append a new `AD-NNN` entry and update the old entry's `status` field to `superseded by AD-NNN`. Never delete old entries — the history is the audit trail.
+**Supersession rule:** When a new decision replaces an old one, append a new `AD-NNN` entry and update the old entry's `status` field to `superseded by AD-NNN`. Never delete old entries - the history is the audit trail.
 
 ---
 
-### `## Handoff` — pause snapshot (~500 tokens, overwritten each pause)
+### `## Handoff` - pause snapshot (~500 tokens, overwritten each pause)
 
 Captures mid-task / in-flight state so work can resume without re-reading the full task history. This is the sole position tracker; it complements `tasks.md` by recording state that `tasks.md` does not capture.
 
@@ -43,10 +51,10 @@ Captures mid-task / in-flight state so work can resume without re-reading the fu
 ## Handoff
 
 - **Feature**: [feature name / .specs path]
-- **Phase / Task**: [e.g., Phase 2 / T4 — implement repository layer]
+- **Phase / Task**: [e.g., Phase 2 / T4 - implement repository layer]
 - **Completed**: [comma-separated task IDs or "none"]
-- **In-progress** (file:line): [e.g., `src/billing/subscription.service.ts:88` — mid-write]
-- **Next step**: [one sentence — exactly what to do next]
+- **In-progress** (file:line): [e.g., `src/billing/subscription.service.ts:88` - mid-write]
+- **Next step**: [one sentence - exactly what to do next]
 - **Blockers**: [none | description]
 - **Uncommitted files**: [list or "none"]
 - **Branch**: [git branch name]
@@ -76,11 +84,11 @@ If the file does not yet exist, create it with both section headers and empty bo
 
 | Trigger | Section | Operation |
 | ------- | ------- | --------- |
-| Design phase, Step 1 (Load Context) | `## Decisions` | **Read** — conform to active decisions or supersede |
-| Design phase, Tech Decisions step | `## Decisions` | **Append** — only for project-level decisions |
-| Pause work / end of session | `## Handoff` | **Replace** — overwrite Handoff section only |
-| Resume work / start of session | `## Handoff` | **Read** — load snapshot, propose next step |
-| Resume work / start of session | `## Decisions` | **Read** — re-confirm active constraints before designing |
+| Design phase, Step 1 (Load Context) | `## Decisions` | **Read** - conform to active decisions or supersede |
+| Design phase, Tech Decisions step | `## Decisions` | **Append** - only for project-level decisions |
+| Pause work / end of session | `## Handoff` | **Replace** - overwrite Handoff section only |
+| Resume work / start of session | `## Handoff` | **Read** - load snapshot, propose next step |
+| Resume work / start of session | `## Decisions` | **Read** - re-confirm active constraints before designing |
 
 ---
 
@@ -112,15 +120,15 @@ Both are silent data loss. The section-scoped write rule is the single correctne
 
 ### Resume
 
-1. Read `.specs/STATE.md` — both sections.
-2. Re-confirm active decisions from `## Decisions` — nothing superseded since last session?
-3. Read `## Handoff` — identify feature, phase/task, next step, blockers, uncommitted files, branch.
+1. Read `.specs/STATE.md` - both sections.
+2. Re-confirm active decisions from `## Decisions` - nothing superseded since last session?
+3. Read `## Handoff` - identify feature, phase/task, next step, blockers, uncommitted files, branch.
 4. Propose the next step to the user before writing any code.
 
 ---
 
 ## AD-NNN numbering
 
-- Numbers are sequential, project-scoped, and permanent — never reused.
+- Numbers are sequential, project-scoped, and permanent - never reused.
 - The counter starts at `AD-001`. Check existing entries before assigning the next number.
 - If `.specs/STATE.md` does not exist, the first decision is `AD-001`.
