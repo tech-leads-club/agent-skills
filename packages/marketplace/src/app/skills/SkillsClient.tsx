@@ -1,7 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CategoryFilter } from '../../components/CategoryFilter'
 import { Pagination } from '../../components/Pagination'
 import { SearchBar } from '../../components/SearchBar'
@@ -17,13 +16,31 @@ const FEATURED_SKILL_ID = 'tlc-spec-driven'
 
 type SortOption = 'featured' | 'name' | 'recent'
 
-export function SkillsClient({ data }: SkillsClientProps) {
-  const searchParams = useSearchParams()
+function isSortOption(value: string | null): value is SortOption {
+  return value === 'featured' || value === 'name' || value === 'recent'
+}
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category') ?? null)
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1)
-  const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'featured')
+export function SkillsClient({ data }: SkillsClientProps) {
+  // Defaults enable static HTML with page-1 cards (no useSearchParams / Suspense shell).
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortBy, setSortBy] = useState<SortOption>('featured')
+  const [urlReady, setUrlReady] = useState(false)
+  const skipPageReset = useRef(true)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const search = params.get('search') ?? ''
+    const category = params.get('category')
+    const page = Number(params.get('page')) || 1
+    const sortParam = params.get('sort')
+    setSearchQuery(search)
+    setSelectedCategory(category)
+    setCurrentPage(page)
+    setSortBy(isSortOption(sortParam) ? sortParam : 'featured')
+    setUrlReady(true)
+  }, [])
 
   const filteredSkills = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -54,10 +71,16 @@ export function SkillsClient({ data }: SkillsClientProps) {
   }, [data.skills, searchQuery, selectedCategory, sortBy])
 
   useEffect(() => {
+    if (!urlReady) return
+    if (skipPageReset.current) {
+      skipPageReset.current = false
+      return
+    }
     setCurrentPage(1)
-  }, [searchQuery, selectedCategory, sortBy])
+  }, [searchQuery, selectedCategory, sortBy, urlReady])
 
   useEffect(() => {
+    if (!urlReady) return
     const params = new URLSearchParams()
     if (searchQuery) params.set('search', searchQuery)
     if (selectedCategory) params.set('category', selectedCategory)
@@ -65,7 +88,7 @@ export function SkillsClient({ data }: SkillsClientProps) {
     if (sortBy !== 'featured') params.set('sort', sortBy)
     const qs = params.toString()
     window.history.replaceState(null, '', `/skills/${qs ? `?${qs}` : ''}`)
-  }, [searchQuery, selectedCategory, currentPage, sortBy])
+  }, [searchQuery, selectedCategory, currentPage, sortBy, urlReady])
 
   const totalPages = Math.ceil(filteredSkills.length / PAGE_SIZE)
   const startIndex = (currentPage - 1) * PAGE_SIZE

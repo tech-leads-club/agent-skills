@@ -16,7 +16,7 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
     <div className="skill-card-hover bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-          <Link href={`/skills/${skill.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <Link href={`/skills/${skill.id}/`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             {skill.name}
           </Link>
         </h3>
@@ -60,7 +60,7 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
 
       <div className="flex justify-end">
         <Link
-          href={`/skills/${skill.id}`}
+          href={`/skills/${skill.id}/`}
           className="text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
         >
           View Details
