@@ -55,6 +55,14 @@
           "dev": false
         }
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/marketplace"],
+      "options": {
+        "jestConfig": "packages/marketplace/jest.config.ts",
+        "passWithNoTests": false
+      }
     }
   }
 }
