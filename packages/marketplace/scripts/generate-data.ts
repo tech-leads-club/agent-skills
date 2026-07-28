@@ -4,6 +4,7 @@ import matter from 'gray-matter'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import { extractDisplayName } from '../src/lib/skill-display-name'
 import type { Category, MarketplaceData, Skill } from '../src/types'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -113,7 +114,7 @@ function generateMarketplaceData(): MarketplaceData {
 
     return {
       id: registrySkill.name,
-      name: registrySkill.name,
+      name: extractDisplayName(content, registrySkill.name),
       description: registrySkill.description,
       category: registrySkill.category,
       path: `skills/${registrySkill.path}/SKILL.md`,
