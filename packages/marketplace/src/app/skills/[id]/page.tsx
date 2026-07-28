@@ -9,6 +9,7 @@ import { CopyButton } from '../../../components/CopyButton'
 import { JsonLd } from '../../../components/JsonLd'
 import { ShareButton } from '../../../components/ShareButton'
 import marketplaceData from '../../../data/skills.json'
+import { demoteFirstMarkdownH1 } from '../../../lib/demote-markdown-h1'
 
 export function generateStaticParams() {
   return marketplaceData.skills.map((skill) => ({
@@ -124,11 +125,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            {/* Markdown content */}
+            {/* Markdown content — demote body H1s so page chrome owns the sole H1 */}
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
               <div className="markdown-body">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                  {skill.content}
+                  {demoteFirstMarkdownH1(skill.content)}
                 </ReactMarkdown>
               </div>
             </div>
