@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { JsonLd } from '../../components/JsonLd'
+import { SkillsCrawlIndex } from '../../components/SkillsCrawlIndex'
 import marketplaceData from '../../data/skills.json'
 import { SkillsClient } from './SkillsClient'
 
@@ -44,6 +45,7 @@ export default function SkillsPage() {
       >
         <SkillsClient data={marketplaceData} />
       </Suspense>
+      <SkillsCrawlIndex skills={marketplaceData.skills} />
     </>
   )
 }
