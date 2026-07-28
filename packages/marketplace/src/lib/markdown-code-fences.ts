@@ -45,10 +45,7 @@ export function mapLinesOutsideCodeFences(markdown: string, transform: (line: st
 }
 
 /** Return the first line outside a code fence that matches `predicate`, or undefined. */
-export function findLineOutsideCodeFences(
-  markdown: string,
-  predicate: (line: string) => boolean,
-): string | undefined {
+export function findLineOutsideCodeFences(markdown: string, predicate: (line: string) => boolean): string | undefined {
   for (const { line, insideFence } of iterateLines(markdown)) {
     if (!insideFence && predicate(line)) return line
   }
