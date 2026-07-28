@@ -4,6 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "module": "ESNext",
     "moduleResolution": "node16",
+    "jsx": "react-jsx",
     "allowImportingTsExtensions": false,
     "types": ["jest", "node"]
   },

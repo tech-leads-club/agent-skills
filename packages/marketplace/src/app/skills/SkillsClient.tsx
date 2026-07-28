@@ -5,6 +5,7 @@ import { CategoryFilter } from '../../components/CategoryFilter'
 import { Pagination } from '../../components/Pagination'
 import { SearchBar } from '../../components/SearchBar'
 import { SkillCard } from '../../components/SkillCard'
+import { filterAndSortSkills, paginateSkills, type SkillSortOption } from '../../lib/skills-filter'
 import type { MarketplaceData } from '../../types'
 
 interface SkillsClientProps {
@@ -12,11 +13,8 @@ interface SkillsClientProps {
 }
 
 const PAGE_SIZE = 12
-const FEATURED_SKILL_ID = 'tlc-spec-driven'
 
-type SortOption = 'featured' | 'name' | 'recent'
-
-function isSortOption(value: string | null): value is SortOption {
+function isSortOption(value: string | null): value is SkillSortOption {
   return value === 'featured' || value === 'name' || value === 'recent'
 }
 
@@ -25,7 +23,7 @@ export function SkillsClient({ data }: SkillsClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState<SortOption>('featured')
+  const [sortBy, setSortBy] = useState<SkillSortOption>('featured')
   const [urlReady, setUrlReady] = useState(false)
   const skipPageReset = useRef(true)
 
@@ -42,33 +40,16 @@ export function SkillsClient({ data }: SkillsClientProps) {
     setUrlReady(true)
   }, [])
 
-  const filteredSkills = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase()
-    let result = data.skills.filter((skill) => {
-      const matchesSearch =
-        normalizedQuery === '' ||
-        skill.name.toLowerCase().includes(normalizedQuery) ||
-        skill.description.toLowerCase().includes(normalizedQuery)
-
-      const matchesCategory = selectedCategory === null || skill.category === selectedCategory
-
-      return matchesSearch && matchesCategory
-    })
-
-    if (sortBy === 'featured') {
-      result = [...result].sort((a, b) => {
-        if (a.id === FEATURED_SKILL_ID) return -1
-        if (b.id === FEATURED_SKILL_ID) return 1
-        return a.name.localeCompare(b.name)
-      })
-    } else if (sortBy === 'recent') {
-      result = [...result].sort((a, b) => b.metadata.lastModified.localeCompare(a.metadata.lastModified))
-    } else {
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-    }
-
-    return result
-  }, [data.skills, searchQuery, selectedCategory, sortBy])
+  const filteredSkills = useMemo(
+    () =>
+      filterAndSortSkills({
+        skills: data.skills,
+        searchQuery,
+        selectedCategory,
+        sortBy,
+      }),
+    [data.skills, searchQuery, selectedCategory, sortBy],
+  )
 
   useEffect(() => {
     if (!urlReady) return
@@ -93,7 +74,7 @@ export function SkillsClient({ data }: SkillsClientProps) {
   const totalPages = Math.ceil(filteredSkills.length / PAGE_SIZE)
   const startIndex = (currentPage - 1) * PAGE_SIZE
   const endIndex = startIndex + PAGE_SIZE
-  const paginatedSkills = filteredSkills.slice(startIndex, endIndex)
+  const paginatedSkills = paginateSkills(filteredSkills, currentPage, PAGE_SIZE)
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -114,7 +95,7 @@ export function SkillsClient({ data }: SkillsClientProps) {
           <span className="text-[13px] text-gray-400 dark:text-gray-500 hidden sm:inline">Sort by:</span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            onChange={(e) => setSortBy(e.target.value as SkillSortOption)}
             className="px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] text-gray-600 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all"
           >
             <option value="featured">Featured</option>

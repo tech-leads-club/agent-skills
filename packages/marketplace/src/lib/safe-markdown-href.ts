@@ -18,3 +18,12 @@ export function isPathLikeHref(href: string): boolean {
   const trimmed = href.trim()
   return trimmed.includes('/') || /\.\w{1,10}$/.test(trimmed)
 }
+
+export type MarkdownLinkPresentation = 'anchor' | 'code' | 'span'
+
+/** Decide how SafeMarkdownAnchor should render a markdown href (pure; unit-tested). */
+export function resolveMarkdownLinkPresentation(href: string | undefined): MarkdownLinkPresentation {
+  if (isSafeMarkdownHref(href)) return 'anchor'
+  if (href && isPathLikeHref(href)) return 'code'
+  return 'span'
+}

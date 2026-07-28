@@ -1,4 +1,4 @@
-import { isPathLikeHref, isSafeMarkdownHref } from '../safe-markdown-href'
+import { isPathLikeHref, isSafeMarkdownHref, resolveMarkdownLinkPresentation } from '../safe-markdown-href'
 
 describe('isSafeMarkdownHref', () => {
   it('allows absolute http(s) links', () => {
@@ -36,5 +36,17 @@ describe('isPathLikeHref', () => {
   it('treats slash paths and file-like names as path-like', () => {
     expect(isPathLikeHref('references/implement.md')).toBe(true)
     expect(isPathLikeHref('CONTRIBUTING.md')).toBe(true)
+  })
+})
+
+describe('resolveMarkdownLinkPresentation', () => {
+  it('keeps absolute and hash hrefs as anchors', () => {
+    expect(resolveMarkdownLinkPresentation('https://github.com/x')).toBe('anchor')
+    expect(resolveMarkdownLinkPresentation('#section')).toBe('anchor')
+  })
+
+  it('renders relative package paths as code (visible label, no anchor)', () => {
+    expect(resolveMarkdownLinkPresentation('references/implement.md')).toBe('code')
+    expect(resolveMarkdownLinkPresentation('CONTRIBUTING.md')).toBe('code')
   })
 })

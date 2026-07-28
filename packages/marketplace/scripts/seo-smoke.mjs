@@ -38,6 +38,11 @@ function firstH1Text(html) {
   return match[1].replace(/<[^>]+>/g, '').trim()
 }
 
+function documentTitle(html) {
+  const match = html.match(/<title>([^<]*)<\/title>/i)
+  return match?.[1]?.trim() ?? null
+}
+
 /** Marketplace-relative hrefs that look like package markdown paths (not absolute https). */
 function badRelativeDocHrefs(html) {
   const hrefs = [...html.matchAll(/\bhref="([^"]+)"/gi)].map((m) => m[1])
@@ -47,6 +52,13 @@ function badRelativeDocHrefs(html) {
     if (/\.md(?:$|[?#])/i.test(href)) return true
     return false
   })
+}
+
+/** True when basename appears as visible text/code and not only inside an href attribute value. */
+function hasVisibleDocLabel(html, label) {
+  if (!html.includes(label)) return false
+  const withoutHrefs = html.replace(/\bhref="[^"]*"/gi, '')
+  return withoutHrefs.includes(label)
 }
 
 const data = JSON.parse(fs.readFileSync(SKILLS_JSON, 'utf8'))
@@ -62,6 +74,9 @@ if (hubLinks.size < skillCount) {
 if (hub.includes('Loading skills')) {
   fail('/skills/ still contains “Loading skills…”')
 }
+if (!hub.includes('All skills')) {
+  fail('/skills/ missing crawlable “All skills” index landmark')
+}
 
 const samplePage = read('skills/accessibility/index.html')
 const h1Count = countH1(samplePage)
@@ -70,14 +85,25 @@ const h1Text = firstH1Text(samplePage)
 if (h1Text !== accessibility.name) {
   fail(`accessibility H1 "${h1Text}" !== display name "${accessibility.name}"`)
 }
+const title = documentTitle(samplePage)
+if (!title || !title.includes(accessibility.name)) {
+  fail(`accessibility <title> "${title}" does not include display name "${accessibility.name}"`)
+}
 
 const tlcPage = read('skills/tlc-spec-driven/index.html')
 const bad = badRelativeDocHrefs(tlcPage)
 if (bad.length > 0) {
   fail(`tlc-spec-driven has unsafe relative doc hrefs: ${bad.slice(0, 8).join(', ')}`)
 }
+if (!hasVisibleDocLabel(tlcPage, 'implement.md')) {
+  fail('tlc-spec-driven missing visible neutralized label implement.md (text/code)')
+}
+const absoluteGithub = [...tlcPage.matchAll(/\bhref="(https:\/\/github\.com\/[^"]+)"/gi)].map((m) => m[1])
+if (absoluteGithub.length === 0) {
+  fail('tlc-spec-driven missing retained absolute GitHub <a href="https://…">')
+}
 
 console.log('SEO smoke OK')
 console.log(`  /skills/ unique skill links: ${hubLinks.size} (skills: ${skillCount})`)
-console.log(`  accessibility H1: ${h1Text}`)
-console.log('  tlc-spec-driven: zero relative .md / references/ hrefs')
+console.log(`  accessibility title/H1: ${title} / ${h1Text}`)
+console.log('  tlc-spec-driven: zero relative .md / references/ hrefs; labels + GitHub <a> retained')

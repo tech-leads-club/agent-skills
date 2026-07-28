@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
 
-import { isPathLikeHref, isSafeMarkdownHref } from '../lib/safe-markdown-href'
+import { resolveMarkdownLinkPresentation } from '../lib/safe-markdown-href'
 
 type Props = AnchorHTMLAttributes<HTMLAnchorElement> & {
   children?: ReactNode
@@ -14,8 +14,10 @@ type Props = AnchorHTMLAttributes<HTMLAnchorElement> & {
 export function SafeMarkdownAnchor({ href, children, ...rest }: Props) {
   // ReactMarkdown may pass a Hast `node` prop — do not forward it to the DOM.
   const { node: _node, ...anchorProps } = rest as Props & { node?: unknown }
+  const presentation = resolveMarkdownLinkPresentation(href)
+  const label = children ?? href
 
-  if (isSafeMarkdownHref(href)) {
+  if (presentation === 'anchor') {
     const external = href != null && /^https?:/i.test(href.trim())
     return (
       <a
@@ -28,8 +30,7 @@ export function SafeMarkdownAnchor({ href, children, ...rest }: Props) {
     )
   }
 
-  const label = children ?? href
-  if (href && isPathLikeHref(href)) {
+  if (presentation === 'code') {
     return <code>{label}</code>
   }
   return <span>{label}</span>
