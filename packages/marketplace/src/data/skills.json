@@ -1,22 +1,6 @@
 {
   "skills": [
     {
-      "id": "docs-writer",
-      "name": "`docs-writer` skill instructions",
-      "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
-      "category": "development",
-      "path": "skills/(development)/docs-writer/SKILL.md",
-      "content": "# `docs-writer` skill instructions\n\nAs an expert technical writer and editor, your goal is to produce and refine documentation that is accurate, clear, consistent, and easy for users to understand. You must adhere to the documentation contribution process outlined in `CONTRIBUTING.md`.\n\n## Step 1: Understand the goal and create a plan\n\n1. **Clarify the request:** Fully understand the user's documentation request. Identify the core feature, command, or concept that needs work.\n2. **Differentiate the task:** Determine if the request is primarily for **writing** new content or **editing** existing content. If the request is ambiguous (e.g., \"fix the docs\"), ask the user for clarification.\n3. **Formulate a plan:** Create a clear, step-by-step plan for the required changes.\n\n## Step 2: Investigate and gather information\n\n1. **Read the code:** Thoroughly examine the relevant codebase, primarily within the `packages/` directory, to ensure your work is backed by the implementation and to identify any gaps.\n2. **Identify files:** Locate the specific documentation files in the `docs/` directory that need to be modified. Always read the latest version of a file before you begin work.\n3. **Check for connections:** Consider related documentation. If you change a command's behavior, check for other pages that reference it. If you add a new page, check if `docs/sidebar.json` needs to be updated. Make sure all links are up to date.\n\n## Step 3: Write or edit the documentation\n\n1. **Follow the style guide:** Adhere to the rules in `references/style-guide.md`. Read this file to understand the project's documentation standards.\n2. Ensure the new documentation accurately reflects the features in the code.\n3. **Use `replace` and `write_file`:** Use file system tools to apply your planned changes. For small edits, `replace` is preferred. For new files or large rewrites, `write_file` is more appropriate.\n\n### Sub-step: Editing existing documentation (as clarified in Step 1)\n\n- **Gaps:** Identify areas where the documentation is incomplete or no longer reflects existing code.\n- **Tone:** Ensure the tone is active and engaging, not passive.\n- **Clarity:** Correct awkward wording, spelling, and grammar. Rephrase sentences to make them easier for users to understand.\n- **Consistency:** Check for consistent terminology and style across all edited documents.\n\n## Step 4: Verify and finalize\n\n1. **Review your work:** After making changes, re-read the files to ensure the documentation is well-formatted, and the content is correct based on existing code.\n2. **Link verification:** Verify the validity of all links in the new content. Verify the validity of existing links leading to the page with the new content or deleted content.\n3. **Offer to run npm format:** Once all changes are complete, offer to run the project's formatting script to ensure consistency by proposing the command: `npm run format`",
-      "metadata": {
-        "hasScripts": false,
-        "hasReferences": true,
-        "referenceFiles": [
-          "style-guide.md"
-        ],
-        "lastModified": "2026-02-26"
-      }
-    },
-    {
       "id": "accessibility",
       "name": "Accessibility (a11y)",
       "description": "Audit and improve web accessibility following WCAG 2.1 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\". Do NOT use for SEO (use seo), performance (use core-web-vitals), or comprehensive site audits covering multiple areas (use web-quality-audit).",
@@ -704,6 +688,22 @@
           "runtimes.md",
           "service-types.md",
           "troubleshooting-basics.md"
+        ],
+        "lastModified": "2026-02-26"
+      }
+    },
+    {
+      "id": "docs-writer",
+      "name": "docs-writer skill instructions",
+      "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
+      "category": "development",
+      "path": "skills/(development)/docs-writer/SKILL.md",
+      "content": "# `docs-writer` skill instructions\n\nAs an expert technical writer and editor, your goal is to produce and refine documentation that is accurate, clear, consistent, and easy for users to understand. You must adhere to the documentation contribution process outlined in `CONTRIBUTING.md`.\n\n## Step 1: Understand the goal and create a plan\n\n1. **Clarify the request:** Fully understand the user's documentation request. Identify the core feature, command, or concept that needs work.\n2. **Differentiate the task:** Determine if the request is primarily for **writing** new content or **editing** existing content. If the request is ambiguous (e.g., \"fix the docs\"), ask the user for clarification.\n3. **Formulate a plan:** Create a clear, step-by-step plan for the required changes.\n\n## Step 2: Investigate and gather information\n\n1. **Read the code:** Thoroughly examine the relevant codebase, primarily within the `packages/` directory, to ensure your work is backed by the implementation and to identify any gaps.\n2. **Identify files:** Locate the specific documentation files in the `docs/` directory that need to be modified. Always read the latest version of a file before you begin work.\n3. **Check for connections:** Consider related documentation. If you change a command's behavior, check for other pages that reference it. If you add a new page, check if `docs/sidebar.json` needs to be updated. Make sure all links are up to date.\n\n## Step 3: Write or edit the documentation\n\n1. **Follow the style guide:** Adhere to the rules in `references/style-guide.md`. Read this file to understand the project's documentation standards.\n2. Ensure the new documentation accurately reflects the features in the code.\n3. **Use `replace` and `write_file`:** Use file system tools to apply your planned changes. For small edits, `replace` is preferred. For new files or large rewrites, `write_file` is more appropriate.\n\n### Sub-step: Editing existing documentation (as clarified in Step 1)\n\n- **Gaps:** Identify areas where the documentation is incomplete or no longer reflects existing code.\n- **Tone:** Ensure the tone is active and engaging, not passive.\n- **Clarity:** Correct awkward wording, spelling, and grammar. Rephrase sentences to make them easier for users to understand.\n- **Consistency:** Check for consistent terminology and style across all edited documents.\n\n## Step 4: Verify and finalize\n\n1. **Review your work:** After making changes, re-read the files to ensure the documentation is well-formatted, and the content is correct based on existing code.\n2. **Link verification:** Verify the validity of all links in the new content. Verify the validity of existing links leading to the page with the new content or deleted content.\n3. **Offer to run npm format:** Once all changes are complete, offer to run the project's formatting script to ensure consistency by proposing the command: `npm run format`",
+      "metadata": {
+        "hasScripts": false,
+        "hasReferences": true,
+        "referenceFiles": [
+          "style-guide.md"
         ],
         "lastModified": "2026-02-26"
       }

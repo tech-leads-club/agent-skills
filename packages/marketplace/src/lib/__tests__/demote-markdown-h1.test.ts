@@ -20,4 +20,19 @@ describe('demoteFirstMarkdownH1', () => {
     const body = '## Keep\n\n### Also keep\n'
     expect(demoteFirstMarkdownH1(body)).toBe(body)
   })
+
+  it('does not touch `#` lines inside fenced code blocks', () => {
+    const body = '# Title\n\n```markdown\n# ADR-{NNN}: {Title}\n```\n'
+    expect(demoteFirstMarkdownH1(body)).toBe('## Title\n\n```markdown\n# ADR-{NNN}: {Title}\n```\n')
+  })
+
+  it('resumes demoting real H1s after a code fence closes', () => {
+    const body = '```sh\n# install deps\n```\n\n# Real Heading\n'
+    expect(demoteFirstMarkdownH1(body)).toBe('```sh\n# install deps\n```\n\n## Real Heading\n')
+  })
+
+  it('handles tilde fences and does not demote their `#` lines', () => {
+    const body = '~~~\n# not a heading\n~~~\n'
+    expect(demoteFirstMarkdownH1(body)).toBe(body)
+  })
 })
