@@ -1,4 +1,10 @@
-import { buildFileUri, getMimeType, getUnsafeStagingPaths, isSafeStagingPath } from '../core/staging'
+import {
+  buildDryRunPreview,
+  buildFileUri,
+  getMimeType,
+  getUnsafeStagingPaths,
+  isSafeStagingPath,
+} from '../core/staging'
 
 describe('isSafeStagingPath', () => {
   it('should accept normal reference paths', () => {
@@ -64,5 +70,26 @@ describe('buildFileUri', () => {
     expect(buildFileUri('C:\\Users\\me\\cache\\demo\\scripts\\a.mjs')).toBe(
       'file:///C%3A/Users/me/cache/demo/scripts/a.mjs',
     )
+  })
+})
+
+describe('buildDryRunPreview', () => {
+  it('should list the destination and every requested file', () => {
+    const preview = buildDryRunPreview('demo', '/cache/demo/abc123', ['scripts/run.mjs', 'references/guide.md'])
+
+    expect(preview).toContain('Dry run — nothing was written')
+    expect(preview).toContain('2 file(s) would be staged')
+    expect(preview).toContain('skill_dir: /cache/demo/abc123')
+    expect(preview).toContain('scripts/run.mjs')
+    expect(preview).toContain('references/guide.md')
+    expect(preview).toContain('Call again without dry_run')
+  })
+
+  // invariant: the preview is pure — it takes no filesystem handle, so it cannot write.
+  // prepare_skill_files returns it before fetching or staging anything.
+  it('should be a pure string builder', () => {
+    const before = buildDryRunPreview('demo', '/cache/demo/abc123', ['scripts/run.mjs'])
+    const after = buildDryRunPreview('demo', '/cache/demo/abc123', ['scripts/run.mjs'])
+    expect(after).toBe(before)
   })
 })

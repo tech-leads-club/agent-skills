@@ -6,7 +6,7 @@ import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
 import { fetchAndVerifySkillFiles } from '../integrity'
 import { type StagedFile, getSkillStagingDir, pruneSupersededRevisions, stageSkillFiles } from '../staging'
 import type { Indexes } from '../types'
-import { buildFileUri, getMimeType, getUnsafeStagingPaths } from './core/staging'
+import { buildDryRunPreview, buildFileUri, getMimeType, getUnsafeStagingPaths } from './core/staging'
 
 const TOOL_DESCRIPTION = `Step 3, for files the instructions tell you to RUN (typically scripts/). Writes them to the user's cache directory; contents never enter context.
 Input: skill_name + optional paths (default: every bundled file). Set dry_run to list what would be written without writing.
@@ -58,15 +58,9 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
       }
 
       // why: a write tool should be previewable without the client having to support elicitation.
-      // Returns the exact destinations, before any network fetch or filesystem write happens.
+      // Returns before any network fetch or filesystem write happens.
       if (args.dry_run === true) {
-        const skillDir = getSkillStagingDir(args.skill_name, skill.contentHash)
-        return [
-          `Dry run — nothing was written. ${requested.length} file(s) would be staged for '${args.skill_name}':`,
-          `skill_dir: ${skillDir}`,
-          ...requested.map((filePath) => `  ${filePath}`),
-          'Call again without dry_run to write them.',
-        ].join('\n')
+        return buildDryRunPreview(args.skill_name, getSkillStagingDir(args.skill_name, skill.contentHash), requested)
       }
 
       let verified: Map<string, string>

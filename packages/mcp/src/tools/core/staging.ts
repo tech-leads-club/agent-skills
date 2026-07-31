@@ -48,6 +48,21 @@ export function getMimeType(filePath: string): string {
 }
 
 /**
+ * Builds the dry-run preview for a staging request.
+ *
+ * invariant: pure by design — it has no filesystem access, so a preview cannot write. The tool
+ * returns this before it fetches or stages anything, which is what makes dry_run safe.
+ */
+export function buildDryRunPreview(skillName: string, skillDir: string, filePaths: string[]): string {
+  return [
+    `Dry run — nothing was written. ${filePaths.length} file(s) would be staged for '${skillName}':`,
+    `skill_dir: ${skillDir}`,
+    ...filePaths.map((filePath) => `  ${filePath}`),
+    'Call again without dry_run to write them.',
+  ].join('\n')
+}
+
+/**
  * Builds a `file://` URI for a staged file.
  * why: the MCP spec's canonical resource_link example is a file:// URI, so staged files are
  * advertised the same way instead of as a bespoke JSON path field.
