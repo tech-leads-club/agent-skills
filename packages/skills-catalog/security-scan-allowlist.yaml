@@ -102,6 +102,27 @@ entries:
   # Skills for code quality, accessibility, and web standards
   # ============================================================================
 
+  - skill: pr-review
+    code: W011
+    reason: >
+      Reading GitHub PR metadata, diffs, and review comments via `gh` is the core purpose
+      of this skill (same class of intentional third-party ingestion as gh-address-comments).
+      Ticket text from the project's configured tracker (Jira CLI/MCP, GitHub issues) is
+      likewise required for the Requirements subagent to score acceptance criteria.
+    allowedBy: felipefr
+    allowedAt: "2026-07-31"
+
+  - skill: pr-review
+    code: W012
+    reason: >
+      False positive on W012: the skill does not fetch arbitrary remote instruction URLs.
+      Track A only loads issue content from the project's already-configured tracker
+      (gh issues, Jira CLI/Atlassian MCP, or equivalent). Earlier curl/Jira REST examples
+      were documentation of that integration, not a supply-chain URL dependency — rewritten
+      to prefer CLI/MCP and env-scoped credentials without hardcoded hosts.
+    allowedBy: felipefr
+    allowedAt: "2026-07-31"
+
   - skill: web-accessibility
     code: W011
     reason: >
