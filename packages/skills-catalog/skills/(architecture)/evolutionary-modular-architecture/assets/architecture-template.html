@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!--
+  Architecture document TEMPLATE (generic, brand-neutral).
+  Usage: copy this file, keep the <style> and structure, replace the placeholder
+  content (search for "Replace" comments and {PLACEHOLDER} text). Number diagrams
+  sequentially as "Diagram N — ...". See references/architecture-doc.md.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Platform — Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bushido:#0F1727; --sand:#E1DCCC;
+  --coral:#F25461; --coral-strong:#C73B47; --coral-soft:#FDEAEC;
+  --mizu:#0171E4; --mizu-soft:#E6F0FB;
+  --bg:#F9F9F9; --bg-soft:#FAFAF9; --bg-code:#F4F4F2;
+  --border:#E8E8E6; --border-strong:#D8D8D6;
+  --text:#141414; --text-soft:#3D3D3D; --text-muted:#6A6A68;
+  --success:#2E7D4F; --success-soft:#E6F2EB;
+  --warn:#B6592A; --warn-soft:#FBEFE5;
+  --danger:#B03A3A; --danger-soft:#FBECEC;
+  --purple:#6B53A5; --purple-soft:#ECE7F5;
+  --sans:"Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --radius-sm:6px; --radius:10px; --radius-lg:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.dot{color:var(--coral)}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.dock{position:sticky;top:0;align-self:start;height:100vh;padding:28px 20px 28px 28px;background:var(--bushido);color:rgba(255,255,255,0.85);border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;scrollbar-width:thin}
+.dock::-webkit-scrollbar{width:6px}
+.dock::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:var(--coral);display:grid;place-items:center;flex-shrink:0}
+.brand .mark::after{content:"";width:12px;height:12px;background:#fff;border-radius:3px;transform:rotate(45deg)}
+.brand-text{display:flex;flex-direction:column;line-height:1.15}
+.brand-title{font-weight:700;font-size:14px;color:#fff}
+.brand-sub{color:rgba(255,255,255,0.55);font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700}
+.dock-section{font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.45);font-weight:700;margin:22px 0 8px;padding-left:4px}
+.dock-section:first-of-type{margin-top:0}
+.dock-nav{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1px}
+.dock-nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius-sm);font-size:13.5px;color:rgba(255,255,255,0.75);text-decoration:none;transition:background 0.12s ease,color 0.12s ease;line-height:1.35}
+.dock-nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+.dock-nav a.active{background:rgba(242,84,97,0.15);color:var(--coral);font-weight:700;position:relative}
+.dock-nav a.active::before{content:"";position:absolute;left:-28px;top:6px;bottom:6px;width:3px;background:var(--coral);border-radius:0 2px 2px 0}
+.dock-nav a .ico{width:16px;display:inline-flex;justify-content:center;color:rgba(255,255,255,0.5);font-size:12px}
+.dock-nav a.active .ico{color:var(--coral)}
+.dock-footer{margin-top:32px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);font-size:11.5px;color:rgba(255,255,255,0.5);line-height:1.55}
+.dock-footer code{font-family:var(--mono);font-size:10.5px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;color:rgba(255,255,255,0.8)}
+main{padding:56px 64px 96px;max-width:920px;margin:0 auto;width:100%}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);margin-bottom:14px;font-weight:500}
+h1{font-size:40px;letter-spacing:-0.025em;font-weight:900;margin:0 0 12px;line-height:1.1}
+.lead{font-size:17px;color:var(--text-soft);max-width:740px;margin:0 0 32px;line-height:1.55}
+.meta-row{display:flex;gap:22px;padding:14px 18px;background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:48px;font-size:13px;flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column}
+.meta-label{color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700}
+.meta-value{color:var(--text);font-weight:500;margin-top:2px}
+section{margin-bottom:64px;scroll-margin-top:32px}
+h2{font-size:26px;letter-spacing:-0.015em;font-weight:700;margin:0 0 6px;line-height:1.2;display:flex;align-items:center;gap:12px}
+h2 .h-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--coral-soft);color:var(--coral-strong);font-size:13px;font-weight:700;font-family:var(--mono)}
+h3{font-size:18px;font-weight:700;letter-spacing:-0.01em;margin:36px 0 8px}
+.section-sub{color:var(--text-muted);margin:0 0 24px;font-size:14px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:13px;background:var(--bg-code);padding:1.5px 6px;border-radius:4px;color:var(--text-soft);border:1px solid var(--border)}
+.toc-inline{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin:8px 0 36px}
+.toc-inline-title{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:700;margin-bottom:10px}
+.toc-inline ol{margin:0;padding-left:18px;columns:2;column-gap:24px}
+.toc-inline li{font-size:13.5px;margin:4px 0;break-inside:avoid}
+.toc-inline a{color:var(--text-soft);text-decoration:none;border-bottom:1px solid transparent}
+.toc-inline a:hover{color:var(--text);border-bottom-color:var(--border-strong)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:18px 0 8px}
+.card{border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;background:#fff;transition:border-color 0.15s ease}
+.card:hover{border-color:var(--border-strong)}
+.card-title{font-weight:700;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-title .tag{font-family:var(--mono);font-size:10.5px;background:var(--bg-code);border:1px solid var(--border);color:var(--text-muted);padding:1px 5px;border-radius:4px;font-weight:500}
+.card-body{font-size:13px;color:var(--text-soft);line-height:1.55}
+.diagram{margin:20px 0 8px;padding:20px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(#fff,#fff) padding-box,repeating-linear-gradient(0deg,transparent 0 23px,rgba(0,0,0,0.025) 23px 24px),repeating-linear-gradient(90deg,transparent 0 23px,rgba(0,0,0,0.025) 23px 24px);overflow-x:auto}
+.diagram svg{display:block;width:100%;height:auto;max-width:100%}
+.diagram-caption{font-size:12px;color:var(--text-muted);margin-top:10px;text-align:center;font-style:italic}
+.callout{border:1px solid var(--border);border-left:3px solid var(--coral);background:var(--coral-soft);border-radius:var(--radius);padding:14px 18px;margin:18px 0;font-size:13.5px;color:var(--text-soft);line-height:1.6}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout.danger{border-left-color:var(--danger);background:var(--danger-soft)}
+.callout.info{border-left-color:var(--mizu);background:var(--mizu-soft)}
+.callout.ok{border-left-color:var(--success);background:var(--success-soft)}
+.callout strong{color:var(--text)}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:500;border:1px solid var(--border);background:var(--bg-soft);color:var(--text-soft)}
+.badge.ok{background:var(--success-soft);color:var(--success);border-color:transparent}
+.badge.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.badge.info{background:var(--mizu-soft);color:var(--mizu);border-color:transparent}
+.badge.core{background:var(--coral-soft);color:var(--coral-strong);border-color:transparent}
+.badge.support{background:var(--mizu-soft);color:var(--mizu);border-color:transparent}
+.badge.generic{background:var(--bg-soft);color:var(--text-muted);border-color:var(--border-strong)}
+.stack-grid{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fff}
+.stack-row{display:contents}
+.stack-row > div{padding:10px 16px;border-top:1px solid var(--border);font-size:13px}
+.stack-row:first-child > div{border-top:none}
+.stack-key{background:var(--bg-soft);font-weight:700;color:var(--text);font-size:12.5px;text-transform:uppercase;letter-spacing:0.04em}
+.stack-val{color:var(--text-soft);font-family:var(--mono);font-size:12.5px;line-height:1.7}
+.stack-val .pill{display:inline-block;padding:1px 8px;background:var(--bg-code);border:1px solid var(--border);border-radius:999px;margin:2px 4px 2px 0;color:var(--text-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0 0;font-size:12px;color:var(--text-muted);justify-content:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}
+.principle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0 8px}
+.principle{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;background:#fff}
+.principle b{display:block;font-size:13px;margin-bottom:2px}
+.principle span{font-size:12px;color:var(--text-muted);line-height:1.5}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:920px){
+  .layout{grid-template-columns:1fr}
+  .dock{position:relative;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,0.08)}
+  main{padding:32px 24px 64px}
+  h1{font-size:30px}
+  .toc-inline ol{columns:1}
+  .two-col{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="dock">
+    <div class="brand">
+      <!-- Replace the mark/text with your project's brand (or keep generic). -->
+      <span class="mark" aria-hidden="true"></span>
+      <div class="brand-text">
+        <span class="brand-title">Platform Name</span>
+        <span class="brand-sub">Architecture</span>
+      </div>
+    </div>
+
+    <div class="dock-section">Overview</div>
+    <ul class="dock-nav">
+      <li><a href="#overview" class="active"><span class="ico">◆</span>What it is</a></li>
+      <li><a href="#domains"><span class="ico">◆</span>Domains (DDD)</a></li>
+      <li><a href="#principles"><span class="ico">◆</span>Principles</a></li>
+    </ul>
+
+    <div class="dock-section">Architecture</div>
+    <ul class="dock-nav">
+      <li><a href="#modular"><span class="ico">▤</span>Modular monolith</a></li>
+      <li><a href="#stack"><span class="ico">⚙</span>Stack</a></li>
+    </ul>
+
+    <div class="dock-footer">
+      Architecture document.<br/>
+      Modular monolith · DDD · <code>YYYY</code>
+    </div>
+  </aside>
+
+  <main>
+    <div class="breadcrumb">
+      docs › architecture › <strong style="color:var(--text)">platform-overview</strong>
+    </div>
+
+    <h1>Platform Name<span class="dot">.</span></h1>
+    <!-- Replace: one-paragraph description of what the platform is and its core stance. -->
+    <p class="lead">{One sentence on what the platform does} — designed as an <strong>evolutionary modular monolith</strong>: strong logical boundaries (DDD bounded contexts, flat-by-aggregate modules, an Anti-Corruption Layer around every external system) with physical boundaries kept evolutionary.</p>
+
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Pattern</span><span class="meta-value">Modular Monolith · DDD</span></div>
+      <div class="meta-item"><span class="meta-label">Monorepo</span><span class="meta-value">Nx — one deploy</span></div>
+      <div class="meta-item"><span class="meta-label">Frontend</span><span class="meta-value">React · Vite</span></div>
+      <div class="meta-item"><span class="meta-label">Backend</span><span class="meta-value">NestJS · Fastify</span></div>
+      <div class="meta-item"><span class="meta-label">Data</span><span class="meta-value">PostgreSQL + Valkey</span></div>
+    </div>
+
+    <div class="toc-inline">
+      <div class="toc-inline-title">Contents</div>
+      <ol>
+        <li><a href="#overview">What it is</a></li>
+        <li><a href="#domains">Domains (DDD)</a></li>
+        <li><a href="#principles">Principles</a></li>
+        <li><a href="#modular">Modular monolith</a></li>
+        <li><a href="#stack">Stack</a></li>
+      </ol>
+    </div>
+
+    <!-- ===================================================== -->
+    <section id="overview">
+      <h2><span class="h-num">1</span>What it is<span class="dot">.</span></h2>
+      <p class="section-sub">{One-line subtitle.}</p>
+      <!-- Replace the three cards with your platform's pillars. -->
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">Isolated domains <span class="tag">DDD</span></div>
+          <div class="card-body">Each capability is a bounded context; each module owns and is the sole writer of its tables.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">No lock-in <span class="tag">ACL</span></div>
+          <div class="card-body">Every external dependency lives behind an Anti-Corruption Layer. Swapping a vendor is swapping an adapter.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Resilience by default <span class="tag">Fail-safe</span></div>
+          <div class="card-body">Retries with backoff + jitter, circuit breakers, idempotency, transactional outbox.</div>
+        </div>
+      </div>
+      <div class="callout info"><strong>The one rule.</strong> Logical boundary (always strong) vs physical boundary (evolutionary). Start simple, evolve granularity only when justified.</div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="domains">
+      <h2><span class="h-num">2</span>Domains — DDD<span class="dot">.</span></h2>
+      <p class="section-sub">Subdomains classified as Core, Supporting, or Generic; everything external is reached only via the ACL.</p>
+
+      <!-- EXAMPLE DIAGRAM — context map. Replace the labels with your contexts. -->
+      <div class="diagram">
+        <svg viewBox="0 0 880 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Domain context map">
+          <rect x="20" y="34" width="840" height="104" rx="14" fill="#FDEAEC" stroke="#F25461" stroke-opacity="0.5"/>
+          <text x="40" y="58" font-family="Lato" font-size="11" font-weight="700" fill="#C73B47" letter-spacing="1.5">CORE DOMAIN</text>
+          <rect x="44" y="70" width="388" height="56" rx="9" fill="#fff" stroke="#F25461" stroke-width="1.3"/>
+          <text x="238" y="103" text-anchor="middle" font-family="Lato" font-size="13.5" font-weight="700" fill="#C73B47">Core Domain A</text>
+          <rect x="448" y="70" width="388" height="56" rx="9" fill="#fff" stroke="#F25461" stroke-width="1.3"/>
+          <text x="642" y="103" text-anchor="middle" font-family="Lato" font-size="13.5" font-weight="700" fill="#C73B47">Core Domain B</text>
+
+          <rect x="20" y="152" width="840" height="104" rx="14" fill="#E6F0FB" stroke="#0171E4" stroke-opacity="0.45"/>
+          <text x="40" y="176" font-family="Lato" font-size="11" font-weight="700" fill="#0A4F9E" letter-spacing="1.5">SUPPORTING</text>
+          <rect x="44" y="188" width="388" height="56" rx="9" fill="#fff" stroke="#0171E4" stroke-width="1.2"/>
+          <text x="238" y="221" text-anchor="middle" font-family="Lato" font-size="13" font-weight="700" fill="#0A4F9E">Supporting C</text>
+          <rect x="448" y="188" width="388" height="56" rx="9" fill="#fff" stroke="#0171E4" stroke-width="1.2"/>
+          <text x="642" y="221" text-anchor="middle" font-family="Lato" font-size="13" font-weight="700" fill="#0A4F9E">Supporting D</text>
+
+          <rect x="20" y="270" width="840" height="92" rx="14" fill="#F4F4F2" stroke="#D8D8D6"/>
+          <text x="40" y="294" font-family="Lato" font-size="11" font-weight="700" fill="#6A6A68" letter-spacing="1.5">GENERIC</text>
+          <rect x="44" y="306" width="388" height="44" rx="9" fill="#fff" stroke="#B8B8B6" stroke-width="1.2"/>
+          <text x="238" y="333" text-anchor="middle" font-family="Lato" font-size="13" font-weight="700" fill="#4A4A48">Generic E</text>
+          <rect x="448" y="306" width="388" height="44" rx="9" fill="#fff" stroke="#B8B8B6" stroke-width="1.2"/>
+          <text x="642" y="333" text-anchor="middle" font-family="Lato" font-size="13" font-weight="700" fill="#4A4A48">Generic F</text>
+
+          <line x1="40" y1="378" x2="840" y2="378" stroke="#C9B68A" stroke-width="1.4" stroke-dasharray="5 5"/>
+          <rect x="338" y="367" width="204" height="22" rx="11" fill="#FBEFE5" stroke="#C9B68A"/>
+          <text x="440" y="382" text-anchor="middle" font-family="Lato" font-size="11" font-weight="700" fill="#7A6A44">↑ Anti-Corruption Layer ↑</text>
+
+          <rect x="20" y="398" width="840" height="100" rx="14" fill="#FBEFE5" stroke="#C9B68A" stroke-opacity="0.6"/>
+          <text x="40" y="422" font-family="Lato" font-size="11" font-weight="700" fill="#7A6A44" letter-spacing="1.5">EXTERNAL — via Ports &amp; Adapters</text>
+          <g font-family="Lato" font-size="12" font-weight="700" fill="#141414">
+            <rect x="44" y="436" width="186" height="48" rx="8" fill="#fff" stroke="#C9B68A"/><text x="137" y="465" text-anchor="middle">External Service 1</text>
+            <rect x="242" y="436" width="186" height="48" rx="8" fill="#fff" stroke="#C9B68A"/><text x="335" y="465" text-anchor="middle">External Service 2</text>
+            <rect x="440" y="436" width="186" height="48" rx="8" fill="#fff" stroke="#C9B68A"/><text x="533" y="465" text-anchor="middle">External Service 3</text>
+            <rect x="638" y="436" width="198" height="48" rx="8" fill="#fff" stroke="#C9B68A"/><text x="737" y="465" text-anchor="middle">External Service 4</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#F25461"></i>Core</span>
+          <span><i style="background:#0171E4"></i>Supporting</span>
+          <span><i style="background:#B8B8B6"></i>Generic</span>
+          <span><i style="background:#C9B68A"></i>External (via ACL)</span>
+        </div>
+        <div class="diagram-caption">Diagram 1 — Domain context map (example). Replace the labels with your bounded contexts.</div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="principles">
+      <h2><span class="h-num">3</span>Principles<span class="dot">.</span></h2>
+      <p class="section-sub">Logical boundaries are non-negotiable; physical boundaries are evolutionary.</p>
+      <div class="principle-grid">
+        <div class="principle"><b>Boundaries</b><span>Public facade only; no internal leaks.</span></div>
+        <div class="principle"><b>State isolation</b><span>Each module owns its tables.</span></div>
+        <div class="principle"><b>Explicit communication</b><span>Contracts and events, not direct calls.</span></div>
+        <div class="principle"><b>Replaceability</b><span>External deps behind ports.</span></div>
+        <div class="principle"><b>Co-location</b><span>1 concept = 1 folder; suffixes &gt; folders.</span></div>
+        <div class="principle"><b>Fail independence</b><span>Breakers, timeouts, fallbacks.</span></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="modular">
+      <h2><span class="h-num">4</span>Modular monolith<span class="dot">.</span></h2>
+      <p class="section-sub">A monorepo: apps bootstrap, libs hold the logic. One deploy today.</p>
+
+      <!-- EXAMPLE DIAGRAM — monorepo layers. -->
+      <div class="diagram">
+        <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Monorepo layers">
+          <defs>
+            <marker id="t-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#3D3D3D"/></marker>
+          </defs>
+          <rect x="20" y="30" width="840" height="74" rx="14" fill="#E6F0FB" stroke="#0171E4" stroke-opacity="0.5"/>
+          <text x="40" y="54" font-family="Lato" font-size="11" font-weight="700" fill="#0A4F9E" letter-spacing="1.5">apps/ — BOOTSTRAP</text>
+          <rect x="44" y="64" width="792" height="32" rx="8" fill="#fff" stroke="#0171E4" stroke-width="1.2"/>
+          <text x="440" y="85" text-anchor="middle" font-family="Lato" font-size="12.5" font-weight="700" fill="#0A4F9E">one deploy · composes the modules</text>
+          <g stroke="#3D3D3D" stroke-width="1.3" fill="none" marker-end="url(#t-arr)"><path d="M440 104 L440 132"/></g>
+
+          <rect x="20" y="140" width="840" height="92" rx="14" fill="#ECE7F5" stroke="#6B53A5" stroke-opacity="0.45"/>
+          <text x="40" y="164" font-family="Lato" font-size="11" font-weight="700" fill="#3A2A6A" letter-spacing="1.5">libs/ — BOUNDED CONTEXTS</text>
+          <g font-family="Lato" font-size="12.5" font-weight="700" fill="#3A2A6A">
+            <rect x="44" y="176" width="186" height="44" rx="8" fill="#fff" stroke="#6B53A5" stroke-width="1.2"/><text x="137" y="203" text-anchor="middle">domain-a</text>
+            <rect x="242" y="176" width="186" height="44" rx="8" fill="#fff" stroke="#6B53A5" stroke-width="1.2"/><text x="335" y="203" text-anchor="middle">domain-b</text>
+            <rect x="440" y="176" width="186" height="44" rx="8" fill="#fff" stroke="#6B53A5" stroke-width="1.2"/><text x="533" y="203" text-anchor="middle">supporting-c</text>
+            <rect x="638" y="176" width="198" height="44" rx="8" fill="#fff" stroke="#6B53A5" stroke-width="1.2"/><text x="737" y="203" text-anchor="middle">identity</text>
+          </g>
+          <g stroke="#3D3D3D" stroke-width="1.3" fill="none" marker-end="url(#t-arr)"><path d="M440 232 L440 260"/></g>
+
+          <rect x="20" y="268" width="840" height="74" rx="14" fill="#E6F2EB" stroke="#2E7D4F" stroke-opacity="0.45"/>
+          <text x="40" y="292" font-family="Lato" font-size="11" font-weight="700" fill="#1A5A32" letter-spacing="1.5">libs/shared/ — CROSS-CUTTING</text>
+          <g font-family="Lato" font-size="12" font-weight="700" fill="#1A5A32">
+            <rect x="44" y="302" width="186" height="32" rx="8" fill="#fff" stroke="#2E7D4F" stroke-width="1.2"/><text x="137" y="323" text-anchor="middle">domain kernel</text>
+            <rect x="242" y="302" width="186" height="32" rx="8" fill="#fff" stroke="#2E7D4F" stroke-width="1.2"/><text x="335" y="323" text-anchor="middle">contracts</text>
+            <rect x="440" y="302" width="186" height="32" rx="8" fill="#fff" stroke="#2E7D4F" stroke-width="1.2"/><text x="533" y="323" text-anchor="middle">infrastructure</text>
+            <rect x="638" y="302" width="198" height="32" rx="8" fill="#fff" stroke="#2E7D4F" stroke-width="1.2"/><text x="737" y="323" text-anchor="middle">resilience</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#0171E4"></i>apps</span>
+          <span><i style="background:#6B53A5"></i>contexts</span>
+          <span><i style="background:#2E7D4F"></i>shared</span>
+        </div>
+        <div class="diagram-caption">Diagram 2 — Monorepo layers (example). Apps orchestrate; logic lives in libs; contexts depend only on shared.</div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="stack">
+      <h2><span class="h-num">5</span>Stack<span class="dot">.</span></h2>
+      <p class="section-sub">Replace the pills with your actual choices.</p>
+      <div class="stack-grid">
+        <div class="stack-row"><div class="stack-key">Frontend</div><div class="stack-val"><span class="pill">React</span><span class="pill">Vite</span><span class="pill">TanStack</span></div></div>
+        <div class="stack-row"><div class="stack-key">Backend</div><div class="stack-val"><span class="pill">NestJS</span><span class="pill">Fastify</span><span class="pill">Prisma</span></div></div>
+        <div class="stack-row"><div class="stack-key">Data</div><div class="stack-val"><span class="pill">PostgreSQL</span><span class="pill">Valkey</span></div></div>
+        <div class="stack-row"><div class="stack-key">Patterns</div><div class="stack-val"><span class="pill">DDD</span><span class="pill">Flat-by-aggregate</span><span class="pill">Ports &amp; Adapters</span><span class="pill">Outbox</span></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.dock-nav a');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  function onScroll() {
+    const y = window.scrollY + 100;
+    let current = sections[0];
+    for (const s of sections) { if (s.offsetTop <= y) current = s; }
+    if (!current) return;
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+</body>
+</html>
