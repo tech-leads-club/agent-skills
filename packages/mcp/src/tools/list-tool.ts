@@ -5,9 +5,8 @@ import type { Indexes } from '../types'
 import { buildListSkillsResponse } from './core/list'
 
 const TOOL_DESCRIPTION =
-  'Browse all available skills grouped by category.\n' +
-  'When: User explicitly asks to see/browse/list all skills (e.g. "what skills are available?", "show me all skills").\n' +
-  'Do NOT call proactively during normal task resolution — use search_skills instead.'
+  'Browse the whole catalog, grouped by category.\n' +
+  'Only when the user explicitly asks to see every skill. To resolve a task, use search_skills.'
 
 export const ListSkillsParamsSchema = z.object({
   explicit_request: z.literal(true),

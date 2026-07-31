@@ -8,12 +8,10 @@ import { getSkillStagingDir, stageSkillFiles } from '../staging'
 import type { Indexes } from '../types'
 import { buildFileUri, getMimeType, getUnsafeStagingPaths } from './core/staging'
 
-const TOOL_DESCRIPTION = `Step 3 of 3 (alternative to fetch_skill_files). Writes a skill's files to disk so you can RUN them, without loading their contents into context.
-When: The skill's instructions tell you to execute something — e.g. "node $SKILL_DIR/scripts/render.mjs" or "python <path-to-skill>/scripts/check.py".
-Input: skill_name + optional file_paths (defaults to every scripts/, references/ and assets/ file the skill has).
-Returns: The absolute skill_dir to use as $SKILL_DIR, plus one resource_link per staged file. File contents are NOT returned — read them with your own file tools only if you actually need to inspect the code.
-Then: Run the command from the skill's instructions with $SKILL_DIR set to the returned skill_dir.
-Lifetime: Files persist on disk under the user's cache directory and are overwritten on the next call. Every file is verified against the registry checksum before being written.`
+const TOOL_DESCRIPTION = `Step 3, for files the instructions tell you to RUN (typically scripts/). Writes them to the user's cache directory; contents never enter context.
+Input: skill_name + optional paths (default: every bundled file). Set dry_run to list what would be written without writing.
+Returns: skill_dir to export as $SKILL_DIR, plus a file:// link per file. Files are checksum-verified before writing and replaced on the next call.
+Then: run the skill's command with SKILL_DIR set. To READ a file instead, use fetch_skill_files.`
 
 export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes): void {
   server.addTool({
@@ -22,6 +20,7 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
     parameters: z.object({
       skill_name: z.string(),
       file_paths: z.array(z.string()).min(1).max(20).optional(),
+      dry_run: z.boolean().optional(),
     }),
     // why: this is the one tool that writes to disk, so it must not claim readOnlyHint.
     // idempotent because staging the same verified content twice yields the same files.
@@ -53,6 +52,18 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
         throw new UserError(
           `Refusing to stage unsafe paths: [${unsafe.join(', ')}]. Only scripts/, references/ and assets/ files are staged.`,
         )
+      }
+
+      // why: a write tool should be previewable without the client having to support elicitation.
+      // Returns the exact destinations, before any network fetch or filesystem write happens.
+      if (args.dry_run === true) {
+        const skillDir = getSkillStagingDir(args.skill_name)
+        return [
+          `Dry run — nothing was written. ${requested.length} file(s) would be staged for '${args.skill_name}':`,
+          `skill_dir: ${skillDir}`,
+          ...requested.map((filePath) => `  ${filePath}`),
+          'Call again without dry_run to write them.',
+        ].join('\n')
       }
 
       let verified: Map<string, string>

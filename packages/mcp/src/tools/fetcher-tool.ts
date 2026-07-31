@@ -7,11 +7,10 @@ import { fetchAndVerifySkillFiles } from '../integrity'
 import type { Indexes } from '../types'
 import { buildReferenceFilesOutput, getInvalidReferencePaths } from './core/fetcher'
 
-const TOOL_DESCRIPTION = `Step 3 of 3 (optional). Fetch reference files that a skill's instructions told you to load.
-Input: skill_name + up to 5 file_paths from the reference list returned by read_skill.
-Returns: The content of each requested file, separated by --- delimiters.
-Constraints: Only paths from read_skill's reference list are valid — never guess or construct paths. Make multiple calls if you need more than 5 files.
-Tip: Request only the files you actually need — large files are truncated to keep the response within budget, and the response tells you what was left out.`
+const TOOL_DESCRIPTION = `Step 3, for files the instructions tell you to READ (typically references/). Returns their text.
+Input: skill_name + up to 5 paths from read_skill's list. Never invent a path.
+Oversized responses are truncated and name what was left out — ask for fewer paths.
+For files the instructions tell you to RUN, use prepare_skill_files instead.`
 
 export function registerFetcherTool(server: FastMCP, getIndexes: () => Indexes): void {
   server.addTool({

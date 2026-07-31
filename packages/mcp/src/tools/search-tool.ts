@@ -4,10 +4,10 @@ import { z } from 'zod'
 import type { Indexes } from '../types'
 import { buildSearchSkillsResponse } from './core/search'
 
-const TOOL_DESCRIPTION = `Step 1 of 3. ALWAYS call this first — before answering — whenever the user asks for help with a task, to check if a specialized skill applies. Discovers skills by intent.
-Input: A concise intent phrase in English (translate the user's request to English keywords if needed — the catalog is indexed in English), e.g. "react component testing" or "aws lambda deployment".
-Returns: Up to 5 skills ranked by relevance (name, usage_hint, category, score 0-100, match_quality). usage_hint is a short summary; full instructions come from read_skill.
-Then: Pick the best match and call read_skill with its name.`
+const TOOL_DESCRIPTION = `Step 1 of 3. Call before answering any task request, to check whether a skill applies.
+Input: an intent phrase in English — the index is English, so translate if needed. E.g. "react component testing".
+Returns: up to 5 matches with usage_hint and score; empty when no skill fits.
+Then: call read_skill with the best name.`
 
 export const SearchSkillsOutputSchema = z.object({
   results: z.array(

@@ -8,12 +8,9 @@ import type { Indexes } from '../types'
 import { buildReadSkillOutput, getMainSkillFile, getReferenceFiles, stripFrontmatter } from './core/skill'
 
 const TOOL_DESCRIPTION =
-  'Step 2 of 3. Retrieves a skill by name and returns its full instructions.\n' +
-  'When to call: (a) After search_skills, using the skill name from results. ' +
-  '(b) Directly, if the user explicitly requests a skill by name (e.g. "use the codenavi skill").\n' +
-  'Input: The exact skill name (kebab-case, e.g. "react-composition-patterns").\n' +
-  "Returns: [0] The skill's main instructions (SKILL.md). [1] A list of available reference file paths (scripts/, references/, assets/).\n" +
-  'Then: Apply the skill instructions. Only call fetch_skill_files if the instructions reference specific files you need.'
+  "Step 2 of 3. Returns a skill's instructions plus the list of files it bundles.\n" +
+  'Input: the exact name from search_skills, or one the user named directly.\n' +
+  'Then: apply the instructions. Only fetch a bundled file if they tell you to.'
 
 export function registerSkillTool(server: FastMCP, getIndexes: () => Indexes): void {
   server.addTool({
