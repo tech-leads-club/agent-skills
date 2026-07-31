@@ -16,5 +16,5 @@ export const MAX_REFERENCE_FILES_DISPLAY = 50
 /** Directory where prepare_skill_files materializes verified skill files for execution. */
 export const STAGING_DIR_NAME = 'agent-skills-mcp'
 
-/** How long a staged skill directory is considered fresh before it is rewritten. */
-export const STAGING_TTL_MS = 24 * 60 * 60 * 1000
+/** Chars of contentHash used to name a skill's revision directory. */
+export const STAGING_REVISION_LENGTH = 12

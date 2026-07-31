@@ -108,8 +108,9 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 > **Returns:** The absolute `skill_dir` to use as `$SKILL_DIR`, plus one `resource_link` per staged file — **not** the file contents.
 > **Then:** Run the skill's command with `SKILL_DIR` set to the returned path.
 
-- **The only tool that writes to disk** — declared as `readOnlyHint: false`, `idempotentHint: true`, `destructiveHint: false`
-- Files are written under `~/.cache/agent-skills-mcp/<skill>/` (override with `SKILLS_STAGING_DIR`), mode `0600`, **without** the execute bit — running staged code takes a deliberate act (invoking an interpreter), never an accidental one
+- **The only tool that writes to disk** — declared as `readOnlyHint: false`, `destructiveHint: false`, `idempotentHint: true`. Both hints are properties of the implementation, not promises: the staging directory is keyed on the skill's `contentHash` (`<skill>/<revision>/`), so a new revision lands **beside** the old one rather than replacing it, and a file already on disk with identical bytes is left untouched — which is what makes "additive" and "idempotent" literally true rather than arguable
+- `dry_run` returns the destination and the exact file list **before** any network fetch or write, so the call is previewable without depending on client elicitation support
+- Files are written under `~/.cache/agent-skills-mcp/` (override with `SKILLS_STAGING_DIR`), mode `0600`, **without** the execute bit — running staged code takes a deliberate act (invoking an interpreter), never an accidental one
 - **Every file is checksum-verified before being written**, so nothing unverified reaches the filesystem
 - Paths are validated twice against traversal: once on the registry-supplied path list, then again after resolution, because `files[]` is remote input served by the CDN
 - Uses `resource_link` with a `file://` URI — the spec's canonical shape for referencing a file without inlining it
