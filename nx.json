@@ -37,15 +37,21 @@
     "groups": {
       "cli": {
         "projects": ["@tech-leads-club/agent-skills"],
-        "releaseTagPattern": "v{version}"
+        "releaseTag": {
+          "pattern": "v{version}"
+        }
       },
       "skills-catalog": {
         "projects": ["@tech-leads-club/skills-catalog"],
-        "releaseTagPattern": "skills-catalog-v{version}"
+        "releaseTag": {
+          "pattern": "skills-catalog-v{version}"
+        }
       },
       "mcp": {
         "projects": ["@tech-leads-club/agent-skills-mcp"],
-        "releaseTagPattern": "mcp-v{version}"
+        "releaseTag": {
+          "pattern": "mcp-v{version}"
+        }
       }
     },
     "git": {
@@ -69,7 +75,12 @@
         "refactor": {
           "semverBump": "patch"
         },
-        "chore": { "semverBump": "patch", "changelog": { "hidden": true } },
+        "chore": {
+          "semverBump": "patch",
+          "changelog": {
+            "hidden": true
+          }
+        },
         "test": false,
         "style": false,
         "build": false,

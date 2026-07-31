@@ -56,3 +56,9 @@ out
 
 # Specs
 .specs
+
+# Nx local artifacts
+.nx/cache
+.nx/polygraph
+.nx/self-healing
+.nx/migrate-runs
