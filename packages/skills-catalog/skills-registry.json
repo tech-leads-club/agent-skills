@@ -701,6 +701,28 @@
       "contentHash": "ac3c94d9910a75aa6a61f7866507d16a3c646ff17e86b79667d1a19c6fa6c659"
     },
     {
+      "name": "evolutionary-modular-architecture",
+      "description": "Guides design and implementation of evolutionary modular-monolith platforms with DDD (strategic + tactical), flat-by-aggregate organization, an Anti-Corruption Layer for vendor independence, a transactional outbox for events, smart resilience (backoff with jitter, circuit breakers, idempotency), and a polished architecture HTML document with elegant SVG diagrams. Use when designing a platform or backend, defining bounded contexts, organizing modules and folders, choosing monolith vs microservices, decoupling from an external service (ERP, storage, AI), making calls resilient, adding real-time push, picking a 2026 TypeScript stack (Nx, NestJS, React), or producing an architecture document or diagram. Also triggers on 'modular monolith', 'bounded contexts', 'flat-by-aggregate', 'ports and adapters', 'architecture diagram'. Do NOT use for simple CRUD, NestJS-only deep implementation (use nestjs-modular-monolith), or pure domain-model review (use tactical-ddd).",
+      "category": "architecture",
+      "path": "(architecture)/evolutionary-modular-architecture",
+      "files": [
+        "SKILL.md",
+        "assets/architecture-template.html",
+        "references/acl-and-communication.md",
+        "references/architecture-doc.md",
+        "references/ddd.md",
+        "references/flat-by-aggregate.md",
+        "references/principles.md",
+        "references/resilience.md",
+        "references/stack-2026.md",
+        "scripts/validate-boundaries.mjs",
+        "scripts/validate-structure.mjs"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "98a300f20d76cf23dee8719dd910291a8013dd27770c6cdb7473dd595cc8a205"
+    },
+    {
       "name": "excalidraw-studio",
       "description": "Generate Excalidraw diagrams from natural language descriptions. Outputs .excalidraw JSON files openable in Excalidraw. Use when asked to \"create a diagram\", \"make a flowchart\", \"visualize a process\", \"draw a system architecture\", \"create a mind map\", \"generate an Excalidraw file\", \"draw an ER diagram\", \"create a sequence diagram\", or \"make a class diagram\". Supports flowcharts, relationship diagrams, mind maps, architecture, DFD, swimlane, class, sequence, and ER diagrams. Can use icon libraries (AWS, GCP, etc.) when set up. Do NOT use for code architecture analysis (use the architecture skills), Mermaid diagram rendering (use mermaid-studio), or non-visual documentation (use docs-writer).",
       "category": "tooling",
@@ -983,7 +1005,7 @@
     },
     {
       "name": "nestjs-modular-monolith",
-      "description": "Specialist in designing and implementing scalable modular monolith architectures using NestJS with DDD, Clean Architecture, and CQRS patterns. Use when building modular monolith backends, designing bounded contexts, creating domain modules, implementing event-driven module communication, or when user mentions \"modular monolith\", \"bounded contexts\", \"module boundaries\", \"DDD\", \"CQRS\", \"clean architecture NestJS\", or \"monolith to microservices\". Do NOT use for simple CRUD APIs, frontend work, or general NestJS questions without architectural context.",
+      "description": "Specialist in designing and implementing scalable modular monolith architectures using NestJS with DDD, Clean Architecture, and CQRS patterns. Use when building modular monolith backends, designing bounded contexts, creating domain modules, implementing event-driven module communication, or when user mentions \"modular monolith\", \"bounded contexts\", \"module boundaries\", \"DDD\", \"CQRS\", \"clean architecture NestJS\", or \"monolith to microservices\". Do NOT use for simple CRUD APIs, frontend work, general NestJS questions without architectural context, or stack-agnostic evolutionary modular monolith design (use evolutionary-modular-architecture).",
       "category": "development",
       "path": "(development)/nestjs-modular-monolith",
       "files": [
@@ -998,7 +1020,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
-      "contentHash": "0bf9fee4b6a151866c38204557b13452feefb315b7d982a36c79125bcc3d076a"
+      "contentHash": "a4e6b084d0cb6ed7a06abc6786cea67292440c5b7e63ed33baed9ecb7525bbeb"
     },
     {
       "name": "netlify-deploy",
@@ -1015,6 +1037,18 @@
       "author": "github.com/openai/skills",
       "version": "1.0.0",
       "contentHash": "a85452537b4a35077d259ed06661d16fb026d252e4b952b2fe82f2a006f39a15"
+    },
+    {
+      "name": "not-your-babysitter",
+      "description": "Autonomous senior-operator mode for AI agents that resolve tasks end to end without babysitting and never create new problems. The agent verifies every claim against real evidence (web search dated to the current month and year, the codebase, and available tools, MCPs, and CLIs); it never guesses, never fakes confidence, and never claims something is done without proof. It stays silent and keeps working, interrupting the user only on three stops, namely a destructive or irreversible action, a dead-end with no evidence after exhausting sources, or genuine ambiguity that changes the outcome. Output is short, literal, and human. Use when the user says \"not-your-babysitter\", \"nanny mode\", \"work autonomously\", \"stop babysitting\", or \"no hand-holding\", or wants an agent that solves problems on its own, especially hands-on engineering and operational tasks. Do not use when the user explicitly wants a tutorial, a verbose walkthrough, or open-ended brainstorming.",
+      "category": "development",
+      "path": "(development)/not-your-babysitter",
+      "files": [
+        "SKILL.md"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "bba71735a9fb5ac0154a38d7a8c817b16f2a61ed1a8e1d04ce46673c775effab"
     },
     {
       "name": "nx-ci-monitor",
@@ -1538,7 +1572,7 @@
     },
     {
       "name": "the-fool",
-      "description": "Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing. Do NOT use for building plans, making decisions, or generating solutions — this skill only challenges and critiques.",
+      "description": "Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing. Do NOT use for building plans, making decisions, or generating solutions — this skill only challenges and critiques. For a multi-agent panel that challenges and then commits to a verdict, use the-jury.",
       "category": "decision-making",
       "path": "(decision-making)/the-fool",
       "files": [
@@ -1553,7 +1587,22 @@
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
-      "contentHash": "b761f983e21e00173ac42760f478095a3e8c733862c20d9f711d10d962f407cc"
+      "contentHash": "4468f89ea05bfdea7a9346bebae5358bcf80ff4a51e6f59195b7312186fe0718"
+    },
+    {
+      "name": "the-jury",
+      "description": "Use when a question, decision, plan, tradeoff, or claim needs a rigorous verdict and one perspective is not enough. Spawns a panel of 3 to 5 subagent jurors that form independent blind opinions, deliberate anonymously under an anti-anchoring and anti-sycophancy protocol, and return one committed verdict with confidence, preserved dissent, and a concrete next action. Domain-agnostic across engineering, architecture, data, product, hiring, strategy, vendor choice, build-vs-buy, and research design. Trigger phrases include \"convene a jury\", \"have agents debate and decide\", \"get a panel to decide\", \"multi-agent decision\", \"stress-test this and decide\", \"monte um juri\", \"tribunal de agentes\", \"painel para decidir\". Do NOT use to only critique without deciding (use the-fool for that), to build a plan or write the solution itself, or for simple factual lookups.",
+      "category": "decision-making",
+      "path": "(decision-making)/the-jury",
+      "files": [
+        "SKILL.md",
+        "references/deliberation-craft.md",
+        "references/juror-archetypes.md",
+        "scripts/tally.py"
+      ],
+      "author": "Felipe Rodrigues - github.com/felipfr",
+      "version": "1.0.0",
+      "contentHash": "d9e8d39cd6e4849526d87d8a5c6b55674588534ca4e8f3f4a8c149055ed39097"
     },
     {
       "name": "tlc-generative-engine-optimization",
