@@ -135,7 +135,11 @@ def main():
         print(json.dumps(EXAMPLE, indent=2))
         return 0
 
-    raw = open(args.input).read() if args.input else sys.stdin.read()
+    if args.input:
+        with open(args.input, encoding='utf-8') as f:
+            raw = f.read()
+    else:
+        raw = sys.stdin.read()
     if not raw.strip():
         print("ERROR: no input. Pass --input FILE or pipe JSON on stdin. Try --example.", file=sys.stderr)
         return 2
