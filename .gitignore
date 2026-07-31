@@ -24,6 +24,9 @@ tmp/
 *.swo
 *~
 
+# Local TLC harness / agent tooling
+.tlc/
+
 # OS files
 .DS_Store
 Thumbs.db
