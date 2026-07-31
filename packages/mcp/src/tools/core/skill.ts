@@ -1,6 +1,6 @@
 import { MAX_REFERENCE_FILES_DISPLAY, SKILL_MAIN_FILE } from '../../constants'
 import type { SkillEntry } from '../../types'
-import { isOptionalReferencePath } from '../../utils'
+import { isBundledFilePath } from '../../utils'
 
 type ContentBlocks = {
   content: [{ type: 'text'; text: string }, { type: 'text'; text: string }]
@@ -13,7 +13,7 @@ export function getMainSkillFile(skill: SkillEntry, skillName: string): string {
 }
 
 export function getReferenceFiles(skill: SkillEntry): string[] {
-  return skill.files.filter((file: string) => isOptionalReferencePath(file))
+  return skill.files.filter((file: string) => isBundledFilePath(file))
 }
 
 /**

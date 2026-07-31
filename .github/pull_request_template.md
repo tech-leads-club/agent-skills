@@ -16,5 +16,5 @@ https://github.com/tech-leads-club/agent-skills/blob/main/CONTRIBUTING.md#-how-c
 - [ ] `npx nx affected -t lint test build --base=origin/main` passes locally
 - [ ] Conventional commit messages (`feat:`, `fix:`, `docs:`, `chore:`)
 - [ ] For a new or changed skill: the `description` follows `[What it does] + [Use when ...] + [Do NOT use for ...]`, and `npm run validate` passes
-- [ ] For bundled skill files: they live in `references/`, `scripts/` or `assets/` — no other folder is served over MCP
+- [ ] For bundled skill files: `references/`, `scripts/` or `assets/` unless there is a reason to differ
 - [ ] An AI agent was involved, and I reviewed every line — or no agent was involved

@@ -53,7 +53,7 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
       const unsafe = getUnsafeStagingPaths(requested)
       if (unsafe.length > 0) {
         throw new UserError(
-          `Refusing to stage unsafe paths: [${unsafe.join(', ')}]. Only scripts/, references/ and assets/ files are staged.`,
+          `Refusing to stage unsafe paths: [${unsafe.join(', ')}]. Paths must be skill-relative files listed by read_skill.`,
         )
       }
 

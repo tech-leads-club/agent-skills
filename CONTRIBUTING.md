@@ -157,7 +157,7 @@ packages/skills-catalog/skills/
 └── _category.json                # Category metadata
 ```
 
-> **Use only these three names for bundled files.** `references/`, `scripts/` and `assets/` are the directories the MCP server exposes — a file under any other folder (`templates/`, `rules/`, `lib/`, or `reference/` in the singular) still ships with the skill and still works through the CLI, but `read_skill` will not list it and `fetch_skill_files` will refuse to serve it. Put templates and static files in `assets/`.
+> **Prefer these three names**, so a reader can guess what a folder holds without opening it: `references/` for docs the agent reads, `scripts/` for things it runs, `assets/` for files that end up in the output. They are a convention, not a constraint — every file listed for a skill in the registry is installed by the CLI and served over MCP, whatever folder it sits in. Some existing skills use `rules/` or `templates/` for good reasons.
 
 ### SKILL.md Format
 

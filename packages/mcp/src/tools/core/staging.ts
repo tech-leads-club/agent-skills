@@ -1,4 +1,4 @@
-import { isOptionalReferencePath } from '../../utils'
+import { isBundledFilePath } from '../../utils'
 
 /**
  * Rejects any skill-relative path that must not be written to disk.
@@ -9,7 +9,7 @@ import { isOptionalReferencePath } from '../../utils'
  */
 export function isSafeStagingPath(filePath: string): boolean {
   if (filePath.length === 0) return false
-  if (!isOptionalReferencePath(filePath)) return false
+  if (!isBundledFilePath(filePath)) return false
   // hazard: reject absolute paths, drive letters, UNC prefixes and backslash separators
   if (filePath.startsWith('/') || filePath.startsWith('\\')) return false
   if (/^[a-zA-Z]:/.test(filePath)) return false

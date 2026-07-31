@@ -1,12 +1,27 @@
-import { getMatchQuality, isOptionalReferencePath } from '../utils'
+import { getMatchQuality, isBundledFilePath } from '../utils'
 
-describe('isOptionalReferencePath', () => {
-  it('should accept only scripts/, references/ and assets/ prefixes', () => {
-    expect(isOptionalReferencePath('references/a.md')).toBe(true)
-    expect(isOptionalReferencePath('scripts/run.sh')).toBe(true)
-    expect(isOptionalReferencePath('assets/icon.svg')).toBe(true)
-    expect(isOptionalReferencePath('SKILL.md')).toBe(false)
-    expect(isOptionalReferencePath('other/file.md')).toBe(false)
+describe('isBundledFilePath', () => {
+  it('should accept the conventional directories', () => {
+    expect(isBundledFilePath('references/a.md')).toBe(true)
+    expect(isBundledFilePath('scripts/run.sh')).toBe(true)
+    expect(isBundledFilePath('assets/icon.svg')).toBe(true)
+  })
+
+  // why: the registry's file list is the contract. Skills in the catalog use rules/, templates/,
+  // lib/ and reference/ too, and the CLI installs them — refusing them here made those files
+  // invisible over MCP.
+  it('should accept any other directory the registry declares', () => {
+    expect(isBundledFilePath('rules/advanced.md')).toBe(true)
+    expect(isBundledFilePath('templates/page.html')).toBe(true)
+    expect(isBundledFilePath('lib/helpers.js')).toBe(true)
+    expect(isBundledFilePath('reference/commands.md')).toBe(true)
+    expect(isBundledFilePath('deeply/nested/file.md')).toBe(true)
+    expect(isBundledFilePath('README.md')).toBe(true)
+  })
+
+  it('should reject the main skill file and an empty path', () => {
+    expect(isBundledFilePath('SKILL.md')).toBe(false)
+    expect(isBundledFilePath('')).toBe(false)
   })
 })
 

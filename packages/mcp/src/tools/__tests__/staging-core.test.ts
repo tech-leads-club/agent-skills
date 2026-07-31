@@ -29,14 +29,21 @@ describe('isSafeStagingPath', () => {
     expect(isSafeStagingPath('')).toBe(false)
   })
 
-  it('should reject files outside the optional reference dirs', () => {
+  it('should accept files under any directory the registry declares', () => {
+    expect(isSafeStagingPath('rules/one.md')).toBe(true)
+    expect(isSafeStagingPath('templates/page.html')).toBe(true)
+    expect(isSafeStagingPath('lib/helpers.js')).toBe(true)
+  })
+
+  it('should reject the main skill file, which read_skill returns instead', () => {
     expect(isSafeStagingPath('SKILL.md')).toBe(false)
-    expect(isSafeStagingPath('package.json')).toBe(false)
-    expect(isSafeStagingPath('other/file.md')).toBe(false)
   })
 
   it('should report every unsafe path', () => {
-    expect(getUnsafeStagingPaths(['scripts/ok.mjs', '../evil', 'SKILL.md'])).toEqual(['../evil', 'SKILL.md'])
+    expect(getUnsafeStagingPaths(['scripts/ok.mjs', 'rules/ok.md', '../evil', 'SKILL.md'])).toEqual([
+      '../evil',
+      'SKILL.md',
+    ])
   })
 })
 

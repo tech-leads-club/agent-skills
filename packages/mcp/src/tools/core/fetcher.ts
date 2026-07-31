@@ -1,5 +1,5 @@
 import type { SkillEntry } from '../../types'
-import { isOptionalReferencePath } from '../../utils'
+import { isBundledFilePath } from '../../utils'
 
 /**
  * Character budget for one fetch_skill_files response (~12.5k tokens).
@@ -12,7 +12,7 @@ export const MAX_REFERENCE_RESPONSE_CHARS = 50_000
 const MIN_USEFUL_TRUNCATION_CHARS = 2_000
 
 export function getInvalidReferencePaths(skill: SkillEntry, filePaths: string[]): string[] {
-  const validReferencePaths = new Set(skill.files.filter((filePath: string) => isOptionalReferencePath(filePath)))
+  const validReferencePaths = new Set(skill.files.filter((filePath: string) => isBundledFilePath(filePath)))
   return filePaths.filter((path) => !validReferencePaths.has(path))
 }
 

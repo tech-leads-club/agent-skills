@@ -48,11 +48,19 @@ describe('skill-core', () => {
     expect(() => getMainSkillFile(skill, 'demo')).toThrow("Skill 'demo' has no SKILL.md in files list")
   })
 
-  it('should include only optional reference files', () => {
+  it('should list every bundled file except SKILL.md', () => {
     const skill = createSkillEntry({
       files: ['SKILL.md', 'references/a.md', 'scripts/run.sh', 'assets/icon.svg', 'other.txt'],
     })
-    expect(getReferenceFiles(skill)).toEqual(['references/a.md', 'scripts/run.sh', 'assets/icon.svg'])
+    expect(getReferenceFiles(skill)).toEqual(['references/a.md', 'scripts/run.sh', 'assets/icon.svg', 'other.txt'])
+  })
+
+  // why: catalog skills use rules/, templates/, lib/ and reference/, and the CLI installs them
+  it('should list files under unconventional directories', () => {
+    const skill = createSkillEntry({
+      files: ['SKILL.md', 'rules/one.md', 'templates/page.html', 'lib/helpers.js'],
+    })
+    expect(getReferenceFiles(skill)).toEqual(['rules/one.md', 'templates/page.html', 'lib/helpers.js'])
   })
 
   it('should truncate reference list with omitted counter', () => {

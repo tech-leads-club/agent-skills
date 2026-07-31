@@ -7,9 +7,6 @@ export const SKILLS_CATALOG_PACKAGE = '@tech-leads-club/skills-catalog'
 /** Main skill instruction file name. */
 export const SKILL_MAIN_FILE = 'SKILL.md'
 
-/** Directory prefixes that denote optional reference files (scripts, references, assets). */
-export const OPTIONAL_REFERENCE_DIRS = ['scripts/', 'references/', 'assets/'] as const
-
 /** Max number of reference file paths to show in read_skill output. */
 export const MAX_REFERENCE_FILES_DISPLAY = 50
 

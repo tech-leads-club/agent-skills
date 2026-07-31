@@ -1,9 +1,18 @@
-import { OPTIONAL_REFERENCE_DIRS } from './constants'
+import { SKILL_MAIN_FILE } from './constants'
 import type { MatchQuality } from './types'
 
-/** Returns whether the file path is an optional reference (scripts/, references/, assets/). */
-export function isOptionalReferencePath(filePath: string): boolean {
-  return OPTIONAL_REFERENCE_DIRS.some((dir) => filePath.startsWith(dir))
+/**
+ * Returns whether the path is a bundled file the server may serve — anything the registry
+ * lists for a skill except the main instruction file, which read_skill returns on its own.
+ *
+ * why: this used to allowlist the `scripts/`, `references/` and `assets/` prefixes, which made
+ * the server refuse files the registry declares and the CLI installs. Skills using other folder
+ * names had their bundled files silently invisible over MCP. The registry's file list is the
+ * contract; a prefix convention is not. Traversal and absolute paths are still rejected, at the
+ * point of writing to disk, by isSafeStagingPath.
+ */
+export function isBundledFilePath(filePath: string): boolean {
+  return filePath.length > 0 && filePath !== SKILL_MAIN_FILE
 }
 
 /** Builds the full CDN URL for a file within a skill, using a pinned skills/ base URL. */

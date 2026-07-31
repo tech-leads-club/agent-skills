@@ -20,12 +20,12 @@ When the agent needs a skill mid-session, loading the full catalog would be wast
 
 The three steps map onto the three levels of **progressive disclosure**, and each level pays only for itself:
 
-| Level | Tool | What loads | Typical cost |
-| :---- | :--- | :--------- | :----------- |
-| 1 — Discovery | `search_skills` | `name`, `category`, `usage_hint`, score | ~50–250 tokens for up to 5 candidates |
-| 2 — Activation | `read_skill` | `SKILL.md` body, frontmatter stripped, plus the reference index | the skill body only — a few thousand tokens |
-| 3 — Execution | `fetch_skill_files` | Only the `references/`, `scripts/`, `assets/` the instructions asked for | Bounded at ~12.5k tokens per call |
-| 3 — Execution | `prepare_skill_files` | Nothing — files land on disk, the agent gets `file://` links | ~700 tokens for a whole skill |
+| Level          | Tool                  | What loads                                                               | Typical cost                                |
+| :------------- | :-------------------- | :----------------------------------------------------------------------- | :------------------------------------------ |
+| 1 — Discovery  | `search_skills`       | `name`, `category`, `usage_hint`, score                                  | ~50–250 tokens for up to 5 candidates       |
+| 2 — Activation | `read_skill`          | `SKILL.md` body, frontmatter stripped, plus the reference index          | the skill body only — a few thousand tokens |
+| 3 — Execution  | `fetch_skill_files`   | Only the `references/`, `scripts/`, `assets/` the instructions asked for | Bounded at ~12.5k tokens per call           |
+| 3 — Execution  | `prepare_skill_files` | Nothing — files land on disk, the agent gets `file://` links             | ~700 tokens for a whole skill               |
 
 Level 3 has two doors because skills use their bundled files in two different ways. A file under `references/` is meant to be **read**, so `fetch_skill_files` returns its text. A file under `scripts/` is meant to be **run** — skill instructions invoke them by path, e.g. `node $SKILL_DIR/scripts/render.mjs` — so `prepare_skill_files` writes the verified file to disk and returns a `file://` resource link instead of its contents. Staging cost is flat: a handful of tokens per file, regardless of file size.
 
@@ -64,7 +64,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 - **Weighted fields:** `name` (0.45), extracted `triggers` (0.30), `description` (0.20), `category` (0.05)
 - **Trigger extraction:** Automatically parses "Triggers on...", "Use when...", and "Keywords -..." patterns from descriptions into a high-signal index field
 - **Relevance scoring:** Each result includes a 0-100 score and a human-readable `match_quality` label (`exact` ≥45 / `strong` ≥30 / `partial` ≥20 / `weak`)
-- **Noise floor:** `weak` matches are dropped. Fuzzy matching returns a ranked list for *any* query, including one no skill answers, so without a floor the agent receives near-zero-scoring results it might act on. It now gets `results: []` and can conclude no skill applies.
+- **Noise floor:** `weak` matches are dropped. Fuzzy matching returns a ranked list for _any_ query, including one no skill answers, so without a floor the agent receives near-zero-scoring results it might act on. It now gets `results: []` and can conclude no skill applies.
 - Returns `structuredContent` validated against the tool's `outputSchema`, with a JSON text fallback
 - Omits the full `description` from results — `usage_hint` carries the gist, and `read_skill` provides the rest
 - Minimum match character length of 2 to avoid noise
@@ -80,7 +80,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 
 - Fetches `SKILL.md` explicitly from `files[]` as the main skill instructions
 - **Strips the YAML frontmatter** before returning: `name` and `description` are the level-1 discovery payload the agent already got from `search_skills`, so resending them duplicates that payload and puts registry metadata ahead of the instructions. Integrity is unaffected — the `contentHash` is verified over the original bytes first.
-- Reference list includes only paths under `scripts/`, `references/`, and `assets/`
+- Reference list covers every file the registry declares for the skill except `SKILL.md`, whatever directory it sits in — the registry's file list is the contract, not a folder-name convention
 - Returns two separate content blocks: main content + compact reference list (capped at 50 paths)
 - Skill with only one file returns a single content block (no empty second block)
 - Invalid `skill_name` → `UserError("Skill '{name}' not found. Use search_skills to find valid names.")`
@@ -94,7 +94,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 > **Constraints:** Only paths from `read_skill`'s reference list are valid — never guess or construct paths. Make multiple calls if you need more than 5 files.
 
 - Validates **all** paths against `skill.files[]` before any network call — rejects with the full list of invalid paths
-- Accepts only paths under `scripts/`, `references/`, and `assets/` from `read_skill`
+- Accepts any path from `read_skill`'s list; paths not declared for that skill are rejected
 - Fetches valid files in parallel (`Promise.allSettled`)
 - Partial failure: returns successful content and notes failed paths — does not abort the entire response
 - **Response budget of 50,000 chars (~12.5k tokens):** files are emitted in the requested order; anything beyond the budget is truncated or omitted, and the response names what was left out so the agent can request it in a follow-up call. Without this, five large reference files could exceed the 25k-token cap agents apply to tool responses.
@@ -146,10 +146,10 @@ Examples:
 
 Use when you already know the exact skill name and want a direct shortcut.
 
-| Argument  | Required | Description                            |
-| :-------- | :------- | :------------------------------------- |
+| Argument  | Required | Description                           |
+| :-------- | :------- | :------------------------------------ |
 | `name`    | Yes      | Exact skill name (e.g. `docs-writer`) |
-| `context` | No       | What specifically you need help with   |
+| `context` | No       | What specifically you need help with  |
 
 Examples:
 
