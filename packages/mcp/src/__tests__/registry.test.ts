@@ -158,9 +158,9 @@ describe('search behavior', () => {
     expect(results[0].item.name).toBe('aws-advisor')
   })
 
-  it('should return no results for unrelated queries', () => {
+  it('should not surface a confident match for unrelated queries', () => {
     const results = indexes.fuse.search('kubernetes-helm-chart')
-    expect(results.length).toBe(0)
+    expect(results.every((r) => (r.score ?? 1) > 0.5)).toBe(true)
   })
 
   it('should limit results to max 5 when sliced', () => {

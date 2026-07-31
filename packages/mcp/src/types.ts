@@ -1,4 +1,4 @@
-import Fuse from 'fuse.js'
+import type Fuse from 'fuse.js'
 
 /** Skill entry from the registry. */
 export interface SkillEntry {

@@ -11,11 +11,19 @@ export function buildCdnUrl(skillsBaseUrl: string, skillPath: string, filePath: 
   return `${skillsBaseUrl}${skillPath}/${filePath}`
 }
 
-/** Returns the match quality based on the score. */
+/**
+ * Returns the match quality based on the score.
+ *
+ * why: the bands map onto the token-search score scale, where a strong match on a multi-word
+ * intent phrase still scores well below 100 — the previous 85/65/45 cutoffs belonged to a
+ * different scale and collapsed every real match into 'weak'.
+ * invariant: 'weak' is the band buildSearchSkillsResponse discards, so this lower bound decides
+ * what search_skills returns at all. Changing it changes tool output, not just a label.
+ */
 export function getMatchQuality(score: number): MatchQuality {
-  if (score >= 85) return 'exact'
-  if (score >= 65) return 'strong'
-  if (score >= 45) return 'partial'
+  if (score >= 45) return 'exact'
+  if (score >= 30) return 'strong'
+  if (score >= 20) return 'partial'
   return 'weak'
 }
 

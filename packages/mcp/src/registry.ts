@@ -115,9 +115,13 @@ export function buildIndexes(registry: Registry): Indexes {
       { name: 'description', weight: 0.2 },
       { name: 'category', weight: 0.05 },
     ],
-    threshold: 0.4,
+    // why: useExtendedSearch turns every whitespace-separated token into a mandatory
+    // AND clause, so natural intent phrases ("react component testing") matched nothing.
+    // Token search + ignoreLocation scores each word independently, anywhere in the field.
+    threshold: 0.3,
     includeScore: true,
-    useExtendedSearch: true,
+    useTokenSearch: true,
+    ignoreLocation: true,
     minMatchCharLength: 2,
   })
 
