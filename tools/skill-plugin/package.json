@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@nx/devkit": "^22.5.0",
+    "@nx/devkit": "23.1.1",
     "@tech-leads-club/core": "*"
   },
   "generators": "./generators.json"

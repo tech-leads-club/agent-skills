@@ -13,7 +13,7 @@
     "agent-skills": "./index.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "publishConfig": {
     "access": "public"
@@ -48,6 +48,7 @@
   "devDependencies": {
     "@jest/globals": "30.3.0",
     "@tech-leads-club/core": "0.0.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@types/figlet": "^1.7.0",
     "@types/node": "^24",
