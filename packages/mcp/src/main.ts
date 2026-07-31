@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { FastMCP } from 'fastmcp'
-import { createRequire } from 'node:module'
 
+import pkg from '../package.json' with { type: 'json' }
 import { CACHE_TTL_MS } from './constants'
 import { registerPrompts } from './prompts'
 import { buildIndexes, getRegistry } from './registry'
@@ -12,12 +12,12 @@ import { registerSearchTool } from './tools/search-tool'
 import { registerSkillTool } from './tools/skill-tool'
 import type { Indexes } from './types'
 
-// Read version at runtime
-const _require = createRequire(import.meta.url)
-const { version = '0.0.0' } = _require('./package.json') as { version?: string }
+// why: inlined at build time — createRequire('./package.json') resolved relative to the
+// emitted bundle, so the version lookup threw whenever package.json wasn't beside it.
+const version = (pkg.version ?? '0.0.0') as `${number}.${number}.${number}`
 
 // MCP server instance
-const server = new FastMCP({ name: 'agent-skills-mcp', version: version as `${number}.${number}.${number}` })
+const server = new FastMCP({ name: 'agent-skills-mcp', version })
 
 // Initialized during warmup in main() before server.start() — always set when tools are called
 let indexes!: Indexes

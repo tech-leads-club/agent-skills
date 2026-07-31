@@ -38,7 +38,7 @@
     "start:dev": "nx build @tech-leads-club/agent-skills-mcp --configuration=development && npx @modelcontextprotocol/inspector node ../../dist/packages/mcp/main.js"
   },
   "dependencies": {
-    "fastmcp": "^3.34.0",
+    "fastmcp": "^4.12.1",
     "fuse.js": "^7.1.0",
     "ky": "^1.14.3",
     "zod": "^4.3.6"
