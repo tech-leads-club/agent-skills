@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
 import { fetchAndVerifySkillFiles } from '../integrity'
-import { Indexes } from '../types'
-import { buildReadSkillOutput, getMainSkillFile, getReferenceFiles } from './core/skill'
+import type { Indexes } from '../types'
+import { buildReadSkillOutput, getMainSkillFile, getReferenceFiles, stripFrontmatter } from './core/skill'
 
 const TOOL_DESCRIPTION =
   'Step 2 of 3. Retrieves a skill by name and returns its full instructions.\n' +
@@ -20,7 +20,7 @@ export function registerSkillTool(server: FastMCP, getIndexes: () => Indexes): v
     name: 'read_skill',
     description: TOOL_DESCRIPTION,
     parameters: z.object({ skill_name: z.string() }),
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { title: 'Read Skill Instructions', readOnlyHint: true, openWorldHint: true },
     execute: async (args) => {
       const skill = getIndexes().map.get(args.skill_name)
       if (!skill) throw new UserError(`Skill '${args.skill_name}' not found. Use search_skills to find valid names.`)
@@ -45,7 +45,7 @@ export function registerSkillTool(server: FastMCP, getIndexes: () => Indexes): v
       }
 
       const referenceFiles = getReferenceFiles(skill)
-      return buildReadSkillOutput(mainContent, referenceFiles)
+      return buildReadSkillOutput(stripFrontmatter(mainContent), referenceFiles)
     },
   })
 }

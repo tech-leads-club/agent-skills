@@ -1,6 +1,41 @@
 import { MAX_REFERENCE_FILES_DISPLAY } from '../../constants'
-import { buildReadSkillOutput, formatReferenceList, getMainSkillFile, getReferenceFiles } from '../core/skill'
+import {
+  buildReadSkillOutput,
+  formatReferenceList,
+  getMainSkillFile,
+  getReferenceFiles,
+  stripFrontmatter,
+} from '../core/skill'
 import { createSkillEntry } from './helpers'
+
+describe('stripFrontmatter', () => {
+  it('should remove the YAML frontmatter and keep the body', () => {
+    const content = '---\nname: demo\ndescription: Does a thing. Use when asked.\n---\n\n# Demo\n\nBody text.'
+    expect(stripFrontmatter(content)).toBe('# Demo\n\nBody text.')
+  })
+
+  it('should handle CRLF line endings', () => {
+    const content = '---\r\nname: demo\r\n---\r\n\r\n# Demo\r\n'
+    expect(stripFrontmatter(content)).toBe('# Demo\r\n')
+  })
+
+  it('should return content unchanged when there is no frontmatter', () => {
+    const content = '# Demo\n\nBody text with --- a dash rule.'
+    expect(stripFrontmatter(content)).toBe(content)
+  })
+
+  it('should not swallow a horizontal rule in the body', () => {
+    const content = '---\nname: demo\n---\n\n# Demo\n\nFirst part.\n\n---\n\nSecond part.'
+    const stripped = stripFrontmatter(content)
+    expect(stripped).toBe('# Demo\n\nFirst part.\n\n---\n\nSecond part.')
+    expect(stripped).toContain('Second part.')
+  })
+
+  it('should leave a body that only starts with an unclosed rule intact', () => {
+    const content = '---\n\n# Demo\n\nBody.'
+    expect(stripFrontmatter(content)).toBe(content)
+  })
+})
 
 describe('skill-core', () => {
   it('should return SKILL.md as main file', () => {
