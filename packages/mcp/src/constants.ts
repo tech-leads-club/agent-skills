@@ -18,3 +18,10 @@ export const STAGING_DIR_NAME = 'agent-skills-mcp'
 
 /** Chars of contentHash used to name a skill's revision directory. */
 export const STAGING_REVISION_LENGTH = 12
+
+/**
+ * Minimum age before a superseded revision directory is pruned.
+ * hazard: an agent may still be running a script out of the previous revision when a skill
+ * updates. The grace period keeps a recently used directory on disk until that turn is over.
+ */
+export const STAGING_PRUNE_MIN_AGE_MS = 60 * 60 * 1000

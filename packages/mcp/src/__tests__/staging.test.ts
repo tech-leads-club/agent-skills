@@ -1,8 +1,8 @@
-import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, stat, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { getSkillStagingDir, getStagingRoot, stageSkillFiles } from '../staging'
+import { getSkillStagingDir, getStagingRoot, pruneSupersededRevisions, stageSkillFiles } from '../staging'
 
 const HASH_A = 'aaaaaaaaaaaabbbbbbbbbbbbcccccccccccc'
 const HASH_B = 'ffffffffffffeeeeeeeeeeeedddddddddddd'
@@ -98,5 +98,75 @@ describe('staging', () => {
     const info = await stat(join(getSkillStagingDir('demo', HASH_A), 'scripts', 'render.mjs'))
     const executeBits = info.mode & 0o111
     expect(executeBits).toBe(0)
+  })
+})
+
+describe('pruneSupersededRevisions', () => {
+  let root: string
+  const previous = process.env.SKILLS_STAGING_DIR
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'prune-test-'))
+    process.env.SKILLS_STAGING_DIR = root
+  })
+
+  afterEach(async () => {
+    if (previous === undefined) delete process.env.SKILLS_STAGING_DIR
+    else process.env.SKILLS_STAGING_DIR = previous
+    await rm(root, { recursive: true, force: true })
+  })
+
+  const age = async (dir: string, ms: number) => {
+    const when = new Date(Date.now() - ms)
+    await utimes(dir, when, when)
+  }
+
+  it('should remove a superseded revision once it is stale', async () => {
+    await stageSkillFiles('demo', HASH_A, new Map([['scripts/run.mjs', 'old']]))
+    await stageSkillFiles('demo', HASH_B, new Map([['scripts/run.mjs', 'new']]))
+    await age(getSkillStagingDir('demo', HASH_A), 2 * 60 * 60 * 1000)
+
+    const removed = await pruneSupersededRevisions('demo', HASH_B)
+
+    expect(removed).toEqual([HASH_A.slice(0, 12)])
+    await expect(readdir(join(root, 'demo'))).resolves.toEqual([HASH_B.slice(0, 12)])
+  })
+
+  // hazard: a script from the previous revision may still be executing
+  it('should keep a recently used revision', async () => {
+    await stageSkillFiles('demo', HASH_A, new Map([['scripts/run.mjs', 'old']]))
+    await stageSkillFiles('demo', HASH_B, new Map([['scripts/run.mjs', 'new']]))
+
+    const removed = await pruneSupersededRevisions('demo', HASH_B)
+
+    expect(removed).toEqual([])
+    await expect(readdir(join(root, 'demo'))).resolves.toHaveLength(2)
+  })
+
+  it('should never remove the current revision', async () => {
+    await stageSkillFiles('demo', HASH_A, new Map([['scripts/run.mjs', 'current']]))
+    await age(getSkillStagingDir('demo', HASH_A), 30 * 24 * 60 * 60 * 1000)
+
+    const removed = await pruneSupersededRevisions('demo', HASH_A)
+
+    expect(removed).toEqual([])
+    await expect(readFile(join(getSkillStagingDir('demo', HASH_A), 'scripts', 'run.mjs'), 'utf8')).resolves.toBe(
+      'current',
+    )
+  })
+
+  it('should not touch other skills', async () => {
+    await stageSkillFiles('other', HASH_A, new Map([['scripts/run.mjs', 'keep']]))
+    await age(getSkillStagingDir('other', HASH_A), 2 * 60 * 60 * 1000)
+
+    await pruneSupersededRevisions('demo', HASH_B)
+
+    await expect(readFile(join(getSkillStagingDir('other', HASH_A), 'scripts', 'run.mjs'), 'utf8')).resolves.toBe(
+      'keep',
+    )
+  })
+
+  it('should be a no-op when the skill was never staged', async () => {
+    await expect(pruneSupersededRevisions('never-staged', HASH_A)).resolves.toEqual([])
   })
 })

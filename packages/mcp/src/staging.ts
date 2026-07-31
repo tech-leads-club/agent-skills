@@ -1,8 +1,8 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join, resolve, sep } from 'node:path'
 
-import { STAGING_DIR_NAME, STAGING_REVISION_LENGTH } from './constants'
+import { STAGING_DIR_NAME, STAGING_PRUNE_MIN_AGE_MS, STAGING_REVISION_LENGTH } from './constants'
 
 /** Root directory for staged skill files. Overridable for tests and sandboxed environments. */
 export function getStagingRoot(): string {
@@ -71,4 +71,48 @@ async function hasIdenticalContent(destination: string, content: string): Promis
   } catch {
     return false
   }
+}
+
+/**
+ * Removes revision directories of one skill other than the current one, once they are stale.
+ *
+ * why: keying directories on contentHash keeps writes additive, but every published revision
+ * would otherwise accumulate forever. A superseded revision is unreachable — the registry serves
+ * one revision at a time and callers only ever receive the current skill_dir — so removing it
+ * reclaims orphaned cache rather than data anyone can still ask for.
+ *
+ * hazard: a script from the previous revision may still be running, so only directories older
+ * than the grace period are removed. Best effort by design: a failure here must not fail staging.
+ */
+export async function pruneSupersededRevisions(
+  skillName: string,
+  currentHash: string,
+  minAgeMs: number = STAGING_PRUNE_MIN_AGE_MS,
+): Promise<string[]> {
+  const skillRoot = join(getStagingRoot(), skillName)
+  const keep = currentHash.slice(0, STAGING_REVISION_LENGTH)
+  const removed: string[] = []
+
+  let entries: string[]
+  try {
+    entries = await readdir(skillRoot)
+  } catch {
+    return removed
+  }
+
+  const cutoff = Date.now() - minAgeMs
+  for (const entry of entries) {
+    if (entry === keep) continue
+    const candidate = join(skillRoot, entry)
+    try {
+      const info = await stat(candidate)
+      if (!info.isDirectory() || info.mtimeMs > cutoff) continue
+      await rm(candidate, { recursive: true, force: true })
+      removed.push(entry)
+    } catch {
+      // a revision we cannot stat or remove is left alone
+    }
+  }
+
+  return removed
 }

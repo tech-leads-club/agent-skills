@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
 import { fetchAndVerifySkillFiles } from '../integrity'
-import { type StagedFile, getSkillStagingDir, stageSkillFiles } from '../staging'
+import { type StagedFile, getSkillStagingDir, pruneSupersededRevisions, stageSkillFiles } from '../staging'
 import type { Indexes } from '../types'
 import { buildFileUri, getMimeType, getUnsafeStagingPaths } from './core/staging'
 
@@ -104,6 +104,8 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
         throw new UserError(`Could not write skill files to disk: ${message}`)
       }
 
+      const pruned = await pruneSupersededRevisions(args.skill_name, skill.contentHash)
+
       const skillDir = getSkillStagingDir(args.skill_name, skill.contentHash)
       const reused = [...staged.values()].filter((file) => !file.written).length
       const header = [
@@ -111,6 +113,7 @@ export function registerPrepareTool(server: FastMCP, getIndexes: () => Indexes):
           (reused > 0 ? ` ${reused} already present, unchanged.` : ''),
         `skill_dir: ${skillDir}`,
         `Run the skill's commands with SKILL_DIR=${skillDir}`,
+        pruned.length > 0 ? `Reclaimed ${pruned.length} superseded revision(s).` : undefined,
         missing.length > 0 ? `Not in this skill: ${missing.join(', ')}` : undefined,
       ]
         .filter(Boolean)
