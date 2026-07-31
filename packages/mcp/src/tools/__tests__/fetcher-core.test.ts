@@ -16,10 +16,15 @@ describe('fetcher-core', () => {
       files: ['SKILL.md', 'references/a.md', 'scripts/run.sh'],
     })
 
-    const output = await fetchReferenceFileContents(skill, ['references/a.md', 'scripts/run.sh'], async (url) => {
-      if (url.endsWith('references/a.md')) return 'alpha'
-      return 'script'
-    })
+    const output = await fetchReferenceFileContents(
+      skill,
+      ['references/a.md', 'scripts/run.sh'],
+      'https://cdn.example/skills/',
+      async (url) => {
+        if (url.endsWith('references/a.md')) return 'alpha'
+        return 'script'
+      },
+    )
 
     expect(output).toContain('## references/a.md')
     expect(output).toContain('alpha')
@@ -33,10 +38,15 @@ describe('fetcher-core', () => {
       files: ['SKILL.md', 'references/a.md', 'scripts/bad.sh'],
     })
 
-    const output = await fetchReferenceFileContents(skill, ['references/a.md', 'scripts/bad.sh'], async (url) => {
-      if (url.endsWith('scripts/bad.sh')) throw new Error('boom')
-      return 'ok'
-    })
+    const output = await fetchReferenceFileContents(
+      skill,
+      ['references/a.md', 'scripts/bad.sh'],
+      'https://cdn.example/skills/',
+      async (url) => {
+        if (url.endsWith('scripts/bad.sh')) throw new Error('boom')
+        return 'ok'
+      },
+    )
 
     expect(output).toContain('## references/a.md')
     expect(output).toContain('ok')
@@ -49,7 +59,7 @@ describe('fetcher-core', () => {
       files: ['SKILL.md', 'scripts/a.sh'],
     })
 
-    const output = await fetchReferenceFileContents(skill, ['scripts/a.sh'], async () => {
+    const output = await fetchReferenceFileContents(skill, ['scripts/a.sh'], 'https://cdn.example/skills/', async () => {
       throw new Error('boom')
     })
 

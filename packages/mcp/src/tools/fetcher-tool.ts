@@ -2,8 +2,10 @@ import { type FastMCP, UserError } from 'fastmcp'
 import ky from 'ky'
 import { z } from 'zod'
 
+import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
+import { fetchAndVerifySkillFiles } from '../integrity'
 import { Indexes } from '../types'
-import { fetchReferenceFileContents, getInvalidReferencePaths } from './core/fetcher'
+import { getInvalidReferencePaths } from './core/fetcher'
 
 const TOOL_DESCRIPTION = `Step 3 of 3 (optional). Fetch reference files that a skill's instructions told you to load.
 Input: skill_name + up to 5 file_paths from the reference list returned by read_skill.
@@ -28,7 +30,34 @@ export function registerFetcherTool(server: FastMCP, getIndexes: () => Indexes):
         )
       }
 
-      return fetchReferenceFileContents(skill, args.file_paths, (url) => ky.get(url).text())
+      try {
+        const cdnRef = await resolveCdnRef()
+        const skillsBaseUrl = buildSkillsBaseUrl(cdnRef)
+        // why: verify the whole skill set before returning any reference bytes
+        const verified = await fetchAndVerifySkillFiles(skill, skillsBaseUrl, (url) => ky.get(url).text())
+
+        const parts: string[] = []
+        const missing: string[] = []
+        for (const filePath of args.file_paths) {
+          const content = verified.get(filePath)
+          if (content === undefined) {
+            missing.push(filePath)
+            continue
+          }
+          parts.push(`## ${filePath}\n\n${content}`)
+        }
+
+        const output = parts.join('\n\n---\n\n')
+        if (missing.length === 0) return output
+        const failureNote = `Failed to fetch: ${missing.join(', ')}`
+        return output.length > 0 ? `${output}\n\n---\n\n${failureNote}` : failureNote
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        if (message.includes('Checksum mismatch')) {
+          throw new UserError(message)
+        }
+        throw new UserError('CDN unavailable or skill integrity check failed. Try again shortly.')
+      }
     },
   })
 }

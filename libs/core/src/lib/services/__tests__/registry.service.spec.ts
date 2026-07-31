@@ -72,8 +72,23 @@ const createPorts = (): TestPorts => {
   const getLatestVersionMock = jest.fn<(packageName: string) => Promise<string>>()
   const loggerErrorMock = jest.fn<(message: string) => void>()
 
-  existsSyncMock.mockReturnValue(false)
+  const virtualFs = new Map<string, string>()
+
+  existsSyncMock.mockImplementation((path) => virtualFs.has(path) || path === '/home/tester/.cache/agent-skills')
   mkdirSyncMock.mockReturnValue(undefined)
+  writeFileSyncMock.mockImplementation((path, content) => {
+    virtualFs.set(path, content)
+  })
+  readFileSyncMock.mockImplementation((path) => {
+    if (!virtualFs.has(path)) throw new Error(`ENOENT: ${path}`)
+    return virtualFs.get(path) as string
+  })
+  rmSyncMock.mockImplementation((path) => {
+    virtualFs.delete(path)
+    for (const key of [...virtualFs.keys()]) {
+      if (key.startsWith(`${path}/`)) virtualFs.delete(key)
+    }
+  })
   readdirSyncMock.mockReturnValue([])
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
   getLatestVersionMock.mockResolvedValue('9.9.9')
@@ -138,6 +153,9 @@ const createPorts = (): TestPorts => {
   }
 }
 
+const SKILL_CONTENT = '# Skill content'
+const SKILL_CONTENT_HASH = 'a1c5d7d4d9e040934b5a90a15400d1d098cfeef386cb54ce4d335bcf1a2eea50'
+
 const registryFixture: SkillsRegistry = {
   version: 'main',
   generatedAt: '2026-03-13T12:00:00.000Z',
@@ -152,7 +170,7 @@ const registryFixture: SkillsRegistry = {
       category: 'quality',
       path: '(quality)/accessibility',
       files: ['SKILL.md'],
-      contentHash: 'abc123',
+      contentHash: SKILL_CONTENT_HASH,
     },
   ],
 }
@@ -292,7 +310,7 @@ describe('downloadSkill', () => {
       ok: true,
       status: 200,
       json: async () => ({}),
-      text: async () => '# Skill content',
+      text: async () => SKILL_CONTENT,
     })
 
     const cachedPath = await downloadSkill(ports, registryFixture.skills[0])
@@ -300,7 +318,7 @@ describe('downloadSkill', () => {
     expect(cachedPath).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
     expect(writeFileSyncMock).toHaveBeenCalledWith(
       '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
-      '# Skill content',
+      SKILL_CONTENT,
       'utf-8',
     )
   })
@@ -355,7 +373,7 @@ describe('downloadSkill', () => {
       ok: true,
       status: 200,
       json: async () => ({}),
-      text: async () => '# Skill content',
+      text: async () => SKILL_CONTENT,
     })
 
     const cachedPath = await downloadSkill(ports, {
@@ -542,7 +560,7 @@ describe('update detection', () => {
         path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
         path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
     )
-    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -565,7 +583,7 @@ describe('update detection', () => {
         path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
         path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
     )
-    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -650,7 +668,7 @@ describe('cache management', () => {
         path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
         path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
     )
-    readFileSyncMock.mockReturnValue('{"contentHash":"abc123","downloadedAt":100}')
+    readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -683,7 +701,7 @@ describe('cache management', () => {
       ok: true,
       status: 200,
       json: async () => registryFixture,
-      text: async () => '# Skill content',
+      text: async () => SKILL_CONTENT,
     })
 
     const path = await ensureSkillDownloaded(ports, 'accessibility')
@@ -774,7 +792,7 @@ describe('cache management', () => {
       ok: true,
       status: 200,
       json: async () => registryFixture,
-      text: async () => '# Skill content',
+      text: async () => SKILL_CONTENT,
     })
 
     const path = await forceDownloadSkill(ports, 'accessibility')

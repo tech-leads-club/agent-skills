@@ -2,8 +2,9 @@ import { type FastMCP, UserError } from 'fastmcp'
 import ky from 'ky'
 import { z } from 'zod'
 
+import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
+import { fetchAndVerifySkillFiles } from '../integrity'
 import { Indexes } from '../types'
-import { buildCdnUrl } from '../utils'
 import { buildReadSkillOutput, getMainSkillFile, getReferenceFiles } from './core/skill'
 
 const TOOL_DESCRIPTION =
@@ -24,12 +25,23 @@ export function registerSkillTool(server: FastMCP, getIndexes: () => Indexes): v
       const skill = getIndexes().map.get(args.skill_name)
       if (!skill) throw new UserError(`Skill '${args.skill_name}' not found. Use search_skills to find valid names.`)
       const mainFile = getMainSkillFile(skill, args.skill_name)
-      let mainContent: string
 
+      let verifiedFiles: Map<string, string>
       try {
-        mainContent = await ky.get(buildCdnUrl(skill.path, mainFile)).text()
-      } catch {
-        throw new UserError('CDN unavailable. Try again shortly.')
+        const cdnRef = await resolveCdnRef()
+        const skillsBaseUrl = buildSkillsBaseUrl(cdnRef)
+        verifiedFiles = await fetchAndVerifySkillFiles(skill, skillsBaseUrl, (url) => ky.get(url).text())
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        if (message.includes('Checksum mismatch')) {
+          throw new UserError(message)
+        }
+        throw new UserError('CDN unavailable or skill integrity check failed. Try again shortly.')
+      }
+
+      const mainContent = verifiedFiles.get(mainFile)
+      if (mainContent === undefined) {
+        throw new UserError(`Skill '${args.skill_name}' is missing ${mainFile} after integrity verification.`)
       }
 
       const referenceFiles = getReferenceFiles(skill)

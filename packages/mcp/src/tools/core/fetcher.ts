@@ -9,11 +9,12 @@ export function getInvalidReferencePaths(skill: SkillEntry, filePaths: string[])
 export async function fetchReferenceFileContents(
   skill: SkillEntry,
   filePaths: string[],
+  skillsBaseUrl: string,
   fetchText: (url: string) => Promise<string>,
 ): Promise<string> {
   const results = await Promise.allSettled(
     filePaths.map(async (filePath) => {
-      const content = await fetchText(buildCdnUrl(skill.path, filePath))
+      const content = await fetchText(buildCdnUrl(skillsBaseUrl, skill.path, filePath))
       return { filePath, content }
     }),
   )

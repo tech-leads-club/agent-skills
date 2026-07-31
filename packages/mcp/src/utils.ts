@@ -1,4 +1,4 @@
-import { CDN_BASE, OPTIONAL_REFERENCE_DIRS } from './constants'
+import { OPTIONAL_REFERENCE_DIRS } from './constants'
 import type { MatchQuality } from './types'
 
 /** Returns whether the file path is an optional reference (scripts/, references/, assets/). */
@@ -6,9 +6,9 @@ export function isOptionalReferencePath(filePath: string): boolean {
   return OPTIONAL_REFERENCE_DIRS.some((dir) => filePath.startsWith(dir))
 }
 
-/** Builds the full CDN URL for a file within a skill. */
-export function buildCdnUrl(skillPath: string, filePath: string): string {
-  return CDN_BASE + skillPath + '/' + filePath
+/** Builds the full CDN URL for a file within a skill, using a pinned skills/ base URL. */
+export function buildCdnUrl(skillsBaseUrl: string, skillPath: string, filePath: string): string {
+  return `${skillsBaseUrl}${skillPath}/${filePath}`
 }
 
 /** Returns the match quality based on the score. */

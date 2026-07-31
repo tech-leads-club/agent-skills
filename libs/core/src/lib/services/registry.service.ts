@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { join, relative } from 'node:path'
 
 import {
@@ -83,9 +84,29 @@ async function getResolvedCdnRef(ports: CorePorts): Promise<string> {
   try {
     cachedCdnRef = await ports.packageResolver.getLatestVersion(SKILLS_CATALOG_PACKAGE)
     return cachedCdnRef
-  } catch {
-    return 'latest'
+  } catch (error) {
+    // invariant: never silently bind skill downloads to mutable @latest
+    throw new Error(
+      `Failed to resolve pinned version for ${SKILLS_CATALOG_PACKAGE}. ` +
+        `Set SKILLS_CDN_REF or fix package resolution. ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    )
   }
+}
+
+/**
+ * Computes contentHash for an in-memory skill file set.
+ * Must match packages/skills-catalog computeSkillHash (sorted path + bytes).
+ */
+function computeSkillContentHash(files: ReadonlyMap<string, string | Buffer>): string {
+  const hash = createHash('sha256')
+  for (const file of [...files.keys()].sort()) {
+    const content = files.get(file)
+    if (content === undefined) continue
+    hash.update(file)
+    hash.update(content)
+  }
+  return hash.digest('hex')
 }
 
 function buildUrls(cdnRef: string): {
@@ -217,12 +238,12 @@ async function downloadSkillFile(
   skill: SkillMetadata,
   file: string,
   skillCachePath: string,
-): Promise<boolean> {
+): Promise<string | null> {
   const filePath = join(skillCachePath, file)
 
   if (!isPathSafe(skillCachePath, filePath)) {
     ports.logger.error(`Security: Skipping suspicious file path: ${file}`)
-    return false
+    return null
   }
 
   const parentDir = join(filePath, '..')
@@ -240,8 +261,9 @@ async function downloadSkillFile(
     throw new Error(`Failed to download ${file}: HTTP ${response.status}`)
   }
 
-  ports.fs.writeFileSync(filePath, await response.text(), 'utf-8')
-  return true
+  const content = await response.text()
+  ports.fs.writeFileSync(filePath, content, 'utf-8')
+  return content
 }
 
 /**
@@ -306,19 +328,30 @@ export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Pro
 
   try {
     const files = [...skill.files]
-    let downloadedCount = 0
+    const downloadedContents = new Map<string, string>()
 
     for (let index = 0; index < files.length; index += MAX_CONCURRENT_DOWNLOADS) {
       const batch = files.slice(index, index + MAX_CONCURRENT_DOWNLOADS)
       const results = await Promise.all(batch.map((file) => downloadSkillFile(ports, skill, file, skillCachePath)))
-      downloadedCount += results.filter(Boolean).length
+      for (const [batchIndex, content] of results.entries()) {
+        if (content === null) continue
+        downloadedContents.set(batch[batchIndex], content)
+      }
     }
 
-    if (downloadedCount < files.length) {
-      throw new Error(`Only ${downloadedCount}/${files.length} files downloaded successfully`)
+    if (downloadedContents.size < files.length) {
+      throw new Error(`Only ${downloadedContents.size}/${files.length} files downloaded successfully`)
     }
 
     if (skill.contentHash) {
+      // why: verify bytes we just fetched, not a second disk read that mocks can desync
+      const computedHash = computeSkillContentHash(downloadedContents)
+      if (computedHash !== skill.contentHash) {
+        throw new Error(
+          `Checksum mismatch for skill '${skill.name}': expected ${skill.contentHash}, got ${computedHash}`,
+        )
+      }
+
       saveCachedSkillMeta(ports, skill.name, {
         contentHash: skill.contentHash,
         downloadedAt: Date.now(),
