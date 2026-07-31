@@ -1,0 +1,46 @@
+name: 🐛 Report a bug or propose a change
+description: Something is broken, wrong, or could work better — in a skill, the CLI, the MCP server, or the docs.
+labels: ['needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Typos, broken links and wrong commands belong here too — they get resolved quickly.
+        See [How contributions work](https://github.com/tech-leads-club/agent-skills/blob/main/CONTRIBUTING.md#-how-contributions-work).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - A skill in the catalog
+        - CLI (@tech-leads-club/agent-skills)
+        - MCP server (@tech-leads-club/agent-skills-mcp)
+        - Marketplace site
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you did, what you expected, and what happened instead. Paste the actual error if there is one.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: For the CLI or MCP, the package version. Skip for docs and skills.
+      placeholder: '0.1.5'
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: If an AI agent helped write this report, I reviewed it and confirmed the problem is real
+          required: true

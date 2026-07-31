@@ -1,0 +1,70 @@
+name: ⭐ Propose a new skill
+description: Suggest a skill to add to the catalog. This is the entry point for non-members.
+labels: ['skill proposal']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a skill. A maintainer will reply on this issue.
+
+        If the proposal fits, you can either implement it yourself — we grant you the access
+        to open the pull request — or a maintainer implements it and credits you. See
+        [How contributions work](https://github.com/tech-leads-club/agent-skills/blob/main/CONTRIBUTING.md#-how-contributions-work).
+
+  - type: input
+    id: name
+    attributes:
+      label: Skill name
+      description: kebab-case, as it will appear in the catalog.
+      placeholder: react-composition-patterns
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What it does
+      description: One or two sentences. What can an agent do with this skill that it cannot do without it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: triggers
+    attributes:
+      label: When should an agent reach for it
+      description: Actual phrases a user would say. These become the `Use when ...` part of the description.
+      placeholder: |
+        "clean up this component"
+        "my component is too big"
+    validations:
+      required: true
+
+  - type: textarea
+    id: overlap
+    attributes:
+      label: What it should NOT be used for
+      description: >
+        Which existing skill could be confused with this one? Search the catalog first. This becomes
+        the `Do NOT use for ...` part of the description, and it is what keeps skill search accurate.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: implement
+    attributes:
+      label: Do you want to implement it?
+      options:
+        - I would like to implement it myself
+        - I am proposing it for someone else to implement
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the catalog and this skill does not already exist
+          required: true
+        - label: If an AI agent helped write this proposal, I reviewed it and can defend every part of it
+          required: true

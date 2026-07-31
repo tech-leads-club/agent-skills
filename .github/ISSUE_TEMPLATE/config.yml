@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 How contributions work
+    url: https://github.com/tech-leads-club/agent-skills/blob/main/CONTRIBUTING.md#-how-contributions-work
+    about: Issue-first flow, who can open pull requests, and how contributors are credited.
+  - name: 💬 Tech Leads Club
+    url: https://techleads.club
+    about: Community behind this catalog.
