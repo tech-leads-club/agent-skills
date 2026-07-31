@@ -1,7 +1,7 @@
 import type { FastMCP } from 'fastmcp'
 
 import { buildIndexes } from '../../registry'
-import { registerSearchTool } from '../search-tool'
+import { SearchSkillsOutputSchema, registerSearchTool } from '../search-tool'
 import { createRegistry } from './helpers'
 
 type RegisteredTool = {
@@ -29,8 +29,7 @@ describe('registerSearchTool', () => {
     const server = new FakeServer()
     const indexes = buildIndexes(createRegistry([{ name: 'aws-advisor', description: 'AWS helper.' }]))
     registerSearchTool(server as unknown as FastMCP, () => indexes)
-    const output = (await server.tool?.execute({ query: 'kubernetes' })) as string
-    const parsed = JSON.parse(output) as { results: unknown[]; message: string }
+    const parsed = (await server.tool?.execute({ query: 'kubernetes' })) as { results: unknown[]; message: string }
     expect(parsed.results).toEqual([])
     expect(parsed.message).toContain('No skills matched')
   })
@@ -44,11 +43,9 @@ describe('registerSearchTool', () => {
     )
     registerSearchTool(server as unknown as FastMCP, () => indexes)
 
-    const output = (await server.tool?.execute({ query: 'react' })) as string
-    const parsed = JSON.parse(output) as {
+    const parsed = (await server.tool?.execute({ query: 'react' })) as {
       results: Array<{
         name: string
-        description: string
         category: string
         usage_hint: string
         score: number
@@ -61,5 +58,19 @@ describe('registerSearchTool', () => {
     expect(parsed.results[0].category).toBe('quality')
     expect(parsed.results[0].score).toBeGreaterThanOrEqual(0)
     expect(parsed.results[0].score).toBeLessThanOrEqual(100)
+  })
+
+  // why: MCP requires a tool's structuredContent to conform to its declared outputSchema
+  it('should return a payload conforming to the declared outputSchema', async () => {
+    const server = new FakeServer()
+    const indexes = buildIndexes(
+      createRegistry([{ name: 'react-best-practices', description: 'React optimization.', category: 'quality' }]),
+    )
+    registerSearchTool(server as unknown as FastMCP, () => indexes)
+
+    for (const query of ['react', 'kubernetes-helm-chart-nothing-matches']) {
+      const payload = await server.tool?.execute({ query })
+      expect(SearchSkillsOutputSchema.safeParse(payload).success).toBe(true)
+    }
   })
 })

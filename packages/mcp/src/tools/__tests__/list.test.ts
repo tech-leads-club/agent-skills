@@ -1,5 +1,5 @@
 import { buildListSkillsResponse } from '../core/list'
-import { ListSkillsParamsSchema } from '../list-tool'
+import { ListSkillsOutputSchema, ListSkillsParamsSchema } from '../list-tool'
 import { createSkillEntry } from './helpers'
 
 describe('list_skills parameters schema', () => {
@@ -60,6 +60,15 @@ describe('buildListSkillsResponse', () => {
     const output = buildListSkillsResponse([createSkill({ description })], 160)
     const listed = output.categories[0].skills[0].description
     expect(listed).toBe('Supports version 1.2 for compatibility checks.')
+  })
+
+  // why: MCP requires a tool's structuredContent to conform to its declared outputSchema
+  it('should return a payload conforming to the declared outputSchema', () => {
+    const output = buildListSkillsResponse(
+      [createSkill({ name: 'alpha', category: 'quality' }), createSkill({ name: 'beta', category: 'development' })],
+      120,
+    )
+    expect(ListSkillsOutputSchema.safeParse(output).success).toBe(true)
   })
 })
 
