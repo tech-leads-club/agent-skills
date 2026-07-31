@@ -12,3 +12,9 @@ export const OPTIONAL_REFERENCE_DIRS = ['scripts/', 'references/', 'assets/'] as
 
 /** Max number of reference file paths to show in read_skill output. */
 export const MAX_REFERENCE_FILES_DISPLAY = 50
+
+/** Directory where prepare_skill_files materializes verified skill files for execution. */
+export const STAGING_DIR_NAME = 'agent-skills-mcp'
+
+/** How long a staged skill directory is considered fresh before it is rewritten. */
+export const STAGING_TTL_MS = 24 * 60 * 60 * 1000

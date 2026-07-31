@@ -8,6 +8,7 @@ import { buildIndexes, getRegistry } from './registry'
 import { registerResources } from './resources'
 import { registerFetcherTool } from './tools/fetcher-tool'
 import { registerListTool } from './tools/list-tool'
+import { registerPrepareTool } from './tools/prepare-tool'
 import { registerSearchTool } from './tools/search-tool'
 import { registerSkillTool } from './tools/skill-tool'
 import type { Indexes } from './types'
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
   registerListTool(server, getIndexes)
   registerSkillTool(server, getIndexes)
   registerFetcherTool(server, getIndexes)
+  registerPrepareTool(server, getIndexes)
   registerResources(server, getRegistry)
   registerPrompts(server, getIndexes)
 
