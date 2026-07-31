@@ -135,7 +135,7 @@ Discover requirements with two tracks (from the profile's `REQS`). Run both; use
 
 Extract the ticket/issue reference from the branch name or PR body, then fetch it with whatever the environment allows. Adapt to the tracker present:
 - GitHub issue `#N` → `gh issue view {N} --json title,body` (or the `owner/repo#N` form).
-- Jira `KEY-123` → the project's Jira API/CLI, e.g. `curl -su "$JIRA_USER:$JIRA_API_TOKEN" "$JIRA_BASE_URL/rest/api/2/issue/KEY-123?fields=summary,description"`.
+- Jira `KEY-123` → the project's configured Jira CLI or Atlassian MCP (issue summary + description + acceptance criteria). Use only host/credentials already configured in the environment — never invent or hardcode a Jira host.
 - Linear / other → whatever the project documents.
 
 Parse acceptance criteria, user stories, and DoD items. If no reference or credentials, skip Track A and fall through to Track B.
@@ -302,7 +302,7 @@ If no findings across all subagents: post `✅ No issues found across all review
 
 ## Examples
 
-**A — Requirements binds to whatever the repo has.** In a repo whose branch is `feat/PLAT-482-trial`, Track A extracts `PLAT-482`, fetches the Jira ticket (`curl -su "$JIRA_USER:$JIRA_API_TOKEN" .../issue/PLAT-482?fields=summary,description`), and scores its acceptance criteria against the diff → `Sources: Jira: PLAT-482`. In a second repo with no tracker but a `.specs/checkout/spec.md` linked from the PR body, Track B reads that spec and scores its requirement IDs. In a third repo with neither but a `docs/adr/0007-rate-limits.md` referenced in the PR, Track B treats the ADR's Decision/Consequences as the criteria. A fourth repo with none of these → post the skip line and stop. Same subagent, four outcomes — driven entirely by the project profile.
+**A — Requirements binds to whatever the repo has.** In a repo whose branch is `feat/PLAT-482-trial`, Track A extracts `PLAT-482`, fetches that issue via the project's configured Jira CLI/MCP, and scores its acceptance criteria against the diff → `Sources: Jira: PLAT-482`. In a second repo with no tracker but a `.specs/checkout/spec.md` linked from the PR body, Track B reads that spec and scores its requirement IDs. In a third repo with neither but a `docs/adr/0007-rate-limits.md` referenced in the PR, Track B treats the ADR's Decision/Consequences as the criteria. A fourth repo with none of these → post the skip line and stop. Same subagent, four outcomes — driven entirely by the project profile.
 
 **B — Architecture extracts its own matrix.** Repo X documents conventions in `CONTRIBUTING.md`; Phase 1 turns its "must/never" bullets into Rules 1–12 and the diff is graded against them. Repo Y instead ships a project-local `.cursor/skills/modular-architecture/SKILL.md`; the subagent loads it and extracts that skill's checklist as the matrix. Repo Z has no convention docs at all → the subagent states so and runs only the minimal generic boundary sweep. No stack rules are ever hardcoded.
 
