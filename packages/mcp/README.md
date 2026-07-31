@@ -18,9 +18,22 @@ You can use **both**: install your go-to skills with the CLI and add the MCP so 
 
 When the agent needs a skill mid-session, loading the full catalog would be wasteful. This server provides a **three-step workflow** — search by intent, load the right skill, then fetch only the references needed — so the agent finds skills in one tool call and doesn't overfetch or guess names.
 
+The three steps map onto the three levels of **progressive disclosure**, and each level pays only for itself:
+
+| Level | Tool | What loads | Typical cost |
+| :---- | :--- | :--------- | :----------- |
+| 1 — Discovery | `search_skills` | `name`, `category`, `usage_hint`, score | ~50–250 tokens for up to 5 candidates |
+| 2 — Activation | `read_skill` | `SKILL.md` body, frontmatter stripped, plus the reference index | the skill body only — a few thousand tokens |
+| 3 — Execution | `fetch_skill_files` | Only the `references/`, `scripts/`, `assets/` the instructions asked for | Bounded at ~12.5k tokens per call |
+| 3 — Execution | `prepare_skill_files` | Nothing — files land on disk, the agent gets `file://` links | ~700 tokens for a whole skill |
+
+Level 3 has two doors because skills use their bundled files in two different ways. A file under `references/` is meant to be **read**, so `fetch_skill_files` returns its text. A file under `scripts/` is meant to be **run** — skill instructions invoke them by path, e.g. `node $SKILL_DIR/scripts/render.mjs` — so `prepare_skill_files` writes the verified file to disk and returns a `file://` resource link instead of its contents. Staging cost is flat: a handful of tokens per file, regardless of file size.
+
 For explicit catalog browsing requests, there is also a dedicated `list_skills` tool that returns a compact category-grouped list with truncated descriptions.
 
-Search is powered by **Fuse.js**: fuzzy matching over name, extracted trigger keywords, description, and category, with extended operators and relevance scoring (0–100 + match quality).
+Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted trigger keywords, description, and category, with relevance scoring (0–100 + match quality). Natural intent phrases work directly — no query syntax to learn.
+
+`search_skills` and `list_skills` declare an MCP `outputSchema`, so clients receive validated `structuredContent` plus a JSON text fallback.
 
 ## 🛠️ Tools
 
@@ -32,6 +45,7 @@ Search is powered by **Fuse.js**: fuzzy matching over name, extracted trigger ke
 > **Returns:** Available skills grouped by `category`, each with `name` and truncated `description`, plus `total_skills` and `total_categories`.
 > **Constraints:** Do not call proactively during normal search/read/fetch workflow.
 
+- Returns `structuredContent` validated against the tool's `outputSchema`, with a JSON text fallback
 - Designed for low token usage with compact JSON output
 - Uses in-memory index data (no extra registry fetch on execution)
 - Returns only currently available skills for use
@@ -40,20 +54,22 @@ Search is powered by **Fuse.js**: fuzzy matching over name, extracted trigger ke
 
 > **Step 1 of 3** in the skill workflow. Always call this before `read_skill`.
 > **When:** The user needs help with a technical task (implement, refactor, test, deploy, review, etc.).
-> **Input:** A concise intent phrase, e.g. `typescript api error handling`, `react component testing`.
-> **Returns:** Up to 5 skills ranked by relevance with `name`, `description`, `category`, `usage_hint`, `score` (0-100), and `match_quality`.
+> **Input:** A concise intent phrase in English, e.g. `typescript api error handling`, `react component testing`.
+> **Returns:** Up to 5 skills ranked by relevance with `name`, `category`, `usage_hint`, `score` (0-100), and `match_quality`.
 > **Then:** Pick the highest-scoring match and call `read_skill` with its name.
-> **Tips:** Multi-word queries use AND logic. Use `|` for OR (e.g. `react | vue testing`). Use `=` for exact match.
 
 **Search features:**
 
-- Fuzzy matching via Fuse.js with **extended search operators** (AND, OR `|`, exact `=`, prefix `^`)
+- **Per-token fuzzy matching** (`useTokenSearch` + `ignoreLocation`): each word is scored independently, anywhere in the field, so natural phrases match without query operators
 - **Weighted fields:** `name` (0.45), extracted `triggers` (0.30), `description` (0.20), `category` (0.05)
 - **Trigger extraction:** Automatically parses "Triggers on...", "Use when...", and "Keywords -..." patterns from descriptions into a high-signal index field
-- **Relevance scoring:** Each result includes a 0-100 score and a human-readable `match_quality` label (`exact` / `strong` / `partial` / `weak`)
+- **Relevance scoring:** Each result includes a 0-100 score and a human-readable `match_quality` label (`exact` ≥45 / `strong` ≥30 / `partial` ≥20 / `weak`)
+- **Noise floor:** `weak` matches are dropped. Fuzzy matching returns a ranked list for *any* query, including one no skill answers, so without a floor the agent receives near-zero-scoring results it might act on. It now gets `results: []` and can conclude no skill applies.
+- Returns `structuredContent` validated against the tool's `outputSchema`, with a JSON text fallback
+- Omits the full `description` from results — `usage_hint` carries the gist, and `read_skill` provides the rest
 - Minimum match character length of 2 to avoid noise
 - Empty query → `UserError("Query cannot be empty")`
-- No matches → empty array with explanatory message
+- No matches (or only `weak` ones) → empty array with explanatory message
 
 ### `read_skill`
 
@@ -63,6 +79,7 @@ Search is powered by **Fuse.js**: fuzzy matching over name, extracted trigger ke
 > **Then:** Apply the skill instructions. Only call `fetch_skill_files` if the instructions reference specific files you need.
 
 - Fetches `SKILL.md` explicitly from `files[]` as the main skill instructions
+- **Strips the YAML frontmatter** before returning: `name` and `description` are the level-1 discovery payload the agent already got from `search_skills`, so resending them duplicates that payload and puts registry metadata ahead of the instructions. Integrity is unaffected — the `contentHash` is verified over the original bytes first.
 - Reference list includes only paths under `scripts/`, `references/`, and `assets/`
 - Returns two separate content blocks: main content + compact reference list (capped at 50 paths)
 - Skill with only one file returns a single content block (no empty second block)
@@ -80,6 +97,22 @@ Search is powered by **Fuse.js**: fuzzy matching over name, extracted trigger ke
 - Accepts only paths under `scripts/`, `references/`, and `assets/` from `read_skill`
 - Fetches valid files in parallel (`Promise.allSettled`)
 - Partial failure: returns successful content and notes failed paths — does not abort the entire response
+- **Response budget of 50,000 chars (~12.5k tokens):** files are emitted in the requested order; anything beyond the budget is truncated or omitted, and the response names what was left out so the agent can request it in a follow-up call. Without this, five large reference files could exceed the 25k-token cap agents apply to tool responses.
+- Use this for files meant to be **read**. For files meant to be **run**, use `prepare_skill_files`.
+
+### `prepare_skill_files`
+
+> **Step 3 of 3 (alternative to `fetch_skill_files`).** Writes a skill's files to disk so the agent can execute them.
+> **When:** The skill's instructions tell the agent to run something (`node $SKILL_DIR/scripts/render.mjs`, `python <path-to-skill>/scripts/check.py`).
+> **Input:** `skill_name` + optional `file_paths` (defaults to every `scripts/`, `references/`, `assets/` file).
+> **Returns:** The absolute `skill_dir` to use as `$SKILL_DIR`, plus one `resource_link` per staged file — **not** the file contents.
+> **Then:** Run the skill's command with `SKILL_DIR` set to the returned path.
+
+- **The only tool that writes to disk** — declared as `readOnlyHint: false`, `idempotentHint: true`, `destructiveHint: false`
+- Files are written under `~/.cache/agent-skills-mcp/<skill>/` (override with `SKILLS_STAGING_DIR`), mode `0600`, **without** the execute bit — running staged code takes a deliberate act (invoking an interpreter), never an accidental one
+- **Every file is checksum-verified before being written**, so nothing unverified reaches the filesystem
+- Paths are validated twice against traversal: once on the registry-supplied path list, then again after resolution, because `files[]` is remote input served by the CDN
+- Uses `resource_link` with a `file://` URI — the spec's canonical shape for referencing a file without inlining it
 
 ---
 
