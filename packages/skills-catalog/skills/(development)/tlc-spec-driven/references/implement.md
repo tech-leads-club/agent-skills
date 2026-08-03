@@ -210,11 +210,16 @@ After the gate check passes:
 
    **On any failure** → rewrite or remove the affected test(s), re-run the gate, then re-run this review.
 
-   *Honest caveat:* This is an inspection-based review (model judgment), complementary to - not a replacement for - the deterministic gate. The gate confirms the test suite runs; the feature-level discrimination sensor (step 10) confirms the tests can detect regressions. This review confirms the suite is meaningful and bounded.
+   *Honest caveat:* This is an inspection-based review (model judgment), complementary to - not a replacement for - the deterministic gate. The gate confirms the test suite runs; the feature-level discrimination sensor (step 9) confirms the tests can detect regressions. This review confirms the suite is meaningful and bounded.
 
    Add the two mapping tables and a one-line adequacy verdict to the Execution Template's Post-Gate section.
 
-### 7. Atomic Git Commit
+### 7. Status + Atomic Commit (same commit)
+
+After the gate is green, close the task record **before** creating the commit, then commit code and status together. Never leave `tasks.md` still open after a successful task commit - a crash between those steps is how resume redoes finished work.
+
+1. Mark the task complete in `tasks.md`. Update requirement traceability in `spec.md` if requirement IDs are used.
+2. Create **one** atomic commit that includes the implementation, its tests, and those status/traceability updates.
 
 Each task gets its own commit immediately after verification. Never batch multiple tasks into one commit.
 
@@ -281,7 +286,8 @@ for reuse across multiple endpoints.
 
 - One task = one commit
 - Description references what was DONE, not what was planned
-- Include only files listed in the task - never sneak in "while I'm here" changes
+- Include only files listed in the task - plus the `tasks.md` / `spec.md` status updates for this task
+- Never sneak in "while I'm here" changes
 - If tests are part of the task, include them in the same commit
 
 **Deterministic check.** Validate the message before committing: `python3 <skill-dir>/scripts/check_commit.py --message "<your message>"`. A non-zero exit means fix the format first. This makes the format rule enforceable instead of memory-dependent.
@@ -305,11 +311,9 @@ During implementation, you will notice things that could be improved, refactored
 
 **The heuristic:** "Is this in my task definition?" If no, don't touch it.
 
-### 9. Update Task Status
+**Blast radius (approval ≠ remote authority):** Approving a spec or tasks authorizes local implementation and local commits only. Before `git push`, force-push, deploy, production DB migration, or any other remote / externally visible / destructive operation, STOP and get an explicit go-ahead for that action - even if Execute was already approved.
 
-Mark task complete in tasks.md. Update requirement traceability in spec.md if requirement IDs are used.
-
-### 10. Feature-Level Validation (after the LAST task - MANDATORY, always runs)
+### 9. Feature-Level Validation (after the LAST task - MANDATORY, always runs)
 
 When the task you just completed is the **last task of the feature** (or of a priority group being delivered on its own, e.g. all P1 tasks), you MUST run feature-level validation before reporting the work as done. **This is not optional and is never prompted - it runs automatically.** Do not stop at the final task's commit.
 
@@ -317,7 +321,7 @@ When the task you just completed is the **last task of the feature** (or of a pr
 
 **Layering:**
 - Per-task adequacy self-check (steps 5-6): cheap, always runs, author does it, confirms each task in isolation.
-- Feature-level validation (step 10): one trustworthy independent gate at completion, always-on, Verifier sub-agent does it.
+- Feature-level validation (step 9): one trustworthy independent gate at completion, always-on, Verifier sub-agent does it.
 
 **How to delegate to the Verifier:**
 Dispatch a fresh sub-agent following the **Verifier** role described in [sub-agents.md](sub-agents.md). Provide it with:
@@ -399,7 +403,7 @@ If you are unsure whether more tasks remain, check `tasks.md`: if every task is 
 **Status**: ✅ Complete | ❌ Blocked | ⚠️ Partial
 ```
 
-**After the LAST task:** dispatch the Verifier sub-agent (see step 10 and [sub-agents.md](sub-agents.md)) for independent feature-level validation, including the spec-anchored check and discrimination sensor. Validation always runs automatically - never prompted. Execute is not done until the Verifier reports PASS and the validation report is written, confirmed deterministically by `python3 <skill-dir>/scripts/validate_state.py <feature>` (exit non-zero = not done); see [validate.md](validate.md).
+**After the LAST task:** dispatch the Verifier sub-agent (see step 9 and [sub-agents.md](sub-agents.md)) for independent feature-level validation, including the spec-anchored check and discrimination sensor. Validation always runs automatically - never prompted. Execute is not done until the Verifier reports PASS and the validation report is written, confirmed deterministically by `python3 <skill-dir>/scripts/validate_state.py <feature>` (exit non-zero = not done); see [validate.md](validate.md).
 
 ---
 
@@ -408,12 +412,13 @@ If you are unsure whether more tasks remain, check `tasks.md`: if every task is 
 - **One task at a time** - Focus prevents errors
 - **Tools matter** - Wrong MCP = wrong approach
 - **Reuses save tokens** - Copy patterns, don't reinvent
-- **Check before commit** - Verify all criteria, then commit
+- **Status then commit, same commit** - Mark `tasks.md` complete before the atomic commit and include that update in it
 - **Stay surgical** - Touch only what's necessary
 - **Commit per task** - Clean git history enables bisect and rollback
 - **Never "while I'm here"** - Scope creep during implementation is the #1 quality killer
+- **Approval is local** - Push, deploy, and other remote/destructive ops need an explicit go-ahead
 - **Learn from mistakes** - If something goes wrong, surface it to the user so it informs the next task
-- **Don't stop at the last commit** - Feature-level validation (step 10) is the final step of Execute, not optional
+- **Don't stop at the last commit** - Feature-level validation (step 9) is the final step of Execute, not optional
 - **Plain voice in prose** - Commit bodies and the validation summary follow the writing rules in [coding-principles.md](coding-principles.md): lead with what changed, no filler
 - **Validate the commit message** - `python3 <skill-dir>/scripts/check_commit.py --message "..."` before committing
 
