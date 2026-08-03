@@ -16,9 +16,11 @@
 | ---- | ----- | ------- |
 | `.specs/lessons.json` | script | Canonical machine state. Never hand-edit. |
 | `.specs/LESSONS.md` | script (rendered) | Human/agent-readable playbook. Read it; never write it by hand. |
-| `scripts/lessons.py` | package | The only way to mutate lessons. |
+| `<skill-dir>/scripts/lessons.py` | package | The only way to mutate lessons. Invoke via the skill directory - never `python3 scripts/lessons.py` from the project root. |
 
 `confirmed` lessons are the playbook the agent loads. `candidate` lessons are tracked but NOT trusted until corroborated across `promote_threshold` distinct features (default 2). `quarantined` lessons failed when applied and are ignored.
+
+**Invocation:** resolve `<skill-dir>` as the directory that contains this skill's `SKILL.md`, then run `python3 <skill-dir>/scripts/lessons.py ...`. The store under `.specs/` is still relative to the project root (use `--root` when cwd differs).
 
 ---
 
@@ -45,7 +47,7 @@ If `validation.md` is a clean PASS with no surviving mutants, no spec-precision 
 For each signal, phrase the lesson as **one terse, actionable, codebase-general sentence** - a rule a future feature could apply, not a restatement of this bug. Then call the script:
 
 ```bash
-python3 scripts/lessons.py add \
+python3 <skill-dir>/scripts/lessons.py add \
   --feature "[feature folder name]" \
   --signal  "[signal value from table above]" \
   --source  "[file:line | AC id | mutant id | SPEC_DEVIATION ref from validation.md]" \
@@ -70,7 +72,7 @@ After distilling, if `validation.md` contained any FAIL, surviving mutant, spec-
 If a `confirmed` lesson was loaded for this feature (see READ below) and the *same* failure recurred anyway, the guidance is not working:
 
 ```bash
-python3 scripts/lessons.py penalize --id L-NNN
+python3 <skill-dir>/scripts/lessons.py penalize --id L-NNN
 ```
 
 Two penalties quarantine it. Use sparingly and only on real repeats.
@@ -85,11 +87,11 @@ At the start of **Specify** (and again at **Design** for Large/Complex), load th
 
 ```bash
 # All confirmed lessons:
-python3 scripts/lessons.py list --status confirmed
+python3 <skill-dir>/scripts/lessons.py list --status confirmed
 
 # Or filter by the area this feature touches:
-python3 scripts/lessons.py list --status confirmed --scope billing
-python3 scripts/lessons.py list --status confirmed --query "idempotency"
+python3 <skill-dir>/scripts/lessons.py list --status confirmed --scope billing
+python3 <skill-dir>/scripts/lessons.py list --status confirmed --query "idempotency"
 ```
 
 Apply the returned lessons as guidance while writing the spec / design. Do **not** load `candidate` or `quarantined` lessons as guidance - they are not trusted. Keep the loaded set small; this runs inside the <40k token budget.
@@ -110,4 +112,4 @@ This layer is additive and self-gating (no signal → no write). To turn it off 
 
 ## Known limitation
 
-Deduplication is exact-after-normalization (lowercase, punctuation-stripped) - there are no embeddings (stdlib-only, zero-dependency by design). Near-duplicate lessons phrased differently will not merge and will each sit as separate candidates that never promote. Mitigation: follow the phrasing rules above. A future version may add embedding-based dedup.
+Deduplication is exact-after-normalization (Unicode casefold, diacritic-stripped, punctuation-stripped, any-script alnum preserved) - there are no embeddings (stdlib-only, zero-dependency by design). Near-duplicate lessons phrased differently will not merge and will each sit as separate candidates that never promote. Mitigation: follow the phrasing rules above. A future version may add embedding-based dedup.
