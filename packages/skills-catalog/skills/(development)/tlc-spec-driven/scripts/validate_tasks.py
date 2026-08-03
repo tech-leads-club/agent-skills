@@ -19,8 +19,9 @@ What it checks (heuristic markdown inspection, not a full parser):
   WARN   - the diagram could not be parsed confidently (cross-check skipped)
 
 Usage:
-  python3 scripts/validate_tasks.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict]
 
+  Invoke from the skill directory that ships this script (not the project root).
   target    Path to a tasks.md, a feature directory, or a project root.
             Omitted -> auto-detect the single feature under <root>/.specs/features/.
   --root    Project root that contains .specs/ (default: current dir).

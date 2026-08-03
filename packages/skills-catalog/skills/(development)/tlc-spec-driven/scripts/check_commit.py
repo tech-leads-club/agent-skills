@@ -11,8 +11,7 @@ or stdin. The file-path form matches how git passes the message file to a
 `commit-msg` hook, so this doubles as an optional git-level guard WITHOUT
 coupling the skill to any AI agent:
 
-    # optional, git-only, one line:
-    ln -s ../../scripts/check_commit.py .git/hooks/commit-msg   # then chmod +x
+    ln -s <skill-dir>/scripts/check_commit.py .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
 
 What it checks:
   ERROR  - header does not match  type(scope)!: description
@@ -22,9 +21,9 @@ What it checks:
   WARN   - header longer than 72 characters
 
 Usage:
-  python3 scripts/check_commit.py [msgfile]
-  python3 scripts/check_commit.py --message "feat(auth): add email validation"
-  echo "fix(cart): prevent negative quantity" | python3 scripts/check_commit.py
+  python3 <skill-dir>/scripts/check_commit.py [msgfile]
+  python3 <skill-dir>/scripts/check_commit.py --message "feat(auth): add email validation"
+  echo "fix(cart): prevent negative quantity" | python3 <skill-dir>/scripts/check_commit.py
 
 Exit codes: 0 pass, 1 violation, 2 usage error.
 """

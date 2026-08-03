@@ -19,9 +19,11 @@ dependencies. Run from the project root (the dir that contains .specs), or pass
 same way lessons.py is invoked at distillation - not a manual step.
 
 Usage:
-  python3 scripts/validate_state.py [feature]     # feature just completed
-  python3 scripts/validate_state.py               # auto-detect the sole feature,
-                                                    # or cross-check all features
+  python3 <skill-dir>/scripts/validate_state.py [feature]
+  python3 <skill-dir>/scripts/validate_state.py
+
+  Invoke from the skill directory that ships this script (not the project root).
+  Pass --root when cwd is not the project that contains .specs/.
 
 Exit codes: 0 ok, 1 a completed feature is missing a real PASS report,
             2 usage error.

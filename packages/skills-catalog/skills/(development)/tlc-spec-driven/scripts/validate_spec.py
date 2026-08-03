@@ -18,8 +18,9 @@ What it checks (heuristic markdown inspection, not a full parser):
   WARN   - open questions are not explicitly resolved
 
 Usage:
-  python3 scripts/validate_spec.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_spec.py [target] [--root DIR] [--strict]
 
+  Invoke from the skill directory that ships this script (not the project root).
   target    Path to a spec.md, a feature directory, or a project root.
             Omitted -> auto-detect the single feature under <root>/.specs/features/.
   --root    Project root that contains .specs/ (default: current dir).
