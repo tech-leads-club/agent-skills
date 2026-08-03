@@ -30,8 +30,9 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 
 1. Tests derive from the spec's acceptance criteria and assert spec-defined outcomes - they never mirror the implementation.
 2. The gate must pass (tests pass) before a task is done - the test runner decides, not self-assessment.
-3. One atomic commit per task. Never batch tasks; never weaken, skip, or delete tests to make them pass.
+3. One atomic commit per task. Mark the task complete in `tasks.md` (and update spec traceability when used) **before** that commit, and include those updates in the same commit. Never batch tasks; never weaken, skip, or delete tests to make them pass.
 4. After the LAST task, a fresh **Verifier always runs automatically** (author ≠ verifier) - spec-anchored outcome check + discrimination sensor. It is never optional and never prompted. See Sub-Agent Delegation.
+5. **Blast radius:** approving a spec or tasks authorizes local implementation and local commits only. `git push`, force-push, deploy, production DB changes, and other remote / externally visible / destructive operations require an explicit go-ahead for that action.
 
 **Deterministic gates run before human review - not from memory.** The structural gates for the spec and tasks are enforced by scripts in this skill's `scripts/` directory, so they cannot silently drift when the model forgets a step:
 
@@ -91,7 +92,9 @@ A non-zero exit means STOP and fix before proceeding. Skip a script only when no
 
 **Resume work:**
 
-Read `.specs/STATE.md` - Handoff section for in-flight state, Decisions section to re-confirm active constraints - then propose the next step.
+1. Read `.specs/STATE.md` (Handoff + Decisions).
+2. Reconcile Handoff against git (`branch`, `status --porcelain`, recent commits) and `tasks.md` - evidence wins over a stale snapshot. Full procedure: [memory.md](references/memory.md).
+3. Propose the reconciled next step before writing code.
 
 ## Context Loading Strategy
 

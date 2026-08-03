@@ -43,7 +43,7 @@ If any one is missing, skip it: an easily-reversed choice you will just reverse;
 
 ### `## Handoff` - pause snapshot (~500 tokens, overwritten each pause)
 
-Captures mid-task / in-flight state so work can resume without re-reading the full task history. This is the sole position tracker; it complements `tasks.md` by recording state that `tasks.md` does not capture.
+Captures mid-task / in-flight state so work can resume without re-reading the full task history. It complements `tasks.md` and git evidence: on resume, the Handoff is a starting hypothesis that must be reconciled against the real branch, commits, and working tree (see Resume below).
 
 **Format:**
 
@@ -87,7 +87,7 @@ If the file does not yet exist, create it with both section headers and empty bo
 | Design phase, Step 1 (Load Context) | `## Decisions` | **Read** - conform to active decisions or supersede |
 | Design phase, Tech Decisions step | `## Decisions` | **Append** - only for project-level decisions |
 | Pause work / end of session | `## Handoff` | **Replace** - overwrite Handoff section only |
-| Resume work / start of session | `## Handoff` | **Read** - load snapshot, propose next step |
+| Resume work / start of session | `## Handoff` | **Read** - load snapshot, then reconcile with git before acting |
 | Resume work / start of session | `## Decisions` | **Read** - re-confirm active constraints before designing |
 
 ---
@@ -122,8 +122,18 @@ Both are silent data loss. The section-scoped write rule is the single correctne
 
 1. Read `.specs/STATE.md` - both sections.
 2. Re-confirm active decisions from `## Decisions` - nothing superseded since last session?
-3. Read `## Handoff` - identify feature, phase/task, next step, blockers, uncommitted files, branch.
-4. Propose the next step to the user before writing any code.
+3. Read `## Handoff` - treat it as a **hypothesis** for feature, phase/task, next step, blockers, uncommitted files, branch - not as ground truth by itself.
+4. **Reconcile with git before editing anything:**
+   - Current branch vs Handoff `Branch`
+   - `git status --porcelain` (uncommitted / unexpected paths)
+   - Recent commits on the branch (messages and touched files)
+   - `tasks.md` completion marks and, when present, gate evidence / commit references
+5. **Resolve conflicts with evidence, not narrative:**
+   - A task with a green gate and an atomic commit already on the branch → do **not** redo it; mark it complete in `tasks.md` if the file still shows it open, then continue from the next incomplete task
+   - Partial unverified work in the working tree → preserve it, re-run the relevant gate, then finish the status+commit cycle
+   - Stale or missing Handoff → rebuild next-step from git + `tasks.md`, then propose that to the user
+   - Unexplained local changes you cannot map to the current task → STOP and ask; do not discard them
+6. Propose the reconciled next step to the user before writing any code.
 
 ---
 
