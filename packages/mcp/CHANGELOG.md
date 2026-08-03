@@ -1,3 +1,35 @@
+## 0.1.6 (2026-07-31)
+
+### 🚀 Features
+
+- **mcp:** reclaim superseded staging revisions ([f7cc3852d](https://github.com/tech-leads-club/agent-skills/commit/f7cc3852d))
+- **mcp:** stage skill files on disk so agents can execute them ([21520a791](https://github.com/tech-leads-club/agent-skills/commit/21520a791))
+- **mcp:** return structuredContent for the JSON tools ([980cbd163](https://github.com/tech-leads-club/agent-skills/commit/980cbd163))
+
+### 🩹 Fixes
+
+- **mcp:** serve every bundled file the registry declares ([4805b5e60](https://github.com/tech-leads-club/agent-skills/commit/4805b5e60))
+- **mcp:** test the dry-run preview without importing the tool module ([6b3e15131](https://github.com/tech-leads-club/agent-skills/commit/6b3e15131))
+- **mcp:** make skill search return relevant results again ([1b20d1577](https://github.com/tech-leads-club/agent-skills/commit/1b20d1577))
+- **security:** pin skills CDN version and verify content hashes ([e091b637e](https://github.com/tech-leads-club/agent-skills/commit/e091b637e))
+
+### 🔥 Performance
+
+- **mcp:** cut the fixed cost of tools/list ([85dd32647](https://github.com/tech-leads-club/agent-skills/commit/85dd32647))
+- **mcp:** stop overspending context in disclosure levels 2 and 3 ([568582cae](https://github.com/tech-leads-club/agent-skills/commit/568582cae))
+
+### 💅 Refactors
+
+- **mcp:** make staging additive so its annotations are literally true ([154e1171a](https://github.com/tech-leads-club/agent-skills/commit/154e1171a))
+
+### 📖 Documentation
+
+- **mcp:** document the progressive-disclosure levels ([c0ce145a7](https://github.com/tech-leads-club/agent-skills/commit/c0ce145a7))
+
+### ❤️ Thank You
+
+- felipfr
+
 ## 0.1.5 (2026-07-20)
 
 This was a version bump only for @tech-leads-club/agent-skills-mcp to align it with other projects, there were no code changes.
