@@ -18,7 +18,7 @@ USEFULNESS_PLANTS = (
     {
         "id": "S901",
         "expected_family": "SLIM",
-        "title": "Plant: generic clean-code theory",
+        "title": "Clean coding tips",
         "body": (
             "# Clean Coding Tips\n\n"
             "- Prefer clear variable names and small functions.\n"
@@ -30,7 +30,7 @@ USEFULNESS_PLANTS = (
     {
         "id": "S902",
         "expected_family": "SLIM",
-        "title": "Plant: product fluff",
+        "title": "Assistant highlights",
         "body": (
             "# Assistant Highlights\n\n"
             "- Works with natural language.\n"
@@ -41,15 +41,16 @@ USEFULNESS_PLANTS = (
     {
         "id": "S903",
         "expected_family": "KEEP-CORE",
-        "title": "Plant: repo-boundary policy",
+        "title": "Module boundary rule",
         "body": (
-            "# Cross-Boundary Persistence Rule\n\n"
+            "# Module Boundary Rule\n\n"
             "## Critical\n\n"
-            "- Never export ORM repositories across package or subdomain boundaries.\n"
-            "- Controllers/resolvers must not inject repositories; call services or facades only.\n"
-            "- Writes that touch persistence must use the project's declared transaction decorator "
-            "with the correct connection name for that module.\n"
-            "- If another module needs data, go through that module's facade — not its repository.\n"
+            "- Never reach into another module's private storage or internal data access layer.\n"
+            "- Call only that module's documented public API (service, facade, or exported interface).\n"
+            "- Writes that span modules must use the project's declared transaction or unit-of-work "
+            "boundary for the owning module — do not open a second write path around it.\n"
+            "- If you need data owned elsewhere, go through that owner module; do not import its "
+            "internal repositories, tables, or storage helpers.\n"
         ),
     },
 )
@@ -125,7 +126,8 @@ def main() -> int:
                 "id": plant["id"],
                 "tier": "T1",
                 "name": plant["title"],
-                "path": f"(plant)/{plant['id']}.md",
+                # invariant: judge-facing path must not contain the word "plant"
+                "path": f"(deck)/{plant['id']}.md",
                 "is_plant": True,
                 "chars": len(plant["body"]),
                 "outline": section_outline(plant["body"]),
@@ -169,7 +171,7 @@ def main() -> int:
         "- OVERLAP must cite the other harness surface path.",
         "- REPO-DEMONSTRATED must cite a concrete example file an agent would open.",
         "- Default UNCLEAR when unsure. Do not mark SLIM on methodology skills without evidence.",
-        "- Score plants S9xx with the same rubric; you do not know which are plants.",
+        "- Score every ID including S9xx with the same rubric.",
         "",
         f"## Surfaces ({len(surfaces)})",
         "",

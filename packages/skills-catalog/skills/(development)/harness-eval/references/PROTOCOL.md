@@ -69,7 +69,7 @@ Judgment is separate from remediation. Reports suggest; humans approve Slim/Ship
 | Manifest echo ×2 | REDUNDANT |
 | Generic fluff ×2 | REDUNDANT |
 | Fixed secrets policy | KEEP |
-| Fixed bundling/persistence caveat | KEEP |
+| Fixed local-vs-CI env caveat | KEEP |
 
 KEEP plants must **not** be verbatim copies of claims already in the deck.
 
@@ -101,7 +101,7 @@ KEEP plants must **not** be verbatim copies of claims already in the deck.
 |----------|-----------------|
 | Generic clean-code theory surface | SLIM |
 | Product-fluff surface | SLIM |
-| Cross-boundary persistence policy surface | KEEP-CORE |
+| Cross-module boundary / public-API policy surface | KEEP-CORE |
 
 **Trap gate:** miss ≤ 1 plant family on Judge2 → PASS; else discard Slim band.
 

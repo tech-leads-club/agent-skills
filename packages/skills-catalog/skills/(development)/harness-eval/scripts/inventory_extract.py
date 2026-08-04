@@ -150,8 +150,8 @@ def extract_skill_refs(root: Path, text: str) -> list[Path]:
         raw = m.group(1) or m.group(2)
         if not raw:
             continue
-        # why: domain nouns collide with skill-id patterns
-        if raw in {"package", "module", "aggregate", "shared", "content", "billing", "identity"}:
+        # why: common English nouns collide with skill-id patterns
+        if raw in {"package", "module", "shared", "project", "service", "system"}:
             continue
         sk = resolve_skill_by_name(root, raw)
         if sk:
@@ -598,9 +598,9 @@ def build_plants(commands: list[str]) -> list[Claim]:
             tier="PLANT",
             source="plant:caveat_echo",
             quote=(
-                "Known issue: some bundled production starts fail entity discovery when "
-                "persistence globs resolve against the bundle directory instead of source; "
-                "prefer the project's test bootstrap path when validating persistence."
+                "Known caveat: commands that pass locally can still fail in CI when they "
+                "depend on machine-local env vars or secrets that are not present in the "
+                "pipeline; prefer the project's documented CI entrypoint when validating."
             ),
             is_plant=True,
             plant_template="caveat_echo",

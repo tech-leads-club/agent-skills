@@ -1,6 +1,6 @@
 ---
 name: harness-eval
-description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness init/setup (harness-init), feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.
+description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
@@ -150,7 +150,7 @@ Actions: Steps 7–11 on that `RUN_ID` (inventory must already exist).
 
 ### Example 3: Wrong skill
 
-User says: "setup harness" → harness-init. User says: "specify feature" → tlc-spec-driven.
+User says: "setup harness" / "init harness" → harness setup (not this skill). User says: "specify feature" → tlc-spec-driven.
 
 ## Troubleshooting
 

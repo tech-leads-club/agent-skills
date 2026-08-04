@@ -879,7 +879,7 @@
     },
     {
       "name": "harness-eval",
-      "description": "Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness init/setup (harness-init), feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.",
+      "description": "Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.",
       "category": "development",
       "path": "(development)/harness-eval",
       "files": [
@@ -896,7 +896,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.4.1",
-      "contentHash": "b5917d70d7c4cf58d26d0eaddeb9138c6ea6df5547f46ac58921e7a93f32f74c"
+      "contentHash": "c08e944c66b24afda2bac8f20452fafbcaef1a44e343208324e1179fae02a571"
     },
     {
       "name": "jira-assistant",
