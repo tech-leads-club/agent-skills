@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness-eval/claims.schema.json",
+  "title": "HarnessEvalClaim",
+  "type": "object",
+  "required": ["id", "tier", "source", "quote", "is_plant"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[CP][0-9]{3}$" },
+    "tier": { "type": "string", "enum": ["T0", "T1", "T2", "PLANT"] },
+    "source": { "type": "string" },
+    "quote": { "type": "string", "minLength": 1 },
+    "is_plant": { "type": "boolean" },
+    "section": { "type": "string" },
+    "plant_template": {
+      "type": "string",
+      "enum": ["manifest_echo", "generic_fluff", "policy_echo", "caveat_echo"]
+    }
+  }
+}
