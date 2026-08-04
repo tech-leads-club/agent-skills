@@ -552,38 +552,50 @@ def extract_claims_from_file(root: Path, path: Path, *, skill_mode: bool) -> lis
     return out
 
 
+# invariant: judge-facing tier/source must not reveal plants (trap-key keeps the truth)
+_PLANT_DECK = {
+    "manifest_echo": ("T0", "AGENTS.md"),
+    "generic_fluff": ("T1", ".agents/skills/workflow-tips/SKILL.md"),
+    "policy_echo": ("T0", "AGENTS.md"),
+    "caveat_echo": ("T0", "AGENTS.md"),
+}
+
+
 def build_plants(commands: list[str]) -> list[Claim]:
     plants: list[Claim] = []
     echoes = list(commands[:2])
     while len(echoes) < 2 and commands:
         echoes.append(commands[0])
     for idx, cmd in enumerate(echoes[:2]):
+        tier, source = _PLANT_DECK["manifest_echo"]
         plants.append(
             Claim(
                 id=f"P{idx+1:03d}",
-                tier="PLANT",
-                source="plant:manifest_echo",
+                tier=tier,
+                source=source,
                 quote=f"Run the project script `{cmd}` when you need that workflow.",
                 is_plant=True,
                 plant_template="manifest_echo",
             )
         )
     for idx, fluff in enumerate(GENERIC_FLUFF):
+        tier, source = _PLANT_DECK["generic_fluff"]
         plants.append(
             Claim(
                 id=f"P{idx+3:03d}",
-                tier="PLANT",
-                source="plant:generic_fluff",
+                tier=tier,
+                source=source,
                 quote=fluff,
                 is_plant=True,
                 plant_template="generic_fluff",
             )
         )
+    tier, source = _PLANT_DECK["policy_echo"]
     plants.append(
         Claim(
             id="P005",
-            tier="PLANT",
-            source="plant:policy_echo",
+            tier=tier,
+            source=source,
             quote=(
                 "Never commit secrets, API keys, or credentials into the repository; "
                 "use environment configuration outside version control."
@@ -592,11 +604,12 @@ def build_plants(commands: list[str]) -> list[Claim]:
             plant_template="policy_echo",
         )
     )
+    tier, source = _PLANT_DECK["caveat_echo"]
     plants.append(
         Claim(
             id="P006",
-            tier="PLANT",
-            source="plant:caveat_echo",
+            tier=tier,
+            source=source,
             quote=(
                 "Known caveat: commands that pass locally can still fail in CI when they "
                 "depend on machine-local env vars or secrets that are not present in the "
@@ -613,8 +626,8 @@ def write_claims_md(path: Path, claims: list[Claim], run_id: str) -> None:
     lines = [
         f"# Blind claim deck — run `{run_id}`",
         "",
-        "> Score every row. Some rows may be synthetic plants.",
-        "> Do NOT read trap-key.json, Judge1 scores, or prior agreement reports.",
+        "> Score every row. Some rows may be synthetic calibration rows.",
+        "> Do NOT read trap-key.json, claims.jsonl, Judge1 scores, or prior agreement reports.",
         "> README is out of harness scope — do not cite it as rediscovery evidence.",
         "",
         "## Rubric",

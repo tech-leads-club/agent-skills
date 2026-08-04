@@ -46,7 +46,7 @@ USEFULNESS_PLANTS = (
             "# Module Boundary Rule\n\n"
             "## Critical\n\n"
             "- Never reach into another module's private storage or internal data access layer.\n"
-            "- Call only that module's documented public API (service, facade, or exported interface).\n"
+            "- Call only that module's documented public API or exported interface.\n"
             "- Writes that span modules must use the project's declared transaction or unit-of-work "
             "boundary for the owning module — do not open a second write path around it.\n"
             "- If you need data owned elsewhere, go through that owner module; do not import its "

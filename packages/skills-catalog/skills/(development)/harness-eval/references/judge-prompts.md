@@ -36,7 +36,7 @@ Rules:
 - Hard rule: cost ≥ 2 → never REDUNDANT-*.
 - Default KEEP/UNCLEAR when unsure.
 - Score ALL IDs including P00x (you do not know which are plants).
-- You MAY read <RUN_DIR>/inventory.json. Do NOT read trap-key.json.
+- You MAY read <RUN_DIR>/inventory.json. Do NOT read trap-key.json or claims.jsonl.
 
 Write ONLY to:
 <RUN_DIR>/05-redundancy-j1.md
@@ -61,6 +61,7 @@ Follow the rubric in that file exactly.
 
 Hard blind constraints — do NOT read:
 - trap-key.json
+- claims.jsonl
 - 05-redundancy-j1.md
 - 07-agreement.md
 - any prior harness-eval agreement/redundancy reports outside this claims.md + inventory.json
@@ -109,7 +110,7 @@ You are Usefulness Judge1 for a stack-agnostic harness audit (Track C).
 Score EVERY surface in:
 <RUN_DIR>/surfaces.md
 
-Read the rubric at the top of that file. For each surface, open the real file on disk when the deck preview is truncated (plants have no real file — score from the fenced body only).
+Read the rubric at the top of that file. For each surface, open the real file on disk when the deck preview is truncated. If the path does not exist on disk, score from the fenced body only.
 
 Question: if this surface were deleted, and an agent could still list the repo and open 1–2 canonical examples, would behavior change?
 
@@ -120,7 +121,7 @@ Rules:
 - REPO-DEMONSTRATED must cite a concrete example file.
 - Default UNCLEAR when unsure (especially when relying on model general knowledge).
 - Score ALL IDs including S9xx (you do not know which are plants).
-- Do NOT read usefulness-trap-key.json, 09-usefulness-j2.md, or 10-usefulness-agreement.md.
+- Do NOT read usefulness-trap-key.json, surfaces.json, 09-usefulness-j2.md, or 10-usefulness-agreement.md.
 - You MAY read inventory.json and other harness files for overlap checks.
 
 Write ONLY to:
@@ -142,10 +143,11 @@ You are Usefulness Judge2 (BLIND) for a stack-agnostic harness audit (Track C).
 Score EVERY surface in:
 <RUN_DIR>/surfaces.md
 
-Read the rubric at the top of that file. Open real files when previews are truncated; plants are body-only.
+Read the rubric at the top of that file. Open real files when previews are truncated; if a path is missing on disk, score from the fenced body only.
 
 Hard blind constraints — do NOT read:
 - usefulness-trap-key.json
+- surfaces.json
 - 08-usefulness-j1.md
 - 10-usefulness-agreement.md
 - Track B score/agreement files (05/06/07) for deciding usefulness classes
