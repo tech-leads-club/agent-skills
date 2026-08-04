@@ -118,7 +118,7 @@ Rules:
 - Evidence-or-zero. Cite harness paths and/or example code paths.
 - README out of scope — never cite it.
 - OVERLAP must cite another harness surface path.
-- REPO-DEMONSTRATED must cite a concrete example file.
+- REPO-DEMONSTRATED must cite a concrete example file in the Evidence / Overlap columns of the score table only. Do not recommend adding that path into the harness surface as a `See …` replacement when trimming.
 - If another harness skill/doc hard-loads this path as source of truth or required Phase-0/load reading, prefer KEEP-CORE or MIXED (keep the checklist body) over SLIM — do not assume seed inventory is the full consumer set; search skill trees when unsure.
 - Default UNCLEAR when unsure (especially when relying on model general knowledge).
 - Score ALL IDs including S9xx (you do not know which are plants).

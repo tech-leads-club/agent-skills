@@ -169,7 +169,8 @@ def main() -> int:
         "Hard rules:",
         "- Evidence-or-zero: cite paths (harness or example code). No README as evidence.",
         "- OVERLAP must cite the other harness surface path.",
-        "- REPO-DEMONSTRATED must cite a concrete example file an agent would open.",
+        "- REPO-DEMONSTRATED must cite a concrete example file an agent would open "
+        "(score Evidence only — not a path to paste into the skill when trimming).",
         "- Default UNCLEAR when unsure. Do not mark SLIM on methodology skills without evidence.",
         "- Score every ID including S9xx with the same rubric.",
         "",

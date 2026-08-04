@@ -1,6 +1,6 @@
 # Harness Evaluation Protocol
 
-> Platform- and codebase-agnostic. Version: 1.5.0
+> Platform- and codebase-agnostic. Version: 1.5.1
 > Scripts and this file live inside the `harness-eval` skill. Run outputs go to the target repo under `.harness-eval/runs/<id>/`.
 
 ## Purpose
@@ -93,7 +93,7 @@ KEEP plants must **not** be verbatim copies of claims already in the deck.
 | Tag | Meaning |
 |-----|---------|
 | BEHAVIOR-CHANGING | Without it, wrong paths/APIs/gates are likely |
-| REPO-DEMONSTRATED | Already taught by 1–2 concrete example files |
+| REPO-DEMONSTRATED | Already taught by 1–2 concrete example files (judge evidence only — not a reason to add those paths into the skill) |
 | THEORY | General SE knowledge; no repo-specific delta |
 | OVERLAP | Same rule already in another harness surface (must cite path) |
 | ROUTING-ONLY | Triggers / purpose / load pointers |
@@ -145,3 +145,5 @@ Human-facing reports: `04-correctness.md`, `07-agreement.md`, `10-usefulness-agr
 Evidence-or-zero for BROKEN, REDUNDANT, and SLIM/THEORY; author ≠ blind judges; plants before Ship/Slim; disagree → Hold; no auto-edit.
 
 **Slim apply:** never stub/delete a path in the Slim band if `10-usefulness-agreement.md` lists it under fan-in blocked, or if a fresh `slim_fanin.py --path <P>` reports citers — update consumers in the same change first.
+
+**Mixed/Slim apply (self-contained):** When cutting REPO-DEMONSTRATED, THEORY, or OVERLAP bulk, leave the remaining BEHAVIOR-CHANGING text self-contained in the harness surface. Never replace a fenced teaching snippet (or the contract it carried) with a soft/hard pointer into `app/`, `lib/`, `test/`, or other non-harness trees. Paths cited in usefulness Evidence / REPO-DEMONSTRATED tags are for judges only.

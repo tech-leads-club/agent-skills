@@ -261,7 +261,9 @@ def main() -> int:
         "prefer re-judge on a second model if deleting >30% of a skill.",
         "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or "
         "update every citing harness surface in the same change, then re-merge.",
-        "- **Mixed:** keep BEHAVIOR-CHANGING bullets; cut THEORY / long examples that cite REPO-DEMONSTRATED paths.",
+        "- **Mixed:** keep BEHAVIOR-CHANGING bullets/snippets self-contained in the surface; "
+        "cut THEORY / REPO-DEMONSTRATED / OVERLAP bulk. Never replace a fenced teaching snippet "
+        "with `See app/...` (or other non-harness path) — those paths are judge evidence only.",
         "- **Keep-core:** do not slim for usefulness reasons.",
         "- **Hold:** no usefulness trim.",
         "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for section-level Keep-core vs Slim detail.",

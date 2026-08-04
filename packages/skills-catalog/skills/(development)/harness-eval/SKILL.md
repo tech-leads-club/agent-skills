@@ -4,7 +4,7 @@ description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.5.0
+  version: 1.5.1
 ---
 
 # Harness Eval
@@ -35,6 +35,7 @@ Run **outputs** (not protocol) go to the target repo at `.harness-eval/runs/<run
 8. **Subagents:** use an allowlisted non-fast model (prefer the same family as the parent when policy allows). Do not use `*-fast` models.
 9. **Do not equate tracks.** Track B Ship ≠ Track C Slim. Rediscoverable ≠ useless; useful ≠ non-redundant.
 10. **Slim apply / fan-in.** Never stub or delete a Slim path listed under “Slim fan-in blocked” (or when `python3 "$SKILL_DIR/scripts/slim_fanin.py" --path <P>` reports citers) unless those consumers are updated in the same change.
+11. **Mixed/Slim apply stays self-contained.** Cutting REPO-DEMONSTRATED / THEORY means delete or compress that bulk in the harness surface. Never replace a fenced teaching snippet (or the contract it carried) with `See app/...` / `lib/...` / `test/...` — that swaps SoT for a code-tree pointer. Judge evidence paths stay in score tables only; if the behavior-changing contract must survive, keep a short in-skill rule or snippet.
 
 ## Instructions
 
@@ -135,7 +136,10 @@ Summarize from the agreement reports (each starts with term definitions):
 - Call out model ids used for Track C and that Slim is model-sensitive
 - Call out any **Slim fan-in blocked** rows (consumers outside seed may appear here)
 
-Stop unless the user asks to apply Ship/Slim. When applying Slim: only paths in the Slim table (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
+Stop unless the user asks to apply Ship/Slim/Mixed. When applying:
+
+- **Slim:** only paths in the Slim table (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
+- **Mixed:** keep BEHAVIOR-CHANGING rules/snippets inside the surface; cut THEORY / REPO-DEMONSTRATED / OVERLAP bulk. Never add code-tree path pointers as substitutes for cut demos (rule 11).
 
 ## Examples
 

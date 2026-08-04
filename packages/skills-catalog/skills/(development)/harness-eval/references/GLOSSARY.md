@@ -47,7 +47,7 @@ Embedded at the top of `04-correctness.md`, `07-agreement.md`, and `10-usefulnes
 | **Slim** | Mostly theory, repo-demo fluff, or overlap — **and** fan-in PASS | **Compress or delete body** (model-sensitive) |
 | **Fan-in blocked** | Another harness surface hard-loads this path as SoT / required load | **Do not stub/delete** until those consumers are updated |
 | **BEHAVIOR-CHANGING** | Without this text, agents likely do the wrong thing | Preserve |
-| **REPO-DEMONSTRATED** | Already taught by opening 1–2 example files | Safe to cut |
+| **REPO-DEMONSTRATED** | Already taught by opening 1–2 example files (judge cites those paths as evidence) | Safe to **cut** from the skill — do **not** replace with a `See app/...` pointer |
 | **THEORY** | General software advice | Safe to cut |
 | **OVERLAP** | Same rule already in another harness file | Cut here; keep the canonical copy |
 | **ROUTING-ONLY** | Triggers / pointers | Keep short |
