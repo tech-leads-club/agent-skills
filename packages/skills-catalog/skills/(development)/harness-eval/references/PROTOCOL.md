@@ -1,7 +1,7 @@
 # Harness Evaluation Protocol
 
-> Platform- and codebase-agnostic. Version: 1.4.1
-> Scripts and this file live inside the `harness-eval` skill. Run outputs go to the target repo under `.tlc/harness-eval/runs/<id>/`.
+> Platform- and codebase-agnostic. Version: 1.5.0
+> Scripts and this file live inside the `harness-eval` skill. Run outputs go to the target repo under `.harness-eval/runs/<id>/`.
 
 ## Purpose
 
@@ -49,8 +49,11 @@ Judgment is separate from remediation. Reports suggest; humans approve Slim/Ship
 
 - Never normalize with `str.lstrip('./')` — it turns a leading-dot dir like ".agents/…" into "agents/…". Strip only a "./" prefix.
 - Skip placeholders: `SPEC_FOLDER`, `{module}`, `[feature]`, `path/to/...`, globs, `<angle>`.
-- Only check concrete prefixes: `.agents/`, `.cursor/`, `docs/`, `.tlc/`, `references/`, `package/`, `app/`, `scripts/`.
+- Only check concrete prefixes: `.agents/`, `.cursor/`, `docs/`, `.harness-eval/`, `.tlc/`, `references/`, `package/`, `app/`, `scripts/`.
 - Skip package-manager builtins (`install`, `add`, …).
+- Do not scan fenced code blocks for path cites (teaching examples stay in fences).
+- Skill-relative `references/` may resolve under another skill named in the same surface (e.g. “load the `dev` skill and read `references/view.md`”).
+- Missing `app/` / `lib/` / `test/` (and similar code-tree) cites are BROKEN only when mandate language (`load`, `open`, `must`, `required`, …) appears in the same paragraph — bare naming examples are not BROKEN.
 
 ## Track B — Redundancy
 
@@ -81,7 +84,7 @@ KEEP plants must **not** be verbatim copies of claims already in the deck.
 
 **Unit:** whole surfaces (`surfaces.md` from T0 + T1 + markdown T2), not atomic claims.
 
-**Question:** If this surface were deleted, and the agent could still list the repo and open 1–2 canonical examples, would behavior change?
+**Question:** If this surface were deleted, and the agent could still list the repo and open 1–2 canonical examples — **and any other harness surface that mandates loading this path still runs** — would behavior change?
 
 **Overall classes:** KEEP-CORE | MIXED | SLIM | ROUTING-ONLY | UNCLEAR.
 
@@ -105,7 +108,9 @@ KEEP plants must **not** be verbatim copies of claims already in the deck.
 
 **Trap gate:** miss ≤ 1 plant family on Judge2 → PASS; else discard Slim band.
 
-**Bands:** Slim = dual SLIM/ROUTING-ONLY + trap PASS; Keep-core = dual KEEP-CORE; Mixed = dual MIXED; Hold = disagree / unclear / missing.
+**Fan-in gate (deterministic, at merge — not judge-scored):** Before a dual SLIM/ROUTING-ONLY surface enters the Slim band, scan the **full** harness markdown corpus (T0 + all skill-tree `*.md` under `.agents/skills`, `.cursor/skills`, `.claude/skills` — not limited to `--seed` inventory). If another surface **hard-loads** the path (load/read/open mandate, “source of truth”, “extract … from”, Phase 0 load lists, etc.), move it to **Hold** with reason `slim-fanin-blocked`. Mere index-table mentions without mandate language do not block. Detail: `slim-fanin.json`.
+
+**Bands:** Slim = dual SLIM/ROUTING-ONLY + trap PASS + fan-in PASS; Keep-core = dual KEEP-CORE; Mixed = dual MIXED; Hold = disagree / unclear / missing / slim-fanin-blocked.
 
 ### Model sensitivity (Track C)
 
@@ -127,10 +132,10 @@ python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID"
 # python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID" --seed AGENTS.md
 python3 "$SKILL_DIR/scripts/track_a_correctness.py" --root . --run-id "$RUN_ID"
 # Track B judges → 05-redundancy-j1.md, 06-blind-scores.md
-python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .tlc/harness-eval/runs/$RUN_ID
+python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .harness-eval/runs/$RUN_ID
 python3 "$SKILL_DIR/scripts/surfaces_extract.py" --root . --run-id "$RUN_ID"
 # Track C judges → 08-usefulness-j1.md, 09-usefulness-j2.md
-python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .tlc/harness-eval/runs/$RUN_ID
+python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
 Human-facing reports: `04-correctness.md`, `07-agreement.md`, `10-usefulness-agreement.md` — each starts with **What these words mean**. Full glossary: skill `references/GLOSSARY.md`.
@@ -138,3 +143,5 @@ Human-facing reports: `04-correctness.md`, `07-agreement.md`, `10-usefulness-agr
 ## Safety
 
 Evidence-or-zero for BROKEN, REDUNDANT, and SLIM/THEORY; author ≠ blind judges; plants before Ship/Slim; disagree → Hold; no auto-edit.
+
+**Slim apply:** never stub/delete a path in the Slim band if `10-usefulness-agreement.md` lists it under fan-in blocked, or if a fresh `slim_fanin.py --path <P>` reports citers — update consumers in the same change first.

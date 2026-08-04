@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Merge Track C usefulness Judge1/Judge2 scores + trap key into Slim/Keep/Hold."""
+"""Merge Track C usefulness Judge1/Judge2 scores + trap key into Slim/Keep/Hold.
+
+Applies a deterministic Slim fan-in gate: dual SLIM/ROUTING-ONLY surfaces that are
+hard-loaded as SoT by another harness surface are moved to Hold (not Slim).
+"""
 
 from __future__ import annotations
 
@@ -9,6 +13,10 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
+
+# why: fan-in lives beside this script inside the skill package
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from slim_fanin import find_mandate_fanin, infer_root_from_run_dir, normalize_cite  # noqa: E402
 
 ROW_RE = re.compile(
     r"^\|\s*(?P<id>S\d{3})\s*\|\s*(?P<overall>[A-Z-]+)\s*\|",
@@ -57,8 +65,15 @@ def load_surfaces(path: Path) -> dict[str, dict]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run-dir", type=Path, required=True)
+    ap.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Repo root for fan-in scan (default: parent of .harness-eval/)",
+    )
     args = ap.parse_args()
-    run = args.run_dir
+    run = args.run_dir.resolve()
+    root = (args.root or infer_root_from_run_dir(run)).resolve()
     j1, m1 = parse_scores(run / "08-usefulness-j1.md")
     j2, m2 = parse_scores(run / "09-usefulness-j2.md")
     surfaces = load_surfaces(run / "surfaces.json")
@@ -76,6 +91,9 @@ def main() -> int:
     trap_pass = len(misses) <= int(trap.get("pass_threshold_misses", 1))
 
     slim, keep, mixed, hold = [], [], [], []
+    fanin_blocked: list[tuple] = []
+    fanin_report: dict[str, list] = {}
+
     for sid, surf in surfaces.items():
         if surf.get("is_plant"):
             continue
@@ -90,7 +108,18 @@ def main() -> int:
             hold.append((sid, surf, a, b, "both-unclear"))
             continue
         if a["family"] == "SLIM" and trap_pass:
-            slim.append((sid, surf, a, b))
+            path = normalize_cite(surf.get("path") or "")
+            # why: plants and missing paths have no on-disk fan-in
+            if path and not path.startswith("plant:") and (root / path).is_file():
+                hits = find_mandate_fanin(root, path)
+            else:
+                hits = []
+            if hits:
+                fanin_report[sid] = hits
+                hold.append((sid, surf, a, b, "slim-fanin-blocked"))
+                fanin_blocked.append((sid, surf, a, b, hits))
+            else:
+                slim.append((sid, surf, a, b))
         elif a["family"] == "SLIM" and not trap_pass:
             hold.append((sid, surf, a, b, "trap-fail-discard-slim"))
         elif a["family"] == "KEEP-CORE":
@@ -108,10 +137,14 @@ def main() -> int:
         "",
         f"> Run dir: `{run}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
+        f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} "
+        f"(slim-fanin-blocked={len(fanin_blocked)})",
         f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
-        "> Bands: Slim = dual SLIM/ROUTING + trap PASS; Keep-core = dual KEEP-CORE; "
-        "Mixed = dual MIXED; Hold = disagree / unclear / missing",
-        "> **Model-sensitive:** re-run with a different allowlisted model before large Slim deletes.",
+        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; "
+        "Keep-core = dual KEEP-CORE; Mixed = dual MIXED; "
+        "Hold = disagree / unclear / missing / slim-fanin-blocked",
+        "> **Model-sensitive:** re-judge on a second model before large Slim deletes.",
+        "> **Fan-in:** another harness surface hard-loads this path as SoT → Hold, not Slim.",
         "",
         "## What these words mean",
         "",
@@ -119,9 +152,10 @@ def main() -> int:
         "|------|---------|------------|",
         "| **Keep-core** | Most of the file changes agent behavior | Do **not** slim |",
         "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk |",
-        "| **Slim** | Mostly theory / repo-demo / overlap | Compress or delete body |",
-        "| **Hold** | Judges disagreed or unclear | Do nothing yet |",
-        "| **Trap PASS** | Planted traps scored correctly | Trust Slim |",
+        "| **Slim** | Mostly theory / repo-demo / overlap, **and** no other harness surface hard-loads it | Compress or delete body |",
+        "| **Hold** | Judges disagreed, unclear, or Slim blocked by fan-in | Do nothing yet (or update consumers first) |",
+        "| **Trap PASS** | Planted traps scored correctly | Necessary but not sufficient for Slim |",
+        "| **Fan-in blocked** | Another harness file mandates loading this path / treats it as SoT | Do **not** stub/delete until consumers are updated |",
         "",
         "This track answers: *does deleting this change agent behavior?* "
         "Not the same as redundancy (`07-agreement.md`).",
@@ -132,7 +166,7 @@ def main() -> int:
         f"- Slim: **{len(slim)}**",
         f"- Keep-core: **{len(keep)}**",
         f"- Mixed: **{len(mixed)}**",
-        f"- Hold: **{len(hold)}**",
+        f"- Hold: **{len(hold)}** (fan-in blocked: {len(fanin_blocked)})",
         f"- Trap misses: {misses or 'none'}",
         "",
         "## Discrimination (plants)",
@@ -160,6 +194,26 @@ def main() -> int:
         lines.append(
             f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | {a['overall']} | {b['overall']} |"
         )
+
+    lines += [
+        "",
+        "## Slim fan-in blocked (do not stub/delete)",
+        "",
+        "Dual SLIM/ROUTING-ONLY, but another harness surface hard-loads the path "
+        "(load/SoT/extract mandate). Update or drop those consumers before Slim apply.",
+        "",
+        "| ID | Path | Citers |",
+        "|----|------|--------|",
+    ]
+    if fanin_blocked:
+        for sid, surf, _a, _b, hits in fanin_blocked:
+            unique = list(dict.fromkeys(h["citer"] for h in hits))
+            citers = ", ".join(f"`{c}`" for c in unique[:8])
+            if len(unique) > 8:
+                citers += f" (+{len(unique) - 8} more)"
+            lines.append(f"| {sid} | `{surf['path']}` | {citers} |")
+    else:
+        lines.append("| — | — | none |")
 
     lines += [
         "",
@@ -203,25 +257,51 @@ def main() -> int:
         "",
         "## Action guidance",
         "",
-        "- **Slim:** high-confidence compress — still human-approve; prefer re-judge on a second model if deleting >30% of a skill.",
+        "- **Slim:** compress only after trap PASS **and** fan-in PASS; still human-approve; "
+        "prefer re-judge on a second model if deleting >30% of a skill.",
+        "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or "
+        "update every citing harness surface in the same change, then re-merge.",
         "- **Mixed:** keep BEHAVIOR-CHANGING bullets; cut THEORY / long examples that cite REPO-DEMONSTRATED paths.",
         "- **Keep-core:** do not slim for usefulness reasons.",
         "- **Hold:** no usefulness trim.",
         "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for section-level Keep-core vs Slim detail.",
+        "- Fan-in detail JSON: `slim-fanin.json`.",
         "",
     ]
     out = run / "10-usefulness-agreement.md"
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    fanin_path = run / "slim-fanin.json"
+    fanin_path.write_text(
+        json.dumps(
+            {
+                "root": str(root),
+                "blocked": {
+                    sid: {
+                        "path": surfaces[sid]["path"],
+                        "citers": hits,
+                    }
+                    for sid, hits in fanin_report.items()
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     print(
         json.dumps(
             {
                 "trap_pass": trap_pass,
+                "fanin_blocked": len(fanin_blocked),
                 "slim": len(slim),
                 "keep": len(keep),
                 "mixed": len(mixed),
                 "hold": len(hold),
                 "models": {"j1": m1, "j2": m2},
                 "report": str(out),
+                "fanin": str(fanin_path),
             },
             indent=2,
         )

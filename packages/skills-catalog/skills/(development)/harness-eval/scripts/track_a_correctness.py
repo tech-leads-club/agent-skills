@@ -24,6 +24,7 @@ CONCRETE_PREFIXES = (
     "docs/",
     ".agents/",
     ".cursor/",
+    ".harness-eval/",
     ".tlc/",
     "references/",
     "package/",
@@ -154,7 +155,7 @@ class Finding:
 
 
 def default_out(root: Path, run_id: str) -> Path:
-    return root / ".tlc" / "harness-eval" / "runs" / run_id
+    return root / ".harness-eval" / "runs" / run_id
 
 
 def rel(root: Path, path: Path) -> str:
@@ -170,6 +171,66 @@ def normalize_cite(cite: str) -> str:
     while c.startswith("./"):
         c = c[2:]
     return c
+
+
+def strip_fenced_code(text: str) -> str:
+    """Remove fenced code blocks so example paths inside fences are not cites."""
+    return re.sub(r"```.*?```", "\n", text, flags=re.S)
+
+
+# why: skill prose often says load `dev` then read references/… — resolve against that skill
+SKILL_MENTION_RE = re.compile(
+    r"[`']([a-z][a-z0-9_-]*)[`']\s+skill"
+    r"|\b(?:the|load(?:ing)?|use|using)\s+([a-z][a-z0-9_-]*)\s+skill\b",
+    re.I,
+)
+# why: pedagogical app/lib examples must not force BROKEN; only mandate language does
+# hazard: bare "read"/"write" matches doc intros ("Read before…") far from the cite
+PATH_MANDATE_RE = re.compile(
+    r"\b(load|open|must|required|touch|modify|edit|delete|restore)\b"
+    r"|\bread\s+(?:the\s+)?(?:file|path|this\s+file)"
+    r"|\bread\s+[`'][^`']+[`']",
+    re.I,
+)
+CODE_TREE_PREFIXES = (
+    "app/",
+    "apps/",
+    "lib/",
+    "src/",
+    "cmd/",
+    "internal/",
+    "spec/",
+    "test/",
+    "tests/",
+)
+
+
+_SKILL_MENTION_STOP = frozenset({"the", "a", "an", "this", "that", "each", "any", "our"})
+
+
+def mentioned_skill_names(text: str) -> list[str]:
+    names: list[str] = []
+    for m in SKILL_MENTION_RE.finditer(text):
+        name = (m.group(1) or m.group(2) or "").strip().lower()
+        if name and name not in _SKILL_MENTION_STOP and name not in names:
+            names.append(name)
+    return names
+
+
+def has_mandate_near_cite(text: str, cite: str) -> bool:
+    """True when mandate language shares the cite's paragraph (blank-line bounded)."""
+    for m in re.finditer(re.escape(cite), text):
+        before = text.rfind("\n\n", 0, m.start())
+        after = text.find("\n\n", m.end())
+        start = 0 if before < 0 else before + 2
+        end = len(text) if after < 0 else after
+        if PATH_MANDATE_RE.search(text[start:end]):
+            return True
+    return False
+
+
+def is_code_tree_cite(cite: str) -> bool:
+    return normalize_cite(cite).startswith(CODE_TREE_PREFIXES)
 
 
 def is_placeholder_cite(cite: str) -> bool:
@@ -223,7 +284,14 @@ def extract_cites(text: str) -> list[str]:
     return out
 
 
-def resolve_cite(root: Path, source: Path, cite: str) -> tuple[Path | None, list[str]]:
+def extract_surface_cites(text: str) -> list[str]:
+    """Cites from prose only — fenced examples are out of scope for Track A."""
+    return extract_cites(strip_fenced_code(text))
+
+
+def resolve_cite(
+    root: Path, source: Path, cite: str, *, text: str | None = None
+) -> tuple[Path | None, list[str]]:
     cite_norm = normalize_cite(cite)
     tried: list[str] = []
     candidates = [root / cite_norm, source.parent / cite_norm, (source.parent / cite_norm).resolve()]
@@ -236,6 +304,15 @@ def resolve_cite(root: Path, source: Path, cite: str) -> tuple[Path | None, list
             candidates.append(skill_root / cite_norm)
         except ValueError:
             pass
+    # why: "load the `dev` skill and read `references/view.md`" (also from AGENTS.md)
+    if cite_norm.startswith("references/") and text:
+        for skill_name in mentioned_skill_names(text):
+            for base in (
+                root / ".agents" / "skills" / skill_name,
+                root / ".cursor" / "skills" / skill_name,
+                root / ".claude" / "skills" / skill_name,
+            ):
+                candidates.append(base / cite_norm)
     seen: set[str] = set()
     for c in candidates:
         key = str(c)
@@ -265,7 +342,7 @@ def check_file(root: Path, source: Path, commands: set[str], finding_id: list[in
     text = source.read_text(encoding="utf-8", errors="replace")
     src = rel(root, source)
 
-    for cite in extract_cites(text):
+    for cite in extract_surface_cites(text):
         if is_placeholder_cite(cite):
             continue
         if cite.count("/") == 0 and not cite.endswith((".md", ".mdc", ".ts", ".js", ".json")):
@@ -288,8 +365,11 @@ def check_file(root: Path, source: Path, commands: set[str], finding_id: list[in
             continue
         if not is_concrete_checkable_cite(cite):
             continue
-        resolved, tried = resolve_cite(root, source, cite)
+        resolved, tried = resolve_cite(root, source, cite, text=text)
         if resolved:
+            continue
+        # invariant: missing app/lib/test paths are BROKEN only with mandate language nearby
+        if is_code_tree_cite(cite) and not has_mandate_near_cite(text, cite):
             continue
         case_hit = next((t for t in tried if t.startswith("case-mismatch:")), None)
         finding_id[0] += 1
@@ -468,6 +548,9 @@ def render_report(out_path: Path, inventory: dict, findings: list[Finding], ok_c
         "",
         "- Path normalization preserves `.agents` (never `str.lstrip('./')`).",
         "- Placeholders and bare example filenames are skipped.",
+        "- Fenced code blocks are not scanned for path cites.",
+        "- `references/` may resolve under a skill named in the same surface (e.g. load `dev`).",
+        "- Missing `app/`/`lib/`/`test/` cites are BROKEN only when mandate language is nearby.",
         "",
     ]
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -507,12 +590,15 @@ def main() -> int:
             )
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
-        for cite in extract_cites(text):
+        for cite in extract_surface_cites(text):
             if is_placeholder_cite(cite) or not is_concrete_checkable_cite(cite):
                 continue
-            resolved, _ = resolve_cite(root, p, cite)
+            resolved, _ = resolve_cite(root, p, cite, text=text)
             if resolved:
                 ok_cites += 1
+            elif is_code_tree_cite(cite) and not has_mandate_near_cite(text, cite):
+                # why: unmandated code-tree cites are pedagogical examples, not BROKEN
+                pass
         findings.extend(check_file(root, p, commands, finding_id))
 
     seen = set()

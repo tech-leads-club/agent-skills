@@ -74,7 +74,7 @@ class Inventory:
 
 
 def default_out(root: Path, run_id: str) -> Path:
-    return root / ".tlc" / "harness-eval" / "runs" / run_id
+    return root / ".harness-eval" / "runs" / run_id
 
 
 def rel(root: Path, path: Path) -> str:
@@ -171,7 +171,7 @@ def discover_from_seeds(root: Path, seeds: list[Path]) -> tuple[list[Path], list
 
 
 BARE_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])((?:references|docs|\.agents|\.cursor|\.tlc|package|app)/"
+    r"(?<![A-Za-z0-9_./-])((?:references|docs|\.agents|\.cursor|\.harness-eval|\.tlc|package|app)/"
     r"[A-Za-z0-9_./-]+\.(?:md|mdc|json|yml|yaml|ts|js|py))"
 )
 

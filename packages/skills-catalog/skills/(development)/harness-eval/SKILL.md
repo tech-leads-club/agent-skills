@@ -4,7 +4,7 @@ description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.4.1
+  version: 1.5.0
 ---
 
 # Harness Eval
@@ -21,7 +21,7 @@ This skill is **self-contained**. Protocol, scripts, and judge prompts live unde
 - Claim record shape: [references/claims.schema.json](references/claims.schema.json) (for tooling; agents do not need to load it every run).
 - Run scripts as `python3 "$SKILL_DIR/scripts/<name>.py" ...`.
 
-Run **outputs** (not protocol) go to the target repo at `.tlc/harness-eval/runs/<run-id>/`.
+Run **outputs** (not protocol) go to the target repo at `.harness-eval/runs/<run-id>/`.
 
 ## Critical rules
 
@@ -30,10 +30,11 @@ Run **outputs** (not protocol) go to the target repo at `.tlc/harness-eval/runs/
 3. **Stack-agnostic.** Never hard-code package managers, DBs, frameworks, or folder layouts in prompts or plants. Discover manifests that exist (JS, Python, Make/Task, Rust, Go, PHP, Ruby/Rails, Java/Gradle/Maven, plus `bin/*`).
 4. **Track A is high-precision.** Prefer false negatives over false BROKEN. Placeholders (`SPEC_FOLDER`, `{x}`, `[feature]`) are never BROKEN. Never normalize paths with `str.lstrip('./')`.
 5. **Track B needs dual judges + plants.** Judge2 is blind (must not read Judge1 scores or `trap-key.json`). Ship only if trap gate PASS and dual REDUNDANT with Judge2 cost ≤ 1.
-6. **Track C needs dual judges + plants.** Blind Judge2 must not read `08-usefulness-j1.md` or `usefulness-trap-key.json`. Slim only if trap PASS and dual SLIM/ROUTING-ONLY. **Usefulness is model-sensitive** — record `model: <id>` in both score files; prefer same model within a run; re-judge on a second model before large Slim deletes.
+6. **Track C needs dual judges + plants.** Blind Judge2 must not read `08-usefulness-j1.md` or `usefulness-trap-key.json`. Slim only if trap PASS, dual SLIM/ROUTING-ONLY, **and fan-in PASS** (no other harness surface hard-loads the path as SoT — merge enforces this on the full skill tree, not just `--seed`). **Usefulness is model-sensitive** — record `model: <id>` in both score files; prefer same model within a run; re-judge on a second model before large Slim deletes.
 7. **KEEP / KEEP-CORE plants must not be verbatim copies** of claims/surfaces already in the deck.
 8. **Subagents:** use an allowlisted non-fast model (prefer the same family as the parent when policy allows). Do not use `*-fast` models.
 9. **Do not equate tracks.** Track B Ship ≠ Track C Slim. Rediscoverable ≠ useless; useful ≠ non-redundant.
+10. **Slim apply / fan-in.** Never stub or delete a Slim path listed under “Slim fan-in blocked” (or when `python3 "$SKILL_DIR/scripts/slim_fanin.py" --path <P>` reports citers) unless those consumers are updated in the same change.
 
 ## Instructions
 
@@ -47,6 +48,7 @@ Set `SKILL_DIR` to the directory containing this `SKILL.md`. Verify:
 - `$SKILL_DIR/scripts/merge_agreement.py`
 - `$SKILL_DIR/scripts/surfaces_extract.py`
 - `$SKILL_DIR/scripts/merge_usefulness.py`
+- `$SKILL_DIR/scripts/slim_fanin.py`
 
 If missing, the skill install is broken — stop.
 
@@ -61,7 +63,7 @@ python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID"
 # python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID" --seed AGENTS.md
 ```
 
-Expected under `.tlc/harness-eval/runs/$RUN_ID/`: `inventory.json`, `claims.jsonl`, `claims.md`, `trap-key.json`.
+Expected under `.harness-eval/runs/$RUN_ID/`: `inventory.json`, `claims.jsonl`, `claims.md`, `trap-key.json`.
 
 ### Step 3: Track A (deterministic)
 
@@ -73,7 +75,7 @@ Expected: `04-correctness.md` (includes term definitions at top). Spot-check tha
 
 ### Step 4: Track B — Judge1
 
-Read `references/judge-prompts.md` (Track B Judge1). Spawn an independent subagent with an allowlisted model. Point it at `.tlc/harness-eval/runs/$RUN_ID/claims.md`. It writes `05-redundancy-j1.md` (include `model: <id>`).
+Read `references/judge-prompts.md` (Track B Judge1). Spawn an independent subagent with an allowlisted model. Point it at `.harness-eval/runs/$RUN_ID/claims.md`. It writes `05-redundancy-j1.md` (include `model: <id>`).
 
 Judge1 may read `inventory.json`. Must not read `trap-key.json`.
 
@@ -88,7 +90,7 @@ Prefer Steps 4 and 5 in parallel.
 ### Step 6: Merge Track B agreement
 
 ```bash
-python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .tlc/harness-eval/runs/$RUN_ID
+python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
 Expected: `07-agreement.md` (Ship/Review/Hold + **What these words mean**). On trap FAIL: fix plants per PROTOCOL, rescore P00x, re-merge — do not Ship.
@@ -118,10 +120,10 @@ Prefer Steps 8 and 9 in parallel.
 ### Step 10: Merge Track C agreement
 
 ```bash
-python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .tlc/harness-eval/runs/$RUN_ID
+python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
-Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these words mean**). On trap FAIL: do not Slim.
+Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these words mean**), plus `slim-fanin.json`. On trap FAIL: do not Slim. Surfaces with `slim-fanin-blocked` are Hold — not Slim apply candidates.
 
 ### Step 11: Present results
 
@@ -129,10 +131,11 @@ Summarize from the agreement reports (each starts with term definitions):
 
 - Track A broken count → `04-correctness.md`
 - Track B trap + Ship/Review/Hold → `07-agreement.md`
-- Track C trap + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
+- Track C trap + fan-in + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
 - Call out model ids used for Track C and that Slim is model-sensitive
+- Call out any **Slim fan-in blocked** rows (consumers outside seed may appear here)
 
-Stop unless the user asks to apply Ship/Slim.
+Stop unless the user asks to apply Ship/Slim. When applying Slim: only paths in the Slim table (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
 
 ## Examples
 
@@ -169,6 +172,10 @@ Cause: missing/allowlisted model or `*-fast` blocked. Solution: re-spawn with an
 ### Track C Slim looks wrong after model change
 
 Expected: usefulness is model-sensitive. Re-run C1+C2 on a second model; intersection of Slim bands is the safe delete set.
+
+### Slim stub broke another skill that loads that file
+
+Cause: content OVERLAP/Slim without fan-in — older runs, or apply skipped the gate. Solution: restore the checklist body; re-merge with `merge_usefulness.py` (fan-in scans full skill trees). Confirm with `slim_fanin.py --path <P>`.
 
 ### Scripts missing
 

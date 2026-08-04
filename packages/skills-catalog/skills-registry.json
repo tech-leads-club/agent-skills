@@ -891,12 +891,13 @@
         "scripts/inventory_extract.py",
         "scripts/merge_agreement.py",
         "scripts/merge_usefulness.py",
+        "scripts/slim_fanin.py",
         "scripts/surfaces_extract.py",
         "scripts/track_a_correctness.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.4.1",
-      "contentHash": "eebb2706763df7dbdf213990e554442857eceecb072584365953b33f1206bc46"
+      "version": "1.5.0",
+      "contentHash": "6d3b2bfdd137abcf712e0e1880e4c0803cb4fd0fdc60f70f3134314dfe224c2e"
     },
     {
       "name": "jira-assistant",

@@ -3,7 +3,7 @@
 Load when dispatching Track B or Track C judges. Substitute:
 
 - `REPO` = target repository root
-- `RUN_DIR` = `$REPO/.tlc/harness-eval/runs/<run-id>`
+- `RUN_DIR` = `$REPO/.harness-eval/runs/<run-id>`
 - `MODEL_ID` = allowlisted non-fast model id used for this judge (required in output headers)
 
 ---
@@ -112,17 +112,19 @@ Score EVERY surface in:
 
 Read the rubric at the top of that file. For each surface, open the real file on disk when the deck preview is truncated. If the path does not exist on disk, score from the fenced body only.
 
-Question: if this surface were deleted, and an agent could still list the repo and open 1–2 canonical examples, would behavior change?
+Question: if this surface were deleted, and an agent could still list the repo and open 1–2 canonical examples — and any other harness surface that mandates loading this path still runs — would behavior change?
 
 Rules:
 - Evidence-or-zero. Cite harness paths and/or example code paths.
 - README out of scope — never cite it.
 - OVERLAP must cite another harness surface path.
 - REPO-DEMONSTRATED must cite a concrete example file.
+- If another harness skill/doc hard-loads this path as source of truth or required Phase-0/load reading, prefer KEEP-CORE or MIXED (keep the checklist body) over SLIM — do not assume seed inventory is the full consumer set; search skill trees when unsure.
 - Default UNCLEAR when unsure (especially when relying on model general knowledge).
 - Score ALL IDs including S9xx (you do not know which are plants).
 - Do NOT read usefulness-trap-key.json, surfaces.json, 09-usefulness-j2.md, or 10-usefulness-agreement.md.
 - You MAY read inventory.json and other harness files for overlap checks.
+- A merge-time fan-in gate also blocks Slim apply when mandate citers exist; still score honestly.
 
 Write ONLY to:
 <RUN_DIR>/08-usefulness-j1.md
@@ -153,7 +155,7 @@ Hard blind constraints — do NOT read:
 - Track B score/agreement files (05/06/07) for deciding usefulness classes
 
 Rules:
-- Same counterfactual and evidence rules as Judge1.
+- Same counterfactual and evidence rules as Judge1 (including hard-load / SoT consumers outside a seeded inventory).
 - README out of scope.
 - Default UNCLEAR when unsure.
 - Score ALL IDs including S9xx.

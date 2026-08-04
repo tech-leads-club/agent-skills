@@ -57,7 +57,7 @@ USEFULNESS_PLANTS = (
 
 
 def default_run(root: Path, run_id: str) -> Path:
-    return root / ".tlc" / "harness-eval" / "runs" / run_id
+    return root / ".harness-eval" / "runs" / run_id
 
 
 def section_outline(text: str, limit: int = 40) -> list[str]:

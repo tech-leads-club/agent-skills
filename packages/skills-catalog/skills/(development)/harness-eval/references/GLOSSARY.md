@@ -44,7 +44,8 @@ Embedded at the top of `04-correctness.md`, `07-agreement.md`, and `10-usefulnes
 |------|---------|-------------------|
 | **Keep-core** | Most of the file **changes agent behavior** | **Do not slim** |
 | **Mixed** | Real behavior-changing core **plus** large theory/examples/overlap | **Keep the rules; cut the bulk** |
-| **Slim** | Mostly theory, repo-demo fluff, or overlap | **Compress or delete body** (model-sensitive) |
+| **Slim** | Mostly theory, repo-demo fluff, or overlap — **and** fan-in PASS | **Compress or delete body** (model-sensitive) |
+| **Fan-in blocked** | Another harness surface hard-loads this path as SoT / required load | **Do not stub/delete** until those consumers are updated |
 | **BEHAVIOR-CHANGING** | Without this text, agents likely do the wrong thing | Preserve |
 | **REPO-DEMONSTRATED** | Already taught by opening 1–2 example files | Safe to cut |
 | **THEORY** | General software advice | Safe to cut |
