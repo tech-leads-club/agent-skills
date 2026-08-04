@@ -36,17 +36,15 @@ MANIFEST_FILES = (
     "settings.gradle.kts",
 )
 README_RE = re.compile(r"(^|/)README[^/]*$", re.I)
-CRITICAL_HEADING_RE = re.compile(
-    r"^(#{1,6})\s+.*\b(critical rules?|critical|do not|important|never|always|"
-    r"non-negotiable|constraints?|hard rules?|execution contract)\b.*$",
-    re.I,
-)
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 BULLET_RE = re.compile(r"^(\s*)([-*+]|\d+\.)\s+(.*)$")
 BACKTICK_PATH_RE = re.compile(r"`([^`]+)`|(?<!!)\[[^\]]*\]\(([^)]+)\)")
 SKILL_SKIP_AFTER = re.compile(
-    r"^(#{1,6})\s+(examples?|references?|resources?|appendix|changelog).*$", re.I
+    r"^(#{1,6})\s+(examples?|references?|resources?|appendix|changelog|troubleshooting).*$",
+    re.I,
 )
+TABLE_SEP_RE = re.compile(r"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$")
+FENCE_RE = re.compile(r"^```")
 GENERIC_FLUFF = (
     "Prefer clear variable names and small functions when writing code.",
     "Keep layers thin and delegate work to the appropriate lower layer.",
@@ -486,31 +484,59 @@ def frontmatter_description(fm: str) -> str:
     return val.strip("\"'")
 
 
+def _is_noise_line(line: str) -> bool:
+    s = line.strip()
+    if not s:
+        return True
+    if FENCE_RE.match(s) or TABLE_SEP_RE.match(s):
+        return True
+    if s in {"---", "***", "___"}:
+        return True
+    if s.startswith(("<!--", "-->")):
+        return True
+    if re.fullmatch(r"[|:\s-]+", s):
+        return True
+    return False
+
+
 def iter_atomic_from_text(text: str, *, skill_mode: bool) -> Iterable[tuple[str, str]]:
+    """Yield (section, quote) for every substantial instruction line.
+
+    skill_mode still skips Examples/References-style sections (noise), but no longer
+    limits extraction to Critical/Important headings or Never/Always lead-ins.
+    """
     section = ""
-    in_critical = not skill_mode
-    critical_level = 0
+    skip_section = False
+    skip_level = 0
+    in_fence = False
     lines = text.splitlines()
     i = 0
     while i < len(lines):
         line = lines[i]
+        if FENCE_RE.match(line.strip()):
+            in_fence = not in_fence
+            i += 1
+            continue
+        if in_fence:
+            i += 1
+            continue
         hm = HEADING_RE.match(line)
         if hm:
             level = len(hm.group(1))
             section = hm.group(2).strip()
             if skill_mode:
-                if CRITICAL_HEADING_RE.match(line):
-                    in_critical = True
-                    critical_level = level
-                elif in_critical and level <= critical_level:
-                    in_critical = False
-                    critical_level = 0
                 if SKILL_SKIP_AFTER.match(line):
-                    in_critical = False
-                    critical_level = 0
+                    skip_section = True
+                    skip_level = level
+                elif skip_section and level <= skip_level:
+                    skip_section = False
+                    skip_level = 0
             i += 1
             continue
-        if skill_mode and not in_critical:
+        if skill_mode and skip_section:
+            i += 1
+            continue
+        if _is_noise_line(line):
             i += 1
             continue
         bm = BULLET_RE.match(line)
@@ -519,7 +545,7 @@ def iter_atomic_from_text(text: str, *, skill_mode: bool) -> Iterable[tuple[str,
             j = i + 1
             while j < len(lines):
                 nxt = lines[j]
-                if not nxt.strip() or HEADING_RE.match(nxt) or BULLET_RE.match(nxt):
+                if not nxt.strip() or HEADING_RE.match(nxt) or BULLET_RE.match(nxt) or FENCE_RE.match(nxt.strip()):
                     break
                 if nxt.startswith("  ") or nxt.startswith("\t"):
                     quote += " " + nxt.strip()
@@ -531,10 +557,10 @@ def iter_atomic_from_text(text: str, *, skill_mode: bool) -> Iterable[tuple[str,
                 yield section, quote
             i = j
             continue
-        if re.match(r"^(IMPORTANT|CRITICAL|Never|Always|Do not)\b", line.strip(), re.I):
-            q = line.strip()
-            if len(q) >= 20 and (not skill_mode or in_critical):
-                yield section, q
+        # why: claims are any substantial prose line, not only IMPORTANT/Never lead-ins
+        q = line.strip().lstrip("> ").strip()
+        if len(q) >= 20 and not q.startswith("|"):
+            yield section, re.sub(r"\s+", " ", q)
         i += 1
 
 
