@@ -12,9 +12,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+# why: doc_scope lives beside this script inside the skill package
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from doc_scope import filter_t2_paths, write_optional_docs_md  # noqa: E402
+
 T0_NAMES = ("AGENTS.md", "CLAUDE.md", ".cursorrules")
 T0_GLOBS = (".cursor/rules/**/*", ".agents/**/*.mdc", ".cursor/**/*.mdc", "*.mdc")
-T1_SKILL_GLOBS = (".agents/skills/**/SKILL.md", ".cursor/skills/**/SKILL.md")
+T1_SKILL_GLOBS = (
+    ".agents/skills/**/SKILL.md",
+    ".cursor/skills/**/SKILL.md",
+    ".claude/skills/**/SKILL.md",
+)
 # invariant: discovery is presence-based; no stack assumed at runtime
 MANIFEST_FILES = (
     "package.json",
@@ -125,7 +133,7 @@ def resolve_skill_by_name(root: Path, name: str) -> Path | None:
     if name.endswith("/SKILL.md") or name.endswith("SKILL.md"):
         p = resolve_cite(root, root / "AGENTS.md", name)
         return p if p and p.name == "SKILL.md" else None
-    for base in (".agents/skills", ".cursor/skills"):
+    for base in (".agents/skills", ".cursor/skills", ".claude/skills"):
         cand = root / base / name / "SKILL.md"
         if cand.is_file():
             return cand.resolve()
@@ -157,8 +165,14 @@ def extract_skill_refs(root: Path, text: str) -> list[Path]:
     return sorted(found)
 
 
-def discover_from_seeds(root: Path, seeds: list[Path]) -> tuple[list[Path], list[Path], list[Path]]:
-    """T0 = seeds; T1 = skills one-hop from seeds; T2 = docs/refs one-hop from T0+T1."""
+def discover_from_seeds(
+    root: Path,
+    seeds: list[Path],
+    *,
+    include_docs: set[str] | None = None,
+    include_doc_types: set[str] | None = None,
+) -> tuple[list[Path], list[Path], list[Path], dict]:
+    """T0 = seeds; T1 = skills one-hop from seeds; T2 = scoped one-hop refs/docs."""
     t0 = sorted({p.resolve() for p in seeds if p.is_file()})
     t1: set[Path] = set()
     for src in t0:
@@ -166,8 +180,14 @@ def discover_from_seeds(root: Path, seeds: list[Path]) -> tuple[list[Path], list
         for sk in extract_skill_refs(root, text):
             t1.add(sk)
     t1_list = sorted(t1)
-    t2 = discover_t2(root, t0, t1_list)
-    return t0, t1_list, t2
+    t2, scope = discover_t2(
+        root,
+        t0,
+        t1_list,
+        include_docs=include_docs,
+        include_doc_types=include_doc_types,
+    )
+    return t0, t1_list, t2, scope
 
 
 BARE_PATH_RE = re.compile(
@@ -227,7 +247,8 @@ def resolve_cite(root: Path, source: Path, cite: str) -> Path | None:
     return None
 
 
-def discover_t2(root: Path, t0: list[Path], t1: list[Path]) -> list[Path]:
+def discover_t2_candidates(root: Path, t0: list[Path], t1: list[Path]) -> list[Path]:
+    """One-hop cited files from T0/T1 (unfiltered). Scope policy applied separately."""
     found: set[Path] = set()
     skill_set = {p.resolve() for p in t1}
     t0_set = {p.resolve() for p in t0}
@@ -248,6 +269,24 @@ def discover_t2(root: Path, t0: list[Path], t1: list[Path]) -> list[Path]:
                 if not is_readme(rel_s):
                     found.add(resolved)
     return sorted(found)
+
+
+def discover_t2(
+    root: Path,
+    t0: list[Path],
+    t1: list[Path],
+    *,
+    include_docs: set[str] | None = None,
+    include_doc_types: set[str] | None = None,
+) -> tuple[list[Path], dict]:
+    """T2 after doc-scope policy: agent refs always; ADR/RFC never; other docs opt-in."""
+    candidates = discover_t2_candidates(root, t0, t1)
+    return filter_t2_paths(
+        root,
+        candidates,
+        include_docs=include_docs,
+        include_doc_types=include_doc_types,
+    )
 
 
 def _uniq(seq: Iterable[str]) -> list[str]:
@@ -700,10 +739,28 @@ def main() -> int:
         help="Scope inventory to these T0 files and one-hop related skills/docs "
         "(repeatable). Example: --seed AGENTS.md",
     )
+    ap.add_argument(
+        "--include-doc",
+        action="append",
+        default=[],
+        dest="include_docs",
+        help="Opt-in a cited non-agent doc path (repeatable). ADRs/RFCs are still excluded.",
+    )
+    ap.add_argument(
+        "--include-doc-type",
+        action="append",
+        default=[],
+        dest="include_doc_types",
+        help="Opt-in an optional doc type bucket from optional-docs-candidates "
+        "(repeatable). Example: --include-doc-type docs",
+    )
     args = ap.parse_args()
     root = args.root.resolve()
     out = args.out_base or default_out(root, args.run_id)
     out.mkdir(parents=True, exist_ok=True)
+
+    include_docs = set(args.include_docs or [])
+    include_doc_types = set(args.include_doc_types or [])
 
     if args.seed:
         seeds: list[Path] = []
@@ -715,11 +772,22 @@ def main() -> int:
                 print(f"seed not found: {s}", file=sys.stderr)
                 return 1
             seeds.append(p.resolve())
-        t0, t1, t2 = discover_from_seeds(root, seeds)
+        t0, t1, t2, scope = discover_from_seeds(
+            root,
+            seeds,
+            include_docs=include_docs,
+            include_doc_types=include_doc_types,
+        )
     else:
         t0 = discover_t0(root)
         t1 = discover_t1_skills(root)
-        t2 = discover_t2(root, t0, t1)
+        t2, scope = discover_t2(
+            root,
+            t0,
+            t1,
+            include_docs=include_docs,
+            include_doc_types=include_doc_types,
+        )
     manifests, commands = load_manifest_commands(root)
 
     inv = Inventory(
@@ -731,7 +799,20 @@ def main() -> int:
         manifests=manifests,
         manifest_commands=commands,
     )
-    (out / "inventory.json").write_text(json.dumps(asdict(inv), indent=2) + "\n", encoding="utf-8")
+    inv_payload = asdict(inv)
+    inv_payload["doc_scope"] = {
+        "included_optional_docs": scope.get("included_optional_docs", []),
+        "included_doc_types": scope.get("included_doc_types", []),
+        "excluded_decision_record_count": len(scope.get("excluded_decision_records") or []),
+        "optional_type_count": {
+            k: len(v) for k, v in (scope.get("optional_by_type") or {}).items()
+        },
+    }
+    (out / "inventory.json").write_text(json.dumps(inv_payload, indent=2) + "\n", encoding="utf-8")
+    (out / "optional-docs-candidates.json").write_text(
+        json.dumps(scope, indent=2) + "\n", encoding="utf-8"
+    )
+    write_optional_docs_md(out / "optional-docs-candidates.md", scope)
 
     claims: list[Claim] = []
     n = 1
@@ -800,6 +881,10 @@ def main() -> int:
                 "t2_files": len(t2),
                 "claims": len(claims),
                 "plants": len(plants),
+                "excluded_decision_records": len(scope.get("excluded_decision_records") or []),
+                "optional_doc_types": list((scope.get("optional_by_type") or {}).keys()),
+                "included_optional_docs": scope.get("included_optional_docs") or [],
+                "optional_docs_report": str(out / "optional-docs-candidates.md"),
                 "out": str(out),
             },
             indent=2,

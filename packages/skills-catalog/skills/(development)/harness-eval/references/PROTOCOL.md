@@ -1,6 +1,6 @@
 # Harness Evaluation Protocol
 
-> Platform- and codebase-agnostic. Version: 1.6.0
+> Platform- and codebase-agnostic. Version: 1.8.2
 > Scripts and this file live inside the `harness-eval` skill. Run outputs go to the target repo under `.harness-eval/runs/<id>/`.
 
 ## Purpose
@@ -13,15 +13,29 @@ Evaluate a repository’s **agent harness** for:
 
 Judgment is separate from remediation. Reports suggest; humans approve Slim/Ship edits.
 
+**Run gating (HIGH PRIORITY — skill opens with questionnaires):** After inventory: **Q1** (optional docs) → **Q2** (B/C budget, certainty + tokens) → **Track A always** → B/C only if approved. Do not spawn B/C judges until Q2 is answered (unless the user already requested those tracks — still show Q2 once).
+
 ## Surface inventory (tiers)
 
 | Tier | Name | Discovery |
 |------|------|-----------|
 | **T0** | Always-on rules | `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/**`, `*.mdc` under repo / `.agents/` / `.cursor/` |
-| **T1** | Skills | `.agents/skills/**/SKILL.md`, `.cursor/skills/**/SKILL.md`, plus `references/**` linked from those files |
-| **T2** | Referenced docs | One-hop paths cited by T0/T1 |
+| **T1** | Skills | `SKILL.md` under `.agents/skills`, `.cursor/skills`, `.claude/skills` (presence-based) |
+| **T2** | Referenced harness files | One-hop cites from T0/T1 after **doc scope** (below) |
 
-**Out of scope:** `README*`, app source as instruction surface (evidence only), user-global rules outside the repo, recursive crawl of all `docs/`.
+**Out of scope:** `README*`, app source as instruction surface (evidence only), user-global rules outside the repo, recursive crawl of all project docs, **ADRs / RFCs / decision-record trees**.
+
+### Doc scope (T2)
+
+Stack-agnostic path policy (see `scripts/doc_scope.py`):
+
+| Class | Rule |
+|-------|------|
+| **Agent harness refs** | Always T2 if cited — files under `.agents/skills/`, `.cursor/skills/`, `.claude/skills/` (including skill `references/`). Wins even if a skill folder is named `adr` (that is harness SoT for writing ADRs, not the decision-record corpus). |
+| **Decision records** | **Never** T2 outside skill trees — path segments like `adr` / `adrs` / `rfc` / `rfcs` / `architecture-decision-records` / `request-for-comments`, or filenames `adr-*` / `rfc-*` (e.g. `docs/adr/**`) |
+| **Other cited docs** | **Opt-in** — default omitted. Inventory writes `optional-docs-candidates.md`. Orchestrator **asks the user** which types/paths to include, then re-runs with `--include-doc-type` / `--include-doc` |
+
+Track A may still flag a broken cite *to* an ADR path from AGENTS.md (correctness of the link). The ADR body is not scored as a harness surface.
 
 ## Agnostic constraints
 
@@ -130,15 +144,28 @@ Resolve `SKILL_DIR` = directory containing this skill’s `SKILL.md`.
 ```bash
 RUN_ID=$(date -u +%Y-%m-%d)-full
 python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID"
-# Scope to AGENTS.md + one-hop related skills/docs:
+# After optional-docs-candidates.md: ask user, then e.g.:
+# python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID" --include-doc-type docs
+# Scope to AGENTS.md + one-hop related skills/refs:
 # python3 "$SKILL_DIR/scripts/inventory_extract.py" --root . --run-id "$RUN_ID" --seed AGENTS.md
+# STOP: Q1 optional docs (if candidates), then Q2 approve B/C (see skill questionnaires)
 python3 "$SKILL_DIR/scripts/track_a_correctness.py" --root . --run-id "$RUN_ID"
+# If B approved:
 # Track B judges → 05-redundancy-j1.md, 06-blind-scores.md
 python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .harness-eval/runs/$RUN_ID
+# If C approved:
 python3 "$SKILL_DIR/scripts/surfaces_extract.py" --root . --run-id "$RUN_ID"
 # Track C judges → 08-usefulness-j1.md, 09-usefulness-j2.md
 python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
+
+### Certainty and token consumption
+
+| Track | Certainty | Token consumption |
+|-------|-----------|-------------------|
+| **A** | Highest — deterministic script; no LLM | ~0 model tokens |
+| **B** | Medium — dual LLM + plants; trap gate; disagree → Hold | High — 2 × every claim |
+| **C** | Lowest / model-sensitive — dual LLM + plants + fan-in | Highest — 2 × every surface (whole files) |
 
 Human-facing reports: `04-correctness.md`, `07-agreement.md`, `10-usefulness-agreement.md` — each starts with **What these words mean**. Mixed apply plan: `11-mixed-apply.md`. Full glossary: skill `references/GLOSSARY.md`.
 
