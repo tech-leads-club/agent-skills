@@ -43,7 +43,7 @@ Embedded at the top of `04-correctness.md`, `07-agreement.md`, and `10-usefulnes
 | Term | Meaning | What you should do |
 |------|---------|-------------------|
 | **Keep-core** | Most of the file **changes agent behavior** | **Do not slim** |
-| **Mixed** | Real behavior-changing core **plus** large theory/examples/overlap | **Keep the rules; cut the bulk** |
+| **Mixed** | Real behavior-changing core **plus** large theory/examples/overlap | Follow **`11-mixed-apply.md`** (KEEP vs CUT) — do not re-judge |
 | **Slim** | Mostly theory, repo-demo fluff, or overlap — **and** fan-in PASS | **Compress or delete body** (model-sensitive) |
 | **Fan-in blocked** | Another harness surface hard-loads this path as SoT / required load | **Do not stub/delete** until those consumers are updated |
 | **BEHAVIOR-CHANGING** | Without this text, agents likely do the wrong thing | Preserve |

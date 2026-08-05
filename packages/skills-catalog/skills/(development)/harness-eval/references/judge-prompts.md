@@ -100,6 +100,8 @@ Allowed Overall values: `KEEP-CORE`, `MIXED`, `SLIM`, `ROUTING-ONLY`, `UNCLEAR`.
 
 Section tags inside Keep-core / Slim cells: `BEHAVIOR-CHANGING`, `REPO-DEMONSTRATED`, `THEORY`, `OVERLAP`, `ROUTING-ONLY`.
 
+**Keep-core / Slim cells must be actionable** (especially when Overall is MIXED): name the concrete sections, patterns, modules, or checklist items to keep vs cut (e.g. `KEEP: ApiErrors concern + error envelope`; `CUT: long BoardsController fences`). Vague cells block Mixed apply. Merge copies these cells into `11-mixed-apply.md`.
+
 **Model sensitivity:** Your prior about “general knowledge” affects THEORY vs BEHAVIOR-CHANGING. Prefer UNCLEAR over SLIM when the call is mostly your prior. Always put `model: <MODEL_ID>` in the header.
 
 ## Usefulness Judge1 prompt
@@ -125,6 +127,7 @@ Rules:
 - Do NOT read usefulness-trap-key.json, surfaces.json, 09-usefulness-j2.md, or 10-usefulness-agreement.md.
 - You MAY read inventory.json and other harness files for overlap checks.
 - A merge-time fan-in gate also blocks Slim apply when mandate citers exist; still score honestly.
+- For MIXED rows, Keep-core and Slim cells must name what to preserve vs remove so merge can build `11-mixed-apply.md`.
 
 Write ONLY to:
 <RUN_DIR>/08-usefulness-j1.md
@@ -160,6 +163,7 @@ Rules:
 - Default UNCLEAR when unsure.
 - Score ALL IDs including S9xx.
 - Record your model id.
+- For MIXED rows, Keep-core and Slim cells must be actionable (named keep vs cut) like Judge1.
 
 Write ONLY to:
 <RUN_DIR>/09-usefulness-j2.md

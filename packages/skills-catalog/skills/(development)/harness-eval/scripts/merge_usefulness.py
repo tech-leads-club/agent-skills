@@ -3,6 +3,9 @@
 
 Applies a deterministic Slim fan-in gate: dual SLIM/ROUTING-ONLY surfaces that are
 hard-loaded as SoT by another harness surface are moved to Hold (not Slim).
+
+Also emits ``11-mixed-apply.md``: the only Mixed apply input — KEEP vs CUT
+copied from judge columns so apply agents do not re-judge.
 """
 
 from __future__ import annotations
@@ -18,7 +21,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from slim_fanin import find_mandate_fanin, infer_root_from_run_dir, normalize_cite  # noqa: E402
 
+# why: full row so Mixed apply can copy Keep-core / Slim without re-opening prose
 ROW_RE = re.compile(
+    r"^\|\s*(?P<id>S\d{3})\s*"
+    r"\|\s*(?P<overall>[A-Z-]+)\s*"
+    r"\|\s*(?P<keep>.*?)\s*"
+    r"\|\s*(?P<slim>.*?)\s*"
+    r"\|\s*(?P<overlap>.*?)\s*"
+    r"\|\s*(?P<evidence>.*?)\s*"
+    r"\|\s*(?P<confidence>[^|\n]*?)\s*\|?\s*$",
+    re.M,
+)
+# why: older/partial tables may only have ID + Overall
+ROW_MIN_RE = re.compile(
     r"^\|\s*(?P<id>S\d{3})\s*\|\s*(?P<overall>[A-Z-]+)\s*\|",
     re.M,
 )
@@ -27,7 +42,6 @@ MODEL_RE = re.compile(r"model:\s*`?([^\n`]+)`?", re.I)
 SLIM_FAMILY = {"SLIM", "ROUTING-ONLY"}
 KEEP_FAMILY = {"KEEP-CORE"}
 MIXED_FAMILY = {"MIXED"}
-# why: UNCLEAR is hold-ish; dual UNCLEAR still holds rather than Slim/Keep
 
 
 def family(overall: str) -> str:
@@ -49,17 +63,122 @@ def parse_scores(path: Path) -> tuple[dict[str, dict], str | None]:
     text = path.read_text(encoding="utf-8", errors="replace")
     model_m = MODEL_RE.search(text)
     model = model_m.group(1).strip() if model_m else None
-    out = {}
+    out: dict[str, dict] = {}
     for m in ROW_RE.finditer(text):
         oid = m.group("id")
         overall = m.group("overall").upper()
-        out[oid] = {"overall": overall, "family": family(overall)}
+        out[oid] = {
+            "overall": overall,
+            "family": family(overall),
+            "keep": m.group("keep").strip(),
+            "slim": m.group("slim").strip(),
+            "overlap": m.group("overlap").strip(),
+            "evidence": m.group("evidence").strip(),
+            "confidence": m.group("confidence").strip(),
+        }
+    # why: fill any IDs missed if a row had too few columns
+    for m in ROW_MIN_RE.finditer(text):
+        oid = m.group("id")
+        if oid in out:
+            continue
+        overall = m.group("overall").upper()
+        out[oid] = {
+            "overall": overall,
+            "family": family(overall),
+            "keep": "",
+            "slim": "",
+            "overlap": "",
+            "evidence": "",
+            "confidence": "",
+        }
     return out, model
 
 
 def load_surfaces(path: Path) -> dict[str, dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
     return {s["id"]: s for s in data.get("surfaces", [])}
+
+
+def cell_or_missing(score: dict | None, key: str, *, required_for_apply: bool = False) -> str:
+    if not score:
+        return "_(missing score)_"
+    val = (score.get(key) or "").strip()
+    if not val or val == "—":
+        if required_for_apply:
+            return "_(empty — skip this path; do not invent KEEP/CUT)_"
+        return "—"
+    return val
+
+
+def write_mixed_apply(
+    run: Path,
+    mixed: list[tuple],
+    m1: str | None,
+    m2: str | None,
+) -> Path:
+    """Emit the mechanical Mixed apply plan. Apply agents must follow this only."""
+    lines = [
+        "# Mixed apply plan (Track C)",
+        "",
+        f"> Run dir: `{run}`",
+        f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
+        "> **This file is the only Mixed apply input.** Do not re-judge usefulness.",
+        "",
+        "## What these words mean",
+        "",
+        "| Word | Meaning | Apply must |",
+        "|------|---------|------------|",
+        "| **KEEP** | Text from judge Keep-core columns | Remain in the harness surface as rule/snippet |",
+        "| **CUT** | Text from judge Slim columns | Delete or compress only this bulk |",
+        "| **Apply** | Mechanical edit | Not a new design pass |",
+        "",
+        "## Hard rules for apply agents",
+        "",
+        "1. For each Mixed ID below, edit **only** that path.",
+        "2. **KEEP** items must survive (same contract — concern/module/section/checklist).",
+        "   Do not replace a KEEP teaching snippet with a weaker pattern.",
+        "3. **CUT** only what both judges' Slim columns describe (or the union when both",
+        "   clearly name the same bulk). If KEEP and CUT conflict, **skip that path** (Hold).",
+        "4. Never replace a fenced teaching snippet with `See app/...` / `lib/...` / `test/...`.",
+        "5. Never defer KEEP content to AGENTS.md or another surface unless CUT explicitly",
+        "   names OVERLAP with that path **and** KEEP still retains the behavior contract.",
+        "6. Do not open the repo to invent a different convention than KEEP states.",
+        "7. After edits: every KEEP bullet must still be satisfied by the file text.",
+        "",
+        f"## Paths ({len(mixed)})",
+        "",
+    ]
+    if not mixed:
+        lines.append("_No dual-MIXED surfaces in this run._")
+        lines.append("")
+    for sid, surf, a, b in mixed:
+        lines += [
+            f"### {sid} — `{surf['path']}`",
+            "",
+            f"- Tier: `{surf['tier']}` · Name: `{surf['name']}`",
+            f"- Overall: J1 `{a['overall']}` · J2 `{b['overall']}`",
+            "",
+            "#### KEEP (do not remove or degrade)",
+            "",
+            f"- **J1:** {cell_or_missing(a, 'keep', required_for_apply=True)}",
+            f"- **J2:** {cell_or_missing(b, 'keep', required_for_apply=True)}",
+            "",
+            "#### CUT (only this bulk)",
+            "",
+            f"- **J1:** {cell_or_missing(a, 'slim', required_for_apply=True)}",
+            f"- **J2:** {cell_or_missing(b, 'slim', required_for_apply=True)}",
+            "",
+            "#### Overlap cites (context only; cut OVERLAP here only if listed under CUT)",
+            "",
+            f"- **J1:** {cell_or_missing(a, 'overlap')}",
+            f"- **J2:** {cell_or_missing(b, 'overlap')}",
+            "",
+            "---",
+            "",
+        ]
+    out = run / "11-mixed-apply.md"
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return out
 
 
 def main() -> int:
@@ -84,7 +203,6 @@ def main() -> int:
         pid = p["id"]
         expected = p["expected_family"]
         got = j2.get(pid, {}).get("family")
-        # why: ROUTING-ONLY is in the SLIM family for trap matching
         if got != expected:
             if not (expected == "SLIM" and j2.get(pid, {}).get("overall") == "ROUTING-ONLY"):
                 misses.append({"id": pid, "expected": expected, "got": got})
@@ -109,7 +227,6 @@ def main() -> int:
             continue
         if a["family"] == "SLIM" and trap_pass:
             path = normalize_cite(surf.get("path") or "")
-            # why: plants and missing paths have no on-disk fan-in
             if path and not path.startswith("plant:") and (root / path).is_file():
                 hits = find_mandate_fanin(root, path)
             else:
@@ -132,6 +249,8 @@ def main() -> int:
     def tier_bucket(items):
         return dict(Counter(c[1]["tier"] for c in items))
 
+    mixed_apply_path = write_mixed_apply(run, mixed, m1, m2)
+
     lines = [
         "# Harness Eval: Usefulness Agreement (Track C)",
         "",
@@ -145,13 +264,15 @@ def main() -> int:
         "Hold = disagree / unclear / missing / slim-fanin-blocked",
         "> **Model-sensitive:** re-judge on a second model before large Slim deletes.",
         "> **Fan-in:** another harness surface hard-loads this path as SoT → Hold, not Slim.",
+        "> **Mixed apply:** use `11-mixed-apply.md` only — do not re-judge from this table alone.",
         "",
         "## What these words mean",
         "",
         "| Word | Meaning | You should |",
         "|------|---------|------------|",
         "| **Keep-core** | Most of the file changes agent behavior | Do **not** slim |",
-        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk |",
+        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk — "
+        "follow `11-mixed-apply.md` |",
         "| **Slim** | Mostly theory / repo-demo / overlap, **and** no other harness surface hard-loads it | Compress or delete body |",
         "| **Hold** | Judges disagreed, unclear, or Slim blocked by fan-in | Do nothing yet (or update consumers first) |",
         "| **Trap PASS** | Planted traps scored correctly | Necessary but not sufficient for Slim |",
@@ -165,7 +286,7 @@ def main() -> int:
         f"- Real surfaces scored: {sum(1 for s in surfaces.values() if not s.get('is_plant'))}",
         f"- Slim: **{len(slim)}**",
         f"- Keep-core: **{len(keep)}**",
-        f"- Mixed: **{len(mixed)}**",
+        f"- Mixed: **{len(mixed)}** → apply plan: `11-mixed-apply.md`",
         f"- Hold: **{len(hold)}** (fan-in blocked: {len(fanin_blocked)})",
         f"- Trap misses: {misses or 'none'}",
         "",
@@ -231,6 +352,8 @@ def main() -> int:
         "",
         "## Mixed (keep core, slim examples/theory)",
         "",
+        "Path list only. **Apply instructions:** `11-mixed-apply.md` (KEEP/CUT per ID).",
+        "",
         "| ID | Tier | Name | Path | J1 | J2 |",
         "|----|------|------|------|----|----|",
     ]
@@ -261,12 +384,12 @@ def main() -> int:
         "prefer re-judge on a second model if deleting >30% of a skill.",
         "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or "
         "update every citing harness surface in the same change, then re-merge.",
-        "- **Mixed:** keep BEHAVIOR-CHANGING bullets/snippets self-contained in the surface; "
-        "cut THEORY / REPO-DEMONSTRATED / OVERLAP bulk. Never replace a fenced teaching snippet "
-        "with `See app/...` (or other non-harness path) — those paths are judge evidence only.",
+        "- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only. "
+        "Do **not** re-judge. Do **not** replace KEEP snippets with `See app/...` or defer "
+        "KEEP contracts to AGENTS.md. Empty Keep-core/Slim cells → skip that path.",
         "- **Keep-core:** do not slim for usefulness reasons.",
         "- **Hold:** no usefulness trim.",
-        "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for section-level Keep-core vs Slim detail.",
+        "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for raw score rows.",
         "- Fan-in detail JSON: `slim-fanin.json`.",
         "",
     ]
@@ -303,6 +426,7 @@ def main() -> int:
                 "hold": len(hold),
                 "models": {"j1": m1, "j2": m2},
                 "report": str(out),
+                "mixed_apply": str(mixed_apply_path),
                 "fanin": str(fanin_path),
             },
             indent=2,

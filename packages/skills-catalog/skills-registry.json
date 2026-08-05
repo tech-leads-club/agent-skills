@@ -879,7 +879,7 @@
     },
     {
       "name": "harness-eval",
-      "description": "Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.",
+      "description": "Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Mixed apply uses 11-mixed-apply.md (KEEP/CUT per ID) so apply agents do not re-judge. Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.",
       "category": "development",
       "path": "(development)/harness-eval",
       "files": [
@@ -896,8 +896,8 @@
         "scripts/track_a_correctness.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.5.1",
-      "contentHash": "5ff2ea610df099e8c7a25269e787c792d4bf659a0ed1cc7ca6a937e90a063734"
+      "version": "1.6.0",
+      "contentHash": "daf2c87ad25dc667eb57f74ee042f68bea1c52303012798465dce46a9cc91da3"
     },
     {
       "name": "jira-assistant",

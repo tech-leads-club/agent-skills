@@ -1,10 +1,10 @@
 ---
 name: harness-eval
-description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.
+description: Evaluate a repo agent harness (AGENTS.md, rules, skills, referenced docs) for broken paths/commands, redundant instructions, and usefulness (behavior-changing vs theory/overlap) using a stack-agnostic dual-judge protocol with planted traps. Agreement reports include plain-language term definitions (Ship, Keep-core, Mixed, Slim, Hold). Mixed apply uses 11-mixed-apply.md (KEEP/CUT per ID) so apply agents do not re-judge. Use when the user says harness eval, harness-eval, harness debug, audit AGENTS.md, audit skills/rules, instruction audit, redundancy of agent instructions, usefulness of skills, which guidelines change behavior, outdated harness docs, Ship/Review/Hold/Slim/Keep-core for harness, or wants Track A/B/C harness evaluation. Do NOT use for harness setup or init, feature spec-driven work (tlc-spec-driven), or applying Ship/Slim trims unless the user explicitly asks after the report.
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.5.1
+  version: 1.6.0
 ---
 
 # Harness Eval
@@ -36,6 +36,7 @@ Run **outputs** (not protocol) go to the target repo at `.harness-eval/runs/<run
 9. **Do not equate tracks.** Track B Ship ≠ Track C Slim. Rediscoverable ≠ useless; useful ≠ non-redundant.
 10. **Slim apply / fan-in.** Never stub or delete a Slim path listed under “Slim fan-in blocked” (or when `python3 "$SKILL_DIR/scripts/slim_fanin.py" --path <P>` reports citers) unless those consumers are updated in the same change.
 11. **Mixed/Slim apply stays self-contained.** Cutting REPO-DEMONSTRATED / THEORY means delete or compress that bulk in the harness surface. Never replace a fenced teaching snippet (or the contract it carried) with `See app/...` / `lib/...` / `test/...` — that swaps SoT for a code-tree pointer. Judge evidence paths stay in score tables only; if the behavior-changing contract must survive, keep a short in-skill rule or snippet.
+12. **Mixed apply is mechanical.** Dual MIXED alone is not enough. Merge emits `11-mixed-apply.md` with per-ID **KEEP** (from Keep-core columns) and **CUT** (from Slim columns). Apply agents must follow that file only — do not re-judge, redesign, or invent a different pattern than KEEP. Empty Keep-core/Slim cells → skip that path (Hold).
 
 ## Instructions
 
@@ -124,7 +125,7 @@ Prefer Steps 8 and 9 in parallel.
 python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
-Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these words mean**), plus `slim-fanin.json`. On trap FAIL: do not Slim. Surfaces with `slim-fanin-blocked` are Hold — not Slim apply candidates.
+Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these words mean**), `11-mixed-apply.md` (KEEP/CUT per Mixed ID), plus `slim-fanin.json`. On trap FAIL: do not Slim. Surfaces with `slim-fanin-blocked` are Hold — not Slim apply candidates.
 
 ### Step 11: Present results
 
@@ -133,13 +134,14 @@ Summarize from the agreement reports (each starts with term definitions):
 - Track A broken count → `04-correctness.md`
 - Track B trap + Ship/Review/Hold → `07-agreement.md`
 - Track C trap + fan-in + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
+- Call out `11-mixed-apply.md` when Mixed count > 0 (the only Mixed apply path)
 - Call out model ids used for Track C and that Slim is model-sensitive
 - Call out any **Slim fan-in blocked** rows (consumers outside seed may appear here)
 
 Stop unless the user asks to apply Ship/Slim/Mixed. When applying:
 
 - **Slim:** only paths in the Slim table (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
-- **Mixed:** keep BEHAVIOR-CHANGING rules/snippets inside the surface; cut THEORY / REPO-DEMONSTRATED / OVERLAP bulk. Never add code-tree path pointers as substitutes for cut demos (rule 11).
+- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only (rule 12). Never re-judge from the Mixed path list alone. Never add code-tree path pointers as substitutes for cut demos (rule 11).
 
 ## Examples
 
@@ -176,6 +178,10 @@ Cause: missing/allowlisted model or `*-fast` blocked. Solution: re-spawn with an
 ### Track C Slim looks wrong after model change
 
 Expected: usefulness is model-sensitive. Re-run C1+C2 on a second model; intersection of Slim bands is the safe delete set.
+
+### Mixed apply rewrote conventions / removed modules
+
+Cause: apply agent re-judged from the Mixed path list instead of following KEEP/CUT. Solution: apply only via `11-mixed-apply.md`; if that file is missing, re-run `merge_usefulness.py`; if Keep-core/Slim cells are vague, re-score those IDs before apply.
 
 ### Slim stub broke another skill that loads that file
 
