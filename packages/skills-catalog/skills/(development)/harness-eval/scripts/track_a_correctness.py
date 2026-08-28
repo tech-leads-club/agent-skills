@@ -493,113 +493,6 @@ def _command_findings(
     return findings
 
 
-def _to_repo_relative(root: Path, path_str: str) -> str:
-    raw = path_str
-    if raw.startswith("case-mismatch:"):
-        raw = raw.split(":", 1)[1]
-    try:
-        p = Path(raw)
-        if p.is_absolute():
-            return p.resolve().relative_to(root.resolve()).as_posix()
-    except (ValueError, OSError):
-        # Outside the repo (other drive, dangling symlink) — keep posix separators only.
-        return raw.replace("\\", "/")
-    return raw.replace("\\", "/")
-
-
-def _claim_cite(claim: str) -> str:
-    matches = re.findall(r"`([^`]+)`", claim)
-    return matches[-1] if matches else ""
-
-
-def _finding_kind(f: Finding) -> str:
-    lower = f.claim.lower()
-    if lower.startswith("command cite"):
-        return "command"
-    if lower.startswith("references skill"):
-        return "skill"
-    if "inventory lists" in lower:
-        return "inventory"
-    if "case mismatch" in f.reality.lower():
-        return "casing"
-    return "path"
-
-
-def _finding_title(f: Finding) -> str:
-    return {
-        "command": "missing command",
-        "skill": "missing skill",
-        "inventory": "missing harness file",
-        "casing": "wrong file casing",
-        "path": "missing file",
-    }[_finding_kind(f)]
-
-
-def _looked_for_line(f: Finding, root: Path, manifests: list[str]) -> str:
-    kind = _finding_kind(f)
-    cite = _claim_cite(f.claim)
-    if kind == "command":
-        if manifests:
-            listed = ", ".join(f"`{m}`" for m in manifests)
-            return f"- **Looked in:** {listed} scripts (repo root only)"
-        return "- **Looked in:** discovered manifest scripts (repo root)"
-    if kind == "skill":
-        return (
-            f"- **Looked for:** `.agents/skills/{cite}/SKILL.md` or "
-            f"`.cursor/skills/{cite}/SKILL.md`"
-        )
-    if kind == "inventory":
-        return f"- **Looked for:** `{_to_repo_relative(root, f.evidence)}`"
-    return f"- **Looked for:** `{cite}` at the repo root (case-sensitive)"
-
-
-def _finding_fix(f: Finding, manifests: list[str]) -> str:
-    kind = _finding_kind(f)
-    cite = _claim_cite(f.claim)
-    manifest = f"`{manifests[0]}`" if manifests else "the repo-root manifest"
-    if kind == "command":
-        m = re.search(r"missing `([^`]+)`", f.evidence)
-        script = m.group(1) if m else cite
-        return (
-            f"Add a `{script}` script to {manifest} at the repo root, "
-            "or change the cite to a command that exists there."
-        )
-    if kind == "skill":
-        return (
-            f"Create `.agents/skills/{cite}/SKILL.md` or "
-            f"`.cursor/skills/{cite}/SKILL.md`, or fix the skill name in `{f.source}`."
-        )
-    if kind == "inventory":
-        return f"Restore `{f.source}` or re-run inventory after moving harness files."
-    if kind == "casing":
-        return "Fix the cite so the casing matches the file on disk."
-    return "Point the cite at a path that exists, or restore the missing file."
-
-
-def _render_finding(f: Finding, root: Path, manifests: list[str]) -> list[str]:
-    cite = _claim_cite(f.claim)
-    cited = f"`{cite}`" if cite else f"`{f.source}`"
-    return [
-        f"### [{f.id}] BROKEN — {_finding_title(f)}",
-        "",
-        f"- **In:** `{f.source}`",
-        f"- **The instruction cites:** {cited}",
-        _looked_for_line(f, root, manifests),
-        f"- **Fix:** {_finding_fix(f, manifests)}",
-        "",
-    ]
-
-
-def _inventory_tier(tier: str, description: str, paths: list[str]) -> list[str]:
-    lines = [f"### {tier}", "", description, ""]
-    if not paths:
-        lines.append("_(none)_")
-    else:
-        lines.extend(f"- `{p}`" for p in paths)
-    lines.append("")
-    return lines
-
-
 def render_report(
     out_path: Path,
     inventory: dict,
@@ -638,16 +531,109 @@ def render_report(
         "",
         "## Inventory",
         "",
+        "### T0",
+        "",
+        "Always-on rules (always loaded).",
+        "",
     ]
-    lines.extend(_inventory_tier("T0", "Always-on rules (always loaded).", t0))
-    lines.extend(_inventory_tier("T1", "Skills.", t1))
-    lines.extend(_inventory_tier("T2", "Cited harness refs.", t2))
-    lines += ["## Findings", ""]
+    if not t0:
+        lines.append("_(none)_")
+    else:
+        for p in t0:
+            lines.append(f"- `{p}`")
+    lines += ["", "### T1", "", "Skills.", ""]
+    if not t1:
+        lines.append("_(none)_")
+    else:
+        for p in t1:
+            lines.append(f"- `{p}`")
+    lines += ["", "### T2", "", "Cited harness refs.", ""]
+    if not t2:
+        lines.append("_(none)_")
+    else:
+        for p in t2:
+            lines.append(f"- `{p}`")
+    lines += ["", "## Findings", ""]
     if not findings:
         lines.append("_No BROKEN path/command findings._")
-    else:
-        for f in findings:
-            lines.extend(_render_finding(f, root, manifests))
+    for f in findings:
+        claim_lower = f.claim.lower()
+        claim_matches = re.findall(r"`([^`]+)`", f.claim)
+        cite = claim_matches[-1] if claim_matches else ""
+        cited = f"`{cite}`" if cite else f"`{f.source}`"
+
+        if claim_lower.startswith("command cite"):
+            kind = "command"
+            title = "missing command"
+        elif claim_lower.startswith("references skill"):
+            kind = "skill"
+            title = "missing skill"
+        elif "inventory lists" in claim_lower:
+            kind = "inventory"
+            title = "missing harness file"
+        elif "case mismatch" in f.reality.lower():
+            kind = "casing"
+            title = "wrong file casing"
+        else:
+            kind = "path"
+            title = "missing file"
+
+        if kind == "command":
+            if manifests:
+                listed = ", ".join(f"`{m}`" for m in manifests)
+                looked = f"- **Looked in:** {listed} scripts (repo root only)"
+            else:
+                looked = "- **Looked in:** discovered manifest scripts (repo root)"
+        elif kind == "skill":
+            looked = (
+                f"- **Looked for:** `.agents/skills/{cite}/SKILL.md` or "
+                f"`.cursor/skills/{cite}/SKILL.md`"
+            )
+        elif kind == "inventory":
+            ev = f.evidence
+            if ev.startswith("case-mismatch:"):
+                ev = ev.split(":", 1)[1]
+            try:
+                p = Path(ev)
+                if p.is_absolute():
+                    ev = p.resolve().relative_to(root.resolve()).as_posix()
+            except (ValueError, OSError):
+                ev = ev.replace("\\", "/")
+            else:
+                ev = ev.replace("\\", "/")
+            looked = f"- **Looked for:** `{ev}`"
+        else:
+            looked = f"- **Looked for:** `{cite}` at the repo root (case-sensitive)"
+
+        manifest_ref = f"`{manifests[0]}`" if manifests else "the repo-root manifest"
+        if kind == "command":
+            m = re.search(r"missing `([^`]+)`", f.evidence)
+            script = m.group(1) if m else cite
+            fix = (
+                f"Add a `{script}` script to {manifest_ref} at the repo root, "
+                "or change the cite to a command that exists there."
+            )
+        elif kind == "skill":
+            fix = (
+                f"Create `.agents/skills/{cite}/SKILL.md` or "
+                f"`.cursor/skills/{cite}/SKILL.md`, or fix the skill name in `{f.source}`."
+            )
+        elif kind == "inventory":
+            fix = f"Restore `{f.source}` or re-run inventory after moving harness files."
+        elif kind == "casing":
+            fix = "Fix the cite so the casing matches the file on disk."
+        else:
+            fix = "Point the cite at a path that exists, or restore the missing file."
+
+        lines += [
+            f"### [{f.id}] BROKEN — {title}",
+            "",
+            f"- **In:** `{f.source}`",
+            f"- **The instruction cites:** {cited}",
+            looked,
+            f"- **Fix:** {fix}",
+            "",
+        ]
     lines += [
         "## Notes",
         "",
