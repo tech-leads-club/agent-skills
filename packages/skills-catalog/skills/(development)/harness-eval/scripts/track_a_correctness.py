@@ -590,8 +590,8 @@ def _render_finding(f: Finding, root: Path, manifests: list[str]) -> list[str]:
     ]
 
 
-def _tier_block(title: str, paths: list[str]) -> list[str]:
-    lines = [f"### {title}", ""]
+def _inventory_tier(tier: str, description: str, paths: list[str]) -> list[str]:
+    lines = [f"### {tier}", "", description, ""]
     if not paths:
         lines.append("_(none)_")
     else:
@@ -612,71 +612,43 @@ def render_report(
     t1 = inventory.get("t1", [])
     t2 = inventory.get("t2", [])
     manifests = list(inventory.get("manifests") or [])
-    files_scanned = len(t0) + len(t1) + len(t2)
-    if manifests:
-        lookup = ", ".join(f"`{m}`" for m in manifests) + " (repo root)"
-    else:
-        lookup = "no manifests discovered"
-    problem_word = "problem" if broken == 1 else "problems"
-    cite_word = "cite" if ok_count == 1 else "cites"
-    if broken:
-        next_line = (
-            f"- **Next:** fix the {broken} cite{'s' if broken != 1 else ''} in "
-            "Findings, then re-run Track A."
-        )
-    else:
-        next_line = "- **Next:** nothing to fix for Track A."
 
     lines = [
         "# Harness Eval: Correctness (Track A)",
         "",
-        "> **Diagnosis only** — harness files (`AGENTS.md`, rules, skills) were not edited.",
-        "> **BROKEN** = a cited path or command does not exist. Fix the cite or restore the file.",
-        "",
         f"> Generated: {datetime.now(timezone.utc).isoformat()}",
         "> Method: deterministic path/command checks (no README)",
         "",
-        "## Executive summary",
-        "",
-        f"- **{broken} {problem_word}** to fix · {ok_count} path {cite_word} OK",
-        (
-            f"- Files scanned: {files_scanned} — always-on rules (T0): {len(t0)}, "
-            f"skills (T1): {len(t1)}, cited refs (T2): {len(t2)}"
-        ),
-        f"- Commands looked up in: {lookup}",
-        next_line,
-        "",
-        "## Findings",
-        "",
-    ]
-    if not findings:
-        lines.append("_No BROKEN path/command findings._")
-        lines.append("")
-    else:
-        for f in findings:
-            lines.extend(_render_finding(f, root, manifests))
-
-    lines += [
-        "## What was scanned",
-        "",
-    ]
-    lines.extend(_tier_block("Always-on rules (T0)", t0))
-    lines.extend(_tier_block("Skills (T1)", t1))
-    lines.extend(_tier_block("Cited refs (T2)", t2))
-    lines += [
         "## What these words mean",
         "",
         "| Word | Meaning | You should |",
         "|------|---------|------------|",
         "| **BROKEN** | A cited path or command does not exist (high-precision check) | Fix the cite or restore the file |",
-        "| **OK path cites** | Concrete path cites that resolved | No action |",
+        "| **OK path-cites** | Concrete path cites that resolved | No action |",
         "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
         "",
-        (
-            "This track answers: *is the harness factually wrong about paths/commands?* "
-            "Not redundancy (`07-agreement.md`) or usefulness (`10-usefulness-agreement.md`)."
-        ),
+        "This track answers: *is the harness factually wrong about paths/commands?* "
+        "Not redundancy (`07`) or usefulness (`10`).",
         "",
+        "## Executive summary",
+        "",
+        f"- T0: {len(t0)} · T1: {len(t1)} · T2: {len(t2)}",
+        f"- Manifests: {', '.join(manifests) or '(none)'}",
+        f"- Findings: **{broken} broken** · {ok_count} path-cites ok",
+        "",
+        "## Inventory",
+        "",
+    ]
+    lines.extend(_inventory_tier("T0", "Always-on rules (always loaded).", t0))
+    lines.extend(_inventory_tier("T1", "Skills.", t1))
+    lines.extend(_inventory_tier("T2", "Cited harness refs.", t2))
+    lines += ["## Findings", ""]
+    if not findings:
+        lines.append("_No BROKEN path/command findings._")
+    else:
+        for f in findings:
+            lines.extend(_render_finding(f, root, manifests))
+    lines += [
         "## Notes",
         "",
         "- Path normalization preserves `.agents` (never `str.lstrip('./')`).",

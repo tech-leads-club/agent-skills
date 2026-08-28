@@ -139,9 +139,9 @@ Run **Q2** from [User questionnaires](#user-questionnaires-high-priority) **befo
 python3 "$SKILL_DIR/scripts/track_a_correctness.py" --root . --run-id "$RUN_ID"
 ```
 
-Expected: `04-correctness.md` — **Findings** first (plain-language **In** / **cites** / **Looked for** / **Fix**); glossary at the bottom. Spot-check that `.agents/...` cites resolve (not `agents/...`).
+Expected: `04-correctness.md` (includes term definitions at top). Spot-check that `.agents/...` cites resolve (not `agents/...`).
 
-When presenting Track A, lead with the problem count and each finding’s **Fix**. Do not open with T0/T1/T2 or the glossary. If Q2 was `A only`, stop. Otherwise continue to the approved B and/or C steps.
+Summarize Track A (broken count + notable clusters). If Q2 was `A only`, stop. Otherwise continue to the approved B and/or C steps.
 
 ### Step 4: Track B — Judge1
 
@@ -197,9 +197,9 @@ Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these
 
 ### Step 11: Present results
 
-Summarize from the agreement reports. Track A (`04-correctness.md`) leads with findings; B/C still start with term definitions.
+Summarize from the agreement reports (each starts with term definitions):
 
-- Track A: problem count, then each finding (**In** / **cites** / **Fix**) → `04-correctness.md`
+- Track A broken count → `04-correctness.md`
 - Track B trap + Ship/Review/Hold → `07-agreement.md`
 - Track C trap + fan-in + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
 - Call out `11-mixed-apply.md` when Mixed count > 0 (the only Mixed apply path)
