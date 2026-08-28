@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -41,7 +42,6 @@ CONCRETE_PREFIXES = (
     "test/",
     "tests/",
 )
-# invariant: PM builtins alone never BROKEN
 PM_BUILTINS = {
     "install",
     "uninstall",
@@ -68,14 +68,12 @@ PM_BUILTINS = {
     "workspace",
     "workspaces",
     "update",
-    "exec",
     "check",
     "require",
     "dump-autoload",
     "dumpautoload",
     "validate",
 }
-# invariant: lifecycle verbs are not project-script names
 RUNNER_BUILTINS = {
     "nx",
     "run",
@@ -83,7 +81,6 @@ RUNNER_BUILTINS = {
     "affected",
     "test",
     "build",
-    "run",
     "mod",
     "generate",
     "vet",
@@ -109,13 +106,25 @@ RUNNER_BUILTINS = {
     "wrapper",
     "server",
     "console",
-    "generate",
     "routes",
     "runner",
     "new",
     "list",
     "help",
 }
+WALK_SKIP_DIRS = frozenset(
+    {
+        "node_modules",
+        ".git",
+        "dist",
+        "coverage",
+        ".harness-eval",
+        ".vitepress",
+        ".next",
+        ".turbo",
+        ".nx",
+    }
+)
 
 COMMAND_CITE_RES = (
     re.compile(
@@ -132,7 +141,6 @@ COMMAND_CITE_RES = (
     re.compile(r"`bin/([A-Za-z0-9_-]+)(?:\s+([A-Za-z0-9:_./-]+))?[^`]*`"),
     re.compile(r"`(?:\./)?mvnw?\s+([A-Za-z0-9:_./-]+)(?:\s+[^`]*)?`"),
     re.compile(r"`(?:\./)?gradlew?\s+([A-Za-z0-9:_./-]+)(?:\s+[^`]*)?`"),
-    # why: go run ./... is covered by RUNNER_BUILTINS; only custom tokens remain
     re.compile(r"`go\s+([A-Za-z0-9:_./-]+)(?:\s+[^`]*)?`"),
     re.compile(
         r"`(?:php\s+)?(?:\.?/)?artisan\s+([A-Za-z0-9:_./:-]+)(?:\s+[^`]*)?`"
@@ -145,6 +153,12 @@ COMMAND_CITE_RES = (
 
 
 @dataclass
+class OkCite:
+    source: str
+    cite: str
+
+
+@dataclass
 class Finding:
     id: str
     severity: str
@@ -152,6 +166,15 @@ class Finding:
     claim: str
     reality: str
     evidence: str
+    kind: str = "path"
+    cite: str = ""
+    looked_for: str = ""
+    tried: list[str] = field(default_factory=list)
+    action: str = ""
+    possible_matches: list[str] = field(default_factory=list)
+    manifests: list[str] = field(default_factory=list)
+    missing_script: str = ""
+    absolute_evidence: str = ""
 
 
 def default_out(root: Path, run_id: str) -> Path:
@@ -160,6 +183,68 @@ def default_out(root: Path, run_id: str) -> Path:
 
 def rel(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
+
+
+def to_repo_relative(root: Path, path_str: str) -> str:
+    if path_str.startswith("case-mismatch:"):
+        raw = path_str.split(":", 1)[1]
+        try:
+            return Path(raw).resolve().relative_to(root.resolve()).as_posix()
+        except (ValueError, OSError):
+            return raw.replace("\\", "/")
+    try:
+        p = Path(path_str)
+        if p.is_absolute():
+            return p.resolve().relative_to(root.resolve()).as_posix()
+    except (ValueError, OSError):
+        pass
+    return normalize_cite(path_str)
+
+
+def normalize_tried(root: Path, tried: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for t in tried:
+        rel_t = to_repo_relative(root, t)
+        if rel_t.startswith("case-mismatch:"):
+            rel_t = rel_t.split(":", 1)[-1]
+        if rel_t not in seen:
+            seen.add(rel_t)
+            out.append(rel_t)
+    return out
+
+
+def find_possible_matches(root: Path, cite: str, *, limit: int = 3) -> list[str]:
+    name = Path(normalize_cite(cite)).name
+    if not name or name in {".", ".."}:
+        return []
+    matches: list[str] = []
+    root_res = root.resolve()
+    for dirpath, dirnames, filenames in os.walk(root_res):
+        dirnames[:] = [d for d in dirnames if d not in WALK_SKIP_DIRS and d != ".husky"]
+        if name in filenames:
+            p = Path(dirpath) / name
+            try:
+                rel_p = p.resolve().relative_to(root_res).as_posix()
+            except ValueError:
+                continue
+            if rel_p not in matches:
+                matches.append(rel_p)
+            if len(matches) >= limit:
+                break
+    return matches
+
+
+def problem_title(f: Finding) -> str:
+    if f.kind == "command":
+        return "Missing command"
+    if f.kind == "skill":
+        return "Missing skill"
+    if f.kind == "inventory":
+        return "Missing harness file"
+    if "Case mismatch" in f.reality:
+        return "Wrong file casing"
+    return "Missing file"
 
 
 def is_readme(path: str) -> bool:
@@ -174,18 +259,14 @@ def normalize_cite(cite: str) -> str:
 
 
 def strip_fenced_code(text: str) -> str:
-    """Remove fenced code blocks so example paths inside fences are not cites."""
     return re.sub(r"```.*?```", "\n", text, flags=re.S)
 
 
-# why: skill prose often says load `dev` then read references/… — resolve against that skill
 SKILL_MENTION_RE = re.compile(
     r"[`']([a-z][a-z0-9_-]*)[`']\s+skill"
     r"|\b(?:the|load(?:ing)?|use|using)\s+([a-z][a-z0-9_-]*)\s+skill\b",
     re.I,
 )
-# why: pedagogical app/lib examples must not force BROKEN; only mandate language does
-# hazard: bare "read"/"write" matches doc intros ("Read before…") far from the cite
 PATH_MANDATE_RE = re.compile(
     r"\b(load|open|must|required|touch|modify|edit|delete|restore)\b"
     r"|\bread\s+(?:the\s+)?(?:file|path|this\s+file)"
@@ -204,7 +285,6 @@ CODE_TREE_PREFIXES = (
     "tests/",
 )
 
-
 _SKILL_MENTION_STOP = frozenset({"the", "a", "an", "this", "that", "each", "any", "our"})
 
 
@@ -218,7 +298,6 @@ def mentioned_skill_names(text: str) -> list[str]:
 
 
 def has_mandate_near_cite(text: str, cite: str) -> bool:
-    """True when mandate language shares the cite's paragraph (blank-line bounded)."""
     for m in re.finditer(re.escape(cite), text):
         before = text.rfind("\n\n", 0, m.start())
         after = text.find("\n\n", m.end())
@@ -285,7 +364,6 @@ def extract_cites(text: str) -> list[str]:
 
 
 def extract_surface_cites(text: str) -> list[str]:
-    """Cites from prose only — fenced examples are out of scope for Track A."""
     return extract_cites(strip_fenced_code(text))
 
 
@@ -304,7 +382,6 @@ def resolve_cite(
             candidates.append(skill_root / cite_norm)
         except ValueError:
             pass
-    # why: "load the `dev` skill and read `references/view.md`" (also from AGENTS.md)
     if cite_norm.startswith("references/") and text:
         for skill_name in mentioned_skill_names(text):
             for base in (
@@ -337,7 +414,13 @@ def resolve_cite(
     return None, tried
 
 
-def check_file(root: Path, source: Path, commands: set[str], finding_id: list[int]) -> list[Finding]:
+def check_file(
+    root: Path,
+    source: Path,
+    commands: set[str],
+    manifests: list[str],
+    finding_id: list[int],
+) -> list[Finding]:
     findings: list[Finding] = []
     text = source.read_text(encoding="utf-8", errors="replace")
     src = rel(root, source)
@@ -360,6 +443,13 @@ def check_file(root: Path, source: Path, commands: set[str], finding_id: list[in
                         claim=f"References skill `{cite}`",
                         reality="No matching SKILL.md under .agents/skills or .cursor/skills",
                         evidence=f"missing:{cite}",
+                        kind="skill",
+                        cite=cite,
+                        looked_for=f".agents/skills/{cite}/SKILL.md or .cursor/skills/{cite}/SKILL.md",
+                        action=(
+                            f"Create `.agents/skills/{cite}/SKILL.md` or "
+                            f"`.cursor/skills/{cite}/SKILL.md`, or fix the skill name in `{src}`."
+                        ),
                     )
                 )
             continue
@@ -368,10 +458,19 @@ def check_file(root: Path, source: Path, commands: set[str], finding_id: list[in
         resolved, tried = resolve_cite(root, source, cite, text=text)
         if resolved:
             continue
-        # invariant: missing app/lib/test paths are BROKEN only with mandate language nearby
         if is_code_tree_cite(cite) and not has_mandate_near_cite(text, cite):
             continue
         case_hit = next((t for t in tried if t.startswith("case-mismatch:")), None)
+        tried_rel = normalize_tried(root, tried)
+        cite_norm = normalize_cite(cite)
+        possible = find_possible_matches(root, cite)
+        if case_hit:
+            found_path = to_repo_relative(root, case_hit)
+            action = f"Fix the casing to match `{found_path}`, or update the cite to that path."
+            reality = f"Case mismatch; found `{found_path}`"
+        else:
+            action = "Change the cite to a path that exists, or restore the file."
+            reality = "File does not exist (case-sensitive check)"
         finding_id[0] += 1
         findings.append(
             Finding(
@@ -379,18 +478,19 @@ def check_file(root: Path, source: Path, commands: set[str], finding_id: list[in
                 severity="BROKEN",
                 source=src,
                 claim=f"Path cite `{cite}`",
-                reality=(
-                    f"Case mismatch; found {case_hit.split(':', 1)[1]}"
-                    if case_hit
-                    else "File does not exist (case-sensitive check)"
-                ),
-                evidence="; ".join(tried[:4]),
+                reality=reality,
+                evidence="; ".join(tried_rel[:6]) or cite_norm,
+                kind="path",
+                cite=cite,
+                looked_for=cite_norm,
+                tried=tried_rel,
+                action=action,
+                possible_matches=possible,
+                absolute_evidence="; ".join(tried[:6]),
             )
         )
 
-    findings.extend(
-        _command_findings(text, src, commands, finding_id)
-    )
+    findings.extend(_command_findings(text, src, commands, manifests, finding_id))
     return findings
 
 
@@ -432,7 +532,6 @@ def _command_ok(token: str, kind: str, commands: set[str]) -> bool:
         return True
     if token in commands:
         return True
-    # why: framework CLIs expose many subcommands absent from manifests; only flag discovered project scripts
     if kind in {"rails", "artisan", "console", "go", "maven"}:
         return True
     if not commands:
@@ -442,15 +541,27 @@ def _command_ok(token: str, kind: str, commands: set[str]) -> bool:
     return False
 
 
+def _manifest_command_label(manifests: list[str]) -> str:
+    if not manifests:
+        return "discovered manifest scripts (repo root only)"
+    if len(manifests) == 1:
+        return f"`{manifests[0]}` scripts (repo root only; workspace packages are not scanned)"
+    joined = ", ".join(f"`{m}`" for m in manifests)
+    return f"{joined} scripts (repo root only; workspace packages are not scanned)"
+
+
 def _command_findings(
     text: str,
     src: str,
     commands: set[str] | list[str],
+    manifests: list[str],
     finding_id: list[int],
 ) -> list[Finding]:
     findings: list[Finding] = []
     cmd_set = set(commands)
     seen_claims: set[str] = set()
+    manifest_label = _manifest_command_label(manifests)
+    sorted_scripts = sorted(cmd_set)
     for cre in COMMAND_CITE_RES:
         for m in cre.finditer(text):
             cite = m.group(0)
@@ -469,7 +580,6 @@ def _command_findings(
                     if cmd_set:
                         bad = bin_name
                 elif len(tokens) > 1 and not _command_ok(tokens[1], "rails", cmd_set):
-                    # why: only rake-like namespaced tasks are checkable against discovered tasks
                     if ":" in tokens[1] and tokens[1] not in cmd_set:
                         bad = tokens[1]
             else:
@@ -488,69 +598,164 @@ def _command_findings(
                     claim=f"Command cite `{cite}`",
                     reality=f"Script/task `{bad}` not in discovered manifest scripts",
                     evidence=f"manifest_commands missing `{bad}`",
+                    kind="command",
+                    cite=cite.strip("`"),
+                    looked_for=bad,
+                    missing_script=bad,
+                    manifests=list(manifests),
+                    action=(
+                        f"Add a script named `{bad}` to {manifest_label}, "
+                        f"or change the cite in `{src}` to an existing command."
+                    ),
                 )
             )
     return findings
 
 
-def render_report(out_path: Path, inventory: dict, findings: list[Finding], ok_count: int) -> None:
+def _format_script_sample(commands: set[str], *, limit: int = 12) -> str:
+    if not commands:
+        return "(none discovered)"
+    sample = sorted(commands)[:limit]
+    text = ", ".join(f"`{s}`" for s in sample)
+    if len(commands) > limit:
+        text += f", … ({len(commands)} total)"
+    return text
+
+
+def render_problem_card(f: Finding, commands: set[str]) -> list[str]:
+    lines = [f"### {f.id} — {problem_title(f)}", ""]
+    lines.append(f"- **In:** `{f.source}`")
+    if f.kind == "command":
+        lines.append(f"- **The instruction says:** `{f.cite}`")
+        manifest_label = _manifest_command_label(f.manifests)
+        lines.append(f"- **Looked in:** {manifest_label}")
+        lines.append(f"- **Missing script/task:** `{f.missing_script or f.looked_for}`")
+        lines.append(f"- **Known scripts:** {_format_script_sample(commands)}")
+    elif f.kind == "skill":
+        lines.append(f"- **The instruction says:** skill `{f.cite}`")
+        lines.append(f"- **Looked for:** `{f.looked_for}`")
+    elif f.kind == "inventory":
+        lines.append(f"- **Listed in inventory:** `{f.cite}`")
+        lines.append(f"- **Looked for:** `{f.looked_for}` on disk")
+    else:
+        lines.append(f"- **The instruction says:** `{f.cite or f.claim}`")
+        lines.append(f"- **Looked for:** `{f.looked_for}` at repo root (case-sensitive)")
+        if f.tried:
+            tried_show = ", ".join(f"`{t}`" for t in f.tried[:6])
+            lines.append(f"- **Also tried:** {tried_show}")
+        if f.possible_matches:
+            hints = ", ".join(f"`{p}`" for p in f.possible_matches)
+            lines.append(
+                f"- **Possible matches (filename only, not verified):** {hints}"
+            )
+    lines.append(f"- **Do this:** {f.action}")
+    lines.append(f"- **Details (legacy):** {f.reality} — {f.evidence}")
+    lines.append("")
+    return lines
+
+
+def render_report(
+    out_path: Path,
+    inventory: dict,
+    findings: list[Finding],
+    ok_cites: list[OkCite],
+    commands: set[str],
+    *,
+    generated_at: str,
+) -> None:
     broken = sum(1 for f in findings if f.severity == "BROKEN")
+    t0 = inventory.get("t0", [])
+    t1 = inventory.get("t1", [])
+    t2 = inventory.get("t2", [])
+    manifests = inventory.get("manifests") or []
+    files_scanned = len(t0) + len(t1) + len(t2)
+    manifest_label = _manifest_command_label(manifests)
+
     lines = [
-        "# Harness Eval: Correctness (Track A)",
+        "# Track A — Correctness (broken paths and commands)",
         "",
-        f"> Generated: {datetime.now(timezone.utc).isoformat()}",
-        "> Method: deterministic path/command checks (no README)",
+        "**Diagnosis only** — agent instructions (`AGENTS.md`, rules, skills) were not edited.",
+        "**Question:** Do paths and commands cited in the harness exist on disk and in discovered manifests?",
         "",
-        "## What these words mean",
+        f"_Generated: {generated_at} · Method: deterministic path/command checks (no README)_",
         "",
-        "| Word | Meaning | You should |",
-        "|------|---------|------------|",
-        "| **BROKEN** | A cited path or command does not exist (high-precision check) | Fix the cite or restore the file |",
-        "| **OK path-cites** | Concrete path cites that resolved | No action |",
+        "## At a glance",
         "",
-        "This track answers: *is the harness factually wrong about paths/commands?* "
-        "Not redundancy (`07`) or usefulness (`10`).",
+        f"- **{broken} problem{'s' if broken != 1 else ''}** to fix · **{len(ok_cites)}** path cite{'s' if len(ok_cites) != 1 else ''} OK",
+        f"- **Files scanned:** {files_scanned} (always-on rules + skills + cited refs)",
+        f"- **Command lookup:** {manifest_label}",
         "",
-        "## Executive summary",
-        "",
-        f"- T0: {len(inventory.get('t0', []))} · T1: {len(inventory.get('t1', []))} · T2: {len(inventory.get('t2', []))}",
-        f"- Manifests: {', '.join(inventory.get('manifests') or []) or '(none)'}",
-        f"- Findings: **{broken} broken** · {ok_count} path-cites ok",
-        "",
-        "## Inventory",
-        "",
-        "### T0",
+        "## What to do next",
         "",
     ]
-    for p in inventory.get("t0", []):
-        lines.append(f"- `{p}`")
-    lines += ["", "### T1", ""]
-    for p in inventory.get("t1", []):
-        lines.append(f"- `{p}`")
-    lines += ["", "### T2", ""]
-    for p in inventory.get("t2", []):
-        lines.append(f"- `{p}`")
-    lines += ["", "## Findings", ""]
-    if not findings:
-        lines.append("_No BROKEN path/command findings._")
-    for f in findings:
+    if broken:
         lines += [
-            f"### [{f.id}] {f.severity}",
-            "",
-            f"- **Source:** `{f.source}`",
-            f"- **Claim:** {f.claim}",
-            f"- **Reality:** {f.reality}",
-            f"- **Evidence:** {f.evidence}",
+            f"1. Fix or restore the **{broken}** cite{'s' if broken != 1 else ''} in **Problems** below. Do not delete harness files just because this report flagged them.",
+            "2. Re-run Track A (`track_a_correctness.py`) until **At a glance** shows **0 problems**.",
+            "3. Optional: ask the agent to apply the fixes in a PR.",
             "",
         ]
+    else:
+        lines += [
+            "1. No broken path or command cites were found — nothing to fix for Track A.",
+            "2. Optional: run Track B (redundancy) or Track C (usefulness) if you opted in at Q2.",
+            "",
+        ]
+
+    lines += [f"## Problems ({broken})", ""]
+    if not findings:
+        lines.append("_No broken path or command cites._")
+        lines.append("")
+    else:
+        for f in findings:
+            lines.extend(render_problem_card(f, commands))
+
+    lines += [f"## Checked and OK ({len(ok_cites)})", ""]
+    if not ok_cites:
+        lines.append("_No concrete path cites resolved in this run._")
+    else:
+        for ok in ok_cites:
+            lines.append(f"- `{ok.cite}` in `{ok.source}`")
+    lines.append("")
+
     lines += [
-        "## Notes",
+        "## What was scanned",
+        "",
+        f"- **Always-on rules (T0):** {len(t0)} file{'s' if len(t0) != 1 else ''}",
+    ]
+    for p in t0:
+        lines.append(f"  - `{p}`")
+    lines += [f"- **Skills (T1):** {len(t1)} file{'s' if len(t1) != 1 else ''}"]
+    for p in t1:
+        lines.append(f"  - `{p}`")
+    lines += [f"- **Cited refs (T2):** {len(t2)} file{'s' if len(t2) != 1 else ''}"]
+    for p in t2:
+        lines.append(f"  - `{p}`")
+    lines.append("")
+
+    lines += [
+        "## How this check works",
+        "",
+        "This track answers: *is the harness factually wrong about paths/commands?* "
+        "Not redundancy (`07-agreement.md`) or usefulness (`10-usefulness-agreement.md`).",
+        "",
+        "### Terms",
+        "",
+        "| Term | Meaning | You should |",
+        "|------|---------|------------|",
+        "| **Problem / BROKEN** | A cited path or command does not exist (high-precision check) | Fix the cite or restore the file |",
+        "| **OK path cite** | Concrete path cite that resolved | No action |",
+        "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
+        "",
+        "### Rules (precision)",
         "",
         "- Path normalization preserves `.agents` (never `str.lstrip('./')`).",
         "- Placeholders and bare example filenames are skipped.",
         "- Fenced code blocks are not scanned for path cites.",
         "- `references/` may resolve under a skill named in the same surface (e.g. load `dev`).",
         "- Missing `app/`/`lib/`/`test/` cites are BROKEN only when mandate language is nearby.",
+        "- **Possible matches** are basename hints only — verify before changing a cite.",
+        "- Command checks use manifests discovered at the **repo root**; workspace package scripts are not scanned unless cited manifests include them.",
         "",
     ]
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -570,14 +775,16 @@ def main() -> int:
         return 1
     inventory = json.loads(inv_path.read_text(encoding="utf-8"))
     commands = set(inventory.get("manifest_commands") or [])
+    manifests = list(inventory.get("manifests") or [])
 
     finding_id = [0]
     findings: list[Finding] = []
-    ok_cites = 0
+    ok_cites: list[OkCite] = []
     for rel_s in inventory.get("t0", []) + inventory.get("t1", []) + inventory.get("t2", []):
         p = root / rel_s
         if not p.is_file():
             finding_id[0] += 1
+            abs_path = str(p)
             findings.append(
                 Finding(
                     id=f"A{finding_id[0]:03d}",
@@ -585,7 +792,12 @@ def main() -> int:
                     source=rel_s,
                     claim="Inventory lists this file",
                     reality="Missing on disk",
-                    evidence=str(p),
+                    evidence=rel_s,
+                    kind="inventory",
+                    cite=rel_s,
+                    looked_for=rel_s,
+                    action=f"Restore `{rel_s}` or re-run inventory after moving harness files.",
+                    absolute_evidence=abs_path,
                 )
             )
             continue
@@ -595,11 +807,10 @@ def main() -> int:
                 continue
             resolved, _ = resolve_cite(root, p, cite, text=text)
             if resolved:
-                ok_cites += 1
+                ok_cites.append(OkCite(source=rel_s, cite=cite))
             elif is_code_tree_cite(cite) and not has_mandate_near_cite(text, cite):
-                # why: unmandated code-tree cites are pedagogical examples, not BROKEN
                 pass
-        findings.extend(check_file(root, p, commands, finding_id))
+        findings.extend(check_file(root, p, commands, manifests, finding_id))
 
     seen = set()
     uniq: list[Finding] = []
@@ -610,9 +821,30 @@ def main() -> int:
         seen.add(key)
         uniq.append(f)
 
-    render_report(out / "04-correctness.md", inventory, uniq, ok_cites)
-    (out / "04-correctness.json").write_text(json.dumps([asdict(f) for f in uniq], indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"run_id": args.run_id, "findings": len(uniq), "broken": sum(1 for f in uniq if f.severity == "BROKEN"), "report": str(out / "04-correctness.md")}, indent=2))
+    generated_at = datetime.now(timezone.utc).isoformat()
+    render_report(
+        out / "04-correctness.md",
+        inventory,
+        uniq,
+        ok_cites,
+        commands,
+        generated_at=generated_at,
+    )
+    (out / "04-correctness.json").write_text(
+        json.dumps([asdict(f) for f in uniq], indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {
+                "run_id": args.run_id,
+                "findings": len(uniq),
+                "broken": sum(1 for f in uniq if f.severity == "BROKEN"),
+                "ok_cites": len(ok_cites),
+                "report": str(out / "04-correctness.md"),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
