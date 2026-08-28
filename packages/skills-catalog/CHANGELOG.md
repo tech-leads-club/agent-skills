@@ -2,7 +2,7 @@
 
 ### 🚀 Features
 
-- **harness-eval:** make Track A `04-correctness.md` readable for humans — findings first with In/cites/Fix, T0–T2 spelled out, glossary last. Detection rules and JSON fields unchanged ([#174](https://github.com/tech-leads-club/agent-skills/issues/174))
+- **harness-eval:** clarify Track A `04-correctness.md` — explain T0/T1/T2 under Inventory; clearer finding labels (In/cites/Fix). Same section order and JSON as before ([#174](https://github.com/tech-leads-club/agent-skills/issues/174))
 
 ## 0.17.3 (2026-08-05)
 
