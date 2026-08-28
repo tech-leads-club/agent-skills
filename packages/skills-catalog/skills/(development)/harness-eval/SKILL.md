@@ -67,7 +67,7 @@ This skill is **self-contained**. Protocol, scripts, and judge prompts live unde
 
 - Read [references/PROTOCOL.md](references/PROTOCOL.md) **completely** before the first run in a session (and again if scripts fail).
 - Read [references/judge-prompts.md](references/judge-prompts.md) when spawning Track B or Track C judges.
-- Plain-language terms: [references/GLOSSARY.md](references/GLOSSARY.md) (embedded at the top of `07` / `10`; after Findings in `04`).
+- Plain-language terms: [references/GLOSSARY.md](references/GLOSSARY.md) (also embedded at the top of `04` / `07` / `10` reports).
 - Claim record shape: [references/claims.schema.json](references/claims.schema.json) (for tooling; agents do not need to load it every run).
 - Run scripts as `python3 "$SKILL_DIR/scripts/<name>.py" ...`.
 
