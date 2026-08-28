@@ -1,6 +1,6 @@
 # Harness Eval — plain-language glossary
 
-Embedded at the top of `07-agreement.md` and `10-usefulness-agreement.md`. Track A (`04-correctness.md`) puts a short glossary under **How this check works** at the **bottom** so problems and actions come first. Prefer verbs over jargon when talking to humans.
+Embedded at the top of `07-agreement.md` and `10-usefulness-agreement.md`. Track A (`04-correctness.md`) puts the glossary **after Findings** so a human can act first. Prefer verbs over jargon when talking to humans.
 
 ## The three tracks
 
