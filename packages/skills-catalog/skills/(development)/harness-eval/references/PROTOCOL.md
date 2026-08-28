@@ -1,6 +1,6 @@
 # Harness Evaluation Protocol
 
-> Platform- and codebase-agnostic. Version: 1.9.0
+> Platform- and codebase-agnostic. Version: 1.8.3
 > Scripts and this file live inside the `harness-eval` skill. Run outputs go to the target repo under `.harness-eval/runs/<id>/`.
 
 ## Purpose
@@ -167,7 +167,7 @@ python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$R
 | **B** | Medium — dual LLM + plants; trap gate; disagree → Hold | High — 2 × every claim |
 | **C** | Lowest / model-sensitive — dual LLM + plants + fan-in | Highest — 2 × every surface (whole files) |
 
-Human-facing reports: `04-correctness.md` (action-first: **At a glance** → **Problems** → **How this check works**; all legacy fields preserved in JSON), `07-agreement.md`, `10-usefulness-agreement.md` — B/C start with **What these words mean**. Mixed apply plan: `11-mixed-apply.md`. Full glossary: skill `references/GLOSSARY.md`.
+Human-facing reports: `04-correctness.md` (findings first, glossary last), `07-agreement.md`, `10-usefulness-agreement.md` — B/C start with **What these words mean**. Mixed apply plan: `11-mixed-apply.md`. Full glossary: skill `references/GLOSSARY.md`.
 
 ## Safety
 
