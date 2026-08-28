@@ -1,3 +1,9 @@
+## 0.17.4 (2026-08-28)
+
+### 🚀 Features
+
+- **harness-eval:** redesign Track A `04-correctness.md` for DevEx — action-first layout (At a glance, What to do next, Problems, Checked and OK) with glossary moved to the bottom; additive JSON fields (`kind`, `action`, `possible_matches`, …) ([#174](https://github.com/tech-leads-club/agent-skills/issues/174))
+
 ## 0.17.3 (2026-08-05)
 
 ### 🚀 Features

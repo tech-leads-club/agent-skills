@@ -69,8 +69,8 @@
       "category": "quality",
       "path": "(quality)/web-accessibility",
       "files": [
-        "SKILL.md",
-        "references/WCAG.md"
+        "references/WCAG.md",
+        "SKILL.md"
       ],
       "author": "web-quality-skills",
       "version": "1.0",
@@ -82,9 +82,9 @@
       "category": "gtm",
       "path": "(gtm)/ai-cold-outreach",
       "files": [
-        "SKILL.md",
         "references/benchmarks-deliverability-tactics.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -96,9 +96,9 @@
       "category": "gtm",
       "path": "(gtm)/ai-pricing",
       "files": [
-        "SKILL.md",
         "references/implementation-guide.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -110,9 +110,9 @@
       "category": "gtm",
       "path": "(gtm)/ai-sdr",
       "files": [
-        "SKILL.md",
         "references/implementation-guide.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -148,7 +148,6 @@
       "category": "cloud",
       "path": "(cloud)/aws-advisor",
       "files": [
-        "SKILL.md",
         "references/checklists.md",
         "references/decision-trees.md",
         "references/mcp-guide.md",
@@ -156,7 +155,8 @@
         "scripts/cost_considerations.py",
         "scripts/generate_diagram.py",
         "scripts/security_review.py",
-        "scripts/well_architected_review.py"
+        "scripts/well_architected_review.py",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -191,314 +191,314 @@
       "path": "(cloud)/cloudflare-deploy",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
-        "references/agents-sdk/README.md",
         "references/agents-sdk/api.md",
         "references/agents-sdk/configuration.md",
         "references/agents-sdk/gotchas.md",
         "references/agents-sdk/patterns.md",
-        "references/ai-gateway/README.md",
+        "references/agents-sdk/README.md",
         "references/ai-gateway/configuration.md",
         "references/ai-gateway/dynamic-routing.md",
         "references/ai-gateway/features.md",
+        "references/ai-gateway/README.md",
         "references/ai-gateway/sdk-integration.md",
         "references/ai-gateway/troubleshooting.md",
-        "references/ai-search/README.md",
         "references/ai-search/api.md",
         "references/ai-search/configuration.md",
         "references/ai-search/gotchas.md",
         "references/ai-search/patterns.md",
-        "references/analytics-engine/README.md",
+        "references/ai-search/README.md",
         "references/analytics-engine/api.md",
         "references/analytics-engine/configuration.md",
         "references/analytics-engine/gotchas.md",
         "references/analytics-engine/patterns.md",
-        "references/api/README.md",
+        "references/analytics-engine/README.md",
         "references/api/api.md",
         "references/api/configuration.md",
         "references/api/gotchas.md",
         "references/api/patterns.md",
-        "references/api-shield/README.md",
+        "references/api/README.md",
         "references/api-shield/api.md",
         "references/api-shield/configuration.md",
         "references/api-shield/gotchas.md",
         "references/api-shield/patterns.md",
-        "references/argo-smart-routing/README.md",
+        "references/api-shield/README.md",
         "references/argo-smart-routing/api.md",
         "references/argo-smart-routing/configuration.md",
         "references/argo-smart-routing/gotchas.md",
         "references/argo-smart-routing/patterns.md",
-        "references/bindings/README.md",
+        "references/argo-smart-routing/README.md",
         "references/bindings/api.md",
         "references/bindings/configuration.md",
         "references/bindings/gotchas.md",
         "references/bindings/patterns.md",
-        "references/bot-management/README.md",
+        "references/bindings/README.md",
         "references/bot-management/api.md",
         "references/bot-management/configuration.md",
         "references/bot-management/gotchas.md",
         "references/bot-management/patterns.md",
-        "references/browser-rendering/README.md",
+        "references/bot-management/README.md",
         "references/browser-rendering/api.md",
         "references/browser-rendering/configuration.md",
         "references/browser-rendering/gotchas.md",
         "references/browser-rendering/patterns.md",
-        "references/c3/README.md",
+        "references/browser-rendering/README.md",
         "references/c3/api.md",
         "references/c3/configuration.md",
         "references/c3/gotchas.md",
         "references/c3/patterns.md",
-        "references/cache-reserve/README.md",
+        "references/c3/README.md",
         "references/cache-reserve/api.md",
         "references/cache-reserve/configuration.md",
         "references/cache-reserve/gotchas.md",
         "references/cache-reserve/patterns.md",
-        "references/containers/README.md",
+        "references/cache-reserve/README.md",
         "references/containers/api.md",
         "references/containers/configuration.md",
         "references/containers/gotchas.md",
         "references/containers/patterns.md",
-        "references/cron-triggers/README.md",
+        "references/containers/README.md",
         "references/cron-triggers/api.md",
         "references/cron-triggers/configuration.md",
         "references/cron-triggers/gotchas.md",
         "references/cron-triggers/patterns.md",
-        "references/d1/README.md",
+        "references/cron-triggers/README.md",
         "references/d1/api.md",
         "references/d1/configuration.md",
         "references/d1/gotchas.md",
         "references/d1/patterns.md",
-        "references/ddos/README.md",
+        "references/d1/README.md",
         "references/ddos/api.md",
         "references/ddos/configuration.md",
         "references/ddos/gotchas.md",
         "references/ddos/patterns.md",
-        "references/do-storage/README.md",
+        "references/ddos/README.md",
         "references/do-storage/api.md",
         "references/do-storage/configuration.md",
         "references/do-storage/gotchas.md",
         "references/do-storage/patterns.md",
+        "references/do-storage/README.md",
         "references/do-storage/testing.md",
-        "references/durable-objects/README.md",
         "references/durable-objects/api.md",
         "references/durable-objects/configuration.md",
         "references/durable-objects/gotchas.md",
         "references/durable-objects/patterns.md",
-        "references/email-routing/README.md",
+        "references/durable-objects/README.md",
         "references/email-routing/api.md",
         "references/email-routing/configuration.md",
         "references/email-routing/gotchas.md",
         "references/email-routing/patterns.md",
-        "references/email-workers/README.md",
+        "references/email-routing/README.md",
         "references/email-workers/api.md",
         "references/email-workers/configuration.md",
         "references/email-workers/gotchas.md",
         "references/email-workers/patterns.md",
-        "references/hyperdrive/README.md",
+        "references/email-workers/README.md",
         "references/hyperdrive/api.md",
         "references/hyperdrive/configuration.md",
         "references/hyperdrive/gotchas.md",
         "references/hyperdrive/patterns.md",
-        "references/images/README.md",
+        "references/hyperdrive/README.md",
         "references/images/api.md",
         "references/images/configuration.md",
         "references/images/gotchas.md",
         "references/images/patterns.md",
-        "references/kv/README.md",
+        "references/images/README.md",
         "references/kv/api.md",
         "references/kv/configuration.md",
         "references/kv/gotchas.md",
         "references/kv/patterns.md",
-        "references/miniflare/README.md",
+        "references/kv/README.md",
         "references/miniflare/api.md",
         "references/miniflare/configuration.md",
         "references/miniflare/gotchas.md",
         "references/miniflare/patterns.md",
-        "references/network-interconnect/README.md",
+        "references/miniflare/README.md",
         "references/network-interconnect/api.md",
         "references/network-interconnect/configuration.md",
         "references/network-interconnect/gotchas.md",
         "references/network-interconnect/patterns.md",
-        "references/observability/README.md",
+        "references/network-interconnect/README.md",
         "references/observability/api.md",
         "references/observability/configuration.md",
         "references/observability/gotchas.md",
         "references/observability/patterns.md",
-        "references/pages/README.md",
+        "references/observability/README.md",
         "references/pages/api.md",
         "references/pages/configuration.md",
         "references/pages/gotchas.md",
         "references/pages/patterns.md",
-        "references/pages-functions/README.md",
+        "references/pages/README.md",
         "references/pages-functions/api.md",
         "references/pages-functions/configuration.md",
         "references/pages-functions/gotchas.md",
         "references/pages-functions/patterns.md",
-        "references/pipelines/README.md",
+        "references/pages-functions/README.md",
         "references/pipelines/api.md",
         "references/pipelines/configuration.md",
         "references/pipelines/gotchas.md",
         "references/pipelines/patterns.md",
-        "references/pulumi/README.md",
+        "references/pipelines/README.md",
         "references/pulumi/api.md",
         "references/pulumi/configuration.md",
         "references/pulumi/gotchas.md",
         "references/pulumi/patterns.md",
-        "references/queues/README.md",
+        "references/pulumi/README.md",
         "references/queues/api.md",
         "references/queues/configuration.md",
         "references/queues/gotchas.md",
         "references/queues/patterns.md",
-        "references/r2/README.md",
+        "references/queues/README.md",
         "references/r2/api.md",
         "references/r2/configuration.md",
         "references/r2/gotchas.md",
         "references/r2/patterns.md",
-        "references/r2-data-catalog/README.md",
+        "references/r2/README.md",
         "references/r2-data-catalog/api.md",
         "references/r2-data-catalog/configuration.md",
         "references/r2-data-catalog/gotchas.md",
         "references/r2-data-catalog/patterns.md",
-        "references/r2-sql/README.md",
+        "references/r2-data-catalog/README.md",
         "references/r2-sql/api.md",
         "references/r2-sql/configuration.md",
         "references/r2-sql/gotchas.md",
         "references/r2-sql/patterns.md",
-        "references/realtime-sfu/README.md",
+        "references/r2-sql/README.md",
         "references/realtime-sfu/api.md",
         "references/realtime-sfu/configuration.md",
         "references/realtime-sfu/gotchas.md",
         "references/realtime-sfu/patterns.md",
-        "references/realtimekit/README.md",
+        "references/realtime-sfu/README.md",
         "references/realtimekit/api.md",
         "references/realtimekit/configuration.md",
         "references/realtimekit/gotchas.md",
         "references/realtimekit/patterns.md",
-        "references/sandbox/README.md",
+        "references/realtimekit/README.md",
         "references/sandbox/api.md",
         "references/sandbox/configuration.md",
         "references/sandbox/gotchas.md",
         "references/sandbox/patterns.md",
-        "references/secrets-store/README.md",
+        "references/sandbox/README.md",
         "references/secrets-store/api.md",
         "references/secrets-store/configuration.md",
         "references/secrets-store/gotchas.md",
         "references/secrets-store/patterns.md",
-        "references/smart-placement/README.md",
+        "references/secrets-store/README.md",
         "references/smart-placement/api.md",
         "references/smart-placement/configuration.md",
         "references/smart-placement/gotchas.md",
         "references/smart-placement/patterns.md",
-        "references/snippets/README.md",
+        "references/smart-placement/README.md",
         "references/snippets/api.md",
         "references/snippets/configuration.md",
         "references/snippets/gotchas.md",
         "references/snippets/patterns.md",
-        "references/spectrum/README.md",
+        "references/snippets/README.md",
         "references/spectrum/api.md",
         "references/spectrum/configuration.md",
         "references/spectrum/gotchas.md",
         "references/spectrum/patterns.md",
-        "references/static-assets/README.md",
+        "references/spectrum/README.md",
         "references/static-assets/api.md",
         "references/static-assets/configuration.md",
         "references/static-assets/gotchas.md",
         "references/static-assets/patterns.md",
-        "references/stream/README.md",
+        "references/static-assets/README.md",
         "references/stream/api-live.md",
         "references/stream/api.md",
         "references/stream/configuration.md",
         "references/stream/gotchas.md",
         "references/stream/patterns.md",
-        "references/tail-workers/README.md",
+        "references/stream/README.md",
         "references/tail-workers/api.md",
         "references/tail-workers/configuration.md",
         "references/tail-workers/gotchas.md",
         "references/tail-workers/patterns.md",
-        "references/terraform/README.md",
+        "references/tail-workers/README.md",
         "references/terraform/api.md",
         "references/terraform/configuration.md",
         "references/terraform/gotchas.md",
         "references/terraform/patterns.md",
-        "references/tunnel/README.md",
+        "references/terraform/README.md",
         "references/tunnel/api.md",
         "references/tunnel/configuration.md",
         "references/tunnel/gotchas.md",
         "references/tunnel/networking.md",
         "references/tunnel/patterns.md",
-        "references/turn/README.md",
+        "references/tunnel/README.md",
         "references/turn/api.md",
         "references/turn/configuration.md",
         "references/turn/gotchas.md",
         "references/turn/patterns.md",
-        "references/turnstile/README.md",
+        "references/turn/README.md",
         "references/turnstile/api.md",
         "references/turnstile/configuration.md",
         "references/turnstile/gotchas.md",
         "references/turnstile/patterns.md",
-        "references/vectorize/README.md",
+        "references/turnstile/README.md",
         "references/vectorize/api.md",
         "references/vectorize/configuration.md",
         "references/vectorize/gotchas.md",
         "references/vectorize/patterns.md",
-        "references/waf/README.md",
+        "references/vectorize/README.md",
         "references/waf/api.md",
         "references/waf/configuration.md",
         "references/waf/gotchas.md",
         "references/waf/patterns.md",
-        "references/web-analytics/README.md",
+        "references/waf/README.md",
         "references/web-analytics/configuration.md",
         "references/web-analytics/gotchas.md",
         "references/web-analytics/integration.md",
         "references/web-analytics/patterns.md",
-        "references/workerd/README.md",
+        "references/web-analytics/README.md",
         "references/workerd/api.md",
         "references/workerd/configuration.md",
         "references/workerd/gotchas.md",
         "references/workerd/patterns.md",
-        "references/workers/README.md",
+        "references/workerd/README.md",
         "references/workers/api.md",
         "references/workers/configuration.md",
         "references/workers/frameworks.md",
         "references/workers/gotchas.md",
         "references/workers/patterns.md",
-        "references/workers-ai/README.md",
+        "references/workers/README.md",
         "references/workers-ai/api.md",
         "references/workers-ai/configuration.md",
         "references/workers-ai/gotchas.md",
         "references/workers-ai/patterns.md",
-        "references/workers-for-platforms/README.md",
+        "references/workers-ai/README.md",
         "references/workers-for-platforms/api.md",
         "references/workers-for-platforms/configuration.md",
         "references/workers-for-platforms/gotchas.md",
         "references/workers-for-platforms/patterns.md",
-        "references/workers-playground/README.md",
+        "references/workers-for-platforms/README.md",
         "references/workers-playground/api.md",
         "references/workers-playground/configuration.md",
         "references/workers-playground/gotchas.md",
         "references/workers-playground/patterns.md",
-        "references/workers-vpc/README.md",
+        "references/workers-playground/README.md",
         "references/workers-vpc/api.md",
         "references/workers-vpc/configuration.md",
         "references/workers-vpc/gotchas.md",
         "references/workers-vpc/patterns.md",
-        "references/workflows/README.md",
+        "references/workers-vpc/README.md",
         "references/workflows/api.md",
         "references/workflows/configuration.md",
         "references/workflows/gotchas.md",
         "references/workflows/patterns.md",
-        "references/wrangler/README.md",
+        "references/workflows/README.md",
         "references/wrangler/api.md",
         "references/wrangler/auth.md",
         "references/wrangler/configuration.md",
         "references/wrangler/gotchas.md",
         "references/wrangler/patterns.md",
-        "references/zaraz/IMPLEMENTATION_SUMMARY.md",
-        "references/zaraz/README.md",
+        "references/wrangler/README.md",
         "references/zaraz/api.md",
         "references/zaraz/configuration.md",
         "references/zaraz/gotchas.md",
-        "references/zaraz/patterns.md"
+        "references/zaraz/IMPLEMENTATION_SUMMARY.md",
+        "references/zaraz/patterns.md",
+        "references/zaraz/README.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -510,9 +510,9 @@
       "category": "development",
       "path": "(development)/codenavi",
       "files": [
-        "SKILL.md",
         "references/coding-principles.md",
-        "references/notebook-spec.md"
+        "references/notebook-spec.md",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -584,9 +584,9 @@
       "category": "gtm",
       "path": "(gtm)/content-to-pipeline",
       "files": [
-        "SKILL.md",
         "references/podcast-community-cadence.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -598,8 +598,8 @@
       "category": "performance",
       "path": "(performance)/core-web-vitals",
       "files": [
-        "SKILL.md",
-        "references/LCP.md"
+        "references/LCP.md",
+        "SKILL.md"
       ],
       "author": "web-quality-skills",
       "version": "1.0",
@@ -635,8 +635,8 @@
       "path": "(creation)/create-rfc",
       "files": [
         "README.md",
-        "SKILL.md",
-        "references/section-templates.md"
+        "references/section-templates.md",
+        "SKILL.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
@@ -670,8 +670,8 @@
       "category": "development",
       "path": "(development)/docs-writer",
       "files": [
-        "SKILL.md",
-        "references/style-guide.md"
+        "references/style-guide.md",
+        "SKILL.md"
       ],
       "contentHash": "c49827c59d2e27d313731dfd36314cfde0e8dbf15be0e8f813d2f8b751546b0c"
     },
@@ -706,7 +706,6 @@
       "category": "architecture",
       "path": "(architecture)/evolutionary-modular-architecture",
       "files": [
-        "SKILL.md",
         "assets/architecture-template.html",
         "references/acl-and-communication.md",
         "references/architecture-doc.md",
@@ -716,7 +715,8 @@
         "references/resilience.md",
         "references/stack-2026.md",
         "scripts/validate-boundaries.mjs",
-        "scripts/validate-structure.mjs"
+        "scripts/validate-structure.mjs",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -728,7 +728,6 @@
       "category": "tooling",
       "path": "(tooling)/excalidraw-studio",
       "files": [
-        "SKILL.md",
         "assets/business-flow-swimlane-template.json",
         "assets/class-diagram-template.json",
         "assets/data-flow-diagram-template.json",
@@ -740,10 +739,11 @@
         "references/element-types.md",
         "references/excalidraw-schema.md",
         "references/icon-libraries.md",
-        "scripts/README.md",
         "scripts/add-arrow.py",
         "scripts/add-icon-to-diagram.py",
-        "scripts/split-excalidraw-library.py"
+        "scripts/README.md",
+        "scripts/split-excalidraw-library.py",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
@@ -768,9 +768,9 @@
       "path": "(design)/figma",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/figma-mcp-config.md",
-        "references/figma-tools-and-prompts.md"
+        "references/figma-tools-and-prompts.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -795,10 +795,10 @@
       "category": "architecture",
       "path": "(architecture)/frontend-blueprint",
       "files": [
-        "SKILL.md",
         "references/collection-guide.md",
         "references/design-principles.md",
-        "references/stitch-integration.md"
+        "references/stitch-integration.md",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -810,14 +810,14 @@
       "category": "design",
       "path": "(design)/frontend-design",
       "files": [
-        "SKILL.md",
         "references/color-and-contrast.md",
         "references/interaction-design.md",
         "references/motion-design.md",
         "references/responsive-design.md",
         "references/spatial-design.md",
         "references/typography.md",
-        "references/ux-writing.md"
+        "references/ux-writing.md",
+        "SKILL.md"
       ],
       "author": "Impeccable (Paul Bakaus), based on Anthropic frontend-design",
       "version": "1.0.0",
@@ -830,8 +830,8 @@
       "path": "(development)/gh-address-comments",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
-        "scripts/fetch_comments.py"
+        "scripts/fetch_comments.py",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -844,8 +844,8 @@
       "path": "(tooling)/gh-fix-ci",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
-        "scripts/inspect_pr_checks.py"
+        "scripts/inspect_pr_checks.py",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -857,9 +857,9 @@
       "category": "gtm",
       "path": "(gtm)/gtm-engineering",
       "files": [
-        "SKILL.md",
         "references/implementation-guide.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -883,22 +883,24 @@
       "category": "development",
       "path": "(development)/harness-eval",
       "files": [
-        "SKILL.md",
-        "references/GLOSSARY.md",
-        "references/PROTOCOL.md",
+        "references/04-correctness.example.md",
         "references/claims.schema.json",
+        "references/GLOSSARY.md",
         "references/judge-prompts.md",
+        "references/PROTOCOL.md",
         "scripts/doc_scope.py",
         "scripts/inventory_extract.py",
         "scripts/merge_agreement.py",
         "scripts/merge_usefulness.py",
         "scripts/slim_fanin.py",
         "scripts/surfaces_extract.py",
-        "scripts/track_a_correctness.py"
+        "scripts/test_track_a_report.py",
+        "scripts/track_a_correctness.py",
+        "SKILL.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.8.2",
-      "contentHash": "448d848a323f50472fbb45eb887322dd2e0484ad724a3e82c435021501265250"
+      "version": "1.9.0",
+      "contentHash": "9fb3e09b0844b1663a84cf5c521384eca36b9be2f37e20bc7a88ec89ecee7ef6"
     },
     {
       "name": "jira-assistant",
@@ -917,8 +919,8 @@
       "category": "gtm",
       "path": "(gtm)/lead-enrichment",
       "files": [
-        "SKILL.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -930,8 +932,8 @@
       "category": "learning",
       "path": "(learning)/learning-opportunities",
       "files": [
-        "SKILL.md",
-        "references/PRINCIPLES.md"
+        "references/PRINCIPLES.md",
+        "SKILL.md"
       ],
       "author": "Chris Hicks",
       "version": "1.1.0",
@@ -943,13 +945,13 @@
       "category": "architecture",
       "path": "(architecture)/legacy-migration-planner",
       "files": [
-        "SKILL.md",
         "references/assessment-framework.md",
         "references/frontend-backend-strategies.md",
         "references/plan-phase.md",
         "references/research-phase.md",
         "references/strangler-fig-patterns.md",
-        "references/testing-safety-nets.md"
+        "references/testing-safety-nets.md",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -961,7 +963,6 @@
       "category": "tooling",
       "path": "(tooling)/mermaid-studio",
       "files": [
-        "SKILL.md",
         "assets/puppeteer-config.json",
         "references/aws-architecture.md",
         "references/c4-architecture.md",
@@ -973,7 +974,8 @@
         "scripts/render-ascii.mjs",
         "scripts/render.mjs",
         "scripts/setup.sh",
-        "scripts/validate.mjs"
+        "scripts/validate.mjs",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.1",
@@ -985,7 +987,6 @@
       "category": "architecture",
       "path": "(architecture)/modular-decomposition",
       "files": [
-        "SKILL.md",
         "references/domain-analysis-examples.md",
         "references/domain-analysis-quick-reference.md",
         "references/domain-analysis.md",
@@ -997,7 +998,8 @@
         "references/pattern-03-flattening.md",
         "references/pattern-04-coupling.md",
         "references/pattern-05-domain-grouping-quick-reference.md",
-        "references/pattern-05-domain-grouping.md"
+        "references/pattern-05-domain-grouping.md",
+        "SKILL.md"
       ],
       "contentHash": "b536c1851c862516e5fc111502311343b952073a992ea07c9f8f9b42fbbc2a44"
     },
@@ -1007,8 +1009,8 @@
       "category": "architecture",
       "path": "(architecture)/modular-design-principles",
       "files": [
-        "SKILL.md",
-        "references/principles.md"
+        "references/principles.md",
+        "SKILL.md"
       ],
       "contentHash": "d53fdca7ae18205376956c39a3a1729edfae843f63e5f2a6c5dd2c64ccd8a576"
     },
@@ -1018,9 +1020,9 @@
       "category": "gtm",
       "path": "(gtm)/multi-platform-launch",
       "files": [
-        "SKILL.md",
         "references/directories-timing-mistakes.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -1032,14 +1034,14 @@
       "category": "development",
       "path": "(development)/nestjs-modular-monolith",
       "files": [
-        "SKILL.md",
         "references/architecture-patterns.md",
         "references/authentication.md",
         "references/module-communication.md",
         "references/stack-configuration.md",
         "references/state-isolation.md",
         "references/testing-patterns.md",
-        "scripts/validate-isolation.sh"
+        "scripts/validate-isolation.sh",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1052,10 +1054,10 @@
       "path": "(cloud)/netlify-deploy",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/cli-commands.md",
         "references/deployment-patterns.md",
-        "references/netlify-toml.md"
+        "references/netlify-toml.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1109,11 +1111,11 @@
       "category": "tooling",
       "path": "(tooling)/nx-workspace",
       "files": [
-        "SKILL.md",
         "reference/best-practices.md",
         "reference/ci-cd.md",
         "reference/commands.md",
-        "reference/configuration.md"
+        "reference/configuration.md",
+        "SKILL.md"
       ],
       "contentHash": "410aad2cc5a3cdaf3ffc04b0a4ad893f6cf2f5babdd836e6eda68f409d3c7bf6"
     },
@@ -1123,8 +1125,8 @@
       "category": "gtm",
       "path": "(gtm)/paid-creative-ai",
       "files": [
-        "SKILL.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -1136,9 +1138,9 @@
       "category": "gtm",
       "path": "(gtm)/partner-affiliate",
       "files": [
-        "SKILL.md",
         "references/implementation-guide.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -1170,10 +1172,10 @@
       "category": "performance",
       "path": "(performance)/perf-web-optimization",
       "files": [
-        "SKILL.md",
         "references/bundle-optimization.md",
         "references/core-web-vitals.md",
-        "references/image-optimization.md"
+        "references/image-optimization.md",
+        "SKILL.md"
       ],
       "contentHash": "864bb35d6ec7e7755181886b57709b76d8b5da5181a6d8480cd412dd772f1ffb"
     },
@@ -1184,10 +1186,10 @@
       "path": "(web-automation)/playwright-skill",
       "files": [
         "API_REFERENCE.md",
-        "SKILL.md",
         "lib/helpers.js",
         "package.json",
-        "run.js"
+        "run.js",
+        "SKILL.md"
       ],
       "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc"
     },
@@ -1197,8 +1199,8 @@
       "category": "gtm",
       "path": "(gtm)/positioning-icp",
       "files": [
-        "SKILL.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -1222,7 +1224,6 @@
       "category": "development",
       "path": "(development)/rails-dev",
       "files": [
-        "SKILL.md",
         "references/api.md",
         "references/async.md",
         "references/auth.md",
@@ -1246,7 +1247,8 @@
         "references/turbo.md",
         "references/validator.md",
         "references/view.md",
-        "references/webhooks.md"
+        "references/webhooks.md",
+        "SKILL.md"
       ],
       "author": "William Calderipe - github.com/wcalderipe",
       "version": "1.0.0",
@@ -1260,9 +1262,6 @@
       "files": [
         "AGENTS.md",
         "README.md",
-        "SKILL.md",
-        "rules/_sections.md",
-        "rules/_template.md",
         "rules/advanced-event-handler-refs.md",
         "rules/advanced-init-once.md",
         "rules/advanced-use-latest.md",
@@ -1319,7 +1318,10 @@
         "rules/server-cache-react.md",
         "rules/server-dedup-props.md",
         "rules/server-parallel-fetching.md",
-        "rules/server-serialization.md"
+        "rules/server-serialization.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "SKILL.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
@@ -1333,9 +1335,6 @@
       "files": [
         "AGENTS.md",
         "README.md",
-        "SKILL.md",
-        "rules/_sections.md",
-        "rules/_template.md",
         "rules/architecture-avoid-boolean-props.md",
         "rules/architecture-compound-components.md",
         "rules/patterns-children-over-render-props.md",
@@ -1343,7 +1342,10 @@
         "rules/react19-no-forwardref.md",
         "rules/state-context-interface.md",
         "rules/state-decouple-implementation.md",
-        "rules/state-lift-state.md"
+        "rules/state-lift-state.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "SKILL.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
@@ -1355,12 +1357,12 @@
       "category": "development",
       "path": "(development)/react-native-expert",
       "files": [
-        "SKILL.md",
         "references/expo-router.md",
         "references/performance-rules.md",
         "references/platform-handling.md",
         "references/project-structure.md",
-        "references/storage-patterns.md"
+        "references/storage-patterns.md",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1373,7 +1375,6 @@
       "path": "(cloud)/render-deploy",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/blueprint-spec.md",
         "references/codebase-analysis.md",
         "references/configuration-guide.md",
@@ -1383,7 +1384,8 @@
         "references/post-deploy-checks.md",
         "references/runtimes.md",
         "references/service-types.md",
-        "references/troubleshooting-basics.md"
+        "references/troubleshooting-basics.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1395,8 +1397,8 @@
       "category": "gtm",
       "path": "(gtm)/sales-motion-design",
       "files": [
-        "SKILL.md",
-        "references/quick-reference.md"
+        "references/quick-reference.md",
+        "SKILL.md"
       ],
       "author": "Chad Boyda / agent-gtm-skills",
       "version": "1.0.0",
@@ -1409,7 +1411,6 @@
       "path": "(security)/security-best-practices",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/golang-general-backend-security.md",
         "references/javascript-express-web-server-security.md",
         "references/javascript-general-web-frontend-security.md",
@@ -1419,7 +1420,8 @@
         "references/javascript-typescript-vue-web-frontend-security.md",
         "references/python-django-web-server-security.md",
         "references/python-fastapi-web-server-security.md",
-        "references/python-flask-web-server-security.md"
+        "references/python-flask-web-server-security.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1432,12 +1434,12 @@
       "path": "(security)/security-ownership-map",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/neo4j-import.md",
         "scripts/build_ownership_map.py",
         "scripts/community_maintainers.py",
         "scripts/query_ownership.py",
-        "scripts/run_ownership_map.py"
+        "scripts/run_ownership_map.py",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1450,9 +1452,9 @@
       "path": "(security)/security-threat-model",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
         "references/prompt-template.md",
-        "references/security-controls-and-assets.md"
+        "references/security-controls-and-assets.md",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1465,8 +1467,8 @@
       "path": "(monitoring)/sentry",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
-        "scripts/sentry_api.py"
+        "scripts/sentry_api.py",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1490,7 +1492,6 @@
       "category": "development",
       "path": "(development)/shopify-developer",
       "files": [
-        "SKILL.md",
         "references/api-admin.md",
         "references/api-storefront.md",
         "references/app-development.md",
@@ -1501,7 +1502,8 @@
         "references/liquid-objects.md",
         "references/liquid-syntax.md",
         "references/performance.md",
-        "references/theme-development.md"
+        "references/theme-development.md",
+        "SKILL.md"
       ],
       "contentHash": "10dd4806c0061bb9e89914557f6aec6badcef893e601293711ba3e8993527e9f"
     },
@@ -1511,11 +1513,11 @@
       "category": "creation",
       "path": "(creation)/skill-architect",
       "files": [
-        "SKILL.md",
         "references/examples.md",
         "references/patterns.md",
         "references/quality-checklist.md",
-        "scripts/validate_skill.py"
+        "scripts/validate_skill.py",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1551,9 +1553,9 @@
       "category": "development",
       "path": "(development)/spec-driven-eval",
       "files": [
-        "SKILL.md",
         "references/quickstart.md",
-        "references/reference.md"
+        "references/reference.md",
+        "SKILL.md"
       ],
       "author": "Waldemar Neto - github.com/waldemarnt",
       "version": "1.0.0",
@@ -1575,10 +1577,10 @@
       "category": "architecture",
       "path": "(architecture)/tactical-ddd",
       "files": [
-        "SKILL.md",
         "detection.md",
         "refactoring.md",
-        "reference.md"
+        "reference.md",
+        "SKILL.md"
       ],
       "contentHash": "c3dfaf45e8cb784f18d9c460c7f005c4ee9dbb430f21ee8af6913bbfea66a75b"
     },
@@ -1599,14 +1601,14 @@
       "category": "decision-making",
       "path": "(decision-making)/the-fool",
       "files": [
-        "SKILL.md",
         "references/cognitive-bias-inventory.md",
         "references/dialectic-synthesis.md",
         "references/evidence-audit.md",
         "references/mode-selection-guide.md",
         "references/pre-mortem-analysis.md",
         "references/red-team-adversarial.md",
-        "references/socratic-questioning.md"
+        "references/socratic-questioning.md",
+        "SKILL.md"
       ],
       "author": "https://github.com/Jeffallan",
       "version": "2.0.0",
@@ -1618,10 +1620,10 @@
       "category": "decision-making",
       "path": "(decision-making)/the-jury",
       "files": [
-        "SKILL.md",
         "references/deliberation-craft.md",
         "references/juror-archetypes.md",
-        "scripts/tally.py"
+        "scripts/tally.py",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "1.0.0",
@@ -1633,9 +1635,9 @@
       "category": "quality",
       "path": "(quality)/tlc-generative-engine-optimization",
       "files": [
-        "SKILL.md",
         "references/measurement-and-tools.md",
         "references/pillars-and-workflow.md",
+        "SKILL.md",
         "templates/faqpage.jsonld",
         "templates/llms.txt",
         "templates/page-metadata.html",
@@ -1653,7 +1655,6 @@
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
-        "SKILL.md",
         "references/code-analysis.md",
         "references/coding-principles.md",
         "references/context-limits.md",
@@ -1670,7 +1671,8 @@
         "scripts/lessons.py",
         "scripts/validate_spec.py",
         "scripts/validate_state.py",
-        "scripts/validate_tasks.py"
+        "scripts/validate_tasks.py",
+        "SKILL.md"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "3.3.0",
@@ -1683,8 +1685,8 @@
       "path": "(cloud)/vercel-deploy",
       "files": [
         "LICENSE.txt",
-        "SKILL.md",
-        "scripts/deploy.sh"
+        "scripts/deploy.sh",
+        "SKILL.md"
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
@@ -1708,8 +1710,8 @@
       "category": "design",
       "path": "(design)/web-design-guidelines",
       "files": [
-        "SKILL.md",
-        "references/guideline.md"
+        "references/guideline.md",
+        "SKILL.md"
       ],
       "author": "vercel",
       "version": "1.0.0",
@@ -1721,8 +1723,8 @@
       "category": "quality",
       "path": "(quality)/web-quality-audit",
       "files": [
-        "SKILL.md",
-        "scripts/analyze.sh"
+        "scripts/analyze.sh",
+        "SKILL.md"
       ],
       "author": "web-quality-skills",
       "version": "1.0",

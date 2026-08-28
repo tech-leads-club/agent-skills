@@ -4,7 +4,7 @@ description: "Evaluate a repo agent harness (AGENTS.md, rules, skills, skill ref
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.8.2
+  version: 1.9.0
 ---
 
 # Harness Eval
@@ -67,7 +67,7 @@ This skill is **self-contained**. Protocol, scripts, and judge prompts live unde
 
 - Read [references/PROTOCOL.md](references/PROTOCOL.md) **completely** before the first run in a session (and again if scripts fail).
 - Read [references/judge-prompts.md](references/judge-prompts.md) when spawning Track B or Track C judges.
-- Plain-language terms: [references/GLOSSARY.md](references/GLOSSARY.md) (also embedded at the top of `04` / `07` / `10` reports).
+- Plain-language terms: [references/GLOSSARY.md](references/GLOSSARY.md) (Track A embeds a short glossary at the **bottom** of `04`; B/C still open with terms at the top).
 - Claim record shape: [references/claims.schema.json](references/claims.schema.json) (for tooling; agents do not need to load it every run).
 - Run scripts as `python3 "$SKILL_DIR/scripts/<name>.py" ...`.
 
@@ -139,9 +139,11 @@ Run **Q2** from [User questionnaires](#user-questionnaires-high-priority) **befo
 python3 "$SKILL_DIR/scripts/track_a_correctness.py" --root . --run-id "$RUN_ID"
 ```
 
-Expected: `04-correctness.md` (includes term definitions at top). Spot-check that `.agents/...` cites resolve (not `agents/...`).
+Expected: `04-correctness.md` — action-first layout (**At a glance**, **What to do next**, **Problems**, **Checked and OK**, **What was scanned**, **How this check works**). See [references/04-correctness.example.md](references/04-correctness.example.md). Spot-check that `.agents/...` cites resolve (not `agents/...`).
 
-Summarize Track A (broken count + notable clusters). If Q2 was `A only`, stop. Otherwise continue to the approved B and/or C steps.
+When presenting Track A to the user, lead with **At a glance** and **Problems** (In / instruction says / looked for / Do this). Do not open with jargon or the glossary — that section is at the bottom of the file for reference.
+
+If Q2 was `A only`, present Track A and stop. Otherwise continue to the approved B and/or C steps.
 
 ### Step 4: Track B — Judge1
 
@@ -197,14 +199,14 @@ Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these
 
 ### Step 11: Present results
 
-Summarize from the agreement reports (each starts with term definitions):
+**Fixed spoken order** — do **not** open with a raw BROKEN table or glossary dump.
 
-- Track A broken count → `04-correctness.md`
-- Track B trap + Ship/Review/Hold → `07-agreement.md`
-- Track C trap + fan-in + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
-- Call out `11-mixed-apply.md` when Mixed count > 0 (the only Mixed apply path)
-- Call out model ids used for Track C and that Slim is model-sensitive
-- Call out any **Slim fan-in blocked** rows (consumers outside seed may appear here)
+1. **Frame:** “This is a diagnosis. Nothing in `AGENTS.md` / rules / skills was changed. Reports: `.harness-eval/runs/<id>/`.”
+2. **What we ran:** e.g. “Track A only (you skipped B/C).”
+3. **Track A** (`04-correctness.md`): read **At a glance**, then summarize each **Problem** in plain language — **In** which file, **what the instruction says**, **where we looked**, **Do this**. Mention **Possible matches** as unverified hints only. If zero problems, say harness cites checked out. Point power users to **How this check works** at the bottom for rules.
+4. **Track B** if run (`07-agreement.md`): trap PASS/FAIL; **Ship** and **Hold** rows (Review as a count). If trap FAIL, say **ignore Ship** before listing Ship rows.
+5. **Track C** if run (`10-usefulness-agreement.md`): trap + fan-in + Slim / Keep-core / Mixed / Hold. Call out `11-mixed-apply.md` when Mixed count > 0. Call out Track C model ids and that Slim is model-sensitive. Call out **Slim fan-in blocked** rows.
+6. **Next actions** (offer; do not apply unless asked): fix problems from Track A / apply Ship / run Track C / stop.
 
 Stop unless the user asks to apply Ship/Slim/Mixed. When applying:
 
