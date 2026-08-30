@@ -5,6 +5,7 @@ import matter from 'gray-matter'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import { buildLlmsTxt } from '../src/lib/seo/llms-txt'
 import { extractDisplayName } from '../src/lib/skill-display-name'
 import type { AgentTarget, Category, MarketplaceData, Skill } from '../src/types'
 
@@ -15,6 +16,7 @@ const WORKSPACE_ROOT = path.resolve(__dirname, '../../..')
 const SKILLS_DIR = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills')
 const REGISTRY_FILE = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills-registry.json')
 const OUTPUT_FILE = path.join(__dirname, '../src/data/skills.json')
+const LLMS_TXT_FILE = path.join(__dirname, '../public/llms.txt')
 
 interface RegistrySkill {
   name: string
@@ -171,8 +173,11 @@ function main() {
   // Write JSON file
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2))
 
+  fs.writeFileSync(LLMS_TXT_FILE, buildLlmsTxt(data))
+
   console.log(`✓ Generated data for ${data.stats.totalSkills} skills`)
   console.log(`✓ Output: ${OUTPUT_FILE}`)
+  console.log(`✓ Output: ${LLMS_TXT_FILE}`)
 }
 
 main()

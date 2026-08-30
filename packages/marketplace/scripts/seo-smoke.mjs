@@ -209,6 +209,14 @@ for (const category of data.categories) {
   }
 }
 
+const llms = read('llms.txt')
+if (!llms.startsWith('# Agent Skills\n\n> ')) {
+  fail('llms.txt must open with an H1 followed by a blockquote summary (llmstxt.org spec)')
+}
+for (const skill of data.skills) {
+  if (!llms.includes(`${ORIGIN}/skills/${skill.id}/`)) fail(`llms.txt missing ${skill.id}`)
+}
+
 if (!/name="robots" content="noindex/i.test(read('404.html'))) {
   fail('404.html is missing a noindex robots directive')
 }
@@ -219,6 +227,7 @@ console.log(
   `  meta descriptions: ${seenDescriptions.size} unique across ${data.skills.length} skill pages, all <= 160 chars`,
 )
 console.log(`  sitemap: ${sitemapUrls.size} URLs, all trailing-slashed, all expected routes present`)
+console.log(`  llms.txt: spec-shaped, links all ${data.skills.length} skills`)
 console.log(`  category hubs: ${categoriesWithSkills.size} populated categories exported and fully linked`)
 
 console.log('SEO smoke OK')
