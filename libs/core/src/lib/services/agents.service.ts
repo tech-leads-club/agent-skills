@@ -19,6 +19,14 @@ type AgentDefinition = {
   detectInstalled: (context: AgentContext) => boolean
 }
 
+export type AgentCatalogEntry = {
+  type: AgentType
+  displayName: string
+  description: string
+  skillsDir: string
+  globalSkillsDir: string
+}
+
 const agentDefinitions: Record<AgentType, AgentDefinition> = {
   // Tier 1: Most popular AI coding agents
   cursor: {
@@ -217,6 +225,34 @@ export function getAllAgentTypes(): AgentType[] {
  * const config = getAgentConfig(ports, 'cursor')
  * ```
  */
+/**
+ * Environment-independent view of every supported agent, for consumers that need the catalog
+ * without a filesystem (docs generation, the marketplace site, static builds).
+ *
+ * why: `getAgentConfig` resolves paths against a real `$HOME` through ports, so build-time
+ * consumers had no way to read agent metadata without faking an environment.
+ *
+ * @param homePlaceholder - Token substituted for the user's home directory in global paths.
+ * @returns One entry per supported agent, in display-name order.
+ * @example
+ * ```ts
+ * const catalog = getAgentCatalog()
+ * ```
+ */
+export function getAgentCatalog(homePlaceholder = '~'): AgentCatalogEntry[] {
+  return getAllAgentTypes().map((type) => {
+    const definition = agentDefinitions[type]
+
+    return {
+      type,
+      displayName: definition.displayName,
+      description: definition.description,
+      skillsDir: definition.skillsDir,
+      globalSkillsDir: definition.globalSkillsDir(homePlaceholder),
+    }
+  })
+}
+
 export function getAgentConfig(ports: CorePorts, type: AgentType): AgentConfig {
   const definition = agentDefinitions[type]
   const context = createAgentContext(ports)

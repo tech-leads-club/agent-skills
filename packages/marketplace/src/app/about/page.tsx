@@ -1,41 +1,22 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CategoryBadge } from '../../components/CategoryBadge'
 import { CopyButton } from '../../components/CopyButton'
 import { JsonLd } from '../../components/JsonLd'
 import marketplaceData from '../../data/skills.json'
+import { buildPageMetadata } from '../../lib/seo/metadata'
+import { breadcrumbSchema, graph, organizationSchema, websiteSchema } from '../../lib/seo/schema'
+import { absoluteUrl, routes } from '../../lib/seo/urls'
 
-export const metadata: Metadata = {
-  title: 'About',
+export const metadata = buildPageMetadata({
+  title: 'About Agent Skills',
   description:
-    'Learn about Agent Skills - a secure, validated skill registry for professional AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with confidence.',
-  alternates: {
-    canonical: '/about',
-  },
-}
+    'Agent Skills is an open-source, security-scanned registry of packaged instructions for AI coding agents, maintained by Tech Leads Club.',
+  path: routes.about(),
+})
 
-const aboutPageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AboutPage',
-  name: 'About Agent Skills',
-  description:
-    'Learn about Agent Skills - a secure, validated skill registry for professional AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with confidence.',
-  url: 'https://agent-skills.techleads.club/about',
-  isPartOf: {
-    '@type': 'WebSite',
-    name: 'Agent Skills Marketplace',
-    url: 'https://agent-skills.techleads.club',
-  },
-}
-
-const agentTiers = [
-  { tier: 'Tier 1 (Full)', agents: 'Cursor, Claude Code', note: 'Full skill support with auto-detection' },
-  {
-    tier: 'Tier 2 (Good)',
-    agents: 'Windsurf, VS Code + Copilot, Cline',
-    note: 'Skill loading with manual configuration',
-  },
-  { tier: 'Tier 3 (Basic)', agents: 'Other MCP clients', note: 'MCP server integration available' },
+const crumbs = [
+  { name: 'Home', path: routes.home() },
+  { name: 'About', path: routes.about() },
 ]
 
 const securityFeatures = [
@@ -81,7 +62,20 @@ export default function AboutPage() {
 
   return (
     <>
-      <JsonLd data={aboutPageSchema} />
+      <JsonLd
+        data={graph([
+          organizationSchema(),
+          websiteSchema(),
+          {
+            '@type': 'AboutPage',
+            name: 'About Agent Skills',
+            description:
+              'Agent Skills is an open-source, security-scanned registry of packaged instructions for AI coding agents, maintained by Tech Leads Club.',
+            url: absoluteUrl(routes.about()),
+          },
+          breadcrumbSchema(crumbs),
+        ])}
+      />
 
       {/* Header Banner */}
       <section className="hero-gradient relative overflow-hidden py-16 sm:py-20 px-4 sm:px-8 text-center">
@@ -164,25 +158,31 @@ export default function AboutPage() {
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800/50">
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
-                    Tier
+                    Agent
                   </th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
-                    Agents
+                    What it is
                   </th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
-                    Support Level
+                    Project skills directory
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {agentTiers.map((t, i) => (
+                {marketplaceData.agents.map((agent, i) => (
                   <tr
-                    key={t.tier}
-                    className={i < agentTiers.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/50' : ''}
+                    key={agent.id}
+                    className={
+                      i < marketplaceData.agents.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/50' : ''
+                    }
                   >
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{t.tier}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{t.agents}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{t.note}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">
+                      <Link href={routes.agent(agent.id)} className="hover:text-blue-600 dark:hover:text-blue-400">
+                        {agent.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{agent.description}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{agent.skillsDir}</td>
                   </tr>
                 ))}
               </tbody>

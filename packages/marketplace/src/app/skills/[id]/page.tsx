@@ -4,104 +4,78 @@ import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
+import { Breadcrumbs } from '../../../components/Breadcrumbs'
 import { CategoryBadge } from '../../../components/CategoryBadge'
 import { CopyButton } from '../../../components/CopyButton'
 import { JsonLd } from '../../../components/JsonLd'
 import { SafeMarkdownAnchor } from '../../../components/SafeMarkdownAnchor'
 import { ShareButton } from '../../../components/ShareButton'
-import marketplaceData from '../../../data/skills.json'
+import { SkillEntitySummary } from '../../../components/SkillEntitySummary'
+import { SkillListItem } from '../../../components/SkillListItem'
+import { allSkills, findCategory, findSkill, installCommand, relatedSkills } from '../../../lib/catalog'
 import { demoteFirstMarkdownH1 } from '../../../lib/demote-markdown-h1'
+import { buildPageMetadata } from '../../../lib/seo/metadata'
+import { breadcrumbSchema, graph, organizationSchema, skillSchema } from '../../../lib/seo/schema'
+import { parseSkillDescription } from '../../../lib/seo/skill-description'
+import { routes } from '../../../lib/seo/urls'
 
 export function generateStaticParams() {
-  return marketplaceData.skills.map((skill) => ({
-    id: skill.id,
-  }))
+  return allSkills().map((skill) => ({ id: skill.id }))
+}
+
+function crumbsFor(skill: { id: string; name: string }, categoryName: string, categoryId: string) {
+  return [
+    { name: 'Home', path: routes.home() },
+    { name: 'Skills', path: routes.skills() },
+    { name: categoryName, path: routes.category(categoryId) },
+    { name: skill.name, path: routes.skill(skill.id) },
+  ]
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const skill = marketplaceData.skills.find((s) => s.id === id)
+  const skill = findSkill(id)
 
   if (!skill) {
     return {}
   }
 
-  const category = marketplaceData.categories.find((c) => c.id === skill.category)
+  const category = findCategory(skill.category)
+  const { summary } = parseSkillDescription(skill.description)
 
-  return {
-    title: skill.name,
-    description: skill.description,
-    alternates: {
-      canonical: `/skills/${skill.id}`,
-    },
-    openGraph: {
-      title: `${skill.name} - Agent Skill | Tech Leads Club`,
-      description: skill.description,
-      type: 'article',
-      images: [
-        {
-          url: '/og-image.png',
-          width: 1024,
-          height: 537,
-          alt: skill.name,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${skill.name} - Agent Skill | Tech Leads Club`,
-      description: skill.description,
-    },
-    keywords: [skill.name, skill.category, category?.name || '', 'AI agent skill', 'coding agent', 'agent automation'],
-  }
+  return buildPageMetadata({
+    title: `${skill.name} — ${category?.name ?? skill.category} Skill for AI Coding Agents`,
+    description: summary,
+    path: routes.skill(skill.id),
+    ogType: 'article',
+    keywords: [
+      `${skill.name} skill`,
+      `${skill.name} AI agent`,
+      `${category?.name ?? skill.category} AI agent skills`,
+      'AI coding agent skill',
+    ],
+  })
 }
 
 export default async function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const skill = marketplaceData.skills.find((s) => s.id === id)
+  const skill = findSkill(id)
 
   if (!skill) {
     notFound()
   }
 
-  const category = marketplaceData.categories.find((c) => c.id === skill.category)
-  const installCommand = `npx @tech-leads-club/agent-skills install --skill ${skill.id}`
-
-  const softwareSourceCodeSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareSourceCode',
-    name: skill.name,
-    description: skill.description,
-    url: `https://agent-skills.techleads.club/skills/${skill.id}`,
-    codeRepository: `https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`,
-    programmingLanguage: 'Markdown',
-    runtimePlatform: 'AI Coding Agents',
-    applicationCategory: category?.name || skill.category,
-    author: {
-      '@type': 'Organization',
-      name: 'Tech Leads Club',
-      url: 'https://github.com/tech-leads-club',
-    },
-    dateModified: skill.metadata.lastModified,
-    keywords: [skill.name, skill.category, 'AI agent skill', 'coding automation'],
-  }
+  const category = findCategory(skill.category)
+  const categoryName = category?.name ?? skill.category
+  const command = installCommand(skill.id)
+  const related = relatedSkills(skill)
+  const crumbs = crumbsFor(skill, categoryName, skill.category)
 
   return (
     <>
-      <JsonLd data={softwareSourceCodeSchema} />
+      <JsonLd data={graph([organizationSchema(), skillSchema(skill, category), breadcrumbSchema(crumbs)])} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[13px] text-gray-400 dark:text-gray-500 mb-6">
-          <Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-            Home
-          </Link>
-          <span>›</span>
-          <Link href="/skills/" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-            Skills
-          </Link>
-          <span>›</span>
-          <span className="text-gray-600 dark:text-gray-300 font-medium">{skill.name}</span>
-        </div>
+        <Breadcrumbs crumbs={crumbs} />
 
         <div className="flex flex-col lg:flex-row gap-10 items-stretch lg:items-start">
           {/* Main Content */}
@@ -112,19 +86,21 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <h1 className="text-2xl sm:text-[28px] font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
                   {skill.name}
                 </h1>
-                <CategoryBadge categoryId={skill.category} categoryName={category?.name || skill.category} />
+                <CategoryBadge categoryId={skill.category} categoryName={categoryName} />
               </div>
               <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">{skill.description}</p>
 
               {/* Install command */}
               <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-3.5 flex items-center justify-between mt-5">
-                <code className="text-sm text-sky-400 font-mono truncate">{installCommand}</code>
+                <code className="text-sm text-sky-400 font-mono truncate">{command}</code>
                 <CopyButton
-                  text={installCommand}
+                  text={command}
                   className="!bg-white/10 !text-white !px-4 !py-1.5 !text-xs hover:!bg-white/20 shrink-0 ml-3"
                 />
               </div>
             </div>
+
+            <SkillEntitySummary name={skill.name} description={skill.description} />
 
             {/* Markdown content — demote body H1s so page chrome owns the sole H1 */}
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
@@ -150,7 +126,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               <div className="flex flex-col gap-4 text-[13px]">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 dark:text-gray-500">Category</span>
-                  <CategoryBadge categoryId={skill.category} categoryName={category?.name || skill.category} />
+                  <CategoryBadge categoryId={skill.category} categoryName={categoryName} />
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 dark:text-gray-500">Updated</span>
@@ -202,6 +178,12 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
               {/* Actions */}
               <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5 space-y-3">
+                <Link
+                  href={routes.category(skill.category)}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-[13px] font-semibold"
+                >
+                  All {categoryName} skills
+                </Link>
                 <ShareButton skillId={skill.id} variant="full" />
                 <a
                   href={`https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/${skill.path}`}
@@ -222,6 +204,22 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           </aside>
         </div>
+
+        {related.length > 0 && (
+          <section aria-labelledby="related-skills" className="mt-14">
+            <h2
+              id="related-skills"
+              className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-4"
+            >
+              Related {categoryName} skills
+            </h2>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((entry) => (
+                <SkillListItem key={entry.id} skill={entry} />
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </>
   )

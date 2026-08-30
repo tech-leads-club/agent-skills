@@ -19,6 +19,10 @@ const config: Config = {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  // why: the shared preset only marks `.ts` as ESM, so a `.tsx` component compiled to CJS
+  // cannot require an ESM `.ts` module — component tests fail the moment a component imports
+  // a plain TypeScript helper.
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   coverageDirectory: '../../coverage/packages/marketplace',
 }
 

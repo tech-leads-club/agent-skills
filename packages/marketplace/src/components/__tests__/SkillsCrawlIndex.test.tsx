@@ -1,13 +1,16 @@
-import { createElement } from 'react'
+import { jest } from '@jest/globals'
+import { createElement, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-jest.mock('next/link', () => ({
+// why: ESM test modules get no injected `jest` global and no hoisted `jest.mock`, so the
+// stub must be registered with unstable_mockModule before the component is imported.
+jest.unstable_mockModule('next/link', () => ({
   __esModule: true,
-  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) =>
+  default: ({ href, children, className }: { href: string; children: ReactNode; className?: string }) =>
     createElement('a', { href, className }, children),
 }))
 
-import { SkillsCrawlIndex } from '../SkillsCrawlIndex'
+const { SkillsCrawlIndex } = await import('../SkillsCrawlIndex')
 
 describe('SkillsCrawlIndex', () => {
   it('renders an empty string when there are no skills (no crash)', () => {
@@ -21,5 +24,16 @@ describe('SkillsCrawlIndex', () => {
     )
     expect(html).toContain('href="/skills/accessibility/"')
     expect(html).toContain('Accessibility (a11y)')
+  })
+
+  it('renders trailing-slash category links when categories are supplied', () => {
+    const html = renderToStaticMarkup(
+      <SkillsCrawlIndex
+        skills={[{ id: 'accessibility', name: 'Accessibility (a11y)' }]}
+        categories={[{ id: 'quality', name: 'Quality' }]}
+      />,
+    )
+    expect(html).toContain('href="/categories/quality/"')
+    expect(html).toContain('Browse by category')
   })
 })

@@ -2,18 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ThemeProvider } from '../components/ThemeProvider'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { ORGANIZATION_NAME, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '../lib/seo/site'
+import { routes } from '../lib/seo/urls'
 import './global.css'
-
-const SITE_URL = 'https://agent-skills.techleads.club'
-const SITE_NAME = 'Agent Skills'
-const SITE_DESCRIPTION =
-  'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Agent Skills | Tech Leads Club',
-    template: '%s | Agent Skills',
+    default: `${SITE_NAME} — Skills for AI Coding Agents | ${ORGANIZATION_NAME}`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: [
@@ -29,13 +26,14 @@ export const metadata: Metadata = {
     'tech leads club',
     'developer tools',
   ],
-  authors: [{ name: 'Tech Leads Club', url: 'https://github.com/tech-leads-club' }],
-  creator: 'Tech Leads Club',
+  authors: [{ name: ORGANIZATION_NAME, url: 'https://github.com/tech-leads-club' }],
+  creator: ORGANIZATION_NAME,
+  publisher: ORGANIZATION_NAME,
   openGraph: {
     type: 'website',
     locale: 'en_US',
     siteName: SITE_NAME,
-    title: 'Agent Skills | Tech Leads Club',
+    title: `${SITE_NAME} — Skills for AI Coding Agents`,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -48,7 +46,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Agent Skills | Tech Leads Club',
+    title: `${SITE_NAME} — Skills for AI Coding Agents`,
     description: SITE_DESCRIPTION,
     images: ['/og-image.png'],
   },
@@ -58,6 +56,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
     },
   },
   icons: {
@@ -66,9 +67,6 @@ export const metadata: Metadata = {
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: '/apple-touch-icon.png',
-  },
-  alternates: {
-    canonical: SITE_URL,
   },
 }
 
@@ -108,16 +106,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     Home
                   </Link>
                   <Link
-                    href="/about"
+                    href={routes.about()}
                     className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors hidden sm:block"
                   >
                     About
                   </Link>
                   <Link
-                    href="/skills"
+                    href={routes.skills()}
                     className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
                   >
                     Skills
+                  </Link>
+                  <Link
+                    href={routes.categories()}
+                    className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors hidden md:block"
+                  >
+                    Categories
+                  </Link>
+                  <Link
+                    href={routes.agents()}
+                    className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors hidden md:block"
+                  >
+                    Agents
                   </Link>
                   <a
                     href="https://github.com/tech-leads-club/agent-skills"
@@ -142,6 +152,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-sm">
+                <Link href={routes.skills()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  All skills
+                </Link>
+                <Link href={routes.categories()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  Categories
+                </Link>
+                <Link href={routes.agents()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  Supported agents
+                </Link>
+                <Link href={routes.about()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  About
+                </Link>
+              </nav>
               <p className="text-center text-gray-600 dark:text-gray-400">
                 Built with ❤️ by{' '}
                 <a

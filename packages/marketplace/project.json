@@ -58,10 +58,24 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/packages/marketplace"],
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/marketplace"
+      ],
       "options": {
         "jestConfig": "packages/marketplace/jest.config.ts",
         "passWithNoTests": false
+      }
+    },
+    "seo-smoke": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "export"
+      ],
+      "options": {
+        "cwd": "packages/marketplace",
+        "commands": [
+          "node scripts/seo-smoke.mjs"
+        ]
       }
     }
   }

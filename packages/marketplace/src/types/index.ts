@@ -22,11 +22,23 @@ export interface Category {
   priority?: number
 }
 
+export interface AgentTarget {
+  id: string
+  name: string
+  description: string
+  /** Project-local install directory, relative to the repository root. */
+  skillsDir: string
+  /** Home-directory install path, with `~` standing in for the user's home. */
+  globalSkillsDir: string
+}
+
 export interface MarketplaceData {
   skills: Skill[]
   categories: Category[]
+  agents: AgentTarget[]
   stats: {
     totalSkills: number
     totalCategories: number
+    totalAgents: number
   }
 }

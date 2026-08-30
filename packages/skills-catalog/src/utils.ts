@@ -31,6 +31,55 @@ export interface SkillsRegistry {
   deprecated?: DeprecatedEntry[]
 }
 
+/**
+ * why: YAML block scalars (`description: >` / `|`) are common in SKILL.md frontmatter,
+ * and a single-line regex captured only the indicator character, publishing ">" as the
+ * skill description to the registry, the CLI and the marketplace metadata.
+ */
+function readScalar(frontmatter: string, key: string): string | undefined {
+  const lines = frontmatter.split('\n')
+  const headerPattern = new RegExp(`^${key}:[ \t]*(.*)$`)
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const header = lines[index].match(headerPattern)
+    if (!header) continue
+
+    const inline = header[1].trim()
+    const isBlockScalar = /^[>|][+-]?\d*$/.test(inline)
+
+    if (inline !== '' && !isBlockScalar) {
+      return stripQuotes(inline)
+    }
+    if (!isBlockScalar) return undefined
+
+    const folded = inline.startsWith('>')
+    const block: string[] = []
+    for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+      const line = lines[cursor]
+      if (line.trim() === '') {
+        block.push('')
+        continue
+      }
+      if (!/^[ \t]/.test(line)) break
+      block.push(line.trim())
+    }
+
+    while (block.length > 0 && block[block.length - 1] === '') block.pop()
+    const joined = folded
+      ? block.reduce((acc, line) => (line === '' ? `${acc}\n` : acc === '' ? line : `${acc} ${line}`), '')
+      : block.join('\n')
+
+    return joined.trim() || undefined
+  }
+
+  return undefined
+}
+
+function stripQuotes(value: string): string {
+  const quoted = value.match(/^(['"])([\s\S]*)\1$/)
+  return (quoted ? quoted[2] : value).trim()
+}
+
 export function parseSkillFrontmatter(content: string): {
   name?: string
   description?: string
@@ -41,16 +90,14 @@ export function parseSkillFrontmatter(content: string): {
   if (!frontmatterMatch) return {}
 
   const frontmatter = frontmatterMatch[1]
-  const nameMatch = frontmatter.match(/^name:\s*(.+)$/m)
-  const descMatch = frontmatter.match(/^description:\s*(.+)$/m)
   const metadataBlock = frontmatter.match(/^metadata:\s*\n((?:\s{2,}.+\n?)*)/m)
   const metadata = metadataBlock?.[1] || ''
   const authorMatch = metadata.match(/author:\s*(.+)$/m)
   const versionMatch = metadata.match(/version:\s*['"]?([^'"]+)['"]?$/m)
 
   return {
-    name: nameMatch?.[1]?.trim(),
-    description: descMatch?.[1]?.trim(),
+    name: readScalar(frontmatter, 'name'),
+    description: readScalar(frontmatter, 'description'),
     author: authorMatch?.[1]?.trim(),
     version: versionMatch?.[1]?.trim(),
   }

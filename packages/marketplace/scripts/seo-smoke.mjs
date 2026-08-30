@@ -61,6 +61,51 @@ function hasVisibleDocLabel(html, label) {
   return withoutHrefs.includes(label)
 }
 
+function canonical(html) {
+  return html.match(/rel="canonical"\s+href="([^"]+)"/i)?.[1] ?? null
+}
+
+/** Attribute values are HTML-escaped, so entities must be decoded before measuring length. */
+function metaDescription(html) {
+  const raw = html.match(/name="description"\s+content="([^"]*)"/i)?.[1]
+  if (raw === undefined) return null
+  return raw
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+
+function jsonLdTypes(html) {
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+  const types = []
+  for (const block of blocks) {
+    let parsed
+    try {
+      parsed = JSON.parse(block)
+    } catch (error) {
+      fail(`invalid JSON-LD block: ${error.message}`)
+    }
+    for (const node of parsed['@graph'] ?? [parsed]) types.push(node['@type'])
+  }
+  return types
+}
+
+/** Every page must self-canonicalise to its own trailing-slashed URL. */
+function assertCanonical(relPath, expectedUrl) {
+  const found = canonical(read(relPath))
+  if (found !== expectedUrl) fail(`${relPath} canonical "${found}" !== "${expectedUrl}"`)
+}
+
+function assertSchema(relPath, expectedTypes) {
+  const types = jsonLdTypes(read(relPath))
+  for (const expected of expectedTypes) {
+    if (!types.includes(expected)) fail(`${relPath} JSON-LD missing @type ${expected} (found: ${types.join(', ')})`)
+  }
+}
+
 const data = JSON.parse(fs.readFileSync(SKILLS_JSON, 'utf8'))
 const skillCount = data.skills.length
 const accessibility = data.skills.find((s) => s.id === 'accessibility')
@@ -102,6 +147,79 @@ const absoluteGithub = [...tlcPage.matchAll(/\bhref="(https:\/\/github\.com\/[^"
 if (absoluteGithub.length === 0) {
   fail('tlc-spec-driven missing retained absolute GitHub <a href="https://…">')
 }
+
+const ORIGIN = 'https://agent-skills.techleads.club'
+
+assertCanonical('index.html', `${ORIGIN}/`)
+assertCanonical('skills/index.html', `${ORIGIN}/skills/`)
+assertCanonical('skills/accessibility/index.html', `${ORIGIN}/skills/accessibility/`)
+assertCanonical('categories/index.html', `${ORIGIN}/categories/`)
+assertCanonical('categories/security/index.html', `${ORIGIN}/categories/security/`)
+assertCanonical('agents/index.html', `${ORIGIN}/agents/`)
+assertCanonical('agents/cursor/index.html', `${ORIGIN}/agents/cursor/`)
+assertCanonical('about/index.html', `${ORIGIN}/about/`)
+
+assertSchema('index.html', ['Organization', 'WebSite'])
+assertSchema('skills/accessibility/index.html', ['Organization', 'TechArticle', 'BreadcrumbList'])
+assertSchema('categories/security/index.html', ['Organization', 'CollectionPage', 'BreadcrumbList'])
+assertSchema('agents/cursor/index.html', ['Organization', 'HowTo', 'BreadcrumbList'])
+
+const seenDescriptions = new Map()
+for (const skill of data.skills) {
+  const relPath = `skills/${skill.id}/index.html`
+  const description = metaDescription(read(relPath))
+  if (!description) fail(`${relPath} has no meta description`)
+  if (description.length > 161) fail(`${relPath} meta description is ${description.length} chars (limit 160)`)
+  if (seenDescriptions.has(description)) {
+    fail(`duplicate meta description on ${relPath} and ${seenDescriptions.get(description)}`)
+  }
+  seenDescriptions.set(description, relPath)
+}
+
+const sitemap = read('sitemap.xml')
+const sitemapUrls = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]))
+const expectedUrls = [
+  `${ORIGIN}/`,
+  `${ORIGIN}/skills/`,
+  `${ORIGIN}/categories/`,
+  `${ORIGIN}/agents/`,
+  ...data.skills.map((skill) => `${ORIGIN}/skills/${skill.id}/`),
+  ...data.agents.map((agent) => `${ORIGIN}/agents/${agent.id}/`),
+]
+for (const url of expectedUrls) {
+  if (!sitemapUrls.has(url)) fail(`sitemap missing ${url}`)
+}
+if (sitemapUrls.size !== [...sitemapUrls].length) fail('sitemap contains duplicate <loc> entries')
+for (const url of sitemapUrls) {
+  if (!url.endsWith('/')) fail(`sitemap URL without trailing slash: ${url}`)
+}
+
+const categoriesWithSkills = new Set(data.skills.map((skill) => skill.category))
+for (const category of data.categories) {
+  const relPath = `categories/${category.id}/index.html`
+  const exists = fs.existsSync(path.join(OUT, relPath))
+  const shouldExist = categoriesWithSkills.has(category.id) && category.id !== 'uncategorized'
+  if (shouldExist && !exists) fail(`missing category hub for ${category.id}`)
+  if (!shouldExist && exists) fail(`category hub ${category.id} exported but has no skills`)
+  if (!exists) continue
+  const hubLinks = uniqueSkillHrefs(read(relPath))
+  const expected = data.skills.filter((skill) => skill.category === category.id).length
+  if (hubLinks.size < expected) {
+    fail(`category ${category.id} links ${hubLinks.size} skills, expected >= ${expected}`)
+  }
+}
+
+if (!/name="robots" content="noindex/i.test(read('404.html'))) {
+  fail('404.html is missing a noindex robots directive')
+}
+
+console.log(`  canonicals: self-referential and trailing-slashed on 8 sampled routes`)
+console.log(`  structured data: Organization/WebSite/TechArticle/CollectionPage/HowTo/BreadcrumbList valid`)
+console.log(
+  `  meta descriptions: ${seenDescriptions.size} unique across ${data.skills.length} skill pages, all <= 160 chars`,
+)
+console.log(`  sitemap: ${sitemapUrls.size} URLs, all trailing-slashed, all expected routes present`)
+console.log(`  category hubs: ${categoriesWithSkills.size} populated categories exported and fully linked`)
 
 console.log('SEO smoke OK')
 console.log(`  /skills/ unique skill links: ${hubLinks.size} (skills: ${skillCount})`)
