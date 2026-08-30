@@ -6,41 +6,31 @@ import { NpmDownloadsCard } from '../components/NpmDownloadsCard'
 import { ShareButton } from '../components/ShareButton'
 import { StatsCard } from '../components/StatsCard'
 import marketplaceData from '../data/skills.json'
+import { populatedCategories } from '../lib/catalog'
+import { buildPageMetadata } from '../lib/seo/metadata'
+import { graph, organizationSchema, websiteSchema } from '../lib/seo/schema'
+import { SITE_DESCRIPTION, SITE_NAME } from '../lib/seo/site'
+import { routes } from '../lib/seo/urls'
 
 const HERO_SKILL_ID = 'tlc-spec-driven'
 const HERO_SKILL_DESCRIPTION =
   'Turn your AI agent into a disciplined engineering partner. Spec-Driven guides every project through 4 adaptive phases — Specify, Design, Tasks, Execute — automatically sizing depth by complexity. From quick bug fixes to full feature builds, it produces atomic commits, requirement traceability, and persistent memory across sessions. Stack-agnostic, zero config, and works with any AI coding agent.'
 
-const websiteSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Agent Skills Marketplace',
-  url: 'https://agent-skills.techleads.club',
-  description:
-    'A curated collection of skills for AI coding agents. Extend Cursor, Claude Code, GitHub Copilot, Windsurf, and more with reusable, packaged instructions.',
-  publisher: {
-    '@type': 'Organization',
-    name: 'Tech Leads Club',
-    url: 'https://github.com/tech-leads-club',
-  },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://agent-skills.techleads.club/skills?search={search_term_string}',
-    },
-    'query-input': 'required name=search_term_string',
-  },
-}
+export const metadata = buildPageMetadata({
+  title: `${SITE_NAME} — Skills for AI Coding Agents`,
+  description: SITE_DESCRIPTION,
+  path: routes.home(),
+})
 
 export default function HomePage() {
   const { stats, skills } = marketplaceData
+  const categories = populatedCategories()
   const heroSkill = skills.find((s) => s.id === HERO_SKILL_ID)
   const featuredSkills = skills.filter((s) => s.id !== HERO_SKILL_ID).slice(0, 3)
 
   return (
     <>
-      <JsonLd data={websiteSchema} />
+      <JsonLd data={graph([organizationSchema(), websiteSchema()])} />
 
       {/* Hero Section */}
       <section className="hero-gradient relative overflow-hidden py-10 sm:py-10 lg:py-10 px-4 sm:px-5">
@@ -199,6 +189,61 @@ export default function HomePage() {
               )
             })}
           </div>
+        </section>
+
+        {/* Definition + hub links — the homepage's primary-entity answer and the crawl path
+            into the category and agent hubs. */}
+        <section aria-labelledby="what-are-agent-skills" className="py-10">
+          <h2 id="what-are-agent-skills" className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+            What are agent skills?
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl mb-4">
+            An agent skill is a packaged set of instructions — a Markdown file, plus optional scripts, templates and
+            reference docs — that you install into an AI coding agent. Once installed, the agent loads the skill when
+            the task matches its triggers, so it follows the same reviewed workflow every time instead of improvising.
+            Every skill in this registry is security-scanned and version-tracked.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl">
+            The registry currently holds {stats.totalSkills} skills across {categories.length} categories, installable
+            into {stats.totalAgents} AI coding agents.
+          </p>
+        </section>
+
+        <section aria-labelledby="browse-by-category" className="py-10">
+          <h2 id="browse-by-category" className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Skill categories
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <li key={category.id}>
+                <Link
+                  href={routes.category(category.id)}
+                  className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  {category.name}
+                  <span className="text-gray-400 dark:text-gray-500">{category.skillCount}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="supported-agents" className="py-10">
+          <h2 id="supported-agents" className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Supported AI coding agents
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {marketplaceData.agents.map((agent) => (
+              <li key={agent.id}>
+                <Link
+                  href={routes.agent(agent.id)}
+                  className="inline-flex text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  {agent.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* Stats */}

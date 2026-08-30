@@ -1,4 +1,13 @@
+# Agent Skills — https://agent-skills.techleads.club
+# Search indexing: everything public is crawlable.
+# AI crawling: retrieval and citation crawlers are allowed on purpose — this catalog exists
+# to be found and quoted by AI answer engines. Change this only with a licensing decision.
+
 User-agent: *
 Allow: /
+
+# Next.js build assets. Blocking these would break rendering for crawlers, so they stay open;
+# listed here only to document that the exclusion is deliberate.
+# Disallow: /_next/
 
 Sitemap: https://agent-skills.techleads.club/sitemap.xml

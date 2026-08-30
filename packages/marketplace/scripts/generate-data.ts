@@ -1,11 +1,13 @@
+import { getAgentCatalog } from '@tech-leads-club/core'
 import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import matter from 'gray-matter'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import { buildLlmsTxt } from '../src/lib/seo/llms-txt'
 import { extractDisplayName } from '../src/lib/skill-display-name'
-import type { Category, MarketplaceData, Skill } from '../src/types'
+import type { AgentTarget, Category, MarketplaceData, Skill } from '../src/types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -14,6 +16,7 @@ const WORKSPACE_ROOT = path.resolve(__dirname, '../../..')
 const SKILLS_DIR = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills')
 const REGISTRY_FILE = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills-registry.json')
 const OUTPUT_FILE = path.join(__dirname, '../src/data/skills.json')
+const LLMS_TXT_FILE = path.join(__dirname, '../public/llms.txt')
 
 interface RegistrySkill {
   name: string
@@ -128,6 +131,16 @@ function generateMarketplaceData(): MarketplaceData {
     }
   })
 
+  // why: agent install paths are canonical CLI data — re-typing them into the site would let
+  // published install instructions drift away from what the installer actually does.
+  const agents: AgentTarget[] = getAgentCatalog().map((agent) => ({
+    id: agent.type,
+    name: agent.displayName,
+    description: agent.description,
+    skillsDir: agent.skillsDir,
+    globalSkillsDir: agent.globalSkillsDir,
+  }))
+
   // Sort skills by name
   skills.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -137,9 +150,11 @@ function generateMarketplaceData(): MarketplaceData {
   return {
     skills,
     categories,
+    agents,
     stats: {
       totalSkills: skills.length,
       totalCategories: categories.length,
+      totalAgents: agents.length,
     },
   }
 }
@@ -158,8 +173,11 @@ function main() {
   // Write JSON file
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2))
 
+  fs.writeFileSync(LLMS_TXT_FILE, buildLlmsTxt(data))
+
   console.log(`✓ Generated data for ${data.stats.totalSkills} skills`)
   console.log(`✓ Output: ${OUTPUT_FILE}`)
+  console.log(`✓ Output: ${LLMS_TXT_FILE}`)
 }
 
 main()
