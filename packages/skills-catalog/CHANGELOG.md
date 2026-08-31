@@ -1,3 +1,9 @@
+## 0.17.5 (2026-08-31)
+
+### 🚀 Features
+
+- **harness-eval:** clarify Track B `07-agreement.md` and Track C `10-usefulness-agreement.md` — summary table plus Details cards (In/You should); no absolute paths. Same section order and merge JSON as before
+
 ## 0.17.4 (2026-08-28)
 
 ### 🚀 Features
