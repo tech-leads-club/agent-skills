@@ -159,8 +159,7 @@ def main() -> int:
         "| **Trap PASS** | Planted traps scored correctly | Trust Ship |",
         "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
         "",
-        "This track answers: *would an agent rediscover this without the harness?* "
-        "Not the same as usefulness (`10-usefulness-agreement.md`).",
+        "This track answers: *would an agent rediscover this without the harness?* Not the same as usefulness (`10-usefulness-agreement.md`).",
         "",
         "## Executive summary",
         "",
@@ -209,8 +208,7 @@ def main() -> int:
                 "",
                 f"- **In:** `{claim['source']}`",
                 f"- **The instruction says:** \"{clip_quote(claim)}\"",
-                f"- **Judges:** both say this is obvious from the repo "
-                f"(J1 {j1_cell(a)}, J2 {j2_cell(b)})",
+                f"- **Judges:** both say this is obvious from the repo (J1 {j1_cell(a)}, J2 {j2_cell(b)})",
                 "- **You should:** Delete or trim this sentence.",
                 "",
             ]
@@ -269,8 +267,7 @@ def main() -> int:
             )
         lines.append("")
         lines.append(
-            f"{len(review)} claims. See J1/J2 score tables "
-            "(`05-redundancy-j1.md`, `06-blind-scores.md`) for full rows."
+            f"{len(review)} claims. See J1/J2 score tables (`05-redundancy-j1.md`, `06-blind-scores.md`) for full rows."
         )
         lines.append("")
 

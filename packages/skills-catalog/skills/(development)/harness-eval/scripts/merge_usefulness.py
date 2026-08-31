@@ -302,12 +302,9 @@ def main() -> int:
         "",
         f"> Run dir: `{display_run_dir(run)}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
-        f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} "
-        f"(slim-fanin-blocked={len(fanin_blocked)})",
+        f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} (slim-fanin-blocked={len(fanin_blocked)})",
         f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
-        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; "
-        "Keep-core = dual KEEP-CORE; Mixed = dual MIXED; "
-        "Hold = disagree / unclear / missing / slim-fanin-blocked",
+        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; Keep-core = dual KEEP-CORE; Mixed = dual MIXED; Hold = disagree / unclear / missing / slim-fanin-blocked",
         "> **Model-sensitive:** re-judge on a second model before large Slim deletes.",
         "> **Fan-in:** another harness surface hard-loads this path as SoT → Hold, not Slim.",
         "> **Mixed apply:** use `11-mixed-apply.md` only — do not re-judge from this band alone.",
@@ -317,16 +314,14 @@ def main() -> int:
         "| Word | Meaning | You should |",
         "|------|---------|------------|",
         "| **Keep-core** | Most of the file changes agent behavior | Do **not** slim |",
-        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk — "
-        "follow `11-mixed-apply.md` |",
+        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk — follow `11-mixed-apply.md` |",
         "| **Slim** | Mostly theory / repo-demo / overlap, **and** no other harness surface hard-loads it | Compress or delete body |",
         "| **Hold** | Judges disagreed, unclear, or Slim blocked by fan-in | Do nothing yet (or update consumers first) |",
         "| **Trap PASS** | Planted traps scored correctly | Necessary but not sufficient for Slim |",
         "| **Fan-in blocked** | Another harness file mandates loading this path / treats it as SoT | Do **not** stub/delete until consumers are updated |",
         "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
         "",
-        "This track answers: *does deleting this change agent behavior?* "
-        "Not the same as redundancy (`07-agreement.md`).",
+        "This track answers: *does deleting this change agent behavior?* Not the same as redundancy (`07-agreement.md`).",
         "",
         "## Executive summary",
         "",
@@ -378,16 +373,14 @@ def main() -> int:
                 "",
                 f"- **In:** `{surf['path']}`",
                 f"- **Judges:** J1 {overall_cell(a)} · J2 {overall_cell(b)}",
-                "- **You should:** Compress or delete this file body (after you approve). "
-                "Do not slim if this path appears under fan-in blocked.",
+                "- **You should:** Compress or delete this file body (after you approve). Do not slim if this path appears under fan-in blocked.",
                 "",
             ]
 
     lines += [
         "## Slim fan-in blocked (do not stub/delete)",
         "",
-        "Dual SLIM/ROUTING-ONLY, but another harness surface hard-loads the path "
-        "(load/SoT/extract mandate). Update or drop those consumers before Slim apply.",
+        "Dual SLIM/ROUTING-ONLY, but another harness surface hard-loads the path (load/SoT/extract mandate). Update or drop those consumers before Slim apply.",
         "",
     ]
     if not fanin_blocked:
@@ -440,8 +433,7 @@ def main() -> int:
     lines += [
         "## Mixed (keep core, slim examples/theory)",
         "",
-        "Real rules plus large theory/examples/overlap. "
-        "**Apply instructions:** `11-mixed-apply.md` (KEEP/CUT per ID).",
+        "Real rules plus large theory/examples/overlap. **Apply instructions:** `11-mixed-apply.md` (KEEP/CUT per ID).",
         "",
     ]
     if not mixed:
@@ -507,13 +499,9 @@ def main() -> int:
     lines += [
         "## Action guidance",
         "",
-        "- **Slim:** compress only after trap PASS **and** fan-in PASS; still human-approve; "
-        "prefer re-judge on a second model if deleting >30% of a skill.",
-        "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or "
-        "update every citing harness surface in the same change, then re-merge.",
-        "- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only. "
-        "Do **not** re-judge. Do **not** replace KEEP snippets with `See app/...` or defer "
-        "KEEP contracts to AGENTS.md. Empty Keep-core/Slim cells → skip that path.",
+        "- **Slim:** compress only after trap PASS **and** fan-in PASS; still human-approve; prefer re-judge on a second model if deleting >30% of a skill.",
+        "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or update every citing harness surface in the same change, then re-merge.",
+        "- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only. Do **not** re-judge. Do **not** replace KEEP snippets with `See app/...` or defer KEEP contracts to AGENTS.md. Empty Keep-core/Slim cells → skip that path.",
         "- **Keep-core:** do not slim for usefulness reasons.",
         "- **Hold:** no usefulness trim.",
         "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for raw score rows.",
@@ -563,4 +551,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    sys.exit(main())
+
     sys.exit(main())
