@@ -897,8 +897,8 @@
         "scripts/track_a_correctness.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.8.3",
-      "contentHash": "675761f3fdb123f26103811ffe52e384adff5ffdf7c603578dfaa4eb2e54b2a2"
+      "version": "1.8.4",
+      "contentHash": "8237db9c985a37b131a6bdea5ad844dc5a7d839a68e87c6cf2c549aaf44276cd"
     },
     {
       "name": "jira-assistant",
