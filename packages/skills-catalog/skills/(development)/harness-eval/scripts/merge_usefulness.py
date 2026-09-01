@@ -120,9 +120,27 @@ def display_run_dir(run: Path) -> str:
 def format_misses(misses: list[dict]) -> str:
     if not misses:
         return "none"
+
+    def got_label(g: object) -> str:
+        return "MISSING" if g is None else str(g)
+
     return ", ".join(
-        f"{m['id']} (expected {m['expected']}, got {m['got']})" for m in misses
+        f"{m['id']} (expected {m['expected']}, got {got_label(m['got'])})" for m in misses
     )
+
+
+def format_tier_breakdown(items: list, tiers: tuple[str, ...] = ("T0", "T1", "T2")) -> str:
+    counts = Counter(c[1]["tier"] for c in items)
+    parts = [f"{t} **{counts[t]}**" for t in tiers if counts.get(t, 0)]
+    return ", ".join(parts) if parts else "_(none)_"
+
+
+def format_hold_reason(reason: str) -> str:
+    return f"`{reason}` — {hold_reason_label(reason)}"
+
+
+def hold_codes_list() -> str:
+    return " / ".join(HOLD_TITLES.keys())
 
 
 def overall_cell(score: dict | None) -> str:
@@ -292,19 +310,19 @@ def main() -> int:
         else:
             hold.append((sid, surf, a, b, "other"))
 
-    def tier_bucket(items):
-        return dict(Counter(c[1]["tier"] for c in items))
-
     mixed_apply_path = write_mixed_apply(run, mixed, m1, m2)
 
     lines = [
         "# Harness Eval: Usefulness Agreement (Track C)",
         "",
+        "> harness-eval-report: track=C schema=1",
         f"> Run dir: `{display_run_dir(run)}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
         f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} (slim-fanin-blocked={len(fanin_blocked)})",
         f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
-        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; Keep-core = dual KEEP-CORE; Mixed = dual MIXED; Hold = disagree / unclear / missing / slim-fanin-blocked",
+        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; Keep-core = dual KEEP-CORE; "
+        "Mixed = dual MIXED; "
+        f"Hold = {hold_codes_list()}",
         "> **Model-sensitive:** re-judge on a second model before large Slim deletes.",
         "> **Fan-in:** another harness surface hard-loads this path as SoT → Hold, not Slim.",
         "> **Mixed apply:** use `11-mixed-apply.md` only — do not re-judge from this band alone.",
@@ -343,10 +361,10 @@ def main() -> int:
 
     lines += [
         "",
-        f"Slim by tier: {tier_bucket(slim)}",
-        f"Keep-core by tier: {tier_bucket(keep)}",
-        f"Mixed by tier: {tier_bucket(mixed)}",
-        f"Hold by tier: {tier_bucket(hold)}",
+        f"Slim by tier: {format_tier_breakdown(slim)}",
+        f"Keep-core by tier: {format_tier_breakdown(keep)}",
+        f"Mixed by tier: {format_tier_breakdown(mixed)}",
+        f"Hold by tier: {format_tier_breakdown(hold)}",
         "",
         "## Slim",
         "",
@@ -476,7 +494,7 @@ def main() -> int:
         ]
         for sid, surf, a, b, reason in hold:
             lines.append(
-                f"| {sid} | {surf['tier']} | {hold_reason_label(reason)} | {surf['name']} | "
+                f"| {sid} | {surf['tier']} | {format_hold_reason(reason)} | {surf['name']} | "
                 f"`{surf['path']}` | {overall_table(a)} | {overall_table(b)} |"
             )
         lines += ["", "### Details", ""]
@@ -490,6 +508,7 @@ def main() -> int:
             lines += [
                 f"#### [{sid}] Hold — {title}",
                 "",
+                f"- **Reason:** {format_hold_reason(reason)}",
                 f"- **In:** `{surf['path']}`",
                 f"- **Judges:** J1 {overall_cell(a)} vs J2 {overall_cell(b)}",
                 f"- **You should:** {hold_action}",

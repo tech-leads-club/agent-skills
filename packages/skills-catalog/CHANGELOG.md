@@ -9,7 +9,7 @@
 - Actionable bands (Ship, Hold, Slim, fan-in blocked, Mixed) now lead with a **summary table**, then a **Details** section with per-item cards (`In` / `You should`).
 - Review (Track B) and Keep-core (Track C) stay **table-only** for quick scanning.
 - Report headers use a **relative** run path (`.harness-eval/runs/<id>`), not an absolute filesystem path.
-- Hold reasons are human-readable (e.g. `judges disagreed` instead of `disagree`).
+- Hold reasons show **code + label** for humans and agents (e.g. `` `disagree` — judges disagreed ``); trap misses use `MISSING` instead of `None`; tier breakdowns are markdown (`T1 **2**`) not Python dict repr; `Bands:` blockquotes list all Hold reason codes.
 
 **What did NOT change**
 

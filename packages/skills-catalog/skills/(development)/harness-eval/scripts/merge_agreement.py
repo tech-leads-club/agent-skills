@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROW_RE = re.compile(
@@ -64,9 +65,27 @@ def display_run_dir(run: Path) -> str:
 def format_misses(misses: list[dict]) -> str:
     if not misses:
         return "none"
+
+    def got_label(g: object) -> str:
+        return "MISSING" if g is None else str(g)
+
     return ", ".join(
-        f"{m['id']} (expected {m['expected']}, got {m['got']})" for m in misses
+        f"{m['id']} (expected {m['expected']}, got {got_label(m['got'])})" for m in misses
     )
+
+
+def format_tier_breakdown(items: list, tiers: tuple[str, ...] = ("T0", "T1", "T2")) -> str:
+    counts = Counter(c[1]["tier"] for c in items)
+    parts = [f"{t} **{counts[t]}**" for t in tiers if counts.get(t, 0)]
+    return ", ".join(parts) if parts else "_(none)_"
+
+
+def format_hold_reason(reason: str) -> str:
+    return f"`{reason}` — {hold_reason_label(reason)}"
+
+
+def hold_codes_list() -> str:
+    return " / ".join(HOLD_TITLES.keys())
 
 
 def clip_quote(claim: dict, limit: int = 280) -> str:
@@ -137,17 +156,14 @@ def main() -> int:
         else:
             review.append((cid, claim, a, b))
 
-    from collections import Counter
-
-    def tier_bucket(items):
-        return dict(Counter(c[1]["tier"] for c in items))
-
     lines = [
         "# Harness Eval: Judge Agreement (Track B)",
         "",
+        "> harness-eval-report: track=B schema=1",
         f"> Run dir: `{display_run_dir(run)}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
-        "> Bands: Ship = dual REDUNDANT + J2 cost≤1; Review = dual KEEP; Hold = disagree / missing",
+        "> Bands: Ship = dual REDUNDANT + J2 cost≤1 + trap PASS; Review = dual KEEP; "
+        f"Hold = {hold_codes_list()}",
         "",
         "## What these words mean",
         "",
@@ -180,8 +196,8 @@ def main() -> int:
 
     lines += [
         "",
-        f"Ship by tier: {tier_bucket(ship)}",
-        f"Hold by tier: {tier_bucket(hold)}",
+        f"Ship by tier: {format_tier_breakdown(ship)}",
+        f"Hold by tier: {format_tier_breakdown(hold)}",
         "",
         "## Ship",
         "",
@@ -230,7 +246,7 @@ def main() -> int:
         for cid, claim, a, b, reason in hold:
             a_s = a["class"] if a else "—"
             lines.append(
-                f"| {cid} | {claim['tier']} | {hold_reason_label(reason)} | "
+                f"| {cid} | {claim['tier']} | {format_hold_reason(reason)} | "
                 f"`{claim['source']}` | {a_s} | {j2_table(b)} | {table_quote(claim)} |"
             )
         lines += ["", "### Details", ""]
@@ -239,6 +255,7 @@ def main() -> int:
             lines += [
                 f"#### [{cid}] Hold — {title}",
                 "",
+                f"- **Reason:** {format_hold_reason(reason)}",
                 f"- **In:** `{claim['source']}`",
                 f"- **The instruction says:** \"{clip_quote(claim)}\"",
                 f"- **Judges:** J1 {j1_cell(a)} vs J2 {j2_cell(b)}",
