@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROW_RE = re.compile(
@@ -15,6 +16,12 @@ ROW_RE = re.compile(
 )
 REDUNDANT = {"REDUNDANT-CODE", "REDUNDANT-GENERAL"}
 KEEP = {"KEEP-POLICY", "KEEP-CAVEAT", "KEEP-ROUTING", "KEEP-COMPRESSED", "UNCLEAR"}
+
+HOLD_TITLES = {
+    "missing-score": "a judge did not score this",
+    "disagree": "judges disagreed",
+    "trap-fail-discard-ship": "trap gate failed — Ship discarded",
+}
 
 
 def family(cls: str) -> str:
@@ -44,6 +51,72 @@ def load_claims(path: Path) -> dict[str, dict]:
             row = json.loads(line)
             rows[row["id"]] = row
     return rows
+
+
+def display_run_dir(run: Path) -> str:
+    posix = run.as_posix().replace("\\", "/")
+    marker = ".harness-eval/"
+    idx = posix.lower().find(marker)
+    if idx >= 0:
+        return posix[idx:]
+    return run.name
+
+
+def format_misses(misses: list[dict]) -> str:
+    if not misses:
+        return "none"
+
+    def got_label(g: object) -> str:
+        return "MISSING" if g is None else str(g)
+
+    return ", ".join(
+        f"{m['id']} (expected {m['expected']}, got {got_label(m['got'])})" for m in misses
+    )
+
+
+def format_tier_breakdown(items: list, tiers: tuple[str, ...] = ("T0", "T1", "T2")) -> str:
+    counts = Counter(c[1]["tier"] for c in items)
+    parts = [f"{t} **{counts[t]}**" for t in tiers if counts.get(t, 0)]
+    return ", ".join(parts) if parts else "_(none)_"
+
+
+def format_hold_reason(reason: str) -> str:
+    return f"`{reason}` — {hold_reason_label(reason)}"
+
+
+def hold_codes_list() -> str:
+    return " / ".join(HOLD_TITLES.keys())
+
+
+def clip_quote(claim: dict, limit: int = 280) -> str:
+    q = (claim.get("quote") or "").replace("\n", " ").strip()
+    if len(q) > limit:
+        return q[: limit - 1] + "…"
+    return q
+
+
+def j1_cell(score: dict | None) -> str:
+    return f"`{score['class']}`" if score else "—"
+
+
+def j2_cell(score: dict | None) -> str:
+    if not score:
+        return "—"
+    return f"cost {score['cost']} / `{score['class']}`"
+
+
+def j2_table(score: dict | None) -> str:
+    if not score:
+        return "—"
+    return f"{score['cost']}/{score['class']}"
+
+
+def table_quote(claim: dict, limit: int = 80) -> str:
+    return clip_quote(claim, limit).replace("|", "\\|")
+
+
+def hold_reason_label(reason: str) -> str:
+    return HOLD_TITLES.get(reason, reason.replace("-", " "))
 
 
 def main() -> int:
@@ -83,17 +156,14 @@ def main() -> int:
         else:
             review.append((cid, claim, a, b))
 
-    from collections import Counter
-
-    def tier_bucket(items):
-        return dict(Counter(c[1]["tier"] for c in items))
-
     lines = [
         "# Harness Eval: Judge Agreement (Track B)",
         "",
-        f"> Run dir: `{run}`",
+        "> harness-eval-report: track=B schema=1",
+        f"> Run dir: `{display_run_dir(run)}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
-        "> Bands: Ship = dual REDUNDANT + J2 cost≤1; Review = dual KEEP; Hold = disagree / missing",
+        "> Bands: Ship = dual REDUNDANT + J2 cost≤1 + trap PASS; Review = dual KEEP; "
+        f"Hold = {hold_codes_list()}",
         "",
         "## What these words mean",
         "",
@@ -103,9 +173,9 @@ def main() -> int:
         "| **Review** | Both judges: keep (not redundant) | Leave alone |",
         "| **Hold** | Judges disagreed or score missing | Do nothing yet |",
         "| **Trap PASS** | Planted traps scored correctly | Trust Ship |",
+        "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
         "",
-        "This track answers: *would an agent rediscover this without the harness?* "
-        "Not the same as usefulness (`10-usefulness-agreement.md`).",
+        "This track answers: *would an agent rediscover this without the harness?* Not the same as usefulness (`10-usefulness-agreement.md`).",
         "",
         "## Executive summary",
         "",
@@ -113,7 +183,7 @@ def main() -> int:
         f"- Ship: **{len(ship)}**",
         f"- Review: **{len(review)}**",
         f"- Hold: **{len(hold)}**",
-        f"- Trap misses: {misses or 'none'}",
+        f"- Trap misses: {format_misses(misses)}",
         "",
         "## Discrimination (plants)",
         "",
@@ -126,38 +196,104 @@ def main() -> int:
 
     lines += [
         "",
-        f"Ship by tier: {tier_bucket(ship)}",
-        f"Hold by tier: {tier_bucket(hold)}",
+        f"Ship by tier: {format_tier_breakdown(ship)}",
+        f"Hold by tier: {format_tier_breakdown(hold)}",
         "",
         "## Ship",
         "",
-        "| ID | Tier | Source | J1 | J2 cost/class | Quote |",
-        "|----|------|--------|----|---------------|-------|",
+        "Safe to delete or trim — both judges say an agent would rediscover this cheaply from the repo.",
+        "",
     ]
-    for cid, claim, a, b in ship:
-        q = claim["quote"][:120].replace("|", "\\|")
-        lines.append(
-            f"| {cid} | {claim['tier']} | `{claim['source']}` | {a['class']} | {b['cost']}/{b['class']} | {q} |"
-        )
-
-    lines += ["", "## Hold", "", "| ID | Tier | Reason | J1 | J2 | Quote |", "|----|------|--------|----|----|-------|"]
-    for cid, claim, a, b, reason in hold:
-        q = claim["quote"][:100].replace("|", "\\|")
-        a_s = a["class"] if a else "—"
-        b_s = f"{b['cost']}/{b['class']}" if b else "—"
-        lines.append(f"| {cid} | {claim['tier']} | {reason} | {a_s} | {b_s} | {q} |")
+    if not ship:
+        lines.append("_No Ship claims._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Source | J1 | J2 cost/class | Quote |",
+            "|----|------|--------|----|---------------|-------|",
+        ]
+        for cid, claim, a, b in ship:
+            lines.append(
+                f"| {cid} | {claim['tier']} | `{claim['source']}` | {a['class']} | "
+                f"{j2_table(b)} | {table_quote(claim)} |"
+            )
+        lines += ["", "### Details", ""]
+        for cid, claim, a, b in ship:
+            lines += [
+                f"#### [{cid}] Ship — safe to trim",
+                "",
+                f"- **In:** `{claim['source']}`",
+                f"- **The instruction says:** \"{clip_quote(claim)}\"",
+                f"- **Judges:** both say this is obvious from the repo (J1 {j1_cell(a)}, J2 {j2_cell(b)})",
+                "- **You should:** Delete or trim this sentence.",
+                "",
+            ]
 
     lines += [
+        "## Hold",
         "",
+        "Judges disagreed, a score is missing, or the trap gate failed — do nothing yet.",
+        "",
+    ]
+    if not hold:
+        lines.append("_No Hold claims._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Reason | Source | J1 | J2 cost/class | Quote |",
+            "|----|------|--------|--------|----|---------------|-------|",
+        ]
+        for cid, claim, a, b, reason in hold:
+            a_s = a["class"] if a else "—"
+            lines.append(
+                f"| {cid} | {claim['tier']} | {format_hold_reason(reason)} | "
+                f"`{claim['source']}` | {a_s} | {j2_table(b)} | {table_quote(claim)} |"
+            )
+        lines += ["", "### Details", ""]
+        for cid, claim, a, b, reason in hold:
+            title = hold_reason_label(reason)
+            lines += [
+                f"#### [{cid}] Hold — {title}",
+                "",
+                f"- **Reason:** {format_hold_reason(reason)}",
+                f"- **In:** `{claim['source']}`",
+                f"- **The instruction says:** \"{clip_quote(claim)}\"",
+                f"- **Judges:** J1 {j1_cell(a)} vs J2 {j2_cell(b)}",
+                "- **You should:** Do nothing yet.",
+                "",
+            ]
+
+    lines += [
         "## Review (KEEP family)",
         "",
-        f"{len(review)} claims. See J1/J2 score tables for detail.",
+        "Both judges: keep (not redundant). Leave these sentences alone.",
         "",
+    ]
+    if not review:
+        lines.append("_No Review claims._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Source | J1 | J2 cost/class | Quote |",
+            "|----|------|--------|----|---------------|-------|",
+        ]
+        for cid, claim, a, b in review:
+            lines.append(
+                f"| {cid} | {claim['tier']} | `{claim['source']}` | {a['class']} | "
+                f"{j2_table(b)} | {table_quote(claim)} |"
+            )
+        lines.append("")
+        lines.append(
+            f"{len(review)} claims. See J1/J2 score tables (`05-redundancy-j1.md`, `06-blind-scores.md`) for full rows."
+        )
+        lines.append("")
+
+    lines += [
         "## Action guidance",
         "",
-        "- **T0 Ship:** edit always-on rules now.",
-        "- **T1 Ship:** skill cleanup backlog.",
-        "- **T2 Ship:** routing/pointer hygiene.",
+        "- **T0 Ship:** always-on rules (always loaded) — edit now.",
+        "- **T1 Ship:** skills — cleanup backlog.",
+        "- **T2 Ship:** cited harness refs — routing/pointer hygiene.",
         "- **Hold:** do not trim.",
         "",
     ]

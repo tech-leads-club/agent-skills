@@ -4,7 +4,7 @@ description: "Evaluate a repo agent harness (AGENTS.md, rules, skills, skill ref
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.8.3
+  version: 1.8.4
 ---
 
 # Harness Eval
@@ -163,7 +163,7 @@ Prefer Steps 4 and 5 in parallel.
 python3 "$SKILL_DIR/scripts/merge_agreement.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
-Expected: `07-agreement.md` (Ship/Review/Hold + **What these words mean**). On trap FAIL: fix plants per PROTOCOL, rescore P00x, re-merge — do not Ship.
+Expected: `07-agreement.md` (summary table + Details cards with In / You should per Ship/Hold; Review table; **What these words mean**). On trap FAIL: fix plants per PROTOCOL, rescore P00x, re-merge — do not Ship.
 
 ### Step 7: Track C — surface deck
 
@@ -193,7 +193,7 @@ Prefer Steps 8 and 9 in parallel.
 python3 "$SKILL_DIR/scripts/merge_usefulness.py" --run-dir .harness-eval/runs/$RUN_ID
 ```
 
-Expected: `10-usefulness-agreement.md` (Slim/Keep-core/Mixed/Hold + **What these words mean**), `11-mixed-apply.md` (KEEP/CUT per Mixed ID), plus `slim-fanin.json`. On trap FAIL: do not Slim. Surfaces with `slim-fanin-blocked` are Hold — not Slim apply candidates.
+Expected: `10-usefulness-agreement.md` (summary table + Details cards per Slim/fan-in/Mixed/Hold; Keep-core table; **What these words mean**), `11-mixed-apply.md` (KEEP/CUT per Mixed ID), plus `slim-fanin.json`. On trap FAIL: do not Slim. Surfaces with `slim-fanin-blocked` are Hold — not Slim apply candidates.
 
 ### Step 11: Present results
 
@@ -204,12 +204,12 @@ Summarize from the agreement reports (each starts with term definitions):
 - Track C trap + fan-in + Slim/Keep-core/Mixed/Hold → `10-usefulness-agreement.md`
 - Call out `11-mixed-apply.md` when Mixed count > 0 (the only Mixed apply path)
 - Call out model ids used for Track C and that Slim is model-sensitive
-- Call out any **Slim fan-in blocked** rows (consumers outside seed may appear here)
+- Call out any **Slim fan-in blocked** cards (consumers outside seed may appear here)
 
 Stop unless the user asks to apply Ship/Slim/Mixed. When applying:
 
-- **Slim:** only paths in the Slim table (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
-- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only (rule 12). Never re-judge from the Mixed path list alone. Never add code-tree path pointers as substitutes for cut demos (rule 11).
+- **Slim:** only paths in the Slim band (fan-in PASS); never stub fan-in-blocked paths without updating citers first.
+- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only (rule 12). Never re-judge from the Mixed band alone. Never add code-tree path pointers as substitutes for cut demos (rule 11).
 
 ## Examples
 
@@ -249,7 +249,7 @@ Expected: usefulness is model-sensitive. Re-run C1+C2 on a second model; interse
 
 ### Mixed apply rewrote conventions / removed modules
 
-Cause: apply agent re-judged from the Mixed path list instead of following KEEP/CUT. Solution: apply only via `11-mixed-apply.md`; if that file is missing, re-run `merge_usefulness.py`; if Keep-core/Slim cells are vague, re-score those IDs before apply.
+Cause: apply agent re-judged from the Mixed band instead of following KEEP/CUT. Solution: apply only via `11-mixed-apply.md`; if that file is missing, re-run `merge_usefulness.py`; if Keep-core/Slim cells are vague, re-score those IDs before apply.
 
 ### T2 empty / skill `references/` missing from inventory
 

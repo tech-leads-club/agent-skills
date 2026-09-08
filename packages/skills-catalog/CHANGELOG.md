@@ -1,3 +1,26 @@
+## 0.17.5 (2026-08-31)
+
+### 🚀 Features
+
+- **harness-eval:** clearer Track B `07-agreement.md` and Track C `10-usefulness-agreement.md` (skill **1.8.3 → 1.8.4**)
+
+**What you'll notice**
+
+- Actionable bands (Ship, Hold, Slim, fan-in blocked, Mixed) now lead with a **summary table**, then a **Details** section with per-item cards (`In` / `You should`).
+- Review (Track B) and Keep-core (Track C) stay **table-only** for quick scanning.
+- Report headers use a **relative** run path (`.harness-eval/runs/<id>`), not an absolute filesystem path.
+- Hold reasons show **code + label** for humans and agents (e.g. `` `disagree` — judges disagreed ``); trap misses use `MISSING` instead of `None`; tier breakdowns are markdown (`T1 **2**`) not Python dict repr; `Bands:` blockquotes list all Hold reason codes.
+
+**What did NOT change**
+
+- Same section order and band names (Ship / Review / Hold; Slim / Keep-core / Mixed / Hold).
+- Same merge script stdout JSON (`ship`, `review`, `hold`, etc.) and the same judge score inputs (`05`/`06`, `08`/`09`).
+- Existing run directories are not modified until you re-run the merge scripts.
+
+**If you have an old run**
+
+- Re-run only `merge_agreement.py` and/or `merge_usefulness.py` on the existing `--run-dir` — no need to re-judge claims or surfaces.
+
 ## 0.17.4 (2026-08-28)
 
 ### 🚀 Features

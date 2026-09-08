@@ -43,6 +43,15 @@ SLIM_FAMILY = {"SLIM", "ROUTING-ONLY"}
 KEEP_FAMILY = {"KEEP-CORE"}
 MIXED_FAMILY = {"MIXED"}
 
+HOLD_TITLES = {
+    "missing-score": "a judge did not score this",
+    "disagree": "judges disagreed",
+    "both-unclear": "both judges were unclear",
+    "slim-fanin-blocked": "fan-in blocked",
+    "trap-fail-discard-slim": "trap gate failed — Slim discarded",
+    "other": "not classified",
+}
+
 
 def family(overall: str) -> str:
     o = overall.upper().strip()
@@ -99,6 +108,61 @@ def load_surfaces(path: Path) -> dict[str, dict]:
     return {s["id"]: s for s in data.get("surfaces", [])}
 
 
+def display_run_dir(run: Path) -> str:
+    posix = run.as_posix().replace("\\", "/")
+    marker = ".harness-eval/"
+    idx = posix.lower().find(marker)
+    if idx >= 0:
+        return posix[idx:]
+    return run.name
+
+
+def format_misses(misses: list[dict]) -> str:
+    if not misses:
+        return "none"
+
+    def got_label(g: object) -> str:
+        return "MISSING" if g is None else str(g)
+
+    return ", ".join(
+        f"{m['id']} (expected {m['expected']}, got {got_label(m['got'])})" for m in misses
+    )
+
+
+def format_tier_breakdown(items: list, tiers: tuple[str, ...] = ("T0", "T1", "T2")) -> str:
+    counts = Counter(c[1]["tier"] for c in items)
+    parts = [f"{t} **{counts[t]}**" for t in tiers if counts.get(t, 0)]
+    return ", ".join(parts) if parts else "_(none)_"
+
+
+def format_hold_reason(reason: str) -> str:
+    return f"`{reason}` — {hold_reason_label(reason)}"
+
+
+def hold_codes_list() -> str:
+    return " / ".join(HOLD_TITLES.keys())
+
+
+def overall_cell(score: dict | None) -> str:
+    return f"`{score['overall']}`" if score else "—"
+
+
+def overall_table(score: dict | None) -> str:
+    return score["overall"] if score else "—"
+
+
+def hold_reason_label(reason: str) -> str:
+    return HOLD_TITLES.get(reason, reason.replace("-", " "))
+
+
+def citer_list(hits: list[dict], limit: int = 8) -> str:
+    unique = list(dict.fromkeys(h["citer"] for h in hits))
+    citers = ", ".join(f"`{c}`" for c in unique[:limit])
+    if len(unique) > limit:
+        citers += f" (+{len(unique) - limit} more)"
+    return citers or "none"
+
+
 def cell_or_missing(score: dict | None, key: str, *, required_for_apply: bool = False) -> str:
     if not score:
         return "_(missing score)_"
@@ -120,7 +184,7 @@ def write_mixed_apply(
     lines = [
         "# Mixed apply plan (Track C)",
         "",
-        f"> Run dir: `{run}`",
+        f"> Run dir: `{display_run_dir(run)}`",
         f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
         "> **This file is the only Mixed apply input.** Do not re-judge usefulness.",
         "",
@@ -246,40 +310,36 @@ def main() -> int:
         else:
             hold.append((sid, surf, a, b, "other"))
 
-    def tier_bucket(items):
-        return dict(Counter(c[1]["tier"] for c in items))
-
     mixed_apply_path = write_mixed_apply(run, mixed, m1, m2)
 
     lines = [
         "# Harness Eval: Usefulness Agreement (Track C)",
         "",
-        f"> Run dir: `{run}`",
+        "> harness-eval-report: track=C schema=1",
+        f"> Run dir: `{display_run_dir(run)}`",
         f"> Trap gate: {'PASS' if trap_pass else 'FAIL'} (misses={len(misses)})",
-        f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} "
-        f"(slim-fanin-blocked={len(fanin_blocked)})",
+        f"> Fan-in gate: {'PASS' if not fanin_blocked else 'BLOCKED'} (slim-fanin-blocked={len(fanin_blocked)})",
         f"> Judges: J1 model=`{m1 or 'unrecorded'}` · J2 model=`{m2 or 'unrecorded'}`",
-        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; "
-        "Keep-core = dual KEEP-CORE; Mixed = dual MIXED; "
-        "Hold = disagree / unclear / missing / slim-fanin-blocked",
+        "> Bands: Slim = dual SLIM/ROUTING + trap PASS + fan-in PASS; Keep-core = dual KEEP-CORE; "
+        "Mixed = dual MIXED; "
+        f"Hold = {hold_codes_list()}",
         "> **Model-sensitive:** re-judge on a second model before large Slim deletes.",
         "> **Fan-in:** another harness surface hard-loads this path as SoT → Hold, not Slim.",
-        "> **Mixed apply:** use `11-mixed-apply.md` only — do not re-judge from this table alone.",
+        "> **Mixed apply:** use `11-mixed-apply.md` only — do not re-judge from this band alone.",
         "",
         "## What these words mean",
         "",
         "| Word | Meaning | You should |",
         "|------|---------|------------|",
         "| **Keep-core** | Most of the file changes agent behavior | Do **not** slim |",
-        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk — "
-        "follow `11-mixed-apply.md` |",
+        "| **Mixed** | Real rules + large theory/examples/overlap | Keep rules; cut bulk — follow `11-mixed-apply.md` |",
         "| **Slim** | Mostly theory / repo-demo / overlap, **and** no other harness surface hard-loads it | Compress or delete body |",
         "| **Hold** | Judges disagreed, unclear, or Slim blocked by fan-in | Do nothing yet (or update consumers first) |",
         "| **Trap PASS** | Planted traps scored correctly | Necessary but not sufficient for Slim |",
         "| **Fan-in blocked** | Another harness file mandates loading this path / treats it as SoT | Do **not** stub/delete until consumers are updated |",
+        "| **T0 / T1 / T2** | Always-on rules / skills / cited harness refs | Fix T0 cites first (always loaded) |",
         "",
-        "This track answers: *does deleting this change agent behavior?* "
-        "Not the same as redundancy (`07-agreement.md`).",
+        "This track answers: *does deleting this change agent behavior?* Not the same as redundancy (`07-agreement.md`).",
         "",
         "## Executive summary",
         "",
@@ -288,7 +348,7 @@ def main() -> int:
         f"- Keep-core: **{len(keep)}**",
         f"- Mixed: **{len(mixed)}** → apply plan: `11-mixed-apply.md`",
         f"- Hold: **{len(hold)}** (fan-in blocked: {len(fanin_blocked)})",
-        f"- Trap misses: {misses or 'none'}",
+        f"- Trap misses: {format_misses(misses)}",
         "",
         "## Discrimination (plants)",
         "",
@@ -301,92 +361,166 @@ def main() -> int:
 
     lines += [
         "",
-        f"Slim by tier: {tier_bucket(slim)}",
-        f"Keep-core by tier: {tier_bucket(keep)}",
-        f"Mixed by tier: {tier_bucket(mixed)}",
-        f"Hold by tier: {tier_bucket(hold)}",
+        f"Slim by tier: {format_tier_breakdown(slim)}",
+        f"Keep-core by tier: {format_tier_breakdown(keep)}",
+        f"Mixed by tier: {format_tier_breakdown(mixed)}",
+        f"Hold by tier: {format_tier_breakdown(hold)}",
         "",
-        "## Slim (compress / delete body candidates)",
+        "## Slim",
         "",
-        "| ID | Tier | Name | Path | J1 | J2 |",
-        "|----|------|------|------|----|----|",
+        "Mostly theory, demo, or overlap — compress or delete the file body after you approve.",
+        "",
     ]
-    for sid, surf, a, b in slim:
-        lines.append(
-            f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | {a['overall']} | {b['overall']} |"
-        )
+    if not slim:
+        lines.append("_No Slim candidates._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Name | Path | J1 | J2 |",
+            "|----|------|------|------|----|----|",
+        ]
+        for sid, surf, a, b in slim:
+            lines.append(
+                f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | "
+                f"{overall_table(a)} | {overall_table(b)} |"
+            )
+        lines += ["", "### Details", ""]
+        for sid, surf, a, b in slim:
+            lines += [
+                f"#### [{sid}] Slim — compress or delete body",
+                "",
+                f"- **In:** `{surf['path']}`",
+                f"- **Judges:** J1 {overall_cell(a)} · J2 {overall_cell(b)}",
+                "- **You should:** Compress or delete this file body (after you approve). Do not slim if this path appears under fan-in blocked.",
+                "",
+            ]
 
     lines += [
-        "",
         "## Slim fan-in blocked (do not stub/delete)",
         "",
-        "Dual SLIM/ROUTING-ONLY, but another harness surface hard-loads the path "
-        "(load/SoT/extract mandate). Update or drop those consumers before Slim apply.",
+        "Dual SLIM/ROUTING-ONLY, but another harness surface hard-loads the path (load/SoT/extract mandate). Update or drop those consumers before Slim apply.",
         "",
-        "| ID | Path | Citers |",
-        "|----|------|--------|",
     ]
-    if fanin_blocked:
-        for sid, surf, _a, _b, hits in fanin_blocked:
-            unique = list(dict.fromkeys(h["citer"] for h in hits))
-            citers = ", ".join(f"`{c}`" for c in unique[:8])
-            if len(unique) > 8:
-                citers += f" (+{len(unique) - 8} more)"
-            lines.append(f"| {sid} | `{surf['path']}` | {citers} |")
+    if not fanin_blocked:
+        lines.append("_No fan-in blocked paths._")
+        lines.append("")
     else:
-        lines.append("| — | — | none |")
+        lines += [
+            "| ID | Tier | Name | Path | J1 | J2 | Citers |",
+            "|----|------|------|------|----|----|--------|",
+        ]
+        for sid, surf, a, b, hits in fanin_blocked:
+            citers = citer_list(hits, limit=3)
+            lines.append(
+                f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | "
+                f"{overall_table(a)} | {overall_table(b)} | {citers} |"
+            )
+        lines += ["", "### Details", ""]
+        for sid, surf, a, b, hits in fanin_blocked:
+            lines += [
+                f"#### [{sid}] Slim — fan-in blocked",
+                "",
+                f"- **In:** `{surf['path']}`",
+                f"- **Judges:** J1 {overall_cell(a)} · J2 {overall_cell(b)}",
+                f"- **Looked for consumers:** {citer_list(hits)}",
+                "- **You should:** Do not stub/delete until those files are updated.",
+                "",
+            ]
 
     lines += [
-        "",
         "## Keep-core",
         "",
-        "| ID | Tier | Name | Path | J1 | J2 |",
-        "|----|------|------|------|----|----|",
+        "Do not slim these files — most of the file changes agent behavior.",
+        "",
     ]
-    for sid, surf, a, b in keep:
-        lines.append(
-            f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | {a['overall']} | {b['overall']} |"
-        )
+    if not keep:
+        lines.append("_No Keep-core surfaces._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Name | Path | J1 | J2 |",
+            "|----|------|------|------|----|----|",
+        ]
+        for sid, surf, a, b in keep:
+            lines.append(
+                f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | "
+                f"{overall_table(a)} | {overall_table(b)} |"
+            )
+        lines.append("")
 
     lines += [
-        "",
         "## Mixed (keep core, slim examples/theory)",
         "",
-        "Path list only. **Apply instructions:** `11-mixed-apply.md` (KEEP/CUT per ID).",
+        "Real rules plus large theory/examples/overlap. **Apply instructions:** `11-mixed-apply.md` (KEEP/CUT per ID).",
         "",
-        "| ID | Tier | Name | Path | J1 | J2 |",
-        "|----|------|------|------|----|----|",
     ]
-    for sid, surf, a, b in mixed:
-        lines.append(
-            f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | {a['overall']} | {b['overall']} |"
-        )
+    if not mixed:
+        lines.append("_No Mixed surfaces._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Name | Path | J1 | J2 |",
+            "|----|------|------|------|----|----|",
+        ]
+        for sid, surf, a, b in mixed:
+            lines.append(
+                f"| {sid} | {surf['tier']} | {surf['name']} | `{surf['path']}` | "
+                f"{overall_table(a)} | {overall_table(b)} |"
+            )
+        lines += ["", "### Details", ""]
+        for sid, surf, a, b in mixed:
+            lines += [
+                f"#### [{sid}] Mixed — keep rules, cut bulk",
+                "",
+                f"- **In:** `{surf['path']}`",
+                f"- **Judges:** J1 {overall_cell(a)} · J2 {overall_cell(b)}",
+                "- **You should:** Open `11-mixed-apply.md` and follow KEEP/CUT for this path.",
+                "",
+            ]
 
     lines += [
-        "",
         "## Hold",
         "",
-        "| ID | Tier | Reason | J1 | J2 | Path |",
-        "|----|------|--------|----|----|------|",
+        "Judges disagreed, were unclear, a score is missing, or Slim is blocked by fan-in.",
+        "",
     ]
-    for sid, surf, a, b, reason in hold:
-        a_s = a["overall"] if a else "—"
-        b_s = b["overall"] if b else "—"
-        lines.append(
-            f"| {sid} | {surf['tier']} | {reason} | {a_s} | {b_s} | `{surf['path']}` |"
-        )
+    if not hold:
+        lines.append("_No Hold surfaces._")
+        lines.append("")
+    else:
+        lines += [
+            "| ID | Tier | Reason | Name | Path | J1 | J2 |",
+            "|----|------|--------|------|------|----|----|",
+        ]
+        for sid, surf, a, b, reason in hold:
+            lines.append(
+                f"| {sid} | {surf['tier']} | {format_hold_reason(reason)} | {surf['name']} | "
+                f"`{surf['path']}` | {overall_table(a)} | {overall_table(b)} |"
+            )
+        lines += ["", "### Details", ""]
+        for sid, surf, a, b, reason in hold:
+            title = hold_reason_label(reason)
+            hold_action = (
+                "Do nothing yet (or update consumers first)."
+                if reason == "slim-fanin-blocked"
+                else "Do nothing yet."
+            )
+            lines += [
+                f"#### [{sid}] Hold — {title}",
+                "",
+                f"- **Reason:** {format_hold_reason(reason)}",
+                f"- **In:** `{surf['path']}`",
+                f"- **Judges:** J1 {overall_cell(a)} vs J2 {overall_cell(b)}",
+                f"- **You should:** {hold_action}",
+                "",
+            ]
 
     lines += [
-        "",
         "## Action guidance",
         "",
-        "- **Slim:** compress only after trap PASS **and** fan-in PASS; still human-approve; "
-        "prefer re-judge on a second model if deleting >30% of a skill.",
-        "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or "
-        "update every citing harness surface in the same change, then re-merge.",
-        "- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only. "
-        "Do **not** re-judge. Do **not** replace KEEP snippets with `See app/...` or defer "
-        "KEEP contracts to AGENTS.md. Empty Keep-core/Slim cells → skip that path.",
+        "- **Slim:** compress only after trap PASS **and** fan-in PASS; still human-approve; prefer re-judge on a second model if deleting >30% of a skill.",
+        "- **Slim fan-in blocked:** do **not** stub/delete; either keep the checklist body or update every citing harness surface in the same change, then re-merge.",
+        "- **Mixed:** open `11-mixed-apply.md` and execute KEEP/CUT per ID only. Do **not** re-judge. Do **not** replace KEEP snippets with `See app/...` or defer KEEP contracts to AGENTS.md. Empty Keep-core/Slim cells → skip that path.",
         "- **Keep-core:** do not slim for usefulness reasons.",
         "- **Hold:** no usefulness trim.",
         "- See `08-usefulness-j1.md` / `09-usefulness-j2.md` for raw score rows.",
