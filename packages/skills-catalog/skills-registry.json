@@ -1666,6 +1666,19 @@
       "contentHash": "0ffb82a6d58cbb4f7f265a29601971bd302322ef89c4392f25278376200596df"
     },
     {
+      "name": "tlc-plan",
+      "description": "Turns decided work into tasks with observable criteria for tlc-implement. Use when the user says \"write the task\", \"cut this PRD into tasks\", \"turn this design doc into work\", or \"tlc-plan\". Do NOT use when nobody has decided what to build, or to implement.",
+      "category": "development",
+      "path": "(development)/tlc-plan",
+      "files": [
+        "SKILL.md",
+        "references/document-format.md"
+      ],
+      "author": "Tech Leads Club - github.com/tech-leads-club",
+      "version": "0.1.1",
+      "contentHash": "2faeaf4954cbefa182c8956fffc2ee14c906cbb6f9f46cce6d94ed4fbce198c6"
+    },
+    {
       "name": "tlc-spec-driven",
       "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Writes testable requirements in EARS notation, atomic tasks, atomic Conventional Commits, and requirement traceability. Ships deterministic Python validation scripts so structural gates are enforced by code, not memory. Features an independent Verifier (author != verifier, evidence-or-zero), a discrimination sensor, a decision log (STATE.md), a test-coverage matrix, and a self-improving lessons layer. Stack-agnostic and tool-agnostic. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",

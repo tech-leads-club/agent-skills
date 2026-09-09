@@ -1,6 +1,6 @@
 # Agent Skills
 
-> 89 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
+> 90 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
 
 Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`. Add `--agent <id>` to target one agent, or `--global` to install for every project. Source: https://github.com/tech-leads-club/agent-skills
 
@@ -12,7 +12,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [Decision Making](https://agent-skills.techleads.club/categories/decision-making/): 2 skills. Skills for critical thinking, structured dissent, and decision quality
 - [Design](https://agent-skills.techleads.club/categories/design/): 4 skills. Skills for UI/UX design and design systems
 - [Go-to-Market](https://agent-skills.techleads.club/categories/gtm/): 18 skills. Skills for GTM, pricing, outbound, inbound, paid, retention, and GTM operations
-- [Development](https://agent-skills.techleads.club/categories/development/): 15 skills. Skills for software development workflows
+- [Development](https://agent-skills.techleads.club/categories/development/): 16 skills. Skills for software development workflows
 - [Learning & Growth](https://agent-skills.techleads.club/categories/learning/): 1 skill. Skills for deliberate learning, skill development, and knowledge retention during AI-assisted work
 - [Monitoring](https://agent-skills.techleads.club/categories/monitoring/): 1 skill. Skills for observability, logging, and system monitoring
 - [Performance](https://agent-skills.techleads.club/categories/performance/): 4 skills. Skills for web performance optimization, audits, and monitoring
@@ -128,6 +128,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [The Jury](https://agent-skills.techleads.club/skills/the-jury/): Use when a question, decision, plan, tradeoff, or claim needs a rigorous verdict and one perspective is not enough. Spawns a panel of 3 to 5 subagent jurors that form independent blind opinions, deliberate anonymously under an anti-anchoring and anti-sycophancy protocol, and return one committed verdict with confidence, preserved dissent, and a concrete next action. Domain-agnostic across engineering, architecture, data, product, hiring, strategy, vendor choice, build-vs-buy, and research design. Trigger phrases include "convene a jury", "have agents debate and decide", "get a panel to decide", "multi-agent decision", "stress-test this and decide", "monte um juri", "tribunal de agentes", "painel para decidir". Do NOT use to only critique without deciding (use the-fool for that), to build a plan or write the solution itself, or for simple factual lookups
 - [Threat Model Source Code Repo](https://agent-skills.techleads.club/skills/security-threat-model/): Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model
 - [TLC Discover](https://agent-skills.techleads.club/skills/tlc-discover/): Interviews an unshaped idea into a verdict and a design document with literal decisions for tlc-plan
+- [TLC Plan](https://agent-skills.techleads.club/skills/tlc-plan/): Turns decided work into tasks with observable criteria for tlc-implement
 - [Vercel Deploy](https://agent-skills.techleads.club/skills/vercel-deploy/): Deploy applications and websites to Vercel
 - [Vercel React Best Practices](https://agent-skills.techleads.club/skills/react-best-practices/): React and Next.js performance optimization guidelines from Vercel Engineering
 - [Video-First Cold Outreach](https://agent-skills.techleads.club/skills/video-outreach/): When the user wants to build video-first cold outreach, create personalized video at scale, implement async selling, or use AI demo generation for prospecting. Also
