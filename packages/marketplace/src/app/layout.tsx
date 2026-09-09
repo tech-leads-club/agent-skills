@@ -165,6 +165,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href={routes.about()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
                   About
                 </Link>
+                <Link href={routes.aiDevFlow()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  AI Dev Flow
+                </Link>
               </nav>
               <p className="text-center text-gray-600 dark:text-gray-400">
                 Built with ❤️ by{' '}

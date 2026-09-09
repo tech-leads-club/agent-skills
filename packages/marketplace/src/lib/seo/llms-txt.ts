@@ -64,6 +64,16 @@ export function buildLlmsTxt(data: MarketplaceData): string {
     '',
     line('About', routes.about(), 'How the registry is built, reviewed and security-scanned'),
     line('All skills', routes.skills(), 'Searchable index of every skill'),
+    line(
+      'TLC AI Dev Flow',
+      routes.aiDevFlow(),
+      'v1 skills for agentic software factories: discover, plan, implement and the-judge',
+    ),
+    line(
+      'TLC Spec-Driven',
+      routes.specDriven(),
+      'Spec-driven framework with adaptive phases, atomic tasks and an independent verifier',
+    ),
     '',
   )
 

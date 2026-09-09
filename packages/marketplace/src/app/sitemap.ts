@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 import { catalog, populatedCategories } from '../lib/catalog'
-import { absoluteUrl, pathFor, routes } from '../lib/seo/urls'
+import { absoluteUrl, routes } from '../lib/seo/urls'
 
 export const dynamic = 'force-static'
 
@@ -25,7 +25,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     { url: absoluteUrl(routes.agents()), changeFrequency: 'monthly', priority: 0.8 },
     { url: absoluteUrl(routes.about()), changeFrequency: 'monthly', priority: 0.5 },
-    { url: absoluteUrl(pathFor(['tlc-spec-driven'])), changeFrequency: 'weekly', priority: 0.9 },
+    { url: absoluteUrl(routes.specDriven()), changeFrequency: 'weekly', priority: 0.9 },
+    { url: absoluteUrl(routes.aiDevFlow()), changeFrequency: 'weekly', priority: 0.9 },
     ...populatedCategories().map((category) => ({
       url: absoluteUrl(routes.category(category.id)),
       changeFrequency: 'weekly' as const,

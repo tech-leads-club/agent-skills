@@ -158,11 +158,26 @@ assertCanonical('categories/security/index.html', `${ORIGIN}/categories/security
 assertCanonical('agents/index.html', `${ORIGIN}/agents/`)
 assertCanonical('agents/cursor/index.html', `${ORIGIN}/agents/cursor/`)
 assertCanonical('about/index.html', `${ORIGIN}/about/`)
+assertCanonical('tlc-spec-driven/index.html', `${ORIGIN}/tlc-spec-driven/`)
+assertCanonical('tlc-ai-dev-flow/index.html', `${ORIGIN}/tlc-ai-dev-flow/`)
 
 assertSchema('index.html', ['Organization', 'WebSite'])
+assertSchema('tlc-ai-dev-flow/index.html', ['Organization', 'WebSite', 'CollectionPage', 'BreadcrumbList'])
 assertSchema('skills/accessibility/index.html', ['Organization', 'TechArticle', 'BreadcrumbList'])
 assertSchema('categories/security/index.html', ['Organization', 'CollectionPage', 'BreadcrumbList'])
 assertSchema('agents/cursor/index.html', ['Organization', 'HowTo', 'BreadcrumbList'])
+
+const flowLanding = read('tlc-ai-dev-flow/index.html')
+if (countH1(flowLanding) !== 1) fail(`tlc-ai-dev-flow H1 count ${countH1(flowLanding)}, expected 1`)
+const flowTitle = documentTitle(flowLanding)
+if (!flowTitle || !flowTitle.includes('TLC AI Dev Flow')) {
+  fail(`tlc-ai-dev-flow <title> "${flowTitle}" does not include TLC AI Dev Flow`)
+}
+const flowDescription = metaDescription(flowLanding)
+if (!flowDescription) fail('tlc-ai-dev-flow has no meta description')
+if (flowDescription.length > 161) {
+  fail(`tlc-ai-dev-flow meta description is ${flowDescription.length} chars (limit 160)`)
+}
 
 const seenDescriptions = new Map()
 for (const skill of data.skills) {
@@ -183,6 +198,8 @@ const expectedUrls = [
   `${ORIGIN}/skills/`,
   `${ORIGIN}/categories/`,
   `${ORIGIN}/agents/`,
+  `${ORIGIN}/tlc-spec-driven/`,
+  `${ORIGIN}/tlc-ai-dev-flow/`,
   ...data.skills.map((skill) => `${ORIGIN}/skills/${skill.id}/`),
   ...data.agents.map((agent) => `${ORIGIN}/agents/${agent.id}/`),
 ]
@@ -216,12 +233,14 @@ if (!llms.startsWith('# Agent Skills\n\n> ')) {
 for (const skill of data.skills) {
   if (!llms.includes(`${ORIGIN}/skills/${skill.id}/`)) fail(`llms.txt missing ${skill.id}`)
 }
+if (!llms.includes(`${ORIGIN}/tlc-ai-dev-flow/`)) fail('llms.txt missing TLC AI Dev Flow landing')
+if (!llms.includes(`${ORIGIN}/tlc-spec-driven/`)) fail('llms.txt missing TLC Spec-Driven landing')
 
 if (!/name="robots" content="noindex/i.test(read('404.html'))) {
   fail('404.html is missing a noindex robots directive')
 }
 
-console.log(`  canonicals: self-referential and trailing-slashed on 8 sampled routes`)
+console.log(`  canonicals: self-referential and trailing-slashed on 10 sampled routes`)
 console.log(`  structured data: Organization/WebSite/TechArticle/CollectionPage/HowTo/BreadcrumbList valid`)
 console.log(
   `  meta descriptions: ${seenDescriptions.size} unique across ${data.skills.length} skill pages, all <= 160 chars`,
@@ -234,3 +253,4 @@ console.log('SEO smoke OK')
 console.log(`  /skills/ unique skill links: ${hubLinks.size} (skills: ${skillCount})`)
 console.log(`  accessibility title/H1: ${title} / ${h1Text}`)
 console.log('  tlc-spec-driven: zero relative .md / references/ hrefs; labels + GitHub <a> retained')
+console.log('  tlc-ai-dev-flow: canonical, CollectionPage schema, llms.txt')

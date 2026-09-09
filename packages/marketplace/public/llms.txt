@@ -141,3 +141,5 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 
 - [About](https://agent-skills.techleads.club/about/): How the registry is built, reviewed and security-scanned
 - [All skills](https://agent-skills.techleads.club/skills/): Searchable index of every skill
+- [TLC AI Dev Flow](https://agent-skills.techleads.club/tlc-ai-dev-flow/): v1 skills for agentic software factories: discover, plan, implement and the-judge
+- [TLC Spec-Driven](https://agent-skills.techleads.club/tlc-spec-driven/): Spec-driven framework with adaptive phases, atomic tasks and an independent verifier
