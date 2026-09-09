@@ -1,6 +1,6 @@
 ---
 name: tlc-spec-lean
-description: 'Lean spec work for models that already know how to implement. What fails is not reasoning: an obligation gets read and abandoned, then a done claim lands on top. Freezes the what in one human-reviewed plan and proof-backed checks, lets the model build, and proves it with someone who did not build it. Use when the user says "tlc-spec-lean", "plan feature", "specify feature", "write the checks", "build this plan", or "verify work". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.'
+description: 'Spec-driven feature work that freezes obligations instead of the plan: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors, then proof-backed checks, then build, then an independent Verifier. Use when the user says "tlc-spec-lean", "plan feature", "specify feature", "write the checks", "build this plan", or "verify work". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.'
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
@@ -9,7 +9,7 @@ metadata:
 
 # Tech Lead's Club - Spec, Lean
 
-For models that already know how to implement: freeze the what, free the plan, prove it with someone who did not build it. Derived from tlc-spec-driven 3.3.0 (Felipe Rodrigues), tlc-plan, and tlc-implement.
+Freeze the obligations. Free the plan. Prove it with someone who did not build it. Derived from tlc-spec-driven 3.3.0 (Felipe Rodrigues), tlc-plan, and tlc-implement.
 
 ```
 ┌──────┐   ┌────────┐   ┌───────┐   ┌────────┐
