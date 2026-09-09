@@ -1725,7 +1725,7 @@
     },
     {
       "name": "tlc-spec-lean",
-      "description": "Spec-driven feature work that freezes obligations instead of the plan: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors, then proof-backed checks, then build, then an independent Verifier. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"write the checks\", \"build this plan\", or \"verify work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
+      "description": "Lean spec work for models that already know how to implement. What fails is not reasoning: an obligation gets read and abandoned, then a done claim lands on top. Freezes the what in one human-reviewed plan and proof-backed checks, lets the model build, and proves it with someone who did not build it. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"write the checks\", \"build this plan\", or \"verify work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
       "category": "development",
       "path": "(development)/tlc-spec-lean",
       "files": [
@@ -1747,7 +1747,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "7753fd82ab5a18672118c24da2e440e247a1ad534b187de3156ac5bbfd1d3ea1"
+      "contentHash": "193afee7d6f92d68200f7e20664f634460d4863e093faa65e71ec653cee3dc97"
     },
     {
       "name": "vercel-deploy",
