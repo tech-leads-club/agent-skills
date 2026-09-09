@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { routes } from '../../lib/seo/urls'
 import { CopyButton } from '../CopyButton'
 import { FLOW_SKILLS, INSTALL_CMD } from './constants'
 
@@ -29,7 +30,7 @@ export function DevFlowCTA() {
           {FLOW_SKILLS.map((skill) => (
             <Link
               key={skill.id}
-              href={`/skills/${skill.id}`}
+              href={routes.skill(skill.id)}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors"
             >
               {skill.id}
@@ -37,7 +38,7 @@ export function DevFlowCTA() {
           ))}
           <span className="text-gray-300 dark:text-gray-700">·</span>
           <Link
-            href="/skills"
+            href={routes.skills()}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors"
           >
             Browse all skills

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { routes } from '../../lib/seo/urls'
 import { CopyButton } from '../CopyButton'
 import { INSTALL_CMD } from './constants'
 
@@ -38,7 +39,10 @@ export function DevFlowHero() {
           </div>
           <p className="text-xs text-gray-400 dark:text-gray-500">
             Works with Cursor, Claude Code, Copilot, Windsurf, Cline and{' '}
-            <Link href="/skills" className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300">
+            <Link
+              href={routes.skills()}
+              className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300"
+            >
               14 others
             </Link>
             .

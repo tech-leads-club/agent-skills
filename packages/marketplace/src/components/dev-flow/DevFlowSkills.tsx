@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { routes } from '../../lib/seo/urls'
 import { FLOW_SKILLS } from './constants'
 
 export function DevFlowSkills() {
@@ -31,7 +32,7 @@ export function DevFlowSkills() {
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{skill.title}</h3>
               <p className="text-[14px] text-gray-500 dark:text-gray-400 leading-relaxed mb-5 flex-1">{skill.body}</p>
               <Link
-                href={`/skills/${skill.id}`}
+                href={routes.skill(skill.id)}
                 className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
                 {skill.id} →
