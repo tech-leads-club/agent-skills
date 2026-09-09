@@ -254,7 +254,7 @@ def cmd_add(root, args):
         return 2
     if not source:
         print("ERROR: --source is required (file:line / AC id / mutant id / SPEC_DEVIATION ref).", file=sys.stderr)
-        print("       A lesson with no grounding in validation.md is an opinion, not a lesson. Refused.", file=sys.stderr)
+        print("       A lesson with no grounding in verification.md is an opinion, not a lesson. Refused.", file=sys.stderr)
         return 2
     if len(text) < 12:
         print("ERROR: --text too short. State the actionable lesson in one terse sentence.", file=sys.stderr)
