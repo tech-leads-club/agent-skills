@@ -1667,7 +1667,7 @@
     },
     {
       "name": "tlc-implement",
-      "description": "Extracts a checklist from decided work, builds it, and proves every check with an independent verifier. Use when the user says \"extract a checklist\", \"build this ticket\", \"implement this spec\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to design the work.",
+      "description": "Implement a work already planned: extracts a checklist, builds it, and proves every check with an independent verifier. Use when the user says \"extract a checklist\", \"build this ticket\", \"implement this spec\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to design the work.",
       "category": "development",
       "path": "(development)/tlc-implement",
       "files": [
@@ -1679,7 +1679,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "0.1.0",
-      "contentHash": "67b15545947b3b57a41bc3f475db09d4ea2280b25c7ef8e190bde73e9237a5c5"
+      "contentHash": "883cc7cba0c2584dfed1603c11238cd42a6c682f8b128f1d7b3c7e03c5dc99c4"
     },
     {
       "name": "tlc-plan",
