@@ -29,7 +29,7 @@ profile: standard
 handoff: on
 ```
 
-`profile` is one of `light`, `standard`, `ui`; `handoff` is `on` or `off`, and absent it is `off`. A batch packs whole slices up to **150k tokens** of estimated reading; a project on a smaller window overrides that with `handoff: on, budget 90k`. Which slices land in which batch is not configured - that is decided per feature, from the slices in front of you, and written down before any code.
+`profile` is one of `light`, `standard`, `ui`; `handoff` is `on` or `off`, and absent it is `on`. A batch packs whole slices up to **150k tokens** of estimated reading; a project on a smaller window overrides that with `handoff: on, budget 90k`. Which slices land in which batch is not configured - that is decided per feature, from the slices in front of you, and written down before any code.
 
 | Profile | Adds | Cannot catch |
 |---|---|---|
