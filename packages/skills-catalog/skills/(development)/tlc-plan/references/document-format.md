@@ -1,6 +1,6 @@
 # Task document format
 
-Load this file only when writing `.tasks/<name>.md` — after the cut, the grounding, and the sweep. Do not load it during Cut.
+Load this file only when writing `.tasks/<name>.md` — after the cut, the grounding, the surface walk, and the sweep. Do not load it during Cut.
 
 Section headings stay as they are — the next skill refers to them by name — while the prose follows the language of the document and identifiers are never translated. The document is for humans first: `tlc-implement` copies criteria into checks, and nothing under `Unresolved` gets settled while building.
 
@@ -59,6 +59,19 @@ stateDiagram-v2
 ## Out of scope
 
 - <excluded capability> - <why>
+
+## Observable
+
+Every item of every surface this task exposes. A landing is a criterion already written, `existing`, `n/a`, or `Unresolved` - never a behaviour the walk invented.
+
+| Surface | Decision | Landing |
+| --- | --- | --- |
+| screen `<name>` | empty state | 1 |
+| screen `<name>` | error state | Unresolved 2 |
+| screen `<name>` | destructive action confirms | existing - <the pattern already in use> |
+| API `<METHOD> /<path>` | error shape and codes | n/a - <why it does not apply> |
+
+<Or:> `None - no user-facing surface`
 
 ## Swept
 
@@ -204,4 +217,6 @@ When a source has no address - a conversation, a document pasted into a chat - s
 
 Copy only the slice that this task cannot get wrong, and copy it literally. The reasoning stays in the source, where it has readers and outlives the merge. Two reasons to copy rather than link: the source covers more than this slice and keeps being edited for months, while the task is the record at the moment of building; and whoever builds needs the exact shape in front of them, not a link to thirty pages containing it somewhere.
 
-**Unresolved** is a table because `Kind` has to travel with the question. A numbered list with a bold prefix still lets a blocking row read as a note, which is the failure this section exists to prevent. The three `Kind` values are a closed set: `blocks` (a criterion cannot be satisfied), `blocks go-live` (proofs can be green and real users still cannot be switched on), `open` (imprecise, not blocking). Order the rows that way, so the status line can be counted from the column rather than inferred from wording. `#` stays because Swept and the chat refer to a row by number. `Until answered` is where a written-in-the-meantime value lives, so a reviewer can see what to tear up when the question closes.
+**Observable** is the surface walk made checkable. A blank landing is an item nobody decided; an `n/a` without a reason is the same blank wearing an escape. A row that would need a new behaviour cites `Unresolved <n>` and stops - writing a criterion to fill the cell is the failure the landing rule exists to prevent. `None - no user-facing surface` is a complete answer, and stating it is what makes the omission contestable.
+
+**Unresolved** is a table because `Kind` has to travel with the question. A numbered list with a bold prefix still lets a blocking row read as a note, which is the failure this section exists to prevent. The three `Kind` values are a closed set: `blocks` (a criterion cannot be satisfied), `blocks go-live` (proofs can be green and real users still cannot be switched on), `open` (imprecise, not blocking - including a default you assumed and nobody confirmed). Order the rows that way, so the status line can be counted from the column rather than inferred from wording. `#` stays because Swept, Observable and the chat refer to a row by number. `Until answered` is where a written-in-the-meantime value lives, so a reviewer can see what to tear up when the question closes. Never treat silence as confirmation: an assumed default stays `open` until a human says otherwise.

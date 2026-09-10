@@ -1683,7 +1683,7 @@
     },
     {
       "name": "tlc-plan",
-      "description": "Turns decided work into tasks with observable criteria for tlc-implement. Use when the user says \"write the task\", \"cut this PRD into tasks\", \"turn this design doc into work\", or \"tlc-plan\". Do NOT use when nobody has decided what to build, or to implement.",
+      "description": "Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source. Use when the user says \"write the task\", \"cut this PRD into tasks\", \"turn this design doc into work\", or \"tlc-plan\". Do NOT use for discovery itself or to implement — a one-line ticket is a decision; a blank wish is not.",
       "category": "development",
       "path": "(development)/tlc-plan",
       "files": [
@@ -1691,8 +1691,8 @@
         "references/document-format.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.1.1",
-      "contentHash": "2faeaf4954cbefa182c8956fffc2ee14c906cbb6f9f46cce6d94ed4fbce198c6"
+      "version": "0.2.0",
+      "contentHash": "428b064742db100add4d42612ce61eaed040aad87e6718e494a09ad9ae03552b"
     },
     {
       "name": "tlc-spec-driven",

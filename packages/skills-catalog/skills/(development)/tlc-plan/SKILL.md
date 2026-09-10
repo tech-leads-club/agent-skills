@@ -1,10 +1,10 @@
 ---
 name: tlc-plan
-description: 'Turns decided work into tasks with observable criteria for tlc-implement. Use when the user says "write the task", "cut this PRD into tasks", "turn this design doc into work", or "tlc-plan". Do NOT use when nobody has decided what to build, or to implement.'
+description: 'Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source. Use when the user says "write the task", "cut this PRD into tasks", "turn this design doc into work", or "tlc-plan". Do NOT use for discovery itself or to implement — a one-line ticket is a decision; a blank wish is not.'
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 0.1.1
+  version: 0.2.0
 ---
 
 # TLC Plan
@@ -18,7 +18,7 @@ CUT ──────────→ GROUND ──────────→ W
  tasks)                              is forced)
 ```
 
-Someone already decided what to build. This turns that decision into work a builder can pick up without guessing, and stops at the first thing nobody decided. It has no opinion about product: it does not explore the problem, generate options, or grow scope. This skill feeds tlc-implement.
+Someone already decided what to build. A one-line ticket counts; a blank "we should do something about billing" does not. This turns that decision into work a builder can pick up without guessing, and stops at the first thing nobody decided. It has no opinion about product: it does not explore the problem, generate options, or grow scope. What it does find is the operational hole the source left implicit - the empty state, the error shape, the flag the job never named - by walking two fixed lists, not by inventing a better feature.
 
 ## Critical rules
 
@@ -61,9 +61,31 @@ Three things only the code answers, and each has a home in the task:
 
 What you do **not** settle here is placement. Which folder, which service, how many classes: the repository's own conventions answer most of it and the rest is reversible, so writing it down produces exactly the design document that goes stale and then misleads. Placement is recorded downstream, against the code, by **tlc-implement**. The exception is a choice that creates a pattern the codebase does not have - that is a one-way door and belongs in `Decided` like any other.
 
+## Walk the surfaces
+
+A surface is anything outside the system that meets it, and each kind carries the same decisions every time it appears. That is what makes a hole findable rather than a matter of remembering: you do not ask "what did I forget about this screen", you walk the row. A thin ticket names the feature and none of these; the walk is what keeps that from shipping as a task with three criteria and an accidental error payload.
+
+| Surface | The decisions it always has |
+| --- | --- |
+| a screen or view | empty, loading, error and unauthorised states; density and ordering; what a destructive action confirms before doing it |
+| an API or webhook someone calls | response shape, error shape with its codes, who may call it, versioning, what happens at the rate limit |
+| a command or scheduled task | output format and verbosity, every flag and its default, exit codes, what it prints when it fails halfway |
+| a document or copy someone reads | structure, tone, depth, and what the reader is meant to do next |
+| a collection being organised | the grouping criterion, naming, ordering, what happens to duplicates, and the exception that does not fit |
+
+Nothing about state, persistence or contracts is here - that is the nine dimensions in Sweep, and duplicating it in both places produces two answers that disagree.
+
+**The walk finds gaps. It does not write criteria.** Each item resolves to a criterion **already in the source or already written from it**, to something the code already does (`existing - <what>`), to `n/a - <reason>`, or to `Unresolved <n>`. The `n/a` escape is mandatory and it is what stops the list from inventing scope: a webhook has no empty state, and saying so costs a line. `None - no user-facing surface` is a complete answer for a task that exposes none.
+
+A landing that would need a new behaviour is a question, never a numbered line you added so the table looks finished. That is the same refuse-rather-than-guess rule, applied to a list that would otherwise manufacture requirements.
+
+Two of these hide better than the rest. An **error shape** is decided by whoever writes the first handler, so it gets decided by accident and then copied. An **empty state** is invisible until the feature ships to someone whose account is new, which is every user on their first day.
+
+**Where the record lives:** `## Observable` in the task, one row per item.
+
 ## Sweep
 
-The source covers what somebody thought of. This is the list of what nobody writes down, and it is fixed so that a blank cannot look like nothing to answer: validation, failure modes, idempotency and retry, authorization, concurrency and ordering, data lifecycle, external-dependency failure, state transitions, observability.
+The source covers what somebody thought of. The surface walk covers what meets a user. This is the list of what nobody writes down about the system, and it is fixed so that a blank cannot look like nothing to answer: validation, failure modes, idempotency and retry, authorization, concurrency and ordering, data lifecycle, external-dependency failure, state transitions, observability.
 
 Walk all nine, every time, and write where each one landed: a criterion you already wrote, something the code already handles, `n/a` with the reason, or - when it needs a product answer - `Unresolved`. Recording the landing is the whole mechanism. A sweep you only think through leaves nothing a reviewer can check, so it decays into a step that gets skipped on the busy day.
 
@@ -89,7 +111,18 @@ Five things must be true of every criterion before you write it:
 
 **A guarantee that something will not happen needs a mechanism.** Nothing prevents a duplicate, a double charge or a second write by default, so "a retry does not create a second subscription" is a claim about machinery: point at the code that enforces it or at the `Decided` row that introduces it, or you wrote a hope. Walk the failure that would produce the thing you are forbidding - the remote call succeeded and the local write did not - and check the mechanism still holds on that path, because that is the one nobody pictures. Where none exists, it is a `Decided` row or a question, never a criterion standing on its own.
 
-Missing one is normal, and the response is to **ask** - not to note it and move on. Put the question to the user with the options you can actually see and what each one would change, so answering is a choice rather than an essay. Most close in one line.
+Missing one is normal, and the response is to **ask** - not to note it and move on. Most of what looks like a question is not one. **A gray area is a decision that is genuinely the user's, has more than one defensible answer, and is not settled by the code.** Fail any of the three and it is not a gray area: the repo's conventions answer it, or one option is clearly right and you state the default in `Unresolved` as `open` with that default in `Until answered`. Do not go looking for a quota of them - a quota manufactures questions the same way a checklist with no `n/a` escape manufactures requirements.
+
+The surface walk and the nine dimensions are the two lists that find what you do not know. "Consider the edge cases" finds nothing.
+
+Where you do ask, these rules are about turn cost rather than politeness. Every badly shaped question spends a turn and buys less than a stated default would have.
+
+- **Concrete options, never an open prompt.** "Card layout or table layout" is answerable; "how should this look?" hands the work back.
+- **Lead with your recommendation and one line of why.** You have read the code; accepting or overriding should cost one word.
+- **Assume first when it is safe.** State the default in `Unresolved` as `open` and invite correction instead of blocking. A question you would have answered the same way regardless of the reply is not worth asking.
+- **At most two independent questions per turn, exactly one when they are dependent** - a dependent answer prunes the questions after it, so asking them together wastes most of them. Three or more in a turn is an interrogation, and it reads as one.
+- **"You decide" is an answer.** Write the recommended default as a criterion and quote `user delegated` on the Sources line that records it, so discretion is on the record rather than inferred from silence later.
+- **The boundary is fixed.** Asking clarifies *how*, never whether to add a capability. A new capability that surfaces goes in `Out of scope` with its reason and stays there.
 
 **Facts you look up; decisions you ask.** Anything the environment already answers - a convention, an existing field, how the current endpoint behaves, what the schema allows - you resolve yourself through the knowledge chain. A question you could have answered by reading the code spends the user's turn and their patience, and enough of them turn this into an interview. Ask only what is genuinely theirs: scope, priority, product behaviour, which trade-off they want.
 
@@ -101,7 +134,7 @@ A source can also decide something wrongly and clearly - stated with a concrete 
 
 ## Format
 
-Read `references/document-format.md` when you write the `.tasks/<name>.md` artifact — after the cut, the grounding, and the sweep. Do not load it during Cut. Section headings in that template are literals: the next skill refers to them by name.
+Read `references/document-format.md` when you write the `.tasks/<name>.md` artifact — after the cut, the grounding, the surface walk, and the sweep. Do not load it during Cut. Section headings in that template are literals: the next skill refers to them by name.
 
 ## Tasks are not pull requests
 
@@ -117,7 +150,7 @@ In strict order: existing code and conventions, project docs, library documentat
 
 ## Output
 
-Produce the artifact; do not narrate the phase. Present the cut, then the tasks, then the open questions with the blocking ones first. Lead with the verdict. State decisions definitively. Cut filler and hedging.
+Produce the artifact; do not narrate the phase. Present the cut, then the tasks, then the open questions with the blocking ones first. If you have to ask before the artifact can be honest, at most two independent questions, with a recommendation; do not hold the task hostage to a quota of gray areas. Lead with the verdict. State decisions definitively. Cut filler and hedging.
 
 ## Examples
 
@@ -127,9 +160,9 @@ User says: "Turn this design doc into work."
 Actions:
 1. Read the source completely. Enumerate slices, then decide how many tasks — default one.
 2. Open the repository. Ground names, one-way doors, and contradictions. Amend the source if it is wrong.
-3. Sweep the nine unwritten requirements. Ask rather than guess.
+3. Walk the surfaces. Sweep the nine unwritten requirements. Ask rather than guess.
 4. Read `references/document-format.md` and write `.tasks/<name>.md`.
-Result: one task file. Criteria are observable outcomes with concrete values. Swept has all nine landings. Unresolved is a table, or `None`.
+Result: one task file. Criteria are observable outcomes with concrete values. Observable has a landing per surface item. Swept has all nine landings. Unresolved is a table, or `None`.
 
 ### Example 2: Source has no decision
 
@@ -147,7 +180,11 @@ Result: hand off; no new task file.
 
 ### A plausible criterion nobody decided
 Cause: a gap in the source was filled with a criterion that reads well.
-Solution: ask. Put the options you can see and what each one would change. What only Product can settle goes to `Unresolved`, never into Criteria.
+Solution: ask. Concrete options, recommendation in one line, at most two independent questions. What only Product can settle goes to `Unresolved`, never into Criteria.
+
+### A criterion the walk invented
+Cause: a surface item or sweep dimension needed a new behaviour and a numbered line was added so the table looks finished.
+Solution: a landing that would need a new behaviour is a question, never a criterion. `n/a` with the reason, `existing`, or `Unresolved`.
 
 ### Horizontal slices
 Cause: "schema first, then the endpoints" was treated as two tasks.
