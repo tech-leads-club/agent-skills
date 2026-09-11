@@ -1,3 +1,4 @@
+import { createRequire } from 'module'
 import { getAgentCatalog } from '@tech-leads-club/core'
 import { execFileSync } from 'child_process'
 import * as fs from 'fs'
@@ -12,11 +13,16 @@ import type { AgentTarget, Category, MarketplaceData, Skill } from '../src/types
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+const require = createRequire(import.meta.url)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const archiver = require('archiver')
+
 const WORKSPACE_ROOT = path.resolve(__dirname, '../../..')
 const SKILLS_DIR = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills')
 const REGISTRY_FILE = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills-registry.json')
 const OUTPUT_FILE = path.join(__dirname, '../src/data/skills.json')
 const LLMS_TXT_FILE = path.join(__dirname, '../public/llms.txt')
+const DOWNLOADS_DIR = path.join(__dirname, '../public/downloads')
 
 interface RegistrySkill {
   name: string
@@ -89,6 +95,29 @@ function readSkillContent(registrySkill: RegistrySkill): { content: string; last
   }
 }
 
+async function generateSkillZip(skillName: string, skillPath: string): Promise<void> {
+  const skillDir = path.join(SKILLS_DIR, skillPath)
+  const zipPath = path.join(DOWNLOADS_DIR, `${skillName}.zip`)
+
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(zipPath)
+    const archive = new archiver.ZipArchive({ zlib: { level: 9 } })
+
+    output.on('close', resolve)
+    archive.on('error', reject)
+
+    archive.pipe(output)
+
+    if (fs.existsSync(skillDir)) {
+      archive.directory(skillDir, skillName)
+    } else {
+      console.warn(`  ⚠ skill directory not found: ${skillDir}`)
+    }
+
+    archive.finalize()
+  })
+}
+
 function generateMarketplaceData(): MarketplaceData {
   console.log('Loading skills registry...')
   const registry = loadRegistry()
@@ -159,25 +188,44 @@ function generateMarketplaceData(): MarketplaceData {
   }
 }
 
-function main() {
+async function main() {
   console.log('Generating marketplace data...')
 
   const data = generateMarketplaceData()
 
-  // Ensure output directory exists
   const outputDir = path.dirname(OUTPUT_FILE)
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true })
   }
 
-  // Write JSON file
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2))
-
   fs.writeFileSync(LLMS_TXT_FILE, buildLlmsTxt(data))
 
   console.log(`✓ Generated data for ${data.stats.totalSkills} skills`)
   console.log(`✓ Output: ${OUTPUT_FILE}`)
   console.log(`✓ Output: ${LLMS_TXT_FILE}`)
+
+  // Generate ZIP archives for each skill
+  console.log('Generating skill ZIP archives...')
+  if (!fs.existsSync(DOWNLOADS_DIR)) {
+    fs.mkdirSync(DOWNLOADS_DIR, { recursive: true })
+  }
+
+  let zipCount = 0
+  for (const skill of data.skills) {
+    // skill.path is like "skills/(quality)/web-accessibility/SKILL.md"
+    // Extract the directory part: "(quality)/web-accessibility"
+    const skillDir = path.dirname(skill.path).replace(/^skills\//, '')
+    await generateSkillZip(skill.id, skillDir)
+    zipCount++
+    if (zipCount % 20 === 0) console.log(`  ${zipCount}/${data.skills.length} zips created...`)
+  }
+
+  console.log(`✓ Generated ${zipCount} skill ZIP archives`)
+  console.log(`✓ Output: ${DOWNLOADS_DIR}`)
 }
 
-main()
+main().catch((err) => {
+  console.error('Failed:', err)
+  process.exit(1)
+})
