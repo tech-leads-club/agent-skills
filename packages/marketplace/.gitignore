@@ -20,6 +20,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# OS
+.DS_Store
+
 # Generated download artifacts
 public/downloads/
 

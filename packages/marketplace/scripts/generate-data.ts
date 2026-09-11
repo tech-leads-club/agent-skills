@@ -1,5 +1,5 @@
-import { createRequire } from 'module'
 import { getAgentCatalog } from '@tech-leads-club/core'
+import { ZipArchive } from 'archiver'
 import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import matter from 'gray-matter'
@@ -12,10 +12,6 @@ import type { AgentTarget, Category, MarketplaceData, Skill } from '../src/types
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-const require = createRequire(import.meta.url)
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const archiver = require('archiver')
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '../../..')
 const SKILLS_DIR = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills')
@@ -99,22 +95,22 @@ async function generateSkillZip(skillName: string, skillPath: string): Promise<v
   const skillDir = path.join(SKILLS_DIR, skillPath)
   const zipPath = path.join(DOWNLOADS_DIR, `${skillName}.zip`)
 
+  // why: a missing source dir would otherwise ship an empty ZIP that looks valid to users
+  if (!fs.existsSync(skillDir)) {
+    throw new Error(`skill directory not found: ${skillDir}`)
+  }
+
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath)
-    const archive = new archiver.ZipArchive({ zlib: { level: 9 } })
+    const archive = new ZipArchive({ zlib: { level: 9 } })
 
     output.on('close', resolve)
+    output.on('error', reject)
     archive.on('error', reject)
 
     archive.pipe(output)
-
-    if (fs.existsSync(skillDir)) {
-      archive.directory(skillDir, skillName)
-    } else {
-      console.warn(`  ⚠ skill directory not found: ${skillDir}`)
-    }
-
-    archive.finalize()
+    archive.directory(skillDir, skillName)
+    archive.finalize().catch(reject)
   })
 }
 
