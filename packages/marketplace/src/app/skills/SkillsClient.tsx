@@ -5,7 +5,8 @@ import { CategoryFilter } from '../../components/CategoryFilter'
 import { Pagination } from '../../components/Pagination'
 import { SearchBar } from '../../components/SearchBar'
 import { SkillCard } from '../../components/SkillCard'
-import { filterAndSortSkills, paginateSkills, type SkillSortOption } from '../../lib/skills-filter'
+import { filterAndSortSkillsWithMeta, paginateSkills, type SkillSortOption } from '../../lib/skills-filter'
+import { buildSearchIndex } from '../../lib/skills-search'
 import type { MarketplaceData } from '../../types'
 
 interface SkillsClientProps {
@@ -40,15 +41,20 @@ export function SkillsClient({ data }: SkillsClientProps) {
     setUrlReady(true)
   }, [])
 
-  const filteredSkills = useMemo(
+  // why: normalizing 92 skill bodies on every keystroke would stall typing, so the index is
+  // built once per dataset and reused by each query.
+  const searchIndex = useMemo(() => buildSearchIndex(data.skills, data.categories), [data.skills, data.categories])
+
+  const { skills: filteredSkills, fullMatchCount } = useMemo(
     () =>
-      filterAndSortSkills({
+      filterAndSortSkillsWithMeta({
         skills: data.skills,
         searchQuery,
         selectedCategory,
         sortBy,
+        searchIndex,
       }),
-    [data.skills, searchQuery, selectedCategory, sortBy],
+    [data.skills, searchQuery, selectedCategory, sortBy, searchIndex],
   )
 
   useEffect(() => {
@@ -76,6 +82,21 @@ export function SkillsClient({ data }: SkillsClientProps) {
   const endIndex = startIndex + PAGE_SIZE
   const paginatedSkills = paginateSkills(filteredSkills, currentPage, PAGE_SIZE)
 
+  // why: only the relevance ordering groups full matches first, so the "related" divider is
+  // meaningless (and would land in the wrong place) under an explicit name/recent sort.
+  const grouped = searchQuery.trim() !== '' && sortBy === 'featured'
+  const exactOnPage = grouped ? paginatedSkills.slice(0, Math.max(0, fullMatchCount - startIndex)) : paginatedSkills
+  const relatedOnPage = grouped ? paginatedSkills.slice(exactOnPage.length) : []
+
+  const renderCards = (items: typeof paginatedSkills) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {items.map((skill) => {
+        const category = data.categories.find((c) => c.id === skill.category)
+        return <SkillCard key={skill.id} skill={skill} categoryName={category?.name || skill.category} />
+      })}
+    </div>
+  )
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
@@ -98,7 +119,7 @@ export function SkillsClient({ data }: SkillsClientProps) {
             onChange={(e) => setSortBy(e.target.value as SkillSortOption)}
             className="px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] text-gray-600 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all"
           >
-            <option value="featured">Featured</option>
+            <option value="featured">{searchQuery.trim() ? 'Relevance' : 'Featured'}</option>
             <option value="name">Name</option>
             <option value="recent">Recent</option>
           </select>
@@ -116,17 +137,40 @@ export function SkillsClient({ data }: SkillsClientProps) {
       {filteredSkills.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-5xl mb-4">🔍</div>
-          <p className="text-lg font-semibold text-gray-500 dark:text-gray-400">No skills found</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Try adjusting your search or filter</p>
+          <p className="text-lg font-semibold text-gray-500 dark:text-gray-400">
+            {searchQuery.trim() ? `No skills match “${searchQuery.trim().replace(/^"|"$/g, '')}”` : 'No skills found'}
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            Try fewer words, or search by category, skill name or id
+          </p>
+          {selectedCategory !== null && (
+            <button
+              type="button"
+              onClick={() => setSelectedCategory(null)}
+              className="mt-4 px-3.5 py-1.5 rounded-full text-[13px] font-medium bg-blue-600 text-white cursor-pointer"
+            >
+              Search all categories
+            </button>
+          )}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {paginatedSkills.map((skill) => {
-              const category = data.categories.find((c) => c.id === skill.category)
-              return <SkillCard key={skill.id} skill={skill} categoryName={category?.name || skill.category} />
-            })}
-          </div>
+          {exactOnPage.length > 0 && renderCards(exactOnPage)}
+
+          {relatedOnPage.length > 0 && (
+            <>
+              <div className="flex items-center gap-3 mt-8 mb-5">
+                <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 shrink-0">
+                  {fullMatchCount === 0 ? 'Closest matches' : 'Related skills'}
+                </span>
+                <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <span className="text-[12px] text-gray-400 dark:text-gray-500 shrink-0">
+                  matching some of your terms
+                </span>
+              </div>
+              {renderCards(relatedOnPage)}
+            </>
+          )}
 
           <div className="mt-2">
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
