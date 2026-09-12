@@ -17,9 +17,24 @@ function skill(partial: Partial<Skill> & Pick<Skill, 'id' | 'name' | 'category'>
 }
 
 const skills: Skill[] = [
-  skill({ id: 'zebra', name: 'Zebra', category: 'writing', metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-01-01' } }),
-  skill({ id: 'tlc-spec-driven', name: 'TLC Spec Driven', category: 'process', metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-06-01' } }),
-  skill({ id: 'accessibility', name: 'Accessibility (a11y)', category: 'frontend', metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-03-01' } }),
+  skill({
+    id: 'zebra',
+    name: 'Zebra',
+    category: 'writing',
+    metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-01-01' },
+  }),
+  skill({
+    id: 'tlc-spec-driven',
+    name: 'TLC Spec Driven',
+    category: 'process',
+    metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-06-01' },
+  }),
+  skill({
+    id: 'accessibility',
+    name: 'Accessibility (a11y)',
+    category: 'frontend',
+    metadata: { hasScripts: false, hasReferences: false, referenceFiles: [], lastModified: '2026-03-01' },
+  }),
 ]
 
 describe('filterAndSortSkills', () => {
@@ -61,6 +76,62 @@ describe('filterAndSortSkills', () => {
       sortBy: 'recent',
     })
     expect(result.map((s) => s.id)).toEqual(['tlc-spec-driven', 'accessibility', 'zebra'])
+  })
+
+  it('ranks search results by relevance under the default featured sort', () => {
+    const result = filterAndSortSkills({
+      skills: [
+        ...skills,
+        skill({
+          id: 'aaa-mentions-zebra',
+          name: 'Aaa Mentions Zebra',
+          category: 'writing',
+          description: 'Talks about zebra.',
+        }),
+      ],
+      searchQuery: 'zebra',
+      selectedCategory: null,
+      sortBy: 'featured',
+    })
+    expect(result.map((s) => s.id)).toEqual(['zebra', 'aaa-mentions-zebra'])
+  })
+
+  it('keeps an explicit name sort even while searching', () => {
+    const result = filterAndSortSkills({
+      skills: [
+        ...skills,
+        skill({
+          id: 'aaa-mentions-zebra',
+          name: 'Aaa Mentions Zebra',
+          category: 'writing',
+          description: 'Talks about zebra.',
+        }),
+      ],
+      searchQuery: 'zebra',
+      selectedCategory: null,
+      sortBy: 'name',
+    })
+    expect(result.map((s) => s.id)).toEqual(['aaa-mentions-zebra', 'zebra'])
+  })
+
+  it('applies search and category together', () => {
+    const result = filterAndSortSkills({
+      skills,
+      searchQuery: 'spec driven',
+      selectedCategory: 'writing',
+      sortBy: 'featured',
+    })
+    expect(result).toEqual([])
+  })
+
+  it('finds multi-word queries whose terms are not adjacent', () => {
+    const result = filterAndSortSkills({
+      skills,
+      searchQuery: 'driven spec',
+      selectedCategory: null,
+      sortBy: 'featured',
+    })
+    expect(result.map((s) => s.id)).toEqual(['tlc-spec-driven'])
   })
 })
 
