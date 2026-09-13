@@ -44,9 +44,11 @@
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
     "@types/node": "^24",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "archiver": "^8.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

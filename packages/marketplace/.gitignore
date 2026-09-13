@@ -23,6 +23,9 @@ next-env.d.ts
 # OS
 .DS_Store
 
+# Generated download artifacts
+public/downloads/
+
 # IDE
 .idea/
 .vscode/
