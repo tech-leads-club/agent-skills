@@ -22,9 +22,9 @@ export function LPHero() {
         </h1>
 
         <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto mb-10">
-          Built for complex, high-quality codebases. Every requirement is mapped to a traceable, atomically-committed
-          task and proven by an independent verifier. In our 4-framework benchmark, the most consistent, with the
-          highest average score and the best test completeness. Works with any stack and any agent.
+          Built for complex, high-quality codebases. Every requirement becomes a traceable, atomically-committed
+          task, then a second agent checks the result. In our 4-framework benchmark, the most consistent — highest
+          average score and the best test completeness. Works with any stack, on the agents we support.
         </p>
 
         <div className="max-w-xl mx-auto">

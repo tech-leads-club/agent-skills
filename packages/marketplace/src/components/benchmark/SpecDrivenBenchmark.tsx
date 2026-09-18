@@ -40,7 +40,7 @@ export function SpecDrivenBenchmark({ skillId }: SpecDrivenBenchmarkProps) {
           id="benchmark-heading"
           className="text-2xl sm:text-[28px] font-extrabold text-gray-900 dark:text-gray-100 tracking-tight mb-2"
         >
-          Proven effectiveness, in numbers
+          Results, in numbers
         </h2>
         <p className="text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl">
           Benchmarked against other spec-driven development frameworks on a real, non-trivial PRD. TLC 3.* runs in its
@@ -104,21 +104,20 @@ export function SpecDrivenBenchmark({ skillId }: SpecDrivenBenchmarkProps) {
           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">TLC 3.* · model ablation</span>
         </div>
         <h3 className="text-2xl sm:text-[28px] font-extrabold text-gray-900 dark:text-gray-100 tracking-tight mb-2">
-          Harness-friendly with most models
+          Works across models
         </h3>
         <p className="text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl">
           The comparison above runs TLC 3.* in its recommended Opus→Sonnet role-split. Here we hold the framework at TLC
           3.* and vary the <strong>single</strong> model instead. The skill harness is deliberately thin and{' '}
           <strong>optimized for how modern models are designed</strong>. It guides without fighting the model&apos;s own
-          reasoning, so almost every strong model lands <strong>Spec-complete (≥ 0.90)</strong>. The role-split (
-          <strong>Opus plans, Sonnet implements</strong>) tops the field at <strong>0.95</strong>, and{' '}
-          <strong>Composer 2.5 is the best value for money</strong> (mean 0.945, peak 0.98).
+          reasoning. The role-split (<strong>Opus plans, Sonnet implements</strong>) tops the field at{' '}
+          <strong>0.95</strong>, and <strong>Composer 2.5 is the best value for money</strong> (mean 0.945, peak 0.98).
         </p>
       </div>
 
       <div className="mb-6">
         <ChartCard
-          title="Harness-friendly with most models"
+          title="Works across models"
           subtitle="Mean Final per model on TLC 3.* (same PRD). Most strong models are Spec-complete; Gemini 3.1 Pro is a poor fit for SDD."
         >
           <ModelTable data={modelBenchmark.models} />

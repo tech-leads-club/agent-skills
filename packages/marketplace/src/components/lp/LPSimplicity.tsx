@@ -1,4 +1,4 @@
-const pills = ['No CLI', 'No complex workflows', 'Just one skill']
+const pills = ['One skill', 'No extra product', 'Runs in your agent']
 
 export function LPSimplicity() {
   return (
@@ -14,8 +14,8 @@ export function LPSimplicity() {
         </h2>
 
         <p className="text-lg sm:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto mb-8">
-          As models get smarter, you don&apos;t need more harness, you need the right one. No CLI. No complex
-          workflows. Just one skill that gets out of the model&apos;s way.
+          As models get smarter, you don&apos;t need more harness, you need the right one. One skill, installed once.
+          No extra product to learn — the agent runs the flow.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">

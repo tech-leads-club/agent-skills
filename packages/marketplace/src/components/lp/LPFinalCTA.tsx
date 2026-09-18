@@ -13,7 +13,7 @@ export function LPFinalCTA() {
           Ready to build with precision?
         </h2>
         <p className="text-[15px] text-gray-500 dark:text-gray-400 mb-8">
-          Scope mapped, quality proven. One command, works with your agent today.
+          Scope mapped. Quality checked. One command, works with your agent today.
         </p>
 
         <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-4 flex items-center justify-between gap-3 mb-6 shadow-md">

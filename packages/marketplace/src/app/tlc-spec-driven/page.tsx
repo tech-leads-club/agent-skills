@@ -9,9 +9,9 @@ import { buildPageMetadata } from '../../lib/seo/metadata'
 import { pathFor } from '../../lib/seo/urls'
 
 export const metadata = buildPageMetadata({
-  title: 'TLC Spec-Driven — AI Agents That Ship Right, Every Time',
+  title: 'TLC Spec-Driven — From request to a checked build',
   description:
-    '4 adaptive phases, atomic tasks with verification criteria, and requirement traceability from spec to commit.',
+    'Four adaptive phases that turn a request into testable requirements, atomic commits, and an independent check before you call it done.',
   path: pathFor(['tlc-spec-driven']),
   ogImage: '/og-tlc-spec-driven.png',
   ogImageWidth: 1200,

@@ -14,7 +14,7 @@ import { routes } from '../lib/seo/urls'
 
 const HERO_SKILL_ID = 'tlc-spec-driven'
 const HERO_SKILL_DESCRIPTION =
-  'Turn your AI agent into a disciplined engineering partner. Spec-Driven guides every project through 4 adaptive phases — Specify, Design, Tasks, Execute — automatically sizing depth by complexity. From quick bug fixes to full feature builds, it produces atomic commits, requirement traceability, and persistent memory across sessions. Stack-agnostic, zero config, and works with any AI coding agent.'
+  'Turn your AI agent into a disciplined engineering partner. Spec-Driven guides every project through 4 adaptive phases — Specify, Design, Tasks, Execute — automatically sizing depth by complexity. From quick bug fixes to full feature builds, it produces atomic commits, requirement traceability, and persistent memory across sessions. Stack-agnostic, on the agents we support.'
 
 export const metadata = buildPageMetadata({
   title: `${SITE_NAME} — Skills for AI Coding Agents`,

@@ -66,14 +66,14 @@ export function LPQuality() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-500/6 dark:bg-blue-400/10 border border-blue-500/12 dark:border-blue-400/20 rounded-full px-4 py-1.5 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Quality by construction</span>
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Quality in the loop</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight mb-3">
             How quality is built and ensured
           </h2>
           <p className="text-[15px] text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Quality is not a final review bolted on at the end. The harness learns how your project tests, builds the
-            right tests into every task, and then proves them with an independent verifier.
+            Quality is not a final review bolted on at the end. The harness learns how your project tests, puts the
+            test in the task, and a second agent checks the result.
           </p>
         </div>
 

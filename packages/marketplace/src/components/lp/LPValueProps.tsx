@@ -11,7 +11,7 @@ const props = [
       </svg>
     ),
     title: 'Maps the full scope',
-    body: 'Specify turns a request into testable requirements with unique IDs, including the edge cases and implicit requirements most agents miss. An explicit out-of-scope table stops creep before it starts.',
+    body: 'Specify turns a request into testable requirements with unique IDs, including the edge cases and implicit requirements the request usually leaves out. An explicit out-of-scope table stops creep before it starts.',
   },
   {
     icon: (
@@ -24,7 +24,7 @@ const props = [
         />
       </svg>
     ),
-    title: 'No requirement left unclear',
+    title: 'Ambiguity gets resolved, not skipped',
     body: 'A requirement closure gate means nothing leaves the spec silently ambiguous: every open question is resolved with you or logged as a signed-off assumption. Declined gray areas are recorded, not dropped.',
   },
   {

@@ -136,7 +136,7 @@ export const benchmark: BenchmarkData = {
     {
       label: 'Consistency',
       value: '0.93–0.95',
-      detail: 'The most consistent framework: highest floor in the field, tight 0.02 range. Repeatable, not a lucky peak.',
+      detail: 'The most consistent framework: highest floor in the field, tight 0.02 range.',
     },
     {
       label: 'Test completeness',
@@ -146,7 +146,7 @@ export const benchmark: BenchmarkData = {
     {
       label: 'Outcome tests',
       value: '12/12',
-      detail: 'Perfect on real persisted-state checks: the only framework to assert the actual DB row after every webhook.',
+      detail: '12/12 on real persisted-state checks: the only framework to assert the actual DB row after every webhook.',
     },
   ],
   directQuestions: [
@@ -154,7 +154,7 @@ export const benchmark: BenchmarkData = {
       question: 'Who tests most rigorously?',
       winner: 'TLC 3.*',
       tlcWins: true,
-      detail: 'Best test completeness (T = 0.90) and a perfect 12/12 on outcome tests. Asserts real state, not just calls.',
+      detail: 'Best test completeness (T = 0.90) and 12/12 on outcome tests. Asserts real state, not just calls.',
     },
     {
       question: 'Who is the most consistent?',
@@ -170,7 +170,7 @@ export const benchmark: BenchmarkData = {
     },
   ],
   verdict:
-    'Across three independent runs on a real, non-trivial PRD, TLC 3.* (Opus plans, Sonnet implements) posts the highest average Final (0.94) and the most consistent results (0.93–0.95) of four spec-driven frameworks, powered by the best test completeness in the field (T = 0.90), a perfect 12/12 on real outcome assertions, and a clean Scope = pass. v3 raises the bar with an independent verifier, a requirement-closure gate, and a self-improving lessons layer, and it stays harness-friendly across most strong models.',
+    'Highest average, most consistent, best tests: TLC 3.* (Opus plans, Sonnet implements) posts a 0.94 mean Final and a 0.93–0.95 range across three independent runs, with the best test completeness in the field (T = 0.90), 12/12 on real outcome assertions, and a clean Scope = pass. v3 adds an independent verifier, a requirement-closure gate, and a self-improving lessons layer.',
 }
 
 // ---------------------------------------------------------------------------

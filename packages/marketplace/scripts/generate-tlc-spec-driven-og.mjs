@@ -25,7 +25,7 @@ const features = [
 
 const benchmarkItems = [
   '4 Adaptive Phases',
-  'Production Ready',
+  'Independent check',
   'Independent Validation',
   'Requirement Traceability',
 ]
@@ -162,7 +162,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <text x="${BADGE_TEXT_X}" y="${textBaselineY(BADGE_CY, BADGE_FONT_SIZE)}" fill="#93C5FD" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="${BADGE_FONT_SIZE}" font-weight="600" letter-spacing="0.04em">${BADGE_LABEL}</text>
 
   <text x="${CONTENT_X}" y="210" fill="#F8FAFC" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">TLC Spec-Driven</text>
-  <text x="${CONTENT_X}" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">AI agents that ship right, every time</text>
+  <text x="${CONTENT_X}" y="258" fill="#CBD5E1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="500">From request to a checked build</text>
   <rect x="${CONTENT_X}" y="278" width="420" height="3" rx="1.5" fill="url(#accent)"/>
 
   ${phaseFlow}

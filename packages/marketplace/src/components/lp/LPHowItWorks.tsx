@@ -31,7 +31,7 @@ const phases = [
     tag: 'VERIFY',
     color: 'bg-rose-500',
     title: 'Independent verification',
-    body: 'A fresh read-only sub-agent (never the author) checks outcomes against the spec and injects faults to confirm the tests catch them. Always on, every feature.',
+    body: 'A fresh read-only sub-agent (never the author) checks outcomes against the spec and injects faults to confirm the tests catch them. A second agent checks the build after the last task.',
     required: true,
   },
 ]
