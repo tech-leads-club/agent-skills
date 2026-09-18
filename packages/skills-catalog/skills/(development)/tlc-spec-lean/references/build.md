@@ -6,6 +6,21 @@ No task list, no phase plan, no per-task review tables, no `Files to touch` decl
 each edit. The checks are the bar; the route is your call. If you find yourself writing a plan
 for the model to obey, you are rebuilding the thing this skill removed.
 
+## Before the first line of code
+
+The checks exist; the size is now visible. Write `## Handoff` with the arithmetic. Then:
+
+- The estimate fits the budget → one builder. Do not ask. Do not offer a spawn.
+- The estimate exceeds it → **stop**. Ask which mechanism, with both exits named:
+  **handoff** (cut at the surface boundary already written, batches sequential and only on
+  green) or **one builder** (stay, and accept compaction / context loss). Record the choice
+  on that same section before any test or implementation lands.
+
+Do not ask where to cut. Do not ask when it fits. Do not offer spawn at the start of a
+feature. The cut is logistics; only the mechanism, and only when over the limit, is a user
+decision. A slice that alone exceeds the budget was cut too coarsely - say so rather than
+splitting mid-outcome. That is not this ask.
+
 ## What is fixed and what is not
 
 Fixed: the checks, the `Test policy` rows, and the proofs each check names. Lowering either is
@@ -128,19 +143,20 @@ Two ways through it, and they are not equivalent. Automatic compaction summarise
 *artifact*, at a boundary you chose. This skill is built for the second - that is why `Landing`
 rows are appended before the code that closes them rather than at the end.
 
-**Handing off.** Only on green, with every proof in the batch passing. The next builder reads
-`checks.md` and the **diff of what already landed** - never a narrative summary. The diff is the
-state, and it carries the hundred reversible choices that sit below the `Landing` bar: naming,
-error shape, where the helper went. Those are exactly what drifts between builders and exactly
-what no document records.
+A handoff chosen at the size gate executes here. **Handing off.** Only on green, with every
+proof in the batch passing. The next builder reads `checks.md` and the **diff of what already
+landed** - never a narrative summary. The diff is the state, and it carries the hundred
+reversible choices that sit below the `Landing` bar: naming, error shape, where the helper
+went. Those are exactly what drifts between builders and exactly what no document records.
 
 Then append the three `## Handoff` lines - boundary, what the user settled mid-build, what was
 abandoned. They go in the artifact rather than in the next builder's prompt: a briefing written
 into a prompt survives exactly one boundary, and the third builder needs the first one's.
 
-**When compaction happens anyway,** re-read `checks.md` and the diff before continuing. You
-cannot see the limit approaching, but you can see that a compaction occurred - so build the
-recovery on the signal that exists.
+If the user chose one builder over a budget miss, compaction is the accepted path.
+**When compaction happens anyway** — chosen or not — re-read `checks.md` and the diff before
+continuing. You cannot see the limit approaching, but you can see that a compaction occurred
+- so build the recovery on the signal that exists.
 
 ## Then stop
 
@@ -149,7 +165,11 @@ hashes, proof results, deviations. Do not dispatch the Verifier - that is the or
 step, after the last batch of the whole feature, over the full check set. A Verifier briefed by
 the builder that just closed the final batch inherits that builder's scope even though it
 inherits none of its tokens, and reports a pass over four checks that reads exactly like a pass
-over forty. See [verify.md](verify.md).
+over forty.
+
+If you hold the whole feature - you wrote every check's commit, or the last batch just returned
+green to you - you are the orchestrator. Dispatch the Verifier in that same turn. Do not ask.
+Do not wait for "verify work". See [verify.md](verify.md).
 
 ## What was deliberately removed
 
@@ -165,4 +185,4 @@ If you are used to a per-task cycle, these are gone on purpose:
 | The `Code Reuse Analysis` table - `Component` / `Location` / `How to Use` | the inventory is already distributed through `Flow`, where each hop marks whether its module exists; what a table adds beyond that is the catalogue again, so only the decision survives, as the sentence opening `Flow` on what is reused instead of duplicated |
 | The pace question (`Quick` / `Guided` / `Detailed`) and a `context.md` of its own | a meta-question spends a turn deciding how to spend turns; the elicitation rules apply always, and their output lands in the plan's `Assumptions` |
 | A quota of gray areas to generate per feature | a quota manufactures questions; the surface rubric in `## Observable` is a fixed enumeration with an `n/a` escape instead, which finds items without inventing them |
-| An offer to spawn sub-agents | logistics the user cannot decide better than you |
+| An offer to spawn sub-agents at the start, or asking where to cut | the cut is logistics; the mechanism is asked only when the estimate exceeds the budget |

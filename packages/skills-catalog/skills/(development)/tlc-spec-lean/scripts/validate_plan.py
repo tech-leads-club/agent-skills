@@ -30,7 +30,6 @@ What it checks:
   ERROR  - a required section is missing
   ERROR  - an acceptance criterion has no SHALL (not testable / not EARS-shaped)
   ERROR  - an Assumptions row has an empty "Chosen default" or "Rationale" cell
-  ERROR  - a Traceability row has a malformed requirement ID
   ERROR  - the Observable section is empty, or has no rows and no `None - <why>`
   ERROR  - an Observable row whose Landing cell is blank
   ERROR  - an Observable `n/a` or `existing` landing with no reason after it
@@ -74,16 +73,15 @@ import sys
 # Each entry is a tuple of acceptable heading names (first is canonical).
 REQUIRED_SECTIONS = [
     ("Problem", "Problem Statement"),
-    ("Out of scope", "Out of Scope"),
-    ("Assumptions", "Assumptions & Open Questions"),
-    ("Criteria", "User Stories"),
-    ("Traceability", "Requirement Traceability"),
-    ("Observable",),
     ("Flow",),
+    ("Impact",),
     ("Relations",),
     ("Surface",),
     ("Landing",),
-    ("Impact",),
+    ("Criteria", "User Stories"),
+    ("Out of scope", "Out of Scope"),
+    ("Assumptions", "Assumptions & Open Questions"),
+    ("Observable",),
 ]
 ADVISORY_SECTIONS = ["Sources"]
 
@@ -95,7 +93,6 @@ SHAPE_HINTS = (
     ("Impact", "state what changes underneath, or `nothing` - a missing row is not an answer"),
 )
 
-ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-\d+$")
 PLACEHOLDER_RE = re.compile(r"^\s*[\[<].+[\]>]\s*$")
 CID_RE = re.compile(r"\bC\d+\b")
 STATUS_RE = re.compile(r"\b[1-5]\d\d\b")
@@ -390,24 +387,6 @@ def check_file(path):
             warnings.append("no 'Open questions:' line in the Assumptions section")
         elif not re.search(r"open questions.*:\s*none", oq_clean):
             warnings.append("open questions do not read as resolved ('Open questions: none')")
-
-    b = present.get("Traceability")
-    if b:
-        template_seen, real_ids = False, 0
-        for r in first_table(lines, b):
-            cells = split_row(r)
-            if not cells or not cells[0]:
-                continue
-            rid = cells[0]
-            if PLACEHOLDER_RE.match(rid) or "[" in rid or "<" in rid:
-                template_seen = True
-                continue
-            if not ID_RE.match(rid):
-                errors.append(f"malformed requirement ID: '{rid}' (expected e.g. AUTH-01)")
-            else:
-                real_ids += 1
-        if template_seen and real_ids == 0:
-            warnings.append("Traceability has only template rows (no real IDs yet)")
 
     # Observable: every item of every surface present. A surface carries the same decisions
     # every time it appears, so a blank here is an item nobody decided - not one that does not

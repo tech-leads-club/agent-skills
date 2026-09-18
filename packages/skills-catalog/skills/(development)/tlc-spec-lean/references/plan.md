@@ -11,6 +11,19 @@ confirmed, and only then does [checks.md](checks.md) turn it into obligations wi
 Skip this file only when the change is under roughly three files with no one-way door - then
 write the intent paragraph straight into `checks.md`.
 
+## File order is for reading
+
+The published file is what a human reads as a task. Layout:
+
+Problem → Flow → Impact → Relations → Surface → Landing → Criteria → Out of scope → Assumptions → Observable → Sources
+
+`## Sources` is two or three citations that bind - the ticket, a design marked binding - not a
+research log of files the agent opened. Last, because it is not the review.
+
+That is not the writing order. Write the problem, walk the surfaces, write the criteria, then
+fill the shape. Writing the shape first is how a criterion gets invented to justify a component.
+The closure gate still requires every criterion to land in `Flow`, `Relations` or `Surface`.
+
 ## Before asking anything
 
 **Load confirmed lessons.** `--root` is a parent flag and has to come before the
@@ -45,7 +58,7 @@ condition that would make the other one win, and the only shape this file has fo
 one. Settle it first with whatever the project uses - an ADR, an RFC, a spike - and link it. This
 file records the shape that won and makes it reviewable.
 
-# Part one: what must be true
+# Writing: what must be true
 
 ## Recover the problem
 
@@ -71,7 +84,7 @@ and you state it as an assumption and move on. Do not go looking for a quota of 
 manufactures questions the same way a checklist with no `n/a` escape manufactures requirements.
 
 **What you do not know is findable, and the next two sections are the two lists that find it.**
-`## Observable` below walks the surfaces this feature exposes, because every surface carries the
+`## Observable` walks the surfaces this feature exposes, because every surface carries the
 same decisions every time; the nine dimensions after it walk the system properties. Neither is a
 prompt to think harder - both are enumerations, for the same reason: "consider the edge cases"
 finds nothing, and a fixed list with a mandatory `n/a` escape finds the item nobody mentioned.
@@ -91,11 +104,15 @@ badly shaped question spends a turn and buys less than a stated default would ha
 - **"You decide" is an answer.** Record it as an assumption with `Confirmed? y` and the rationale
   `user delegated`, so discretion is on the record rather than inferred from silence later.
 - **The boundary is fixed.** Asking clarifies *how*, never whether to add a capability. A new
-  capability that surfaces goes in `Out of scope` with its reason and stays there.
+  capability that surfaces goes in `Out of scope` with its reason and stays there. That table
+  is product capabilities only - process and harness rules live in AGENTS.md or as
+  Observable `n/a`.
 
 Anything asked and not answered, or that you chose not to raise, lands in `## Assumptions` with
 your chosen default and rationale and `Confirmed? n`. That column is the whole record of who
-decided what: `y` means a human said so. Never mark `y` for a default nobody saw.
+decided what: `y` means a human said so. Never mark `y` for a default nobody saw. Once a default
+is a numbered criterion, drop the assumption row - the table is leftovers, not a second copy of
+the criteria.
 
 ## Walk the surfaces
 
@@ -123,8 +140,10 @@ Two of these hide better than the rest. An **error shape** is decided by whoever
 handler, so it gets decided by accident and then copied. An **empty state** is invisible until the
 feature ships to someone whose account is new, which is every user on their first day.
 
-**Where the record lives:** `## Observable` in this file, one row per item, because each lands on
-a criterion rather than on a check.
+**Where the record lives:** `## Observable` last in this file, because it is a worksheet and not
+the review. One row per item, because each lands on a criterion rather than on a check. One row
+may group the same decision across several routes (`all new /api/counts*` · versioning, rate
+limits · `n/a - <reason>`).
 
 ## Write the criteria in EARS
 
@@ -195,7 +214,7 @@ answers are `n/a` with the reason, or a question.
 **Where the record lives:** the landing for each dimension is written in `checks.md` under
 `## Swept`, because each one has to cite a check number. Do not duplicate it here.
 
-# Part two: what is being built
+# Writing: what is being built
 
 Five sections, each bounded by a rule about what stays out. That boundary is the whole point:
 the design half of most spec-driven flows fails not because designing is wrong but because the
@@ -206,11 +225,11 @@ here.
 
 ## Flow - the path, not the catalogue
 
-Open with one or two sentences on what this reuses instead of duplicating - the verifier that
+Open with **one sentence** on what this reuses instead of duplicating - the verifier that
 already exists, the job that already prunes, the policy that already decides. That sentence is a
 decision, and it is the one that keeps a second implementation of an existing thing from landing
-in the diff. It replaces a code-reuse table: each hop below already marks whether its module
-exists, so the inventory is distributed through the path and the sentence carries only the choice.
+in the diff. A convention inventory does not open the section: each hop already marks whether
+its module exists, so the inventory is distributed through the path.
 
 Then one line per hop, in order: what enters, which module it crosses, what it hands to the next,
 and what persists or goes out at the end. This is the map a reviewer reads the `Landing` rows
@@ -247,10 +266,11 @@ that disagrees with the schema in three months.
 
 ## Surface - the signature
 
-Only when this adds or changes an interface something outside it consumes. The **signature, not
-a specification**: route, what goes in, what comes out, which statuses. A payload key stops
-being yours to rename the moment something outside this codebase reads it, which is why this is
-a review and not documentation.
+Only a route this feature adds or whose signature changes. An existing route that still works
+is a criterion or an `Impact` row, not a Surface line. The **signature, not a specification**:
+route, what goes in, what comes out, which statuses. A payload key stops being yours to rename
+the moment something outside this codebase reads it, which is why this is a review and not
+documentation.
 
 Do **not** put check numbers here - checks do not exist yet. Each route's statuses become a set
 row in the `Coverage` join in `checks.md`, which is what proves none of them went unclaimed.
@@ -272,7 +292,7 @@ it. Keep the row short - `Relations` and `Surface` carry the diagram and the sig
 omission contestable.
 
 Two things look like doors and are not. Scope ("V1 does not charge") reverses by doing the next
-slice and already lives in `Out of scope` above. A rule with no mechanism ("one trial per user")
+slice and already lives in `Out of scope`. A rule with no mechanism ("one trial per user")
 reverses by changing a condition; it becomes a door only once something persisted enforces it,
 and then the row is the unique index with its literal definition, not the rule.
 
@@ -292,7 +312,9 @@ shape here, the constraint there. See [memory.md](memory.md).
 
 ## Impact - what gets disturbed
 
-What already exists and changes underneath. "Nothing" is a valid answer; a missing row is not.
+In the file this sits after `Flow` - blast radius on the first scroll, not after forty
+criteria. What already exists and changes underneath. "Nothing" is a valid answer; a missing
+row is not.
 
 The domain rows matter more than they look. A name leaks - it becomes a class, a column, a
 payload key, a route - so naming is a one-way door that does not look like one. For a term that
@@ -337,21 +359,16 @@ python3 <skill-dir>/scripts/validate_plan.py <feature>
 ```
 
 It fails a missing or empty section, a criterion that is not EARS-shaped, an assumption row with
-an empty default or rationale, a malformed requirement ID, an `Observable` row whose landing is
-blank or whose `n/a` carries no reason, a `Landing` row with no literal shape or no rejected
-alternative, a `Relations` block that names columns or types, a `Surface` row
-missing its statuses, and check numbers written into `Surface` before checks exist. It warns on a
-`Flow` hop naming a module marked neither as existing nor as a door. Judgment calls stay yours.
+an empty default or rationale, an `Observable` row whose landing is blank or whose `n/a` carries
+no reason, a `Landing` row with no literal shape or no rejected alternative, a `Relations` block
+that names columns or types, a `Surface` row missing its statuses, and check numbers written
+into `Surface` before checks exist. It warns on a `Flow` hop naming a module marked neither as
+existing nor as a door. Judgment calls stay yours.
 
 ## Template: `.specs/features/<feature>/plan.md`
 
 `````markdown
 # <Feature>
-
-Sources:
-
-- <ticket URL / document path / "conversation"> - <what it settles>
-- <design> - **binding for the interface**: screens <ids>, and where the copy lives
 
 ## Problem
 
@@ -361,80 +378,9 @@ none.>
 
 <What is different for a user when this ships.>
 
-## Out of scope
-
-| Excluded | Why |
-| --- | --- |
-| <capability> | <reason> |
-
-## Assumptions
-
-| Assumption | Chosen default | Rationale | Confirmed? |
-| --- | --- | --- | --- |
-| <ambiguity> | <what we will do> | <why> | y/n |
-
-**Open questions:** none - all resolved or logged above.
-
-<Or, when something genuinely stayed open:>
-
-| # | Kind | Question | Until answered |
-| --- | --- | --- | --- |
-| 1 | blocks | <question> | <which criterion cannot be satisfied> |
-| 2 | blocks go-live | <question> | <what cannot be switched on for real users> |
-| 3 | open | <question> | <what stays imprecise, and what was written meanwhile> |
-
-## Criteria
-
-Grouped by slice - one observable outcome each, never a layer. Numbering runs across the whole
-plan. A screen names its screen and gives every state that matters its own line: empty, loading,
-error, unauthorised.
-
-### S1: <slice - the outcome someone can watch> (P1)
-
-**Acceptance Criteria**
-
-1. WHEN <trigger> THEN the system SHALL <observable outcome with the concrete value>
-2. IF <undesired condition> THEN the system SHALL <response>
-3. WHILE <state holds> the system SHALL <behaviour>
-4. The system SHALL <always-on invariant with its concrete value>
-
-**Independent test:** <how to demo this slice alone>
-
-### S2: <slice> (P2)
-
-**Acceptance Criteria**
-
-5. WHEN <trigger> THEN the system SHALL <outcome>
-
-**Independent test:** <how to demo>
-
-## Traceability
-
-| ID | Slice | Criteria | Status |
-| --- | --- | --- | --- |
-| FEAT-01 | S1 | 1, 2, 3 | Pending |
-| FEAT-02 | S2 | 5 | Pending |
-
-**ID format:** `CATEGORY-NUMBER`, e.g. `AUTH-01`. **Status:** Pending → In checks →
-Implementing → Verified.
-
-## Observable
-
-Every item of every surface this feature exposes. `n/a` needs its reason.
-
-| Surface | Decision | Landing |
-| --- | --- | --- |
-| screen `<name>` | empty state | AC <n> |
-| screen `<name>` | error state | AC <n> |
-| screen `<name>` | destructive action confirms | existing - <the pattern already in use> |
-| API `<METHOD> /<path>` | error shape and codes | AC <n> |
-| API `<METHOD> /<path>` | versioning | n/a - <why it does not apply> |
-
-<Or:> `None - no user-facing surface`
-
 ## Flow
 
-<One or two sentences: what this reuses instead of duplicating.>
+<One sentence: what this reuses instead of duplicating.>
 
 1. <what enters> -> `<Module>` (exists) - <what it does, what it hands on>
 2. `<Module>` (exists) - <what it does>, persists `<Entity>` (door <n>)
@@ -453,6 +399,14 @@ flowchart TD
     A --> OUT[response]
 ```
 
+## Impact
+
+| Front | What changes |
+| --- | --- |
+| domain | new term: `<Name>` - <one-line definition>, lives in <module> |
+| domain | existing term: `<Name>` meant <x>, now means <y> - <who branches on it today> |
+| stored data | <backfill now / migrate on read / dual write / nothing to migrate> |
+
 ## Relations
 
 ```mermaid
@@ -468,6 +422,8 @@ One-way constraints: <field> unique (door <n>), <field> not null with <value> in
 
 ## Surface
 
+Only routes this adds or whose signature changes.
+
 | Route | In | Out | Status |
 | --- | --- | --- | --- |
 | `<METHOD> /<path>` | `<field>`, `<field>` | `<field>` · `<field>` | `<code>`, `<code>`, `<code>` |
@@ -482,23 +438,87 @@ One-way constraints: <field> unique (door <n>), <field> not null with <value> in
 
 - Nothing else in this change is hard to reverse
 
-## Impact
+## Criteria
 
-| Front | What changes |
+Grouped by slice - one observable outcome each, never a layer. Numbering runs across the whole
+plan. A screen names its screen and gives every state that matters its own line: empty, loading,
+error, unauthorised.
+
+### S1: <slice - the outcome someone can watch> (P1)
+
+<One line: the outcome this slice is.>
+
+**Acceptance Criteria**
+
+1. WHEN <trigger> THEN the system SHALL <observable outcome with the concrete value>
+2. IF <undesired condition> THEN the system SHALL <response>
+3. WHILE <state holds> the system SHALL <behaviour>
+4. The system SHALL <always-on invariant with its concrete value>
+
+**Independent test:** <how to demo this slice alone>
+
+### S2: <slice> (P2)
+
+<One line: the outcome this slice is.>
+
+**Acceptance Criteria**
+
+5. WHEN <trigger> THEN the system SHALL <outcome>
+
+**Independent test:** <how to demo>
+
+## Out of scope
+
+Product capabilities only. Process and harness rules live in AGENTS.md or as Observable `n/a`.
+
+| Excluded | Why |
 | --- | --- |
-| domain | new term: `<Name>` - <one-line definition>, lives in <module> |
-| domain | existing term: `<Name>` meant <x>, now means <y> - <who branches on it today> |
-| stored data | <backfill now / migrate on read / dual write / nothing to migrate> |
+| <capability> | <reason> |
+
+## Assumptions
+
+Defaults that are not already a numbered criterion. Drop a row once it is.
+
+| Assumption | Chosen default | Rationale | Confirmed? |
+| --- | --- | --- | --- |
+| <ambiguity> | <what we will do> | <why> | y/n |
+
+**Open questions:** none - all resolved or logged above.
+
+<Or, when something genuinely stayed open:>
+
+| # | Kind | Question | Until answered |
+| --- | --- | --- | --- |
+| 1 | blocks | <question> | <which criterion cannot be satisfied> |
+| 2 | blocks go-live | <question> | <what cannot be switched on for real users> |
+| 3 | open | <question> | <what stays imprecise, and what was written meanwhile> |
+
+## Observable
+
+Worksheet, not the review. `n/a` needs its reason. One row may group the same decision
+across several routes.
+
+| Surface | Decision | Landing |
+| --- | --- | --- |
+| screen `<name>` | empty state | AC <n> |
+| screen `<name>` | error state | AC <n> |
+| screen `<name>` | destructive action confirms | existing - <the pattern already in use> |
+| API `<METHOD> /<path>` | error shape and codes | AC <n> |
+| all new `<METHOD> /<path>*` | versioning, rate limits | n/a - <why they do not apply> |
+
+<Or:> `None - no user-facing surface`
+
+## Sources
+
+- <ticket or binding design> - <what it settles>
 `````
 
 ## Then confirm, and only then write checks
 
-**This is the one place worth stopping for a human by default.** Present the plan and stop: the
-criteria are what everything downstream traces to, and the doors are the rows that cost the most
-to raise late. Where a `Landing` door has a live alternative, `Relations` changes the shape of
-data that already exists, `Surface` changes something already consumed, or `Impact` names a term
-whose meaning shifts under existing callers - say so explicitly rather than burying it in the
-table, because those are the four a reviewer would want pointed at.
+**This is the one place worth stopping for a human by default.** Present the plan and stop.
+Point at `Flow`, at `Impact`, and at any `Landing` door that still has a live alternative -
+those are the three a reviewer would want named, not buried. Where `Relations` changes data
+that already exists or `Surface` changes something already consumed, say that too.
 
 Then continue into [checks.md](checks.md). Every route's statuses, every door, and every entity
 here owes a set row or a check there - that derivation is the next step's job, and it is the one
@@ -510,5 +530,5 @@ that catches what this file left implicit.
 - **A criterion you cannot imagine a test for is not ready.** You do not name the test here;
   that happens in `checks.md`, against the repo's real test setup.
 - **Priority tags are advisory.** They order the work; they never scale down verification.
-- The two halves are written in one sitting, and the shape is written **after** the criteria -
-  the order is what stops a criterion from being invented to justify a component.
+- The two halves are written in one sitting. The shape is written **after** the criteria - that
+  is writing order, not file order. File order is for the human reading the task.

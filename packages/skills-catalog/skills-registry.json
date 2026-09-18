@@ -1634,7 +1634,7 @@
     },
     {
       "name": "tlc-discover",
-      "description": "Interviews an unshaped idea into a verdict and a design document with literal decisions for tlc-plan. Use when the user says \"research this\", \"help me understand this problem\", \"should we build this\", \"discovery\", \"explore this problem\", or \"tlc-discover\". Do NOT use when the shape is already decided (tlc-plan), or to implement.",
+      "description": "Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room. Use when the user says \"research this\", \"help me understand this problem\", \"should we build this\", \"discovery\", \"explore this problem\", or \"tlc-discover\". Do NOT use to cut a finished design into tasks, or to implement.",
       "category": "development",
       "path": "(development)/tlc-discover",
       "files": [
@@ -1642,8 +1642,8 @@
         "references/document-format.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.8.0",
-      "contentHash": "a00cd1b2c150cd274f8207ae2fb22af25926ba550ad20d5100131efeaad0bfd8"
+      "version": "0.9.0",
+      "contentHash": "518ab626fc8bac4ed1d0c5170b617d1adaec28a83634c1a462c7529d42170d3a"
     },
     {
       "name": "tlc-generative-engine-optimization",
@@ -1746,8 +1746,8 @@
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.0.0",
-      "contentHash": "af264d73172a488bab93cb76366df411cee8631800480fbca4add00dd72bbd8b"
+      "version": "1.1.0",
+      "contentHash": "28368cb86a9d441fce24426eb502a39a5e7f9ffe0ad5d682fead2ce76c5b085b"
     },
     {
       "name": "vercel-deploy",

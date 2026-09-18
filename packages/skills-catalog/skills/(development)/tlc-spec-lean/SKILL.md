@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes obligations instead of the p
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '1.0.0'
+  version: '1.1.0'
 ---
 
 # Tech Lead's Club - Spec, Lean
@@ -57,9 +57,11 @@ never scale down with the profile.
    and `Surface` are additive - a door discovered while building gets a row before the code that
    closes it, and a row the user approved is never rewritten. `Flow` and `Impact` are neither:
    they are **kept true**, so a different path changes the hop in that path's commit.
-5. The **Verifier is a fresh sub-agent**, dispatched by whoever holds the whole feature, never
-   by a builder, over `<feature base>..HEAD` with **every** check. Never optional, never
-   prompted, never the author. A builder finishes, reports, and stops.
+5. The **Verifier is a fresh sub-agent**, never the author, never optional, never waiting to
+   be asked. Whoever holds the whole feature dispatches it after the **last commit of the
+   feature** lands - over `<feature base>..HEAD`, with **every** check. Never by a builder,
+   and never as a child of one. A builder finishes, reports, and stops. The work is not done
+   at the last commit; it is done when the Verifier's report accounts for every check.
 6. **The profile is a floor and it is not a secret.** The verification report names it, or "no
    faults injected" reads exactly like forgetting to inject them.
 7. The completion gate is a script, not a feeling: `validate_verification.py` must exit 0.
@@ -119,7 +121,7 @@ it worthwhile.
 ├── LESSONS.md                  # rendered by scripts/lessons.py - never hand-edit
 ├── lessons.json                # machine-owned
 └── features/<feature>/
-    ├── plan.md                 # problem, EARS criteria, surfaces walked, then flow, relations, surface, landing, impact
+    ├── plan.md                 # problem, flow, impact, then the rest of the shape, then criteria; audit last
     ├── checks.md               # claims + proofs, the coverage join, test policy, swept
     └── verification.md         # the Verifier's report
 ```
@@ -138,10 +140,12 @@ ratify whatever was already assumed.
 **Both halves live in one file because they are one review.** The file boundary is the semantic
 one: on this side, what a human confirms; on the other, obligations with proofs. Splitting the
 plan into a spec and a design would cut it in a place that matches neither, and would buy two
-mandatory stops for one feature. The order inside the file still matters - the criteria are
-written before the shape, which is what stops a criterion from being invented to justify a
-component - and the closure gate has a check the split could not have: every criterion has to
-land somewhere in `Flow`, `Relations` or `Surface`, or it is out of scope or a gap in the shape.
+mandatory stops for one feature. File order is for reading - Problem, Flow, Impact, then the
+rest of the shape, then the criteria, then the audit tables. Writing order is not: write the
+problem, walk the surfaces, write the criteria, then fill the shape. That is what stops a
+criterion from being invented to justify a component. The closure gate still requires every
+criterion to land somewhere in `Flow`, `Relations` or `Surface`, or it is out of scope or a
+gap in the shape.
 
 The derivation into `checks.md` is the load-bearing part, not paperwork. Every route in `Surface`
 owes a `Coverage` set row whose members are its statuses; every door in `Landing` owes a check;
@@ -156,10 +160,10 @@ authority of a written document. None of those fields exists here. Five bounded 
 | Section | Reviews | Kept out |
 | --- | --- | --- |
 | `Flow` | the path, one line per hop | any module that neither exists nor is created by a door - that is placement |
+| `Impact` | what changes underneath: terms, and existing data | risk registers |
 | `Relations` | entities, cardinality, one-way constraints | columns and types |
 | `Surface` | route, in, out, statuses | request-body specification, and check ids - those do not exist yet |
 | `Landing` | the one-way doors, with the literal shape and the rejected alternative | anything a refactor reverses |
-| `Impact` | what changes underneath: terms, and existing data | risk registers |
 
 **Which folder, how many classes, what the private method is called: the diff.** Reversible,
 answered by the repo's conventions, and never worth an artifact. That is the deliberate trade,
@@ -172,8 +176,8 @@ first; then the plan records the shape that won and makes it reviewable.
 
 ## Flow
 
-**Plan** - the problem and the boundary, acceptance criteria in EARS notation with requirement
-IDs, then the path, the entities, the interface, the doors and what gets disturbed. Facts you look
+**Plan** - the problem, then the path and what the change disturbs, then the rest of the shape,
+then the criteria. Writing still goes problem → surfaces → criteria → shape. Facts you look
 up; decisions you ask - and when you ask, concrete options with your recommendation, at most two
 per turn. **Two enumerations do the finding**, because "consider the edge cases" finds nothing: the
 surfaces this feature exposes, each carrying the same decisions every time it appears, and the nine
@@ -183,16 +187,18 @@ before any check exists. Full process, how to ask, rules per shape section, temp
 gate: [plan.md](references/plan.md).
 
 **Checks** - derive claims with proofs from the plan, join every enumerated set member to a check,
-and record where each swept dimension landed. This is the artifact everything downstream refers to
-by check number: [checks.md](references/checks.md).
+and record where each swept dimension landed. Close with `## Handoff` and the arithmetic; if
+the estimate exceeds the budget, stop for the mechanism ask before Build. This is the artifact
+everything downstream refers to by check number: [checks.md](references/checks.md).
 
-**Build** - your call how. Write the tests from the checks, implement, run each proof, commit
-in coherent pieces. No task list, no per-task review tables. Boundaries, `Landing` timing,
-handoff and the scope guardrail: [build.md](references/build.md).
+**Build** - your call how, after the `## Handoff` arithmetic and, if the estimate exceeds the
+budget, the user's mechanism choice. Write the tests from the checks, implement, run each
+proof, commit in coherent pieces. No task list, no per-task review tables. Boundaries,
+`Landing` timing, handoff and the scope guardrail: [build.md](references/build.md).
 
-**Verify** - after the last commit of the feature, the orchestrator dispatches a fresh
-Verifier. Procedure, report format and scoped re-verification:
-[verify.md](references/verify.md).
+**Verify** - when the last commit of the feature lands, dispatch a fresh Verifier in the
+same turn. Do not ask. Do not wait for "verify work". Procedure, report format and scoped
+re-verification: [verify.md](references/verify.md).
 
 Durable memory - project decisions, session handoff, and the lessons layer:
 [memory.md](references/memory.md).
@@ -237,20 +243,36 @@ makes `light` unusable, and only injection tells the two apart. The fixtures in
 
 ## Sub-agents and handoff
 
-**One builder unless the reading does not fit.** Pack whole slices - never split a slice -
+**One builder unless the estimate does not fit.** Pack whole slices - never split a slice -
 accumulating while the running estimate stays under the declared `budget` (default 150k
-tokens, from `wc -c` on the files each slice touches, divided by four). Hand off at the last
-slice that fits, preferring a boundary where the surface changes. Write the intended split
-into `checks.md` under `## Handoff` with the arithmetic, before any code: a number with its
-reason can be argued with, a bare number can only be trusted.
+tokens, from `wc -c` on the files each slice touches, divided by four). Prefer a cut where
+the surface changes. Write the intended split into `checks.md` under `## Handoff` with the
+arithmetic, after the checks exist and before any code: a number with its reason can be
+argued with, a bare number can only be trusted.
+
+Then the gate, and only then:
+
+- The estimate fits → one builder. Do not ask. Do not offer a spawn.
+- The estimate exceeds the budget → **stop**. Do not start the implementation. Ask which
+  mechanism to use, with both exits named:
+  - **handoff** — cut at the surface boundary already written, batches sequential and only
+    on green
+  - **one builder** — stay, and accept compaction / context loss
+- A slice that alone exceeds the budget was cut too coarsely - say so rather than splitting
+  mid-outcome. That is not this ask.
+
+Do not ask where to cut. The cut is logistics; the user's answer cannot be better informed
+than the arithmetic. Do not ask when it fits. Do not offer spawn at the start of a feature.
+Record the chosen mechanism on the same `## Handoff` line before the first line of code.
 
 Batches run sequentially and only hand off on green. The next builder reads `checks.md` and
-the **diff** of what landed, never a narrative summary. A slice that alone exceeds the budget
-was cut too coarsely - say so rather than splitting mid-outcome.
+the **diff** of what landed, never a narrative summary.
 
-Do not ask the user to approve the split. It is logistics, and their answer cannot be better
-informed than yours. What does need a decision is the profile, a live alternative in
-`Landing`, and anything the refuse-rather-than-guess gate caught.
+When the last batch returns green, the parent dispatches the Verifier in that same turn.
+Do not ask. A builder never launches it.
+
+What else needs a decision is the profile, a live alternative in `Landing`, and anything
+the refuse-rather-than-guess gate caught.
 
 **Model tier**, only if the harness assigns a model per sub-agent: high reasoning for a
 core-domain slice and for writing the checks, faster for mechanical slices, mid-to-high for
@@ -279,7 +301,7 @@ project, and identifiers are never translated.
 User says: "tlc-spec-lean — plan the lockfile v2 migration"
 Actions:
 
-1. Read the repository and write `.specs/features/lockfile-v2/plan.md` (problem, EARS criteria, Flow, Relations, Surface, Landing, Impact)
+1. Read the repository and write `.specs/features/lockfile-v2/plan.md` (Problem, Flow, Impact, Relations, Surface, Landing, Criteria)
 2. Run `python3 <skill-dir>/scripts/validate_plan.py lockfile-v2`
 3. Stop for human review — no checks and no code yet
 
@@ -292,13 +314,15 @@ Actions:
 
 1. Derive `.specs/features/lockfile-v2/checks.md` from the approved plan (claims + proofs, Coverage join, Test policy, Swept)
 2. Run `python3 <skill-dir>/scripts/validate_checks.py lockfile-v2`
-3. Write tests from the checks — never from the implementation — then implement, run each proof, and commit
+3. Write `## Handoff` with the arithmetic. Under the budget: one builder, no ask. Over: stop and ask (handoff vs one builder); record the choice before any code
+4. Write tests from the checks — never from the implementation — then implement, run each proof, and commit
+5. After the last commit of the feature, dispatch a fresh Verifier with [verify.md](references/verify.md) — same turn, no ask. A builder of one batch would have stopped after step 4 instead.
 
-Result: Proof-backed checks, green proofs, coherent commits. The builder reports and stops. The builder does not write `verification.md`.
+Result: Proof-backed checks, green proofs, coherent commits, and a Verifier report that accounts for every check. The author does not write `verification.md`.
 
-### Example 3: Verify the work
+### Example 3: Verify a feature that already landed
 
-User says: "verify work"
+User says: "verify work" (recovery — the happy path never waits for this)
 Actions:
 
 1. The orchestrator — not the builder — dispatches a fresh Verifier over `<feature base>..HEAD` with every check

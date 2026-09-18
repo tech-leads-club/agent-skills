@@ -4,7 +4,11 @@
 than as an opinion.
 
 This is the only mechanism standing between "done" and a self-report, so it is never prompted,
-never optional, and never skipped because the author feels confident.
+never optional, never waiting to be asked, and never skipped because the author feels confident.
+
+**When:** the last commit of the feature has landed. Dispatch in that turn. The work is not done
+at that commit; it is done when this report accounts for every check. "verify work" is recovery
+for a feature that already landed without a report, not the happy path.
 
 ## Author is not verifier
 
@@ -26,6 +30,11 @@ the author is the author deciding what to do about the author's own work.
 this file. It runs read-only over the real tree and fixes nothing. The plan is an input because
 half the enumerations it sweeps for - a route's statuses, an entity's constraints - are named
 there and only *owe* a row in the checks.
+
+**How to dispatch.** Launch a fresh sub-agent with no inherited conversation. Hand it this file,
+`plan.md`, `checks.md`, every source the plan marks binding, and the diff range
+`<feature base>..HEAD`. It writes `verification.md` and fixes nothing. You run
+`validate_verification.py`. You do not write the report yourself.
 
 **No sub-agent mechanism available?** Then run this file as a fresh-eyes pass in a new session -
 re-read the plan, the checks and the diff from scratch - and write `Verifier: self-verified
