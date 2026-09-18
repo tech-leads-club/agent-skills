@@ -62,20 +62,36 @@ function getGitLastModified(filePath: string): string {
   return new Date().toISOString().split('T')[0]
 }
 
-function readSkillContent(registrySkill: RegistrySkill): { content: string; lastModified: string } {
+// why: `allowed-tools` is space-delimited in the Agent Skills spec, but Claude Code also accepts commas
+// and YAML lists, and entries like `Bash(git status:*)` carry spaces inside the parentheses.
+function parseAllowedTools(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String)
+  if (typeof value !== 'string') return []
+  const separator = value.includes(',') ? /,(?![^(]*\))/ : /\s+(?![^(]*\))/
+  return value
+    .split(separator)
+    .map((tool) => tool.trim())
+    .filter(Boolean)
+}
+
+function readSkillContent(registrySkill: RegistrySkill): {
+  content: string
+  lastModified: string
+  allowedTools: string[]
+} {
   const skillFile = path.join(SKILLS_DIR, registrySkill.path, 'SKILL.md')
 
   if (!fs.existsSync(skillFile)) {
     console.warn(`SKILL.md not found at ${skillFile}`)
-    return { content: '', lastModified: new Date().toISOString().split('T')[0] }
+    return { content: '', lastModified: new Date().toISOString().split('T')[0], allowedTools: [] }
   }
 
   const fileContent = fs.readFileSync(skillFile, 'utf-8')
   const lastModified = getGitLastModified(skillFile)
 
   try {
-    const { content } = matter(fileContent)
-    return { content: content.trim(), lastModified }
+    const { content, data } = matter(fileContent)
+    return { content: content.trim(), lastModified, allowedTools: parseAllowedTools(data['allowed-tools']) }
   } catch {
     console.warn(`Failed to parse frontmatter for ${registrySkill.name}, using fallback`)
     const lines = fileContent.split('\n')
@@ -87,7 +103,7 @@ function readSkillContent(registrySkill: RegistrySkill): { content: string; last
     }
 
     const content = lines.slice(contentStart).join('\n').trim()
-    return { content, lastModified }
+    return { content, lastModified, allowedTools: [] }
   }
 }
 
@@ -114,6 +130,23 @@ async function generateSkillZip(skillName: string, skillPath: string): Promise<v
   })
 }
 
+const RUNTIME_BY_EXTENSION: Record<string, string> = {
+  '.py': 'Python',
+  '.js': 'Node.js',
+  '.mjs': 'Node.js',
+  '.cjs': 'Node.js',
+  '.ts': 'Node.js',
+  '.sh': 'Bash',
+}
+
+function inferScriptRuntimes(files: string[]): string[] {
+  const runtimes = files
+    .filter((f) => f.startsWith('scripts/'))
+    .map((f) => RUNTIME_BY_EXTENSION[path.extname(f)])
+    .filter(Boolean)
+  return [...new Set(runtimes)].sort()
+}
+
 function generateMarketplaceData(): MarketplaceData {
   console.log('Loading skills registry...')
   const registry = loadRegistry()
@@ -138,7 +171,7 @@ function generateMarketplaceData(): MarketplaceData {
       .map((f) => path.basename(f))
 
     // Read content and lastModified from git history
-    const { content, lastModified } = readSkillContent(registrySkill)
+    const { content, lastModified, allowedTools } = readSkillContent(registrySkill)
 
     return {
       id: registrySkill.name,
@@ -152,6 +185,9 @@ function generateMarketplaceData(): MarketplaceData {
         hasReferences,
         referenceFiles,
         lastModified,
+        version: registrySkill.version,
+        scriptRuntimes: inferScriptRuntimes(registrySkill.files),
+        allowedTools,
       },
     }
   })

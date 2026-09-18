@@ -12,7 +12,15 @@ import { SafeMarkdownAnchor } from '../../../components/SafeMarkdownAnchor'
 import { ShareButton } from '../../../components/ShareButton'
 import { SkillEntitySummary } from '../../../components/SkillEntitySummary'
 import { SkillListItem } from '../../../components/SkillListItem'
-import { allSkills, findCategory, findSkill, installCommand, relatedSkills } from '../../../lib/catalog'
+import {
+  allSkills,
+  catalog,
+  featuredAgents,
+  findCategory,
+  findSkill,
+  installCommand,
+  relatedSkills,
+} from '../../../lib/catalog'
 import { demoteFirstMarkdownH1 } from '../../../lib/demote-markdown-h1'
 import { buildPageMetadata } from '../../../lib/seo/metadata'
 import { breadcrumbSchema, graph, organizationSchema, skillSchema } from '../../../lib/seo/schema'
@@ -70,6 +78,10 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
   const command = installCommand(skill.id)
   const related = relatedSkills(skill)
   const crumbs = crumbsFor(skill, categoryName, skill.category)
+  const agents = featuredAgents()
+  const otherAgentsCount = catalog.agents.length - agents.length
+  const scriptRuntimes = skill.metadata.scriptRuntimes ?? []
+  const allowedTools = skill.metadata.allowedTools ?? []
 
   return (
     <>
@@ -128,6 +140,12 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   <span className="text-gray-400 dark:text-gray-500">Category</span>
                   <CategoryBadge categoryId={skill.category} categoryName={categoryName} />
                 </div>
+                {skill.metadata.version && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 dark:text-gray-500">Version</span>
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">v{skill.metadata.version}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 dark:text-gray-500">Updated</span>
                   <span className="font-semibold text-gray-600 dark:text-gray-300">{skill.metadata.lastModified}</span>
@@ -135,7 +153,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 dark:text-gray-500">Scripts</span>
                   <span className="font-semibold text-gray-600 dark:text-gray-300">
-                    {skill.metadata.hasScripts ? 'Yes' : 'No'}
+                    {scriptRuntimes.length > 0 ? scriptRuntimes.join(', ') : skill.metadata.hasScripts ? 'Yes' : 'No'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -175,6 +193,51 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   </ul>
                 </div>
               )}
+
+              {allowedTools.length > 0 && (
+                <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5">
+                  <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-3">
+                    Allowed Tools
+                  </p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {allowedTools.map((tool) => (
+                      <li key={tool}>
+                        <code className="text-xs bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                          {tool}
+                        </code>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5">
+                <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-3">
+                  Works with {catalog.agents.length} agents
+                </p>
+                <ul className="flex flex-wrap gap-1.5">
+                  {agents.map((agent) => (
+                    <li key={agent.id}>
+                      <Link
+                        href={routes.agent(agent.id)}
+                        className="inline-block text-xs bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        {agent.name}
+                      </Link>
+                    </li>
+                  ))}
+                  {otherAgentsCount > 0 && (
+                    <li>
+                      <Link
+                        href={routes.agents()}
+                        className="inline-block text-xs px-2 py-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        +{otherAgentsCount} more
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </div>
 
               {/* Actions */}
               <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5 space-y-3">

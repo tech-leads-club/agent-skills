@@ -3,6 +3,11 @@ export interface SkillMetadata {
   hasReferences: boolean
   referenceFiles: string[]
   lastModified: string
+  version?: string
+  /** Runtimes inferred from the extensions of bundled `scripts/` files. */
+  scriptRuntimes?: string[]
+  /** Frontmatter `allowed-tools`: agent tools the skill may use without a permission prompt. */
+  allowedTools?: string[]
 }
 
 export interface Skill {

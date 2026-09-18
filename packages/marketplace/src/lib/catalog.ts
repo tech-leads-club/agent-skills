@@ -21,6 +21,14 @@ export function findAgent(id: string): AgentTarget | undefined {
   return data.agents.find((agent) => agent.id === id)
 }
 
+// why: the catalog is sorted by display name and carries no tier, so the sidebar needs an explicit
+// pick of the CLI's Tier 1 agents to lead with instead of whichever five sort first alphabetically.
+const FEATURED_AGENT_IDS = ['claude-code', 'cursor', 'github-copilot', 'windsurf', 'cline']
+
+export function featuredAgents(): AgentTarget[] {
+  return FEATURED_AGENT_IDS.map(findAgent).filter((agent): agent is AgentTarget => agent !== undefined)
+}
+
 export function skillsInCategory(categoryId: string): Skill[] {
   return data.skills.filter((skill) => skill.category === categoryId)
 }
