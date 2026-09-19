@@ -4,6 +4,9 @@
 import { jest } from '@jest/globals'
 import { act, renderHook, waitFor } from '@testing-library/react'
 
+const actualFs = await import('node:fs/promises')
+const actualOs = await import('node:os')
+
 const mockMkdir = jest.fn<() => Promise<void>>()
 const mockReadFile = jest.fn<(path: string, encoding: string) => Promise<string>>()
 const mockWriteFile = jest.fn<(path: string, data: string, encoding: string) => Promise<void>>()
@@ -12,6 +15,7 @@ const mockRename = jest.fn<(oldPath: string, newPath: string) => Promise<void>>(
 const mockRm = jest.fn<(path: string, options?: { force?: boolean }) => Promise<void>>()
 
 jest.unstable_mockModule('node:fs/promises', () => ({
+  ...actualFs,
   mkdir: mockMkdir,
   readFile: mockReadFile,
   writeFile: mockWriteFile,
@@ -19,7 +23,7 @@ jest.unstable_mockModule('node:fs/promises', () => ({
   rm: mockRm,
 }))
 
-jest.unstable_mockModule('node:os', () => ({ homedir: mockHomedir }))
+jest.unstable_mockModule('node:os', () => ({ ...actualOs, homedir: mockHomedir }))
 
 const { useConfig } = await import('../useConfig')
 
@@ -33,7 +37,7 @@ describe('useConfig hook', () => {
 
   describe('initial load', () => {
     it('should load config on mount', async () => {
-      const config = { firstLaunchComplete: true, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = { firstLaunchComplete: true, shortcutsOverlayDismissed: false, version: '1.0.0', targetAgents: [] }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       const { result } = renderHook(() => useConfig())
       expect(result.current.loading).toBe(true)
@@ -47,7 +51,12 @@ describe('useConfig hook', () => {
     })
 
     it('should handle first launch state', async () => {
-      const config = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       const { result } = renderHook(() => useConfig())
       await waitFor(() => {
@@ -58,7 +67,7 @@ describe('useConfig hook', () => {
     })
 
     it('should handle shortcuts dismissed state', async () => {
-      const config = { firstLaunchComplete: true, shortcutsOverlayDismissed: true, version: '1.0.0' }
+      const config = { firstLaunchComplete: true, shortcutsOverlayDismissed: true, version: '1.0.0', targetAgents: [] }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       const { result } = renderHook(() => useConfig())
       await waitFor(() => {
@@ -78,6 +87,7 @@ describe('useConfig hook', () => {
         firstLaunchComplete: false,
         shortcutsOverlayDismissed: false,
         version: '1.0.0',
+        targetAgents: [],
       })
     })
 
@@ -91,6 +101,7 @@ describe('useConfig hook', () => {
         firstLaunchComplete: false,
         shortcutsOverlayDismissed: false,
         version: '1.0.0',
+        targetAgents: [],
       })
       expect(result.current.isFirstLaunch).toBe(true)
     })
@@ -98,7 +109,12 @@ describe('useConfig hook', () => {
 
   describe('markFirstLaunchComplete', () => {
     it('should update first launch state', async () => {
-      const initialConfig = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const initialConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       const updatedConfig = { ...initialConfig, firstLaunchComplete: true }
       mockReadFile
         .mockResolvedValueOnce(JSON.stringify(initialConfig))
@@ -123,7 +139,12 @@ describe('useConfig hook', () => {
     })
 
     it('should handle errors when marking first launch complete', async () => {
-      const config = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       mockMkdir.mockResolvedValue(undefined)
       mockWriteFile.mockRejectedValue(new Error('Write failed'))
@@ -140,7 +161,12 @@ describe('useConfig hook', () => {
 
   describe('markShortcutsDismissed', () => {
     it('should update shortcuts dismissed state', async () => {
-      const initialConfig = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const initialConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       const updatedConfig = { ...initialConfig, shortcutsOverlayDismissed: true }
       mockReadFile
         .mockResolvedValueOnce(JSON.stringify(initialConfig))
@@ -165,7 +191,12 @@ describe('useConfig hook', () => {
     })
 
     it('should handle errors when marking shortcuts dismissed', async () => {
-      const config = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       mockMkdir.mockResolvedValue(undefined)
       mockWriteFile.mockRejectedValue(new Error('Write failed'))
@@ -182,7 +213,12 @@ describe('useConfig hook', () => {
 
   describe('updateConfig', () => {
     it('should update config with partial updates', async () => {
-      const initialConfig = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const initialConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       const updatedConfig = { ...initialConfig, firstLaunchComplete: true, shortcutsOverlayDismissed: true }
       mockReadFile
         .mockResolvedValueOnce(JSON.stringify(initialConfig))
@@ -207,7 +243,12 @@ describe('useConfig hook', () => {
     })
 
     it('should handle errors when updating config', async () => {
-      const config = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(config))
       mockMkdir.mockResolvedValue(undefined)
       mockWriteFile.mockRejectedValue(new Error('Write failed'))
@@ -224,7 +265,12 @@ describe('useConfig hook', () => {
 
   describe('cleanup', () => {
     it('should not update state after unmount', async () => {
-      const config = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const config = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockImplementation(
         () =>
           new Promise((resolve) => {
