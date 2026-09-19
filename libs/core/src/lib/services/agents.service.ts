@@ -139,6 +139,14 @@ const agentDefinitions: Record<AgentType, AgentDefinition> = {
     detectInstalled: ({ home, projectRoot, ports }) =>
       ports.fs.existsSync(join(home, '.kiro')) || ports.fs.existsSync(join(projectRoot, '.kiro')),
   },
+  pi: {
+    displayName: 'Pi',
+    description: 'Minimal terminal coding agent',
+    skillsDir: '.pi/skills',
+    globalSkillsDir: (home) => join(home, '.pi/agent/skills'),
+    detectInstalled: ({ home, projectRoot, ports }) =>
+      ports.fs.existsSync(join(home, '.pi')) || ports.fs.existsSync(join(projectRoot, '.pi')),
+  },
 
   // Tier 3: Enterprise & specialized
   'amazon-q': {

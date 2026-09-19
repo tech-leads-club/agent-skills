@@ -77,6 +77,7 @@ describe('agents service', () => {
       'kiro',
       'codex',
       'opencode',
+      'pi',
       'roo',
       'sourcegraph',
       'tabnine',
@@ -101,6 +102,13 @@ describe('agents service', () => {
       description: 'Open-source AI coding terminal',
       skillsDir: '.opencode/skills',
       globalSkillsDir: join('/home/tester', '.config/opencode/skills'),
+    })
+    expect(getAgentConfig(ports, 'pi')).toMatchObject({
+      name: 'pi',
+      displayName: 'Pi',
+      description: 'Minimal terminal coding agent',
+      skillsDir: '.pi/skills',
+      globalSkillsDir: join('/home/tester', '.pi/agent/skills'),
     })
   })
 
@@ -129,6 +137,16 @@ describe('agents service', () => {
     expect(detectInstalledAgents(ports)).toEqual(['cursor', 'opencode'])
   })
 
+  it('detects pi from its home directory or a project-level .pi folder', () => {
+    const { ports, existsSyncMock } = createPorts()
+
+    existsSyncMock.mockImplementation((path) => path === '/home/tester/.pi')
+    expect(detectInstalledAgents(ports)).toEqual(['pi'])
+
+    existsSyncMock.mockImplementation((path) => path === '/workspace/project/.pi')
+    expect(detectInstalledAgents(ports)).toEqual(['pi'])
+  })
+
   it('returns every supported agent when all install locations exist', () => {
     const { ports, existsSyncMock } = createPorts()
     existsSyncMock.mockReturnValue(true)
@@ -147,6 +165,7 @@ describe('agents service', () => {
       'kilocode',
       'trae',
       'kiro',
+      'pi',
       'amazon-q',
       'augment',
       'tabnine',

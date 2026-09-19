@@ -71,6 +71,7 @@ export const AGENT_TYPES = [
   'droid',
   'trae',
   'kiro',
+  'pi',
 ] as const
 
 /**

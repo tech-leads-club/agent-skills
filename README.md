@@ -89,6 +89,7 @@ Install skills to any of these AI coding agents:
 |                                                           |    **[OpenAI Codex](https://openai.com/index/introducing-codex/)**     |         **[Tabnine](https://www.tabnine.com)**          |
 |                                                           |                    **[Roo Code](https://roo.dev)**                     |                                                         |
 |                                                           |                    **[TRAE](https://docs.trae.ai)**                    |                                                         |
+|                                                           |             **[Pi](https://github.com/earendil-works/pi)**             |                                                         |
 
 </div>
 
