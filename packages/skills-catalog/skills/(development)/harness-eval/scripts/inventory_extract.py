@@ -86,7 +86,12 @@ def default_out(root: Path, run_id: str) -> Path:
 
 
 def rel(root: Path, path: Path) -> str:
-    return path.resolve().relative_to(root.resolve()).as_posix()
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(root.resolve()).as_posix()
+    except ValueError:
+        # why: a cite can resolve to a real file outside the repo; report it absolute instead of aborting the run
+        return resolved.as_posix()
 
 
 def is_readme(path: str) -> bool:
@@ -250,6 +255,7 @@ def resolve_cite(root: Path, source: Path, cite: str) -> Path | None:
 def discover_t2_candidates(root: Path, t0: list[Path], t1: list[Path]) -> list[Path]:
     """One-hop cited files from T0/T1 (unfiltered). Scope policy applied separately."""
     found: set[Path] = set()
+    root_abs = root.resolve()
     skill_set = {p.resolve() for p in t1}
     t0_set = {p.resolve() for p in t0}
     for src in t0 + t1:
@@ -263,6 +269,9 @@ def discover_t2_candidates(root: Path, t0: list[Path], t1: list[Path]) -> list[P
             if resolved in skill_set and resolved.name == "SKILL.md":
                 continue
             if resolved in t0_set:
+                continue
+            # invariant: a file outside the repo root is not a harness surface, so it never becomes a T2 candidate
+            if root_abs not in resolved.parents:
                 continue
             rel_s = rel(root, resolved)
             if resolved.suffix.lower() in {".md", ".mdc", ".json", ".yml", ".yaml"} or "references" in rel_s:
