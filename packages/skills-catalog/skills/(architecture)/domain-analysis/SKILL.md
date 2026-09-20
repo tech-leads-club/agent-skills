@@ -144,7 +144,7 @@ Score = (
   Usage Cohesion (0-3) +         // Used together
   Data Cohesion (0-2) +          // Entity relationships
   Change Cohesion (0-2)          // Change together
-) / 10
+)
 
 8-10: High Cohesion ✅
 5-7:  Medium Cohesion ⚠️
