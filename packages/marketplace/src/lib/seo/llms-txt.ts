@@ -70,6 +70,11 @@ export function buildLlmsTxt(data: MarketplaceData): string {
       'v1 skills for agentic software factories: discover, plan, implement and the-judge',
     ),
     line(
+      'Agent Skills MCP',
+      routes.mcp(),
+      'MCP server that serves the catalog on demand — search, read and fetch skills without installing them',
+    ),
+    line(
       'TLC Spec-Driven',
       routes.specDriven(),
       'Spec-driven framework with adaptive phases, atomic tasks and an independent verifier',
