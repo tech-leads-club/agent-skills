@@ -2305,6 +2305,13 @@
       "globalSkillsDir": "~/.config/opencode/skills"
     },
     {
+      "id": "pi",
+      "name": "Pi",
+      "description": "Minimal terminal coding agent",
+      "skillsDir": ".pi/skills",
+      "globalSkillsDir": "~/.pi/agent/skills"
+    },
+    {
       "id": "roo",
       "name": "Roo Code",
       "description": "AI coding assistant for VS Code",
@@ -2343,6 +2350,6 @@
   "stats": {
     "totalSkills": 92,
     "totalCategories": 15,
-    "totalAgents": 19
+    "totalAgents": 20
   }
 }

@@ -1,6 +1,6 @@
 # Agent Skills
 
-> 92 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
+> 92 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 20 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
 
 Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`. Add `--agent <id>` to target one agent, or `--global` to install for every project. Source: https://github.com/tech-leads-club/agent-skills
 
@@ -37,6 +37,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [Kiro](https://agent-skills.techleads.club/agents/kiro/): AI Agent with workspace and global skill scopes. Installs to .kiro/skills
 - [OpenAI Codex](https://agent-skills.techleads.club/agents/codex/): OpenAI's coding agent. Installs to .codex/skills
 - [OpenCode](https://agent-skills.techleads.club/agents/opencode/): Open-source AI coding terminal. Installs to .opencode/skills
+- [Pi](https://agent-skills.techleads.club/agents/pi/): Minimal terminal coding agent. Installs to .pi/skills
 - [Roo Code](https://agent-skills.techleads.club/agents/roo/): AI coding assistant for VS Code. Installs to .roo/skills
 - [Sourcegraph Cody](https://agent-skills.techleads.club/agents/sourcegraph/): AI assistant with codebase context. Installs to .sourcegraph/skills
 - [Tabnine](https://agent-skills.techleads.club/agents/tabnine/): AI code completions with privacy focus. Installs to .tabnine/skills
