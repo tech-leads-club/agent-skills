@@ -2,7 +2,7 @@ import type { Category, Skill } from '../types'
 
 /** invariant: content is indexed only up to this many characters, so a long SKILL.md body
  * cannot dominate index size or dilute scoring. */
-const CONTENT_INDEX_LIMIT = 4000
+export const CONTENT_INDEX_LIMIT = 4000
 
 /** invariant: terms this short only match whole tokens or token prefixes — letting "ci" match
  * inside "prin-ci-ples" buries the one skill actually about CI. */

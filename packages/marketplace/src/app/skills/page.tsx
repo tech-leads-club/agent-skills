@@ -6,12 +6,20 @@ import { populatedCategories } from '../../lib/catalog'
 import { buildPageMetadata } from '../../lib/seo/metadata'
 import { breadcrumbSchema, collectionPageSchema, graph, organizationSchema } from '../../lib/seo/schema'
 import { routes } from '../../lib/seo/urls'
+import { CONTENT_INDEX_LIMIT } from '../../lib/skills-search'
 import { SkillsClient } from './SkillsClient'
 
 const crumbs = [
   { name: 'Home', path: routes.home() },
   { name: 'Skills', path: routes.skills() },
 ]
+
+// why: every prop of a client component is serialized into the page's RSC payload; full SKILL.md
+// bodies made /skills/ ~1.5 MB, while search only ever reads the first CONTENT_INDEX_LIMIT chars.
+const clientData = {
+  ...marketplaceData,
+  skills: marketplaceData.skills.map((skill) => ({ ...skill, content: skill.content.slice(0, CONTENT_INDEX_LIMIT) })),
+}
 
 export const metadata = buildPageMetadata({
   title: 'Browse All Skills',
@@ -39,7 +47,7 @@ export default function SkillsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <Breadcrumbs crumbs={crumbs} />
       </div>
-      <SkillsClient data={marketplaceData} />
+      <SkillsClient data={clientData} />
       <SkillsCrawlIndex skills={marketplaceData.skills} categories={categories} />
     </>
   )
