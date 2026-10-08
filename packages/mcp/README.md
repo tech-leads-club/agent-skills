@@ -276,4 +276,4 @@ npm run start:dev          # Build + Inspector (uses ../../dist/packages/mcp)
 
 ## 📄 License & repo
 
-MIT — [Tech Leads Club](https://github.com/tech-leads-club). Same repo as the [CLI](https://github.com/tech-leads-club/agent-skills#-quick-start) and the [skills catalog](https://tech-leads-club.github.io/agent-skills/).
+MIT — [Tech Leads Club](https://github.com/tech-leads-club). Same repo as the [CLI](https://github.com/tech-leads-club/agent-skills#-quick-start) and the [skills catalog](https://agent-skills.techleads.club/).

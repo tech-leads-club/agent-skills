@@ -37,7 +37,7 @@
 </p>
 
 <p align="center">
-  <a href="https://tech-leads-club.github.io/agent-skills/" target="_blank">https://tech-leads-club.github.io/agent-skills/</a>
+  <a href="https://agent-skills.techleads.club/" target="_blank">https://agent-skills.techleads.club/</a>
 </p>
 
 ## 📖 Table of Contents

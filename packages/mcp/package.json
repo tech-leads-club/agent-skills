@@ -4,7 +4,7 @@
   "description": "The official MCP for agent-skills. Curated catalog, progressive disclosure flow: Search → load canonical SKILL.md → fetch only validated references. Safe, lean, zero config.",
   "author": "Tech Leads Club",
   "license": "MIT",
-  "homepage": "https://github.com/tech-leads-club/agent-skills",
+  "homepage": "https://agent-skills.techleads.club/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tech-leads-club/agent-skills.git",

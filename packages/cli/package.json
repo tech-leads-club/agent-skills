@@ -4,6 +4,7 @@
   "description": "Secure, verifiable CLI to install and manage skills for professional AI coding agents",
   "author": "Tech Leads Club",
   "license": "MIT",
+  "homepage": "https://agent-skills.techleads.club/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tech-leads-club/agent-skills.git"
