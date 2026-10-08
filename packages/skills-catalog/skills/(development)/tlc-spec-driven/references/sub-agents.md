@@ -19,14 +19,18 @@ The benchmarked sweet spot is ~7 tasks of context per worker (~20 tasks → 3 wo
 
 1. Count total tasks `T`.
 2. If `T ≤ ~8` → inline, no sub-agents.
-3. Otherwise walk phases **in order**, accumulating whole phases into the current batch. When the batch's running task count reaches ~7 **and** phases remain, close the batch and start the next.
+3. Otherwise walk phases **in order**, accumulating whole phases into the current batch. For each phase, in this order:
+   - **Overflow guard** - a **non-empty** batch refuses a phase that would push it past **~1.5× the budget (~10 tasks)**: close the batch as it stands and start the next one with that phase. (An empty batch always accepts, so a single over-sized phase still gets its own worker.)
+   - **Close on budget** - after adding the phase, if the batch's running task count has reached ~7 **and** phases remain, close the batch and start the next.
 4. **Never split a phase** across workers - the cut only ever lands on a phase boundary. This preserves dependency ordering and keeps a phase's tasks + shared context in one worker.
 5. If the final batch is a lone tail (1-2 tasks), fold it into the previous batch.
 
+Without the overflow guard the walk does not reproduce the counts below: `[8,2,2,8]` would close at `{P1=8}` and then swallow `{P2+P3+P4=12}` into one 12-task worker, because the batch is still at 4 when P4 is offered.
+
 Result ≈ `ceil(T / 7)` workers, scaling linearly. Unevenness is absorbed by greedy packing - phases never need to divide evenly. Worked examples (20 tasks):
 
-- Phases `[3,3,3,3,4,4]` → `{P1+P2=6, P3+P4=6, P5+P6=8}` = **3 workers**
-- Phases `[8,2,2,8]` → `{P1=8, P2+P3=4, P4=8}` = **3 workers** (no even split needed)
+- Phases `[3,3,3,3,4,4]` → `{P1+P2+P3=9, P4+P5=7, P6=4}` = **3 workers**
+- Phases `[8,2,2,8]` → `{P1=8, P2+P3=4, P4=8}` = **3 workers** (the guard refuses P4 at 4+8=12; no even split needed)
 - Phases `[5,5,5,5]` → `{P1+P2=10, P3+P4=10}` = **2 workers** (phases too coarse to hit 3 - see below)
 
 **Coarse-phase caveat:** Because the cut lands only on phase boundaries, very coarse phases limit how finely you can pack. If a single phase alone exceeds ~1.5× the budget (~10+ tasks), that is a Tasks-authoring smell - split it into real sub-phases during Tasks (at a genuine dependency/cohesion boundary), never at dispatch time.
