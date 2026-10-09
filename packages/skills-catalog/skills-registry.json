@@ -502,7 +502,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "f51f33e059b64bfb145de75c5b85da8d4fdd91dd2f846557183a98f51b0f87ea"
+      "contentHash": "a9f5a391efeeb71a9d661ba9d55309e1b3e8a985a05310cda311577931901d0e"
     },
     {
       "name": "codenavi",
@@ -603,7 +603,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "3a67190e1dea1f2573d4fbb17071bbdac5ff4fd087d8cb5271094851c2acd559"
+      "contentHash": "5f65f4b1e8a82315daab1da09031955b1c3d445d51de67a886d0e5dc6d3466fe"
     },
     {
       "name": "coupling-analysis",
@@ -1375,7 +1375,7 @@
       ],
       "author": "github.com/openai/skills",
       "version": "1.0.0",
-      "contentHash": "b2d22a5612b4b1871c4d33765f8ee875ffc7eb3604cc9f2faabb1ff3c0c527ea"
+      "contentHash": "a72c854017f48e17b039a67b3a47ec9bc02f4b2879078719ae8794ce7429fac0"
     },
     {
       "name": "sales-motion-design",
@@ -1799,7 +1799,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "8af5bd3453984bdcef903709b6ef0606b12ae1badb6dd5b5b382b930d2594d7c"
+      "contentHash": "75e1f67233fe72759e458bff0276a6052eb3743266e2343a46184c7e89aedeff"
     }
   ],
   "deprecated": [
