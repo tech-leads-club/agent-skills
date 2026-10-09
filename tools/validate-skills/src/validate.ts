@@ -1,15 +1,22 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
-import { basename, dirname, join } from 'path'
+import { getEncoding, type Tiktoken } from 'js-tiktoken'
+import { basename, join } from 'path'
 import { parse as parseYaml } from 'yaml'
 
-interface Check {
+import { checkLinks } from './links'
+import { reviewUrls } from './urls'
+
+export interface Check {
   name: string
   passed: boolean
   message: string
   severity: 'error' | 'warning'
+  /** Path relative to the skill folder; SKILL.md when absent. */
+  file?: string
+  line?: number
 }
 
-interface ValidationResult {
+export interface ValidationResult {
   path: string
   checks: Check[]
   passed: number
@@ -18,7 +25,47 @@ interface ValidationResult {
   summary?: string
 }
 
-function validateSkill(skillPath: string): ValidationResult {
+export interface ValidateOptions {
+  /** Domains the skill had at the base ref. When set, the external URL review runs. */
+  baseDomains?: Set<string>
+}
+
+const SPEC_FIELDS = ['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools']
+const TOKEN_BUDGET = 5000
+
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+let encoder: Tiktoken | undefined
+export function countTokens(text: string): number {
+  encoder ??= getEncoding('cl100k_base')
+  return encoder.encode(text).length
+}
+
+export function validateSkill(skillPath: string, options: ValidateOptions = {}): ValidationResult {
+  const results = validateStructure(skillPath)
+  if (options.baseDomains && existsSync(skillPath) && statSync(skillPath).isDirectory()) {
+    for (const check of reviewUrls(skillPath, options.baseDomains)) record(results, check)
+  }
+  if (results.failed === 0) {
+    results.summary = `PASS — ${results.passed} checks passed${results.warnings > 0 ? `, ${results.warnings} warnings` : ''}`
+  } else if (!results.summary) {
+    results.summary = `FAIL — ${results.failed} errors, ${results.warnings} warnings`
+  }
+  return results
+}
+
+function record(results: ValidationResult, check: Check) {
+  results.checks.push(check)
+  if (check.passed) {
+    results.passed++
+  } else if (check.severity === 'warning') {
+    results.warnings++
+  } else {
+    results.failed++
+  }
+}
+
+function validateStructure(skillPath: string): ValidationResult {
   const results: ValidationResult = {
     path: skillPath,
     checks: [],
@@ -27,15 +74,14 @@ function validateSkill(skillPath: string): ValidationResult {
     warnings: 0,
   }
 
-  function addCheck(name: string, passed: boolean, message: string, severity: 'error' | 'warning' = 'error') {
-    results.checks.push({ name, passed, message, severity })
-    if (passed) {
-      results.passed++
-    } else if (severity === 'warning') {
-      results.warnings++
-    } else {
-      results.failed++
-    }
+  function addCheck(
+    name: string,
+    passed: boolean,
+    message: string,
+    severity: 'error' | 'warning' = 'error',
+    location: { file?: string; line?: number } = {},
+  ) {
+    record(results, { name, passed, message, severity, ...location })
   }
 
   // --- Check 1: Folder exists ---
@@ -91,6 +137,11 @@ function validateSkill(skillPath: string): ValidationResult {
   addCheck('frontmatter_delimiters', true, 'YAML frontmatter delimiters present')
 
   const fmRaw = fmMatch[1]
+  const fmLines = fmRaw.split('\n')
+  const fmLine = (pattern: RegExp) => {
+    const index = fmLines.findIndex((l) => pattern.test(l))
+    return index === -1 ? {} : { line: index + 2 }
+  }
   let fm: Record<string, unknown>
 
   try {
@@ -132,6 +183,40 @@ function validateSkill(skillPath: string): ValidationResult {
         ? `name '${name}' matches folder '${folderName}'`
         : `name '${name}' does NOT match folder '${folderName}'`,
       'warning',
+    )
+  }
+
+  if (name && String(name).includes('--')) {
+    addCheck(
+      'name_consecutive_hyphens',
+      false,
+      `name '${name}' contains consecutive hyphens (--)`,
+      'warning',
+      fmLine(/^name\s*:/),
+    )
+  }
+
+  // --- Check 6b: frontmatter fields follow the agentskills.io spec ---
+  const unknownFields = Object.keys(fm).filter((key) => !SPEC_FIELDS.includes(key))
+  for (const field of unknownFields) {
+    addCheck(
+      'frontmatter_unknown_field',
+      false,
+      `Unknown frontmatter field '${field}' (spec allows: ${SPEC_FIELDS.join(', ')})`,
+      'warning',
+      fmLine(new RegExp(`^${escapeRegExp(field)}\\s*:`)),
+    )
+  }
+  if (unknownFields.length === 0) addCheck('frontmatter_unknown_field', true, 'All frontmatter fields are in the spec')
+
+  if (fm.compatibility !== undefined) {
+    const compatLength = String(fm.compatibility).length
+    addCheck(
+      'compatibility_length',
+      compatLength <= 500,
+      `compatibility length: ${compatLength}/500 chars`,
+      'warning',
+      fmLine(/^compatibility\s*:/),
     )
   }
 
@@ -188,6 +273,19 @@ function validateSkill(skillPath: string): ValidationResult {
     )
   } else {
     addCheck('metadata_present', true, 'metadata field present')
+
+    for (const [key, value] of Object.entries(metadata)) {
+      const isPlainString = typeof value === 'string' && !value.includes('<') && !value.includes('>')
+      if (!isPlainString) {
+        addCheck(
+          'metadata_format',
+          false,
+          `metadata.${key} must be a string without < or > (got ${typeof value === 'string' ? 'angle brackets' : typeof value})`,
+          'warning',
+          fmLine(new RegExp(`^\\s+${escapeRegExp(key)}\\s*:`)),
+        )
+      }
+    }
 
     const metaVersion = metadata.version
     const hasVersion = !!metaVersion
@@ -252,91 +350,26 @@ function validateSkill(skillPath: string): ValidationResult {
     }
   }
 
-  // --- Summary ---
-  if (results.failed === 0) {
-    results.summary = `PASS — ${results.passed} checks passed${results.warnings > 0 ? `, ${results.warnings} warnings` : ''}`
-  } else {
-    results.summary = `FAIL — ${results.failed} errors, ${results.warnings} warnings`
+  // --- Check 10: token budget (agentskills.io recommends under 5000) ---
+  const tokens = countTokens(content)
+  addCheck(
+    'token_budget',
+    tokens <= TOKEN_BUDGET,
+    tokens <= TOKEN_BUDGET ? `${tokens} tokens` : `${tokens}/${TOKEN_BUDGET} tokens — move detail to references/`,
+    'warning',
+  )
+
+  // --- Check 11: relative links in every markdown file ---
+  const links = checkLinks(skillPath)
+  for (const link of links.findings) {
+    const where = `${link.file}:${link.line}`
+    if (link.kind === 'broken') {
+      addCheck('link_broken', false, `${where} links to missing ${link.target}`, 'error', link)
+    } else {
+      addCheck('link_escapes_skill', false, `${where} links outside the skill: ${link.target}`, 'warning', link)
+    }
   }
+  if (links.findings.length === 0) addCheck('links_resolve', true, `All ${links.checked} relative links resolve`)
 
   return results
-}
-
-function printReport(results: ValidationResult) {
-  console.log(`\n${'='.repeat(60)}`)
-  console.log(`  Skill Validation Report`)
-  console.log(`  Path: ${results.path}`)
-  console.log(`${'='.repeat(60)}\n`)
-
-  for (const check of results.checks) {
-    const icon = check.passed ? '✅' : check.severity === 'warning' ? '⚠️' : '❌'
-    console.log(`  ${icon} ${check.name}: ${check.message}`)
-  }
-
-  console.log(`\n${'─'.repeat(60)}`)
-  console.log(`  ${results.summary}`)
-  console.log(`  Passed: ${results.passed} | Failed: ${results.failed} | Warnings: ${results.warnings}`)
-  console.log(`${'─'.repeat(60)}\n`)
-}
-
-function validateBatch(skillsRoot: string): boolean {
-  const allResults: ValidationResult[] = []
-
-  const categories = readdirSync(skillsRoot).sort()
-  for (const categoryDir of categories) {
-    const categoryPath = join(skillsRoot, categoryDir)
-    if (!statSync(categoryPath).isDirectory()) continue
-
-    const skills = readdirSync(categoryPath).sort()
-    for (const skillDir of skills) {
-      const skillPath = join(categoryPath, skillDir)
-      if (!statSync(skillPath).isDirectory()) continue
-
-      allResults.push(validateSkill(skillPath))
-    }
-  }
-
-  const totalPassed = allResults.filter((r) => r.failed === 0).length
-  const totalFailed = allResults.filter((r) => r.failed > 0).length
-  const totalWarnings = allResults.reduce((acc, r) => acc + r.warnings, 0)
-
-  console.log(`\n${'='.repeat(60)}`)
-  console.log(`  Batch Validation Summary`)
-  console.log(`${'='.repeat(60)}\n`)
-
-  for (const r of allResults) {
-    const skillName = basename(r.path)
-    const category = basename(dirname(r.path))
-    const icon = r.failed === 0 ? '✅' : '❌'
-    const warningStr = r.warnings > 0 ? ` (${r.warnings} warnings)` : ''
-    console.log(`  ${icon} ${category}/${skillName}: ${r.summary}${warningStr}`)
-  }
-
-  console.log(`\n${'─'.repeat(60)}`)
-  console.log(
-    `  Total: ${allResults.length} skills | Passed: ${totalPassed} | Failed: ${totalFailed} | Warnings: ${totalWarnings}`,
-  )
-  console.log(`${'─'.repeat(60)}\n`)
-
-  for (const r of allResults) {
-    if (r.failed > 0) {
-      printReport(r)
-    }
-  }
-
-  return totalFailed === 0
-}
-
-const args = process.argv.slice(2)
-if (args.length === 0) {
-  // Default to batch mode
-  const success = validateBatch('packages/skills-catalog/skills')
-  process.exit(success ? 0 : 1)
-} else if (args[0] === '--batch' && args[1]) {
-  const success = validateBatch(args[1])
-  process.exit(success ? 0 : 1)
-} else {
-  const results = validateSkill(args[0])
-  printReport(results)
-  process.exit(results.failed === 0 ? 0 : 1)
 }
