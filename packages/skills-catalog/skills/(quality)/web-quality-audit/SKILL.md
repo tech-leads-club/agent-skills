@@ -186,6 +186,6 @@ For detailed guidelines on specific areas:
 
 - Performance Optimization
 - [Core Web Vitals](../core-web-vitals/SKILL.md)
-- Accessibility
+- [Accessibility](../accessibility/SKILL.md)
 - [SEO](../seo/SKILL.md)
-- Best Practices
+- [Best Practices](../best-practices/SKILL.md)
