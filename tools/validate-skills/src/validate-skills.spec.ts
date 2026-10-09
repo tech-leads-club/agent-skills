@@ -136,6 +136,24 @@ describe('Link Integrity', () => {
     expect(cli.stdout).toContain('❌ link_broken: SKILL.md:')
   })
 
+  it('C2: a link leaving the skill to no catalog skill, or to a missing file in one, is link_broken', () => {
+    const root = tempDir()
+    const body =
+      '[typo](../core-web-vitls/SKILL.md)\n[deep](../../../nowhere.md)\n[gone](../core-web-vitals/missing.md)\n'
+    writeFiles(root, {
+      'skills/(quality)/seo/SKILL.md': skillMd({ name: 'seo', body }),
+      'skills/(performance)/core-web-vitals/SKILL.md': skillMd({ name: 'core-web-vitals' }),
+    })
+    const { checks } = validateSkill(join(root, 'skills/(quality)/seo'))
+    expect(failed(checks, 'link_broken').map((c) => c.message.split(' links to missing ')[1])).toEqual([
+      '../core-web-vitls/SKILL.md',
+      '../../../nowhere.md',
+      '../core-web-vitals/missing.md',
+    ])
+    expect(failed(checks, 'link_escapes_skill')).toEqual([])
+    expect(runIn(root, ['--batch', 'skills']).code).toBe(1)
+  })
+
   it('C3: a link leaving the skill is link_escapes_skill (warning) citing origin, line and target; exit code stays 0', () => {
     const root = tempDir()
     writeFiles(root, {
@@ -158,6 +176,10 @@ describe('Link Integrity', () => {
     ])
     expect(failed(checks, 'link_broken')).toEqual([])
     expect(runIn(root, ['--batch', 'skills']).code).toBe(0)
+
+    // the real catalog example from the task: seo -> ../core-web-vitals/SKILL.md
+    const seo = failed(validateSkill(join(CATALOG, '(quality)/seo')).checks, 'link_escapes_skill')
+    expect(seo.map((c) => c.message)).toContain('SKILL.md:23 links outside the skill: ../core-web-vitals/SKILL.md')
   })
 
   it('C4: anchors, mailto, http(s) and links inside fenced or inline code are not checked', () => {
@@ -277,6 +299,11 @@ describe('Token Budget', () => {
     })
     const { lines } = runIn(dirname(dirname(dir)), [join('cat', 'alpha')])
     expect(lines).toContain(`  ✅ token_budget: ${expected} tokens`)
+
+    const badYaml = '---\nname: [unclosed\n---\n# Body\n'
+    const yamlChecks = validateSkill(makeSkill({ 'SKILL.md': badYaml })).checks
+    expect(failed(yamlChecks, 'frontmatter_valid_yaml')).toHaveLength(1)
+    expect(yamlChecks.find((c) => c.name === 'token_budget')?.message).toBe(`${cl100k.encode(badYaml).length} tokens`)
   })
 
   it('C11: over 5000 tokens is a token_budget warning with N/5000 tokens — move detail to references/; 5000 passes', () => {
@@ -321,6 +348,12 @@ describe('Changed Skill Report', () => {
     expect(alphaReport.some((l) => l.startsWith('  ⚠️ no_readme: README.md found'))).toBe(true)
     const deltaReport = lines.slice(lines.indexOf('  Path: skills/c/delta'))
     expect(deltaReport).toContain('  ⚠️ ref_linked_new.md: references/new.md exists but is not referenced in SKILL.md')
+
+    // CI shape: the changes are commits after the base, the working tree is clean
+    git(repo, 'add', '-A')
+    git(repo, 'commit', '-q', '-m', 'pr')
+    const committed = runIn(repo, ['--batch', 'skills', '--base', base])
+    expect(reportedPaths(committed.lines).sort()).toEqual(['skills/c/alpha', 'skills/c/delta', 'skills/c/gamma'])
   })
 
   it('C13: each failed check of a changed skill is a ::error/::warning with repo file, line (or 1) and title', () => {

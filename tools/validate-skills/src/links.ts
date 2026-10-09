@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'fs'
-import { dirname, join, resolve, sep } from 'path'
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
+import { dirname, join, relative, resolve, sep } from 'path'
 
 import { listSkillFiles } from './files'
 
@@ -18,7 +18,7 @@ const SCHEME = /^[a-z][a-z0-9+.-]*:/i
 /**
  * Relative markdown links in every .md file of the skill. A target resolves from the skill root first
  * (agentskills.io), then relative to the file that holds the link (markdown). A link that leaves the skill
- * folder is reported as escaping, never as broken.
+ * escapes when it lands in another catalog skill, and is broken otherwise.
  */
 export function checkLinks(skillPath: string): { findings: LinkFinding[]; checked: number } {
   const root = resolve(skillPath)
@@ -49,9 +49,9 @@ export function checkLinks(skillPath: string): { findings: LinkFinding[]; checke
         const fromFile = resolve(root, dirname(file), path)
         const resolved = [resolve(root, path), fromFile].some((c) => isInside(root, c) && existsSync(c))
         if (resolved) continue
-        // Sibling skills sit in other category folders here but side by side once installed, so a link that
-        // leaves the skill cannot be checked on disk.
-        findings.push({ kind: isInside(root, fromFile) ? 'broken' : 'escapes', file, line: index + 1, target })
+        const kind =
+          !isInside(root, fromFile) && existsInSibling(root, relative(dirname(root), fromFile)) ? 'escapes' : 'broken'
+        findings.push({ kind, file, line: index + 1, target })
       }
     })
   }
@@ -60,6 +60,21 @@ export function checkLinks(skillPath: string): { findings: LinkFinding[]; checke
 }
 
 const isInside = (root: string, path: string) => path === root || path.startsWith(root + sep)
+
+/**
+ * Installs put skills side by side, while the catalog splits them into category folders. `flatPath` is the
+ * target relative to the skill's parent as an install lays it out (`<skill>/<path>`); it exists when that skill
+ * is in any category of the catalog and holds `<path>`.
+ */
+function existsInSibling(skillRoot: string, flatPath: string): boolean {
+  const [skill, ...rest] = flatPath.split(sep)
+  if (!skill || skill === '..') return false
+  const catalog = dirname(dirname(skillRoot))
+  return readdirSync(catalog).some((category) => {
+    const sibling = join(catalog, category, skill)
+    return statSync(join(catalog, category)).isDirectory() && existsSync(sibling) && existsSync(join(sibling, ...rest))
+  })
+}
 
 /** The filesystem part of a relative link, or undefined for anchors, URLs with a scheme and absolute paths. */
 function relativePath(target: string): string | undefined {

@@ -124,10 +124,31 @@ function validateStructure(skillPath: string): ValidationResult {
     'warning',
   )
 
-  // --- Check 5: Parse frontmatter ---
   const skillPathFull = join(skillPath, 'SKILL.md')
   const content = readFileSync(skillPathFull, 'utf-8')
 
+  // --- Check 4b: token budget (agentskills.io recommends under 5000) ---
+  const tokens = countTokens(content)
+  addCheck(
+    'token_budget',
+    tokens <= TOKEN_BUDGET,
+    tokens <= TOKEN_BUDGET ? `${tokens} tokens` : `${tokens}/${TOKEN_BUDGET} tokens — move detail to references/`,
+    'warning',
+  )
+
+  // --- Check 4c: relative links in every markdown file ---
+  const links = checkLinks(skillPath)
+  for (const link of links.findings) {
+    const where = `${link.file}:${link.line}`
+    if (link.kind === 'broken') {
+      addCheck('link_broken', false, `${where} links to missing ${link.target}`, 'error', link)
+    } else {
+      addCheck('link_escapes_skill', false, `${where} links outside the skill: ${link.target}`, 'warning', link)
+    }
+  }
+  if (links.findings.length === 0) addCheck('links_resolve', true, `All ${links.checked} relative links resolve`)
+
+  // --- Check 5: Parse frontmatter ---
   const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n/)
   if (!fmMatch) {
     addCheck('frontmatter_delimiters', false, 'Missing or malformed --- delimiters in frontmatter')
@@ -349,27 +370,6 @@ function validateStructure(skillPath: string): ValidationResult {
       )
     }
   }
-
-  // --- Check 10: token budget (agentskills.io recommends under 5000) ---
-  const tokens = countTokens(content)
-  addCheck(
-    'token_budget',
-    tokens <= TOKEN_BUDGET,
-    tokens <= TOKEN_BUDGET ? `${tokens} tokens` : `${tokens}/${TOKEN_BUDGET} tokens — move detail to references/`,
-    'warning',
-  )
-
-  // --- Check 11: relative links in every markdown file ---
-  const links = checkLinks(skillPath)
-  for (const link of links.findings) {
-    const where = `${link.file}:${link.line}`
-    if (link.kind === 'broken') {
-      addCheck('link_broken', false, `${where} links to missing ${link.target}`, 'error', link)
-    } else {
-      addCheck('link_escapes_skill', false, `${where} links outside the skill: ${link.target}`, 'warning', link)
-    }
-  }
-  if (links.findings.length === 0) addCheck('links_resolve', true, `All ${links.checked} relative links resolve`)
 
   return results
 }
