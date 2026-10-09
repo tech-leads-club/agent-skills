@@ -603,7 +603,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "3a67190e1dea1f2573d4fbb17071bbdac5ff4fd087d8cb5271094851c2acd559"
+      "contentHash": "5f65f4b1e8a82315daab1da09031955b1c3d445d51de67a886d0e5dc6d3466fe"
     },
     {
       "name": "coupling-analysis",
@@ -1799,7 +1799,7 @@
       ],
       "author": "web-quality-skills",
       "version": "1.0",
-      "contentHash": "8af5bd3453984bdcef903709b6ef0606b12ae1badb6dd5b5b382b930d2594d7c"
+      "contentHash": "b70924d28716d78e101c725ac5818b5cfc0534a0ff6d38fa7444925f582075df"
     }
   ],
   "deprecated": [
