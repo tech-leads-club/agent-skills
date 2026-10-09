@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'fs'
 import { getEncoding } from 'js-tiktoken'
 import { tmpdir } from 'os'
 import { dirname, join, resolve } from 'path'
@@ -152,6 +152,33 @@ describe('Link Integrity', () => {
     ])
     expect(failed(checks, 'link_escapes_skill')).toEqual([])
     expect(runIn(root, ['--batch', 'skills']).code).toBe(1)
+  })
+
+  it('C3: siblings resolve by frontmatter name as installed; on-disk targets outside the skill also escape', () => {
+    const root = tempDir()
+    const body = [
+      '[by name](../accessibility/SKILL.md)',
+      '[by folder](../web-accessibility/SKILL.md)',
+      '[on disk](../../(performance)/core-web-vitals/SKILL.md)',
+      '[encoded](../../%28performance%29/core-web-vitals/SKILL.md)',
+      '[dir](../accessibility/)',
+      '',
+    ].join('\n')
+    writeFiles(root, {
+      'skills/(quality)/audit/SKILL.md': skillMd({ name: 'audit', body }),
+      'skills/(a11y)/web-accessibility/SKILL.md': skillMd({ name: 'accessibility' }),
+      'skills/(performance)/core-web-vitals/SKILL.md': skillMd({ name: 'core-web-vitals' }),
+    })
+    symlinkSync(join(root, 'nowhere'), join(root, 'skills/dangling'))
+    const { checks } = validateSkill(join(root, 'skills/(quality)/audit'))
+    const target = (c: Check) => c.message.split(/ links (?:to missing |outside the skill: )/)[1]
+    expect(failed(checks, 'link_escapes_skill').map(target)).toEqual([
+      '../accessibility/SKILL.md',
+      '../../(performance)/core-web-vitals/SKILL.md',
+      '../../%28performance%29/core-web-vitals/SKILL.md',
+      '../accessibility/',
+    ])
+    expect(failed(checks, 'link_broken').map(target)).toEqual(['../web-accessibility/SKILL.md'])
   })
 
   it('C3: a link leaving the skill is link_escapes_skill (warning) citing origin, line and target; exit code stays 0', () => {

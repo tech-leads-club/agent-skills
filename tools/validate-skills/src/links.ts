@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
+import { existsSync, readdirSync, readFileSync } from 'fs'
 import { dirname, join, relative, resolve, sep } from 'path'
 
 import { listSkillFiles } from './files'
@@ -12,7 +12,7 @@ export interface LinkFinding {
 
 const FENCE = /^\s{0,3}(`{3,}|~{3,})/
 const INLINE_CODE = /(`+)[\s\S]*?\1/g
-const LINK = /\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]+)(?:\s+[^)]*)?\)/g
+const LINK = /\[[^\]]*\]\(\s*(<[^>]*>|[^()\s]*(?:\([^()\s]*\)[^()\s]*)*)(?:\s+[^)]*)?\)/g
 const SCHEME = /^[a-z][a-z0-9+.-]*:/i
 
 /**
@@ -49,8 +49,9 @@ export function checkLinks(skillPath: string): { findings: LinkFinding[]; checke
         const fromFile = resolve(root, dirname(file), path)
         const resolved = [resolve(root, path), fromFile].some((c) => isInside(root, c) && existsSync(c))
         if (resolved) continue
-        const kind =
-          !isInside(root, fromFile) && existsInSibling(root, relative(dirname(root), fromFile)) ? 'escapes' : 'broken'
+        const leaves = !isInside(root, fromFile)
+        const reachable = existsSync(fromFile) || existsInSibling(root, relative(dirname(root), fromFile))
+        const kind = leaves && reachable ? 'escapes' : 'broken'
         findings.push({ kind, file, line: index + 1, target })
       }
     })
@@ -62,18 +63,34 @@ export function checkLinks(skillPath: string): { findings: LinkFinding[]; checke
 const isInside = (root: string, path: string) => path === root || path.startsWith(root + sep)
 
 /**
- * Installs put skills side by side, while the catalog splits them into category folders. `flatPath` is the
- * target relative to the skill's parent as an install lays it out (`<skill>/<path>`); it exists when that skill
- * is in any category of the catalog and holds `<path>`.
+ * Installs put skills side by side under their frontmatter `name`, while the catalog splits them into category
+ * folders. `flatPath` is the target as an install lays it out (`<name>/<path>`); it exists when a catalog skill
+ * has that name and holds `<path>`.
  */
 function existsInSibling(skillRoot: string, flatPath: string): boolean {
-  const [skill, ...rest] = flatPath.split(sep)
-  if (!skill || skill === '..') return false
-  const catalog = dirname(dirname(skillRoot))
-  return readdirSync(catalog).some((category) => {
-    const sibling = join(catalog, category, skill)
-    return statSync(join(catalog, category)).isDirectory() && existsSync(sibling) && existsSync(join(sibling, ...rest))
-  })
+  const [name, ...rest] = flatPath.split(sep)
+  if (!name || name === '..') return false
+  const sibling = skillsByName(dirname(dirname(skillRoot))).get(name)
+  return sibling !== undefined && existsSync(join(sibling, ...rest))
+}
+
+const catalogs = new Map<string, Map<string, string>>()
+
+/** Skill folders of a `<category>/<skill>` catalog, keyed by their frontmatter `name`. */
+function skillsByName(catalog: string): Map<string, string> {
+  const cached = catalogs.get(catalog)
+  if (cached) return cached
+  const byName = new Map<string, string>()
+  for (const category of readdirSync(catalog, { withFileTypes: true }).filter((e) => e.isDirectory())) {
+    for (const skill of readdirSync(join(catalog, category.name), { withFileTypes: true })) {
+      const skillMd = join(catalog, category.name, skill.name, 'SKILL.md')
+      if (!skill.isDirectory() || !existsSync(skillMd)) continue
+      const name = readFileSync(skillMd, 'utf-8').match(/^---\s*\n[\s\S]*?^name:\s*["']?([^"'\n]+?)["']?\s*$/m)?.[1]
+      if (name) byName.set(name, join(catalog, category.name, skill.name))
+    }
+  }
+  catalogs.set(catalog, byName)
+  return byName
 }
 
 /** The filesystem part of a relative link, or undefined for anchors, URLs with a scheme and absolute paths. */
