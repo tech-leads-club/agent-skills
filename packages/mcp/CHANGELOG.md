@@ -1,3 +1,13 @@
+## 0.1.9 (2026-10-14)
+
+### 🩹 Fixes
+
+- **core:** download skill files as raw bytes ([b63673845](https://github.com/tech-leads-club/agent-skills/commit/b63673845))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
 ## 0.1.8 (2026-10-08)
 
 ### 🩹 Fixes
