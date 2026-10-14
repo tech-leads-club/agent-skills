@@ -1716,6 +1716,19 @@
       "contentHash": "428b064742db100add4d42612ce61eaed040aad87e6718e494a09ad9ae03552b"
     },
     {
+      "name": "tlc-prd",
+      "description": "Interviews an idea into a PRD file covering situation, problem, success, boundary, and journey states, and stops before any technical design. Use when the user says \"escreve o PRD\", \"cria o PRD\", \"PRD\", \"spec de produto\", \"product requirements\", \"tlc-prd\", or \"o que o produto precisa decidir\". Do NOT use to design a solution, choose technology, publish the document, or cut the PRD into tasks.",
+      "category": "development",
+      "path": "(development)/tlc-prd",
+      "files": [
+        "SKILL.md",
+        "references/document-format.md"
+      ],
+      "author": "Tech Leads Club - github.com/tech-leads-club",
+      "version": "1.0.0",
+      "contentHash": "ece2d6eb9d79b9aa5973b8363223ee323bc9369765fcf875df4be11d579c1b1a"
+    },
+    {
       "name": "tlc-spec-driven",
       "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Writes testable requirements in EARS notation, atomic tasks, atomic Conventional Commits, and requirement traceability. Ships deterministic Python validation scripts so structural gates are enforced by code, not memory. Features an independent Verifier (author != verifier, evidence-or-zero), a discrimination sensor, a decision log (STATE.md), a test-coverage matrix, and a self-improving lessons layer. Stack-agnostic and tool-agnostic. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",

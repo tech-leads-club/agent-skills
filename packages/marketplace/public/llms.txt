@@ -1,6 +1,6 @@
 # Agent Skills
 
-> 93 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
+> 94 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
 
 Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`. Add `--agent <id>` to target one agent, or `--global` to install for every project. Source: https://github.com/tech-leads-club/agent-skills
 
@@ -12,7 +12,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [Decision Making](https://agent-skills.techleads.club/categories/decision-making/): 2 skills. Skills for critical thinking, structured dissent, and decision quality
 - [Design](https://agent-skills.techleads.club/categories/design/): 4 skills. Skills for UI/UX design and design systems
 - [Go-to-Market](https://agent-skills.techleads.club/categories/gtm/): 18 skills. Skills for GTM, pricing, outbound, inbound, paid, retention, and GTM operations
-- [Development](https://agent-skills.techleads.club/categories/development/): 18 skills. Skills for software development workflows
+- [Development](https://agent-skills.techleads.club/categories/development/): 19 skills. Skills for software development workflows
 - [Learning & Growth](https://agent-skills.techleads.club/categories/learning/): 1 skill. Skills for deliberate learning, skill development, and knowledge retention during AI-assisted work
 - [Monitoring](https://agent-skills.techleads.club/categories/monitoring/): 1 skill. Skills for observability, logging, and system monitoring
 - [Performance](https://agent-skills.techleads.club/categories/performance/): 4 skills. Skills for web performance optimization, audits, and monitoring
@@ -132,6 +132,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [TLC Discover](https://agent-skills.techleads.club/skills/tlc-discover/): Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room
 - [TLC Implement](https://agent-skills.techleads.club/skills/tlc-implement/): Implement a work already planned: extracts a checklist, builds it, and proves every check with an independent verifier
 - [TLC Plan](https://agent-skills.techleads.club/skills/tlc-plan/): Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source
+- [TLC PRD](https://agent-skills.techleads.club/skills/tlc-prd/): Interviews an idea into a PRD file covering situation, problem, success, boundary, and journey states, and stops before any technical design
 - [Vercel Deploy](https://agent-skills.techleads.club/skills/vercel-deploy/): Deploy applications and websites to Vercel
 - [Vercel React Best Practices](https://agent-skills.techleads.club/skills/react-best-practices/): React and Next.js performance optimization guidelines from Vercel Engineering
 - [Video-First Cold Outreach](https://agent-skills.techleads.club/skills/video-outreach/): When the user wants to build video-first cold outreach, create personalized video at scale, implement async selling, or use AI demo generation for prospecting. Also
