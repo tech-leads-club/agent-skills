@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Usage: $SKILL_DIR/scripts/config
+# Writes .demos/demo.config.mjs with every default, documented in place.
+# Does nothing if the file already exists.
+set -euo pipefail
+
+# Follows symlinks without GNU `readlink -f`, which macOS lacks.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  LINK="$(readlink "$SOURCE")"
+  case "$LINK" in /*) SOURCE="$LINK" ;; *) SOURCE="$(dirname "$SOURCE")/$LINK" ;; esac
+done
+SKILL_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "not in a git repository: run from the project to record" >&2; exit 1; }
+FILE="$ROOT/.demos/demo.config.mjs"
+
+if [ -f "$FILE" ]; then
+  echo "exists: $FILE"
+  exit 0
+fi
+
+mkdir -p "$(dirname "$FILE")"
+node "$SKILL_DIR/assets/config.mjs" init "$FILE" >/dev/null
+echo "created: $FILE"

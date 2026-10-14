@@ -1,0 +1,8 @@
+{
+  "name": "demo-recorder",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}

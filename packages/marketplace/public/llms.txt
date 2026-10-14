@@ -1,6 +1,6 @@
 # Agent Skills
 
-> 92 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
+> 93 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
 
 Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`. Add `--agent <id>` to target one agent, or `--global` to install for every project. Source: https://github.com/tech-leads-club/agent-skills
 
@@ -19,7 +19,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [Quality](https://agent-skills.techleads.club/categories/quality/): 7 skills. Skills for code quality, testing, and best practices
 - [Security](https://agent-skills.techleads.club/categories/security/): 3 skills. Skills for security analysis, vulnerability detection, and secure coding
 - [Tooling](https://agent-skills.techleads.club/categories/tooling/): 8 skills. Skills for tooling and utilities
-- [Web Automation](https://agent-skills.techleads.club/categories/web-automation/): 1 skill. Skills for browser automation and web testing
+- [Web Automation](https://agent-skills.techleads.club/categories/web-automation/): 2 skills. Skills for browser automation and web testing
 
 ## Agents
 
@@ -69,6 +69,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [Coupling Analysis Skill](https://agent-skills.techleads.club/skills/coupling-analysis/): Analyzes coupling between modules using the three-dimensional model (strength, distance, volatility) from "Balancing Coupling in Software Design"
 - [Cursor Subagent Creator](https://agent-skills.techleads.club/skills/cursor-subagent-creator/): Creates Cursor-specific AI subagents with isolated context for complex multi-step workflows
 - [Decomposition Planning and Roadmap](https://agent-skills.techleads.club/skills/decomposition-planning-roadmap/): Creates step-by-step decomposition plans and migration roadmaps for breaking apart monolithic applications
+- [Demo](https://agent-skills.techleads.club/skills/demo/): Record a demo video of a web app feature or flow on a real desktop (Docker, Xvfb, XFCE, real X cursor), producing an mp4 plus a click/hover/scroll/type telemetry file. Takes a flow description, an existing demo name or path, or init
 - [Deploy to Render](https://agent-skills.techleads.club/skills/render-deploy/): Deploy applications to Render by analyzing codebases, generating render.yaml Blueprints, and providing Dashboard deeplinks
 - [docs-writer skill instructions](https://agent-skills.techleads.club/skills/docs-writer/): Write, review, and edit documentation files with consistent structure, tone, and technical accuracy
 - [Domain Identification and Grouping](https://agent-skills.techleads.club/skills/domain-identification-grouping/): Groups existing components into logical business domains to plan service-based architecture

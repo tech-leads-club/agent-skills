@@ -665,6 +665,27 @@
       "contentHash": "8de88d993b2556a6b38c26fd79c863f06bf7746faf87c0c9fd1b9a198a49e1ac"
     },
     {
+      "name": "demo",
+      "description": "Record a demo video of a web app feature or flow on a real desktop (Docker, Xvfb, XFCE, real X cursor), producing an mp4 plus a click/hover/scroll/type telemetry file. Takes a flow description, an existing demo name or path, or init. Use when the user says \"record a demo of the checkout\", \"gravar um demo dessa feature\", \"make a screencast of this flow\", \"video for the changelog\", \"re-record the checkout demo\", \"refresh the demo video\", or \"demo init\". Do NOT use for general browser testing or automation that needs no video (use playwright-skill), page debugging or network inspection (use chrome-devtools), or static screenshots.",
+      "category": "web-automation",
+      "path": "(web-automation)/demo",
+      "files": [
+        "SKILL.md",
+        "assets/config.mjs",
+        "assets/docker/Dockerfile",
+        "assets/docker/package.json",
+        "assets/docker/record.sh",
+        "assets/docker/wallpaper.jpg",
+        "assets/lib.mjs",
+        "references/init.md",
+        "scripts/config",
+        "scripts/record"
+      ],
+      "author": "github.com/wcalderipe",
+      "version": "1.0.0",
+      "contentHash": "befea3ed2b19ef2eaa20f8a0f8e9390ad859c43335e857fce3cea227260731cd"
+    },
+    {
       "name": "docs-writer",
       "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
       "category": "development",
