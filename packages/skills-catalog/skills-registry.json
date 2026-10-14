@@ -1717,7 +1717,7 @@
     },
     {
       "name": "tlc-prd",
-      "description": "Interviews an idea into a PRD file covering situation, problem, success, boundary, and journey states, and stops before any technical design. Use when the user says \"escreve o PRD\", \"cria o PRD\", \"PRD\", \"spec de produto\", \"product requirements\", \"tlc-prd\", or \"o que o produto precisa decidir\". Do NOT use to design a solution, choose technology, publish the document, or cut the PRD into tasks.",
+      "description": "Interviews an idea into a PRD file covering situation, problem, success, boundary, and journey states, and stops before any technical design. Use when the user says \"write the PRD\", \"create the PRD\", \"PRD\", \"product spec\", \"product requirements\", \"tlc-prd\", or \"what does the product need to decide\". Do NOT use for designing a solution, choosing technology, publishing the document, or cutting the PRD into tasks.",
       "category": "development",
       "path": "(development)/tlc-prd",
       "files": [
@@ -1726,7 +1726,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.0.0",
-      "contentHash": "ece2d6eb9d79b9aa5973b8363223ee323bc9369765fcf875df4be11d579c1b1a"
+      "contentHash": "ce417e8df0cff1870fbfdd157959e6efbdc6b1b547c57ac3850134e8f70bba80"
     },
     {
       "name": "tlc-spec-driven",

@@ -27,7 +27,7 @@ Write `.prd/<slug>.md`.
 - Effort: <in steady use | not shipped yet | in active construction>
 - Decision: <open | committed by <who>, <when>, in <roadmap, cycle, document>>
 - In flight: <what this copies as precedent; what is specified elsewhere and stays out> - one sentence each
-- At stake: <what being wrong costs - reverted in an afternoon | expensive | one-way>
+- At stake: <what being wrong costs - cheap to undo | expensive | one-way>
 
 ## Problem
 
