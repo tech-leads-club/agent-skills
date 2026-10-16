@@ -21,18 +21,18 @@ remembers.
 independence on its own: the parent writes the brief, so a Verifier spawned by the agent that
 just closed the last batch inherits that agent's *scope*. It gets pointed at the last batch, and
 a pass over four checks reads exactly like a pass over forty. The range is
-`<feature base>..HEAD` and the set is **every** check in `obligations.md`, whoever wrote them.
+`<feature base>..HEAD` and the set is **every** check in `checks.md`, whoever wrote them.
 
 The verdict goes back to the orchestrator and the user, never to a builder. A FAIL returned to
 the author is the author deciding what to do about the author's own work.
 
-**It receives:** `plan.md`, `obligations.md`, every source the plan marks binding, the diff range, and
+**It receives:** `plan.md`, `checks.md`, every source the plan marks binding, the diff range, and
 this file. It runs read-only over the real tree and fixes nothing. The plan is an input because
 half the enumerations it sweeps for - a route's statuses, an entity's constraints - are named
 there and only *owe* a row in the checks.
 
 **How to dispatch.** Launch a fresh sub-agent with no inherited conversation. Hand it this file,
-`plan.md`, `obligations.md`, every source the plan marks binding, and the diff range
+`plan.md`, `checks.md`, every source the plan marks binding, and the diff range
 `<feature base>..HEAD`. It writes `verification.md` and fixes nothing. You run
 `validate_verification.py`. You do not write the report yourself.
 
@@ -43,17 +43,17 @@ gate that is visible is worth more than one that pretends.
 
 ## Read the profile first
 
-`obligations.md` carries a `Profile:` line, and `light` is the default. Step 1 runs under `ui`. The
+`checks.md` carries a `Profile:` line, and `light` is the default. Step 1 runs under `ui`. The
 `Coverage` recompute, the `Test policy` verdicts and fault injection run under `standard` and
 `ui`. Everything else runs always: the proofs at `HEAD`, each named test shown to exist and have
 run, one located assertion per check, the level and sampling judgment, and the `Swept existing`
 re-read.
 
-**The report's profile must be the one `obligations.md` was approved under, and the gate compares
+**The report's profile must be the one `checks.md` was approved under, and the gate compares
 them.** A report declaring a cheaper profile than the feature was approved under makes a whole
 step disappear with nothing to see, which is worse than a FAIL: a mismatch is an error, not a
 preference. Under `standard` the report owes a `## Faults injected` section and a `## Coverage`
-section; under `ui` it also owes `## Binding sources`; where `obligations.md` carries `Test policy`
+section; under `ui` it also owes `## Binding sources`; where `checks.md` carries `Test policy`
 rows, it owes a verdict on them. A step that produced no section did not run, and requiring the
 section is what makes "skipped" distinguishable from "forgotten".
 

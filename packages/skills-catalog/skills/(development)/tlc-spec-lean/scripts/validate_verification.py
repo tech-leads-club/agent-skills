@@ -25,9 +25,9 @@ What it checks:
   ERROR  - PASS while a binding source leaves an element Uncovered
   ERROR  - PASS while a check row's Result is not PASS
   ERROR  - PASS while a Test policy row's expectation is not met
-  ERROR  - the report's profile does not match the one obligations.md was approved under
+  ERROR  - the report's profile does not match the one checks.md was approved under
   ERROR  - profile ui, but the report carries no binding-sources section (step 1 vanished)
-  ERROR  - profile standard/ui with Test policy rows in obligations.md, but no verdicts in the report
+  ERROR  - profile standard/ui with Test policy rows in checks.md, but no verdicts in the report
   WARN   - the report says self-verified (author == verifier: degraded gate)
   WARN   - no `Profile:` line, so a skipped step cannot be told from a forgotten one
   WARN   - no `Round:` line
@@ -119,8 +119,8 @@ def _profile(text):
 
 
 def _checks_context(fdir):
-    """What obligations.md was approved under: (profile, has a Test policy section)."""
-    path = os.path.join(fdir, "obligations.md")
+    """What checks.md was approved under: (profile, has a Test policy section)."""
+    path = os.path.join(fdir, "checks.md")
     if not os.path.exists(path):
         return None, False
     body = open(path, encoding="utf-8", errors="replace").read()
@@ -177,7 +177,7 @@ def _check_feature(fdir, name):
         warnings.append(f"{name}: no `Profile:` line - a step that did not run is indistinguishable from one forgotten")
     elif approved_profile and report_profile != approved_profile:
         errors.append(
-            f"{name}: report says profile '{report_profile}' but obligations.md was approved under "
+            f"{name}: report says profile '{report_profile}' but checks.md was approved under "
             f"'{approved_profile}' - the profile decides which steps run, so a mismatch silently drops one"
         )
     effective = approved_profile or report_profile
@@ -209,7 +209,7 @@ def _check_feature(fdir, name):
         )
     if effective in ("standard", "ui") and policy_rows_exist and not has_heading(lines, "Test policy"):
         errors.append(
-            f"{name}: obligations.md carries Test policy rows but the report gives no verdict on them - "
+            f"{name}: checks.md carries Test policy rows but the report gives no verdict on them - "
             f"those rows are the bar the author built under, so an unmet one is a finding"
         )
 
@@ -275,7 +275,7 @@ def _check_feature(fdir, name):
 def _appears_complete(fdir):
     if os.path.exists(os.path.join(fdir, "verification.md")):
         return True
-    checks = os.path.join(fdir, "obligations.md")
+    checks = os.path.join(fdir, "checks.md")
     if not os.path.exists(checks):
         return False
     body = open(checks, encoding="utf-8", errors="replace").read()

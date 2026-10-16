@@ -21,7 +21,7 @@ The failures it exists to catch are the ones that make a plan lie rather than in
   - columns and types inside `Relations`, which is the exact detail that goes stale and
     then misleads the next reader with the authority of a written diagram;
   - a `Surface` row with no statuses, since the statuses are what becomes a Coverage set
-    in obligations.md - drop them here and the join has nothing to enumerate.
+    in checks.md - drop them here and the join has nothing to enumerate.
 
 Pure standard library, zero dependencies. Operates only on the plan.md markdown
 artifact - never on the target codebase - so it stays stack-agnostic.
@@ -41,7 +41,7 @@ What it checks:
   ERROR  - a Landing row with no rejected alternative named
   ERROR  - a Relations diagram carrying an attribute block: columns and types go stale
   ERROR  - a Surface row whose Status cell names no status code
-  ERROR  - a check id written into Surface, which cannot exist before obligations.md does
+  ERROR  - a check id written into Surface, which cannot exist before checks.md does
   WARN   - an AC has SHALL but no recognizable EARS lead keyword
   WARN   - an AC carries a vague word instead of a concrete value
   WARN   - no numbered acceptance criteria found at all
@@ -261,8 +261,8 @@ def classify_ears(text):
 
 
 def sibling_profile(plan_path):
-    """The profile obligations.md declares, when it exists yet."""
-    checks = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "obligations.md")
+    """The profile checks.md declares, when it exists yet."""
+    checks = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "checks.md")
     if not os.path.isfile(checks):
         return None
     with open(checks, "r", encoding="utf-8") as f:
@@ -352,7 +352,7 @@ def check_file(path):
         profile = sibling_profile(path)
         if profile and profile != "ui":
             warnings.append(
-                f"a source is marked binding but obligations.md declares profile {profile}, so nobody "
+                f"a source is marked binding but checks.md declares profile {profile}, so nobody "
                 "opens it - raise the profile to ui or drop the marking"
             )
 
@@ -449,7 +449,7 @@ def check_file(path):
                 )
                 break
 
-    # Surface: statuses are what becomes a Coverage set in obligations.md.
+    # Surface: statuses are what becomes a Coverage set in checks.md.
     surf = present.get("Surface")
     if surf:
         body = [lines[i].strip() for i in range(*surf) if lines[i].strip()]
@@ -463,12 +463,12 @@ def check_file(path):
             if not STATUS_RE.search(status_cell):
                 errors.append(
                     f"Surface '{cells[0][:48]}': Status names no status code - those statuses are the "
-                    "set that owes a Coverage row in obligations.md"
+                    "set that owes a Coverage row in checks.md"
                 )
         for i in range(*surf):
             if CID_RE.search(lines[i]):
                 errors.append(
-                    f"L{i + 1}: Surface names a check id, but obligations.md does not exist yet - each route's "
+                    f"L{i + 1}: Surface names a check id, but checks.md does not exist yet - each route's "
                     "statuses become a Coverage set there instead"
                 )
                 break
