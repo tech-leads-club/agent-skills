@@ -56,7 +56,7 @@ creates inconsistency nobody can see.
 
 1. Read `.specs/STATE.md` - handoff and decisions.
 2. Reconcile against git: `git branch --show-current`, `git status --porcelain`, recent commits,
-   and the completion marks in `checks.md`. **Evidence wins over a stale snapshot** - a handoff
+   and the completion marks in `obligations.md`. **Evidence wins over a stale snapshot** - a handoff
    written before a crash describes intent, the commits describe fact.
 3. Propose the reconciled next step before writing code.
 

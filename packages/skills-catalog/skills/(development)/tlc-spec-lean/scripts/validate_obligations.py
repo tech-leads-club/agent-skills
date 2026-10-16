@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-validate_checks.py - deterministic gate for a feature checks.md, run before any code.
+validate_obligations.py - deterministic gate for a feature obligations.md, run before any code.
 
 This is the omission catcher. The failure it exists to prevent is not a vague claim
 (a human notices those) but a set member that was named in prose and never assigned a
@@ -11,7 +11,7 @@ The Coverage join makes that failure structural - every member is its own token 
 the check that proves it - and this script makes the join checkable: a row declaring a
 set of 5 with 4 members assigned fails, loudly, before a line of code is written.
 
-Pure standard library, zero dependencies. Operates only on the checks.md markdown
+Pure standard library, zero dependencies. Operates only on the obligations.md markdown
 artifact - never on the target codebase - so it stays stack-agnostic.
 
 The requirements and the solution's shape are not this file's business: both were
@@ -39,10 +39,10 @@ What it checks:
   WARN   - a `Test policy` section is absent under profile standard/ui
 
 Usage:
-  python3 <skill-dir>/scripts/validate_checks.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_obligations.py [target] [--root DIR] [--strict]
 
   Invoke from the skill directory that ships this script (not the project root).
-  target    Path to a checks.md, a feature directory, a feature name, or a project root.
+  target    Path to an obligations.md, a feature directory, a feature name, or a project root.
             Omitted -> auto-detect the single feature under <root>/.specs/features/.
   --root    Project root that contains .specs/ (default: current dir).
   --strict  Treat warnings as errors.
@@ -101,11 +101,11 @@ def resolve_checks(target, root):
         if os.path.isfile(target):
             return target
         if os.path.isdir(target):
-            cand = os.path.join(target, "checks.md")
+            cand = os.path.join(target, "obligations.md")
             if os.path.isfile(cand):
                 return cand
             return _autodetect(target)
-        cand = os.path.join(root, ".specs", "features", target, "checks.md")
+        cand = os.path.join(root, ".specs", "features", target, "obligations.md")
         if os.path.isfile(cand):
             return cand
         return None
@@ -118,15 +118,15 @@ def _autodetect(root):
         return None
     features = [
         d for d in sorted(os.listdir(base))
-        if os.path.isfile(os.path.join(base, d, "checks.md"))
+        if os.path.isfile(os.path.join(base, d, "obligations.md"))
     ]
     if len(features) == 1:
-        return os.path.join(base, features[0], "checks.md")
+        return os.path.join(base, features[0], "obligations.md")
     if len(features) == 0:
         return None
     raise SystemExit(
-        "validate_checks: multiple features found; pass one explicitly:\n  "
-        + "\n  ".join(os.path.join(base, f, "checks.md") for f in features)
+        "validate_obligations: multiple features found; pass one explicitly:\n  "
+        + "\n  ".join(os.path.join(base, f, "obligations.md") for f in features)
     )
 
 
@@ -367,7 +367,7 @@ def check_file(path):
     for cid in sorted(referenced - set(checks), key=lambda c: int(c[1:])):
         errors.append(f"{cid} is referenced in Coverage or Swept but is not defined in ## Checks")
 
-    # The derivation. checks.md is derived from plan.md, so a route reviewed there with
+    # The derivation. obligations.md is derived from plan.md, so a route reviewed there with
     # nothing pointing back at it here is either dead or unproven - and the plan naming it
     # is what makes it look covered.
     for route in plan_routes(path):
@@ -387,8 +387,8 @@ def check_file(path):
 
 def main(argv=None):
     p = argparse.ArgumentParser(
-        prog="validate_checks.py",
-        description="Pre-build gate for a feature checks.md: proofs, the coverage join, the sweep.",
+        prog="validate_obligations.py",
+        description="Pre-build gate for a feature obligations.md: proofs, the coverage join, the sweep.",
     )
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
@@ -398,7 +398,7 @@ def main(argv=None):
     path = resolve_checks(args.target, args.root)
     if not path:
         print(
-            "validate_checks: could not locate a checks.md. Pass a path or run from the project root.",
+            "validate_obligations: could not locate an obligations.md. Pass a path or run from the project root.",
             file=sys.stderr,
         )
         return 2
@@ -409,7 +409,7 @@ def main(argv=None):
     for e in errors:
         print(f"  ERROR {e}")
     fail = errors or (warnings and args.strict)
-    print(f"\nvalidate_checks: {len(errors)} error(s), {len(warnings)} warning(s) in {path} [profile: {profile or 'none'}]")
+    print(f"\nvalidate_obligations: {len(errors)} error(s), {len(warnings)} warning(s) in {path} [profile: {profile or 'none'}]")
     return 1 if fail else 0
 
 

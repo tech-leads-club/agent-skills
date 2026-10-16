@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes obligations instead of the p
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '1.1.0'
+  version: '1.2.0'
 ---
 
 # Tech Lead's Club - Spec, Lean
@@ -97,14 +97,14 @@ under a wrong implementation. `standard` exists for exactly those two.
 existing. A step whose input is empty costs a line, not a pass ("no set rows", "no binding
 source").
 
-The `Coverage` join is **written** into `checks.md` at every profile - the join is what makes an
+The `Coverage` join is **written** into `obligations.md` at every profile - the join is what makes an
 omission structural, and that costs nothing at authoring time. What `standard` buys is the
 Verifier **recomputing** it from the authority over each set instead of reading the author's
 table back.
 
 The profile is a pin, not a preference, and unlike `tlc-implement` that is enforced rather than
 asked for: `validate_verification.py` fails a report whose profile differs from the one
-`checks.md` was approved under, and fails a `standard` report with no fault rows or no
+`obligations.md` was approved under, and fails a `standard` report with no fault rows or no
 recomputed coverage, and a `ui` report with no binding-sources section. So a step that did not
 run stays distinguishable from a step that was forgotten, which is the whole reason to declare
 a floor.
@@ -122,12 +122,12 @@ it worthwhile.
 ├── lessons.json                # machine-owned
 └── features/<feature>/
     ├── plan.md                 # problem, flow, impact, then the rest of the shape, then criteria; audit last
-    ├── checks.md               # claims + proofs, the coverage join, test policy, swept
+    ├── obligations.md          # claims + proofs, the coverage join, test policy, swept
     └── verification.md         # the Verifier's report
 ```
 
 Create each file when its phase produces content. For a change under roughly three files with no
-one-way door, write only `checks.md` with an `## Intent` paragraph and skip `plan.md` - one
+one-way door, write only `obligations.md` with an `## Intent` paragraph and skip `plan.md` - one
 bounded escape, not a sizing matrix.
 
 ## Understanding and obligations are separate artifacts
@@ -147,10 +147,10 @@ criterion from being invented to justify a component. The closure gate still req
 criterion to land somewhere in `Flow`, `Relations` or `Surface`, or it is out of scope or a
 gap in the shape.
 
-The derivation into `checks.md` is the load-bearing part, not paperwork. Every route in `Surface`
+The derivation into `obligations.md` is the load-bearing part, not paperwork. Every route in `Surface`
 owes a `Coverage` set row whose members are its statuses; every door in `Landing` owes a check;
 every entity in `Relations` owes one. A shape section with nothing pointing back at it from
-`checks.md` is either dead or unproven, and `validate_checks.py` warns on the common case.
+`obligations.md` is either dead or unproven, and `validate_obligations.py` warns on the common case.
 
 **The design half exists; the component catalogue does not.** What made design documents rot was
 never the diagram, it was `Purpose` / `Location` / `Interfaces` / `Dependencies` per class -
@@ -189,7 +189,7 @@ gate: [plan.md](references/plan.md).
 **Checks** - derive claims with proofs from the plan, join every enumerated set member to a check,
 and record where each swept dimension landed. Close with `## Handoff` and the arithmetic; if
 the estimate exceeds the budget, stop for the mechanism ask before Build. This is the artifact
-everything downstream refers to by check number: [checks.md](references/checks.md).
+everything downstream refers to by check number: [obligations.md](references/obligations.md).
 
 **Build** - your call how, after the `## Handoff` arithmetic and, if the estimate exceeds the
 budget, the user's mechanism choice. Write the tests from the checks, implement, run each
@@ -212,7 +212,7 @@ project root; pass `--root` when cwd differs. A non-zero exit means STOP and fix
 | When | Command |
 | --- | --- |
 | Before presenting the plan | `validate_plan.py <feature>` |
-| Before starting to build | `validate_checks.py <feature>` |
+| Before starting to build | `validate_obligations.py <feature>` |
 | Before each commit | `check_commit.py --message "<msg>"` |
 | Before declaring done | `validate_verification.py <feature>` |
 | At distillation | `lessons.py add ...` |
@@ -223,7 +223,7 @@ replaced: it fails a criterion with no SHALL, an assumption with no chosen defau
 row whose landing is blank or whose `n/a` carries no reason, a `Landing`
 row with no literal shape or no rejected alternative, columns and types inside `Relations`, a
 `Surface` route with no statuses, and any section left blank rather than answered with
-`None - <why>`. `validate_checks.py` is the omission catcher: it fails a check with no proof, a
+`None - <why>`. `validate_obligations.py` is the omission catcher: it fails a check with no proof, a
 coverage row whose declared size exceeds the members actually assigned, a missing swept dimension,
 and a missing profile line, and warns on a route the plan reviewed that no check mentions.
 `validate_verification.py` fails a PASS report that cites no `file:line`, records a surviving
@@ -246,7 +246,7 @@ makes `light` unusable, and only injection tells the two apart. The fixtures in
 **One builder unless the estimate does not fit.** Pack whole slices - never split a slice -
 accumulating while the running estimate stays under the declared `budget` (default 150k
 tokens, from `wc -c` on the files each slice touches, divided by four). Prefer a cut where
-the surface changes. Write the intended split into `checks.md` under `## Handoff` with the
+the surface changes. Write the intended split into `obligations.md` under `## Handoff` with the
 arithmetic, after the checks exist and before any code: a number with its reason can be
 argued with, a bare number can only be trusted.
 
@@ -265,7 +265,7 @@ Do not ask where to cut. The cut is logistics; the user's answer cannot be bette
 than the arithmetic. Do not ask when it fits. Do not offer spawn at the start of a feature.
 Record the chosen mechanism on the same `## Handoff` line before the first line of code.
 
-Batches run sequentially and only hand off on green. The next builder reads `checks.md` and
+Batches run sequentially and only hand off on green. The next builder reads `obligations.md` and
 the **diff** of what landed, never a narrative summary.
 
 When the last batch returns green, the parent dispatches the Verifier in that same turn.
@@ -305,15 +305,15 @@ Actions:
 2. Run `python3 <skill-dir>/scripts/validate_plan.py lockfile-v2`
 3. Stop for human review — no checks and no code yet
 
-Result: A plan the user can object to. `validate_plan.py` exits 0. `checks.md` does not exist.
+Result: A plan the user can object to. `validate_plan.py` exits 0. `obligations.md` does not exist.
 
 ### Example 2: Write the checks and build
 
 User says: "write the checks and build this plan"
 Actions:
 
-1. Derive `.specs/features/lockfile-v2/checks.md` from the approved plan (claims + proofs, Coverage join, Test policy, Swept)
-2. Run `python3 <skill-dir>/scripts/validate_checks.py lockfile-v2`
+1. Derive `.specs/features/lockfile-v2/obligations.md` from the approved plan (claims + proofs, Coverage join, Test policy, Swept)
+2. Run `python3 <skill-dir>/scripts/validate_obligations.py lockfile-v2`
 3. Write `## Handoff` with the arithmetic. Under the budget: one builder, no ask. Over: stop and ask (handoff vs one builder); record the choice before any code
 4. Write tests from the checks — never from the implementation — then implement, run each proof, and commit
 5. After the last commit of the feature, dispatch a fresh Verifier with [verify.md](references/verify.md) — same turn, no ask. A builder of one batch would have stopped after step 4 instead.

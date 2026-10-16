@@ -123,7 +123,7 @@ Building under them is reversible and needs no permission; writing them reaches 
 agent, so approved rows land in their own commit before the build. If the user does not answer,
 build under them and leave the files alone.
 
-## Template: `.specs/features/<feature>/checks.md`
+## Template: `.specs/features/<feature>/obligations.md`
 
 ````markdown
 # <Feature> checks
@@ -236,7 +236,7 @@ everything about the requirements and the solution's shape: [plan.md](plan.md).
 ## Gate before building
 
 ```bash
-python3 <skill-dir>/scripts/validate_checks.py <feature>
+python3 <skill-dir>/scripts/validate_obligations.py <feature>
 ```
 
 It fails a check with no `Proof:`, a duplicate check id, a coverage row whose declared size

@@ -6,10 +6,10 @@ claim carries a test selector. Two halves: what must be true, then what is being
 They are one file because they are one activity and one review. Reading forty checks to
 reconstruct what is being built is not planning, and deriving the obligations in the same pass
 that decides the shape produces checks that ratify whatever was already assumed. So this gets
-confirmed, and only then does [checks.md](checks.md) turn it into obligations with proofs.
+confirmed, and only then does [obligations.md](obligations.md) turn it into obligations with proofs.
 
 Skip this file only when the change is under roughly three files with no one-way door - then
-write the intent paragraph straight into `checks.md`.
+write the intent paragraph straight into `obligations.md`.
 
 ## File order is for reading
 
@@ -211,7 +211,7 @@ is the tell that the dimension is uncovered: a duplicate rejected because a row 
 says nothing about two requests arriving at once. When you catch yourself borrowing, the honest
 answers are `n/a` with the reason, or a question.
 
-**Where the record lives:** the landing for each dimension is written in `checks.md` under
+**Where the record lives:** the landing for each dimension is written in `obligations.md` under
 `## Swept`, because each one has to cite a check number. Do not duplicate it here.
 
 # Writing: what is being built
@@ -273,7 +273,7 @@ the moment something outside this codebase reads it, which is why this is a revi
 documentation.
 
 Do **not** put check numbers here - checks do not exist yet. Each route's statuses become a set
-row in the `Coverage` join in `checks.md`, which is what proves none of them went unclaimed.
+row in the `Coverage` join in `obligations.md`, which is what proves none of them went unclaimed.
 
 `None - nothing consumed outside` is complete.
 
@@ -342,7 +342,7 @@ Before presenting the plan, five checks. Nothing proceeds unresolved **and** unm
    nobody populated, a credential nobody issued. Three kinds: `blocks`, `blocks go-live`,
    `open`.
 4. **Both enumerations are walked, not skimmed.** Every item of every surface present has a
-   landing in `## Observable`, and all nine dimensions have one in `checks.md`. A blank in either
+   landing in `## Observable`, and all nine dimensions have one in `obligations.md`. A blank in either
    is the failure both lists exist to make visible.
 5. **Every criterion has somewhere to land in the shape.** A criterion whose behaviour crosses
    no hop in `Flow`, touches nothing in `Relations` and appears on no route in `Surface` is
@@ -520,7 +520,7 @@ Point at `Flow`, at `Impact`, and at any `Landing` door that still has a live al
 those are the three a reviewer would want named, not buried. Where `Relations` changes data
 that already exists or `Surface` changes something already consumed, say that too.
 
-Then continue into [checks.md](checks.md). Every route's statuses, every door, and every entity
+Then continue into [obligations.md](obligations.md). Every route's statuses, every door, and every entity
 here owes a set row or a check there - that derivation is the next step's job, and it is the one
 that catches what this file left implicit.
 
@@ -528,7 +528,7 @@ that catches what this file left implicit.
 
 - **P1 is a vertical slice** - a complete, demo-able outcome, not a layer.
 - **A criterion you cannot imagine a test for is not ready.** You do not name the test here;
-  that happens in `checks.md`, against the repo's real test setup.
+  that happens in `obligations.md`, against the repo's real test setup.
 - **Priority tags are advisory.** They order the work; they never scale down verification.
 - The two halves are written in one sitting. The shape is written **after** the criteria - that
   is writing order, not file order. File order is for the human reading the task.

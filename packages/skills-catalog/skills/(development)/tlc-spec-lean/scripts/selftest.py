@@ -2,7 +2,7 @@
 """
 selftest.py - fault injection against this skill's own gates, plus a smoke run of its tooling.
 
-The gates in validate_plan.py, validate_checks.py and validate_verification.py are only
+The gates in validate_plan.py, validate_obligations.py and validate_verification.py are only
 worth their invocation if they FAIL when the artifact is wrong. A validator that exits 0
 on everything is decoration, and nothing about running it would reveal that. So the same
 discipline the skill demands of a feature applies to the skill: mutate the artifact, run
@@ -34,35 +34,35 @@ FEATURE = "billing"
 
 # (validator, artifact, description, mutation, expected exit, expected message fragment)
 CASES = [
-    ("validate_checks", "checks.md", "drop one member from a size-5 set",
+    ("validate_obligations", "obligations.md", "drop one member from a size-5 set",
      lambda s: s.replace(" · `trial_will_end` C10 | - |", " | - |", 1),
      1, "declares 5 members but only 4"),
-    ("validate_checks", "checks.md", "remove a check's Proof line",
+    ("validate_obligations", "obligations.md", "remove a check's Proof line",
      lambda s: re.sub(r"\nProof: `bin/rails test test/billing/access_test\.rb[^\n]*\n", "\n", s),
      1, "C4 has no `Proof:` line"),
-    ("validate_checks", "checks.md", "delete the concurrency sweep line",
+    ("validate_obligations", "obligations.md", "delete the concurrency sweep line",
      lambda s: s.replace("- concurrency: C7\n", ""),
      1, "dimension 'concurrency' has no line"),
-    ("validate_checks", "checks.md", "bare n/a with no reason",
+    ("validate_obligations", "obligations.md", "bare n/a with no reason",
      lambda s: re.sub(r"- data lifecycle: n/a[^\n]*", "- data lifecycle: n/a", s),
      1, "`n/a` with no reason"),
-    ("validate_checks", "checks.md", "remove the Profile line",
+    ("validate_obligations", "obligations.md", "remove the Profile line",
      lambda s: s.replace("Profile: standard\n", ""),
      1, "no `Profile:` line"),
-    ("validate_checks", "checks.md", "reference an undefined check",
+    ("validate_obligations", "obligations.md", "reference an undefined check",
      lambda s: s.replace("into it C1 ·", "into it C99 ·"),
      1, "C99 is referenced in Coverage"),
-    ("validate_checks", "checks.md", "duplicate check id",
+    ("validate_obligations", "obligations.md", "duplicate check id",
      lambda s: s.replace("**C6** - A `Suspended` subscription returns", "**C5** - A `Suspended` subscription returns"),
      1, "duplicate check id C5"),
-    ("validate_checks", "checks.md", "non-empty Unproven cell",
+    ("validate_obligations", "obligations.md", "non-empty Unproven cell",
      lambda s: s.replace("| C2, table-driven over all 9 | - |", "| C2, table-driven over all 9 | `paused` |"),
      1, "Unproven is '`paused`'"),
-    ("validate_checks", "checks.md", "proof with no test selector (warn)",
+    ("validate_obligations", "obligations.md", "proof with no test selector (warn)",
      lambda s: s.replace('Proof: `bin/rails test test/billing/access_test.rb -n "/suspended_denies_paid_groups/"`',
                          "Proof: `bin/rails test`"),
      0, "names no test selector"),
-    ("validate_checks", "checks.md", "vague claim (warn)",
+    ("validate_obligations", "obligations.md", "vague claim (warn)",
      lambda s: s.replace("denies access to paid access groups", "handles access gracefully"),
      0, "instead of a concrete value"),
 
@@ -126,7 +126,7 @@ CASES = [
                          "- design `03` - **binding for the interface** - the 9 statuses"),
      0, "declares profile standard, so nobody"),
 
-    ("validate_checks", "plan.md", "a route reviewed in the plan that no check mentions (warn)",
+    ("validate_obligations", "plan.md", "a route reviewed in the plan that no check mentions (warn)",
      lambda s: s.replace("`POST /webhooks/provider`", "`POST /webhooks/provider/v2`"),
      0, "owe a Coverage row, or the route is dead"),
 
@@ -181,10 +181,10 @@ CASES = [
      0, "self-verified"),
     ("validate_verification", "verification.md", "report downgrades the approved profile",
      lambda s: s.replace("**Profile**: standard", "**Profile**: light"),
-     1, "checks.md was approved under 'standard'"),
+     1, "obligations.md was approved under 'standard'"),
 
-    # Profile-scoped steps: raising the profile in checks.md must make the report owe a section.
-    ("validate_verification", "checks.md", "profile ui but no binding-sources section in the report",
+    # Profile-scoped steps: raising the profile in obligations.md must make the report owe a section.
+    ("validate_verification", "obligations.md", "profile ui but no binding-sources section in the report",
      lambda s: s.replace("Profile: standard", "Profile: ui"),
      1, "no `## Binding sources` section"),
     ("validate_verification", "verification.md", "profile standard with no recomputed Coverage",
@@ -200,7 +200,7 @@ CASES = [
 # of silently, and it would make `light` unusable.
 NEGATIVE_CONTROLS = [
     ("validate_verification", "a light report with no faults and no coverage is accepted",
-     {"checks.md": lambda s: s.replace("Profile: standard", "Profile: light"),
+     {"obligations.md": lambda s: s.replace("Profile: standard", "Profile: light"),
       "verification.md": lambda s: re.sub(
           r"## Coverage\n.*?\n## Faults injected\n.*?\n## Gate", "## Gate",
           s.replace("**Profile**: standard", "**Profile**: light"), flags=re.S)}),
@@ -211,7 +211,7 @@ def scaffold():
     root = tempfile.mkdtemp(prefix="tlc-spec-lean-selftest-")
     fdir = os.path.join(root, ".specs", "features", FEATURE)
     os.makedirs(fdir)
-    for name in ("plan.md", "checks.md", "verification.md"):
+    for name in ("plan.md", "obligations.md", "verification.md"):
         shutil.copyfile(os.path.join(FIXTURES, name), os.path.join(fdir, name))
     return root
 
@@ -325,7 +325,7 @@ def main(argv=None):
     base = scaffold()
     print("baseline - a clean artifact set must pass every gate")
     baseline_ok = True
-    for validator in ("validate_plan", "validate_checks", "validate_verification"):
+    for validator in ("validate_plan", "validate_obligations", "validate_verification"):
         code, out = run(validator, base)
         if code != 0:
             baseline_ok = False

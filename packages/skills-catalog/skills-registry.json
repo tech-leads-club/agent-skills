@@ -1765,23 +1765,23 @@
       "files": [
         "SKILL.md",
         "references/build.md",
-        "references/checks.md",
         "references/memory.md",
+        "references/obligations.md",
         "references/plan.md",
         "references/verify.md",
         "scripts/check_commit.py",
-        "scripts/fixtures/checks.md",
+        "scripts/fixtures/obligations.md",
         "scripts/fixtures/plan.md",
         "scripts/fixtures/verification.md",
         "scripts/lessons.py",
         "scripts/selftest.py",
-        "scripts/validate_checks.py",
+        "scripts/validate_obligations.py",
         "scripts/validate_plan.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "28368cb86a9d441fce24426eb502a39a5e7f9ffe0ad5d682fead2ce76c5b085b"
+      "version": "1.2.0",
+      "contentHash": "ff100d4a6c865017226dd7037f691343f3f19673d43bde0dff732f58a1b8fffc"
     },
     {
       "name": "vercel-deploy",
