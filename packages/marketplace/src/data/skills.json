@@ -1837,8 +1837,8 @@
           "tasks.md",
           "validate.md"
         ],
-        "lastModified": "2026-08-03",
-        "version": "3.3.0",
+        "lastModified": "2026-10-20",
+        "version": "3.3.1",
         "scriptRuntimes": [
           "Python"
         ],

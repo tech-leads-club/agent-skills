@@ -109,23 +109,34 @@ def parse_tasks(lines):
 
 
 def parse_phase_membership(lines):
-    """Map task_id -> phase index, read from '### Phase N' headers in the Execution Plan."""
-    membership = {}
-    phase_idx = 0
-    in_phase = False
+    from_diagram, from_headers = {}, {}
+    phase_idx, phase_level, in_fence = None, 0, False
     for ln in lines:
-        pm = re.match(r"^#{2,4}\s+Phase\s+(\d+)", ln.strip(), re.IGNORECASE)
-        if pm:
-            phase_idx = int(pm.group(1))
-            in_phase = True
+        stripped = ln.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
             continue
-        if in_phase:
-            # Map a task to a phase ONLY when it appears as a task header (### Tn:),
-            # never when it is merely referenced (e.g. in a `Depends on:` line or a
-            # diagram arrow), which would misattribute the referenced task to this phase.
-            hm = TASK_RE.match(ln.strip())
-            if hm:
-                membership[hm.group(1).upper()] = phase_idx
+        if in_fence:
+            if phase_idx is not None:
+                for tid in EDGE_RE.findall(stripped.upper()):
+                    from_diagram.setdefault(tid, phase_idx)
+            continue
+        hm = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+        if not hm:
+            continue
+        level, title = len(hm.group(1)), hm.group(2)
+        phase_m = re.match(r"^Phase\s+(\d+)", title, re.IGNORECASE)
+        if phase_m:
+            phase_idx, phase_level = int(phase_m.group(1)), level
+            continue
+        tm = TASK_RE.match(stripped)
+        if tm and phase_idx is not None:
+            from_headers[tm.group(1).upper()] = phase_idx
+            continue
+        if phase_idx is not None and level <= phase_level:
+            phase_idx = None
+    membership = dict(from_diagram)
+    membership.update(from_headers)
     return membership
 
 
