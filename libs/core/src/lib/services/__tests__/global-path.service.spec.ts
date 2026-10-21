@@ -1,3 +1,5 @@
+import { fixturePath } from './path-fixtures'
+
 import { describe, expect, it, jest } from '@jest/globals'
 
 import { join } from 'node:path'
@@ -29,8 +31,8 @@ const createPorts = (): TestPorts => {
   const fs = { existsSync: existsSyncMock } as unknown as FileSystemPort
   const shell = { exec: execMock } as unknown as ShellPort
   const env = {
-    cwd: jest.fn(() => '/home/user'),
-    homedir: jest.fn(() => '/home/user'),
+    cwd: jest.fn(() => fixturePath('/home/user')),
+    homedir: jest.fn(() => fixturePath('/home/user')),
     platform: jest.fn(() => 'linux'),
     getEnv: jest.fn(() => undefined),
   } as unknown as EnvPort
@@ -43,8 +45,8 @@ const createPorts = (): TestPorts => {
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/home/user'),
-      getSkillsCatalogPath: jest.fn(() => '/home/user/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/home/user')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/home/user/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
   }

@@ -1,3 +1,5 @@
+import { fixturePath } from './path-fixtures'
+
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import type {
@@ -23,7 +25,7 @@ type TestPorts = {
 
 const createPorts = (): TestPorts => {
   const appendFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
-  const homedirMock = jest.fn(() => '/home/tester')
+  const homedirMock = jest.fn(() => fixturePath('/home/tester'))
   const mkdirMock = jest.fn<(path: string, options?: { recursive?: boolean }) => Promise<void>>()
   const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
 
@@ -33,7 +35,7 @@ const createPorts = (): TestPorts => {
     readFile: readFileMock,
   } as unknown as FileSystemPort
   const env = {
-    cwd: jest.fn(() => '/workspace/project'),
+    cwd: jest.fn(() => fixturePath('/workspace/project')),
     homedir: homedirMock,
     platform: jest.fn(() => 'linux'),
     getEnv: jest.fn(() => undefined),
@@ -46,8 +48,8 @@ const createPorts = (): TestPorts => {
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
@@ -66,16 +68,16 @@ describe('getAuditLogPath', () => {
 
     const result = getAuditLogPath(ports)
 
-    expect(result).toBe('/home/tester/.agent-skills/audit.log')
+    expect(result).toBe(fixturePath('/home/tester/.agent-skills/audit.log'))
     expect(homedirMock).toHaveBeenCalledTimes(1)
   })
 
   it('uses the provided baseDir when available', () => {
     const { ports, homedirMock } = createPorts()
 
-    const result = getAuditLogPath(ports, '/tmp/custom-home')
+    const result = getAuditLogPath(ports, fixturePath('/tmp/custom-home'))
 
-    expect(result).toBe('/tmp/custom-home/.agent-skills/audit.log')
+    expect(result).toBe(fixturePath('/tmp/custom-home/.agent-skills/audit.log'))
     expect(homedirMock).not.toHaveBeenCalled()
   })
 })
@@ -95,9 +97,9 @@ describe('logAudit', () => {
       failed: 0,
     })
 
-    expect(mkdirMock).toHaveBeenCalledWith('/home/tester/.agent-skills', { recursive: true })
+    expect(mkdirMock).toHaveBeenCalledWith(fixturePath('/home/tester/.agent-skills'), { recursive: true })
     expect(appendFileMock).toHaveBeenCalledWith(
-      '/home/tester/.agent-skills/audit.log',
+      fixturePath('/home/tester/.agent-skills/audit.log'),
       '{"action":"install","skillName":"test-skill","agents":["Cursor"],"success":1,"failed":0,"timestamp":"2026-03-10T10:00:00.000Z"}\n',
       'utf-8',
     )
@@ -118,12 +120,12 @@ describe('logAudit', () => {
         success: 1,
         failed: 0,
       },
-      '/tmp/custom-home',
+      fixturePath('/tmp/custom-home'),
     )
 
-    expect(mkdirMock).toHaveBeenCalledWith('/tmp/custom-home/.agent-skills', { recursive: true })
+    expect(mkdirMock).toHaveBeenCalledWith(fixturePath('/tmp/custom-home/.agent-skills'), { recursive: true })
     expect(appendFileMock).toHaveBeenCalledWith(
-      '/tmp/custom-home/.agent-skills/audit.log',
+      fixturePath('/tmp/custom-home/.agent-skills/audit.log'),
       '{"action":"install","skillName":"test-skill","agents":["Cursor"],"success":1,"failed":0,"timestamp":"2026-03-10T10:00:00.000Z"}\n',
       'utf-8',
     )
@@ -211,7 +213,7 @@ describe('readAuditLog', () => {
       }),
     )
 
-    await expect(readAuditLog(ports, undefined, '/tmp/custom-home')).resolves.toEqual([
+    await expect(readAuditLog(ports, undefined, fixturePath('/tmp/custom-home'))).resolves.toEqual([
       {
         action: 'install',
         skillName: 'skill-1',
@@ -222,7 +224,7 @@ describe('readAuditLog', () => {
       },
     ])
 
-    expect(readFileMock).toHaveBeenCalledWith('/tmp/custom-home/.agent-skills/audit.log', 'utf-8')
+    expect(readFileMock).toHaveBeenCalledWith(fixturePath('/tmp/custom-home/.agent-skills/audit.log'), 'utf-8')
     expect(homedirMock).not.toHaveBeenCalled()
   })
 
