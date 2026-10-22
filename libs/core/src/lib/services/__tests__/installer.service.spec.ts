@@ -1,3 +1,7 @@
+import { relative } from 'node:path'
+
+import { fixturePath } from './path-fixtures'
+
 import { describe, expect, it, jest } from '@jest/globals'
 
 import type {
@@ -70,7 +74,7 @@ const createPorts = (): TestPorts => {
 
   appendFileMock.mockResolvedValue(undefined)
   cpMock.mockResolvedValue(undefined)
-  existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+  existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
   lstatMock.mockImplementation(async () => {
     const error = new Error('missing') as Error & { code?: string }
     error.code = 'ENOENT'
@@ -102,9 +106,9 @@ const createPorts = (): TestPorts => {
   } as unknown as FileSystemPort
 
   const env = {
-    cwd: jest.fn(() => '/workspace/project/packages/cli'),
+    cwd: jest.fn(() => fixturePath('/workspace/project/packages/cli')),
     getEnv: jest.fn(() => undefined),
-    homedir: jest.fn(() => '/home/tester'),
+    homedir: jest.fn(() => fixturePath('/home/tester')),
     platform: jest.fn(() => 'linux'),
   } as unknown as EnvPort
 
@@ -121,8 +125,8 @@ const createPorts = (): TestPorts => {
     packageResolver: {} as PackageResolverPort,
     paths: {
       getLocalSkillsDirectory: jest.fn(() => null),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
   }
@@ -147,13 +151,13 @@ describe('installer service path helpers', () => {
   it('returns the expected local install path for an agent', () => {
     const { ports } = createPorts()
 
-    expect(getInstallPath(ports, 'my-skill', 'cursor')).toBe('/workspace/project/.cursor/skills/my-skill')
+    expect(getInstallPath(ports, 'my-skill', 'cursor')).toBe(fixturePath('/workspace/project/.cursor/skills/my-skill'))
   })
 
   it('returns the expected canonical local path', () => {
     const { ports } = createPorts()
 
-    expect(getCanonicalPath(ports, 'my-skill')).toBe('/workspace/project/.agents/skills/my-skill')
+    expect(getCanonicalPath(ports, 'my-skill')).toBe(fixturePath('/workspace/project/.agents/skills/my-skill'))
   })
 })
 
@@ -163,21 +167,25 @@ describe('installSkills', () => {
     const skill: SkillInfo = {
       name: 'my-skill',
       description: 'Test skill',
-      path: '/tmp/catalog/my-skill',
+      path: fixturePath('/tmp/catalog/my-skill'),
       category: 'testing',
     }
 
     const results = await installSkills(ports, [skill], createInstallOptions({ skills: ['my-skill'] }))
 
-    expect(mkdirMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills', { recursive: true })
-    expect(cpMock).toHaveBeenCalledWith('/tmp/catalog/my-skill', '/workspace/project/.cursor/skills/my-skill', {
-      recursive: true,
-    })
+    expect(mkdirMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills'), { recursive: true })
+    expect(cpMock).toHaveBeenCalledWith(
+      fixturePath('/tmp/catalog/my-skill'),
+      fixturePath('/workspace/project/.cursor/skills/my-skill'),
+      {
+        recursive: true,
+      },
+    )
     expect(results).toEqual([
       {
         agent: 'Cursor',
         skill: 'my-skill',
-        path: '/workspace/project/.cursor/skills/my-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/my-skill'),
         method: 'copy',
         success: true,
       },
@@ -190,13 +198,13 @@ describe('installSkills', () => {
       {
         name: 'alpha-skill',
         description: 'Alpha skill',
-        path: '/tmp/catalog/alpha-skill',
+        path: fixturePath('/tmp/catalog/alpha-skill'),
         category: 'testing',
       },
       {
         name: 'beta-skill',
         description: 'Beta skill',
-        path: '/tmp/catalog/beta-skill',
+        path: fixturePath('/tmp/catalog/beta-skill'),
         category: 'testing',
       },
     ]
@@ -208,14 +216,14 @@ describe('installSkills', () => {
       {
         agent: 'Cursor',
         skill: 'alpha-skill',
-        path: '/workspace/project/.cursor/skills/alpha-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/alpha-skill'),
         method: 'copy',
         success: true,
       },
       {
         agent: 'Cursor',
         skill: 'beta-skill',
-        path: '/workspace/project/.cursor/skills/beta-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/beta-skill'),
         method: 'copy',
         success: true,
       },
@@ -230,7 +238,7 @@ describe('installSkills', () => {
     const skill: SkillInfo = {
       name: 'my-skill',
       description: 'Test skill',
-      path: '/tmp/catalog/my-skill',
+      path: fixturePath('/tmp/catalog/my-skill'),
       category: 'testing',
     }
 
@@ -240,19 +248,26 @@ describe('installSkills', () => {
       createInstallOptions({ method: 'symlink', skills: ['my-skill'] }),
     )
 
-    expect(cpMock).toHaveBeenCalledWith('/tmp/catalog/my-skill', '/workspace/project/.agents/skills/my-skill', {
-      recursive: true,
-    })
+    expect(cpMock).toHaveBeenCalledWith(
+      fixturePath('/tmp/catalog/my-skill'),
+      fixturePath('/workspace/project/.agents/skills/my-skill'),
+      {
+        recursive: true,
+      },
+    )
     expect(symlinkMock).toHaveBeenCalledWith(
-      '../../.agents/skills/my-skill',
-      '/workspace/project/.cursor/skills/my-skill',
+      relative(
+        fixturePath('/workspace/project/.cursor/skills'),
+        fixturePath('/workspace/project/.agents/skills/my-skill'),
+      ),
+      fixturePath('/workspace/project/.cursor/skills/my-skill'),
       undefined,
     )
     expect(results).toEqual([
       {
         agent: 'Cursor',
         skill: 'my-skill',
-        path: '/workspace/project/.cursor/skills/my-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/my-skill'),
         method: 'symlink',
         success: true,
         usedGlobalSymlink: false,
@@ -268,7 +283,7 @@ describe('installSkills', () => {
     const skill: SkillInfo = {
       name: 'fallback-skill',
       description: 'Fallback skill',
-      path: '/tmp/catalog/fallback-skill',
+      path: fixturePath('/tmp/catalog/fallback-skill'),
       category: 'testing',
     }
 
@@ -281,15 +296,15 @@ describe('installSkills', () => {
     )
 
     expect(cpMock).toHaveBeenLastCalledWith(
-      '/tmp/catalog/fallback-skill',
-      '/workspace/project/.cursor/skills/fallback-skill',
+      fixturePath('/tmp/catalog/fallback-skill'),
+      fixturePath('/workspace/project/.cursor/skills/fallback-skill'),
       { recursive: true },
     )
     expect(results).toEqual([
       {
         agent: 'Cursor',
         skill: 'fallback-skill',
-        path: '/workspace/project/.cursor/skills/fallback-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/fallback-skill'),
         method: 'copy',
         success: true,
         symlinkFailed: true,
@@ -302,7 +317,7 @@ describe('installSkills', () => {
     const skill: SkillInfo = {
       name: 'broken-skill',
       description: 'Broken skill',
-      path: '/tmp/catalog/broken-skill',
+      path: fixturePath('/tmp/catalog/broken-skill'),
       category: 'testing',
     }
 
@@ -314,7 +329,7 @@ describe('installSkills', () => {
       {
         agent: 'Cursor',
         skill: 'broken-skill',
-        path: '/workspace/project/.cursor/skills/broken-skill',
+        path: fixturePath('/workspace/project/.cursor/skills/broken-skill'),
         method: 'copy',
         success: false,
         error: 'copy failed',
@@ -359,7 +374,10 @@ describe('removeSkill', () => {
 
     const results = await removeSkill(ports, 'my-skill', ['cursor'])
 
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/my-skill', { recursive: true, force: true })
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills/my-skill'), {
+      recursive: true,
+      force: true,
+    })
     expect(results).toEqual([
       {
         skill: 'my-skill',
@@ -411,11 +429,11 @@ describe('removeSkill', () => {
 
     const results = await removeSkill(ports, 'shared-skill', ['cursor', 'codex'])
 
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/shared-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills/shared-skill'), {
       recursive: true,
       force: true,
     })
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.codex/skills/shared-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.codex/skills/shared-skill'), {
       recursive: true,
       force: true,
     })
@@ -467,7 +485,7 @@ describe('removeSkill', () => {
         success: true,
       },
     ])
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/symlink-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills/symlink-skill'), {
       recursive: true,
       force: true,
     })
@@ -507,7 +525,7 @@ describe('removeSkill', () => {
         success: true,
       },
     ])
-    expect(rmMock).toHaveBeenCalledWith('/home/tester/.cursor/skills/global-symlink-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cursor/skills/global-symlink-skill'), {
       recursive: true,
       force: true,
     })
@@ -544,7 +562,7 @@ describe('removeSkill', () => {
     const results = await removeSkill(ports, 'multi-agent-skill', ['cursor'])
 
     expect(results[0].success).toBe(true)
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/multi-agent-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills/multi-agent-skill'), {
       recursive: true,
       force: true,
     })
@@ -601,11 +619,11 @@ describe('removeSkill', () => {
     const results = await removeSkill(ports, 'symlink-cleanup-skill', ['cursor'])
 
     expect(results[0].success).toBe(true)
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.cursor/skills/symlink-cleanup-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.cursor/skills/symlink-cleanup-skill'), {
       recursive: true,
       force: true,
     })
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.agents/skills/symlink-cleanup-skill', {
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.agents/skills/symlink-cleanup-skill'), {
       recursive: true,
       force: true,
     })
