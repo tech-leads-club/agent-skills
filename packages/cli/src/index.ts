@@ -95,6 +95,21 @@ program
     runCliCache(options)
   })
 
+// Agents command
+program
+  .command('agents')
+  .description('Manage target agents')
+  .option('--auto', 'Auto-detect installed agents and set as target agents')
+  .option('--add <agents...>', 'Add agents to target list')
+  .option('--set <agents...>', 'Set entire target agents list')
+  .option('--remove <agents...>', 'Remove agents from target list')
+  .option('--show', 'Show current target agents list')
+  .option('--clear', 'Clear target agents list')
+  .action(async (options) => {
+    const { runCliAgents } = await import('./cli/agents')
+    await runCliAgents(options)
+  })
+
 // Credits command
 program
   .command('credits')
