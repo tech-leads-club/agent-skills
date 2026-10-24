@@ -4,7 +4,7 @@ description: Feature planning and implementation with 4 adaptive phases (Specify
 license: CC-BY-4.0
 metadata:
   author: Felipe Rodrigues - github.com/felipfr
-  version: 3.3.0
+  version: 3.3.1
 ---
 
 # Tech Lead's Club - Spec-Driven Development

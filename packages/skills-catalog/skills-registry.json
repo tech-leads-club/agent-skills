@@ -1754,8 +1754,8 @@
         "scripts/validate_tasks.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "3.3.0",
-      "contentHash": "7bed1026351bfcc3931cad739705bede60e828ad68598e2f827507b3943ec10f"
+      "version": "3.3.1",
+      "contentHash": "2f67ec8bd6e460cfb38d4f0e8e330549d0690a64ac88895c8ede0226477d2375"
     },
     {
       "name": "tlc-spec-lean",

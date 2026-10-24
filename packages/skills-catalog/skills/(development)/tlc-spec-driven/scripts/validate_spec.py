@@ -155,14 +155,16 @@ def check(spec_path):
 
     # 2. Acceptance criteria are EARS-shaped (have a SHALL).
     in_ac = False
+    ac_started = False
     for i, ln in enumerate(lines, start=1):
         stripped = ln.strip()
-        if re.match(r"^\*{0,2}Acceptance Criteria\*{0,2}\s*:?\s*$", stripped):
-            in_ac = True
+        if re.match(r"^\*{0,2}Acceptance Criteria\*{0,2}\s*(?:\([^)]*\))?\s*:?\s*$", stripped):
+            in_ac, ac_started = True, False
             continue
         if in_ac:
             m = re.match(r"^\s*\d+\.\s+(.*)$", ln)
             if m:
+                ac_started = True
                 item = m.group(1).strip()
                 if PLACEHOLDER_RE.match(item):
                     continue  # untouched template row
@@ -171,7 +173,9 @@ def check(spec_path):
                     errors.append(f"L{i}: acceptance criterion has no SHALL (not testable): {item[:70]}")
                 elif note.startswith("warn"):
                     warnings.append(f"L{i}: AC has SHALL but no EARS keyword (WHEN/WHILE/WHERE/IF or ubiquitous 'The … shall'): {item[:60]}")
-            elif stripped == "" or re.match(r"^#{1,3}\s", ln) or stripped.startswith("**"):
+            elif stripped == "" and not ac_started:
+                continue
+            elif (stripped == "" and ac_started) or re.match(r"^#{1,3}\s", ln) or stripped.startswith("**"):
                 in_ac = False
 
     # 3. Assumptions table cells filled.
