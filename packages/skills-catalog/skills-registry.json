@@ -1749,7 +1749,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Asks you before it assumes, treats a design you attach as the contract, and proves every criterion before it says the work is done. You make every open product decision. The agent asks, and it stops for your approval of the spec and again for the tasks. A screen that comes with the request is the spec. Each criterion cites the file it has to reproduce, and any difference needs your approval. The photo is taken in a window the size of that design, never shrunk from a wide monitor. An independent judge opens the app, retakes the photos, and compares them item by item. Each criterion has a proof, and an independent reviewer plants bugs to see if the tests complain. The check ends after one fix pass. What still fails comes back to you. Use when you say \"specify feature\" or \"discuss feature\" or \"design\" or \"tasks\" or \"implement\" or \"validate\" or \"verify work\" or \"UAT\" or \"record decision\" or \"pause work\" or \"resume work\". Do NOT use for architecture decomposition or a standalone technical design document.",
+      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1782,7 +1782,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "4.0.0",
-      "contentHash": "01c2610dd398133c7dfd2275e9ec2f926d5662b259c951b729acaa7cb916cd0e"
+      "contentHash": "2607b8b6bb30902138d36990787eeace56e72e125cbb21b1b6b7ffdb3dac139a"
     },
     {
       "name": "tlc-spec-lean",
