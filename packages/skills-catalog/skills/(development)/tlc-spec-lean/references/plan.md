@@ -1,369 +1,213 @@
 # Plan
 
-**Goal:** the one artifact a human reads to understand the work and object to it, **before** any
-claim carries a test selector. Two halves: what must be true, then what is being built.
+The one artifact a human reads to understand the work and object to it, before any claim
+carries a test selector. Two halves: what must be true, then what is being built. They share a
+file because they are one review: deriving the checks in the same pass that decides the shape
+produces checks that ratify whatever was already assumed.
 
-They are one file because they are one activity and one review. Reading forty checks to
-reconstruct what is being built is not planning, and deriving the obligations in the same pass
-that decides the shape produces checks that ratify whatever was already assumed. So this gets
-confirmed, and only then does [checks.md](checks.md) turn it into obligations with proofs.
-
-Skip this file only when the change is under roughly three files with no one-way door - then
-write the intent paragraph straight into `checks.md`.
-
-## File order is for reading
-
-The published file is what a human reads as a task. Layout:
-
-Problem → Flow → Impact → Relations → Surface → Landing → Criteria → Out of scope → Assumptions → Observable → Sources
-
-`## Sources` is two or three citations that bind - the ticket, a design marked binding - not a
-research log of files the agent opened. Last, because it is not the review.
-
-That is not the writing order. Write the problem, walk the surfaces, write the criteria, then
-fill the shape. Writing the shape first is how a criterion gets invented to justify a component.
-The closure gate still requires every criterion to land in `Flow`, `Relations` or `Surface`.
+Skip this file when the change is under roughly three files with no one-way door; write the
+intent paragraph straight into `checks.md`.
 
 ## Before asking anything
 
-**Load confirmed lessons.** `--root` is a parent flag and has to come before the
-subcommand: `python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed`
-(add `--scope` or `--query` for the area this feature touches). Confirmed only - never
-`candidate` or `quarantined`. No store yet, or no code tool: skip silently.
+- Load confirmed lessons: `python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed`
+  (add `--scope` or `--query` for the area). Confirmed only. No store yet: skip.
+- Read `.specs/STATE.md` `## Decisions`. Every `active` `AD-NNN` constrains the shape: conform, or
+  append an entry that supersedes it and say why.
+- Open every binding source in full - every capture, frame and state - before the first
+  criterion.
 
-**Read `.specs/STATE.md` `## Decisions`.** Every `active` `AD-NNN` is a project-level constraint
-the shape must conform to. Where one conflicts with what is best for this feature, there are two
-options and both are explicit: conform, or append a new entry that supersedes the old one
-(setting the old row's status to `superseded by AD-NNN`) and say why. Silently ignoring an active
-decision creates an inconsistency nobody can find later.
+Facts you look up; decisions you ask. Ask only what is the user's: scope, priority, product
+behaviour, a trade-off.
 
-**Scan the code this feature touches.** Neighbouring features, the existing conventions, the
-terms already in use. This grounds the questions in reality, it is where you find that the source
-names things the system does not have, and it is what the shape gets built from.
+An open architectural bet (job or request cycle, which of two architectures) is settled first in
+an ADR, RFC or spike and linked. This file records the shape that won.
 
-**Facts you look up; decisions you ask.** Anything the environment answers - a convention, an
-existing field, how the current endpoint behaves, what the schema allows - you resolve yourself
-through the knowledge chain: existing code and conventions, project docs, library documentation,
-web search, then flag as uncertain. Never invent an API, a flag or a behaviour; a fabrication
-here propagates into the checks and then into a green test that proves nothing. A question you
-could have answered by reading the code spends the user's turn and their patience, and enough of
-them turn this into an interview. Ask only what is genuinely theirs: scope, priority, product
-behaviour, which trade-off they want.
-
-**A bet that is still open does not get placed here.** Whether this is a job or a request cycle,
-whether the state machine belongs in the model or a service, which of two architectures to commit
-to - when that is genuinely undecided it needs each option costed against this repository and the
-condition that would make the other one win, and the only shape this file has for a decision is a
-`Landing` row. Squeezing one in produces a bet nobody reviewed, recorded where nobody looks for
-one. Settle it first with whatever the project uses - an ADR, an RFC, a spike - and link it. This
-file records the shape that won and makes it reviewable.
-
-# Writing: what must be true
+# What must be true
 
 ## Recover the problem
 
-The source usually arrives as a solution. Write the problem in the present tense with no
-solution inside it: what is true today that should not be, who pays for it, and what it costs
-them. "We have no Stripe integration" is not a problem - it is the absence of this feature's
-answer, and phrased that way it can only justify the thing already chosen. "Anyone evaluating
-the product has to enter a card first" is a sentence someone can disagree with, and being
-disagreeable is the test.
+Write the problem in the present tense with no solution inside it: what is true today that should
+not be, who pays for it, what it costs. "We have no Stripe integration" is the absence of an
+answer; "anyone evaluating the product has to enter a card first" is a problem someone can
+disagree with. Copy the evidence the source gives literally, or say it gives none.
 
-Copy the evidence the source gives, literally - a conversion figure, a support volume, a date
-somebody else set. Where it gives none, say so rather than manufacturing urgency.
+Close the section with what is different for a user when this ships. That line is the goal the
+checks are held against.
 
-**Challenge vagueness.** "Good" means what? "Users" means who? "Simple" means how? Make the
-abstract concrete: walk me through using this.
+## How to ask
 
-## How to ask, when you have to ask
+A gray area is a decision that is the user's, has more than one defensible answer, and is not
+settled by the code. Anything else is an assumption you state and move on from.
 
-Most of what looks like a question is not one. **A gray area is a decision that is genuinely the
-user's, has more than one defensible answer, and is not settled by the code.** Fail any of the
-three and it is not a gray area: the repo's conventions answer it, or one option is clearly right
-and you state it as an assumption and move on. Do not go looking for a quota of them - a quota
-manufactures questions the same way a checklist with no `n/a` escape manufactures requirements.
+Ask every gray area before presenting the plan, until the requirements leave no product decision
+to the builder. A gray area does not become an `Assumptions` row to save a question.
 
-**What you do not know is findable, and the next two sections are the two lists that find it.**
-`## Observable` walks the surfaces this feature exposes, because every surface carries the
-same decisions every time; the nine dimensions after it walk the system properties. Neither is a
-prompt to think harder - both are enumerations, for the same reason: "consider the edge cases"
-finds nothing, and a fixed list with a mandatory `n/a` escape finds the item nobody mentioned.
+- "You decide" is an answer: record it in `Assumptions` with `Confirmed? y` and rationale
+  `user delegated`. Write `user delegated` only when the user said it in the conversation.
+- Asking clarifies how, not whether to add a capability. A new capability that surfaces goes in
+  `Out of scope` with its reason.
+- Removing, renaming or changing something a binding source draws is the user's call. Ask it as
+  a `blocks` question with your recommendation, even when the system lacks the concept. It is
+  never resolved by an `Out of scope` row alone. The answer becomes an `AD-NNN` in
+  `.specs/STATE.md` whose rationale quotes the question and the option chosen; each departure it
+  approves lands in `## Differences from the source` citing that id.
 
-Where you do ask, these are the rules, and they are about turn cost rather than politeness. Every
-badly shaped question spends a turn and buys less than a stated default would have.
-
-- **Concrete options, never an open prompt.** "Card layout or table layout" is answerable; "how
-  should this look?" hands the work back.
-- **Lead with your recommendation and one line of why.** You have read the code; accepting or
-  overriding should cost one word.
-- **Assume first when it is safe.** State the default and invite correction instead of blocking.
-  A question you would have answered the same way regardless of the reply is not worth asking.
-- **At most two independent questions per turn, exactly one when they are dependent** - a
-  dependent answer prunes the questions after it, so asking them together wastes most of them.
-  Three or more in a turn is an interrogation, and it reads as one.
-- **"You decide" is an answer.** Record it as an assumption with `Confirmed? y` and the rationale
-  `user delegated`, so discretion is on the record rather than inferred from silence later.
-- **The boundary is fixed.** Asking clarifies *how*, never whether to add a capability. A new
-  capability that surfaces goes in `Out of scope` with its reason and stays there. That table
-  is product capabilities only - process and harness rules live in AGENTS.md or as
-  Observable `n/a`.
-
-Anything asked and not answered, or that you chose not to raise, lands in `## Assumptions` with
-your chosen default and rationale and `Confirmed? n`. That column is the whole record of who
-decided what: `y` means a human said so. Never mark `y` for a default nobody saw. Once a default
-is a numbered criterion, drop the assumption row - the table is leftovers, not a second copy of
-the criteria.
+An assumption lands in `## Assumptions` with your default, the rationale and `Confirmed? n`. `y`
+means a human said so.
 
 ## Walk the surfaces
 
-A surface is anything outside the system that meets it, and each kind carries the same decisions
-every time it appears. That is what makes them findable rather than a matter of remembering: you
-do not ask "what did I forget about this screen", you walk the row.
+Each kind of surface carries the same decisions every time. Walk the row for every surface this
+feature exposes; each item becomes a criterion, an existing behaviour you name, or nothing to
+decide. There is no table for it in the plan.
 
 | Surface | The decisions it always has |
 | --- | --- |
-| a screen or view | empty, loading, error and unauthorised states; density and ordering; what a destructive action confirms before doing it |
-| an API or webhook someone calls | response shape, error shape with its codes, who may call it, versioning, what happens at the rate limit |
-| a command or scheduled task | output format and verbosity, every flag and its default, exit codes, what it prints when it fails halfway |
-| a document or copy someone reads | structure, tone, depth, and what the reader is meant to do next |
-| a collection being organised | the grouping criterion, naming, ordering, what happens to duplicates, and the exception that does not fit |
+| a screen or view | empty, loading, error and unauthorised states; ordering of content; what a long list or a wide table does - what scrolls and what stays in view; what a destructive action confirms; what each control does when used - who acts, which control, what the page shows afterwards |
+| an API or webhook | response shape, error shape with its codes, who may call it, versioning, rate limit behaviour |
+| a command or scheduled task | output format, every flag and its default, exit codes, what it prints when it fails halfway |
+| a document or copy | structure, tone, depth, what the reader does next |
+| a collection being organised | grouping, naming, ordering, duplicates, the exception that does not fit |
 
-Nothing about state, persistence or contracts is here - that is the nine dimensions below, and
-duplicating it in both places produces two answers that disagree.
-
-**Each item resolves to a criterion, to something that already behaves that way, or to an explicit
-`n/a - <reason>`.** The `n/a` escape is mandatory and it is what stops the list from inventing
-scope: a webhook has no empty state, and saying so costs a line. `None - no user-facing surface`
-is a complete answer for a feature that exposes none.
-
-Two of these hide better than the rest. An **error shape** is decided by whoever writes the first
-handler, so it gets decided by accident and then copied. An **empty state** is invisible until the
-feature ships to someone whose account is new, which is every user on their first day.
-
-**Where the record lives:** `## Observable` last in this file, because it is a worksheet and not
-the review. One row per item, because each lands on a criterion rather than on a check. One row
-may group the same decision across several routes (`all new /api/counts*` · versioning, rate
-limits · `n/a - <reason>`).
+The two that hide best: the error shape (decided by whoever writes the first handler) and the empty
+state (invisible until a new account opens the page). State, persistence and contracts are the
+nine dimensions in [checks.md](checks.md), not this list.
 
 ## Write the criteria in EARS
 
-Every acceptance criterion resolves to exactly one pattern. Pick the one that fits instead of
-forcing everything into WHEN/THEN.
+| Pattern | Template | Use for |
+| --- | --- | --- |
+| Ubiquitous | The [system] SHALL [response] | always-on invariants |
+| Event-driven | WHEN [trigger] THEN the [system] SHALL [response] | a response to a discrete trigger |
+| State-driven | WHILE [state] the [system] SHALL [response] | behaviour that holds during a state |
+| Optional-feature | WHERE [feature is present] the [system] SHALL [response] | behaviour behind a flag |
+| Unwanted-behaviour | IF [condition] THEN the [system] SHALL [response] | errors, invalid input, timeouts |
+| Complex | WHILE [state], WHEN [trigger] the [system] SHALL [response] | combinations |
 
-| Pattern | Keyword | Template | Use for |
-| --- | --- | --- | --- |
-| Ubiquitous | (none) | The [system] SHALL [response] | always-on invariants |
-| Event-driven | WHEN | WHEN [trigger] THEN the [system] SHALL [response] | a response to a discrete trigger |
-| State-driven | WHILE | WHILE [state] the [system] SHALL [response] | behaviour that holds during a state |
-| Optional-feature | WHERE | WHERE [feature is present] the [system] SHALL [response] | behaviour behind a flag or optional capability |
-| Unwanted-behaviour | IF / THEN | IF [undesired condition] THEN the [system] SHALL [response] | errors, failures, invalid input, timeouts |
-| Complex | combination | WHILE [state], WHEN [trigger] the [system] SHALL [response] | the above combined |
+One requirement per criterion, with a concrete value - a status code, a field, a bound - never
+"quickly" or "properly". Edge cases are criteria, usually IF/THEN.
 
-The patterns exist so that failure states, state transitions and optional behaviour become
-first-class criteria instead of footnotes squeezed into a subordinate clause of some other
-line. That is the whole reason not to use one shape.
+**A control owes a gesture.** Every control this feature puts in front of a user owes a criterion
+that names who acts, which control, and what the page shows afterwards. A screenshot shows the
+button, never what it does. Name the use as it really happens: several files where several are
+allowed, editing what exists and not only creating it.
 
-**Rules.** One requirement per criterion, never two behaviours bundled. Concrete values - a
-status code, a field, a bound - never "quickly", "gracefully" or "properly". Every criterion
-contains a SHALL and is measurable. Edge cases are criteria, usually IF/THEN, not a separate
-list.
+**A screen with a binding source points at it.** Each screen or state the source draws gets one
+criterion naming the gesture that reaches it and its capture files - the image, and the structural
+capture beside it where there is one:
 
-**One run must settle it.** A percentile, an average, an uptime or an error rate is a service
-target, not a criterion: no single execution can satisfy or fail it. Split the line - the
-behaviour becomes the criterion, and the target lands on the observability dimension of the
-sweep. Fused, the provable half hides behind the unprovable one and a test that never touched
-the number marks the whole line green.
+```
+27. WHEN bob uses "Add cover" THEN the system SHALL show the dialog in
+    `.specs/features/<f>/captures/cover.png` (`.specs/features/<f>/captures/cover.aria.yml`)
+```
 
-**A guarantee that something will not happen needs a mechanism.** Nothing prevents a duplicate
-or a double charge by default, so "a retry does not create a second subscription" is a claim
-about machinery. Point at the code that enforces it, or make it a one-way door in `Landing`
-below. Walk the failure that would produce the forbidden thing - the remote call succeeded and
-the local write did not - because that is the path nobody pictures. Where no mechanism exists it
-is a door or a question, never a criterion standing alone.
+The builder matches the image for composition and look. Do not retype the screen into criteria;
+add criteria only for what the source cannot show: what a control does, states nobody captured,
+the rules behind a form. Labels and sentences a capture draws are copied from it, character for
+character, in criteria and Assumptions alike; a state the capture does not draw reuses them, not a
+paraphrase. Its sample data - names, quantities, dates - is not transcribed: the builder recreates
+it with the capture open. A binding source is also the measure of scope: build what it draws, minus
+what `## Differences from the source` lists.
 
-## Sweep the nine dimensions
+**Which references bind.** A capture, screenshot, design frame or live site that comes with the
+request binds: it is the result the user expects, and the user does not have to say so. It is
+`non-binding` only when the user called it inspiration - a mood board, "something like X", a
+product cited for its feel - and its `Sources` line quotes them: `non-binding - user: "<their
+words>"`. Something the source draws that the stored model cannot hold, such as a code or a field,
+is a departure asked as above, never a reason to make the source non-binding. A binding source
+lives in files: export each frame or state, open ones included, to
+`.specs/features/<f>/captures/` with its structure beside it where the tool gives one, keep the link
+in `Sources` with the date, and ask for the files as a `blocks` question when you cannot reach it.
+Each capture's `Sources` line shows the image, `![<name>](captures/<file>)`, so whoever approves
+the plan sees the screen beside the criteria.
 
-The source covers what somebody thought of. This is the list of what nobody writes down, and
-it is fixed so a blank cannot look like nothing to answer:
+**A screen with no reference gets outcomes, not layout.** Say what a user can see and do, never
+where things sit. Layout is the builder's call, held to the design system.
 
-| Dimension | What to cover |
-| --- | --- |
-| Validation and bounds | limits, formats, sanitization |
-| Failure and partial failure | timeouts, partial saves, rollbacks |
-| Idempotency, retry, duplicates | safe retries, dedup keys |
-| Authorization and rate limits | who can call what, throttling |
-| Concurrency and ordering | races, ordering guarantees |
-| Data lifecycle | TTL, archival, deletion, backfill |
-| External-dependency failure | circuit breakers, fallbacks |
-| State transitions | valid transitions, guards |
-| Observability | logging, metrics, tracing |
+**A backend criterion is a rule with examples under it.** One example is the strong case - the
+boundary, or the input where an implementation fitted to the obvious sample breaks.
 
-Walk all nine. Each resolves to a criterion, to something the code already handles, or to an
-explicit `n/a because [reason]`. The `n/a` escape is mandatory - it is what stops the list from
-manufacturing requirements. Where a dimension needs a product answer it becomes an open
-question, never a criterion you invented.
+```
+12. IF a coupon has expired THEN checkout SHALL reject it with 422 `coupon_expired`
+    - expired yesterday → 422; expires today at 23:59 → accepted; no expiry date → accepted
+```
 
-Concurrency and observability hide better than the other seven, because neither is visible to
-a user until it fails. Those two are why this list exists.
+**One run must settle it.** A percentile, an average or an uptime is a service target, not a
+criterion. Split it: the behaviour is the criterion, the target goes to observability.
 
-A landing must observe **that** dimension. Reaching for a number already used on another line
-is the tell that the dimension is uncovered: a duplicate rejected because a row already exists
-says nothing about two requests arriving at once. When you catch yourself borrowing, the honest
-answers are `n/a` with the reason, or a question.
+**A guarantee that something will not happen needs a mechanism.** "A retry does not create a second
+subscription" points at the code that enforces it, or becomes a `Landing` door. Without one it is
+a question.
 
-**Where the record lives:** the landing for each dimension is written in `checks.md` under
-`## Swept`, because each one has to cite a check number. Do not duplicate it here.
+# What is being built
 
-# Writing: what is being built
+Three sections, each with a rule about what stays out: no component catalogue, no columns, no
+types. Those are reversible and settled in the diff.
 
-Five sections, each bounded by a rule about what stays out. That boundary is the whole point:
-the design half of most spec-driven flows fails not because designing is wrong but because the
-document accumulates a component catalogue - `Purpose`, `Location`, `Interfaces`,
-`Dependencies` per class - which is reversible detail, goes stale within weeks, and then
-misleads the next reader with the authority of a written document. None of those fields exists
-here.
+## Shape - the path and what it disturbs
 
-## Flow - the path, not the catalogue
+Open with one sentence on what this reuses instead of duplicating, and one on where the rules that
+change an outcome run: in a layer the repo's tests can reach, as its `AGENTS.md` or test docs say.
+Filtering, searching, sorting and counting decide what a user sees, so they are rules too, not
+presentation.
 
-Open with **one sentence** on what this reuses instead of duplicating - the verifier that
-already exists, the job that already prunes, the policy that already decides. That sentence is a
-decision, and it is the one that keeps a second implementation of an existing thing from landing
-in the diff. A convention inventory does not open the section: each hop already marks whether
-its module exists, so the inventory is distributed through the path.
+**The path.** One numbered line per hop: what enters, which module it crosses, what it hands on,
+what persists or goes out at the end. Name only modules that exist today, marked `(exists)`, or
+that a `Landing` door creates, marked `(door <n>)`; a new module with no door is `(new)` and its
+placement is the builder's. `single module - <name>` is complete.
 
-Then one line per hop, in order: what enters, which module it crosses, what it hands to the next,
-and what persists or goes out at the end. This is the map a reviewer reads the `Landing` rows
-against, and what a second builder needs so it does not rebuild a hop that exists.
+**The drawing.** The person approving the plan reads a drawing before a list, so draw the path in
+mermaid: a `sequenceDiagram` for a request and its answer, a `flowchart` when it branches, fans out
+or hands off to a queue or job. Number each arrow or node with its line in the list and name the
+same modules in both: the list says what each hop decides, the drawing shows the shape. Both stay
+true through the build.
 
-**Name only modules that exist today, or that `Landing` creates as a door.** A component that is
-neither is placement - reversible, answered by the repo's conventions, settled in the diff. That
-single rule is what keeps this from becoming the catalogue.
+**The data.** An `erDiagram` of the entities this reads or writes and how they relate, then one
+line, `New: <entities and relations this adds>` (`New: nothing - read only` is complete). No
+attribute blocks. `Data: none - <why>` when nothing stored is touched.
 
-`single module - <name>` is a complete answer, and most features are that. The section is
-required anyway: a feature crossing four modules and one crossing one have to be distinguishable
-without reading the whole artifact.
+**States**, only when an entity or a screen moves through states: a `stateDiagram-v2` with each
+transition and what triggers it. A missing transition shows in a drawing where it hides in a list
+of criteria.
 
-**When the path is not linear, draw it instead.** A numbered list cannot express one event
-fanning out to three independent handlers, a fork that takes one of two paths, or a hop that
-enqueues and returns while the work happens later - and flattening any of those into a sequence
-describes a system that does not exist. Use a mermaid `flowchart` for exactly those cases, with
-the same rule: every module node carries `(exists)` or the door that creates it, or it is
-placement and does not belong here.
+**Changes underneath.** A table of what already exists and changes: a domain term that changes
+meaning (name who branches on it today), stored data (backfill, migrate on read, or nothing), and
+each reader that will see the new data. Each reader named gets a criterion or an `Out of scope`
+row.
 
-The diagram is the exception and the list is the default, for a reason that is not aesthetic:
-`Flow` is **kept true** through the build, and a list is cheap to correct in the commit that
-changes the path while a diagram quietly rots. Reach for it when the shape genuinely branches,
-not to make a three-hop line look considered.
-
-## Relations - the stored shape
-
-Only when this changes the shape of stored data, and only what `Landing` settled: entities,
-cardinality, and the constraints that are one-way. **No columns, no types.** Those are
-reversible, they come from the repo's conventions, and putting them here produces the diagram
-that disagrees with the schema in three months.
-
-`None - no stored-data shape change` is complete.
+When stored data changes, the `erDiagram` also carries the one-way constraints `Landing` settled.
 
 ## Surface - the signature
 
-Only a route this feature adds or whose signature changes. An existing route that still works
-is a criterion or an `Impact` row, not a Surface line. The **signature, not a specification**:
-route, what goes in, what comes out, which statuses. A payload key stops being yours to rename
-the moment something outside this codebase reads it, which is why this is a review and not
-documentation.
-
-Do **not** put check numbers here - checks do not exist yet. Each route's statuses become a set
-row in the `Coverage` join in `checks.md`, which is what proves none of them went unclaimed.
-
-`None - nothing consumed outside` is complete.
+Only a route this adds or whose signature changes: route, what goes in, what comes out, statuses,
+and who may call it. The statuses include what a caller who may not call gets (redirect, 401, 403
+or 404); `Who: anyone` owes none. No check numbers here. `None - nothing consumed outside` is
+complete.
 
 ## Landing - the one-way doors
 
 A door is one-way when reversing it costs more than a refactor: a persisted schema, a contract
-someone else consumes, a new dependency, a data backfill, and a pattern the codebase does not
-have yet - precedent stops being reversible once the next features have copied it.
+someone consumes, a new dependency, a backfill, a pattern the codebase does not have yet. Each row
+gives the literal shape the next person copies and the alternative rejected, with the property
+that disqualified it. Scope and rules with no persisted mechanism are not doors. Identifier width,
+uniqueness, nullability over a populated table and a field a consumer binds to are doors.
+`None - <why nothing here is one-way>` is complete. A door that reaches past this feature also goes
+in `.specs/STATE.md` `## Decisions` ([memory.md](memory.md)).
 
-Each row shows the **literal shape** the next person will copy and what you rejected, named with
-the property that disqualified it: "cleaner" cannot be argued with, "cannot express the next
-state" can. Where the choice was forced rather than compared, name the constraint that forced
-it. Keep the row short - `Relations` and `Surface` carry the diagram and the signature.
-
-`None - <why nothing here is one-way>` is a complete answer, and stating it is what makes the
-omission contestable.
-
-Two things look like doors and are not. Scope ("V1 does not charge") reverses by doing the next
-slice and already lives in `Out of scope`. A rule with no mechanism ("one trial per user")
-reverses by changing a condition; it becomes a door only once something persisted enforces it,
-and then the row is the unique index with its literal definition, not the rule.
-
-A column or a type belongs here whenever it is a door, and the tell is never the word "column".
-Identifier width is a type and irreversibly a door. Uniqueness decides product behaviour.
-Nullability over a populated table is a data-dependent migration. A field a consumer binds to
-stops being yours to rename. Everything else about the schema - names, indexes, ordinary types -
-is settled while building.
-
-Weigh the rejection against what comes after this feature. A constraint that settles the problem
-in front of you can forbid something a later slice needs, and when a door reaches past the
-boundary, say what it closes. When a decision needs a paragraph to justify itself, it is an ADR
-or an RFC and it comes **before** this file: write it, link it, keep the row literal.
-
-**A door that reaches past this feature also belongs in `.specs/STATE.md` `## Decisions`** - the
-shape here, the constraint there. See [memory.md](memory.md).
-
-## Impact - what gets disturbed
-
-In the file this sits after `Flow` - blast radius on the first scroll, not after forty
-criteria. What already exists and changes underneath. "Nothing" is a valid answer; a missing
-row is not.
-
-The domain rows matter more than they look. A name leaks - it becomes a class, a column, a
-payload key, a route - so naming is a one-way door that does not look like one. For a term that
-changes meaning, name **who branches on it today**: those callers never appear in the feature's
-diff. Past two terms, give each its own row; six terms in one cell cannot show a gap.
-
-The stored-data row is about what runs against existing data, not only about rows you move. A
-unique index over a column that was never unique fails on the first pair that already exists, in
-production, against real rows.
-
-# Closure gate
-
-Before presenting the plan, five checks. Nothing proceeds unresolved **and** unmarked.
-
-1. **Unambiguity and precision.** Every criterion has a single interpretation and a precise
-   expected outcome. One that fails either gets resolved with the user, split, or logged as an
-   assumption with the chosen interpretation and its rationale.
-2. **Assumptions closure.** Every unresolved decision that surfaced is either resolved or
-   recorded in `## Assumptions` with a chosen default and a rationale - including every gray area
-   you chose not to raise and every one the user declined. Silently dropped is the failure this
-   check exists for; a default nobody saw is fine, a default nobody can find is not.
-3. **Blocking questions are marked as such.** A question that stops a criterion from ever being
-   satisfiable is different in kind from one that leaves an error payload undecided. So is one
-   that blocks nothing technical and still stops the feature reaching real users - a catalog
-   nobody populated, a credential nobody issued. Three kinds: `blocks`, `blocks go-live`,
-   `open`.
-4. **Both enumerations are walked, not skimmed.** Every item of every surface present has a
-   landing in `## Observable`, and all nine dimensions have one in `checks.md`. A blank in either
-   is the failure both lists exist to make visible.
-5. **Every criterion has somewhere to land in the shape.** A criterion whose behaviour crosses
-   no hop in `Flow`, touches nothing in `Relations` and appears on no route in `Surface` is
-   either out of scope or a gap in the shape. This is the check the two halves being one file
-   buys, and it is the reason to write them in one sitting.
-
-This gate clarifies existing requirements; it never invents new ones. `Out of scope` and the
-sweep's `n/a` escape are the counterweights.
-
-**Run it, do not eyeball it:**
+# Before presenting
 
 ```bash
 python3 <skill-dir>/scripts/validate_plan.py <feature>
 ```
 
-It fails a missing or empty section, a criterion that is not EARS-shaped, an assumption row with
-an empty default or rationale, an `Observable` row whose landing is blank or whose `n/a` carries
-no reason, a `Landing` row with no literal shape or no rejected alternative, a `Relations` block
-that names columns or types, a `Surface` row missing its statuses, and check numbers written
-into `Surface` before checks exist. It warns on a `Flow` hop naming a module marked neither as
-existing nor as a door. Judgment calls stay yours.
+It checks the structure. What it cannot see stays yours: a hop marked `(exists)` only stands if
+that module already does what the criteria assign it. And read the request again, one sentence at a
+time: each one lands on a criterion, an `Out of scope` row or an open question. A sentence that lands
+nowhere is the requirement that goes missing, and nobody downstream reads the request again.
+
+Every unresolved decision is a criterion, an `Assumptions` row, or an open question marked
+`blocks`, `blocks go-live` or `open`.
 
 ## Template: `.specs/features/<feature>/plan.md`
 
@@ -372,77 +216,67 @@ existing nor as a door. Judgment calls stay yours.
 
 ## Problem
 
-<Present tense, no solution inside it: what is true today that should not be, who pays for it,
-what it costs them. The evidence the source gives, copied literally - or a note that it gives
-none.>
+<Present tense, no solution inside it: what is true today, who pays, what it costs. The evidence
+the source gives, or a note that it gives none.>
 
 <What is different for a user when this ships.>
 
-## Flow
+## Shape
 
-<One sentence: what this reuses instead of duplicating.>
+<One sentence: what this reuses instead of duplicating. One sentence: where the rules that change an outcome run, in a layer the repo's tests reach.>
 
 1. <what enters> -> `<Module>` (exists) - <what it does, what it hands on>
 2. `<Module>` (exists) - <what it does>, persists `<Entity>` (door <n>)
-3. `<Module>` (new, no door - placement per conventions) - <what it decides>
+3. `<Module>` (new) - <what it decides>
 4. out: `<response>`, and `<Module>` (exists) reads `<field>` on the next request
 
-<Or, for most features:> `single module - <Name>`
-
-<Or, only when the path branches, fans out, or hands off asynchronously:>
-
 ```mermaid
-flowchart TD
-    IN[what enters] --> V["Module (exists)"]
-    V --> A["Module (exists)"]
-    V --> B["Module (door 2)"]
-    A --> OUT[response]
+sequenceDiagram
+    participant A as <Module>
+    participant B as <Module>
+    A->>B: 1. <what enters>
+    B-->>A: 4. <response>
 ```
 
-## Impact
+**Changes underneath**
 
 | Front | What changes |
 | --- | --- |
-| domain | new term: `<Name>` - <one-line definition>, lives in <module> |
-| domain | existing term: `<Name>` meant <x>, now means <y> - <who branches on it today> |
-| stored data | <backfill now / migrate on read / dual write / nothing to migrate> |
-
-## Relations
+| domain | `<Name>` meant <x>, now means <y> - <who branches on it today> |
+| stored data | <backfill now / migrate on read / nothing to migrate> |
+| readers | <screen or job that shows the new data> |
 
 ```mermaid
 erDiagram
     <Entity> ||--o{ <Entity> : "<verb>"
-    <Entity> ||--|| <Entity> : "<field> - unique, door <n>"
 ```
 
-One-way constraints: <field> unique (door <n>), <field> not null with <value> in the enum
-(door <n>). No columns and no types here.
+New: <entities and relations this adds, or `nothing - read only`>. One-way constraints: <field>
+unique (door <n>).
 
-<Or:> `None - no stored-data shape change`
+<Only when something moves through states:>
+
+```mermaid
+stateDiagram-v2
+    [*] --> <State>
+    <State> --> <State> : <trigger>
+```
 
 ## Surface
 
-Only routes this adds or whose signature changes.
-
-| Route | In | Out | Status |
-| --- | --- | --- | --- |
-| `<METHOD> /<path>` | `<field>`, `<field>` | `<field>` · `<field>` | `<code>`, `<code>`, `<code>` |
-
-<Or:> `None - nothing consumed outside`
+| Route | In | Out | Status | Who |
+| --- | --- | --- | --- | --- |
+| `<METHOD> /<path>` | `<field>` | `<field>` | `<code>`, `<denied code>` | <who may call it, and what the rest get> |
 
 ## Landing
 
 | One-way door | Literal shape | Alternative rejected |
 | --- | --- | --- |
-| <what> | <enum value, unique index, dependency - the literal a reader copies> | <the option, and the property that disqualified it> |
+| <what> | <the literal a reader copies> | <the option, and the property that disqualified it> |
 
 - Nothing else in this change is hard to reverse
 
 ## Criteria
-
-Grouped by slice - one observable outcome each, never a layer. Numbering runs across the whole
-plan. A screen names its screen and gives every state that matters its own line: empty, loading,
-error, unauthorised.
 
 ### S1: <slice - the outcome someone can watch> (P1)
 
@@ -452,24 +286,10 @@ error, unauthorised.
 
 1. WHEN <trigger> THEN the system SHALL <observable outcome with the concrete value>
 2. IF <undesired condition> THEN the system SHALL <response>
-3. WHILE <state holds> the system SHALL <behaviour>
-4. The system SHALL <always-on invariant with its concrete value>
-
-**Independent test:** <how to demo this slice alone>
-
-### S2: <slice> (P2)
-
-<One line: the outcome this slice is.>
-
-**Acceptance Criteria**
-
-5. WHEN <trigger> THEN the system SHALL <outcome>
-
-**Independent test:** <how to demo>
+   - <example> → <result>; <the strong case> → <result>
+3. WHEN <who> <gesture> THEN the system SHALL show the <screen> in `<image>` (`<structural capture>`)
 
 ## Out of scope
-
-Product capabilities only. Process and harness rules live in AGENTS.md or as Observable `n/a`.
 
 | Excluded | Why |
 | --- | --- |
@@ -477,58 +297,37 @@ Product capabilities only. Process and harness rules live in AGENTS.md or as Obs
 
 ## Assumptions
 
-Defaults that are not already a numbered criterion. Drop a row once it is.
-
 | Assumption | Chosen default | Rationale | Confirmed? |
 | --- | --- | --- | --- |
 | <ambiguity> | <what we will do> | <why> | y/n |
 
 **Open questions:** none - all resolved or logged above.
 
-<Or, when something genuinely stayed open:>
+## Differences from the source
 
-| # | Kind | Question | Until answered |
-| --- | --- | --- | --- |
-| 1 | blocks | <question> | <which criterion cannot be satisfied> |
-| 2 | blocks go-live | <question> | <what cannot be switched on for real users> |
-| 3 | open | <question> | <what stays imprecise, and what was written meanwhile> |
+<Only when a source binds. Every way the product departs from what the source draws, each one
+approved by the user.>
 
-## Observable
-
-Worksheet, not the review. `n/a` needs its reason. One row may group the same decision
-across several routes.
-
-| Surface | Decision | Landing |
+| Source shows | Product shows | Confirmed |
 | --- | --- | --- |
-| screen `<name>` | empty state | AC <n> |
-| screen `<name>` | error state | AC <n> |
-| screen `<name>` | destructive action confirms | existing - <the pattern already in use> |
-| API `<METHOD> /<path>` | error shape and codes | AC <n> |
-| all new `<METHOD> /<path>*` | versioning, rate limits | n/a - <why they do not apply> |
+| <label, control or state in the capture> | <what the product shows instead, or nothing> | y - <AD-NNN holding the question and the answer> |
 
-<Or:> `None - no user-facing surface`
+<Or:> None - the product matches the source
 
 ## Sources
 
-- <ticket or binding design> - <what it settles>
+- <ticket or binding design> - binding - <what it settles>
+- ![<capture>](captures/<capture>.png) - binding - <what it draws>
+- <what the user called inspiration> - non-binding - user: "<their words>" - <what it informs>
 `````
 
-## Then confirm, and only then write checks
+## Then confirm
 
-**This is the one place worth stopping for a human by default.** Present the plan and stop.
-Point at `Flow`, at `Impact`, and at any `Landing` door that still has a live alternative -
-those are the three a reviewer would want named, not buried. Where `Relations` changes data
-that already exists or `Surface` changes something already consumed, say that too.
-
-Then continue into [checks.md](checks.md). Every route's statuses, every door, and every entity
-here owes a set row or a check there - that derivation is the next step's job, and it is the one
-that catches what this file left implicit.
+Present the plan and stop: this is the one default stop for a human. Name `Shape`, any `Landing`
+door with a live alternative, and anything that changes existing data or a consumed contract.
+Then continue into [checks.md](checks.md).
 
 ## Notes
 
-- **P1 is a vertical slice** - a complete, demo-able outcome, not a layer.
-- **A criterion you cannot imagine a test for is not ready.** You do not name the test here;
-  that happens in `checks.md`, against the repo's real test setup.
-- **Priority tags are advisory.** They order the work; they never scale down verification.
-- The two halves are written in one sitting. The shape is written **after** the criteria - that
-  is writing order, not file order. File order is for the human reading the task.
+- P1 is a vertical slice, not a layer. Priority orders the work and never scales down verification.
+- A criterion you cannot imagine a test for is not ready.

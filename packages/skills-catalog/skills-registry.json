@@ -1768,20 +1768,26 @@
         "references/checks.md",
         "references/memory.md",
         "references/plan.md",
+        "references/verify-screens.md",
         "references/verify.md",
         "scripts/check_commit.py",
+        "scripts/check_proofs.py",
         "scripts/fixtures/checks.md",
         "scripts/fixtures/plan.md",
+        "scripts/fixtures/proofs.md",
         "scripts/fixtures/verification.md",
+        "scripts/lean_config.py",
         "scripts/lessons.py",
+        "scripts/mutate.py",
+        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_checks.py",
         "scripts/validate_plan.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.2.0",
-      "contentHash": "807aad338cc9e306f68fe9335bc5251a5e749e0bc3676998801e48bf2ff79a80"
+      "version": "2.0.0",
+      "contentHash": "409d8a43d022e2d15d03927bdc062032cf7331da6aab7b8f3de4b95f7a0d666a"
     },
     {
       "name": "vercel-deploy",
