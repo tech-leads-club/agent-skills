@@ -57,6 +57,8 @@ When user suggests scope creep: "That sounds like a separate feature. I'll note 
 
 ### 4. Write context.md
 
+Write it in the turn the answers arrive, with the user's words for each decision; an answer left in the chat is lost to a compaction.
+
 ---
 
 ## Template: `.specs/features/[feature]/context.md`

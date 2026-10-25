@@ -18,6 +18,8 @@ What it checks:
            `<capture>.running.png`, or a picture at another size than its capture (1x, 2x, 3x pass)
   ERROR  - a browser proof that names no `.running.png`, or one that is not on disk
   ERROR  - a `walk` proof and no `**Walked:**` line in the Handoff
+  ERROR  - screens.md with no `**Round**:` line, or a round past 2
+  ERROR  - spec.md or tasks.md with no `**Approved**: <date> - user: "<their words>"` line
   WARN   - the report says self-verified (author == verifier: a degraded gate)
 
 Usage:
@@ -34,7 +36,7 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, read_mutations
+from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, read_mutations, unapproved
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
@@ -43,6 +45,8 @@ WALK_PROOF_RE = re.compile(r"^`?walk\b", re.IGNORECASE)
 WALKED_RE = re.compile(r"^\s*[-*]?\s*\**walked\**\s*:", re.IGNORECASE)
 SHOT_RE = re.compile(r"[\w./-]+\.running\.png")
 CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
+ROUND_RE = re.compile(r"^\**\s*Round\s*\**\s*:\s*\**\s*(\d+)", re.IGNORECASE)
+MAX_ROUNDS = 2
 
 
 def _feature_dirs(root):
@@ -197,6 +201,15 @@ def _screens_verdicts(fdir, name):
             f"(verify-screens.md)"
         ]
     errors = []
+    rounds = [int(m.group(1)) for m in (ROUND_RE.match(ln.strip()) for ln in strip_fences(_read(path))) if m]
+    if not rounds:
+        errors.append(
+            f"{name}: screens.md has no `**Round**:` line - the screens sub-agent writes 1, and 2 on the "
+            f"second and last round, so a resumed run knows which round it is in")
+    elif rounds[0] > MAX_ROUNDS:
+        errors.append(
+            f"{name}: screens.md reads `**Round**: {rounds[0]}` - there is no third round; what still "
+            f"differs after round 2 goes to the user")
     for header, rows in tables:
         verdict_col = column(header, "verdict")
         for r in rows:
@@ -341,6 +354,10 @@ def _check_feature(fdir, name):
         errors += _screens_verdicts(fdir, name)
         errors += _screen_evidence(fdir, plan, name)
     errors += _walk_logged(checks_lines, name)
+    for doc in unapproved(fdir):
+        errors.append(
+            f"{name}: {doc} has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - the spec and "
+            f"the tasks are approved by the user, in their words, before Execute")
     return errors, warnings
 
 

@@ -30,6 +30,10 @@ the next. After all tasks in the batch are complete, the worker reports a compac
 done, commit hashes, test counts, deviations/blockers) to the orchestrator. See
 [sub-agents.md](sub-agents.md) for the full model.
 
+### Before implementing: the approvals
+
+Run `python3 <skill-dir>/scripts/validate_tasks.py <feature> --execute`. Execute starts only when `spec.md`, and `tasks.md` when it exists, carry `**Approved**: <date> - user: "<their words>"`. A missing line means the user has not approved: present and stop, never write it yourself.
+
 ### Before implementing: assess sub-agent delegation (MANDATORY - before the first task)
 
 Before implementing anything, if a formal `tasks.md` with an Execution Plan exists, **count its total tasks** and pack the phases into task-budgeted batches (~7 tasks per worker, whole phases - see [sub-agents.md](sub-agents.md)). If that yields **more than one batch** (> ~8 tasks), you MUST present the sub-agent offer to the user and wait for their choice before starting Execute - do not silently proceed inline. If the feature fits a single batch (≤ ~8 tasks, or the user declines), execute inline. Skip this check only when you are already a batch worker executing a delegated batch (the orchestrator already made the delegation decision).
@@ -206,6 +210,7 @@ During implementation, you will notice things that could be improved, refactored
 - If it's a bug: surface it to the user (or capture it as a separate task)
 - If it's an improvement: add it to the feature's `context.md` under "Deferred Ideas" (or surface it to the user if there is no `context.md`)
 - If it's related to the current task: only include it if it's in the "Done when" criteria
+- If the user settles something mid-build: write it in the turn it arrives - into `spec.md` when it changes a criterion (an `AD-NNN` when it departs from a binding source), otherwise on the `**Settled mid-build:**` line of tasks.md `## Handoff`, in their words
 
 **The heuristic:** "Is this in my task definition?" If no, don't touch it.
 
@@ -222,9 +227,9 @@ Save each state a capture draws beside it as `captures/<capture>.running.png`, t
 When the last task of the feature is committed, the orchestrator - never a batch worker - closes it:
 
 1. **Run the proofs.** `python3 <skill-dir>/scripts/check_proofs.py <feature>` runs every check's proof once per runner at `HEAD`, the `**Build**:` commands, and checks the pictures and the walk; it writes `proofs.md`. A red row goes back to an implementer before anyone verifies.
-2. **Dispatch two fresh sub-agents in parallel, over the same `HEAD`:** the **Verifier** with [validate.md](validate.md), and when a criterion cites a capture, the **screens sub-agent** with [verify-screens.md](verify-screens.md). Author ≠ verifier: neither is the author, and neither fixes anything.
+2. **Dispatch two fresh sub-agents in parallel, over the same `HEAD`:** the **Verifier** with [validate.md](validate.md), and when a criterion cites a capture, the **screens sub-agent** with [verify-screens.md](verify-screens.md). Author ≠ verifier: neither is the author, and neither fixes anything. Write both on the `**Dispatched:**` line of tasks.md `## Handoff` before sending them, with the `HEAD`, and mark each `returned` when it does.
 3. **Fix every finding in one pass,** each closed by a commit the report's `Closed` column cites.
-4. **Round 2 is the script:** `check_proofs.py <feature> --mutations mutations.json` with the Verifier's mutations, and the screens sub-agent again on the rows that read `differs` only. There is no second Verifier. What still fails goes to the user.
+4. **Round 2 is the script:** `check_proofs.py <feature> --mutations mutations.json` with the Verifier's mutations, and the screens sub-agent again on the rows that read `differs` only, which writes `**Round**: 2`. There is no second Verifier and no third round. What still fails goes to the user.
 5. **Gate:** `python3 <skill-dir>/scripts/validate_verification.py <feature>` exits 0, then distill lessons ([lessons.md](lessons.md)). Close only when every sub-agent you dispatched has returned.
 
 ## Execution Template

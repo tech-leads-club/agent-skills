@@ -52,6 +52,7 @@ Write `.specs/features/<feature>/screens.md`: the verdict table, then one invent
 # <Feature> screens
 
 **Verifier**: independent sub-agent (author != verifier)
+**Round**: 1
 
 | Screen | Compared with | Verdict | Finding |
 | --- | --- | --- | --- |
@@ -72,4 +73,5 @@ Return the rows that differ in chat; a diverging screen goes back with the Verif
 There is one more round after a fix, and it is the last. A fresh screens sub-agent retakes only the
 pictures with a `differs` row, opens only those rows, and marks each `same` or `differs` again. Rows
 marked `same` stay as they were: what passed has passed. Nothing new is added to an inventory in this
-round. What still differs goes to the user.
+round. It sets `**Round**: 2`; a screens.md already at 2 gets no further round. What still differs
+goes to the user.

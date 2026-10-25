@@ -250,9 +250,9 @@ def with_diff(old, new):
 RUNNING = "screens/billing.running.png"
 
 
-def screens_md(verdict):
+def screens_md(verdict, round_line="**Round**: 1\n"):
     return lambda s: (
-        "# Billing screens\n\n**Verifier**: independent sub-agent (author != verifier)\n\n"
+        "# Billing screens\n\n**Verifier**: independent sub-agent (author != verifier)\n" + round_line + "\n"
         "| Screen | Compared with | Verdict | Finding |\n| --- | --- | --- | --- |\n"
         f"| `{RUNNING}` | AC 9 | {verdict} | - |\n")
 
@@ -338,6 +338,14 @@ MULTI_CASES = [
     ("validate_verification", "a walk proof with no Walked line in the Handoff",
      {"checks.md": with_walk_proof},
      1, "no `**Walked:**` line"),
+    ("validate_verification", "screens.md with no Round line",
+     {"plan.md": with_binding, "screens.md": screens_md("matches", ""),
+      "captures/billing--card-form.running.png": lambda s: "png"},
+     1, "no `**Round**:` line"),
+    ("validate_verification", "screens.md in a third round",
+     {"plan.md": with_binding, "screens.md": screens_md("matches", "**Round**: 3\n"),
+      "captures/billing--card-form.running.png": lambda s: "png"},
+     1, "there is no third round"),
     ("validate_plan", "a binding source with no Differences section",
      {"plan.md": lambda s: with_binding(s).replace(DIFFERENCES, "")},
      1, "no `## Differences from the source` section"),
@@ -425,6 +433,9 @@ NEGATIVE_CONTROLS = [
       "checks.md": with_browser_shot("screens/billing.running.png"), RUNNING: lambda s: "png"}),
     ("validate_verification", "a screen judged in screens.md is accepted",
      {"plan.md": with_screen, "screens.md": screens_md("matches"), RUNNING: lambda s: "png"}),
+    ("validate_verification", "a capture judged again in round 2 is accepted",
+     {"plan.md": with_binding, "screens.md": screens_md("matches", "**Round**: 2\n"),
+      "captures/billing--card-form.running.png": lambda s: "png"}),
     ("validate_checks", "a walk proof needs no test selector and no picture",
      {"checks.md": with_walk_proof}, "names no test selector"),
     ("validate_verification", "a walk proof with its visit in the Walked line is accepted",
@@ -480,6 +491,43 @@ TOOLING = [
 ]
 
 
+TASKS = """# Billing Tasks
+
+{approval}**Mutations**: 3
+**Build**: `bun run build`
+
+## Test Coverage Matrix
+
+| Layer | Tests |
+| --- | --- |
+| Service | unit |
+
+## Gate Check Commands
+
+| Level | Command |
+| --- | --- |
+| quick | `bun test` |
+
+## Execution Plan
+
+### Phase 1: Core
+
+## Task Breakdown
+
+### T1: Suspend on a failed charge
+
+**Where**: `src/billing.ts`
+**Depends on**: None
+**Tests**: unit
+**Gate**: quick
+
+## Checks
+
+**C1** - A failed charge suspends the subscription (AC 1)
+Proof: `bun test src/billing.test.ts -t "suspends on a failed charge"`
+"""
+
+
 def run_tooling():
     """Exercise the scripts the skill ships beyond the validators.
 
@@ -522,24 +570,65 @@ def run_tooling():
     # The spec-driven flow keeps its checks in tasks.md and its criteria in spec.md: the same gate
     # has to read them there, and still fail when a proof does.
     if shipped("validate_verification"):
-        root = scaffold()
-        fdir = os.path.join(root, ".specs", "features", FEATURE)
-        os.rename(os.path.join(fdir, "checks.md"), os.path.join(fdir, "tasks.md"))
-        os.rename(os.path.join(fdir, "plan.md"), os.path.join(fdir, "spec.md"))
-        code, out = run("validate_verification", root)
-        proofs = os.path.join(fdir, "proofs.md")
-        with open(proofs, encoding="utf-8") as f:
-            text = f.read()
-        with open(proofs, "w", encoding="utf-8") as f:
-            f.write(text.replace("| C3 |", "| C3x |", 1))
-        code2, out2 = run("validate_verification", root)
-        shutil.rmtree(root)
-        if code == 0 and code2 == 1 and "C3" in out2:
-            print("  ok      validate_verification.py: reads tasks.md and spec.md, and fails a missing proof there")
-        else:
-            ok = False
-            print(f"  BROKEN  validate_verification.py: spec-driven layout - exit {code} then {code2}: "
-                  f"{(out + out2).strip()[:300]}")
+        def spec_driven_layout():
+            root = scaffold()
+            fdir = os.path.join(root, ".specs", "features", FEATURE)
+            for old, new in (("checks.md", "tasks.md"), ("plan.md", "spec.md")):
+                text = read_artifact(os.path.join(fdir, old))
+                os.remove(os.path.join(fdir, old))
+                title, rest = text.split("\n", 1)
+                write_artifact(os.path.join(fdir, new),
+                               f"{title}\n\n**Approved**: 2026-10-25 - user: \"Aprovado, pode seguir.\"\n{rest}")
+            return root, fdir
+
+        def edit(path, old, new):
+            text = read_artifact(path)
+            write_artifact(path, text.replace(old, new, 1))
+            return text != text.replace(old, new, 1)
+
+        approval = '**Approved**: 2026-10-25 - user: "Aprovado, pode seguir."'
+        for desc, file, old, new, want_code, want_frag in [
+            ("reads tasks.md and spec.md approved by the user", None, None, None, 0, ""),
+            ("fails a missing proof in that layout", "proofs.md", "| C3 |", "| C3x |", 1, "C3"),
+            ("fails a spec with no approval line", "spec.md", approval, "", 1, "spec.md has no `**Approved**"),
+            ("fails tasks approved without the user's words", "tasks.md", approval,
+             "**Approved**: 2026-10-25 - agent, the plan is complete", 1, "tasks.md has no `**Approved**"),
+            ("fails an approval with no date", "spec.md", approval,
+             '**Approved**: yes - user: "ok"', 1, "spec.md has no `**Approved**"),
+        ]:
+            root, fdir = spec_driven_layout()
+            applied = file is None or edit(os.path.join(fdir, file), old, new)
+            code, out = run("validate_verification", root)
+            shutil.rmtree(root)
+            if applied and code == want_code and want_frag in out:
+                print(f"  ok      validate_verification.py: spec-driven layout {desc}")
+            else:
+                ok = False
+                print(f"  BROKEN  validate_verification.py: spec-driven layout {desc} - applied={applied} "
+                      f"exit {code}: {out.strip()[:300]}")
+
+    if shipped("validate_tasks"):
+        approval = '**Approved**: 2026-10-25 - user: "Aprovado, pode seguir."\n'
+        for desc, spec, tasks, argv, want_code, want_frag in [
+            ("--execute passes with both approvals", approval, approval, ["--execute"], 0, ""),
+            ("--execute fails with the spec unapproved", "", approval, ["--execute"], 1, "spec.md has no"),
+            ("--execute fails with the tasks unapproved", approval, "**Status**: Approved\n", ["--execute"], 1,
+             "tasks.md has no"),
+            ("before approval the tasks are validated without one", "", "", [], 0, ""),
+        ]:
+            root = tempfile.mkdtemp(prefix="tasks-")
+            fdir = os.path.join(root, ".specs", "features", FEATURE)
+            os.makedirs(fdir)
+            write_artifact(os.path.join(fdir, "spec.md"), "# Billing Specification\n\n" + spec)
+            write_artifact(os.path.join(fdir, "tasks.md"), TASKS.replace("{approval}", tasks))
+            code, out = run_script("validate_tasks.py", FEATURE, "--root", root, *argv)
+            shutil.rmtree(root, ignore_errors=True)
+            if code == want_code and want_frag in out:
+                print(f"  ok      validate_tasks.py: {desc}")
+            else:
+                ok = False
+                print(f"  BROKEN  validate_tasks.py: {desc} - expected exit={want_code} and {want_frag!r}, "
+                      f"got exit={code}: {out.strip()[:300]}")
 
     # the lessons store has to survive a real round-trip on disk, not only its unit checks
     if not shipped("lessons"):

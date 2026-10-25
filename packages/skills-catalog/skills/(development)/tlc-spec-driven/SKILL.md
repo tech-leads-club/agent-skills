@@ -28,7 +28,7 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 
 **Execution contract - every task, non-negotiable (holds even if you do not open the reference files):**
 
-1. **Ask, then stop for approval.** Every gray area that is the user's - scope, product behaviour, a departure from a binding source - is asked before the spec is presented; an assumption never stands in for one. Approving the spec and approving the tasks are the two stops for a human. When nobody is there to answer, end your turn with the questions.
+1. **Ask, then stop for approval.** Every gray area that is the user's - scope, product behaviour, a departure from a binding source - is asked before the spec is presented; an assumption never stands in for one. Approving the spec and approving the tasks are the two stops for a human. When nobody is there to answer, end your turn with the questions. Each approval is written as `**Approved**: <date> - user: "<their words>"` in spec.md and tasks.md; one the user did not give is never written. Every answer goes into its file in the turn it arrives - the chat does not survive a compaction.
 2. Tests derive from the spec's acceptance criteria and assert spec-defined outcomes - they never mirror the implementation.
 3. The gate must pass before a task is done - the test runner decides, not self-assessment. One atomic commit per task, with `tasks.md` marked complete before it - and inside it when the repo tracks `.specs/`; where the repo ignores `.specs/`, the commit holds only the code and its tests, and never forces them in. Never batch tasks; never weaken, skip, or delete tests to make them pass.
 4. **Every criterion has a check, and every check a proof.** tasks.md `## Checks` holds one claim per criterion with the test command that selects its test. After the LAST task, `check_proofs.py` runs them all once at `HEAD`, with the build; then a fresh **Verifier** (author ≠ verifier) runs **always**, never prompted - `**Mutations**: N` mutations (3 by default) wherever a rule would stay green, examples nobody named, assertions looser than their criterion. Done means every finding is closed by a commit and `validate_verification.py` exits 0.
@@ -42,14 +42,15 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 | --- | --- |
 | Before presenting the spec | `validate_spec.py <feature>` - EARS criteria, filled assumptions, requirement IDs, and with captures: binding or quoted, cited, shown, departures approved |
 | Before presenting the tasks | `validate_tasks.py <feature>` - granularity, dependencies, `Tests` and `Gate` per task, `## Checks` with a proof each, `**Build**:`, `**Mutations**:` |
+| Before the first task | `validate_tasks.py <feature> --execute` - the same checks, and the spec and tasks each approved in the user's words |
 | Before each commit | `check_commit.py --message "<msg>"` |
 | After the last task, and after the fix | `check_proofs.py <feature> [--mutations <mutations.json>]` - writes `proofs.md` |
-| Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, mutations killed, findings closed, pictures judged, walk logged |
+| Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, mutations killed, findings closed, pictures judged in round 1 or 2, walk logged, both approvals written |
 | After editing a script or a template | `selftest.py` |
 
 Skip a script only when no code-execution tool is available; then perform the same checks by reading the artifact.
 
-**Before Execute:** read [implement.md](references/implement.md) completely and run `validate_tasks.py`; if a formal `tasks.md` packs into more than one task-budgeted batch (> ~8 tasks), present the sub-agent offer first (see Sub-Agent Delegation).
+**Before Execute:** read [implement.md](references/implement.md) completely and run `validate_tasks.py <feature> --execute`, which also requires both approvals in the user's words; if a formal `tasks.md` packs into more than one task-budgeted batch (> ~8 tasks), present the sub-agent offer first (see Sub-Agent Delegation).
 
 ## Auto-Sizing: The Core Principle
 
@@ -100,11 +101,11 @@ Skip a script only when no code-execution tool is available; then perform the sa
 
 1. Specify → (Design) → (Tasks) → Execute (depth auto-sized)
 
-**Resume work:**
+**Resume work - a new session, or after a compaction:**
 
-1. Read `.specs/STATE.md` (Handoff + Decisions).
-2. Reconcile Handoff against git (`branch`, `status --porcelain`, recent commits) and `tasks.md` - evidence wins over a stale snapshot. Full procedure: [memory.md](references/memory.md).
-3. Propose the reconciled next step before writing code.
+1. Re-read this file, then the reference for the phase the files show. A summary keeps the task, not these rules.
+2. Read `.specs/STATE.md` Decisions and the feature's files - `spec.md` and `tasks.md` (their `**Approved**:` lines, marks and `## Handoff`), `proofs.md`, `verification.md`, `screens.md` - and reconcile them against git: evidence wins over a note. Where each file puts you: [memory.md](references/memory.md).
+3. After a compaction in the middle of a run, continue when the files and git agree; stop only on a conflict. In a new session, propose the reconciled next step before writing code.
 
 ## Context Loading Strategy
 
@@ -124,7 +125,7 @@ Never load several feature specs or several architecture docs at once.
 
 **One worker per task-budgeted batch (~7 tasks, whole phases):** Phases stay the semantic/dependency unit; a **batch** is the execution unit - one or more *consecutive whole phases* packed to ~7 tasks. Walk phases in order, accumulate whole phases into the current batch until it reaches the budget, then start the next - **never split a phase** across workers. Each worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Batches run sequentially. Workers never spawn further sub-agents.
 
-**Verifier and screens sub-agent (always-on, never prompted):** after the final task, the orchestrator runs `check_proofs.py`, then dispatches both in parallel over the same `HEAD` - the Verifier with [validate.md](references/validate.md), the screens sub-agent with [verify-screens.md](references/verify-screens.md) when a criterion cites a capture. Every finding is fixed in one pass; round 2 is `check_proofs.py --mutations` and the screens sub-agent on the rows that differed. No second Verifier; what still fails goes to the user. Then the gate, then lessons ([lessons.md](references/lessons.md)).
+**Verifier and screens sub-agent (always-on, never prompted):** after the final task, the orchestrator runs `check_proofs.py`, then dispatches both in parallel over the same `HEAD` - the Verifier with [validate.md](references/validate.md), the screens sub-agent with [verify-screens.md](references/verify-screens.md) when a criterion cites a capture. Each dispatch - batch workers included - is written on the `**Dispatched:**` line of tasks.md `## Handoff` before it is sent, so a compacted orchestrator waits instead of sending a second. Every finding is fixed in one pass; round 2 is `check_proofs.py --mutations` and the screens sub-agent on the rows that differed, with `**Round**: 2` in screens.md. No second Verifier and no third round; what still fails goes to the user. Then the gate, then lessons ([lessons.md](references/lessons.md)).
 
 **Model tier per role** (only if the harness supports choosing a model per sub-agent): mechanical batches on a faster tier, core-domain batches and Design on a high-reasoning tier, the Verifier mid-to-high. Rubric in [sub-agents.md](references/sub-agents.md).
 

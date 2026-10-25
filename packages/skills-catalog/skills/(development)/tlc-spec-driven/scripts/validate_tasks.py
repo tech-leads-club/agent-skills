@@ -18,9 +18,10 @@ What it checks (heuristic markdown inspection, not a full parser):
   WARN   - a task's `Where` names multiple files (granularity smell -> split it)
   WARN   - a task says `Tests: none` (confirm the coverage matrix agrees)
   WARN   - the diagram could not be parsed confidently (cross-check skipped)
+  ERROR  - with --execute: spec.md or tasks.md has no `**Approved**: <date> - user: "<their words>"`
 
 Usage:
-  python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict] [--execute]
 
   Invoke from the skill directory that ships this script (not the project root).
   target    Path to a tasks.md, a feature directory, or a project root.
@@ -35,6 +36,8 @@ import argparse
 import os
 import re
 import sys
+
+from lean_config import unapproved
 
 REQUIRED_SECTIONS = ["Test Coverage Matrix", "Gate Check Commands", "Execution Plan", "Task Breakdown", "Checks"]
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
@@ -267,6 +270,8 @@ def main(argv=None):
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
     p.add_argument("--strict", action="store_true")
+    p.add_argument("--execute", action="store_true",
+                   help="Before the first task: also require the spec and the tasks approved in the user's words")
     args = p.parse_args(argv)
 
     tasks_path = resolve_tasks(args.target, args.root)
@@ -275,6 +280,11 @@ def main(argv=None):
         return 2
 
     errors, warnings = check(tasks_path)
+    if args.execute:
+        for name in unapproved(os.path.dirname(os.path.abspath(tasks_path))):
+            errors.append(
+                f"{name} has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - Execute starts "
+                f"after the user approves; present it and stop, never write the approval yourself")
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:

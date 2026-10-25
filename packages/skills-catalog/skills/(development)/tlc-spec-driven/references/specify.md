@@ -142,12 +142,16 @@ Fix inline. This gate is bounded to THIS feature's stated dimensions and actual 
 
 **Then present the spec and stop.** Approval of the spec is a stop for a human: lead with the questions that block, then the defaults you picked for the user to correct.
 
+Each answer goes into the spec in the turn it arrives - a criterion, an Assumptions row with `y`, or an `AD-NNN` for a departure - not at the end of the conversation. When the user approves, write `**Approved**: <YYYY-MM-DD> - user: "<their words>"` under the title. An approval the user did not give is never written; `validate_tasks.py --execute` refuses to start without it.
+
 ---
 
 ## Template: `.specs/features/[feature]/spec.md`
 
 ```markdown
 # [Feature Name] Specification
+
+**Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
 
 ## Problem Statement
 

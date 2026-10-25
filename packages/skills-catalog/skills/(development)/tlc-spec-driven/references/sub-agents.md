@@ -73,7 +73,7 @@ No raw logs, no full test output - only the above fields keep the main context c
 **The orchestrating agent's role during Execute:**
 
 1. Count total tasks and pack phases into task-budgeted batches (~7 tasks each) - if that yields more than one batch, offer batch sub-agents and wait for the user to accept
-2. Dispatch the next batch to a worker (or execute inline if not using sub-agents)
+2. Dispatch the next batch to a worker (or execute inline if not using sub-agents), written on tasks.md's `**Dispatched:**` line first
 3. Receive the compact summary
 4. Update `tasks.md` with results
 5. If all tasks in the summary show complete: dispatch the next batch
@@ -91,7 +91,9 @@ No raw logs, no full test output - only the above fields keep the main context c
 runs `check_proofs.py`, then dispatches two fresh sub-agents in parallel over the same `HEAD`: the
 Verifier ([validate.md](validate.md)) and, when a criterion cites a capture, the screens sub-agent
 ([verify-screens.md](verify-screens.md)). Neither is a batch worker, neither is the author, and
-neither fixes anything. A batch worker never dispatches either.
+neither fixes anything. A batch worker never dispatches either. Each dispatch goes on tasks.md's
+`**Dispatched:**` line before it is sent; an orchestrator that finds one there with no report on disk
+waits for it rather than sending another.
 
 **What they receive:** the Verifier gets `spec.md`, tasks.md, `proofs.md`, the diff range and
 `validate.md`; the screens sub-agent gets `spec.md`, the captures, the `**Walked:**` line and
@@ -102,8 +104,8 @@ findings table with a `Closed` column) and `mutations.json`; the screens sub-age
 `screens.md` (a verdict per picture and one inventory each). Both return their findings in chat.
 
 **Failure handling:** every finding is fixed in one pass, then `check_proofs.py --mutations` runs
-again and the screens sub-agent re-opens only the rows that differed. There is no second Verifier
-and no third round: what still fails goes to the user. The gate is
+again and the screens sub-agent re-opens only the rows that differed, writing `**Round**: 2`. There
+is no second Verifier and no third round: what still fails goes to the user. The gate is
 `python3 <skill-dir>/scripts/validate_verification.py <feature>`.
 
 **Standalone fallback:** without sub-agents, run each file in a new session and write

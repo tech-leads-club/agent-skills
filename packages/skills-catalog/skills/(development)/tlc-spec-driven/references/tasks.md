@@ -184,7 +184,7 @@ A failing check means restructure before presenting - do not show failing tasks 
 
 ### 6. Present and stop
 
-Present the tasks for approval and stop: this is the second stop for a human, after the spec.
+Present the tasks for approval and stop: this is the second stop for a human, after the spec. When the user approves, set `**Status**: Approved` and write `**Approved**: <YYYY-MM-DD> - user: "<their words>"`; an approval the user did not give is never written.
 
 ---
 
@@ -203,6 +203,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Design**: `.specs/features/[feature]/design.md`
 **Status**: Draft | Approved | In Progress | Done
+**Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
 **Mutations**: 3
 **Build**: `[build command]; [type check command]; [lint command]`
 
@@ -342,6 +343,10 @@ Proof: browser captures/[capture].running.png
 
 ## Handoff
 
+The feature's live state, written as it happens - a compaction gives no warning.
+
+**Settled mid-build:** [each answer the user gave during Execute, in their words, the turn it arrived - or none]
+**Dispatched:** [each sub-agent before it is sent: batch worker, Verifier, screens round 1 or 2 - at which `HEAD`, and `returned` when it does]
 **Walked:** [each story's Independent Test as you did it - what the screen showed, and how the user reaches each state: sign-in, data, path]
 
 ---
@@ -378,7 +383,7 @@ with no sub-agents spawned.
 
 **The orchestrating agent's role during Execute:**
 1. Count total tasks and pack phases into ~7-task batches - offer batch sub-agents if that yields more than one batch and the user accepts
-2. Dispatch the next batch (to a worker, or execute inline)
+2. Dispatch the next batch (to a worker, or execute inline), written on the Handoff's `**Dispatched:**` line first
 3. Receive the compact batch summary
 4. Update tasks.md with results
 5. If the batch summary shows all tasks complete: proceed to the next batch
