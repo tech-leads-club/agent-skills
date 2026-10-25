@@ -1,355 +1,109 @@
 # Execute: Validate & Verify
 
-**Goal**: Verify implementation meets spec AND coding principles. This is NOT a separate phase - verification is part of every task's completion within Execute.
-
-**Three levels of verification:**
-
-1. **Per-task verification (always, author self-check):** After implementing each task, verify its "Done when" criteria before committing. This is mandatory and automatic. The implementer runs it.
-
-2. **Feature-level validation (independent Verifier sub-agent, always-on, never prompted):** After all tasks for a feature (or priority group) are done, validation runs automatically - the orchestrator dispatches a **fresh Verifier sub-agent** (see [sub-agents.md](sub-agents.md)). Do NOT ask the user whether to run it; it is the safety net, not an opt-in. User interaction is limited to interactive UAT (for user-facing features) and acting on a FAIL verdict ("fix these gaps now?"). The Verifier:
-   - Runs **read-only** over the real implementation and tests - mutations run in a scratch/throwaway state only (see Discrimination Sensor section)
-   - Scopes coverage to the feature's **git diff surface** (not the full repository)
-   - Re-derives coverage independently using **evidence-or-zero**: every AC must be traced to a `file:line` + assertion expression; a criterion with no `file:line` citation counts as NOT covered
-   - Runs the **spec-anchored outcome check** and the **discrimination sensor** (both described below)
-   - Writes `.specs/features/[feature]/validation.md` with the full evidence report
-   - Returns a compact verdict + ranked gap list to the orchestrator in chat
-   - Gaps become **fix tasks** routed back to an implementer; re-verification follows with a maximum of **3 fix→re-verify iterations** before escalating to the user
-
-3. **Interactive UAT (for user-facing features only):** The feature has complex user-facing behavior where human judgment matters (UI flows, interaction patterns, visual design). For backend-only or infrastructure work, automated checks are sufficient.
+A safety net that raises the work, not an audit of it. A script settles what can be settled
+mechanically; a fresh sub-agent spends a few minutes on what needs judgement: where the code can be
+wrong while every test stays green. It runs once per feature, beside the screens sub-agent.
 
 **Trigger for explicit validation:** "Validate", "verify work", "UAT", "test with me", "walk me through it"
 
----
+## Author is not verifier
 
-## Process
+The Verifier is a fresh sub-agent with no inherited context; a self-check reapplies the thinking that
+produced the gap. The author's `## Handoff` in tasks.md carries that thinking, so the Verifier reads
+the spec, the checks and their proofs, not the Handoff. With no sub-agent mechanism, run this file in
+a new session and write `Verifier: self-verified (degraded - no sub-agent)`; the gate flags it.
 
-### 1. Check Completed Tasks
+## The round
 
-Go through tasks.md:
+1. The orchestrator runs `python3 <skill-dir>/scripts/check_proofs.py <feature>` at `HEAD`. It runs
+   every check's proof once per runner, matches each check to the tests its filter selects, runs the
+   `**Build**:` commands, checks the pictures and the walk, and writes `proofs.md`. A red row goes back
+   to an implementer before anything else.
+2. The orchestrator dispatches, in the same turn and in parallel, the screens sub-agent when a
+   criterion cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier. Both read the
+   same `HEAD`. The dispatch names the feature, the files and the diff range, and nothing about what
+   to accept.
+3. Every finding from both is fixed in one pass. Then
+   `check_proofs.py <feature> --mutations .specs/features/<feature>/mutations.json` runs again, the
+   screens sub-agent goes back over the rows that differed (the second and last round), the closing
+   commit is written into each finding, and the gate runs. There is no second Verifier: the script
+   shows the mutations killed and the proofs green at the new `HEAD`. What still fails goes to the
+   user.
 
-- [ ] All tasks marked done?
-- [ ] Any blocked or partial?
+## What the Verifier does
 
-### 2. Spec-Anchored Acceptance Criteria Check
+It receives `spec.md`, tasks.md (its `## Checks`), `proofs.md`, the diff range and this file. It does
+not rerun the proofs or re-locate every assertion; `proofs.md` already says which tests ran and
+passed. It works over the real tree and fixes nothing; its writes are `verification.md`,
+`mutations.json` and throwaway examples it does not commit.
 
-For each acceptance criterion in `spec.md`, the Verifier re-derives the **spec-defined expected outcome** and confirms the test's actual assertion matches it:
+**Mutations.** Choose `**Mutations**: N` from tasks.md (3 by default) in production code the diff
+touched, wherever the rule lives - a rule in the browser with no test is still a rule. Take the
+decisions hardest to undo or most often gotten wrong: a returned value, a condition, a bound shifted
+by one, an order, a sign, a filter. One object per mutation in
+`.specs/features/<feature>/mutations.json` with `file`, an `old` snippet that occurs once, `new`, the
+narrowest `proof` and a `label`; then run `check_proofs.py <feature> --mutations <that file>`. It
+applies each in the real tree through `mutate.py`, runs its test and restores the file byte for byte.
+A mutation not killed is a finding: the test that should fail does not.
 
-```markdown
-### P1: [Story Title]
+**Own examples.** For two rules the spec states, try a value neither the spec nor the checks name -
+the other side of a boundary, an empty set, a large one. Run each at `HEAD` as a throwaway test or a
+request. A rule that breaks on yours is a finding.
 
-**Acceptance Criteria**:
+**Assertions that do not hold the value.** Read the criteria against the tests the checks name and
+report the ones whose assertion is looser than the value the criterion fixes, that prove a rule on
+two cases out of nine, or that sit at another level than the Test Coverage Matrix names for that
+layer. Report what you find; do not tabulate every check.
 
-| Criterion (WHEN X THEN Y) | Spec-defined outcome | `file:line` + assertion expression | Result |
-| ------------------------- | -------------------- | ---------------------------------- | ------ |
-| WHEN [X] THEN [Y]         | [precise value/state from spec] | `path/to/test.ts:42` - `expect(result.field).toBe(expected)` | ✅ PASS / ❌ GAP / ⚠️ Spec-precision gap |
-```
+**The spec against the captures.** When a capture binds, a check or criterion that contradicts what
+it draws - a label spelled differently, a control it draws that no criterion builds, a state turned
+into a screen of its own - is a finding, even with a green proof. Departures listed in
+`## Differences from the source` with `Confirmed: y` are approved.
 
-**Rules:**
+## Report
 
-- Where the spec defines a precise outcome (specific status code, field value, error message, state), the test assertion MUST target that exact outcome - not just that an assertion exists.
-- Where the spec does NOT define a precise outcome, mark as **⚠️ Spec-precision gap** and flag it in the report. Do NOT silently pass a vague assertion.
-- Evidence-or-zero: a criterion with no `file:line` citation counts as NOT covered.
-
-### 3. Check Edge Cases
-
-From spec.md edge cases:
-
-- [ ] [Edge case 1] handled correctly
-- [ ] [Edge case 2] handled correctly
-
-### 4. Run Build-Level Gate Check (MANDATORY)
-
-Run the Build-level gate check from the **Gate Check Commands** section in tasks.md. This is NOT optional.
-
-1. Run: `[Build gate command from the Gate Check Commands section in tasks.md]`
-2. Non-zero exit code = STOP. Do not proceed to Code Quality Check.
-3. Record results:
-   - Total test count: [N]
-   - Passed: [N]
-   - Failed: [list]
-   - Skipped: [list - each skip must be justified]
-
-**Test Integrity Check:**
-
-- Compare current test count against the count before this feature was implemented
-- If test count DECREASED: investigate why. Tests should only be deleted with explicit justification.
-- If assertions were weakened (less specific than before): flag as potential regression
-
-### 5. Discrimination Sensor (MANDATORY - always runs after gate check passes)
-
-The sensor provides the empirical guarantee that the tests can actually detect regressions. It runs in a scratch/throwaway state - the real working tree is never modified.
-
-**How it works:**
-
-1. **Prepare an isolated scratch.** Never mutate the real worktree. Choose one:
-   - Preferred: a temporary git worktree (`git worktree add <scratch-path> HEAD`), mutate and run tests there, then `git worktree remove --force <scratch-path>`.
-   - Fallback (no git / worktree unavailable): copy only the affected file(s) to a temp directory, mutate the copies, point the test runner at those copies (or restore originals from the copies' backups), then delete the temp directory.
-   - **Forbidden:** `git stash` / `git stash pop`. A stash records state *before* the mutation; popping it does not reverse a mutation applied afterward, and on a clean tree `git stash` creates no entry at all - so the fault is left in the real worktree.
-2. **Capture a baseline.** Record `git status --porcelain` (or equivalent) of the real worktree *before* any sensor work. It must be unchanged after cleanup.
-3. **Inject a behavior-level fault** into the scratch copy of the new code introduced by this feature. Choose a mutation proportional to the code's risk:
-   - Flip a boolean condition (`if (x)` → `if (!x)`, `>` → `>=`)
-   - Change a return value (return a wrong status code, wrong field, zero instead of a computed value)
-   - Off-by-one (shift a loop bound, change a slice index)
-   - Remove a required side effect (delete a method call that the spec requires)
-4. **Run the tests** that cover the mutated code (against the scratch). Use the Quick or Full gate command from tasks.md.
-5. **Confirm the mutant is killed** (tests FAIL). Discard the scratch (remove worktree or delete temp copies).
-6. **Verify isolation.** Re-run `git status --porcelain` on the real worktree and confirm it matches the baseline from step 2. If it differs, STOP - restore the real tree before continuing, and treat the sensor run as invalid.
-7. **If a mutant survives** (tests still pass after the fault), the tests are not discriminating for that behavior - add a fix task to strengthen the assertion.
-
-**Tiering (proportional, not optional):**
-
-| Context | Sensor depth |
-| ------- | ------------ |
-| Default (all features) | Lightweight fault-injection: 1-3 targeted behavior-level mutations per feature, focused on the highest-risk new code |
-| P0 / critical paths (payment, auth, data integrity) | Full mutation run: use language-appropriate mutation tooling if available (e.g., Stryker, mutmut, cargo-mutants, pitest); otherwise increase the number of manual fault-injection mutations to ≥5 covering all branches |
-
-**Stack-agnostic:** The sensor targets behavior-level semantics (what the code does), not a specific tool. Any language, any framework.
-
-**Report:** Record killed/survived for each mutation attempt. Surviving mutants → create fix tasks before marking the feature done.
-
-### 6. Code Quality Check (MANDATORY)
-
-For each changed file, verify against [coding-principles.md](coding-principles.md):
-
-| Check                                | Pass? |
-| ------------------------------------ | ----- |
-| No features beyond what was asked    |       |
-| No abstractions for single-use code  |       |
-| No unnecessary "flexibility" added   |       |
-| Only touched files required for task |       |
-| Didn't "improve" unrelated code      |       |
-| Matches existing patterns/style      |       |
-| Would senior engineer approve?       |       |
-| Tests map to acceptance criteria and are non-shallow (spot-check one story) | |
-| Spec-anchored outcome check: each test's asserted value matches the spec-defined outcome (or gap flagged) | |
-| Per-layer Coverage Expectation met: domain logic has 1:1 AC mapping; routes/e2e cover happy + edge + error paths for every route in scope | |
-| Every test in scope maps to a spec AC, listed edge case, or Done-when criterion (no unclaimed tests) | |
-| Documented project quality/testing guidelines followed (cite guideline file, or "none - strong defaults applied") | |
-
-❌ Any "No"? → Fix before marking complete.
-
-### 7. Interactive UAT (if user-facing feature)
-
-For each testable deliverable, present one test at a time:
-
-```
-Test [N]: [Test Name]
-
-Expected: [What should happen - specific and observable]
-
-→ Does this work? Describe what you see.
-```
-
-Wait for user response:
-
-| User says                      | Interpret as            |
-| ------------------------------ | ----------------------- |
-| "yes", "pass", "works", "next" | ✅ Pass                 |
-| "skip", "can't test", "n/a"    | ⏭️ Skip                 |
-| Anything else                  | ❌ Issue - log verbatim |
-
-**Severity inference (never ask the user for severity):**
-
-| User description contains               | Inferred severity |
-| --------------------------------------- | ----------------- |
-| crash, error, exception, fails, broken  | Blocker           |
-| doesn't work, wrong, missing, can't     | Major             |
-| slow, weird, off, minor, small          | Minor             |
-| color, font, spacing, alignment, visual | Cosmetic          |
-| (unclear)                               | Major (default)   |
-
-### 8. Generate Fix Plans (if issues found)
-
-For each issue found during UAT or from the Verifier:
-
-1. **Diagnose** - Analyze the codebase to find root cause
-2. **Create fix task** - Write a task definition with:
-   - What: The specific fix
-   - Where: File paths
-   - Verify: How to prove the fix works
-   - Done when: Acceptance criteria for the fix
-3. **Present fix plan** - Show all fix tasks to user for approval
-
-Fix tasks follow the same format as regular tasks and can be executed with the implement phase.
-
-**Guardrail:** Maximum 3 diagnostic iterations per issue. If root cause isn't found after 3 attempts, flag for human investigation. The same 3-iteration bound applies to the Verifier's fix→re-verify cycle: if gaps persist after 3 rounds, escalate to the user rather than continuing to loop.
-
-### 9. Write Validation Report File + Return Chat Summary (MANDATORY)
-
-After all checks complete, the Verifier MUST:
-
-1. **Write the persisted report** to `.specs/features/[feature]/validation.md` (see template below). This file is the evidence artifact - it survives the session and can be referenced by CI, reviewers, or future agents.
-2. **Return a compact summary in chat** to the orchestrator (see Compact Chat Summary section below). The orchestrator surfaces it to the user and routes any ranked gaps to fix tasks.
-
-**Deterministic backing (run it, do not eyeball it).** After writing the report, run `python3 <skill-dir>/scripts/validate_state.py <feature>`. It confirms the report is real - present, verdict filled to PASS, and backed by at least one `file:line` evidence citation - so a missing, hollow, placeholder, or FAIL report cannot slip through as done. A non-zero exit means the feature is NOT done: repair the report or route the FAIL gaps to fix tasks, then re-run. This is the closing gate of Execute and runs automatically, the same way the lessons layer runs at distillation; it is never a manual step. If no code-execution tool is available, confirm the same by reading `validation.md`.
-
-### 10. Distill Lessons (MANDATORY when validation.md has signal)
-
-This is the closing action of validation - not a separate phase. Immediately after the report is written, turn its grounded failures into reusable, project-local guidance by following [lessons.md](lessons.md). In short: for each surviving mutant, spec-precision gap, failed/uncovered AC, or `// SPEC_DEVIATION`, record one terse general lesson via `python3 <skill-dir>/scripts/lessons.py add` (the script enforces grounding and owns all bookkeeping). A clean PASS with no signal → record nothing. Run the self-check: if there was signal but no lesson was recorded, say so in chat. See [lessons.md](lessons.md) for the exact commands, phrasing rules, scope discipline, and the no-script fallback.
-
----
-
-## Compact Chat Summary (returned in chat after validation)
-
-The Verifier returns this block to the orchestrator after completing all checks:
+Write `.specs/features/<feature>/verification.md`:
 
 ```markdown
-## Validation: [Feature] - [PASS ✅ | FAIL ❌]
+# <Feature> verification
 
-**Spec-anchored check**: [N/N ACs matched spec outcome | M spec-precision gaps flagged]
-**Gate**: [X passed, 0 failed]
-**Sensor**: [N mutations injected, N killed, N survived]
-**Report**: `.specs/features/[feature]/validation.md`
+**Verdict**: FAIL
+**Mutations**: 3 - probed C1, C4, C9
+**Proofs**: `proofs.md` at <sha>
+**Verifier**: independent sub-agent (author != verifier)
 
-**Ranked gaps** (if FAIL):
-1. [Gap description] - [AC or criterion] - [file:line or "no evidence"]
-2. ...
+## Findings
+
+| Finding | Evidence | Fix | Closed |
+| --- | --- | --- | --- |
+| Transfer in is counted as out and no test fails | mutation `direction in -> out` not killed | assert the sign of a Transfer in on its destination | |
+| C7 asserts the count exists, not that it is 5 | `stock-map.service.test.ts:88` - `toBeDefined()` | assert `atZero` is 5 on the capture's data | |
 ```
 
----
+With nothing to report, write `None - <one line on what was probed>` under `## Findings` and
+`**Verdict**: PASS`. Return the findings in chat. Whoever fixes fills `Closed` with the commit that
+fixes each one and the check that now proves it; the gate refuses an empty `Closed`. A finding that
+needs a new criterion appends it to the spec with a new requirement ID and a check - never edits an
+approved one.
 
-## Validation Report Template (`.specs/features/[feature]/validation.md`)
+## The gate
 
-```markdown
-# [Feature] Validation
-
-**Date**: [YYYY-MM-DD]
-**Spec**: `.specs/features/[feature]/spec.md`
-**Diff range**: [commit range or branch..HEAD]
-**Verifier**: independent sub-agent (author ≠ verifier)
-
----
-
-## Task Completion
-
-| Task | Status     | Notes   |
-| ---- | ---------- | ------- |
-| T1   | ✅ Done    | -       |
-| T2   | ✅ Done    | -       |
-| T3   | ⚠️ Partial | [Issue] |
-
----
-
-## Spec-Anchored Acceptance Criteria
-
-| Criterion (WHEN X THEN Y) | Spec-defined outcome | `file:line` + assertion | Result |
-| ------------------------- | -------------------- | ----------------------- | ------ |
-| WHEN X THEN Y             | [precise value/state from spec] | `path/to/test.ts:42` - `expect(result.field).toBe(expected)` | ✅ PASS |
-| WHEN A THEN B             | [expected value]     | `path/to/test.ts:88` - `expect(res.status).toBe(400)` | ✅ PASS |
-| WHEN C THEN D             | not precisely defined in spec | - | ⚠️ Spec-precision gap |
-
-**Status**: ✅ All ACs covered / ❌ Gaps present / ⚠️ Spec-precision gaps flagged
-
----
-
-## Discrimination Sensor
-
-| Mutation | File:line | Description | Killed? |
-| -------- | --------- | ----------- | ------- |
-| 1        | `src/service.ts:42` | Flipped condition `x > 0` → `x >= 0` | ✅ Killed |
-| 2        | `src/service.ts:88` | Changed return value `status: 'active'` → `status: 'inactive'` | ✅ Killed |
-| 3        | `src/handler.ts:15` | Removed side-effect call to `notify()` | ❌ Survived → fix task created |
-
-**Sensor depth**: [lightweight / P0-full]
-**Result**: [N/N killed] - [PASS ✅ | FAIL ❌]
-
----
-
-## Interactive UAT Results (if performed)
-
-| #   | Test        | Result   | Details                                         |
-| --- | ----------- | -------- | ----------------------------------------------- |
-| 1   | [Test name] | ✅ Pass  | -                                               |
-| 2   | [Test name] | ❌ Issue | [Verbatim user response] - Severity: [inferred] |
-| 3   | [Test name] | ⏭️ Skip  | [Reason]                                        |
-
----
-
-## Code Quality
-
-| Principle        | Status |
-| ---------------- | ------ |
-| Minimum code     | ✅     |
-| Surgical changes | ✅     |
-| No scope creep   | ✅     |
-| Matches patterns | ✅     |
-| Spec-anchored outcome check (asserted values match spec) | ✅ |
-| Per-layer Coverage Expectation met (domain 1:1 ACs; routes happy+edge+error) | ✅ |
-| Every test maps to a spec requirement - no unclaimed tests | ✅ |
-| Documented guidelines followed: [file(s) or "none - strong defaults applied"] | ✅ |
-
----
-
-## Edge Cases
-
-- [x] Edge case 1: Handled correctly
-- [ ] Edge case 2: NOT handled - needs fix
-
----
-
-## Gate Check
-
-- **Gate command**: [Build gate command from the Gate Check Commands section in tasks.md]
-- **Result**: [X] passed, [Y] failed, [Z] skipped
-- **Test count before feature**: [N]
-- **Test count after feature**: [M]
-- **Delta**: [+(M - N) new tests]
-- **Skipped tests**: [list with justification for each]
-- **Failures**: [list with details]
-
----
-
-## Fix Plans (if issues found)
-
-### Fix 1: [Issue description]
-
-- **Root cause**: [What's actually wrong]
-- **Fix task**: [Task definition]
-- **Priority**: [Blocker/Major/Minor/Cosmetic]
-
----
-
-## Requirement Traceability Update
-
-Update spec.md requirement statuses:
-
-| Requirement | Previous Status | New Status   |
-| ----------- | --------------- | ------------ |
-| [FEAT]-01   | Implementing    | ✅ Verified  |
-| [FEAT]-02   | Implementing    | ❌ Needs Fix |
-
----
-
-## Summary
-
-**Overall**: ✅ Ready | ⚠️ Issues | ❌ Not Ready
-
-**Spec-anchored check**: [N/N ACs matched spec outcome | M spec-precision gaps]
-**Sensor**: [N/N mutations killed]
-**Gate**: [X passed]
-
-**What works**: [List]
-
-**Issues found**: [Issue 1: How to fix]
-
-**Next steps**: [Action]
+```bash
+python3 <skill-dir>/scripts/validate_verification.py <feature>
 ```
 
----
+It reads `proofs.md` at `HEAD` (every check has a passing row, the build passed, the owed mutations
+are killed, the tree is clean), `screens.md` when a criterion cites a capture, the `**Walked:**`
+line when a check is a walk, and every finding closed. `0` means the feature is done.
 
-## Tips
+## Interactive UAT (Complex scope, or when a screen cannot be walked)
 
-- **Validation is never prompted** - it always runs after the last task; do not ask the user whether to run it
-- **Spec-anchored, not just covered** - "there is an assertion" is not enough; the assertion must target the spec-defined outcome
-- **Sensor in scratch only** - never mutate the real tree; use a temp worktree or file copies (never `git stash`), run, discard, then confirm porcelain matches the pre-sensor baseline
-- **Surviving mutants are fix tasks** - do not mark the feature done if the sensor found weak tests
-- **P1 first** - MVP must work before P2/P3
-- **WHEN/THEN = Test** - Each criterion is a test case
-- **Be specific** - "Doesn't work" isn't helpful
-- **Recommend fixes** - Don't just report problems, create fix tasks
-- **Quality check is mandatory** - Not optional
-- **Infer severity** - Never ask the user "how bad is this?"
-- **Max 3 diagnostic iterations** - Prevents infinite investigation loops
-- **Update traceability** - Every verified requirement updates spec.md status
-- **Always write the report file** - `.specs/features/[feature]/validation.md` is the persisted evidence artifact
-- **Distill after writing** - turn grounded failures into lessons via `scripts/lessons.py` ([lessons.md](lessons.md)); clean PASS → no lesson
+Present one test at a time - what to do and what should happen - and log the answer verbatim. Infer
+severity from the words, never ask for it: crash, error, broken → Blocker; doesn't work, wrong,
+missing → Major; slow, weird, off → Minor; colour, font, spacing → Cosmetic; unclear → Major. An
+issue becomes a finding in `verification.md` like any other.
+
+## Distill lessons
+
+After the gate passes, turn each finding into one lesson with `scripts/lessons.py`
+([lessons.md](lessons.md)). A feature with no finding records nothing.

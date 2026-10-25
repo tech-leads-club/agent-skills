@@ -19,18 +19,14 @@ The benchmarked sweet spot is ~7 tasks of context per worker (~20 tasks → 3 wo
 
 1. Count total tasks `T`.
 2. If `T ≤ ~8` → inline, no sub-agents.
-3. Otherwise walk phases **in order**, accumulating whole phases into the current batch. For each phase, in this order:
-   - **Overflow guard** - a **non-empty** batch refuses a phase that would push it past **~1.5× the budget (~10 tasks)**: close the batch as it stands and start the next one with that phase. (An empty batch always accepts, so a single over-sized phase still gets its own worker.)
-   - **Close on budget** - after adding the phase, if the batch's running task count has reached ~7 **and** phases remain, close the batch and start the next.
+3. Otherwise walk phases **in order**, accumulating whole phases into the current batch. When the batch's running task count reaches ~7 **and** phases remain, close the batch and start the next.
 4. **Never split a phase** across workers - the cut only ever lands on a phase boundary. This preserves dependency ordering and keeps a phase's tasks + shared context in one worker.
 5. If the final batch is a lone tail (1-2 tasks), fold it into the previous batch.
 
-Without the overflow guard the walk does not reproduce the counts below: `[8,2,2,8]` would close at `{P1=8}` and then swallow `{P2+P3+P4=12}` into one 12-task worker, because the batch is still at 4 when P4 is offered.
-
 Result ≈ `ceil(T / 7)` workers, scaling linearly. Unevenness is absorbed by greedy packing - phases never need to divide evenly. Worked examples (20 tasks):
 
-- Phases `[3,3,3,3,4,4]` → `{P1+P2+P3=9, P4+P5=7, P6=4}` = **3 workers**
-- Phases `[8,2,2,8]` → `{P1=8, P2+P3=4, P4=8}` = **3 workers** (the guard refuses P4 at 4+8=12; no even split needed)
+- Phases `[3,3,3,3,4,4]` → `{P1+P2=6, P3+P4=6, P5+P6=8}` = **3 workers**
+- Phases `[8,2,2,8]` → `{P1=8, P2+P3=4, P4=8}` = **3 workers** (no even split needed)
 - Phases `[5,5,5,5]` → `{P1+P2=10, P3+P4=10}` = **2 workers** (phases too coarse to hit 3 - see below)
 
 **Coarse-phase caveat:** Because the cut lands only on phase boundaries, very coarse phases limit how finely you can pack. If a single phase alone exceeds ~1.5× the budget (~10+ tasks), that is a Tasks-authoring smell - split it into real sub-phases during Tasks (at a genuine dependency/cohesion boundary), never at dispatch time.
@@ -89,43 +85,29 @@ No raw logs, no full test output - only the above fields keep the main context c
 
 ---
 
-## Verifier Sub-Agent
+## Verifier and screens sub-agent
 
-**Always-on, never prompted - one per feature completion.** The Verifier is a separate role from the batch worker. It runs once - after the last task of the feature is committed - as an independent quality gate, dispatched automatically by the orchestrator. It is **not** gated behind the batching offer; it always runs. Do NOT ask the user whether to run validation; it is mandatory.
+**Always-on, never prompted - once per feature.** After the last task is committed, the orchestrator
+runs `check_proofs.py`, then dispatches two fresh sub-agents in parallel over the same `HEAD`: the
+Verifier ([validate.md](validate.md)) and, when a criterion cites a capture, the screens sub-agent
+([verify-screens.md](verify-screens.md)). Neither is a batch worker, neither is the author, and
+neither fixes anything. A batch worker never dispatches either.
 
-**Author ≠ verifier:** The agent (or batch worker) that wrote the code and tests is the author. The Verifier is a fresh sub-agent dispatched by the orchestrator after the final commit. It does not inherit the author's context, mental model, or assumptions. This separation is what makes the gate trustworthy.
+**What they receive:** the Verifier gets `spec.md`, tasks.md, `proofs.md`, the diff range and
+`validate.md`; the screens sub-agent gets `spec.md`, the captures, the `**Walked:**` line and
+`verify-screens.md`. Neither gets the author's reasoning.
 
-**What the Verifier receives:**
-- `spec.md` for the feature (ACs = source of truth)
-- The git diff surface for the feature (scoped to the feature branch or commit range)
-- The test files in scope
-- `references/validate.md` as its operating checklist
+**What comes back:** the Verifier writes `verification.md` (verdict, the mutations it probed, a
+findings table with a `Closed` column) and `mutations.json`; the screens sub-agent writes
+`screens.md` (a verdict per picture and one inventory each). Both return their findings in chat.
 
-**What the Verifier does (full process in `validate.md`):**
-1. **Spec-anchored coverage check** - re-derives coverage evidence-or-zero: every AC traced to `file:line` + assertion expression. For each covered criterion, confirms the test's asserted value matches the **spec-defined expected outcome** (not just that an assertion exists). Where the spec does not define a precise outcome, flags a **spec-precision gap** rather than passing silently.
-2. **Discrimination sensor** - injects a small behavior-level fault (flip a condition, change a return value, off-by-one, remove a required side effect) in an **isolated scratch** (temporary `git worktree` or temp file copies - never `git stash`), runs the relevant tests there, confirms they FAIL (kill the mutant), discards the scratch, and verifies the real worktree's `git status --porcelain` matches the pre-sensor baseline. Tiered by risk: lightweight (1-3 mutations) for standard features; expanded (≥5 mutations or full mutation tooling) for P0/critical paths. Surviving mutants become fix tasks.
-3. Applies the **payload/conjunction rule**: checks payload fields are asserted on value/state, not just that the call occurred.
-4. **Writes the persisted report** to `.specs/features/[feature]/validation.md` - PASS/FAIL, per-AC evidence (`file:line` + assertion + spec outcome), sensor result (killed/survived per mutation), gate exit results, diff/commit range.
-5. **Returns a compact verdict in chat** to the orchestrator.
-6. Does **NOT** write, modify, or fix any code or tests - the real working tree is never mutated (sensor mutations run in scratch state only).
+**Failure handling:** every finding is fixed in one pass, then `check_proofs.py --mutations` runs
+again and the screens sub-agent re-opens only the rows that differed. There is no second Verifier
+and no third round: what still fails goes to the user. The gate is
+`python3 <skill-dir>/scripts/validate_verification.py <feature>`.
 
-**What the Verifier reports back (compact chat format):**
-```
-## Validation: [feature name] - [PASS ✅ | FAIL ❌]
-
-**Spec-anchored check**: [N/N ACs matched spec outcome | M spec-precision gaps flagged]
-**Gate**: [X passed, 0 failed]
-**Sensor**: [N mutations injected, N killed, N survived]
-**Report**: `.specs/features/[feature]/validation.md`
-
-**Ranked gaps** (if FAIL):
-1. [Gap description] - [AC or criterion] - [file:line or "no evidence"]
-2. ...
-```
-
-**Failure handling:** The orchestrator routes the ranked gaps to an implementer as fix tasks, then re-dispatches the Verifier. This fix→re-verify loop is bounded to a maximum of **3 iterations**. If gaps remain after 3 iterations, escalate to the user.
-
-**Standalone fallback:** When running without sub-agents (a single agent executing the full feature), run `validate.md` as an independent fresh-eyes pass - re-read `spec.md` and the diff from scratch, apply evidence-or-zero, run the spec-anchored check and discrimination sensor, write the report file, then run `python3 <skill-dir>/scripts/validate_state.py <feature>` to confirm the report is a real PASS, and report PASS/FAIL before marking the feature done.
+**Standalone fallback:** without sub-agents, run each file in a new session and write
+`self-verified (degraded - no sub-agent)` in its report; the gate warns.
 
 ---
 
@@ -140,7 +122,7 @@ Judge the tier by the work in front of the role, not by the role's title:
 | Design phase | High ambiguity, hard-to-reverse structural decisions | High-reasoning |
 | Batch worker - core-domain or high-ambiguity phase | Non-obvious logic, tricky edge cases, novel integration | High-reasoning |
 | Batch worker - mechanical phase | Entities, DTOs, config, wiring, straightforward CRUD against a settled pattern | Faster / cheaper |
-| Verifier | Adversarial reasoning: designs mutations, re-derives coverage, judges outcome precision | Mid-to-high |
+| Verifier | Adversarial reasoning: designs mutations and own examples, judges assertions against the spec | Mid-to-high |
 | Specify / Tasks authoring | Structured but judgment-heavy | Mid-to-high |
 
 **Rules of thumb:**

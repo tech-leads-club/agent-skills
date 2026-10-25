@@ -1749,14 +1749,12 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Writes testable requirements in EARS notation, atomic tasks, atomic Conventional Commits, and requirement traceability. Ships deterministic Python validation scripts so structural gates are enforced by code, not memory. Features an independent Verifier (author != verifier, evidence-or-zero), a discrimination sensor, a decision log (STATE.md), a test-coverage matrix, and a self-improving lessons layer. Stack-agnostic and tool-agnostic. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
+      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
         "SKILL.md",
-        "references/code-analysis.md",
         "references/coding-principles.md",
-        "references/context-limits.md",
         "references/design.md",
         "references/discuss.md",
         "references/implement.md",
@@ -1766,15 +1764,25 @@
         "references/sub-agents.md",
         "references/tasks.md",
         "references/validate.md",
+        "references/verify-screens.md",
         "scripts/check_commit.py",
+        "scripts/check_proofs.py",
+        "scripts/fixtures/checks.md",
+        "scripts/fixtures/plan.md",
+        "scripts/fixtures/proofs.md",
+        "scripts/fixtures/verification.md",
+        "scripts/lean_config.py",
         "scripts/lessons.py",
+        "scripts/mutate.py",
+        "scripts/runners.py",
+        "scripts/selftest.py",
         "scripts/validate_spec.py",
-        "scripts/validate_state.py",
-        "scripts/validate_tasks.py"
+        "scripts/validate_tasks.py",
+        "scripts/validate_verification.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "3.3.0",
-      "contentHash": "7bed1026351bfcc3931cad739705bede60e828ad68598e2f827507b3943ec10f"
+      "version": "4.0.0",
+      "contentHash": "2607b8b6bb30902138d36990787eeace56e72e125cbb21b1b6b7ffdb3dac139a"
     },
     {
       "name": "tlc-spec-lean",
