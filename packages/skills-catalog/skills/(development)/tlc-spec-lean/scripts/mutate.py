@@ -127,7 +127,11 @@ def kill_group(proc):
 
 def load_spec(path, root):
     try:
-        raw = sys.stdin.read() if path == "-" else open(path, encoding="utf-8").read()
+        if path == "-":
+            raw = sys.stdin.read()
+        else:
+            with open(path, encoding="utf-8") as f:
+                raw = f.read()
         mutations = json.loads(raw)
     except (OSError, ValueError) as e:
         raise SystemExit(f"mutate: cannot read spec: {e}")

@@ -96,11 +96,16 @@ def column(header, *names):
     return None
 
 
+def _read(path):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return f.read()
+
+
 def _plan_lines(fdir):
     path = os.path.join(fdir, "plan.md")
     if not os.path.exists(path):
         return []
-    return strip_fences(open(path, encoding="utf-8", errors="replace").read())
+    return strip_fences(_read(path))
 
 
 def _image_size(path):
@@ -183,9 +188,8 @@ def _screens_verdicts(fdir, name):
     path = os.path.join(fdir, "screens.md")
     tables = []
     if os.path.exists(path):
-        tables = [(h, rows) for h, rows in find_tables(strip_fences(
-            open(path, encoding="utf-8", errors="replace").read()))
-            if column(h, "verdict") is not None and column(h, "screen") is not None]
+        tables = [(h, rows) for h, rows in find_tables(strip_fences(_read(path)))
+                  if column(h, "verdict") is not None and column(h, "screen") is not None]
     if not tables:
         return [
             f"{name}: the feature has a screen but there is no `screens.md` with a Screens table - each "
@@ -223,7 +227,7 @@ def _browser_shots(fdir, name, running):
     cpath = os.path.join(fdir, "checks.md")
     if not os.path.exists(cpath):
         return errors
-    lines = strip_fences(open(cpath, encoding="utf-8", errors="replace").read())
+    lines = strip_fences(_read(cpath))
     for ln in lines:
         match = PROOF_RE.match(ln.strip())
         if not match or not BROWSER_PROOF_RE.match(match.group(1).strip()):
@@ -261,7 +265,7 @@ def _check_with_proofs(fdir, name, lines, checks_lines):
     the evidence, verification.md the Verifier's findings, each closed by a commit."""
     errors, warnings = [], []
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
-    plines = strip_fences(open(os.path.join(fdir, "proofs.md"), encoding="utf-8", errors="replace").read())
+    plines = strip_fences(_read(os.path.join(fdir, "proofs.md")))
     pbody = "\n".join(plines)
 
     m = re.search(r"\*\*HEAD\*\*\s*:\s*`?([0-9a-f]{4,40})", pbody)
@@ -326,10 +330,9 @@ def _check_feature(fdir, name):
     if errors:
         return errors, warnings
 
-    lines = strip_fences(open(os.path.join(fdir, "verification.md"), encoding="utf-8", errors="replace").read())
+    lines = strip_fences(_read(os.path.join(fdir, "verification.md")))
     cpath = os.path.join(fdir, "checks.md")
-    checks_lines = strip_fences(open(cpath, encoding="utf-8", errors="replace").read()) \
-        if os.path.exists(cpath) else []
+    checks_lines = strip_fences(_read(cpath)) if os.path.exists(cpath) else []
     errors, warnings = _check_with_proofs(fdir, name, lines, checks_lines)
     if "self-verified" in "\n".join(lines).lower():
         warnings.append(f"{name}: verification.md says self-verified - author == verifier, a degraded gate")
@@ -347,7 +350,7 @@ def _appears_complete(fdir):
     checks = os.path.join(fdir, "checks.md")
     if not os.path.exists(checks):
         return False
-    body = open(checks, encoding="utf-8", errors="replace").read()
+    body = _read(checks)
     if not re.search(r"^\**\s*C\d+\s*\**\s*[-–—:]", body, re.MULTILINE):
         return False
     if re.search(r"^\s*-\s*\[\s\]", body, re.MULTILINE):

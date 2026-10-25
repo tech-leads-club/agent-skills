@@ -192,6 +192,14 @@ def write_artifact(path, content):
             f.write(content)
 
 
+def read_artifact(path):
+    """The artifact's text, or "" when it does not exist."""
+    if not os.path.exists(path):
+        return ""
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return f.read()
+
+
 def png(width, height):
     """The header of a PNG of that size - all the size gate reads."""
     return (b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\rIHDR"
@@ -601,7 +609,7 @@ def run_proofs_tooling():
     try:
         fdir = os.path.join(root, ".specs", "features", FEATURE)
         os.makedirs(fdir)
-        open(os.path.join(root, "billing.test.ts"), "w").write(PROOFS_TEST)
+        write_artifact(os.path.join(root, "billing.test.ts"), PROOFS_TEST)
         unknown = ("# Billing checks\n\nMutations: 0\nBuild: none - fixture\n\n## Checks\n\n"
                    "**C1** - counted (AC 1)\nProof: `sh -c 'echo \"Ran 2 tests\"'`\n\n"
                    "**C2** - silent (AC 2)\nProof: `sh -c 'echo ok'`\n\n")
@@ -612,9 +620,9 @@ def run_proofs_tooling():
             (PROOFS_CHECKS.replace('"keeps a paid account active" billing', '"no such test" billing'),
              1, "no test ran", "a filter that matches no test is not a pass"),
         ]:
-            open(os.path.join(fdir, "checks.md"), "w").write(checks)
+            write_artifact(os.path.join(fdir, "checks.md"), checks)
             code, out = run_script("check_proofs.py", FEATURE, "--root", root)
-            written = open(os.path.join(fdir, "proofs.md")).read() if os.path.exists(os.path.join(fdir, "proofs.md")) else ""
+            written = read_artifact(os.path.join(fdir, "proofs.md"))
             if code == want and frag in (out + written):
                 print(f"  ok      check_proofs.py: {desc}")
             else:
@@ -767,7 +775,7 @@ def main(argv=None):
         for artifact, edit in edits.items():
             path = os.path.join(root, ".specs", "features", FEATURE, artifact)
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            original = open(path, encoding="utf-8", errors="replace").read() if os.path.exists(path) else ""
+            original = read_artifact(path)
             mutated = edit(original)
             if mutated == original:
                 applied = False
@@ -801,7 +809,7 @@ def main(argv=None):
         for artifact, edit in edits.items():
             path = os.path.join(root, ".specs", "features", FEATURE, artifact)
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            original = open(path, encoding="utf-8", errors="replace").read() if os.path.exists(path) else ""
+            original = read_artifact(path)
             mutated = edit(original)
             if mutated == original:
                 controls_ok = False

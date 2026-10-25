@@ -46,7 +46,9 @@ BUILD_RE = re.compile(r"^\**\s*Build\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 
 def build_commands(path):
     """The commands on checks.md's `Build:` line, or [] for `none`."""
-    for raw in open(path, encoding="utf-8"):
+    with open(path, encoding="utf-8") as f:
+        lines = f.readlines()
+    for raw in lines:
         m = BUILD_RE.match(raw.strip())
         if m:
             text = m.group(1).strip()
@@ -59,7 +61,9 @@ def build_commands(path):
 def checks_of(path):
     """[(check id, [proof text])] in file order."""
     checks, current = [], None
-    for raw in open(path, encoding="utf-8"):
+    with open(path, encoding="utf-8") as f:
+        lines = f.readlines()
+    for raw in lines:
         line = raw.strip()
         m = CHECK_RE.match(line)
         if m:
@@ -89,7 +93,9 @@ def screens_verdicts(fdir):
     path = os.path.join(fdir, "screens.md")
     rows = {}
     if os.path.exists(path):
-        for line in open(path, encoding="utf-8"):
+        with open(path, encoding="utf-8") as f:
+            lines = f.readlines()
+        for line in lines:
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
             if len(cells) >= 3 and ".running.png" in cells[0]:
                 rows[os.path.basename(cells[0].strip("`"))] = cells[2].lower()
@@ -136,7 +142,8 @@ def main(argv=None):
         print(f"check_proofs: no checks.md under {fdir}", file=sys.stderr)
         return 2
     checks = checks_of(checks_path)
-    walked = any("**Walked:**" in ln for ln in open(checks_path, encoding="utf-8"))
+    with open(checks_path, encoding="utf-8") as f:
+        walked = "**Walked:**" in f.read()
     screens = screens_verdicts(fdir)
 
     groups, plan = {}, []

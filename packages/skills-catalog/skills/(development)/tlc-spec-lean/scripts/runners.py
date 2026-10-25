@@ -148,8 +148,10 @@ class Jest(Bun):
             subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
             if not os.path.exists(out):
                 return None
+            with open(out) as f:
+                report = json.load(f)
             cases = []
-            for suite in json.load(open(out)).get("testResults", []):
+            for suite in report.get("testResults", []):
                 for a in suite.get("assertionResults", []):
                     cases.append((suite.get("name", ""), a.get("fullName", ""), a.get("title", ""),
                                   a.get("status") == "passed"))

@@ -1787,7 +1787,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "2.0.0",
-      "contentHash": "409d8a43d022e2d15d03927bdc062032cf7331da6aab7b8f3de4b95f7a0d666a"
+      "contentHash": "d0deda5495f52bace0fbfeeb6cbdab47f02cf39ebea9d8b5b2f5c64ac7dea6ff"
     },
     {
       "name": "vercel-deploy",
