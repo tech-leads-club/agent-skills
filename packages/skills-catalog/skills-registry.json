@@ -1688,32 +1688,51 @@
     },
     {
       "name": "tlc-implement",
-      "description": "Implement a work already planned: extracts a checklist, builds it, and proves every check with an independent verifier. Use when the user says \"extract a checklist\", \"build this ticket\", \"implement this spec\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to design the work.",
+      "description": "Implements work already planned - a plan.md from tlc-plan, or a small ticket - by freezing it into checks with proofs, building, and proving every check with a script and an independent Verifier before declaring done. Use when the user says \"implement this plan\", \"build this ticket\", \"implement this spec\", \"write the checks\", \"verify work\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to plan a feature that needs one (that is tlc-plan).",
       "category": "development",
       "path": "(development)/tlc-implement",
       "files": [
         "SKILL.md",
-        "references/checklist-format.md",
-        "references/screens.md",
-        "references/test-policy.md",
-        "references/verify.md"
+        "references/build.md",
+        "references/checks.md",
+        "references/memory.md",
+        "references/verify-screens.md",
+        "references/verify.md",
+        "scripts/check_commit.py",
+        "scripts/check_proofs.py",
+        "scripts/fixtures/checks.md",
+        "scripts/fixtures/plan.md",
+        "scripts/fixtures/proofs.md",
+        "scripts/fixtures/verification.md",
+        "scripts/lean_config.py",
+        "scripts/lessons.py",
+        "scripts/mutate.py",
+        "scripts/runners.py",
+        "scripts/selftest.py",
+        "scripts/validate_checks.py",
+        "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.1.0",
-      "contentHash": "b3bbd69d067b042072e9538ea5edc90db28b0873fdf4d86157ca4ae5363bfd9e"
+      "version": "1.0.0",
+      "contentHash": "38d1aba13ca13b06b40ba03c240e991d6f6633f476f4c020af5a74daded0215b"
     },
     {
       "name": "tlc-plan",
-      "description": "Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source. Use when the user says \"write the task\", \"cut this PRD into tasks\", \"turn this design doc into work\", or \"tlc-plan\". Do NOT use for discovery itself or to implement — a one-line ticket is a decision; a blank wish is not.",
+      "description": "Turns a request, ticket, PRD, design or thread into one plan a human approves and a builder can act on without the conversation: asks every gray area until no product decision is left to the builder, then writes the problem, EARS criteria with concrete values, the path and the data it touches (drawn in mermaid), the interface, and only the decisions that are hard to reverse. Captures that come with the request bind. Use when the user says \"plan this\", \"plan feature\", \"specify feature\", \"write the plan\", \"cut this PRD into tasks\", or \"tlc-plan\". Do NOT use to implement (that is tlc-implement), for a standalone design document, or when nobody has decided what to build.",
       "category": "development",
       "path": "(development)/tlc-plan",
       "files": [
         "SKILL.md",
-        "references/document-format.md"
+        "references/plan.md",
+        "scripts/fixtures/plan.md",
+        "scripts/lean_config.py",
+        "scripts/lessons.py",
+        "scripts/selftest.py",
+        "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.2.0",
-      "contentHash": "428b064742db100add4d42612ce61eaed040aad87e6718e494a09ad9ae03552b"
+      "version": "1.0.0",
+      "contentHash": "ac47b3461320390d5dee25d264ef37b91577365be510027a860614568e2fb049"
     },
     {
       "name": "tlc-prd",
