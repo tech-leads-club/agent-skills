@@ -23,7 +23,7 @@ from slim_fanin import find_mandate_fanin, infer_root_from_run_dir, normalize_ci
 
 # why: full row so Mixed apply can copy Keep-core / Slim without re-opening prose
 ROW_RE = re.compile(
-    r"^\|\s*(?P<id>S\d{3})\s*"
+    r"^\|\s*(?P<id>S\d{3,})\s*"
     r"\|\s*(?P<overall>[A-Z-]+)\s*"
     r"\|\s*(?P<keep>.*?)\s*"
     r"\|\s*(?P<slim>.*?)\s*"
@@ -34,7 +34,7 @@ ROW_RE = re.compile(
 )
 # why: older/partial tables may only have ID + Overall
 ROW_MIN_RE = re.compile(
-    r"^\|\s*(?P<id>S\d{3})\s*\|\s*(?P<overall>[A-Z-]+)\s*\|",
+    r"^\|\s*(?P<id>S\d{3,})\s*\|\s*(?P<overall>[A-Z-]+)\s*\|",
     re.M,
 )
 MODEL_RE = re.compile(r"model:\s*`?([^\n`]+)`?", re.I)
