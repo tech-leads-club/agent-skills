@@ -21,6 +21,7 @@ derivation from them, which is where omissions surface.
 What it checks:
   ERROR  - no `Mutations:` line, or one above 5
   ERROR  - no `Build:` line naming the repo's build, type check and lint commands (or `none - <why>`)
+  ERROR  - a sibling plan.md with no `**Approved**: <date> - user: "<their words>"` line
   ERROR  - a required section is missing (Checks, Coverage, Swept)
   ERROR  - a check with no `Proof:` line
   ERROR  - a duplicate check id
@@ -57,7 +58,7 @@ import os
 import re
 import sys
 
-from lean_config import MAX_MUTATIONS, plan_marks_binding, read_mutations
+from lean_config import MAX_MUTATIONS, plan_approved, plan_marks_binding, read_mutations
 
 REQUIRED_SECTIONS = ["Checks", "Coverage", "Swept"]
 
@@ -284,6 +285,10 @@ def check_file(path):
     if not any(re.match(r"^\**\s*Build\s*\**\s*:\s*\S", ln.strip(), re.IGNORECASE) for ln in lines):
         errors.append("no `Build:` line - name the repo's build, type check and lint commands (or `Build: none - <why>`); "
                       "a green test suite does not show the code compiles")
+    plan = _plan_lines(path)
+    if plan and not plan_approved(plan):
+        errors.append("plan.md has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - checks are "
+                      "written from an approved plan; present it and stop, never write the approval yourself")
 
     # Sections.
     for name in REQUIRED_SECTIONS:

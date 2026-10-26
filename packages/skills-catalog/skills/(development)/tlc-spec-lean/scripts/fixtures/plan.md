@@ -1,5 +1,7 @@
 # Dunning on failed charge
 
+**Approved**: 2026-10-23 - user: "approved, go ahead"
+
 ## Problem
 
 A member whose card fails keeps full access until someone notices in the provider dashboard,

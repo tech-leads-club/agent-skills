@@ -18,6 +18,9 @@ What it checks:
            `<capture>.running.png`, or a picture at another size than its capture (1x, 2x, 3x pass)
   ERROR  - a browser proof that names no `.running.png`, or one that is not on disk
   ERROR  - a `walk` proof and no `**Walked:**` line in the Handoff
+  ERROR  - plan.md with no `**Approved**: <date> - user: "<their words>"` line
+  ERROR  - screens.md with no `**Round**:` line or past round 2, no `**HEAD**`, or code changed after
+           the HEAD it judged
   WARN   - the report says self-verified (author == verifier: a degraded gate)
 
 Usage:
@@ -34,10 +37,13 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, plan_marks_binding, plan_owes_pictures, read_mutations
+from lean_config import _section, plan_approved, plan_marks_binding, plan_owes_pictures, read_mutations
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
+ROUND_RE = re.compile(r"^\**\s*Round\s*\**\s*:\s*\**\s*(\d+)", re.IGNORECASE)
+JUDGED_HEAD_RE = re.compile(r"^\**\s*HEAD\s*\**\s*:\s*\**\s*`?([0-9a-f]{7,40})", re.IGNORECASE)
+MAX_ROUNDS = 2
 BROWSER_PROOF_RE = re.compile(r"^`?browser\b", re.IGNORECASE)
 WALK_PROOF_RE = re.compile(r"^`?walk\b", re.IGNORECASE)
 WALKED_RE = re.compile(r"^\s*[-*]?\s*\**walked\**\s*:", re.IGNORECASE)
@@ -96,11 +102,16 @@ def column(header, *names):
     return None
 
 
+def _read(path):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return f.read()
+
+
 def _plan_lines(fdir):
     path = os.path.join(fdir, "plan.md")
     if not os.path.exists(path):
         return []
-    return strip_fences(open(path, encoding="utf-8", errors="replace").read())
+    return strip_fences(_read(path))
 
 
 def _image_size(path):
@@ -178,14 +189,33 @@ def _screen_evidence(fdir, plan, name):
     return errors
 
 
+def _code_changed_since(root, sha):
+    """Paths outside `.specs/` changed between `sha` and HEAD; None when git cannot say."""
+    try:
+        inside = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], cwd=root,
+                                capture_output=True, text=True)
+        if inside.returncode != 0:
+            return None
+        p = subprocess.run(["git", "diff", "--name-only", sha, "HEAD"], cwd=root, capture_output=True, text=True)
+    except OSError:
+        return None
+    if p.returncode != 0:
+        return [f"<{sha} is not a commit here>"]
+    return [f for f in p.stdout.split() if not f.startswith(".specs/")]
+
+
 def _screens_verdicts(fdir, name):
-    """screens.md is the screens sub-agent's verdict; a PASS cannot stand beside a screen that diverges."""
+    """screens.md is the screens sub-agent's verdict; a PASS cannot stand beside a screen that diverges.
+
+    The verdict holds only for the code it judged: a commit that changes code after the judged HEAD
+    is a screen nobody looked at.
+    """
     path = os.path.join(fdir, "screens.md")
-    tables = []
+    tables, lines = [], []
     if os.path.exists(path):
-        tables = [(h, rows) for h, rows in find_tables(strip_fences(
-            open(path, encoding="utf-8", errors="replace").read()))
-            if column(h, "verdict") is not None and column(h, "screen") is not None]
+        lines = strip_fences(_read(path))
+        tables = [(h, rows) for h, rows in find_tables(lines)
+                  if column(h, "verdict") is not None and column(h, "screen") is not None]
     if not tables:
         return [
             f"{name}: the feature has a screen but there is no `screens.md` with a Screens table - each "
@@ -193,6 +223,23 @@ def _screens_verdicts(fdir, name):
             f"(verify-screens.md)"
         ]
     errors = []
+    rounds = [int(m.group(1)) for m in (ROUND_RE.match(ln.strip()) for ln in lines) if m]
+    if not rounds:
+        errors.append(f"{name}: screens.md has no `**Round**:` line - the screens sub-agent writes 1, and 2 on "
+                      f"the second and last round, so a resumed run knows which round it is in")
+    elif rounds[0] > MAX_ROUNDS:
+        errors.append(f"{name}: screens.md reads `**Round**: {rounds[0]}` - there is no third round; what still "
+                      f"differs after round 2 goes to the user")
+    judged = next((m.group(1) for m in (JUDGED_HEAD_RE.match(ln.strip()) for ln in lines) if m), None)
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
+    if not judged:
+        errors.append(f"{name}: screens.md names no `**HEAD**` - the screens sub-agent writes the commit it judged")
+    else:
+        changed = _code_changed_since(root, judged)
+        if changed:
+            errors.append(
+                f"{name}: screens.md judged {judged} and code changed since ({', '.join(changed[:4])}) - the "
+                f"screens sub-agent judges again at HEAD in round 2; after round 2 it goes to the user")
     for header, rows in tables:
         verdict_col = column(header, "verdict")
         for r in rows:
@@ -223,7 +270,7 @@ def _browser_shots(fdir, name, running):
     cpath = os.path.join(fdir, "checks.md")
     if not os.path.exists(cpath):
         return errors
-    lines = strip_fences(open(cpath, encoding="utf-8", errors="replace").read())
+    lines = strip_fences(_read(cpath))
     for ln in lines:
         match = PROOF_RE.match(ln.strip())
         if not match or not BROWSER_PROOF_RE.match(match.group(1).strip()):
@@ -261,7 +308,7 @@ def _check_with_proofs(fdir, name, lines, checks_lines):
     the evidence, verification.md the Verifier's findings, each closed by a commit."""
     errors, warnings = [], []
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
-    plines = strip_fences(open(os.path.join(fdir, "proofs.md"), encoding="utf-8", errors="replace").read())
+    plines = strip_fences(_read(os.path.join(fdir, "proofs.md")))
     pbody = "\n".join(plines)
 
     m = re.search(r"\*\*HEAD\*\*\s*:\s*`?([0-9a-f]{4,40})", pbody)
@@ -326,14 +373,16 @@ def _check_feature(fdir, name):
     if errors:
         return errors, warnings
 
-    lines = strip_fences(open(os.path.join(fdir, "verification.md"), encoding="utf-8", errors="replace").read())
+    lines = strip_fences(_read(os.path.join(fdir, "verification.md")))
     cpath = os.path.join(fdir, "checks.md")
-    checks_lines = strip_fences(open(cpath, encoding="utf-8", errors="replace").read()) \
-        if os.path.exists(cpath) else []
+    checks_lines = strip_fences(_read(cpath)) if os.path.exists(cpath) else []
     errors, warnings = _check_with_proofs(fdir, name, lines, checks_lines)
     if "self-verified" in "\n".join(lines).lower():
         warnings.append(f"{name}: verification.md says self-verified - author == verifier, a degraded gate")
     plan = _plan_lines(fdir)
+    if plan and not plan_approved(plan):
+        errors.append(f"{name}: plan.md has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - the "
+                      f"plan is approved by the user, in their words, before the checks")
     if plan_owes_pictures(plan, checks_lines):
         errors += _screens_verdicts(fdir, name)
         errors += _screen_evidence(fdir, plan, name)
@@ -347,7 +396,7 @@ def _appears_complete(fdir):
     checks = os.path.join(fdir, "checks.md")
     if not os.path.exists(checks):
         return False
-    body = open(checks, encoding="utf-8", errors="replace").read()
+    body = _read(checks)
     if not re.search(r"^\**\s*C\d+\s*\**\s*[-–—:]", body, re.MULTILINE):
         return False
     if re.search(r"^\s*-\s*\[\s\]", body, re.MULTILINE):

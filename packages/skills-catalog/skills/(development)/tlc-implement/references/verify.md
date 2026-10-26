@@ -16,16 +16,18 @@ a new session and write `Verifier: self-verified (degraded - no sub-agent)`; the
 1. The builder runs `python3 <skill-dir>/scripts/check_proofs.py <feature>` at `HEAD`. It runs every
    proof once per runner, matches each check to the tests its filter selects, checks the pictures
    and the walk, and writes `proofs.md`. A red row is the builder's to fix before anything else.
-2. The builder dispatches, in the same turn and in parallel, the screens sub-agent when a capture has
-   a picture ([verify-screens.md](verify-screens.md)) and the Verifier. Both read the same `HEAD`.
-   The dispatch prompt names the feature, the files and the diff range, and nothing about what to
-   accept.
+2. The builder dispatches, in the same turn and in parallel, the screens sub-agent when a criterion
+   cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier. Both read the same
+   `HEAD`. The dispatch prompt names the feature, the files and the diff range, and nothing about
+   what to accept. Each goes on the `**Dispatched:**` line of `checks.md` `## Handoff` before it is
+   sent; a builder resuming after a compaction that finds one there with no report on disk waits
+   for it instead of sending another.
 3. The builder fixes everything both name in one pass, runs
-   `check_proofs.py <feature> --mutations .specs/features/<feature>/mutations.json`, sends the
-   screens sub-agent back over the rows that differed (the second and last round), writes the
-   closing commit into each finding, and runs the gate. There is no second Verifier: the script
-   shows the mutations killed and the proofs green at the new `HEAD`. What still fails goes to the
-   user.
+   `check_proofs.py <feature> --mutations .specs/features/<feature>/mutations.json`, and when the
+   fix changed code re-saves every picture at the new `HEAD` and resumes the round-1 screens
+   sub-agent for round 2 (it is the last), writes the closing commit into each finding, and runs the gate.
+   There is no second Verifier: the script shows the mutations killed and the proofs green at the
+   new `HEAD`. What still fails goes to the user.
 
 ## What the Verifier does
 
@@ -87,7 +89,9 @@ python3 <skill-dir>/scripts/validate_verification.py <feature>
 ```
 
 It reads `proofs.md` at `HEAD` (every check has a passing row, the owed mutations are killed),
-`screens.md` when a capture has a picture, and every finding closed. `0` the feature is done.
+`screens.md` when a criterion cites a capture (round 1 or 2, judged at a `HEAD` no code commit has
+passed), the plan's `**Approved**:` line, and every finding closed. `0`
+the feature is done.
 
 ## Distill lessons
 

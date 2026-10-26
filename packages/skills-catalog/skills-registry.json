@@ -1713,8 +1713,8 @@
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.0.0",
-      "contentHash": "38d1aba13ca13b06b40ba03c240e991d6f6633f476f4c020af5a74daded0215b"
+      "version": "1.1.0",
+      "contentHash": "66c91f40f0f8250c1a52c3242b4f4e33a5b038f5a2fda2578bf2f95df5de0b11"
     },
     {
       "name": "tlc-plan",
@@ -1731,8 +1731,8 @@
         "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.0.0",
-      "contentHash": "ac47b3461320390d5dee25d264ef37b91577365be510027a860614568e2fb049"
+      "version": "1.1.0",
+      "contentHash": "6e6fa709ed167718184622004855fc151b47fb3878f4030fa5745c85bd292404"
     },
     {
       "name": "tlc-prd",
@@ -1813,8 +1813,8 @@
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "2.0.0",
-      "contentHash": "d0deda5495f52bace0fbfeeb6cbdab47f02cf39ebea9d8b5b2f5c64ac7dea6ff"
+      "version": "2.1.0",
+      "contentHash": "51bcf485f5b981d613d660767d03f194d9117188c7615914108759a21de7b5cf"
     },
     {
       "name": "vercel-deploy",

@@ -56,6 +56,9 @@ to the builder. A gray area does not become an `Assumptions` row to save a quest
 An assumption lands in `## Assumptions` with your default, the rationale and `Confirmed? n`. `y`
 means a human said so.
 
+Each answer goes into the plan in the turn it arrives - a criterion, an `Assumptions` row with `y`,
+or an `AD-NNN` - not at the end of the conversation: a compaction keeps the file, not the chat.
+
 ## Walk the surfaces
 
 Each kind of surface carries the same decisions every time. Walk the row for every surface this
@@ -64,7 +67,7 @@ decide. There is no table for it in the plan.
 
 | Surface | The decisions it always has |
 | --- | --- |
-| a screen or view | empty, loading, error and unauthorised states; ordering of content; what a long list or a wide table does - what scrolls and what stays in view; what a destructive action confirms; what each control does when used - who acts, which control, what the page shows afterwards |
+| a screen or view | empty, loading, error and unauthorised states; ordering of content; the window widths it must work at - the captures' sizes, or asked when no capture settles it; what a long list or a wide table does - what scrolls and what stays in view; what a destructive action confirms; what each control does when used - who acts, which control, what the page shows afterwards |
 | an API or webhook | response shape, error shape with its codes, who may call it, versioning, rate limit behaviour |
 | a command or scheduled task | output format, every flag and its default, exit codes, what it prints when it fails halfway |
 | a document or copy | structure, tone, depth, what the reader does next |
@@ -214,6 +217,8 @@ Every unresolved decision is a criterion, an `Assumptions` row, or an open quest
 `````markdown
 # <Feature>
 
+**Approved**: <written when the user approves - YYYY-MM-DD - user: "their words">
+
 > Build this with **tlc-implement**. Every criterion becomes a check with a proof; nothing under
 > the open questions is settled while building.
 
@@ -329,7 +334,9 @@ approved by the user.>
 Present the plan and stop: this is the one stop for a human. Name `Shape`, any `Landing` door
 with a live alternative, and anything that changes existing data or a consumed contract. Apply what
 the user changes, rerun the validator, and stop again at approval: the build is **tlc-implement**'s,
-from this file alone, and it may be a different agent with none of this conversation.
+from this file alone, and it may be a different agent with none of this conversation. When the user
+approves, write `**Approved**: <YYYY-MM-DD> - user: "<their words>"` under the title; one the user
+did not give is never written, and **tlc-implement** refuses to start without it.
 
 ## Notes
 

@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes obligations instead of the p
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '2.0.0'
+  version: '2.1.0'
 ---
 
 # Tech Lead's Club - Spec, Lean
@@ -30,8 +30,8 @@ hard to reverse gets a one-way door with its literal shape, and the rest is deci
 These hold even if no reference file is read. Each one lives here; the references point back.
 
 1. Every check is one observable claim with a concrete value plus the proof that settles it: a test
-   or command whose exit code decides, or, for a state a capture draws, the author's picture of it
-   judged against the capture (rule 9).
+   or command whose exit code decides, or, for a state a capture draws, a picture of it judged
+   against the capture (rule 9).
 2. Tests assert what the checks say, not what the code happens to do. Do not write a test by
    reading the implementation.
 3. A test changes only with the claim it proves, and leaves with the code it proves, in the same
@@ -50,19 +50,28 @@ These hold even if no reference file is read. Each one lives here; the reference
    rules the Verifier probes, not how good the work is: code quality, the tests behind every check
    and a complete `Coverage` join are owed whatever N is. The checks are the floor; an edge case or
    guard no check names is still the work.
-7. The completion gate is a script: `validate_verification.py` exits 0.
+7. The completion gate is a script: `validate_verification.py` exits 0. The final report opens
+   with its last line; a red gate is said first, never left for the reader to find.
 8. An approved spec authorizes local edits and local commits. `git push`, deploy and production
    data changes need an explicit go-ahead for that action.
 9. **A state a capture draws is one picture.** The author reaches that state and saves
-   `<capture>.running.png` beside the capture, at the capture's size: a wider window lays the page
-   out differently. Nobody reopens the app to judge it: a screens sub-agent judges the file
-   ([verify-screens.md](references/verify-screens.md)), and the picture matches the capture except
-   for what `## Differences from the source` lists. A state no capture draws, and an existing
-   screen the feature does not change, are proven by a test or a `walk` proof, with no picture.
+   `<capture>.running.png` beside the capture from a browser window at the capture's size - its
+   pixel size over its scale: a wider window lays the page out differently, and resizing the image
+   afterwards hides it. Nobody reopens the app to judge it: a screens sub-agent judges the file
+   ([verify-screens.md](references/verify-screens.md)), and a picture whose text reads smaller than
+   the capture's was resized and is retaken. It matches the capture except for what
+   `## Differences from the source` lists. A state no capture draws, and an existing screen the
+   feature does not change, are proven by a test or a `walk` proof, with no picture and no judge.
 10. A capture, frame or live site that comes with the request binds unless the user called it
     inspiration. A binding source is changed only by the user. Removing, renaming or departing
     from something it draws is asked, recorded as a decision in `.specs/STATE.md`, and listed in
     the plan's `## Differences from the source` with `Confirmed: y - AD-NNN`.
+11. **The files hold the run; the chat does not survive a compaction.** The user's approval is
+    written in plan.md as `**Approved**: <date> - user: "<their words>"` - never one the user did
+    not give. Each answer goes into its file in the turn it arrives. Each sub-agent goes on the
+    `**Dispatched:**` line of `checks.md` `## Handoff` before it is sent. After a compaction or in a
+    new session, re-read this file and the current phase's reference, then resume from the files
+    ([memory.md](references/memory.md)).
 
 ## Configuration
 
@@ -79,7 +88,7 @@ mutations: 3
 | --- | --- | --- |
 | `check_proofs.py` (always) | every proof once per runner at `HEAD`, each check matched to the tests its filter selects, pictures and walk checked, mutations injected | a test that passes for the wrong reason |
 | The Verifier (always) | N mutations wherever a rule lives, two examples nobody named, assertions looser than their criterion, checks that contradict a binding capture ([verify.md](references/verify.md)) | the rules no mutation probed |
-| The screens sub-agent (a capture has a picture) | an inventory of each capture, every row `same` or `differs` ([verify-screens.md](references/verify-screens.md)) | spacing, colour and type weight; detail smaller than a screenshot shows |
+| The screens sub-agent (a criterion cites a capture) | an inventory of each capture against the author's picture, every row `same` or `differs`, at a named `HEAD` ([verify-screens.md](references/verify-screens.md)) | spacing, colour and type weight; detail smaller than a screenshot shows; screens no capture draws |
 
 Screens take no mutation; spend N where a wrong implementation costs most. Where N looks too low
 for the feature, say so in one line and let the user raise it.
@@ -124,7 +133,7 @@ exit means stop and fix. Run a script rather than read it: its messages say what
 | When | Command |
 | --- | --- |
 | Before presenting the plan | `validate_plan.py <feature>` |
-| Before starting to build | `validate_checks.py <feature>` |
+| Before starting to build | `validate_checks.py <feature>` - it also requires the plan's `**Approved**:` line |
 | Before each commit | `check_commit.py --message "<msg>"` |
 | Before dispatching the Verifier, and after the fix | `check_proofs.py <feature> [--mutations <mutations.json>]` |
 | Before declaring done | `validate_verification.py <feature>` |

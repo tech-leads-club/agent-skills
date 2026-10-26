@@ -168,10 +168,11 @@ Proof: `bin/rails test test/billing/status_map_test.rb -n "/every_provider_statu
 
 ## Handoff
 
-<Empty until a builder finishes. Each one appends:>
+<The run's live state. A compaction gives no warning, so each line is written as it happens:>
 
+- **Settled mid-build:** <each answer the user gave while building, in their words, the turn it came - or none>
+- **Dispatched:** <each sub-agent before it is sent: Verifier, screens round 1 or 2 - at which `HEAD`, and `returned` when it is back>
 - **Boundary:** C1-C7 closed at `<sha>`
-- **Settled mid-build:** <clarifications the user gave that did not become a Landing row>
 - **Abandoned:** <tried, discarded, and why>
 - **Walked:** <only with a screen: what you did, what the page showed, how the user reaches each state, and each visit a `walk` check names>
 ````

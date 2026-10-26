@@ -4,7 +4,7 @@ description: 'Turns a request, ticket, PRD, design or thread into one plan a hum
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # TLC Plan
@@ -39,7 +39,11 @@ often a different agent with none of this conversation.
 5. Only what is hard to reverse is decided here, with its literal shape. Placement, names and
    types inside the conventions are the builder's and are settled in the diff.
 6. `validate_plan.py` exits 0 before the plan is presented, and approval is the one stop for a
-   human. The plan stays true through the build: `Landing`, `Surface` and the data are additive;
+   human. The approval is written under the plan's title as
+   `**Approved**: <date> - user: "<their words>"` - never one the user did not give - and each
+   answer goes into the plan in the turn it arrives: a compaction keeps the file, not the chat.
+   After one, or in a new session, re-read this file and the plan reference, then continue from
+   `plan.md`. The plan stays true through the build: `Landing`, `Surface` and the data are additive;
    the path and `Changes underneath` change in the commit that changes them.
 
 ## Cut: how many plans

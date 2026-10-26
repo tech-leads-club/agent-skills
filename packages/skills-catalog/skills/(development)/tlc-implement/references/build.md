@@ -64,9 +64,10 @@ what was asked for. Open the running app and do what the plan promises as the us
 that share the state you changed included. If you cannot reach the app, hand the
 steps to the user.
 
-Save each state a capture draws beside it as `<capture>.running.png`, at the capture's size so the
-page lays out as the capture does, and name the file in the proof. It matches the capture except
-for what `## Differences from the source` lists. A state no capture draws gets no picture; a `walk`
+Save each state a capture draws beside it as `<capture>.running.png`, taken in a browser window at
+the capture's size - its pixel size over its scale - so the page lays out as the capture does; an
+image resized afterwards does not. Name the file in the proof. It matches the capture except for
+what `## Differences from the source` lists. A state no capture draws gets no picture; a `walk`
 check is a visit you name in the `**Walked:**` line, which also says how the user reaches each
 state.
 
@@ -76,14 +77,18 @@ difference from a capture is fixed, not turned into a check.
 
 ## Then stop
 
-Append your block to `## Handoff` in `checks.md`: boundary, what the user settled mid-build, what
-was abandoned, the walk. Report checks closed, commit hashes, proof results and deviations.
+What the user settles while you build goes on the `**Settled mid-build:**` line in the turn they
+say it, in their words - a compaction drops the chat, not the file. When you stop, append to
+`## Handoff` in `checks.md`: boundary, what was abandoned, the walk. Report checks closed, commit
+hashes, proof results and deviations.
 
 Run `python3 <skill-dir>/scripts/check_proofs.py <feature>`; a red row goes back to the build. Then,
 if you hold the whole feature, dispatch in this turn and in parallel the screens sub-agent when a
-capture has a picture ([verify-screens.md](verify-screens.md)) and the Verifier
-([verify.md](verify.md)). When both have returned, fix everything they name in one pass, look at
-your own pictures beside the captures where the fix touched them, run `check_proofs.py` with the
-Verifier's `mutations.json`, and send the screens sub-agent back over the rows that differed - the
-second and last round. Write each finding's closing commit, then run the gate. What still fails goes
-to the user. Close only when every sub-agent you dispatched has returned.
+criterion cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier
+([verify.md](verify.md)), each written on the `**Dispatched:**` line with the `HEAD` before it is
+sent and marked `returned` when it is back. When both have returned, fix everything they name in
+one pass, run `check_proofs.py` with the Verifier's `mutations.json`, and when the fix changed code,
+re-save every picture at the new `HEAD` and resume the round-1 screens sub-agent for round 2 (a
+fresh one only when it cannot be resumed) - it is the last. Write each finding's closing commit, then run the gate. A commit that changes code after
+round 2 leaves a screen nobody judged: the gate says so, and it goes to the user. Close only when
+every sub-agent you dispatched has returned, and open the report with the gate's last line.

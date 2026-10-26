@@ -21,6 +21,15 @@ CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 SCREEN_CRITERION_RE = re.compile(r"\bSHALL\s+(?:NOT\s+)?(?:show|display|render|hide)\b", re.IGNORECASE)
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*`?browser\b", re.IGNORECASE)
 CRITERION_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
+APPROVED_RE = re.compile(
+    r"^\**\s*Approved\s*\**\s*:\s*\**\s*\d{4}-\d{2}-\d{2}\b.*\buser\s*:\s*[\"“][^\"”]*\S[^\"”]*[\"”]",
+    re.IGNORECASE)
+
+
+def plan_approved(plan_lines):
+    """True when plan.md carries `**Approved**: <date> - user: "<their words>"`. The approval is the
+    user's, so it carries their words; the chat that held it does not survive a compaction."""
+    return any(APPROVED_RE.match(s.strip()) for s in plan_lines)
 
 
 def read_mutations(lines):

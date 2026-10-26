@@ -1,5 +1,7 @@
 # Dunning on failed charge
 
+**Approved**: 2026-10-23 - user: "approved, go ahead"
+
 > Build this with **tlc-implement**. Every criterion becomes a check with a proof; nothing under
 > the open questions is settled while building.
 

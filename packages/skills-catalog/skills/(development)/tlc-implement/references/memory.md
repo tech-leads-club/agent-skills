@@ -29,11 +29,28 @@ row in each place: the shape in `Landing`, the constraint here.
 Every `active` `AD-NNN` constrains the work. Conform, or append an entry that supersedes it (set the
 old row's status to `superseded by AD-NNN`) and say why.
 
-## Resuming work
+## Resuming work - a new session, or after a compaction
 
-Read `.specs/STATE.md` and the feature's `checks.md`, its completion marks and `## Handoff`, then
-reconcile them against git: the commits are fact; a note written before a crash is intent. Propose
-the next step before writing code.
+A compaction is a resume: the summary keeps the task and drops the rules. Re-read `SKILL.md` and the
+reference for the phase the files show, then read `.specs/STATE.md` and the feature's files -
+`plan.md` and its `**Approved**:` line, `checks.md` with its completion marks and `## Handoff`,
+`proofs.md`, `verification.md`, `screens.md` - and reconcile them against git: the commits are
+fact; a note written before a crash is intent. After a compaction in the middle of a run, continue
+when the files and git agree, and stop only on a conflict. In a new session, propose the next step
+before writing code.
+
+Where the files put you - the first row that holds:
+
+| The files show | Next |
+| --- | --- |
+| `plan.md` with no `**Approved**:` line | stop: the plan goes back to **tlc-plan** and the user |
+| no `checks.md` | Checks |
+| a check not closed | Build; a check whose commit is on the branch is closed - mark it |
+| a screen and no `**Walked:**` line | the walk and the pictures (build.md) |
+| no `proofs.md`, or one at another commit than `HEAD`, and nothing dispatched | `check_proofs.py` |
+| `**Dispatched:**` names a sub-agent whose report is not on disk (`verification.md`, `screens.md`) | wait for it; send it again only when it cannot return - a new session - and say so on the line |
+| an open finding, or `screens.md` `**Round**: 1` that diverges or names an older `HEAD` | the fix pass, then round 2 |
+| `screens.md` `**Round**: 2` | the script and the gate; what still fails goes to the user - there is no third round |
 
 ## Lessons
 

@@ -250,11 +250,20 @@ def with_diff(old, new):
 RUNNING = "screens/billing.running.png"
 
 
-def screens_md(verdict):
+JUDGED = "**Round**: 1\n**HEAD**: 0a1b2c3\n"
+
+
+def screens_md(verdict, judged=JUDGED):
     return lambda s: (
-        "# Billing screens\n\n**Verifier**: independent sub-agent (author != verifier)\n\n"
+        "# Billing screens\n\n**Verifier**: independent sub-agent (author != verifier)\n" + judged + "\n"
         "| Screen | Compared with | Verdict | Finding |\n| --- | --- | --- | --- |\n"
         f"| `{RUNNING}` | AC 9 | {verdict} | - |\n")
+
+
+def judged_capture(judged=JUDGED):
+    """A binding capture with the author's picture, judged in screens.md."""
+    return {"plan.md": with_binding, "screens.md": screens_md("matches", judged),
+            "captures/billing--card-form.running.png": lambda s: "png"}
 
 
 def with_browser_shot(rel):
@@ -338,6 +347,27 @@ MULTI_CASES = [
     ("validate_verification", "a walk proof with no Walked line in the Handoff",
      {"checks.md": with_walk_proof},
      1, "no `**Walked:**` line"),
+    ("validate_verification", "screens.md with no Round line",
+     judged_capture("**HEAD**: 0a1b2c3\n"),
+     1, "no `**Round**:` line"),
+    ("validate_verification", "screens.md in a third round",
+     judged_capture("**Round**: 3\n**HEAD**: 0a1b2c3\n"),
+     1, "there is no third round"),
+    ("validate_verification", "screens.md that names no judged HEAD",
+     judged_capture("**Round**: 1\n"),
+     1, "names no `**HEAD**`"),
+    ("validate_verification", "a plan with no approval line",
+     {"plan.md": lambda s: s.replace('**Approved**: 2026-10-23 - user: "approved, go ahead"\n', "")},
+     1, "plan.md has no `**Approved**"),
+    ("validate_checks", "checks written from a plan nobody approved",
+     {"plan.md": lambda s: s.replace('**Approved**: 2026-10-23 - user: "approved, go ahead"\n', "")},
+     1, "plan.md has no `**Approved**"),
+    ("validate_checks", "an approval without the user's words",
+     {"plan.md": lambda s: s.replace('user: "approved, go ahead"', "the plan is complete")},
+     1, "plan.md has no `**Approved**"),
+    ("validate_checks", "an approval with no date",
+     {"plan.md": lambda s: s.replace("**Approved**: 2026-10-23 -", "**Approved**: yes -")},
+     1, "plan.md has no `**Approved**"),
     ("validate_plan", "a binding source with no Differences section",
      {"plan.md": lambda s: with_binding(s).replace(DIFFERENCES, "")},
      1, "no `## Differences from the source` section"),
@@ -408,9 +438,9 @@ NEGATIVE_CONTROLS = [
     ("validate_checks", "a screen check citing the criterion's capture is accepted",
      {"plan.md": with_binding, "checks.md": with_screen_check}),
     ("validate_verification", "a plan with a binding source and matching pictures is accepted",
-     {"plan.md": with_binding,
-      "screens.md": screens_md("matches"),
-      "captures/billing--card-form.running.png": lambda s: "png"}),
+     judged_capture()),
+    ("validate_verification", "a capture judged again in round 2 is accepted",
+     judged_capture("**Round**: 2\n**HEAD**: 0a1b2c3\n")),
     ("validate_verification", "a picture at twice its capture's size is the same layout",
      {"plan.md": lambda s: with_screen(with_binding(s)), "screens.md": screens_md("matches"),
       "captures/billing--card-form.png": lambda s: png(1024, 839),
@@ -518,6 +548,39 @@ def run_tooling():
                       f"got {code}: {out.strip()}")
     finally:
         shutil.rmtree(empty, ignore_errors=True)
+
+    # A verdict holds for the code it judged: a commit to .specs/ keeps it, a commit to code does not.
+    if shipped("validate_verification") and shutil.which("git"):
+        root = scaffold()
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        for artifact, edit in judged_capture().items():
+            path = os.path.join(fdir, artifact)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            write_artifact(path, edit(read_artifact(path)))
+
+        def git(*cmd):
+            return subprocess.run(["git", *cmd], cwd=root, capture_output=True, text=True).stdout.strip()
+
+        def commit(message):
+            git("add", "-A")
+            git("-c", "user.email=s@t", "-c", "user.name=selftest", "commit", "-qm", message)
+            return git("rev-parse", "--short", "HEAD")
+
+        git("init", "-q")
+        judged = commit("feat: the screen")
+        screens = os.path.join(fdir, "screens.md")
+        write_artifact(screens, read_artifact(screens).replace("0a1b2c3", judged))
+        commit("docs: the verdict")
+        _, kept = run("validate_verification", root)
+        write_artifact(os.path.join(root, "app.ts"), "export const late = true\n")
+        commit("fix: a change after the judge")
+        _, stale = run("validate_verification", root)
+        shutil.rmtree(root, ignore_errors=True)
+        if "code changed since" not in kept and "code changed since (app.ts)" in stale:
+            print("  ok      validate_verification.py: a verdict survives a .specs commit and not a code commit")
+        else:
+            ok = False
+            print(f"  BROKEN  validate_verification.py: judged HEAD - kept: {kept.strip()[:200]} | stale: {stale.strip()[:200]}")
 
     # the lessons store has to survive a real round-trip on disk, not only its unit checks
     if not shipped("lessons"):
