@@ -1,195 +1,131 @@
 ---
 name: tlc-plan
-description: 'Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source. Use when the user says "write the task", "cut this PRD into tasks", "turn this design doc into work", or "tlc-plan". Do NOT use for discovery itself or to implement — a one-line ticket is a decision; a blank wish is not.'
+description: 'Turns a request, ticket, PRD, design or thread into one plan a human approves and a builder can act on without the conversation: asks every gray area until no product decision is left to the builder, then writes the problem, EARS criteria with concrete values, the path and the data it touches (drawn in mermaid), the interface, and only the decisions that are hard to reverse. Captures that come with the request bind. Use when the user says "plan this", "plan feature", "specify feature", "write the plan", "cut this PRD into tasks", or "tlc-plan". Do NOT use to implement (that is tlc-implement), for a standalone design document, or when nobody has decided what to build.'
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 0.2.0
+  version: 1.1.0
 ---
 
 # TLC Plan
 
-Cut the source. Ground it in the code. Write the task.
+Ask until nothing is the builder's to decide. Write it down so a stranger can build it.
 
 ```
-CUT ──────────→ GROUND ──────────→ WRITE
-(slices, then   (the repository     (one task,
- how many        it lands in)        unless a seam
- tasks)                              is forced)
+┌─────┐   ┌───────┐   ┌──────┐   ┌─────────┐
+│ ASK │ → │ SHAPE │ → │ CHECK│ → │ APPROVE │ → tlc-implement
+└─────┘   └───────┘   └──────┘   └─────────┘
 ```
 
-Someone already decided what to build. A one-line ticket counts; a blank "we should do something about billing" does not. This turns that decision into work a builder can pick up without guessing, and stops at the first thing nobody decided. It has no opinion about product: it does not explore the problem, generate options, or grow scope. What it does find is the operational hole the source left implicit - the empty state, the error shape, the flag the job never named - by walking two fixed lists, not by inventing a better feature.
+The common failure of a coding agent is a requirement that never became an obligation, followed by
+a completion claim. It starts here: a gray area the plan settled by guessing, a capture treated as
+a suggestion, a sentence of the request that landed nowhere. This skill produces the one document a
+human reads and objects to before any code exists, and it is the whole brief for whoever builds,
+often a different agent with none of this conversation.
 
-## Critical rules
+## Rules
 
-1. Every criterion is an **observable outcome with a concrete value**. "The columns exist" is not a criterion, and that is the point - a horizontal slice has nothing observable to write, so the format cannot express one.
-2. **Refuse rather than guess.** A gap in the source comes back as a question. A plausible criterion nobody decided is the expensive failure: it reads well, gets approved, and ships.
-3. `Decided` carries only what is hard to reverse, in its literal shape. Everything reversible is decided while building and reviewed in the diff.
-4. Raising a concern is free; growing scope is the user's call. Ask about anything you find; add capability nobody asked for, never.
-5. When the source contradicts the code, **amend the source**. Quietly building the right thing leaves the document that five other people read still wrong.
-6. The task is the record of decision. Linked documents keep the reasoning and stay editable; if one diverges later, ask before building.
+1. Every criterion is one observable outcome with a concrete value - a status code, a field, a
+   bound, a label - that one run settles. "Gracefully", a percentile or "the columns exist" is not
+   a criterion.
+2. Ask every gray area before presenting the plan: a decision that is the user's, has more than one
+   defensible answer, and is not settled by the code. An assumption never stands in for a question
+   to save one. Asking clarifies how, never whether to add a capability.
+3. A capture, frame or live site that comes with the request binds unless the user called it
+   inspiration. Only the user changes a binding source: a departure from it is asked, recorded as
+   an `AD-NNN` in `.specs/STATE.md`, and listed in `## Differences from the source`.
+4. The rules that change what a user sees run in a layer the repo's tests reach. Filtering,
+   searching, sorting and counting are rules.
+5. Only what is hard to reverse is decided here, with its literal shape. Placement, names and
+   types inside the conventions are the builder's and are settled in the diff.
+6. `validate_plan.py` exits 0 before the plan is presented, and approval is the one stop for a
+   human. The approval is written under the plan's title as
+   `**Approved**: <date> - user: "<their words>"` - never one the user did not give - and each
+   answer goes into the plan in the turn it arrives: a compaction keeps the file, not the chat.
+   After one, or in a new session, re-read this file and the plan reference, then continue from
+   `plan.md`. The plan stays true through the build: `Landing`, `Surface` and the data are additive;
+   the path and `Changes underneath` change in the commit that changes them.
 
-## Cut
+## Cut: how many plans
 
-Read every source completely first - PRD, design doc, RFC, thread. Then enumerate the slices it contains, and only after that decide how many tasks they become. Those are two questions, and collapsing them is where sizing goes wrong.
+Read every source completely, then decide how many plans it becomes. Default to one. Every one-way
+door in the source is then reviewed together, where the interactions between them are visible;
+split six ways, the same doors arrive in six batches and nobody sees the whole.
 
-**A slice is one observable outcome, never a layer.** "Schema first, then the endpoints" produces pieces nobody can verify alone, and their criteria degenerate into structure - the table exists, the route responds - which proves nothing about behaviour. A slice is right when someone can watch it work.
+Split only for a reason you can defend from evidence: a piece cannot land before another without
+breaking production, a piece waits on an answer only someone else can give, or a piece belongs to
+another team. Each piece is then its own feature folder with its own plan.
 
-Vertical is the shape of a slice, not the size of a task. A task holding every slice in the source is still vertical, because every criterion is still an outcome someone can watch. Only the layer cut is unwritable here.
+Say when it is big, and what makes it big: one-way doors first, a migration among them, then the
+number of slices. Show the seams that exist - order constraints first, marked as the kind that
+cannot be collapsed - and let the user pick where to cut.
 
-Preparation that proves nothing - a nullable column, a client with no caller - is real work and belongs in a commit or a pull request, but it is not a task, because it has no criterion.
+A slice inside a plan is one outcome someone can watch, never a layer. Preparation that proves
+nothing on its own - a nullable column, a client with no caller - is a commit, not a slice.
 
-**Default to one task for the whole source.** Splitting is the exception and needs a reason you can defend from evidence, which narrows it to three: a piece cannot land before another without breaking production, a piece waits on an answer only someone else can give, or a piece belongs to another team. Past those it is preference about how this team likes to work, and preference is not yours to impose - a cut you cannot defend makes the user undo your work before they start theirs.
+## Artifacts
 
-The default buys something real, too. Every one-way door in the source gets reviewed **together**, once, where the interactions between them are visible. Split six ways, the same doors arrive in six batches and the abstraction they share grows by accretion, each task adding the minimum its own criteria needed and nobody ever seeing the whole.
+```
+.specs/
+├── STATE.md                    # decisions log (AD-NNN)
+├── LESSONS.md                  # rendered by scripts/lessons.py - read it
+└── features/<feature>/
+    ├── plan.md                 # problem, shape, surface, doors, criteria
+    └── captures/               # the binding source files
+```
 
-**Say when it is big.** The cost of a large task is not a large pull request - those are independent, and one task routinely becomes several. The cost is how much work gets thrown away when an irreversible decision turns out wrong, because you find out later. So weigh what makes that expensive: how many one-way doors there are, whether a schema migration is among them, and how many slices - in that order. Six slices with no doors is safe whole; three slices with four doors and a migration is not.
+The plan format, how to ask, the surface walk and EARS: [references/plan.md](references/plan.md).
+Its section headings are a schema **tlc-implement** and the validator read; prose follows the
+project's language, and identifiers are never translated.
 
-When it is big, show the seams that exist instead of a number you made up. Order constraints first, marked as the kind that cannot be collapsed, then the thematic groupings, each with the reason it is a seam. Let the user pick where to cut. A round number the skill suggests is an opinion dressed as arithmetic.
+## Decisions and lessons
 
-**Sizing evidence, in order.** What the project declares wins: a contributing rule, a team convention doc. Then the issue tracker, if it is reachable - task size is a tracker property, and git history only ever reveals pull request size, which is a different question. Then ask. Say which of the three you used, so an inference about pull requests is never mistaken for one about tasks.
+`.specs/STATE.md` holds the decisions a future feature has to conform to:
 
-## Ground
+```markdown
+# Project state
 
-Now open the repository. Everything above was written without the code in front of anyone, so it is wrong in places nobody can see from the document alone.
+## Decisions
 
-Three things only the code answers, and each has a home in the task:
+| ID | Decision | Rationale | Status | Date |
+| --- | --- | --- | --- | --- |
+| AD-001 | Webhook ingest is idempotent on provider delivery id | replays are routine and cheap to dedup at the edge | active | 2026-02-14 |
+```
 
-- **What the change disturbs.** Which existing term changes meaning, and who depends on it today. A status that starts meaning something new breaks every caller branching on it, and none of them appear in the diff of the feature.
-- **Which decisions are actually one-way.** A choice is precedent-setting only relative to what exists. You cannot tell a new pattern from an ordinary one without reading the conventions it will sit beside.
-- **Where the source is simply wrong.** Names the system does not use, APIs that do not exist, a field the document invented. This is the most valuable thing the phase produces, and it goes back to the source, not only into the task.
+Edit only the body of `## Decisions`. Where the repo already keeps ADRs or a decision log, append
+there instead. Every `active` entry constrains the plan: conform, or append one that supersedes it
+(the old row's status becomes `superseded by AD-NNN`) and say why. An answer that departs from a
+binding source is a decision: it says what the product shows instead, and its rationale quotes the
+question and the option chosen.
 
-What you do **not** settle here is placement. Which folder, which service, how many classes: the repository's own conventions answer most of it and the rest is reversible, so writing it down produces exactly the design document that goes stale and then misleads. Placement is recorded downstream, against the code, by **tlc-implement**. The exception is a choice that creates a pattern the codebase does not have - that is a one-way door and belongs in `Decided` like any other.
+Lessons are written by **tlc-implement** from real verification findings. Read the confirmed ones
+for the area before asking anything:
 
-## Walk the surfaces
+```bash
+python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed [--scope <area>]
+```
 
-A surface is anything outside the system that meets it, and each kind carries the same decisions every time it appears. That is what makes a hole findable rather than a matter of remembering: you do not ask "what did I forget about this screen", you walk the row. A thin ticket names the feature and none of these; the walk is what keeps that from shipping as a task with three criteria and an accidental error payload.
+## Scripts
 
-| Surface | The decisions it always has |
+Resolve `<skill-dir>` as the directory containing this `SKILL.md`. Pass `--root` when cwd is not
+the project root. Run a script rather than read it: its messages say what to change.
+
+| When | Command |
 | --- | --- |
-| a screen or view | empty, loading, error and unauthorised states; density and ordering; what a destructive action confirms before doing it |
-| an API or webhook someone calls | response shape, error shape with its codes, who may call it, versioning, what happens at the rate limit |
-| a command or scheduled task | output format and verbosity, every flag and its default, exit codes, what it prints when it fails halfway |
-| a document or copy someone reads | structure, tone, depth, and what the reader is meant to do next |
-| a collection being organised | the grouping criterion, naming, ordering, what happens to duplicates, and the exception that does not fit |
+| Before presenting the plan, and after each change to it | `python3 <skill-dir>/scripts/validate_plan.py <feature>` |
+| Before asking anything | `python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed` |
+| After editing the validator or the template | `python3 <skill-dir>/scripts/selftest.py` |
 
-Nothing about state, persistence or contracts is here - that is the nine dimensions in Sweep, and duplicating it in both places produces two answers that disagree.
+## Requires
 
-**The walk finds gaps. It does not write criteria.** Each item resolves to a criterion **already in the source or already written from it**, to something the code already does (`existing - <what>`), to `n/a - <reason>`, or to `Unresolved <n>`. The `n/a` escape is mandatory and it is what stops the list from inventing scope: a webhook has no empty state, and saying so costs a line. `None - no user-facing surface` is a complete answer for a task that exposes none.
-
-A landing that would need a new behaviour is a question, never a numbered line you added so the table looks finished. That is the same refuse-rather-than-guess rule, applied to a list that would otherwise manufacture requirements.
-
-Two of these hide better than the rest. An **error shape** is decided by whoever writes the first handler, so it gets decided by accident and then copied. An **empty state** is invisible until the feature ships to someone whose account is new, which is every user on their first day.
-
-**Where the record lives:** `## Observable` in the task, one row per item.
-
-## Sweep
-
-The source covers what somebody thought of. The surface walk covers what meets a user. This is the list of what nobody writes down about the system, and it is fixed so that a blank cannot look like nothing to answer: validation, failure modes, idempotency and retry, authorization, concurrency and ordering, data lifecycle, external-dependency failure, state transitions, observability.
-
-Walk all nine, every time, and write where each one landed: a criterion you already wrote, something the code already handles, `n/a` with the reason, or - when it needs a product answer - `Unresolved`. Recording the landing is the whole mechanism. A sweep you only think through leaves nothing a reviewer can check, so it decays into a step that gets skipped on the busy day.
-
-Concurrency and observability hide better than the other seven, because neither is visible to a user until it fails. Those two are the reason this list exists.
-
-A landing must be a criterion that observes **that** dimension. Reaching for a number already used on another line is the tell that the dimension is uncovered: a duplicate rejected because a row already exists says nothing about two requests arriving at once, and a webhook deduplicated by event id says nothing about two webhooks arriving out of order. When you catch yourself borrowing, the honest landings are `n/a` with the reason, or a question. Both survive being read; a borrowed number does not.
-
-The `n/a` escape is what stops the list from manufacturing requirements. A dimension that does not apply is a complete answer, and inventing a criterion to fill a row is the failure this would otherwise cause. Growing scope stays the user's call: a dimension that resolves to real new behaviour is a question you ask, never a criterion you add.
-
-**tlc-implement** reads this instead of sweeping again - a dimension that lands on a criterion here is a check with a proof there.
-
-## Refuse rather than guess
-
-Five things must be true of every criterion before you write it:
-
-- someone could **observe** the outcome - if you cannot say what would be seen, it is too vague
-- it carries a **concrete value** - a status code, a field, a limit; never "gracefully", "properly" or "fast"
-- **one run settles it** - a single execution either satisfies it or does not
-- when it claims something will **not** happen, you can name what prevents it
-- the **boundary** is stated - you can say what is explicitly out
-
-**One run has to settle it.** This is where a target sneaks past the concrete-value check wearing a number: "status propagates within 5 minutes at p95" has a figure in it, and no single execution can satisfy or fail it, because a percentile is a property of a distribution. Percentiles, averages, uptime and error rates are service targets. Split the line - the behaviour is the criterion, that the status matches once the event is processed, and the target goes where it is actually measured, which is the observability dimension of the sweep. Fused, the provable half hides behind the unprovable one and a test that never touched the number marks the whole line green.
-
-**A guarantee that something will not happen needs a mechanism.** Nothing prevents a duplicate, a double charge or a second write by default, so "a retry does not create a second subscription" is a claim about machinery: point at the code that enforces it or at the `Decided` row that introduces it, or you wrote a hope. Walk the failure that would produce the thing you are forbidding - the remote call succeeded and the local write did not - and check the mechanism still holds on that path, because that is the one nobody pictures. Where none exists, it is a `Decided` row or a question, never a criterion standing on its own.
-
-Missing one is normal, and the response is to **ask** - not to note it and move on. Most of what looks like a question is not one. **A gray area is a decision that is genuinely the user's, has more than one defensible answer, and is not settled by the code.** Fail any of the three and it is not a gray area: the repo's conventions answer it, or one option is clearly right and you state the default in `Unresolved` as `open` with that default in `Until answered`. Do not go looking for a quota of them - a quota manufactures questions the same way a checklist with no `n/a` escape manufactures requirements.
-
-The surface walk and the nine dimensions are the two lists that find what you do not know. "Consider the edge cases" finds nothing.
-
-Where you do ask, these rules are about turn cost rather than politeness. Every badly shaped question spends a turn and buys less than a stated default would have.
-
-- **Concrete options, never an open prompt.** "Card layout or table layout" is answerable; "how should this look?" hands the work back.
-- **Lead with your recommendation and one line of why.** You have read the code; accepting or overriding should cost one word.
-- **Assume first when it is safe.** State the default in `Unresolved` as `open` and invite correction instead of blocking. A question you would have answered the same way regardless of the reply is not worth asking.
-- **At most two independent questions per turn, exactly one when they are dependent** - a dependent answer prunes the questions after it, so asking them together wastes most of them. Three or more in a turn is an interrogation, and it reads as one.
-- **"You decide" is an answer.** Write the recommended default as a criterion and quote `user delegated` on the Sources line that records it, so discretion is on the record rather than inferred from silence later.
-- **The boundary is fixed.** Asking clarifies *how*, never whether to add a capability. A new capability that surfaces goes in `Out of scope` with its reason and stays there.
-
-**Facts you look up; decisions you ask.** Anything the environment already answers - a convention, an existing field, how the current endpoint behaves, what the schema allows - you resolve yourself through the knowledge chain. A question you could have answered by reading the code spends the user's turn and their patience, and enough of them turn this into an interview. Ask only what is genuinely theirs: scope, priority, product behaviour, which trade-off they want.
-
-What survives the asking is what only Product or a tech lead can settle, and that goes to `Unresolved`, never into a criterion that sounds right. **Mark the ones that block.** A question that stops a criterion from ever being satisfiable is different in kind from one that leaves an error payload undecided, and a prefix in a list still hides the difference: the blocking one reads like a note while it is the reason the task cannot be handed on. `Kind` is a column so a blank cannot look like `open`. Where you wrote something anyway to keep the rest coherent, that goes in `Until answered`, so the review knows what to check.
-
-A third kind blocks neither. The work ships, every proof is green, and the feature still cannot be turned on for real users - a catalog nobody populated, a credential nobody issued, an account nobody approved. It hides precisely because everything upstream passes, so it surfaces on launch day, and it gets its own `Kind` (`blocks go-live`) for that reason.
-
-A source can also decide something wrongly and clearly - stated with a concrete value, just bad. That passes this gate and should: the place to catch it is the review of the task, and the task being explicit is what makes the review possible.
-
-## Format
-
-Read `references/document-format.md` when you write the `.tasks/<name>.md` artifact — after the cut, the grounding, the surface walk, and the sweep. Do not load it during Cut. Section headings in that template are literals: the next skill refers to them by name.
-
-## Tasks are not pull requests
-
-A task is a unit of verification and must prove something. A pull request is a unit of review and only has to be reviewable. They coincide often, and when they do not, the task is not what bends: preparation can be its own pull request while never being its own task.
-
-So when a task is large enough to need splitting for review, propose the pull requests separately from the task, and calibrate rather than assert. What the repository declares comes first - a `CONTRIBUTING` rule, a pull request template. Where nothing is declared, read what the team actually does: median files and lines per merge, whether migrations travel alone or beside behaviour. Practice beats a number somebody wrote once.
-
-Carry the same distinction as in the cut: order constraints are not negotiable, review preference is. A team that collapses a boundary thinking it is taste, when it was there to avoid a broken intermediate state, breaks a deploy.
-
-## Knowledge chain
-
-In strict order: existing code and conventions, project docs, library documentation, web search, then flag as uncertain. Never invent an API, a flag or a behaviour. "I could not find documentation for this" always beats a plausible fabrication.
+| Needs | For | Without it |
+| --- | --- | --- |
+| Python 3.8+ (standard library only) | the scripts | the plan still applies; say the validator did not run |
+| a model that reads images | binding captures | ask the user to describe each state, and say so in `Sources` |
+| access to the design source (file, MCP, URL) | exporting each state to `captures/` | ask for the files as a `blocks` question |
 
 ## Output
 
-Produce the artifact; do not narrate the phase. Present the cut, then the tasks, then the open questions with the blocking ones first. If you have to ask before the artifact can be honest, at most two independent questions, with a recommendation; do not hold the task hostage to a quota of gray areas. Lead with the verdict. State decisions definitively. Cut filler and hedging.
-
-## Examples
-
-### Example 1: One source, one task
-
-User says: "Turn this design doc into work."
-Actions:
-1. Read the source completely. Enumerate slices, then decide how many tasks — default one.
-2. Open the repository. Ground names, one-way doors, and contradictions. Amend the source if it is wrong.
-3. Walk the surfaces. Sweep the nine unwritten requirements. Ask rather than guess.
-4. Read `references/document-format.md` and write `.tasks/<name>.md`.
-Result: one task file. Criteria are observable outcomes with concrete values. Observable has a landing per surface item. Swept has all nine landings. Unresolved is a table, or `None`.
-
-### Example 2: Source has no decision
-
-User says: "Write the tasks for this idea."
-Actions: Do not run this skill. Nobody has decided what to build. There is no source to cut.
-Result: hand off; no `.tasks/` file from this skill.
-
-### Example 3: Wrong skill
-
-User says: "Implement the billing task."
-Actions: Do not run this skill. That is tlc-implement.
-Result: hand off; no new task file.
-
-## Common failures
-
-### A plausible criterion nobody decided
-Cause: a gap in the source was filled with a criterion that reads well.
-Solution: ask. Concrete options, recommendation in one line, at most two independent questions. What only Product can settle goes to `Unresolved`, never into Criteria.
-
-### A criterion the walk invented
-Cause: a surface item or sweep dimension needed a new behaviour and a numbered line was added so the table looks finished.
-Solution: a landing that would need a new behaviour is a question, never a criterion. `n/a` with the reason, `existing`, or `Unresolved`.
-
-### Horizontal slices
-Cause: "schema first, then the endpoints" was treated as two tasks.
-Solution: a slice is one observable outcome someone can watch. Default to one task. Split only for an order constraint, an answer only someone else can give, or another team.
-
-### Borrowed sweep landing
-Cause: concurrency landed on a uniqueness criterion already used for validation.
-Solution: a landing must observe that dimension. If it does not apply, `n/a` with the reason. If it needs a product answer, `Unresolved`.
+Produce the artifact; do not narrate the phase. When you stop, lead with the verdict: the plan, the
+questions that block first with your recommendation, then the defaults you picked for the user to
+correct. Section headings stay in English.

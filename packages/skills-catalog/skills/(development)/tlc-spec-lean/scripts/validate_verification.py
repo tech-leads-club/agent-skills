@@ -2,40 +2,30 @@
 """
 validate_verification.py - deterministic completion gate for a feature.
 
-The skill's strongest invariant is "a feature is done when an independent Verifier's
-report accounts for every check." That is prose the model has to remember, and prose
-is what a long trajectory quietly drops. This turns it into a checkable pass/fail run
-as the closing step, so declaring a feature done without a real report fails loudly.
-
-It does NOT merely check that verification.md exists. A report that exists but holds
-the template placeholder, cites no evidence, or records a surviving mutant next to a
-PASS verdict would sail through a shallow existence check while proving nothing. The
-gate reads the report's own tables and refuses a verdict its rows contradict.
-
-Pure standard library, zero dependencies. Operates only on the .specs/ markdown
-artifacts, so it stays stack-agnostic.
+A feature is done when check_proofs.py shows every proof green at HEAD and the Verifier's findings
+are each closed by a commit. That is prose a long trajectory quietly drops, so this turns it into a
+pass/fail run as the closing step. It reads the artifacts, never the target codebase.
 
 What it checks:
-  ERROR  - no verification.md (Verify is the closing step of the flow, not an option)
-  ERROR  - the verdict is FAIL, missing, or still the '[PASS | FAIL]' placeholder
-  ERROR  - PASS with no file:line evidence anywhere (evidence-or-zero)
-  ERROR  - profile standard/ui with no fault rows, or with no recomputed Coverage section
-  ERROR  - PASS while a fault row says the mutant survived
-  ERROR  - PASS while a Coverage row leaves a member Unproven
-  ERROR  - PASS while a binding source leaves an element Uncovered
-  ERROR  - PASS while a check row's Result is not PASS
-  ERROR  - PASS while a Test policy row's expectation is not met
-  ERROR  - the report's profile does not match the one checks.md was approved under
-  ERROR  - profile ui, but the report carries no binding-sources section (step 1 vanished)
-  ERROR  - profile standard/ui with Test policy rows in checks.md, but no verdicts in the report
-  WARN   - the report says self-verified (author == verifier: degraded gate)
-  WARN   - no `Profile:` line, so a skipped step cannot be told from a forgotten one
-  WARN   - no `Round:` line
+  ERROR  - no verification.md, or no proofs.md (run check_proofs.py)
+  ERROR  - proofs.md written at another commit than HEAD, or over uncommitted changes
+  ERROR  - a check in checks.md with no row in proofs.md, or a row that is not `pass`
+  ERROR  - checks.md names `Build:` commands and proofs.md has no Build row, or one that failed
+  ERROR  - fewer mutation rows in proofs.md than checks.md's `Mutations:`, or one not killed
+  ERROR  - no `## Findings` section in verification.md, or a finding with no commit in `Closed`
+  ERROR  - pictures owed (a criterion cites a capture, or a check is proven in the browser) and no
+           screens.md, a row in it that does not read `matches`, a cited capture with no
+           `<capture>.running.png`, or a picture at another size than its capture (1x, 2x, 3x pass)
+  ERROR  - a browser proof that names no `.running.png`, or one that is not on disk
+  ERROR  - a `walk` proof and no `**Walked:**` line in the Handoff
+  ERROR  - plan.md with no `**Approved**: <date> - user: "<their words>"` line
+  ERROR  - screens.md with no `**Round**:` line or past round 2, no `**HEAD**`, or code changed after
+           the HEAD it judged
+  WARN   - the report says self-verified (author == verifier: a degraded gate)
 
 Usage:
   python3 <skill-dir>/scripts/validate_verification.py [feature] [--root DIR] [--strict]
 
-  Invoke from the skill directory that ships this script (not the project root).
   Pass --root when cwd is not the project that contains .specs/.
 
 Exit codes: 0 ok, 1 the feature is not done, 2 usage error.
@@ -44,13 +34,21 @@ Exit codes: 0 ok, 1 the feature is not done, 2 usage error.
 import argparse
 import os
 import re
+import subprocess
 import sys
 
-EVIDENCE_RE = re.compile(r"[\w./-]+\.[A-Za-z0-9]+:\d+")
-PROFILE_RE = re.compile(r"^\**Profile\**\s*:\s*`?(\w+)`?", re.IGNORECASE | re.MULTILINE)
-EMPTY_CELL = {"", "-", "—", "–", "none", "n/a", "na", "nothing"}
-SURVIVED_RE = re.compile(r"\b(no|survived|alive|not killed)\b", re.IGNORECASE)
-UNMET_RE = re.compile(r"\b(no|not met|unmet|fail|failed|gap)\b", re.IGNORECASE)
+from lean_config import _section, plan_approved, plan_marks_binding, plan_owes_pictures, read_mutations
+
+PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+RUNNING_SUFFIX = ".running.png"
+ROUND_RE = re.compile(r"^\**\s*Round\s*\**\s*:\s*\**\s*(\d+)", re.IGNORECASE)
+JUDGED_HEAD_RE = re.compile(r"^\**\s*HEAD\s*\**\s*:\s*\**\s*`?([0-9a-f]{7,40})", re.IGNORECASE)
+MAX_ROUNDS = 2
+BROWSER_PROOF_RE = re.compile(r"^`?browser\b", re.IGNORECASE)
+WALK_PROOF_RE = re.compile(r"^`?walk\b", re.IGNORECASE)
+WALKED_RE = re.compile(r"^\s*[-*]?\s*\**walked\**\s*:", re.IGNORECASE)
+SHOT_RE = re.compile(r"[\w./-]+\.running\.png")
+CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 
 
 def _feature_dirs(root):
@@ -104,171 +102,291 @@ def column(header, *names):
     return None
 
 
-def has_heading(lines, *names):
-    for ln in lines:
-        s = ln.strip()
-        for n in names:
-            if re.match(r"^#{1,4}\s+" + re.escape(n) + r"\b", s, re.IGNORECASE):
-                return True
-    return False
+def _read(path):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return f.read()
 
 
-def _profile(text):
-    m = PROFILE_RE.search(text)
-    return m.group(1).lower() if m else None
-
-
-def _checks_context(fdir):
-    """What checks.md was approved under: (profile, has a Test policy section)."""
-    path = os.path.join(fdir, "checks.md")
+def _plan_lines(fdir):
+    path = os.path.join(fdir, "plan.md")
     if not os.path.exists(path):
-        return None, False
-    body = open(path, encoding="utf-8", errors="replace").read()
-    lines = strip_fences(body)
-    return _profile("\n".join(lines)), has_heading(lines, "Test policy")
+        return []
+    return strip_fences(_read(path))
 
 
-def _verdict(lines):
-    """Return 'pass', 'fail', 'unfilled', or None."""
-    candidates = [
-        ln for ln in lines
-        if re.search(r"^\**verdict\**\s*:", ln.strip(), re.IGNORECASE)
-        or re.search(r"^#{1,4}\s*verification\b", ln.strip(), re.IGNORECASE)
-    ]
-    hay = " ".join(candidates) if candidates else "\n".join(lines)
-    has_pass = re.search(r"\bPASS\b", hay) is not None
-    has_fail = re.search(r"\bFAIL\b", hay) is not None
-    if has_pass and has_fail:
-        return "unfilled"
-    if has_pass:
-        return "pass"
-    if has_fail:
-        return "fail"
+def _image_size(path):
+    """(width, height) of a PNG or JPEG file, or None when the header is not one of those."""
+    try:
+        with open(path, "rb") as f:
+            data = f.read(65536)
+    except OSError:
+        return None
+    if data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24:
+        return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+    if data[:2] == b"\xff\xd8":
+        i = 2
+        while i + 9 < len(data):
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            marker = data[i + 1]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                return int.from_bytes(data[i + 7:i + 9], "big"), int.from_bytes(data[i + 5:i + 7], "big")
+            i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
     return None
+
+
+def _same_layout(picture, capture):
+    """A picture matches a capture's size at 1x, 2x or 3x - the same layout at another pixel ratio."""
+    return any(picture == (capture[0] * k, capture[1] * k) for k in (1, 2, 3))
+
+
+def _picture_sizes(fdir, root, cited, name):
+    """A picture judged against a capture is taken at the capture's size: a wider window lays the
+    page out differently, so the judge compares a layout the capture never drew."""
+    errors = []
+    for cap in cited:
+        path = os.path.join(root, cap)
+        twin = os.path.splitext(path)[0] + RUNNING_SUFFIX
+        c, r = _image_size(path), _image_size(twin)
+        if c and r and not _same_layout(r, c):
+            errors.append(
+                f"{name}: `{os.path.basename(twin)}` is {r[0]}x{r[1]} and its capture is {c[0]}x{c[1]} - take "
+                f"the picture at the capture's size"
+            )
+    return errors
+
+
+def _screen_evidence(fdir, plan, name):
+    """The builder's comparison left files behind: a running screenshot per capture.
+
+    This judges nothing about the screens - the screens sub-agent's `screens.md` does that. It only
+    makes "the screen was saved" something a file shows, so a build that skipped the UI cannot pass.
+    """
+    errors = []
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
+    running = set()
+    for dirpath, _, files in os.walk(fdir):
+        running |= {f for f in files if f.endswith(RUNNING_SUFFIX)}
+    if not running:
+        errors.append(
+            f"{name}: the feature has a screen but no `*{RUNNING_SUFFIX}` sits under the feature folder - "
+            f"the builder saves a screenshot of each screen it compared"
+        )
+    cited = sorted({c for ln in plan for c in CAPTURE_RE.findall(ln) if not c.endswith(RUNNING_SUFFIX)})
+    for cap in cited:
+        path = os.path.join(root, cap)
+        if not os.path.isfile(path):
+            continue
+        twin = os.path.splitext(os.path.basename(cap))[0] + RUNNING_SUFFIX
+        if not os.path.isfile(os.path.splitext(path)[0] + RUNNING_SUFFIX) and twin not in running:
+            errors.append(
+                f"{name}: the capture `{cap}` has no `{twin}` beside it - the running screen was "
+                f"never set next to the picture it has to match"
+            )
+    errors += _picture_sizes(fdir, root, cited, name)
+    errors += _browser_shots(fdir, name, running)
+    return errors
+
+
+def _code_changed_since(root, sha):
+    """Paths outside `.specs/` changed between `sha` and HEAD; None when git cannot say."""
+    try:
+        inside = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], cwd=root,
+                                capture_output=True, text=True)
+        if inside.returncode != 0:
+            return None
+        p = subprocess.run(["git", "diff", "--name-only", sha, "HEAD"], cwd=root, capture_output=True, text=True)
+    except OSError:
+        return None
+    if p.returncode != 0:
+        return [f"<{sha} is not a commit here>"]
+    return [f for f in p.stdout.split() if not f.startswith(".specs/")]
+
+
+def _screens_verdicts(fdir, name):
+    """screens.md is the screens sub-agent's verdict; a PASS cannot stand beside a screen that diverges.
+
+    The verdict holds only for the code it judged: a commit that changes code after the judged HEAD
+    is a screen nobody looked at.
+    """
+    path = os.path.join(fdir, "screens.md")
+    tables, lines = [], []
+    if os.path.exists(path):
+        lines = strip_fences(_read(path))
+        tables = [(h, rows) for h, rows in find_tables(lines)
+                  if column(h, "verdict") is not None and column(h, "screen") is not None]
+    if not tables:
+        return [
+            f"{name}: the feature has a screen but there is no `screens.md` with a Screens table - each "
+            f"picture is judged by a screens sub-agent on controls, arrangement, copy, drawing and render "
+            f"(verify-screens.md)"
+        ]
+    errors = []
+    rounds = [int(m.group(1)) for m in (ROUND_RE.match(ln.strip()) for ln in lines) if m]
+    if not rounds:
+        errors.append(f"{name}: screens.md has no `**Round**:` line - the screens sub-agent writes 1, and 2 on "
+                      f"the second and last round, so a resumed run knows which round it is in")
+    elif rounds[0] > MAX_ROUNDS:
+        errors.append(f"{name}: screens.md reads `**Round**: {rounds[0]}` - there is no third round; what still "
+                      f"differs after round 2 goes to the user")
+    judged = next((m.group(1) for m in (JUDGED_HEAD_RE.match(ln.strip()) for ln in lines) if m), None)
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
+    if not judged:
+        errors.append(f"{name}: screens.md names no `**HEAD**` - the screens sub-agent writes the commit it judged")
+    else:
+        changed = _code_changed_since(root, judged)
+        if changed:
+            errors.append(
+                f"{name}: screens.md judged {judged} and code changed since ({', '.join(changed[:4])}) - the "
+                f"screens sub-agent judges again at HEAD in round 2; after round 2 it goes to the user")
+    for header, rows in tables:
+        verdict_col = column(header, "verdict")
+        for r in rows:
+            if verdict_col < len(r) and not r[verdict_col].lower().startswith("match"):
+                errors.append(
+                    f"{name}: PASS but the screen '{r[0][:40]}' reads '{r[verdict_col][:40]}' in screens.md - "
+                    f"a missing control, another arrangement, wrong copy or an element drawn differently "
+                    f"fails like a red proof"
+                )
+    return errors
+
+
+def _walk_logged(checks_lines, name):
+    """A `walk` proof's evidence is the author's `**Walked:**` line; with none, nothing was visited."""
+    walks = [ln for ln in checks_lines
+             if (m := PROOF_RE.match(ln.strip())) and WALK_PROOF_RE.match(m.group(1).strip())]
+    if walks and not any(WALKED_RE.match(ln) for ln in _section(checks_lines, "Handoff")):
+        return [
+            f"{name}: checks.md has a `walk` proof but its `## Handoff` has no `**Walked:**` line - "
+            f"the visit the proof names is not on record"
+        ]
+    return []
+
+
+def _browser_shots(fdir, name, running):
+    """Every browser proof names a screenshot that exists. The screens sub-agent judges that picture."""
+    errors = []
+    cpath = os.path.join(fdir, "checks.md")
+    if not os.path.exists(cpath):
+        return errors
+    lines = strip_fences(_read(cpath))
+    for ln in lines:
+        match = PROOF_RE.match(ln.strip())
+        if not match or not BROWSER_PROOF_RE.match(match.group(1).strip()):
+            continue
+        shots = SHOT_RE.findall(match.group(1))
+        if not shots:
+            errors.append(
+                f"{name}: a browser proof names no `.running.png` - the screens sub-agent judges the saved "
+                f"picture, and a check with no picture is unproven"
+            )
+            continue
+        for rel in shots:
+            saved = os.path.isfile(os.path.join(fdir, rel)) or os.path.basename(rel) in running
+            if not saved:
+                errors.append(
+                    f"{name}: browser proof names `{rel}`, which is not under the feature folder"
+                )
+    return errors
+
+
+CHECK_ID_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]")
+SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
+
+
+def _git_head(root):
+    try:
+        p = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True, text=True)
+    except OSError:
+        return None
+    return p.stdout.strip() if p.returncode == 0 else None
+
+
+def _check_with_proofs(fdir, name, lines, checks_lines):
+    """The report format where check_proofs.py ran the proofs and the mutations: proofs.md holds
+    the evidence, verification.md the Verifier's findings, each closed by a commit."""
+    errors, warnings = [], []
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
+    plines = strip_fences(_read(os.path.join(fdir, "proofs.md")))
+    pbody = "\n".join(plines)
+
+    m = re.search(r"\*\*HEAD\*\*\s*:\s*`?([0-9a-f]{4,40})", pbody)
+    head = _git_head(root)
+    if not m:
+        errors.append(f"{name}: proofs.md names no `**HEAD**` - run check_proofs.py again")
+    elif head and not (head.startswith(m.group(1)) or m.group(1).startswith(head)):
+        errors.append(f"{name}: proofs.md was written at {m.group(1)} and HEAD is {head} - run check_proofs.py again")
+
+    tree = re.search(r"\*\*Tree\*\*\s*:\s*(\S+)", pbody)
+    if tree and tree.group(1).lower().startswith("dirty"):
+        errors.append(f"{name}: proofs.md ran on uncommitted changes - commit them and run check_proofs.py again")
+
+    ids = {mm.group(1) for mm in (CHECK_ID_RE.match(ln.strip()) for ln in checks_lines) if mm}
+    seen, killed_rows = set(), []
+    for header, rows in find_tables(plines):
+        result, check, killed = column(header, "result"), column(header, "check"), column(header, "killed")
+        if result is not None and check is not None:
+            for r in rows:
+                if check < len(r):
+                    seen.add(r[check])
+                if result < len(r) and not r[result].lower().startswith("pass"):
+                    errors.append(f"{name}: proofs.md - {r[check]} reads '{r[result][:40]}'")
+        if killed is not None:
+            killed_rows += [r for r in rows if killed < len(r)]
+            for r in rows:
+                if killed < len(r) and not r[killed].lower().startswith("yes"):
+                    errors.append(f"{name}: proofs.md - mutation '{r[0][:50]}' reads '{r[killed]}'")
+    for cid in sorted(ids - seen, key=lambda c: int(c[1:])):
+        errors.append(f"{name}: proofs.md has no row for {cid} - run check_proofs.py again")
+    build = next((ln.strip() for ln in checks_lines if re.match(r"^\**\s*Build\s*\**\s*:", ln.strip(), re.IGNORECASE)), "")
+    if build and "none" not in build.lower()[:15] and "Build" not in seen:
+        errors.append(f"{name}: checks.md names `Build:` commands and proofs.md has no Build row - run check_proofs.py again")
+
+    owed, _ = read_mutations(checks_lines)
+    if owed and len(killed_rows) < owed:
+        errors.append(
+            f"{name}: `Mutations: {owed}` owes {owed} mutation rows and proofs.md has {len(killed_rows)} - run "
+            f"check_proofs.py --mutations with the Verifier's spec"
+        )
+
+    findings = _section(lines, "Findings")
+    if not findings:
+        errors.append(f"{name}: verification.md has no `## Findings` section (write `None - <why>` when empty)")
+    for header, rows in find_tables(findings):
+        closed = column(header, "closed")
+        for r in rows:
+            if closed is None or closed >= len(r) or not SHA_RE.search(r[closed]):
+                errors.append(f"{name}: finding '{r[0][:50]}' is not closed - fix it and write the commit in `Closed`")
+    return errors, warnings
 
 
 def _check_feature(fdir, name):
     errors, warnings = [], []
-    vpath = os.path.join(fdir, "verification.md")
-    if not os.path.exists(vpath):
+    if not os.path.exists(os.path.join(fdir, "verification.md")):
         errors.append(
             f"{name}: no verification.md - the feature is not done until a fresh Verifier "
-            f"(author != verifier) writes it over <feature base>..HEAD with every check"
+            f"(author != verifier) writes its findings over <feature base>..HEAD"
         )
+    if not os.path.exists(os.path.join(fdir, "proofs.md")):
+        errors.append(f"{name}: no proofs.md - run check_proofs.py <feature> at HEAD")
+    if errors:
         return errors, warnings
 
-    text = open(vpath, encoding="utf-8", errors="replace").read()
-    lines = strip_fences(text)
-    body = "\n".join(lines)
-
-    verdict = _verdict(lines)
-    if verdict is None:
-        errors.append(f"{name}: no PASS/FAIL verdict (a prose-only report does not count)")
-    elif verdict == "unfilled":
-        errors.append(f"{name}: verdict is still the template placeholder '[PASS | FAIL]'")
-    elif verdict == "fail":
-        errors.append(f"{name}: verdict is FAIL - route the ranked gaps back as fixes, then re-verify")
-
-    # The profile decides which steps run, so a report that quietly declares a cheaper one
-    # than the feature was approved under makes an entire step disappear without a trace.
-    report_profile = _profile(body)
-    approved_profile, policy_rows_exist = _checks_context(fdir)
-    if report_profile is None:
-        warnings.append(f"{name}: no `Profile:` line - a step that did not run is indistinguishable from one forgotten")
-    elif approved_profile and report_profile != approved_profile:
-        errors.append(
-            f"{name}: report says profile '{report_profile}' but checks.md was approved under "
-            f"'{approved_profile}' - the profile decides which steps run, so a mismatch silently drops one"
-        )
-    effective = approved_profile or report_profile
-    if not re.search(r"^\**round\**\s*:", body, re.IGNORECASE | re.MULTILINE):
-        warnings.append(f"{name}: no `Round:` line - a scoped re-verification must say what was carried forward")
-    if re.search(r"self[- ]verified", body, re.IGNORECASE):
-        warnings.append(
-            f"{name}: report is self-verified (author == verifier) - a degraded gate, "
-            f"since a self-check reproduces the author's own blind spot"
-        )
-
-    if verdict != "pass":
-        return errors, warnings
-
-    if not EVIDENCE_RE.search(body):
-        errors.append(f"{name}: PASS but cites no file:line evidence - evidence-or-zero not satisfied")
-
-    # A profile-scoped step that produced no section did not run. Requiring the section is what
-    # makes "skipped" distinguishable from "forgotten" - otherwise that is only a sentence.
-    if effective in ("standard", "ui") and not has_heading(lines, "Coverage"):
-        errors.append(
-            f"{name}: profile is {effective} but there is no `## Coverage` section - the join has to "
-            f"be recomputed from the authority over each set, not read back from the author's table"
-        )
-    if effective == "ui" and not has_heading(lines, "Binding sources", "Binding source"):
-        errors.append(
-            f"{name}: profile is ui but there is no `## Binding sources` section - step 1 is the "
-            f"only step that can catch a check contradicting the design, and no later step can"
-        )
-    if effective in ("standard", "ui") and policy_rows_exist and not has_heading(lines, "Test policy"):
-        errors.append(
-            f"{name}: checks.md carries Test policy rows but the report gives no verdict on them - "
-            f"those rows are the bar the author built under, so an unmet one is a finding"
-        )
-
-    tables = find_tables(lines)
-    saw_faults = False
-
-    for header, rows in tables:
-        killed = column(header, "killed")
-        if killed is not None:
-            saw_faults = True
-            for r in rows:
-                if killed >= len(r):
-                    continue
-                cell = r[killed]
-                if cell.lower() in EMPTY_CELL and cell.lower() != "no":
-                    continue
-                if SURVIVED_RE.match(cell) or "survived" in cell.lower():
-                    errors.append(
-                        f"{name}: PASS but a mutant survived ({r[0][:50]}) - the assertion would "
-                        f"pass under a plausible wrong implementation"
-                    )
-
-        unproven = column(header, "unproven")
-        if unproven is not None:
-            for r in rows:
-                if unproven < len(r) and r[unproven].lower() not in EMPTY_CELL:
-                    errors.append(f"{name}: PASS but Coverage leaves '{r[unproven][:50]}' unproven ({r[0][:40]})")
-
-        uncovered = column(header, "uncovered")
-        if uncovered is not None:
-            for r in rows:
-                if uncovered < len(r) and r[uncovered].lower() not in EMPTY_CELL:
-                    errors.append(
-                        f"{name}: PASS but a binding source leaves '{r[uncovered][:50]}' uncovered ({r[0][:40]})"
-                    )
-
-        result = column(header, "result")
-        if result is not None and column(header, "check", "claim") is not None:
-            for r in rows:
-                if result < len(r) and r[result] and "pass" not in r[result].lower():
-                    errors.append(f"{name}: PASS but check {r[0][:20]} reports '{r[result][:30]}'")
-
-        met = column(header, "expectation met", "met")
-        if met is not None:
-            for r in rows:
-                if met < len(r) and r[met] and UNMET_RE.search(r[met]):
-                    errors.append(
-                        f"{name}: PASS but a Test policy row is unmet ({r[0][:40]}: '{r[met][:40]}') "
-                        f"- the rows priced work the checks do not name"
-                    )
-
-    # Fault injection is profile-scoped (standard, ui), like tlc-implement. Under `light` a
-    # report with no fault rows is correct, and the profile line is what says so.
-    if effective in ("standard", "ui") and not saw_faults:
-        errors.append(
-            f"{name}: profile is {effective} but there are no fault rows - a green suite proves the "
-            f"tests execute, only a killed mutant proves they can fail"
-        )
-
+    lines = strip_fences(_read(os.path.join(fdir, "verification.md")))
+    cpath = os.path.join(fdir, "checks.md")
+    checks_lines = strip_fences(_read(cpath)) if os.path.exists(cpath) else []
+    errors, warnings = _check_with_proofs(fdir, name, lines, checks_lines)
+    if "self-verified" in "\n".join(lines).lower():
+        warnings.append(f"{name}: verification.md says self-verified - author == verifier, a degraded gate")
+    plan = _plan_lines(fdir)
+    if plan and not plan_approved(plan):
+        errors.append(f"{name}: plan.md has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - the "
+                      f"plan is approved by the user, in their words, before the checks")
+    if plan_owes_pictures(plan, checks_lines):
+        errors += _screens_verdicts(fdir, name)
+        errors += _screen_evidence(fdir, plan, name)
+    errors += _walk_logged(checks_lines, name)
     return errors, warnings
 
 
@@ -278,7 +396,7 @@ def _appears_complete(fdir):
     checks = os.path.join(fdir, "checks.md")
     if not os.path.exists(checks):
         return False
-    body = open(checks, encoding="utf-8", errors="replace").read()
+    body = _read(checks)
     if not re.search(r"^\**\s*C\d+\s*\**\s*[-–—:]", body, re.MULTILINE):
         return False
     if re.search(r"^\s*-\s*\[\s\]", body, re.MULTILINE):

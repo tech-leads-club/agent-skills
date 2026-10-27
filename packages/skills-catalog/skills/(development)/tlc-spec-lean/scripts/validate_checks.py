@@ -19,7 +19,9 @@ reviewed in plan.md and are gated by validate_plan.py. What this script owns is 
 derivation from them, which is where omissions surface.
 
 What it checks:
-  ERROR  - no `Profile:` line, or an unknown profile
+  ERROR  - no `Mutations:` line, or one above 5
+  ERROR  - no `Build:` line naming the repo's build, type check and lint commands (or `none - <why>`)
+  ERROR  - a sibling plan.md with no `**Approved**: <date> - user: "<their words>"` line
   ERROR  - a required section is missing (Checks, Coverage, Swept)
   ERROR  - a check with no `Proof:` line
   ERROR  - a duplicate check id
@@ -30,13 +32,14 @@ What it checks:
   ERROR  - a swept dimension missing, or its landing left blank
   ERROR  - an `n/a` swept landing with no reason after it
   ERROR  - a check id referenced in Coverage or Swept that is not defined
+  ERROR  - a plan criterion cites a binding capture and no check proving it cites that capture
   WARN   - a route in plan.md's Surface that nothing here mentions
-  WARN   - a proof that names no test selector (a whole suite settles no single claim)
+  WARN   - a proof that names no test selector (a whole suite settles no single claim; `browser`
+           and `walk` proofs are exempt)
   WARN   - a claim carrying a vague word instead of a concrete value
   WARN   - a Coverage row that declares no set size
   WARN   - a swept landing that is neither a check, `existing`, `n/a`, nor `Unresolved`
   WARN   - a blocking unresolved question still open
-  WARN   - a `Test policy` section is absent under profile standard/ui
 
 Usage:
   python3 <skill-dir>/scripts/validate_checks.py [target] [--root DIR] [--strict]
@@ -55,12 +58,16 @@ import os
 import re
 import sys
 
-PROFILES = ("light", "standard", "ui")
+from lean_config import MAX_MUTATIONS, plan_approved, plan_marks_binding, read_mutations
+
 REQUIRED_SECTIONS = ["Checks", "Coverage", "Swept"]
 
-PROFILE_RE = re.compile(r"^\**Profile\**\s*:\s*`?(\w+)`?", re.IGNORECASE)
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+# A state a capture draws is proven by the screenshot the author saved, and a visit by the author's
+# walk - neither by a test selector.
+SCREEN_PROOF_RE = re.compile(r"^`?(?:browser|walk)\b")
+CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 CID_RE = re.compile(r"\bC\d+\b")
 PLACEHOLDER_RE = re.compile(r"^\s*[\[<].+[\]>]\s*$")
 SIZE_RE = re.compile(r"\((\d+)\s*(?:[a-z\- ]+)?\)")
@@ -216,16 +223,19 @@ def count_members(cell):
     return sum(1 for p in parts if CID_RE.search(p))
 
 
-def plan_routes(checks_path):
-    """Route paths named in the sibling plan.md's Surface table, if there is one."""
+def _plan_lines(checks_path):
     plan = os.path.join(os.path.dirname(os.path.abspath(checks_path)), "plan.md")
     if not os.path.isfile(plan):
         return []
     with open(plan, "r", encoding="utf-8") as f:
-        lines = strip_fences(f.read().splitlines())
-    bounds = section_bounds(lines, "Surface")
+        return strip_fences(f.read().splitlines())
+
+
+def plan_routes(checks_path):
+    """Route paths named in the sibling plan.md's Surface table, if there is one."""
+    lines = _plan_lines(checks_path)
     routes = []
-    for r in table_rows(lines, bounds):
+    for r in table_rows(lines, section_bounds(lines, "Surface")):
         cells = split_row(r)
         if not cells or PLACEHOLDER_RE.match(cells[0]):
             continue
@@ -235,47 +245,70 @@ def plan_routes(checks_path):
     return routes
 
 
+def plan_screen_captures(checks_path):
+    """{criterion number: [capture stems it cites]} for a plan whose Sources marks a source binding.
+
+    A stem is a cited image path without directory and extensions, so an image and its
+    structural capture count as one.
+    """
+    lines = _plan_lines(checks_path)
+    if not plan_marks_binding(lines):
+        return {}
+    out = {}
+    crit = section_bounds(lines, "Criteria")
+    if not crit:
+        return {}
+    for i in range(*crit):
+        m = re.match(r"^\s*(\d+)\.\s+(.*)$", lines[i])
+        if not m:
+            continue
+        cited = sorted({os.path.basename(p).split(".")[0] for p in CAPTURE_RE.findall(m.group(2))
+                        if "://" not in p and not p.endswith(".running.png")})
+        if cited:
+            out[int(m.group(1))] = cited
+    return out
+
+
 def check_file(path):
     with open(path, "r", encoding="utf-8") as f:
         raw = f.read().splitlines()
     lines = strip_fences(raw)
     errors, warnings = [], []
 
-    # Profile.
-    profile = None
-    for ln in lines:
-        m = PROFILE_RE.match(ln.strip())
-        if m:
-            profile = m.group(1).lower()
-            break
-    if profile is None:
-        errors.append("no `Profile:` line - the verification report has to name the profile in force")
-    elif profile not in PROFILES:
-        errors.append(f"unknown profile '{profile}' (expected one of: {', '.join(PROFILES)})")
+    # Mutation count.
+    mutations, _ = read_mutations(lines)
+    if mutations is None:
+        errors.append("no `Mutations:` line - the verification report has to name the mutation count in force")
+    elif mutations > MAX_MUTATIONS:
+        errors.append(f"`Mutations: {mutations}` exceeds the cap of {MAX_MUTATIONS} - more mutations repeat the "
+                      "experiment; a whole-repo mutation run belongs to CI, not to the Verifier")
+    if not any(re.match(r"^\**\s*Build\s*\**\s*:\s*\S", ln.strip(), re.IGNORECASE) for ln in lines):
+        errors.append("no `Build:` line - name the repo's build, type check and lint commands (or `Build: none - <why>`); "
+                      "a green test suite does not show the code compiles")
+    plan = _plan_lines(path)
+    if plan and not plan_approved(plan):
+        errors.append("plan.md has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - checks are "
+                      "written from an approved plan; present it and stop, never write the approval yourself")
 
     # Sections.
     for name in REQUIRED_SECTIONS:
         if section_bounds(lines, name) is None:
             errors.append(f"missing required section: ## {name}")
-    if profile in ("standard", "ui") and section_bounds(lines, "Test policy") is None:
-        warnings.append(
-            f"profile is {profile} but there is no ## Test policy section - confirm the repo already "
-            "answers which level proves each layer and how deeply"
-        )
-
     # Checks.
     checks, duplicates = parse_checks(lines)
     for cid, line_no in duplicates:
         errors.append(f"L{line_no}: duplicate check id {cid} - ids are referenced downstream and must be unique")
     if not checks:
         errors.append("no checks parsed - expected lines shaped `**C1** - <claim>` followed by `Proof: <command>`")
-        return errors, warnings, profile
+        return errors, warnings, mutations
 
     for cid, c in sorted(checks.items(), key=lambda kv: int(kv[0][1:])):
         if not c["proofs"]:
             errors.append(f"{cid} has no `Proof:` line - no proof, no check (L{c['line']})")
         for pr in c["proofs"]:
             low = pr.lower()
+            if SCREEN_PROOF_RE.match(low):
+                continue
             if not any(tok in low for tok in SELECTOR_TOKENS):
                 warnings.append(
                     f"{cid}: proof names no test selector, so it may be a whole suite - "
@@ -377,12 +410,25 @@ def check_file(path):
                 f"owe a Coverage row, or the route is dead"
             )
 
+    # A screen criterion points at a capture; its check has to keep pointing there. A check that
+    # lists the screen's labels instead brings the transcription back one step later.
+    for ac, stems in sorted(plan_screen_captures(path).items()):
+        mine = {cid: c for cid, c in checks.items()
+                if str(ac) in re.findall(r"\bAC\s*(\d+)", c["claim"])}
+        claims = " ".join(c["claim"] for c in mine.values())
+        for stem in stems:
+            if stem not in claims:
+                errors.append(
+                    f"AC {ac} cites the capture `{stem}` but no check proving AC {ac} does - the check "
+                    f"holds the screen to the capture, not to a list of its labels"
+                )
+
     # Blocking questions.
     for i, ln in enumerate(lines, start=1):
         if ln.strip().startswith("|") and re.search(r"\|\s*blocks\s*\|", ln, re.IGNORECASE):
             warnings.append(f"L{i}: an unresolved question is marked `blocks` - it cannot be settled while building")
 
-    return errors, warnings, profile
+    return errors, warnings, mutations
 
 
 def main(argv=None):
@@ -403,13 +449,13 @@ def main(argv=None):
         )
         return 2
 
-    errors, warnings, profile = check_file(path)
+    errors, warnings, mutations = check_file(path)
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:
         print(f"  ERROR {e}")
     fail = errors or (warnings and args.strict)
-    print(f"\nvalidate_checks: {len(errors)} error(s), {len(warnings)} warning(s) in {path} [profile: {profile or 'none'}]")
+    print(f"\nvalidate_checks: {len(errors)} error(s), {len(warnings)} warning(s) in {path} [mutations: {'none' if mutations is None else mutations}]")
     return 1 if fail else 0
 
 

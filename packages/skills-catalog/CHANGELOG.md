@@ -1,3 +1,37 @@
+## 0.17.15 (2026-10-26)
+
+### 🚀 Features
+
+- **skills-catalog:** keep lean-skill approvals and screen verdicts after compaction ([eec04107f](https://github.com/tech-leads-club/agent-skills/commit/eec04107f))
+- **skills-catalog:** bump tlc-spec-driven to 4.0.0 ([ef2672d67](https://github.com/tech-leads-club/agent-skills/commit/ef2672d67))
+
+### 🩹 Fixes
+
+- **skills-catalog:** keep tlc-spec-driven approvals across compaction ([65ca25bf3](https://github.com/tech-leads-club/agent-skills/commit/65ca25bf3))
+- **skills-catalog:** describe tlc-spec-driven by what the user feels ([4e5db8a3a](https://github.com/tech-leads-club/agent-skills/commit/4e5db8a3a))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.14 (2026-10-25)
+
+### 🚀 Features
+
+- **skills-catalog:** bump tlc-plan and tlc-implement to 1.0.0 ([3be478be8](https://github.com/tech-leads-club/agent-skills/commit/3be478be8))
+- **skills-catalog:** bump tlc-spec-lean to 2.0.0 ([2fca1d197](https://github.com/tech-leads-club/agent-skills/commit/2fca1d197))
+
+### 🩹 Fixes
+
+- **skills-catalog:** close files in tlc-spec-lean scripts ([783f80563](https://github.com/tech-leads-club/agent-skills/commit/783f80563))
+- **tlc-spec-driven:** make the batching example match its own rule ([#163](https://github.com/tech-leads-club/agent-skills/issues/163))
+
+### ❤️ Thank You
+
+- Antonio Fulgêncio @antoniofulg
+- Claude Opus 5 (1M context)
+- Waldemar Neto @waldemarnt
+
 ## 0.17.13 (2026-10-16)
 
 ### 🚀 Features

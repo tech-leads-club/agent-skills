@@ -4,7 +4,7 @@
 
 **The split that keeps it alive**: the agent (you) supplies *judgment* - read the failure, phrase the lesson, cite its grounding. The script `scripts/lessons.py` owns everything *mechanical* - IDs, recurrence counting across distinct features, candidate→confirmed promotion, pruning, demotion, and rendering. Hand-kept bookkeeping is exactly what rots, so it is not your job; the script's job.
 
-**What feeds it**: only the execution signals already produced by the Verifier in [validate.md](validate.md) and written to `.specs/features/[feature]/validation.md`. No signal → no lesson. This is the hard gate: a lesson with no grounding in a real verification outcome is an opinion, and the script refuses it.
+**What feeds it**: only the findings the Verifier writes to `.specs/features/[feature]/verification.md` ([validate.md](validate.md)). No signal → no lesson. This is the hard gate: a lesson with no grounding in a real verification outcome is an opinion, and the script refuses it.
 
 **Scope discipline (critical)**: this layer captures *execution* lessons that are project-local and grounded in a signal. It does **NOT** capture methodology opinions about the SDD process itself ("we should always discuss earlier"). Those are maintainer decisions that ship in a version bump - never auto-written. If a candidate lesson is really about how to run the skill rather than about this codebase, do not record it.
 
@@ -26,21 +26,21 @@
 
 ## WRITE - distill lessons (runs inside Execute, after validation)
 
-This is **not a new phase**. It is the final action of the Verifier step in [validate.md](validate.md), grafted onto a step that already always runs. Do it immediately after `validation.md` is written, before reporting completion.
+This is **not a new phase**. It is the final action of feature-level validation ([validate.md](validate.md)), after the gate passes.
 
 ### When to write
 
-Walk the just-written `validation.md`. For each **grounded** signal, record one lesson:
+For each finding in `verification.md` (and each `diverges` row the second screens round left), record one lesson:
 
-| validation.md signal | `--signal` value |
-| -------------------- | ---------------- |
-| An acceptance criterion failed or had no evidence | `ac_gap` |
-| A discrimination-sensor mutant survived (weak test) | `surviving_mutant` |
-| A criterion flagged ⚠️ Spec-precision gap | `spec_precision_gap` |
-| A `// SPEC_DEVIATION` marker was added during implement | `spec_deviation` |
-| The build-level gate check failed | `gate_fail` |
+| Finding | `--signal` value |
+| ------- | ---------------- |
+| A mutation the tests did not kill | `surviving_mutant` |
+| An assertion looser than its criterion, or a rule proven on too few cases | `spec_precision_gap` |
+| An example of the Verifier's own that broke a rule | `ac_gap` |
+| A check or criterion that contradicts a binding capture | `spec_deviation` |
+| A red row in `proofs.md` (a proof or the build) | `gate_fail` |
 
-If `validation.md` is a clean PASS with no surviving mutants, no spec-precision gaps, and no deviations → **write nothing**. A clean run produces no lessons. This is correct, not a miss.
+A report with no finding → **write nothing**. A clean run produces no lessons. This is correct, not a miss.
 
 ### How to write
 
@@ -50,7 +50,7 @@ For each signal, phrase the lesson as **one terse, actionable, codebase-general 
 python3 <skill-dir>/scripts/lessons.py add \
   --feature "[feature folder name]" \
   --signal  "[signal value from table above]" \
-  --source  "[file:line | AC id | mutant id | SPEC_DEVIATION ref from validation.md]" \
+  --source  "[file:line or check id from the finding]" \
   --text    "[the one-sentence lesson]" \
   --scope   "[optional: path/layer/tag, e.g. billing, routes, repo-layer]"
 ```
@@ -65,7 +65,7 @@ python3 <skill-dir>/scripts/lessons.py add \
 
 ### Self-check (do not skip)
 
-After distilling, if `validation.md` contained any FAIL, surviving mutant, spec-precision gap, or SPEC_DEVIATION but you recorded zero lessons, state plainly in chat: *"Validation had signal X but no lesson was recorded - recording now / here's why it's out of scope."* Silent skipping is how the file dies.
+After distilling, if `verification.md` had findings but you recorded zero lessons, state plainly in chat: *"Validation had signal X but no lesson was recorded - recording now / here's why it's out of scope."* Silent skipping is how the file dies.
 
 ### Demotion
 

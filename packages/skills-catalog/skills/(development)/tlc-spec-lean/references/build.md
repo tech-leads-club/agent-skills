@@ -1,190 +1,94 @@
 # Build
 
-**Goal:** satisfy the checks. How is yours.
+Deliver what the user asked for, at the quality you would sign. The checks are the floor and the
+evidence, not the target; the route is yours. No task list and no per-task review tables. The bar
+is [SKILL.md](../SKILL.md) rules 2, 3 and 6.
 
-No task list, no phase plan, no per-task review tables, no `Files to touch` declaration before
-each edit. The checks are the bar; the route is your call. If you find yourself writing a plan
-for the model to obey, you are rebuilding the thing this skill removed.
+## Build against the source
 
-## Before the first line of code
+When the plan marks a source binding, the source is the reference, not the plan's description of
+it. Where a check or a criterion disagrees with the source, ask before building that part.
 
-The checks exist; the size is now visible. Write `## Handoff` with the arithmetic. Then:
+## What is fixed and what is yours
 
-- The estimate fits the budget → one builder. Do not ask. Do not offer a spawn.
-- The estimate exceeds it → **stop**. Ask which mechanism, with both exits named:
-  **handoff** (cut at the surface boundary already written, batches sequential and only on
-  green) or **one builder** (stay, and accept compaction / context loss). Record the choice
-  on that same section before any test or implementation lands.
+Fixed: the checks and the proofs each check names. Changing them is renegotiation with the user.
 
-Do not ask where to cut. Do not ask when it fits. Do not offer spawn at the start of a
-feature. The cut is logistics; only the mechanism, and only when over the limit, is a user
-decision. A slice that alone exceeds the budget was cut too coarsely - say so rather than
-splitting mid-outcome. That is not this ask.
+Yours: order, decomposition, commits, where files go, naming, error shapes, helpers. The repo's
+conventions answer most of it.
 
-## What is fixed and what is not
-
-Fixed: the checks, the `Test policy` rows, and the proofs each check names. Lowering either is
-renegotiation with the user, visible in the diff.
-
-Yours: order, decomposition, how many commits, where files go, naming, error shapes, which
-helper gets extracted. The repo's conventions answer most of it and the rest is reversible and
-reviewed in the diff.
-
-The plan's shape sections have a rule each, and the split matters because it is what keeps one
-file both approved and current.
-
-Additive: `Landing`, `Relations`, `Surface`. A door you discover while building gets a row - never
-a deletion, and never a rewrite of a row the user approved. `Relations` and `Surface` grow the
-same way, because both were reviewed: an entity or a route appearing mid-build is new information,
-one that quietly changes shape is a renegotiation.
-
-**Kept true: `Flow` and `Impact`.** They are a map, not an obligation, so changing them is not
-renegotiation - but a map that no longer matches the road is worse than none, because the next
-reader trusts it. Take a different path and the hop changes, in the commit that takes it. The rule
-is the same as `Landing`'s and for the same reason: written afterwards it describes what you
-happened to do, which is the failure mode of every architecture document that ever went stale.
-
-A hop you *add* is worth a second look before you write it. Reaching a fifth module in a feature
-scoped to two is not a `Flow` edit, it is evidence the boundary was wrong - say so rather than
-quietly extending the path.
+In `plan.md`, `Landing`, `Surface` and the stored shape are additive: a door found mid-build gets a
+row, and a row the user approved is not rewritten. The path and `Changes underneath` in `Shape` are
+kept true: take a different path and change the hop in that commit. A fifth module in a feature
+scoped to two means the boundary was wrong; say so.
 
 ## Tests come from the checks
 
-Write the test from the check's claim and its concrete value. Never write a test by reading the
-implementation and asserting what it currently does: that produces a test that passes under the
-bug it was supposed to catch.
+Write each test from the check's claim and its concrete value, not from the implementation. A red
+proof is a stop. If a check or an approved `Landing` row turns out wrong or unbuildable, renegotiate
+with the user. Extra tests are welcome.
 
-**Hard constraints, no exceptions:**
+## A door found mid-build
 
-- Do not weaken an assertion to make it pass.
-- Do not delete a test, and do not use the framework's skip / disable / pending mechanism to
-  bypass a failing one.
-- Do not modify a check's test afterwards to make the implementation pass.
-
-A red proof is a stop, not a note. If a check turns out to be wrong or impossible, stop and
-renegotiate with the user. The same holds for a `Landing` row the user approved that the build
-proves unbuildable - they approved that shape specifically.
-
-Extra tests beyond the proofs are welcome and there is no quota. A guard clause, a log line, a
-clear error message at an edge the checks did not name: that is the work, not scope creep.
-
-## Landing rows go in before the code
-
-A door found mid-build did not exist when the design was confirmed, so it lands the same way that
-file's rows did. Decide it yourself - stopping to ask on every one defeats the point of getting out
-of your way. Then record it in `plan.md`: append the row with its literal shape and the
-alternative you rejected **before the code that closes it is written**, and in that code's commit.
-
-The timing is the mechanism. An alternative is only knowable while you are still choosing between
-them; written at the end it becomes a justification of what you already wrote, which is the stale
-design document `Landing` exists to avoid. Stating what the other option would have done is also
-the one thing that can expose a bad decision with nobody else in the loop.
-
-A new door that contradicts nothing already approved never stops the build.
+Decide it yourself, then append the row to `Landing` with its literal shape and the rejected
+alternative before the code that closes it, in that code's commit. Written afterwards, it becomes a
+justification. A new door that contradicts nothing approved does not stop the build.
 
 ## Commit
 
-One coherent piece per commit, [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
-`<type>(<scope>): <description>`, types `feat` `fix` `refactor` `docs` `test` `style` `perf`
-`build` `ci` `chore`. Imperative mood, lowercase, no trailing period. A `!` marker requires a
-`BREAKING CHANGE:` footer.
-
-Validate before committing:
+Follow the repo's commit convention. Where it has none, use
+[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) and validate each
+message:
 
 ```bash
 python3 <skill-dir>/scripts/check_commit.py --message "feat(billing): suspend on failed charge"
 ```
 
-Optional git-level guard, independent of any agent:
-
-```bash
-ln -sf <skill-dir>/scripts/check_commit.py .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
-```
-
-Skip the hook if the project manages hooks its own way. When a slice's proofs are all green, mark
-its checks complete in `checks.md` and commit that with the slice. The slice is the
-checkpoint: marking check by check adds bookkeeping the build does not need, and a resume reads
-the marks plus the diff to see which slices landed. A check whose proof spans several slices stays
-unmarked until the last one lands.
-
-Never add Co-Authored-By, Made-with, or any agent attribution trailer.
+When a slice's proofs are green, mark its checks complete in `checks.md`, and commit `.specs/` with
+the slice when the repo tracks it. No Co-Authored-By, Made-with or other agent trailer unless the
+repo asks for one.
 
 ## How to write the code
 
-Behavioural bias, not a checklist:
+Surgical: do not improve adjacent code or formatting, and remove only what your change orphaned.
 
-**Simplicity.** No features beyond what was asked. No abstraction for single-use code. No
-"flexibility" nobody requested. No error handling for impossible scenarios. Two hundred lines
-that could be fifty: rewrite them.
+## Scope
 
-**Surgical changes.** Do not improve adjacent code, comments or formatting. Do not refactor what
-is not broken. Match existing style even where you would do it differently. Remove only the
-imports and variables your own change orphaned; pre-existing dead code gets mentioned, not
-deleted.
+Outside the plan's scope, do not touch it: surface a bug, note an improvement. Inside it, nothing
+is missing: what a control needs to work for real is the work even when no check names it. Pushes
+and deploys: [SKILL.md](../SKILL.md) rule 8.
 
-**Push back.** Multiple interpretations exist: present them, do not pick silently. A simpler
-approach exists: say so. The user's approach looks wrong: disagree honestly.
+## Before you stop (features with a screen)
 
-After each change, ask whether a senior engineer would call it overcomplicated. If yes, simplify
-before proceeding.
+Green proofs do not show that a person can do what the plan promised, or that the screen looks like
+what was asked for. Open the running app and do what the plan promises as the user would, screens
+that share the state you changed included. If you cannot reach the app, hand the
+steps to the user.
 
-## Scope guardrail
+Save each state a capture draws beside it as `<capture>.running.png`, taken in a browser window at
+the capture's size - its pixel size over its scale - so the page lays out as the capture does; an
+image resized afterwards does not. Name the file in the proof. It matches the capture except for
+what `## Differences from the source` lists. A state no capture draws gets no picture; a `walk`
+check is a visit you name in the `**Walked:**` line, which also says how the user reaches each
+state.
 
-You will notice things that could be improved. Do not act on them. A bug gets surfaced to the
-user; an improvement gets noted in chat or as a follow-up. The heuristic: is this in a check? If
-no, do not touch it.
-
-**Blast radius.** An approved spec authorizes local edits and local commits. `git push`,
-force-push, deploy, production DB changes and any other remote or destructive operation need an
-explicit go-ahead for that action, even mid-build.
-
-## Running out of context
-
-Two ways through it, and they are not equivalent. Automatic compaction summarises the
-*conversation* and chooses for you what to drop. A handoff to a fresh builder carries the
-*artifact*, at a boundary you chose. This skill is built for the second - that is why `Landing`
-rows are appended before the code that closes them rather than at the end.
-
-A handoff chosen at the size gate executes here. **Handing off.** Only on green, with every
-proof in the batch passing. The next builder reads `checks.md` and the **diff of what already
-landed** - never a narrative summary. The diff is the state, and it carries the hundred
-reversible choices that sit below the `Landing` bar: naming, error shape, where the helper
-went. Those are exactly what drifts between builders and exactly what no document records.
-
-Then append the three `## Handoff` lines - boundary, what the user settled mid-build, what was
-abandoned. They go in the artifact rather than in the next builder's prompt: a briefing written
-into a prompt survives exactly one boundary, and the third builder needs the first one's.
-
-If the user chose one builder over a budget miss, compaction is the accepted path.
-**When compaction happens anyway** — chosen or not — re-read `checks.md` and the diff before
-continuing. You cannot see the limit approaching, but you can see that a compaction occurred
-- so build the recovery on the signal that exists.
+Something broken that a check covers is a red proof you missed: fix it. Something broken that no
+check covers is a missing obligation: append a check with its proof, say so, then fix it. A
+difference from a capture is fixed, not turned into a check.
 
 ## Then stop
 
-When the last check of **your batch** is committed, report and stop: checks closed, commit
-hashes, proof results, deviations. Do not dispatch the Verifier - that is the orchestrator's
-step, after the last batch of the whole feature, over the full check set. A Verifier briefed by
-the builder that just closed the final batch inherits that builder's scope even though it
-inherits none of its tokens, and reports a pass over four checks that reads exactly like a pass
-over forty.
+What the user settles while you build goes on the `**Settled mid-build:**` line in the turn they
+say it, in their words - a compaction drops the chat, not the file. When you stop, append to
+`## Handoff` in `checks.md`: boundary, what was abandoned, the walk. Report checks closed, commit
+hashes, proof results and deviations.
 
-If you hold the whole feature - you wrote every check's commit, or the last batch just returned
-green to you - you are the orchestrator. Dispatch the Verifier in that same turn. Do not ask.
-Do not wait for "verify work". See [verify.md](verify.md).
-
-## What was deliberately removed
-
-If you are used to a per-task cycle, these are gone on purpose:
-
-| Removed | Why |
-| --- | --- |
-| Granular task breakdown with `Where` / `Tools` / `Depends on` | buys ordering, not correctness, and competes with the checks for attention |
-| Per-task test adequacy review with evidence tables | author self-review reproduces the author's own blind spot; the Verifier does it once, better |
-| Pre-implementation assumption declaration per task | the assumptions that matter are in the spec, closed by its gate |
-| The component catalogue in a design doc - `Purpose` / `Location` / `Interfaces` / `Dependencies` per class | reversible detail that goes stale with the authority of a document; the plan keeps the path, the entities, the signature and the doors, and nothing per-component |
-| The `graph TD` architecture diagram, as the default rendering of the path | a picture of five boxes carries less than five lines that each say what enters, what crosses and what is handed on, and it rots silently while `Flow` is kept true through the build; a mermaid `flowchart` stays available for the case a list genuinely cannot express - a fan-out, a fork, an async hand-off |
-| The `Code Reuse Analysis` table - `Component` / `Location` / `How to Use` | the inventory is already distributed through `Flow`, where each hop marks whether its module exists; what a table adds beyond that is the catalogue again, so only the decision survives, as the sentence opening `Flow` on what is reused instead of duplicated |
-| The pace question (`Quick` / `Guided` / `Detailed`) and a `context.md` of its own | a meta-question spends a turn deciding how to spend turns; the elicitation rules apply always, and their output lands in the plan's `Assumptions` |
-| A quota of gray areas to generate per feature | a quota manufactures questions; the surface rubric in `## Observable` is a fixed enumeration with an `n/a` escape instead, which finds items without inventing them |
-| An offer to spawn sub-agents at the start, or asking where to cut | the cut is logistics; the mechanism is asked only when the estimate exceeds the budget |
+Run `python3 <skill-dir>/scripts/check_proofs.py <feature>`; a red row goes back to the build. Then,
+if you hold the whole feature, dispatch in this turn and in parallel the screens sub-agent when a
+criterion cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier
+([verify.md](verify.md)), each written on the `**Dispatched:**` line with the `HEAD` before it is
+sent and marked `returned` when it is back. When both have returned, fix everything they name in
+one pass, run `check_proofs.py` with the Verifier's `mutations.json`, and when the fix changed code,
+re-save every picture at the new `HEAD` and resume the round-1 screens sub-agent for round 2 (a
+fresh one only when it cannot be resumed) - it is the last. Write each finding's closing commit, then run the gate. A commit that changes code after
+round 2 leaves a screen nobody judged: the gate says so, and it goes to the user. Close only when
+every sub-agent you dispatched has returned, and open the report with the gate's last line.

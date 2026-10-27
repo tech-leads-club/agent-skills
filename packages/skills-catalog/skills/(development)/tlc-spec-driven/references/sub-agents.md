@@ -73,7 +73,7 @@ No raw logs, no full test output - only the above fields keep the main context c
 **The orchestrating agent's role during Execute:**
 
 1. Count total tasks and pack phases into task-budgeted batches (~7 tasks each) - if that yields more than one batch, offer batch sub-agents and wait for the user to accept
-2. Dispatch the next batch to a worker (or execute inline if not using sub-agents)
+2. Dispatch the next batch to a worker (or execute inline if not using sub-agents), written on tasks.md's `**Dispatched:**` line first
 3. Receive the compact summary
 4. Update `tasks.md` with results
 5. If all tasks in the summary show complete: dispatch the next batch
@@ -85,43 +85,31 @@ No raw logs, no full test output - only the above fields keep the main context c
 
 ---
 
-## Verifier Sub-Agent
+## Verifier and screens sub-agent
 
-**Always-on, never prompted - one per feature completion.** The Verifier is a separate role from the batch worker. It runs once - after the last task of the feature is committed - as an independent quality gate, dispatched automatically by the orchestrator. It is **not** gated behind the batching offer; it always runs. Do NOT ask the user whether to run validation; it is mandatory.
+**Always-on, never prompted - once per feature.** After the last task is committed, the orchestrator
+runs `check_proofs.py`, then dispatches two fresh sub-agents in parallel over the same `HEAD`: the
+Verifier ([validate.md](validate.md)) and, when a criterion cites a capture, the screens sub-agent
+([verify-screens.md](verify-screens.md)). Neither is a batch worker, neither is the author, and
+neither fixes anything. A batch worker never dispatches either. Each dispatch goes on tasks.md's
+`**Dispatched:**` line before it is sent; an orchestrator that finds one there with no report on disk
+waits for it rather than sending another.
 
-**Author ≠ verifier:** The agent (or batch worker) that wrote the code and tests is the author. The Verifier is a fresh sub-agent dispatched by the orchestrator after the final commit. It does not inherit the author's context, mental model, or assumptions. This separation is what makes the gate trustworthy.
+**What they receive:** the Verifier gets `spec.md`, tasks.md, `proofs.md`, the diff range and
+`validate.md`; the screens sub-agent gets `spec.md`, the captures, the `**Walked:**` line and
+`verify-screens.md`. Neither gets the author's reasoning.
 
-**What the Verifier receives:**
-- `spec.md` for the feature (ACs = source of truth)
-- The git diff surface for the feature (scoped to the feature branch or commit range)
-- The test files in scope
-- `references/validate.md` as its operating checklist
+**What comes back:** the Verifier writes `verification.md` (verdict, the mutations it probed, a
+findings table with a `Closed` column) and `mutations.json`; the screens sub-agent writes
+`screens.md` (a verdict per picture and one inventory each). Both return their findings in chat.
 
-**What the Verifier does (full process in `validate.md`):**
-1. **Spec-anchored coverage check** - re-derives coverage evidence-or-zero: every AC traced to `file:line` + assertion expression. For each covered criterion, confirms the test's asserted value matches the **spec-defined expected outcome** (not just that an assertion exists). Where the spec does not define a precise outcome, flags a **spec-precision gap** rather than passing silently.
-2. **Discrimination sensor** - injects a small behavior-level fault (flip a condition, change a return value, off-by-one, remove a required side effect) in an **isolated scratch** (temporary `git worktree` or temp file copies - never `git stash`), runs the relevant tests there, confirms they FAIL (kill the mutant), discards the scratch, and verifies the real worktree's `git status --porcelain` matches the pre-sensor baseline. Tiered by risk: lightweight (1-3 mutations) for standard features; expanded (≥5 mutations or full mutation tooling) for P0/critical paths. Surviving mutants become fix tasks.
-3. Applies the **payload/conjunction rule**: checks payload fields are asserted on value/state, not just that the call occurred.
-4. **Writes the persisted report** to `.specs/features/[feature]/validation.md` - PASS/FAIL, per-AC evidence (`file:line` + assertion + spec outcome), sensor result (killed/survived per mutation), gate exit results, diff/commit range.
-5. **Returns a compact verdict in chat** to the orchestrator.
-6. Does **NOT** write, modify, or fix any code or tests - the real working tree is never mutated (sensor mutations run in scratch state only).
+**Failure handling:** every finding is fixed in one pass, then `check_proofs.py --mutations` runs
+again and the screens sub-agent re-opens only the rows that differed, writing `**Round**: 2`. There
+is no second Verifier and no third round: what still fails goes to the user. The gate is
+`python3 <skill-dir>/scripts/validate_verification.py <feature>`.
 
-**What the Verifier reports back (compact chat format):**
-```
-## Validation: [feature name] - [PASS ✅ | FAIL ❌]
-
-**Spec-anchored check**: [N/N ACs matched spec outcome | M spec-precision gaps flagged]
-**Gate**: [X passed, 0 failed]
-**Sensor**: [N mutations injected, N killed, N survived]
-**Report**: `.specs/features/[feature]/validation.md`
-
-**Ranked gaps** (if FAIL):
-1. [Gap description] - [AC or criterion] - [file:line or "no evidence"]
-2. ...
-```
-
-**Failure handling:** The orchestrator routes the ranked gaps to an implementer as fix tasks, then re-dispatches the Verifier. This fix→re-verify loop is bounded to a maximum of **3 iterations**. If gaps remain after 3 iterations, escalate to the user.
-
-**Standalone fallback:** When running without sub-agents (a single agent executing the full feature), run `validate.md` as an independent fresh-eyes pass - re-read `spec.md` and the diff from scratch, apply evidence-or-zero, run the spec-anchored check and discrimination sensor, write the report file, then run `python3 <skill-dir>/scripts/validate_state.py <feature>` to confirm the report is a real PASS, and report PASS/FAIL before marking the feature done.
+**Standalone fallback:** without sub-agents, run each file in a new session and write
+`self-verified (degraded - no sub-agent)` in its report; the gate warns.
 
 ---
 
@@ -136,7 +124,7 @@ Judge the tier by the work in front of the role, not by the role's title:
 | Design phase | High ambiguity, hard-to-reverse structural decisions | High-reasoning |
 | Batch worker - core-domain or high-ambiguity phase | Non-obvious logic, tricky edge cases, novel integration | High-reasoning |
 | Batch worker - mechanical phase | Entities, DTOs, config, wiring, straightforward CRUD against a settled pattern | Faster / cheaper |
-| Verifier | Adversarial reasoning: designs mutations, re-derives coverage, judges outcome precision | Mid-to-high |
+| Verifier | Adversarial reasoning: designs mutations and own examples, judges assertions against the spec | Mid-to-high |
 | Specify / Tasks authoring | Structured but judgment-heavy | Mid-to-high |
 
 **Rules of thumb:**
