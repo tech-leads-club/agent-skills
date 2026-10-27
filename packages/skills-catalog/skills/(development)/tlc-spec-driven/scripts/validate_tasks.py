@@ -11,15 +11,17 @@ markdown artifact, so it is stack-agnostic and tool-agnostic.
 What it checks (heuristic markdown inspection, not a full parser):
   ERROR  - a required section is missing
   ERROR  - a task is missing its `Tests` or `Gate` field
+  ERROR  - no `## Checks`, a check with no `Proof:`, no `Build:` line, or no `**Mutations**: N` (0-5)
   ERROR  - a task depends on a task in a LATER phase (dependencies point back only)
   ERROR  - a dependency edge shown in the diagram has no matching `Depends on`
            (and vice-versa) when both sides are parseable
   WARN   - a task's `Where` names multiple files (granularity smell -> split it)
   WARN   - a task says `Tests: none` (confirm the coverage matrix agrees)
   WARN   - the diagram could not be parsed confidently (cross-check skipped)
+  ERROR  - with --execute: spec.md or tasks.md has no `**Approved**: <date> - user: "<their words>"`
 
 Usage:
-  python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict] [--execute]
 
   Invoke from the skill directory that ships this script (not the project root).
   target    Path to a tasks.md, a feature directory, or a project root.
@@ -35,7 +37,13 @@ import os
 import re
 import sys
 
-REQUIRED_SECTIONS = ["Test Coverage Matrix", "Gate Check Commands", "Execution Plan", "Task Breakdown"]
+from lean_config import unapproved
+
+REQUIRED_SECTIONS = ["Test Coverage Matrix", "Gate Check Commands", "Execution Plan", "Task Breakdown", "Checks"]
+CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
+PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+BUILD_RE = re.compile(r"^\**\s*Build\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+MUTATIONS_RE = re.compile(r"^\**Mutations\**\s*:\s*\**\s*`?(\d+)", re.IGNORECASE)
 TASK_RE = re.compile(r"^#{2,4}\s+(T\d+)\s*:", re.IGNORECASE)
 EDGE_RE = re.compile(r"\bT\d+\b")
 FILE_HINT_RE = re.compile(r"[\w./-]+\.\w{1,6}\b")
@@ -159,6 +167,36 @@ def parse_diagram_edges(lines):
     return edges, found_any_arrow
 
 
+def check_proofs_owed(lines):
+    """The checks the build is held to, each with the proof that settles it, the build commands,
+    and the mutation count: check_proofs.py and the completion gate read exactly these."""
+    errors = []
+    stripped = [ln.strip() for ln in lines]
+    checks, current = [], None
+    for ln in stripped:
+        m = CHECK_RE.match(ln)
+        if m:
+            current = [m.group(1), 0]
+            checks.append(current)
+        elif current and PROOF_RE.match(ln):
+            current[1] += 1
+    if section_present(lines, "Checks") and not checks:
+        errors.append("## Checks has no check - one `**C<n>** - <claim> (<requirement id>)` per criterion, "
+                      "each followed by `Proof: <the test command that selects its test>`")
+    for cid, proofs in checks:
+        if not proofs:
+            errors.append(f"{cid}: no `Proof:` line - name the test command whose filter selects the test that settles it")
+    if not any(BUILD_RE.match(ln) for ln in stripped):
+        errors.append("no `Build:` line - name the repo's build, type check and lint commands, `;`-separated "
+                      "(or `Build: none - <why>`); check_proofs.py runs them")
+    m = next((MUTATIONS_RE.match(ln) for ln in stripped if MUTATIONS_RE.match(ln)), None)
+    if not m:
+        errors.append("no `**Mutations**: N` line in the header - 3 unless the project declares another count")
+    elif int(m.group(1)) > 5:
+        errors.append(f"Mutations: {m.group(1)} - the count is 0 to 5")
+    return errors
+
+
 def check(tasks_path):
     with open(tasks_path, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
@@ -167,6 +205,8 @@ def check(tasks_path):
     for name in REQUIRED_SECTIONS:
         if not section_present(lines, name):
             errors.append(f"missing required section: ## {name}")
+
+    errors += check_proofs_owed(lines)
 
     tasks = parse_tasks(lines)
     if not tasks:
@@ -230,6 +270,8 @@ def main(argv=None):
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
     p.add_argument("--strict", action="store_true")
+    p.add_argument("--execute", action="store_true",
+                   help="Before the first task: also require the spec and the tasks approved in the user's words")
     args = p.parse_args(argv)
 
     tasks_path = resolve_tasks(args.target, args.root)
@@ -238,6 +280,11 @@ def main(argv=None):
         return 2
 
     errors, warnings = check(tasks_path)
+    if args.execute:
+        for name in unapproved(os.path.dirname(os.path.abspath(tasks_path))):
+            errors.append(
+                f"{name} has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - Execute starts "
+                f"after the user approves; present it and stop, never write the approval yourself")
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:

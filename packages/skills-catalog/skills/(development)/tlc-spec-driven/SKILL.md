@@ -1,10 +1,10 @@
 ---
 name: tlc-spec-driven
-description: Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Writes testable requirements in EARS notation, atomic tasks, atomic Conventional Commits, and requirement traceability. Ships deterministic Python validation scripts so structural gates are enforced by code, not memory. Features an independent Verifier (author != verifier, evidence-or-zero), a discrimination sensor, a decision log (STATE.md), a test-coverage matrix, and a self-improving lessons layer. Stack-agnostic and tool-agnostic. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.
+description: Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.
 license: CC-BY-4.0
 metadata:
   author: Felipe Rodrigues - github.com/felipfr
-  version: 3.3.0
+  version: 4.0.0
 ---
 
 # Tech Lead's Club - Spec-Driven Development
@@ -22,28 +22,35 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 
 ## Critical Rules (read before acting)
 
-**Loading this skill's files.** Reference files live under `references/` in this skill's own directory (where this `SKILL.md` resides). Resolve them relative to the skill directory - never the workspace root - and load them through the active skill by name; never assume a fixed install path. When a step tells you to read a reference, **read it completely (to EOF)** before acting - never act on a partial/truncated read.
+**Loading this skill's files.** Reference files live under `references/` in this skill's own directory (where this `SKILL.md` resides). Resolve them relative to the skill directory, never the workspace root. When a step tells you to read a reference, read it to the end before acting.
 
-**Running this skill's scripts.** Every `scripts/*.py` shipped with this skill lives under that same skill directory. Resolve the skill directory first, then invoke `python3 <skill-dir>/scripts/<name>.py ...`. Never run `python3 scripts/...` from the consuming project root - that looks for a project-local `scripts/` tree that is not this skill. Project data under `.specs/` is still read/written relative to the project root (pass `--root` when the cwd is elsewhere). Below, `<skill-dir>` means the directory that contains this `SKILL.md`.
+**Running this skill's scripts.** Every `scripts/*.py` lives under that same skill directory: run `python3 <skill-dir>/scripts/<name>.py ...`, never `python3 scripts/...` from the project root. Project data under `.specs/` is read and written relative to the project root (pass `--root` when the cwd is elsewhere). Run a script rather than read it: its messages say what to change.
 
 **Execution contract - every task, non-negotiable (holds even if you do not open the reference files):**
 
-1. Tests derive from the spec's acceptance criteria and assert spec-defined outcomes - they never mirror the implementation.
-2. The gate must pass (tests pass) before a task is done - the test runner decides, not self-assessment.
-3. One atomic commit per task. Mark the task complete in `tasks.md` (and update spec traceability when used) **before** that commit, and include those updates in the same commit. Never batch tasks; never weaken, skip, or delete tests to make them pass.
-4. After the LAST task, a fresh **Verifier always runs automatically** (author ≠ verifier) - spec-anchored outcome check + discrimination sensor. It is never optional and never prompted. See Sub-Agent Delegation.
-5. **Blast radius:** approving a spec or tasks authorizes local implementation and local commits only. `git push`, force-push, deploy, production DB changes, and other remote / externally visible / destructive operations require an explicit go-ahead for that action.
+1. **Ask, then stop for approval.** Every gray area that is the user's - scope, product behaviour, a departure from a binding source - is asked before the spec is presented; an assumption never stands in for one. Approving the spec and approving the tasks are the two stops for a human. When nobody is there to answer, end your turn with the questions. Each approval is written as `**Approved**: <date> - user: "<their words>"` in spec.md and tasks.md; one the user did not give is never written. Every answer goes into its file in the turn it arrives - the chat does not survive a compaction.
+2. Tests derive from the spec's acceptance criteria and assert spec-defined outcomes - they never mirror the implementation.
+3. The gate must pass before a task is done - the test runner decides, not self-assessment. One atomic commit per task, with `tasks.md` marked complete before it - and inside it when the repo tracks `.specs/`; where the repo ignores `.specs/`, the commit holds only the code and its tests, and never forces them in. Never batch tasks; never weaken, skip, or delete tests to make them pass.
+4. **Every criterion has a check, and every check a proof.** tasks.md `## Checks` holds one claim per criterion with the test command that selects its test. After the LAST task, `check_proofs.py` runs them all once at `HEAD`, with the build; then a fresh **Verifier** (author ≠ verifier) runs **always**, never prompted - `**Mutations**: N` mutations (3 by default) wherever a rule would stay green, examples nobody named, assertions looser than their criterion. Done means every finding is closed by a commit and `validate_verification.py` exits 0.
+5. **A screen is held to its design.** A capture that comes with the request binds unless the user called it inspiration; its criterion cites the capture file. Each state a capture draws is saved as `captures/<capture>.running.png` from a browser window at the capture's size - an image resized afterwards shows another layout - and a fresh screens sub-agent retakes and judges it ([verify-screens.md](references/verify-screens.md)).
+6. **Where rules run.** Every rule that changes what a user sees - including filtering, searching, sorting and counting - runs in a layer the repo's tests reach.
+7. **Blast radius:** approving a spec or tasks authorizes local implementation and local commits only. `git push`, force-push, deploy, production DB changes, and other remote or destructive operations need an explicit go-ahead for that action.
 
-**Deterministic gates run before human review - not from memory.** The structural gates for the spec and tasks are enforced by scripts in this skill's `scripts/` directory, so they cannot silently drift when the model forgets a step:
+**Deterministic gates run before human review - not from memory.** A non-zero exit means STOP and fix:
 
-- Before confirming a spec: `python3 <skill-dir>/scripts/validate_spec.py <spec-path-or-feature>` (closure gate: EARS-shaped ACs, filled assumptions, well-formed requirement IDs, required sections).
-- Before presenting tasks for approval: `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` (granularity smell, diagram-vs-`Depends on` parity within a phase, no forward-phase dependency, every task carries `Tests` + `Gate`).
-- On each commit: `python3 <skill-dir>/scripts/check_commit.py --message "<msg>"` (Conventional Commits). Optionally wire it as a git `commit-msg` guard (git only, no agent dependency) - see [implement.md](references/implement.md).
-- Before declaring a feature done: `python3 <skill-dir>/scripts/validate_state.py <feature>` (completion gate: the Verifier's `validation.md` exists, its verdict is filled to PASS, and it cites `file:line` evidence - a missing, FAIL, placeholder, or evidence-free report fails). The closing step of Execute runs this automatically, the same way the lessons layer runs at distillation; it is not a manual step.
+| When | Command |
+| --- | --- |
+| Before presenting the spec | `validate_spec.py <feature>` - EARS criteria, filled assumptions, requirement IDs, and with captures: binding or quoted, cited, shown, departures approved |
+| Before presenting the tasks | `validate_tasks.py <feature>` - granularity, dependencies, `Tests` and `Gate` per task, `## Checks` with a proof each, `**Build**:`, `**Mutations**:` |
+| Before the first task | `validate_tasks.py <feature> --execute` - the same checks, and the spec and tasks each approved in the user's words |
+| Before each commit | `check_commit.py --message "<msg>"` |
+| After the last task, and after the fix | `check_proofs.py <feature> [--mutations <mutations.json>]` - writes `proofs.md` |
+| Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, mutations killed, findings closed, pictures judged in round 1 or 2, walk logged, both approvals written |
+| After editing a script or a template | `selftest.py` |
 
-A non-zero exit means STOP and fix before proceeding. Skip a script only when no code-execution tool is available; then perform the same checks by reading the artifact.
+Skip a script only when no code-execution tool is available; then perform the same checks by reading the artifact.
 
-**Before Execute:** read [implement.md](references/implement.md) completely and run `<skill-dir>/scripts/validate_tasks.py`; if a formal `tasks.md` packs into more than one task-budgeted batch (> ~8 tasks), present the sub-agent offer first (see Sub-Agent Delegation).
+**Before Execute:** read [implement.md](references/implement.md) completely and run `validate_tasks.py <feature> --execute`, which also requires both approvals in the user's words; if a formal `tasks.md` packs into more than one task-budgeted batch (> ~8 tasks), present the sub-agent offer first (see Sub-Agent Delegation).
 
 ## Auto-Sizing: The Core Principle
 
@@ -60,8 +67,8 @@ A non-zero exit means STOP and fix before proceeding. Skip a script only when no
 
 - **Specify and Execute are always required** - you always need to know WHAT and DO it
 - **Design is skipped** when the change is straightforward (no architectural decisions, no new patterns)
-- **Tasks is skipped** when there are ≤3 obvious steps (they become implicit in Execute)
-- **Discuss is triggered within Specify** when the agent detects ambiguous gray areas that need user input, or when the feature has any implicit-requirement dimension present (persistence/state, external calls, auth, payments, concurrency, state transitions)
+- **Tasks is skipped** when there are ≤3 obvious steps (they become implicit in Execute); the checks then go in a `## Checks` section at the end of `spec.md`
+- **Discuss is triggered within Specify** when the agent detects gray areas that need user input, or when the feature has any implicit-requirement dimension present (persistence/state, external calls, auth, payments, concurrency, state transitions)
 - **Interactive UAT is triggered within Execute** only for user-facing features with complex behavior
 
 **Safety valve:** Even when Tasks is skipped, Execute ALWAYS starts by listing atomic steps inline (see [implement.md](references/implement.md)). If that listing reveals >5 steps or complex dependencies, STOP and create a formal `tasks.md` - the Tasks phase was wrongly skipped.
@@ -73,16 +80,20 @@ A non-zero exit means STOP and fix before proceeding. Skip a script only when no
 ├── STATE.md            # Project memory: Decisions log (AD-NNN) + Handoff snapshot
 ├── LESSONS.md          # Self-improving lessons playbook (rendered by scripts/lessons.py - do not hand-edit)
 ├── lessons.json        # Canonical lessons state (machine-owned)
-└── features/           # Feature specifications
+└── features/
     └── [feature]/
-        ├── spec.md         # Requirements with traceable IDs
-        ├── context.md      # User decisions for gray areas (only when discuss is triggered)
-        ├── design.md       # Architecture & components (only for Large/Complex)
-        ├── tasks.md        # Atomic tasks with verification (only for Large/Complex)
-        └── validation.md   # Verifier report: PASS/FAIL, per-AC evidence, sensor result, diff range
+        ├── spec.md          # Requirements with traceable IDs, Differences from the source, Sources
+        ├── captures/        # binding design files, and <capture>.running.png pictures
+        ├── context.md       # User decisions for gray areas (only when discuss is triggered)
+        ├── design.md        # Architecture & components (only for Large/Complex)
+        ├── tasks.md         # Atomic tasks, ## Checks with a proof each, ## Handoff
+        ├── proofs.md        # written by check_proofs.py: every proof and mutation at HEAD
+        ├── mutations.json   # the Verifier's mutations, re-run after the fix
+        ├── screens.md       # the screens sub-agent's inventory and verdict, per picture
+        └── verification.md  # the Verifier's findings, each closed by a commit
 ```
 
-**Create artifacts lazily.** Write each file only when its phase actually produces content - never scaffold empty `context.md`, `design.md`, or `tasks.md` up front. An empty file signals a phase happened when it did not; absence is the correct state for a skipped phase. The deterministic validators (`scripts/validate_spec.py`, `scripts/validate_tasks.py`, `scripts/check_commit.py`, `scripts/validate_state.py`) ship inside this skill's own `scripts/` directory, alongside `lessons.py`.
+**Create artifacts lazily.** Write each file only when its phase produces content - never scaffold empty `context.md`, `design.md`, or `tasks.md` up front. Absence is the correct state for a skipped phase.
 
 ## Workflow
 
@@ -90,47 +101,35 @@ A non-zero exit means STOP and fix before proceeding. Skip a script only when no
 
 1. Specify → (Design) → (Tasks) → Execute (depth auto-sized)
 
-**Resume work:**
+**Resume work - a new session, or after a compaction:**
 
-1. Read `.specs/STATE.md` (Handoff + Decisions).
-2. Reconcile Handoff against git (`branch`, `status --porcelain`, recent commits) and `tasks.md` - evidence wins over a stale snapshot. Full procedure: [memory.md](references/memory.md).
-3. Propose the reconciled next step before writing code.
+1. Re-read this file, then the reference for the phase the files show. A summary keeps the task, not these rules.
+2. Read `.specs/STATE.md` Decisions and the feature's files - `spec.md` and `tasks.md` (their `**Approved**:` lines, marks and `## Handoff`), `proofs.md`, `verification.md`, `screens.md` - and reconcile them against git: evidence wins over a note. Where each file puts you: [memory.md](references/memory.md).
+3. After a compaction in the middle of a run, continue when the files and git agree; stop only on a conflict. In a new session, propose the reconciled next step before writing code.
 
 ## Context Loading Strategy
 
-**On-demand load (only what the current task needs):**
+Load only what the current step needs:
 
-- `.specs/STATE.md` - Decisions section (read at Design, re-read on resume); Handoff section (read on resume only)
+- `.specs/STATE.md` - Decisions section (read at Specify and Design, re-read on resume); Handoff section (read on resume only)
 - confirmed lessons - load at Specify and Design via `python3 <skill-dir>/scripts/lessons.py list --status confirmed` ([lessons.md](references/lessons.md)); confirmed only, never candidates
-- spec.md (when working on a specific feature)
-- context.md (when designing or implementing from user decisions)
-- design.md (when implementing from design)
-- tasks.md (when executing tasks)
+- spec.md, context.md, design.md, tasks.md - when the step works from them
 
-**Never load simultaneously:**
-
-- Multiple feature specs
-- Multiple architecture docs
-
-**Target:** <40k tokens total context
-**Reserve:** 160k+ tokens for work, reasoning, outputs
-**Monitoring:** Display status when >40k (see [context-limits.md](references/context-limits.md))
+Never load several feature specs or several architecture docs at once.
 
 ## Sub-Agent Delegation
 
 **Trigger:** count total tasks. If the feature packs into more than one task-budgeted batch (> ~8 tasks) → offer sub-agents; if it fits a single batch (≤ ~8 tasks) → execute inline.
 
-**Offer-then-confirm** - never auto-spawn. The user must accept before any sub-agent is dispatched.
+**Offer-then-confirm** - never auto-spawn. The user must accept before any batch worker is dispatched.
 
-**One worker per task-budgeted batch (~7 tasks, whole phases):** Phases stay the semantic/dependency unit; a **batch** is the execution unit - one or more *consecutive whole phases* packed to ~7 tasks. Walk phases in order, accumulate whole phases into the current batch until it reaches the budget, then start the next - **never split a phase** across workers. ~20 tasks → ~3 workers; scales linearly (40 → ~6). Each worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Batches run sequentially - a batch never starts until the previous one reports all tasks complete. Workers never spawn further sub-agents.
+**One worker per task-budgeted batch (~7 tasks, whole phases):** Phases stay the semantic/dependency unit; a **batch** is the execution unit - one or more *consecutive whole phases* packed to ~7 tasks. Walk phases in order, accumulate whole phases into the current batch until it reaches the budget, then start the next - **never split a phase** across workers. Each worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Batches run sequentially. Workers never spawn further sub-agents.
 
-**Verifier (always-on, never prompted):** After the final task is committed, the orchestrator dispatches a fresh Verifier sub-agent automatically - regardless of phase count. Validation never requires a user prompt; it is the closing step of Execute. **Author ≠ verifier**: the Verifier re-derives coverage independently using evidence-or-zero; it does not inherit the author's mental model. The Verifier: (1) performs a **spec-anchored outcome check** - confirms each test's asserted value matches the spec-defined expected outcome, flags spec-precision gaps; (2) runs a **discrimination sensor** - injects behavior-level faults in an isolated scratch (temp worktree or file copies - never `git stash`), confirms tests kill them, discards the scratch and verifies real-tree porcelain matches the pre-sensor baseline; surviving mutants become fix tasks; (3) writes `.specs/features/[feature]/validation.md` (PASS/FAIL, per-AC evidence, sensor result, diff range); (4) returns a compact verdict + ranked gap list to the orchestrator in chat. Gaps become fix tasks; the fix→re-verify loop is bounded to 3 iterations before escalating. (5) **distills lessons** - turns each grounded failure (surviving mutant, spec-precision gap, failed AC, SPEC_DEVIATION) into a reusable project-local lesson via `<skill-dir>/scripts/lessons.py`; a clean PASS records nothing (see [lessons.md](references/lessons.md)).
+**Verifier and screens sub-agent (always-on, never prompted):** after the final task, the orchestrator runs `check_proofs.py`, then dispatches both in parallel over the same `HEAD` - the Verifier with [validate.md](references/validate.md), the screens sub-agent with [verify-screens.md](references/verify-screens.md) when a criterion cites a capture. Each dispatch - batch workers included - is written on the `**Dispatched:**` line of tasks.md `## Handoff` before it is sent, so a compacted orchestrator waits instead of sending a second. Every finding is fixed in one pass; round 2 is `check_proofs.py --mutations` and the screens sub-agent on the rows that differed, with `**Round**: 2` in screens.md. No second Verifier and no third round; what still fails goes to the user. Then the gate, then lessons ([lessons.md](references/lessons.md)).
 
-**Model tier per role (only if the harness supports choosing a model per sub-agent).** Match the reasoning cost to the work instead of paying top-tier reasoning for boilerplate. A batch worker on a mechanical, low-ambiguity phase (entities, config, wiring, straightforward CRUD) runs on a faster/cheaper tier; a worker on a core-domain or high-ambiguity phase, and the Design phase itself, runs on a high-reasoning tier; the Verifier runs on a mid-to-high tier because it does adversarial reasoning and designs mutations. This is a portable recommendation: if the harness cannot set a per-sub-agent model, ignore it. Full rubric in [sub-agents.md](references/sub-agents.md).
+**Model tier per role** (only if the harness supports choosing a model per sub-agent): mechanical batches on a faster tier, core-domain batches and Design on a high-reasoning tier, the Verifier mid-to-high. Rubric in [sub-agents.md](references/sub-agents.md).
 
-**Standalone fallback:** Without sub-agents, run `validate.md` as an independent fresh-eyes pass after the final commit - including the spec-anchored check and discrimination sensor.
-
-Full mechanics (worker payload, compact summary format, failure handling, context sizing, model tier, Verifier report format): [sub-agents.md](references/sub-agents.md).
+**Standalone fallback:** without sub-agents, run `validate.md` and `verify-screens.md` each in a new session after the final commit and write `self-verified` in the report; the gate warns.
 
 ## Commands
 
@@ -143,6 +142,7 @@ Full mechanics (worker payload, compact summary format, failure handling, contex
 | Break into tasks, create tasks | [tasks.md](references/tasks.md) |
 | Implement task, build, execute | [implement.md](references/implement.md) |
 | Validate, verify, test, UAT, walk me through it | [validate.md](references/validate.md) |
+| Judge the screens against the design | [verify-screens.md](references/verify-screens.md) |
 
 **Memory:**
 | Trigger Pattern | Reference |
@@ -151,34 +151,26 @@ Full mechanics (worker payload, compact summary format, failure handling, contex
 | Pause work, end session, I need to stop | [memory.md](references/memory.md) |
 | Resume work, continue, pick up where we left off | [memory.md](references/memory.md) |
 | Load lessons, what have we learned, apply past lessons | [lessons.md](references/lessons.md) |
-| Record lesson, distill lessons (auto-runs after validation) | [lessons.md](references/lessons.md) |
+| Record lesson, distill lessons (runs after the gate) | [lessons.md](references/lessons.md) |
 
-## Knowledge Verification Chain
+## Knowledge
 
-When researching, designing, or making any technical decision, follow this chain in strict order. Never skip steps.
+Facts you look up, decisions you ask. Look in the codebase and its conventions first, then the project docs and `.specs/STATE.md`, then library documentation, then the web. Never invent an API, a pattern or a behaviour: "I could not find documentation for this" beats a plausible fabrication, and anything you could not confirm is said to be uncertain.
 
-```
-Step 1: Codebase → check existing code, conventions, and patterns already in use
-Step 2: Project docs → README, docs/, inline comments, `.specs/STATE.md` (Decisions)
-Step 3: Context7 MCP → resolve library ID, then query for current API/patterns
-Step 4: Web search → official docs, reputable sources, community patterns
-Step 5: Flag as uncertain → "I'm not certain about X - here's my reasoning, but verify"
-```
+## Requires
 
-**Rules:**
+| Needs | For | Without it |
+| --- | --- | --- |
+| Python 3.8+ (standard library only) | every script | the gates do not run; the phases still apply |
+| git | `mutate.py` and `check_proofs.py` (HEAD, clean tree) | no mutations and no HEAD check: say so in the report |
+| sub-agents | batch workers, the Verifier and the screens sub-agent | run inline; verify in a new session and write `self-verified` |
+| a model that reads images | binding captures and the screens sub-agent | ask the user to describe each state; hand the pictures to the user |
+| a browser the agent can drive | the walk and the pictures | hand the steps to the user |
 
-- Never skip to Step 5 if Steps 1-4 are available
-- Step 5 is ALWAYS flagged as uncertain - never presented as fact
-- **NEVER assume or fabricate.** If you cannot find an answer, say "I don't know" or "I couldn't find documentation for this". Inventing APIs, patterns, or behaviors causes cascading failures across design → tasks → implementation. Uncertainty is always preferable to fabrication.
+Test runners: `check_proofs.py` groups bun, vitest, jest, pytest and go test into one run each; any other command runs alone and is judged by its exit code.
 
 ## Output Behavior
 
-**Do the work; do not narrate the machinery.** Produce the right artifact for the phase instead of announcing the phase ("I will now run the Specify phase"). The user judges the output, not a play-by-play of the process. This keeps the flow from reading as robotic.
+**Do the work; do not narrate the machinery.** Produce the right artifact for the phase instead of announcing the phase. The user judges the output.
 
-**Match effort to the work.** Lightweight steps (feature-level checks, validation, mechanical tasks) do not need top-tier reasoning; heavy steps (complex design, ambiguous features) do. If the harness lets you pick a model per sub-agent, apply the tier rubric in [sub-agents.md](references/sub-agents.md); otherwise proceed and simply invest more care on the heavy steps. Mention this once per session at most, and only if it helps; skip it for an experienced user.
-
-**Write generated artifacts in a plain, decided voice.** Specs, ADRs, validation reports, commit messages, and chat summaries follow the writing rules in [coding-principles.md](references/coding-principles.md): lead with the verdict, state decisions definitively, cut filler and mechanical hedging.
-
-## Code Analysis
-
-Use available tools with graceful degradation. See [code-analysis.md](references/code-analysis.md).
+**Write generated artifacts in a plain, decided voice.** Specs, decisions, reports, commit messages and chat summaries follow the writing rules in [coding-principles.md](references/coding-principles.md): lead with the verdict, state decisions definitively, cut filler and hedging. Section headings stay in English; prose follows the project; identifiers are never translated.

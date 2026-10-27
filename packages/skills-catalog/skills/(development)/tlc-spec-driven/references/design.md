@@ -47,7 +47,9 @@ Every flagged concern MUST include a mitigation - how the design (or a follow-up
 
 **Large/Complex only - approach exploration:** Before committing to a single architecture, present 2-3 viable approaches with trade-offs and a recommendation. Lead with the recommendation to avoid analysis paralysis. All approaches must deliver the same scoped thing (no alternative scopes). Confirm the chosen approach with the user before detailing components. Medium features: skip - design inline.
 
-Overview of how components interact. Use mermaid diagrams when helpful.
+Overview of how components interact, drawn in mermaid: a `sequenceDiagram` for a request and its answer, a `flowchart` when it branches or hands off to a queue or job.
+
+**Where the rules run.** Every rule that changes what a user sees - a state, a total, a count, filtering, searching, sorting - runs in a layer the repo's tests reach, as its `AGENTS.md` or test docs say. Filtering, searching, sorting and counting are rules, not presentation: put in the browser, they ship with no test behind them.
 
 ### 3. Identify Code Reuse
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-lessons.py - deterministic bookkeeping for the tlc-spec-driven lessons layer.
+lessons.py - deterministic bookkeeping for the .specs lessons layer.
 
 The LLM supplies judgment (which failure happened, how to phrase the lesson, what
 signal grounds it). This script owns everything mechanical: IDs, distinct-feature
@@ -18,10 +18,10 @@ cwd at the project root (the dir that contains .specs), or pass --root.
 
 Commands:
   add        Record a grounded lesson from a verification signal.
-  list       Print lessons (default: confirmed) for loading at Specify/Design.
+  list       Print lessons (default: confirmed) for loading at Plan/Checks.
   penalize   Mark a confirmed lesson as having failed when applied (-> quarantine).
   prune      Drop stale uncorroborated candidates (also runs automatically on add/list).
-  status     Print counts (used by the self-check in validate.md).
+  status     Print counts (used by the self-check in verify.md).
   init       Create empty store + rendered file.
   selftest   Run stdlib regressions (normalization).
 
@@ -41,7 +41,7 @@ RENDER_REL = os.path.join(".specs", "LESSONS.md")
 
 SIGNALS = {
     "ac_gap": "Acceptance criterion not covered / failed",
-    "surviving_mutant": "Discrimination sensor mutant survived (weak test)",
+    "surviving_mutant": "Mutant survived (weak test)",
     "spec_precision_gap": "Spec did not define a precise outcome",
     "spec_deviation": "Implementation diverged from spec/design (SPEC_DEVIATION)",
     "gate_fail": "Build-level gate check failed",
@@ -211,7 +211,7 @@ def _render(root, data):
         return out
 
     lines += block(
-        "Confirmed (load these at Specify/Design)",
+        "Confirmed (load these at Plan/Checks)",
         by_status["confirmed"],
         "Corroborated across multiple features. Safe to apply as guidance.",
     )
@@ -254,7 +254,7 @@ def cmd_add(root, args):
         return 2
     if not source:
         print("ERROR: --source is required (file:line / AC id / mutant id / SPEC_DEVIATION ref).", file=sys.stderr)
-        print("       A lesson with no grounding in validation.md is an opinion, not a lesson. Refused.", file=sys.stderr)
+        print("       A lesson with no grounding in verification.md is an opinion, not a lesson. Refused.", file=sys.stderr)
         return 2
     if len(text) < 12:
         print("ERROR: --text too short. State the actionable lesson in one terse sentence.", file=sys.stderr)
@@ -369,7 +369,7 @@ def cmd_status(root, args):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for tlc-spec-driven.")
+    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for .specs/lessons.json.")
     p.add_argument("--root", default=".", help="Project root containing .specs/ (default: current dir)")
     sub = p.add_subparsers(dest="cmd", required=True)
 

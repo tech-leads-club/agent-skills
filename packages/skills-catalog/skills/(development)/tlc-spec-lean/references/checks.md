@@ -1,159 +1,146 @@
 # Checks
 
-**Goal:** one small, frozen, external obligation set. Every claim carries the proof that
-settles it, and every enumerated set is joined member by member, so an omission leaves an empty
-cell instead of a confident sentence.
+One small, frozen obligation set. Every claim carries the proof that settles it, and every
+enumerated set is joined member by member, so an omission leaves an empty cell instead of a
+confident sentence. Everything downstream refers to a check by number.
 
-This is the artifact everything downstream refers to by check number: a proof, a review
-comment, a question, a fault. It replaces a task breakdown - it says what must be true, never
-how to work.
-
-**It is derived, not decided.** [plan.md](plan.md) settled what must be true and what is being
-built; this turns both into obligations with proofs.
-So the shape - the path, the entities, the interface, the doors - is not written here and not
-re-argued here. What *is* this file's job is the derivation, and it is where omissions surface:
-every route's statuses in `Surface`, every door in `Landing`, every entity in `Relations` owes a
-set row in `Coverage` or a check. A shape section with nothing pointing back at it from here is
-either dead or unproven, and both are findings.
+This file is derived from [plan.md](plan.md), not decided here. Every route's statuses in
+`Surface`, every door in `Landing` and every entity in the stored shape owes a `Coverage` row or a
+check. A plan section nothing points back at is dead or unproven.
 
 ## Find the real commands first
 
-Read the package manifest, the task runner and the CI workflows. Prefer a command that already
-runs in CI. Where nothing exists for what a check needs, ask - never invent a command, because
-a proof that cannot run is worse than none.
+Prefer a command CI already runs. Where nothing exists for what a check needs, ask. A proof names
+a specific test, not a whole suite.
+Repeat `Proof:` when one test cannot settle the whole claim.
 
-A proof must name a **specific test**, not a whole suite. A suite going green settles no
-individual claim. Repeat `Proof:` when one test cannot settle the whole claim; every proof
-listed must be green.
+Under `Mutations:`, a `Build:` line names the repo's own build, type check and lint commands - the
+ones CI or the package manifest runs over the code this feature touches - separated by `;`.
+`check_proofs.py` runs them at `HEAD`: a green test suite does not show that the code compiles.
+`Build: none - <why>` when the repo has none.
 
 ## What makes a check writable
 
-Four things must be true before you write one:
+- someone could observe the outcome
+- it carries a concrete value - a status code, a field, a bound
+- one run settles it
+- you can name the proof - the test or command whose exit code decides
 
-- someone could **observe** the outcome - if you cannot say what would be seen, it is too vague
-- it carries a **concrete value** - a status code, a field, a bound
-- **one run settles it** - a single execution either satisfies it or does not
-- you can name the **proof** - the test or command whose exit code decides
-
-Missing one is normal and asking is cheap. Proceeding on a guess is not: a vague check becomes a
-vague assertion that passes, which is the failure this whole artifact exists to prevent.
+Missing one, ask. A vague check becomes a vague assertion that passes.
 
 ## The proof has to reach the claim
 
-Read the code before choosing the proof, then check the claim against the input space behind it.
+A claim about nine provider statuses is not proven by a
+test that exercises two. A claim about a response at a boundary is not settled by a test that never
+crosses it. When claim and proof sit at different levels, split the claim or name a second proof.
 
-A claim about nine provider statuses is not proven by a test that exercises two - that gap needs
-a second proof, and it is a question about coverage rather than about test style. A claim phrased
-as a response at a boundary is not settled by a test that never crosses it. A claim about a
-decision table is not settled by one path through it. When the claim and the proof sit at
-different levels, either split the claim or name the second proof - never let the level slide to
-whichever is cheaper to write.
+A gesture is proven by performing it: the proof opens, clicks, chooses the file, submits, and reads
+the page. A label in the markup, or a request that posts the finished document, does not prove the
+control.
 
-**Obligations add up rather than substitute.** A test proves the layer where it *asserts*, not
-the layers it happens to *pass through*. An end-to-end test that traverses a branch exercises one
-path through it and cannot fail when a second branch is wrong. Treating it as proof of the code
-it traversed is level substitution, and it is the most common way a green suite ships a broken
-branch table.
+Obligations add up. A test proves the layer where it asserts, not the layers it passes through; an
+end-to-end test exercises one path through a branch table and cannot fail when another branch is
+wrong.
 
 ## Coverage - the join
 
-Every set a proof must cover gets a row, and **every member is written as its own token** beside
-the check that proves it.
+Every set a proof must cover gets a row, and every member is written as its own token beside the
+check that proves it. A set collapsed into a sentence has no empty cell, so a member can go missing
+unseen. One table-driven proof over the whole set may stand for it, with the size stated.
 
-A set collapsed into a sentence - "dispatches over paused, updated, deleted and trial_will_end" -
-has no empty cell, so a member can go missing while the sentence still reads perfectly. That is
-how a branch named in your own evidence ships unproven. One proof that is table-driven over the
-whole set may stand for it, with the size stated, because there the enumeration lives in the test.
+Walk it from the sets, not from the checks: the doors in `Landing`, the decision tables in the code,
+the input space behind a claim, anything enumerated in prose.
 
-Walk it **from the sets, not from the checks.** Summarising the checks you just wrote can only
-find a check with nothing behind it; it cannot find a name with no check, which is the failure
-that costs. The rows are not a new inventory - they are the enumerations already named somewhere:
-a door in the plan's `Landing`, a decision table in the level evidence, the input space behind
-a claim. Anything enumerated in prose owes a row here.
+- **Every route in `Surface` owes a row**, and its members are the statuses.
+- **A binding source's controls are a set.** Its members are the controls each capture draws,
+  minus what `## Differences from the source` removes, each beside a check whose proof performs the
+  gesture. The capture says how it looks; the proof says it works.
+- **A backend rule is one check, and its examples are the members**, the plan's strong case
+  included.
+- **Startup configuration is a set of places.** Each assembly that boots the app - the entry
+  point, the test harness, every app that mounts the module - is a member. Prefer one shared
+  assembly both paths use.
 
-**Every route in the plan's `Surface` owes a row, and its members are the statuses.** That row
-is the only thing that turns the signature you reviewed into an obligation; without it a status
-listed in the plan can ship with nothing behind it, and the artifact that named it looks like
-evidence that it was covered.
+Write the count and its denominator; `-` in `Unproven` is earned by the row beside it.
 
-Never assert a negative. Write the count and its denominator and let `-` in the `Unproven`
-column be earned by the row beside it.
+**A screen criterion's check cites the same capture files**, never a list of the screen's labels.
+Its proof is the comparison, not a test:
 
-**Startup configuration is a set too, and its members are places.** A test suite assembles the
-application itself, so anything this change needs to be true before the first request arrives now
-lives in every assembly separately - and a proof can only ever assert the one it built. Each
-assembly is a member, including every app that mounts the module. The member is the place, never
-the value: the failure is not a wrong value, it is a value present in one assembly and absent from
-another. Two resolutions count - a proof at each place, or one shared assembly both paths use.
-Prefer the second; a row with two members is already the argument for collapsing them.
+```markdown
+**C40** - The Administrator view matches `.specs/features/<f>/captures/admin.png` (AC 49)
+Proof: browser - reach the state, save `captures/admin.running.png`
+```
 
-## Test policy (`standard`, `ui`)
+Checks that end in the same captured state name the same file. A state no capture draws gets no
+picture: its proof is a test, or `walk` when only a visit shows it. So does an existing screen the
+feature does not change, reached through the nav: the author's `**Walked:**` line names the visit.
+[SKILL.md](../SKILL.md) rule 9.
 
-Only when the repo does not already answer two questions for every layer this change touches:
-**which level proves this code**, and **how much of its input space must the proof assert to
-count**. Do not judge whether the repo "has testing docs" - it almost always does, and that
-impression is what makes this step never fire.
+```markdown
+**C41** - The nav still opens Items (AC 2)
+Proof: walk - open Items from the nav
+```
 
-A statement answers neither question when it only says where tests live, how they are named, how
-to run them, or how a test is built (which dependencies are real and which are doubled). Watch
-for the last one especially: keying the level to whether a test uses real dependencies decides
-*how* to write a test, and read as deciding *what deserves* one, every decision table that
-touches a real dependency gets routed away from its own layer and is never enumerated.
+## Swept - the nine dimensions
 
-Classify by the **shape of the code**, never by the name of the layer. Layer names lie.
+The plan covers what somebody thought of; this list covers what nobody writes down. Each dimension
+lands on a check, on `existing - <the guard that already covers it>`, or on `n/a - <reason>`. A
+dimension that needs a product answer is a question, never a check you invented.
 
-- **Instrumentation** - the body forwards its arguments to one call, or maps one shape onto
-  another with no conditional deciding the result. A test over it re-asserts the framework.
-- **Decision** - anything that changes an outcome. A dispatch over a status or event type. A
-  boundary or validation check. A state transition. A conditionally assembled payload. A mapping
-  table with more than one row. A guard, a precedence rule, an ordering rule.
+| Dimension | What to cover |
+| --- | --- |
+| validation | limits, formats, sanitization; a URL the server fetches for a user. A limit that only disables a control also needs the request that skips it |
+| failure modes | timeouts, partial saves, rollbacks |
+| idempotency | safe retries, dedup keys |
+| authorization | who can call what, throttling; a lookup that reveals people |
+| concurrency | races, ordering guarantees |
+| data lifecycle | TTL, deletion, backfill; what a user entered comes back unchanged after save, reopen, save |
+| dependency failure | fallbacks when an external call fails |
+| state transitions | valid transitions, guards |
+| observability | logging, metrics, tracing |
 
-Count the decision points per file and write the number down: "dispatches over six event types,
-eleven branch points" is contestable, "looks like business logic" is not. Then **name the
-members**, because those names are what `Coverage` joins against.
+Concurrency and observability hide best; neither is visible until it fails. A landing must
+observe that dimension: a duplicate rejected because a row exists says nothing about two requests
+arriving at once.
 
-Derive from the code, not from the current suite - a module with no tests at a level is evidence
-about its history, not that its logic needs none. Judge the house pattern across the whole repo,
-not the folder you happen to be changing: search for the closest analogue by code shape - the
-other state machine, the other dispatcher - and cite it. A proposal pointing at a sibling proven
-at that level is precedent; one that does not is taste.
+## The level of each proof
 
-State the cost. Then ask **one** narrow question: do these rows go into the repo's guidelines?
-Building under them is reversible and needs no permission; writing them reaches every future
-agent, so approved rows land in their own commit before the build. If the user does not answer,
-build under them and leave the files alone.
+Prove each rule at the level the repo's `AGENTS.md` or test docs name for that layer. Where they name
+none, a rule that changes an outcome - a dispatch over a status, a boundary, a state transition, a
+mapping with more than one row, a guard, an order - gets a test at its own layer, and code that only
+forwards its arguments gets none of its own: a test over it re-asserts the framework.
+
+## The mutation count
+
+The first line under the title is `Mutations: N`, 0 to 5, copied from the project's `AGENTS.md`
+(`mutations:`), `3` when it declares none. Screens take no mutation. What the count does and does
+not change: [SKILL.md](../SKILL.md) rule 6.
 
 ## Template: `.specs/features/<feature>/checks.md`
 
 ````markdown
 # <Feature> checks
 
-Profile: light
+Mutations: 3
+Build: `<build command>`; `<lint command>`
 Plan: `.specs/features/<feature>/plan.md`
 
 ## Intent
 
-<Only when there is no plan.md - a change under three files with no one-way door: the problem in
-the present tense, then what is different for a user when this ships.>
+<Only when there is no plan.md: the problem in the present tense, then what is different for a
+user when this ships.>
 
 <N checks in M slices · K one-way doors · Q open, of which B block>
 
 ## Checks
 
-Grouped by the spec's slices; numbering runs across the whole feature.
+### S1 - <slice>
 
-### S1 - <slice> · 4 files · 38 KB · ~10k
-
-**C1** - A failed charge sets status to Suspended, never Cancelled (FEAT-01, AC 1)
+**C1** - A failed charge sets status to Suspended, never Cancelled (AC 1)
 Proof: `bin/rails test test/billing/dunning_test.rb -n "/failed_charge_suspends/"`
 
-**C2** - Every provider status maps to exactly one local status (FEAT-01, AC 4)
+**C2** - Every provider status maps to exactly one local status (AC 4)
 Proof: `bin/rails test test/billing/status_map_test.rb -n "/every_provider_status/"`
-
-### S2 - <slice> · 9 files · 140 KB · ~35k
-
-**C3** - Retrying the same webhook delivery id changes nothing (FEAT-02, AC 5)
-Proof: `bin/rails test test/webhooks/ingest_test.rb -n "/retry_is_idempotent/"`
 
 ## Coverage
 
@@ -161,101 +148,39 @@ Proof: `bin/rails test test/webhooks/ingest_test.rb -n "/retry_is_idempotent/"`
 | --- | --- | --- |
 | provider status -> local (9) | C2, table-driven over all 9 | - |
 | webhook event types (5) | `paused` C12 · `updated` C13 · `deleted` C14 · `trial_will_end` C15 · other C16 | - |
-| `trial_days` bound (4 edges) | 0 C5 · 1 C5 · 30 C5 · 31 C5 | - |
-| `Suspended` transitions (3) | into it C1 · out to `Active` C6 · out to `Cancelled` C7 | - |
+| grace period rule, AC 3 (3 examples) | day 6 C8 · day 7 C8 · day 8 C8 | - |
+| source controls: `<screen>` (<n>) | `<control>` C<n> · `<control>` C<n> | - |
 | `POST /webhooks/provider` statuses (3) | 200 C3 · 409 C7 · 422 C16 | - |
 | startup config: raw request body (2 assemblies) | app entry point C17 · test harness C3 | - |
 
-- Claims naming a status code, route or response shape: C7, C12, C16 - each has a proof that
-  crosses the boundary
-- No other check claims more than the single case its proof exercises
-
-## Test policy
-
-<Only at `standard` / `ui`, and only when the repo leaves the two questions open. Omit the
-section entirely otherwise.>
-
-| Code | Required proofs | Coverage expectation |
-| --- | --- | --- |
-| Decides, reached across a boundary | one at the boundary **and** one at its own layer | the contract at the boundary; one asserted case per row of the decision table at its own layer |
-| Decides, not reached across a boundary | one at its own layer | one asserted case per row of the decision table |
-| Entry point that decides nothing | one at the boundary | accepted input, each rejected input, each error path |
-| Instrumentation, pass-throughs | none of its own | covered by its consumer's proof |
-
-Evidence:
-
-- `<file>`: dispatches over <n> cases, <n> branch points -> decides
-- `<file>`: forwards a single call, no conditional -> instrumentation
-- closest analogue in the repo: `<file>`, same shape, already proven at this level with <n> cases
-
-Cost: <n> proofs at their own layer across <n> files. Without these rows, <n> decision tables are
-proven only by a path that happens to traverse them.
-
 ## Swept
-
-Where each unwritten requirement landed. All nine, one line each, every time.
 
 - validation: C5
 - failure modes: C1
 - idempotency: C3
-- authorization: existing - <the guard or policy that already covers this>
+- authorization: existing - <the guard that already covers this>
 - concurrency: C7
 - data lifecycle: n/a - <why it does not apply>
 - dependency failure: C6
 - state transitions: C1, C2
 - observability: n/a - no logging requirement in this slice
 
-## Out of scope
-
-- <excluded capability> - <why>
-
 ## Handoff
 
-Size, with the arithmetic, written after the checks exist and before any code. The cut is
-yours; the mechanism is not, once the estimate exceeds the budget.
+<The run's live state. A compaction gives no warning, so each line is written as it happens:>
 
-Under the budget — one builder, no ask:
-
-- S1 = 10k, all in Billing; S2 enters Webhooks at 25k total, under the 150k budget - one builder
-
-Over the budget — stop, ask (handoff vs one builder), then record the choice:
-
-- S1-S3 = 118k, all in Billing; S4 enters Webhooks at 190k -> proposed cut after S3
-- Mechanism: handoff | one builder (compaction accepted) — <the user's choice>
-
-<Appended by each builder as it finishes, three lines each:>
-
+- **Settled mid-build:** <each answer the user gave while building, in their words, the turn it came - or none>
+- **Dispatched:** <each sub-agent before it is sent: Verifier, screens round 1 or 2 - at which `HEAD`, and `returned` when it is back>
 - **Boundary:** C1-C7 closed at `<sha>`
-- **Settled mid-build:** <every clarification the user gave that did not become a Landing row or an edited check>
 - **Abandoned:** <tried, discarded, and why>
+- **Walked:** <only with a screen: what you did, what the page showed, how the user reaches each state, and each visit a `walk` check names>
 ````
 
-`Out of scope` is only needed when there is no plan, which already carries it - along with
-everything about the requirements and the solution's shape: [plan.md](plan.md).
+With no plan.md, add `## Out of scope` with the excluded capabilities and why.
 
-## Gate before building
+## Gate, then keep going
 
-```bash
-python3 <skill-dir>/scripts/validate_checks.py <feature>
-```
-
-It fails a check with no `Proof:`, a duplicate check id, a coverage row whose declared size
-exceeds the members actually assigned, a coverage row with an empty member cell, a missing swept
-dimension, a swept landing left blank, and a missing `Profile:` line. It warns on a proof that
-names no test selector, on a claim carrying a vague word, and - the derivation check - on a route
-the plan's `Surface` names that nothing here mentions.
-
-A non-zero exit means fix before writing code. The script checks structure; the judgment - is the
-proof the right one, does the level match the claim - stays yours.
-
-## Then keep going
-
-Write the artifact and continue into [build.md](build.md). Waiting for approval by default buys
-nothing when the plan was already confirmed and the checks derive from it. Stop only for: scope
-the sweep raised that would grow the work, a derivation that contradicts the approved plan -
-which sends you back to that file, not around it - anything the writability gate caught that
-asking did not resolve, and writing test-policy rows into the repo's guidelines.
-
-What keeps this reviewable is the ordering, not a commit: the artifact is complete before you
-touch code, so it reads as what you were building toward rather than a rationalisation of what
-you built.
+Run `python3 <skill-dir>/scripts/validate_checks.py <feature>`; it checks structure, and whether
+each proof is the right one stays yours. Then continue into [build.md](build.md) without waiting.
+Stop only for scope the sweep raised, a derivation that contradicts the approved plan, or a
+writability gap asking did not resolve.

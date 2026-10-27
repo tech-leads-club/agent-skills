@@ -13,6 +13,10 @@ What it checks (heuristic markdown inspection, not a full parser):
   ERROR  - an acceptance criterion has no SHALL (not testable / not EARS-shaped)
   ERROR  - an Assumptions row has an empty "Chosen default" or "Rationale" cell
   ERROR  - a Requirement Traceability row has a malformed ID
+  ERROR  - a capture under captures/ with no Sources line, non-binding with no quote of the user,
+           not cited by a criterion, or not shown as an image (`![..](captures/..)`)
+  ERROR  - a binding source and no `## Differences from the source`, or a row not confirmed under an
+           active AD-NNN in .specs/STATE.md
   WARN   - an AC has SHALL but no recognizable EARS lead keyword
   WARN   - template placeholder rows are still present (spec not filled in)
   WARN   - open questions are not explicitly resolved
@@ -33,6 +37,12 @@ import argparse
 import os
 import re
 import sys
+
+from lean_config import BINDING_RE, NOT_BINDING_RE
+
+IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+USER_QUOTE_RE = re.compile(r"\buser\b[^\"“]*[\"“][^\"”]{3,}[\"”]", re.IGNORECASE)
+AD_ID_RE = re.compile(r"\bAD-\d{3,}\b")
 
 REQUIRED_SECTIONS = [
     "Problem Statement",
@@ -231,7 +241,86 @@ def check(spec_path):
         if template_seen and real_ids == 0:
             warnings.append("Requirement Traceability has only template rows (no real IDs yet)")
 
+    errors += check_sources(lines, spec_path)
     return errors, warnings
+
+
+def _body(lines, name):
+    """A `## name` section with its `###` subsections, up to the next `#` or `##` heading."""
+    out, inside = [], False
+    for ln in lines:
+        s = ln.strip()
+        if re.match(r"^#{1,2}\s+\S", s):
+            inside = re.match(r"^#{1,2}\s+" + re.escape(name) + r"\s*$", s) is not None
+            continue
+        if inside:
+            out.append(s)
+    return out
+
+
+def _active_decisions(spec_path):
+    """AD ids marked active in .specs/STATE.md (the project root is the folder holding .specs/)."""
+    cur = os.path.dirname(os.path.abspath(spec_path))
+    while True:
+        state = os.path.join(cur, ".specs", "STATE.md")
+        if os.path.isfile(state):
+            with open(state, encoding="utf-8") as f:
+                return {m.group(0) for ln in f if "active" in ln.lower() for m in AD_ID_RE.finditer(ln)}
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            return set()
+        cur = parent
+
+
+def check_sources(lines, spec_path):
+    """A capture that comes with the request binds; it is non-binding only on the user's quoted word.
+    With a binding source, every capture is cited by a criterion and shown in the spec, and every
+    departure from it is in `## Differences from the source`, approved under an active AD-NNN."""
+    errors = []
+    cdir = os.path.join(os.path.dirname(os.path.abspath(spec_path)), "captures")
+    images = sorted(f for f in os.listdir(cdir) if f.lower().endswith(IMAGE_EXT) and ".running." not in f) \
+        if os.path.isdir(cdir) else []
+    sources = _body(lines, "Sources")
+    binding = any(BINDING_RE.search(x) and not NOT_BINDING_RE.search(x) for x in sources)
+    if images and section_bounds(lines, "Sources") is None:
+        errors.append("captures/ holds the design but there is no `## Sources` section - one line per capture, "
+                      "`![<name>](captures/<file>) - binding - <what it draws>`")
+    stories = "\n".join(_body(lines, "User Stories"))
+    shown = "\n".join(x for x in lines if "![" in x)
+    for f in images:
+        cited = [x for x in sources if f in x]
+        bound = any(BINDING_RE.search(x) and not NOT_BINDING_RE.search(x) for x in cited)
+        if sources and not cited:
+            errors.append(f"Sources: the capture `{f}` has no line - a capture that comes with the request binds")
+        elif cited and not bound and not all(USER_QUOTE_RE.search(x) for x in cited):
+            errors.append(f"Sources: `{f}` is not binding and no line quotes the user calling it inspiration - "
+                          "write `non-binding - user: \"<their words>\"` only when they said so")
+        if binding and f.split(".")[0] not in stories:
+            errors.append(f"no acceptance criterion cites the capture `{f}` - each screen's criterion names its "
+                          "capture file, or the builder never aims at the picture")
+        if f not in shown:
+            errors.append(f"the capture `{f}` is not shown in the spec - put `![<name>](captures/{f})` on its "
+                          "Sources line so whoever approves sees the screen")
+    if binding:
+        b = section_bounds(lines, "Differences from the source")
+        if b is None:
+            errors.append("a source binds but there is no `## Differences from the source` section - list every way "
+                          "the product departs from it, or `None - the product matches the source`")
+        else:
+            active = _active_decisions(spec_path)
+            rows = [lines[i] for i in range(*b) if lines[i].strip().startswith("|") and not is_separator(lines[i])][1:]
+            for r in rows:
+                cells = split_row(r)
+                if not cells or not cells[0] or PLACEHOLDER_RE.match(cells[0]):
+                    continue
+                confirmed = cells[-1]
+                if not re.match(r"^\W*y(es)?\b", confirmed, re.IGNORECASE):
+                    errors.append(f"Differences '{cells[0][:40]}': Confirmed is '{confirmed[:20]}' - departing from a "
+                                  "binding source is the user's call; ask it")
+                elif not any(m in active for m in AD_ID_RE.findall(confirmed)):
+                    errors.append(f"Differences '{cells[0][:40]}': cites no active AD-NNN in .specs/STATE.md - the "
+                                  "decision holds the question and the answer")
+    return errors
 
 
 def main(argv=None):

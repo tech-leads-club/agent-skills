@@ -3,9 +3,9 @@
 validate_plan.py - deterministic gate for a feature plan.md, run before writing checks.
 
 One artifact, one gate. The plan carries both halves a human confirms - what must be
-true (problem, criteria, assumptions) and what is being built (flow, relations,
-surface, landing, impact) - so this script turns the closure gate into a pass/fail run
-instead of trusting the model to remember it.
+true (problem, criteria, assumptions) and what is being built (shape, surface, landing) -
+so this script turns the structural part of the review into a pass/fail run instead of
+trusting the model to remember it.
 
 The failures it exists to catch are the ones that make a plan lie rather than inform:
 
@@ -18,10 +18,11 @@ The failures it exists to catch are the ones that make a plan lie rather than in
     copied, so the next person re-decides it;
   - a `Landing` row with no rejected alternative, which is the difference between a
     decision and a description of what happened;
-  - columns and types inside `Relations`, which is the exact detail that goes stale and
-    then misleads the next reader with the authority of a written diagram;
+  - columns and types inside the stored shape, which is the exact detail that goes stale
+    and then misleads the next reader with the authority of a written diagram;
   - a `Surface` row with no statuses, since the statuses are what becomes a Coverage set
-    in checks.md - drop them here and the join has nothing to enumerate.
+    in checks.md - drop them here and the join has nothing to enumerate;
+  - a departure from a binding source the user never approved.
 
 Pure standard library, zero dependencies. Operates only on the plan.md markdown
 artifact - never on the target codebase - so it stays stack-agnostic.
@@ -30,28 +31,36 @@ What it checks:
   ERROR  - a required section is missing
   ERROR  - an acceptance criterion has no SHALL (not testable / not EARS-shaped)
   ERROR  - an Assumptions row has an empty "Chosen default" or "Rationale" cell
-  ERROR  - the Observable section is empty, or has no rows and no `None - <why>`
-  ERROR  - an Observable row whose Landing cell is blank
-  ERROR  - an Observable `n/a` or `existing` landing with no reason after it
-  ERROR  - Flow, Relations, Surface or Impact is empty, or still the template placeholder
+  ERROR  - Shape or Surface is empty, or still the template placeholder
            (each has a one-line "None - <why>" answer, so a blank is never "nothing to say")
+  ERROR  - Shape has no `Changes underneath` part
   ERROR  - the Landing section is empty (state `None - <why>` instead)
   ERROR  - Landing has no door rows and does not state `None - <why>`
   ERROR  - a Landing row with no literal shape
   ERROR  - a Landing row with no rejected alternative named
-  ERROR  - a Relations diagram carrying an attribute block: columns and types go stale
+  ERROR  - an erDiagram in Shape carrying an attribute block: columns and types go stale
   ERROR  - a Surface row whose Status cell names no status code
+  ERROR  - a Surface table with no Who column, a blank Who, or a Who other than `anyone`
+           whose Status names no code for the callers who may not (3xx, 401, 403, 404)
   ERROR  - a check id written into Surface, which cannot exist before checks.md does
+  ERROR  - a capture a criterion cites that does not exist, or a link where a file belongs
+  ERROR  - Sources marks a source binding, but there is no Differences from the source section
+  ERROR  - a Differences row whose Confirmed cell is not `y` - departing from a binding source
+           is the user's call
+  ERROR  - with a binding source, an image under the feature's captures/ that no criterion cites
+  ERROR  - an image under captures/ left non-binding with no Sources line quoting the user
+           calling it inspiration (`non-binding - user: "<their words>"`)
   WARN   - an AC has SHALL but no recognizable EARS lead keyword
   WARN   - an AC carries a vague word instead of a concrete value
   WARN   - no numbered acceptance criteria found at all
   WARN   - template placeholder rows are still present (plan not filled in)
   WARN   - open questions are not explicitly resolved
   WARN   - no Sources section ('nothing' is valid, a missing section is not)
-  WARN   - an Impact section with no rows
-  WARN   - a Flow hop, or a flowchart node, naming a module marked neither existing
+  ERROR  - a Shape path with no mermaid drawing, or a module on the path the drawings never name
+  ERROR  - a Shape with no `erDiagram` and no `Data: none - <why>`, or an erDiagram with no `New:` line
+  ERROR  - a capture under captures/ that the plan does not show as an image (`![..](captures/..)`)
+  WARN   - a path hop, or a flowchart node, naming a module marked neither existing
            nor as a Landing door
-  WARN   - a source marked binding (only Verify step 1 opens those, and only at profile ui)
 
 Usage:
   python3 <skill-dir>/scripts/validate_plan.py [target] [--root DIR] [--strict]
@@ -70,32 +79,36 @@ import os
 import re
 import sys
 
+from lean_config import BINDING_RE, NOT_BINDING_RE, _section, plan_marks_binding
+
 # Each entry is a tuple of acceptable heading names (first is canonical).
 REQUIRED_SECTIONS = [
     ("Problem", "Problem Statement"),
-    ("Flow",),
-    ("Impact",),
-    ("Relations",),
+    ("Shape",),
     ("Surface",),
     ("Landing",),
     ("Criteria", "User Stories"),
     ("Out of scope", "Out of Scope"),
     ("Assumptions", "Assumptions & Open Questions"),
-    ("Observable",),
 ]
 ADVISORY_SECTIONS = ["Sources"]
+DIFFERENCES = ("Differences from the source", "Differences")
 
 # The shape half: each has a one-line answer when it does not apply.
 SHAPE_HINTS = (
-    ("Flow", "state the hops in order, or `single module - <name>`"),
-    ("Relations", "state the entities and cardinality, or `None - no stored-data shape change`"),
+    ("Shape", "state the hops in order, or `single module - <name>`, and what changes underneath"),
     ("Surface", "state the route signature, or `None - nothing consumed outside`"),
-    ("Impact", "state what changes underneath, or `nothing` - a missing row is not an answer"),
 )
+CHANGES_RE = re.compile(r"changes underneath", re.IGNORECASE)
+CONFIRMED_RE = re.compile(r"^\W*y(es)?\b", re.IGNORECASE)
+AD_ID_RE = re.compile(r"\bAD-\d{3,}\b")
+IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 
 PLACEHOLDER_RE = re.compile(r"^\s*[\[<].+[\]>]\s*$")
 CID_RE = re.compile(r"\bC\d+\b")
 STATUS_RE = re.compile(r"\b[1-5]\d\d\b")
+DENIED_RE = re.compile(r"\b(3\d\d|401|403|404)\b")
+OPEN_WHO_RE = re.compile(r"^\W*(anyone|public|anonymous)\b", re.IGNORECASE)
 NONE_RE = re.compile(r"\b(none|nothing|n/?a|single module)\b", re.IGNORECASE)
 VAGUE_RE = re.compile(
     r"\b(gracefully|properly|correctly|quickly|fast|slow|efficiently|reasonably|"
@@ -120,6 +133,8 @@ MODULE_RE = re.compile(r"`([^`]+)`")
 # carry the resolution marker, the same as a list hop does.
 NODE_LABEL_RE = re.compile(r"[\[(]\s*\"?([^\"\]()|]+?)\"?\s*[\])]")
 EDGE_LINE_RE = re.compile(r"--+>|--+\s")
+# An erDiagram relationship carries cardinality markers on both sides of the dashes.
+ER_EDGE_RE = re.compile(r"[|}{o]{2}--|--[|}{o]{2}")
 
 
 def resolve_plan(target, root):
@@ -260,19 +275,6 @@ def classify_ears(text):
     return (True, "warn: SHALL present but no EARS lead keyword")
 
 
-def sibling_profile(plan_path):
-    """The profile checks.md declares, when it exists yet."""
-    checks = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "checks.md")
-    if not os.path.isfile(checks):
-        return None
-    with open(checks, "r", encoding="utf-8") as f:
-        for ln in f:
-            m = re.match(r"^\**Profile\**\s*:\s*`?(\w+)`?", ln.strip(), re.IGNORECASE)
-            if m:
-                return m.group(1).lower()
-    return None
-
-
 def check_criteria(lines):
     """EARS shape of every numbered acceptance criterion."""
     errors, warnings = [], []
@@ -309,7 +311,8 @@ def check_criteria(lines):
             vague = VAGUE_RE.search(item)
             if vague:
                 warnings.append(f"L{i}: AC uses '{vague.group(0)}' instead of a concrete value: {item[:60]}")
-        elif re.match(r"^#{1,4}\s", ln) or stripped.startswith("**") or re.match(r"^\s*[-*+]\s", ln):
+        # An indented bullet is a rule's example and stays inside the block.
+        elif re.match(r"^#{1,4}\s", ln) or stripped.startswith("**") or re.match(r"^[-*+]\s", ln):
             in_ac = False
     if ac_count == 0:
         warnings.append("no numbered acceptance criteria found - is the plan filled in?")
@@ -323,9 +326,229 @@ def _warn_unresolved(warnings, idx, names, land_text, kind):
     if any(n.lower() in land_text for n in names):
         return
     warnings.append(
-        f"L{idx + 1}: Flow {kind} names `{names[0]}` without marking it as existing or as a "
+        f"L{idx + 1}: Shape {kind} names `{names[0]}` without marking it as existing or as a "
         "Landing door - if it is neither, it is placement and belongs in the diff"
     )
+
+
+def _path_bases(plan_path):
+    """Where a capture path may be relative to: the project root holding .specs/, then the plan's folder."""
+    here = os.path.dirname(os.path.abspath(plan_path))
+    cur = here
+    while True:
+        if os.path.isdir(os.path.join(cur, ".specs")):
+            return [cur, here]
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            return [here]
+        cur = parent
+
+
+def check_captures(lines, plan_path, binding):
+    """Every capture a criterion cites is a file under the project. With a binding source, every
+    image under the feature's captures/ is cited by a criterion, or the builder never aims at it."""
+    errors = []
+    crit = section_bounds(lines, ("Criteria", "User Stories"))
+    criteria_text = "\n".join(lines[crit[0]:crit[1]]) if crit else ""
+    bases = _path_bases(plan_path) + [os.path.join(os.path.dirname(os.path.abspath(plan_path)), "captures")]
+    for p in MODULE_RE.findall(criteria_text):
+        if "://" in p:
+            if binding:
+                errors.append(
+                    f"Criteria: `{p[:48]}` is a link, not a capture - export the frame or state to a file "
+                    "under the project, keep the link in Sources"
+                )
+            continue
+        if not p.lower().endswith(IMAGE_EXT + (".yml", ".yaml")):
+            continue
+        if not any(os.path.exists(os.path.join(b, p)) for b in bases):
+            errors.append(f"Criteria: capture `{p}` does not exist")
+    if binding:
+        cdir = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "captures")
+        if os.path.isdir(cdir):
+            for f in sorted(os.listdir(cdir)):
+                if not f.lower().endswith(IMAGE_EXT) or ".running." in f:
+                    continue
+                stem = f.split(".")[0]
+                if stem not in criteria_text:
+                    errors.append(
+                        f"no criterion cites the capture `{f}` - each screen's criterion names its "
+                        "capture files, or the builder never aims at the picture"
+                    )
+    return errors
+
+
+USER_QUOTE_RE = re.compile(r"\buser\b[^\"“]*[\"“][^\"”]{3,}[\"”]", re.IGNORECASE)
+
+# A hop's module: the backticked name right before its marker.
+MARKED_MODULE_RE = re.compile(r"`([^`]+)`\s*\((?:exists|existing|new|door\s*\d+)\)", re.IGNORECASE)
+DATA_NONE_RE = re.compile(r"^\W*Data\W*:?\s*none\b", re.IGNORECASE)
+NEW_LINE_RE = re.compile(r"^\W*New\W*:", re.IGNORECASE)
+
+
+def raw_lines(path):
+    """The file as written: strip_fences blanks the fence lines that delimit a mermaid block."""
+    with open(path, encoding="utf-8") as f:
+        return f.read().splitlines()
+
+
+def mermaid_blocks(lines, bounds):
+    """(index of the opening fence, diagram kind, body lines) for each mermaid block in bounds."""
+    out, i, end = [], bounds[0], bounds[1]
+    while i < end:
+        if lines[i].strip().startswith("```mermaid"):
+            j = i + 1
+            while j < end and not lines[j].strip().startswith("```"):
+                j += 1
+            body = lines[i + 1:j]
+            kind = next((x.split()[0] for x in body if x.strip()), "")
+            out.append((i, kind, body))
+            i = j + 1
+        else:
+            i += 1
+    return out
+
+
+def _drawn(name, text):
+    base = name.replace("\\", "/").rstrip("/").split("/")[-1]
+    stem = base.rsplit(".", 1)[0] if "." in base else base
+    return any(x and x.lower() in text for x in (name, base, stem))
+
+
+def check_drawings(lines, shape, plan_path):
+    """The plan is read by the person who approves it, and a drawing is read before a list. The path
+    and the data are drawn, and the drawing names the modules the list does, so the two cannot
+    describe different systems."""
+    errors = []
+    blocks = mermaid_blocks(raw_lines(plan_path), shape)
+    body = [lines[i] for i in range(*shape)]
+    if any("single module" in x.lower() for x in body):
+        hops = []
+    else:
+        hops = [i for i in range(*shape) if re.match(r"^\s*\d+\.\s", lines[i])]
+    paths = [b for b in blocks if b[1] in ("sequenceDiagram", "flowchart", "graph")]
+    if hops and not paths:
+        errors.append(
+            "Shape lists the path but does not draw it - add a mermaid `sequenceDiagram` (a request and "
+            "its answer) or `flowchart` (branches, queues, jobs) numbered like the list; whoever approves "
+            "the plan reads the drawing first"
+        )
+    elif hops:
+        drawn = "\n".join(x for b in blocks for x in b[2]).lower()
+        for i in hops:
+            for name in MARKED_MODULE_RE.findall(lines[i]):
+                if not _drawn(name, drawn):
+                    errors.append(
+                        f"L{i + 1}: `{name}` is on the path but not in its drawing - name the same modules "
+                        "in both, or the two describe different systems"
+                    )
+    has_er = any(b[1] == "erDiagram" for b in blocks)
+    if not has_er and not any(DATA_NONE_RE.match(x) for x in body):
+        errors.append(
+            "Shape has no `erDiagram` of the data this reads or writes - draw the entities it touches and "
+            "how they relate, or state `Data: none - <why>`"
+        )
+    elif has_er and not any(NEW_LINE_RE.match(x) for x in body):
+        errors.append(
+            "Shape: the erDiagram has no `New:` line - say which entities or relations this adds, or "
+            "`New: nothing - read only`"
+        )
+    cdir = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "captures")
+    if os.path.isdir(cdir):
+        shown = "\n".join(x for x in lines if "![" in x)
+        for f in sorted(os.listdir(cdir)):
+            if f.lower().endswith(IMAGE_EXT) and ".running." not in f and f not in shown:
+                errors.append(
+                    f"the capture `{f}` is not shown in the plan - put `![<name>](captures/{f})` on its "
+                    "Sources line so whoever approves sees the screen"
+                )
+    return errors
+
+
+def check_unbound_captures(lines, plan_path, binding):
+    """A capture that came with the request binds. It is non-binding only on the user's word,
+    quoted on its Sources line - otherwise the planner can drop it to avoid asking."""
+    cdir = os.path.join(os.path.dirname(os.path.abspath(plan_path)), "captures")
+    if not os.path.isdir(cdir):
+        return []
+    sources = _section(lines, "Sources")
+    errors = []
+    for f in sorted(os.listdir(cdir)):
+        if not f.lower().endswith(IMAGE_EXT) or ".running." in f:
+            continue
+        cited = [s for s in sources if f in s]
+        if any(BINDING_RE.search(s) and not NOT_BINDING_RE.search(s) for s in cited):
+            continue
+        if cited and all(USER_QUOTE_RE.search(s) for s in cited):
+            continue
+        if not cited and binding:
+            continue
+        errors.append(
+            f"Sources: the capture `{f}` is not binding and no line quotes the user calling it "
+            "inspiration - a capture that comes with the request binds; write "
+            "`non-binding - user: \"<their words>\"` only when they said so"
+        )
+    return errors
+
+
+def active_decisions(plan_path):
+    """The `active` AD ids in the project's `.specs/STATE.md`, or None when there is no such file."""
+    root = _path_bases(plan_path)[0]
+    state = os.path.join(root, ".specs", "STATE.md")
+    if not os.path.isfile(state):
+        return None
+    ids = set()
+    with open(state, "r", encoding="utf-8") as f:
+        for line in f:
+            cells = split_row(line.strip()) if line.strip().startswith("|") else []
+            if len(cells) >= 4 and AD_ID_RE.fullmatch(cells[0]) and cells[3].lower().startswith("active"):
+                ids.add(cells[0])
+    return ids
+
+
+def check_differences(lines, plan_path):
+    """With a binding source, every departure from it is listed, and the user approved each one in
+    a decision `.specs/STATE.md` holds, so what was asked outlives the conversation."""
+    bounds = section_bounds(lines, DIFFERENCES)
+    if bounds is None:
+        return [
+            "Sources marks a source binding but there is no `## Differences from the source` section - "
+            "list each approved departure, or state `None - the product matches the source`"
+        ]
+    errors = []
+    body = [lines[i].strip() for i in range(*bounds) if lines[i].strip()]
+    rows = first_table(lines, bounds)
+    if not rows and not any(NONE_RE.search(x) for x in body):
+        errors.append(
+            "Differences from the source has no rows and does not state `None - the product matches the source`"
+        )
+    decisions = None
+    for r in rows:
+        cells = split_row(r)
+        if not cells or not cells[0] or PLACEHOLDER_RE.match(cells[0]):
+            continue
+        confirmed = cells[2] if len(cells) > 2 else ""
+        if not CONFIRMED_RE.match(confirmed):
+            errors.append(
+                f"Differences '{cells[0][:40]}': Confirmed is '{confirmed[:20]}' - departing from a binding "
+                "source is the user's call; ask, then mark `y`"
+            )
+            continue
+        cited = AD_ID_RE.findall(confirmed)
+        if not cited:
+            errors.append(
+                f"Differences '{cells[0][:40]}': Confirmed cites no decision - record the question and the "
+                "answer as an `AD-NNN` in `.specs/STATE.md` and write `y - AD-NNN`"
+            )
+            continue
+        if decisions is None:
+            decisions = active_decisions(plan_path) or set()
+        for ad in cited:
+            if ad not in decisions:
+                errors.append(
+                    f"Differences '{cells[0][:40]}': cites {ad}, which `.specs/STATE.md` does not hold as active"
+                )
+    return errors
 
 
 def check_file(path):
@@ -346,15 +569,6 @@ def check_file(path):
         label = re.compile(r"^\**" + re.escape(name) + r"\**\s*:", re.IGNORECASE)
         if section_bounds(lines, name) is None and not any(label.match(ln.strip()) for ln in lines):
             warnings.append(f"no {name} section - 'nothing' is a valid answer, a missing section is not")
-
-    # A source marked binding is only ever opened by step 1 of Verify, which runs at `ui`.
-    if any(re.search(r"\bbinding\b", ln, re.IGNORECASE) for ln in lines):
-        profile = sibling_profile(path)
-        if profile and profile != "ui":
-            warnings.append(
-                f"a source is marked binding but checks.md declares profile {profile}, so nobody "
-                "opens it - raise the profile to ui or drop the marking"
-            )
 
     # --- what must be true ---
 
@@ -388,43 +602,11 @@ def check_file(path):
         elif not re.search(r"open questions.*:\s*none", oq_clean):
             warnings.append("open questions do not read as resolved ('Open questions: none')")
 
-    # Observable: every item of every surface present. A surface carries the same decisions
-    # every time it appears, so a blank here is an item nobody decided - not one that does not
-    # apply, which is what the mandatory `n/a - <reason>` escape is for.
-    obs = present.get("Observable")
-    if obs:
-        body = [lines[i].strip() for i in range(*obs) if lines[i].strip()]
-        rows = first_table(lines, obs)
-        declares_none = any(NONE_RE.search(x) for x in body)
-        if not body:
-            errors.append(
-                "Observable section is empty - walk each surface's decisions, or state "
-                "`None - no user-facing surface`"
-            )
-        elif not rows and not declares_none:
-            errors.append("Observable has no rows and does not state `None - no user-facing surface`")
-        for r in rows:
-            cells = split_row(r)
-            if len(cells) < 3 or not cells[0] or PLACEHOLDER_RE.match(cells[0]):
-                continue
-            label = f"{cells[0][:28]} / {cells[1][:28]}"
-            landing = cells[2]
-            if not landing or PLACEHOLDER_RE.match(landing) or landing in ("-", "\u2014"):
-                errors.append(
-                    f"Observable '{label}': landing is blank - a criterion, `existing - <what>`, "
-                    "or `n/a - <reason>`"
-                )
-                continue
-            low = landing.lower()
-            for kw in ("n/a", "na -", "existing"):
-                if low.startswith(kw):
-                    rest = landing[len(kw):].strip(" -\u2013\u2014:")
-                    if len(rest) < 3:
-                        errors.append(
-                            f"Observable '{label}': `{kw}` with no reason - say why it does not "
-                            "apply, or name what already behaves that way"
-                        )
-                    break
+    binding = plan_marks_binding(lines)
+    errors += check_captures(lines, path, binding)
+    errors += check_unbound_captures(lines, path, binding)
+    if binding:
+        errors += check_differences(lines, path)
 
     # --- what is being built ---
 
@@ -438,13 +620,16 @@ def check_file(path):
         elif all(PLACEHOLDER_RE.match(x) for x in body):
             errors.append(f"{sec} section is still the template placeholder")
 
-    # Relations: no columns, no types. In mermaid that detail is an attribute block.
-    rel = present.get("Relations")
-    if rel:
-        for i in range(*rel):
+    shape = present.get("Shape")
+    if shape:
+        errors += check_drawings(lines, shape, path)
+
+    # Stored shape: no columns, no types. In mermaid that detail is an attribute block.
+    if shape:
+        for i in range(*shape):
             if ER_ATTRIBUTE_RE.match(lines[i]):
                 errors.append(
-                    f"L{i + 1}: Relations carries an attribute block ('{lines[i].strip()}') - columns and "
+                    f"L{i + 1}: Shape carries an attribute block ('{lines[i].strip()}') - columns and "
                     "types are reversible, come from the repo's conventions, and go stale here"
                 )
                 break
@@ -455,6 +640,13 @@ def check_file(path):
         body = [lines[i].strip() for i in range(*surf) if lines[i].strip()]
         declares_none = any(NONE_RE.search(x) for x in body)
         rows = first_table(lines, surf)
+        header = next((split_row(lines[i]) for i in range(*surf) if lines[i].strip().startswith("|")), [])
+        who_col = next((k for k, h in enumerate(header) if h.lower() == "who"), None)
+        if rows and who_col is None:
+            errors.append(
+                "Surface has no Who column - who may call each route, and what the rest get back, "
+                "is part of the signature"
+            )
         for r in rows:
             cells = split_row(r)
             if not cells or not cells[0] or PLACEHOLDER_RE.match(cells[0]):
@@ -464,6 +656,18 @@ def check_file(path):
                 errors.append(
                     f"Surface '{cells[0][:48]}': Status names no status code - those statuses are the "
                     "set that owes a Coverage row in checks.md"
+                )
+                continue
+            if who_col is None:
+                continue
+            who = cells[who_col] if len(cells) > who_col else ""
+            if not who:
+                errors.append(f"Surface '{cells[0][:48]}': Who is blank - name who may call it, or `anyone`")
+            elif not OPEN_WHO_RE.search(who) and not DENIED_RE.search(status_cell):
+                errors.append(
+                    f"Surface '{cells[0][:48]}': only '{who[:40]}' may call it, but Status names no code "
+                    "for the rest (a 3xx, 401, 403 or 404) - that status is the Coverage member proving "
+                    "the door is shut"
                 )
         for i in range(*surf):
             if CID_RE.search(lines[i]):
@@ -495,31 +699,33 @@ def check_file(path):
                 if not cells[2] or PLACEHOLDER_RE.match(cells[2]):
                     errors.append(f"Landing '{cells[0][:40]}': no rejected alternative named")
 
-    # Impact: a section with no rows is a sweep nobody did.
-    imp = present.get("Impact")
-    if imp:
-        body = [lines[i].strip() for i in range(*imp) if lines[i].strip()]
-        if body and not first_table(lines, imp) and not any(x.startswith(("-", "*")) for x in body):
-            warnings.append("Impact has neither rows nor bullets - name the fronts, even to say nothing changes")
+    # Shape: what changes underneath is a sweep, so a missing part is a sweep nobody did.
+    if shape:
+        body = [lines[i] for i in range(*shape)]
+        if any(x.strip() for x in body) and not any(CHANGES_RE.search(x) for x in body):
+            errors.append(
+                "Shape has no `Changes underneath` part - name what already exists and changes, "
+                "even to say nothing does"
+            )
 
-    # Flow: a module that neither exists nor is created by a door is placement, which this
-    # artifact deliberately leaves to the diff. Naming one here is how the catalogue creeps back.
-    flow = present.get("Flow")
-    if flow:
+        # A module that neither exists nor is created by a door is placement, which this
+        # artifact leaves to the diff. Naming one here is how the catalogue creeps back.
         land_text = "\n".join(lines[i] for i in range(*land)).lower() if land else ""
-        for i in range(*flow):
+        for i in range(*shape):
             ln = lines[i].strip()
-            if not re.match(r"^\s*(\d+\.|[-*])\s", ln):
+            if not re.match(r"^\s*\d+\.\s", ln):
                 continue
             if HOP_RESOLVED_RE.search(ln):
                 continue
             _warn_unresolved(warnings, i, MODULE_RE.findall(ln), land_text, "hop")
 
-        # A branching path is drawn instead of listed, and the same rule holds inside the
-        # diagram: a node that neither exists nor is created by a door is placement.
-        for i in range(*flow):
+        # The same rule holds inside a flowchart: a node that neither exists nor is created
+        # by a door is placement.
+        flow_lines = {i + 1 + k for i, kind, body in mermaid_blocks(raw_lines(path), shape)
+                      if kind in ("flowchart", "graph") for k in range(len(body))}
+        for i in sorted(flow_lines):
             ln = lines[i]
-            if not EDGE_LINE_RE.search(ln) or HOP_RESOLVED_RE.search(ln):
+            if ER_EDGE_RE.search(ln) or not EDGE_LINE_RE.search(ln) or HOP_RESOLVED_RE.search(ln):
                 continue
             labels = [lbl.strip() for lbl in NODE_LABEL_RE.findall(ln) if lbl.strip()]
             _warn_unresolved(warnings, i, labels, land_text, "diagram node")

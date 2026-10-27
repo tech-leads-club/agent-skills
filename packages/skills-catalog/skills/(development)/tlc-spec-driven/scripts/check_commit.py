@@ -29,6 +29,7 @@ Exit codes: 0 pass, 1 violation, 2 usage error.
 """
 
 import argparse
+import os
 import re
 import sys
 
@@ -40,8 +41,12 @@ def read_message(args):
     if args.message is not None:
         return args.message
     if args.msgfile:
-        with open(args.msgfile, "r", encoding="utf-8") as f:
-            return f.read()
+        # git passes a path that exists. Anything else is the message itself, which is how a
+        # caller invokes this by hand - a traceback there is a worse answer than the check.
+        if os.path.isfile(args.msgfile):
+            with open(args.msgfile, "r", encoding="utf-8") as f:
+                return f.read()
+        return args.msgfile
     if not sys.stdin.isatty():
         return sys.stdin.read()
     return ""
@@ -90,7 +95,8 @@ def check(message):
 
 def main(argv=None):
     p = argparse.ArgumentParser(prog="check_commit.py", description="Validate a Conventional Commits message.")
-    p.add_argument("msgfile", nargs="?", default=None, help="path to a commit message file (as git passes to commit-msg)")
+    p.add_argument("msgfile", nargs="?", default=None,
+                   help="a commit message file (as git passes to commit-msg), or the message itself")
     p.add_argument("--message", default=None, help="the commit message as a string")
     args = p.parse_args(argv)
 
