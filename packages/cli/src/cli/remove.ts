@@ -1,8 +1,9 @@
-import chalk from 'chalk'
-import { AGENT_TYPES, removeSkill } from '@tech-leads-club/core'
 import type { AgentType } from '@tech-leads-club/core'
+import { AGENT_TYPES, removeSkill } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
+import { getTargetAgents, reportNoTargetAgents } from '../services/target-agents'
 
 interface RemoveCliOptions {
   skill?: string[]
@@ -21,14 +22,21 @@ export async function runCliRemove(options: RemoveCliOptions): Promise<void> {
   }
 
   const skillNames = Array.isArray(options.skill) ? options.skill : [options.skill]
-  const rawAgents = options.agent || ['cursor', 'claude-code', 'windsurf']
-  const invalidAgents = rawAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
+
+  const { agents: targetAgents, source } = await getTargetAgents(options.agent)
+  if (targetAgents.length === 0) {
+    reportNoTargetAgents('remove', 'removal')
+  }
+
+  const invalidAgents = targetAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
   if (invalidAgents.length > 0) {
     console.error(chalk.red(`❌ Unknown agent(s): ${invalidAgents.join(', ')}`))
     console.error(chalk.dim(`   Valid agents: ${AGENT_TYPES.join(', ')}`))
     process.exit(1)
   }
-  const agents = rawAgents as AgentType[]
+  const agents = targetAgents as AgentType[]
+
+  console.log(chalk.blue(`⏳ Using ${source} to identify target agents: ${agents.join(', ')}`))
 
   if (options.force) {
     console.log(chalk.yellow('⚠️  Force mode enabled - bypassing lockfile check'))

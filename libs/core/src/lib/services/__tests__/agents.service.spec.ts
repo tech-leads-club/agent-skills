@@ -129,6 +129,15 @@ describe('agents service', () => {
     expect(detectInstalledAgents(ports)).toEqual(['cursor', 'opencode'])
   })
 
+  it('ignores the project directory and only checks the home directory when homeOnly is set', () => {
+    const { ports, existsSyncMock } = createPorts()
+    existsSyncMock.mockImplementation(
+      (path) => path === '/home/tester/.cursor' || path === '/workspace/project/.opencode',
+    )
+
+    expect(detectInstalledAgents(ports, { homeOnly: true })).toEqual(['cursor'])
+  })
+
   it('returns every supported agent when all install locations exist', () => {
     const { ports, existsSyncMock } = createPorts()
     existsSyncMock.mockReturnValue(true)

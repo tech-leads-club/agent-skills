@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { detectInstalledAgents, getAllAgentTypes } from '@tech-leads-club/core'
 import type { AgentType } from '@tech-leads-club/core'
+import { detectInstalledAgents, getAllAgentTypes } from '@tech-leads-club/core'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ports } from '../ports'
+import { loadConfig } from '../services/config'
 
 export function useAgents() {
   const [selectedAgents, setSelectedAgents] = useState<AgentType[]>([])
@@ -11,14 +12,22 @@ export function useAgents() {
   const allAgents = useMemo(() => getAllAgentTypes(), [])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let cancelled = false
+
+    const timer = setTimeout(async () => {
       const detected = detectInstalledAgents(ports)
+      const config = await loadConfig()
+      if (cancelled) return
+
       setInstalledAgents(detected)
-      setSelectedAgents(detected)
+      setSelectedAgents(config.targetAgents.length > 0 ? config.targetAgents : detected)
       setLoading(false)
     }, 800)
 
-    return () => clearTimeout(timer)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [])
 
   const toggleAgent = (agent: AgentType) => {

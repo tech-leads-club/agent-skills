@@ -193,11 +193,15 @@ const agentDefinitions: Record<AgentType, AgentDefinition> = {
   },
 }
 
-const createAgentContext = (ports: CorePorts): AgentContext => ({
-  home: ports.env.homedir(),
-  projectRoot: findProjectRoot(ports),
-  ports,
-})
+const createAgentContext = (ports: CorePorts, options?: { homeOnly?: boolean }): AgentContext => {
+  const home = ports.env.homedir()
+
+  return {
+    home,
+    projectRoot: options?.homeOnly ? home : findProjectRoot(ports),
+    ports,
+  }
+}
 
 /**
  * Returns all supported agent types sorted alphabetically by display name.
@@ -271,14 +275,16 @@ export function getAgentConfig(ports: CorePorts, type: AgentType): AgentConfig {
  * Detects which supported agents are installed on the current system.
  *
  * @param ports - Core ports used to check filesystem presence.
+ * @param options.homeOnly - When true, only checks the home directory, ignoring the
+ * current project. Use this for detection results that get persisted globally.
  * @returns The installed agent types.
  * @example
  * ```ts
  * const installedAgents = detectInstalledAgents(ports)
  * ```
  */
-export function detectInstalledAgents(ports: CorePorts): AgentType[] {
-  const context = createAgentContext(ports)
+export function detectInstalledAgents(ports: CorePorts, options?: { homeOnly?: boolean }): AgentType[] {
+  const context = createAgentContext(ports, options)
 
   return (Object.entries(agentDefinitions) as [AgentType, AgentDefinition][])
     .filter(([, definition]) => definition.detectInstalled(context))
