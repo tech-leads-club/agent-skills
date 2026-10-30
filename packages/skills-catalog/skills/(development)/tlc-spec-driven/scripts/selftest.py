@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES = os.path.join(HERE, "fixtures")
@@ -461,16 +462,17 @@ def scaffold():
 def run(validator, root):
     p = subprocess.run(
         [sys.executable, os.path.join(HERE, f"{validator}.py"), FEATURE, "--root", root],
-        capture_output=True, text=True,
+        capture_output=True, encoding="utf-8", errors="replace",
     )
     return p.returncode, p.stdout + p.stderr
 
 
-def run_script(name, *args, cwd=None):
+def run_script(name, *args, cwd=None, env=None, here=HERE):
     """Run a shipped script directly and return (exit code, combined output)."""
     proc = subprocess.run(
-        [sys.executable, os.path.join(HERE, name), *args],
-        capture_output=True, text=True, cwd=cwd,
+        [sys.executable, os.path.join(here, name), *args],
+        capture_output=True, encoding="utf-8", errors="replace", cwd=cwd,
+        env=None if env is None else {**os.environ, **env},
     )
     return proc.returncode, proc.stdout + proc.stderr
 
@@ -641,12 +643,13 @@ def run_tooling():
               "--source", "app/billing/x.rb:31", "--text", "assert the dedup path returns the row"],
              "ADDED"),
             (["--root", root, "status"], "1 total"),
+            (["status", "--root", root], "1 total"),
         ]
         for argv, frag in steps:
             code, out = run_script("lessons.py", *argv)
             if code != 0 or frag.lower() not in out.lower():
                 ok = False
-                print(f"  BROKEN  lessons.py: round-trip step {argv[2]!r} - expected {frag!r}, "
+                print(f"  BROKEN  lessons.py: round-trip step {' '.join(argv)!r} - expected {frag!r}, "
                       f"got exit={code}: {out.strip()}")
                 break
         else:
@@ -745,8 +748,59 @@ def run_proofs_tooling():
     return ok
 
 
+def run_mutation_report():
+    """check_proofs.py --mutations against a stub mutate.py: a mutate.py that broke must never read
+    as a run with nothing to kill, and a mutation killed by a timeout counts as killed."""
+    root, tools = tempfile.mkdtemp(prefix="report-"), tempfile.mkdtemp(prefix="tools-")
+    ok = True
+    try:
+        for name in os.listdir(HERE):
+            if name.endswith(".py") and name != "mutate.py":
+                shutil.copy(os.path.join(HERE, name), tools)
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        os.makedirs(fdir)
+        # UTF-8 bytes a cp1252 decode refuses (0x8D), whatever encoding the proof's own stdout has
+        write_artifact(os.path.join(root, "ok.py"),
+                       'import sys\nsys.stdout.buffer.write("Ran 1 test - \\u00cd\\n".encode("utf-8"))\n')
+        write_artifact(os.path.join(fdir, "checks.md"),
+                       "# Billing checks\n\nMutations: 2\nBuild: none - fixture\n\n## Checks\n\n"
+                       f"**C1** - counted (AC 1)\nProof: `\"{sys.executable}\" ok.py`\n\n")
+        spec = os.path.join(root, "mutations.json")
+        write_artifact(spec, json.dumps([{"file": "ok.py", "old": "a", "new": "b", "proof": "x"}] * 2))
+        table = "| Mutation | Location | Killed |\n| --- | --- | --- |\n"
+        row = "| a | `ok.py:1` | {} |\n"
+        for stub, want, frags, desc in [
+            ("raise AttributeError(\"module 'signal' has no attribute 'SIGHUP'\")", 1,
+             ["mutate.py failed (exit 1)", "SIGHUP"], "a mutate.py that crashed is a failed row, not 0 killed"),
+            ('import sys\nprint("mutate: STOP - not restored byte-for-byte: ok.py", file=sys.stderr)\nsys.exit(3)',
+             1, ["mutate.py failed (exit 3)", "not restored"], "a tree mutate.py could not restore is a failed row"),
+            (f"print({table + row.format('yes')!r})\nraise SystemExit(1)", 1,
+             ["mutate.py failed (exit 1)"], "a table shorter than the spec is a failed row"),
+            (f"print({table + row.format('yes (timeout)') + row.format('yes')!r})", 0,
+             ["| yes (timeout) |", "mutations 2 killed, 0 not"], "a mutation killed by a timeout counts as killed"),
+        ]:
+            write_artifact(os.path.join(tools, "mutate.py"), stub + "\n")
+            code, out = run_script("check_proofs.py", FEATURE, "--root", root, "--mutations", spec, here=tools)
+            proofs = os.path.join(fdir, "proofs.md")
+            written = read_artifact(proofs) if os.path.exists(proofs) else ""
+            if code == want and all(f in out + written for f in frags):
+                print(f"  ok      check_proofs.py: {desc}")
+            else:
+                ok = False
+                print(f"  BROKEN  check_proofs.py: {desc} - expected exit={want} and {frags!r}, got exit={code}")
+                print("          " + (out + written).strip().replace("\n", "\n          "))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(tools, ignore_errors=True)
+    return ok
+
+
 APP = 'def status(paid):\n    return "active" if paid else "suspended"\n\n\ndef unused():\n    return 1\n'
 PROOF = 'from app import status\nassert status(False) == "suspended"\n'
+SLOW = ('import subprocess, sys, time\nfrom app import status\n'
+        'if status(False) != "suspended":\n'
+        '    subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])\n'
+        '    time.sleep(60)\n')
 
 
 def run_mutation_tooling():
@@ -775,18 +829,18 @@ def run_mutation_tooling():
             if out:
                 print("          " + out.strip().replace("\n", "\n          "))
 
-    def mutation(spec, *extra):
+    def mutation(spec, *extra, env=None):
         path = os.path.join(root, "..", os.path.basename(root) + ".json")
         with open(path, "w", encoding="utf-8") as f:
             f.write(spec)
-        return run_script("mutate.py", "--spec", path, "--root", root, *extra)
+        return run_script("mutate.py", "--spec", path, "--root", root, *extra, env=env)
 
     def clean():
         p = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True)
         return p.stdout == ""
 
     try:
-        for name, body in (("app.py", APP), ("test_app.py", PROOF), (".gitignore", "__pycache__/\n")):
+        for name, body in (("app.py", APP), ("test_app.py", PROOF), ("slow.py", SLOW), (".gitignore", "__pycache__/\n")):
             with open(os.path.join(root, name), "w", encoding="utf-8") as f:
                 f.write(body)
         sh("git", "init", "-q")
@@ -807,6 +861,19 @@ def run_mutation_tooling():
         code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s}]'
                           % json.dumps(py))
         report(code == 0 and "1 killed, 0 survived, 0 blocked" in out, "every mutation killed exits 0", out)
+
+        code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s,'
+                             ' "label": "status suspended \\u2192 x"}]' % json.dumps(py),
+                             env={"PYTHONIOENCODING": "cp1252"})
+        report(code == 0 and "| status suspended \u2192 x |" in out,
+               "a label the console code page cannot encode still prints its row", out)
+
+        started = time.monotonic()
+        code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s}]'
+                             % json.dumps(f'"{sys.executable}" slow.py'), "--timeout", "3")
+        elapsed = time.monotonic() - started
+        report(code == 0 and "| yes (timeout) |" in out and "still holds" not in out and elapsed < 30 and clean(),
+               f"a hung proof whose child holds the output is killed as one tree ({elapsed:.0f} s)", out)
 
         code, out = mutation('[{"file": "app.py", "old": "return", "new": "pass", "proof": "true"}]')
         report(code == 2 and "occurs 2 times" in out and clean(),
@@ -935,10 +1002,12 @@ def main(argv=None):
             print("          " + out.strip().replace("\n", "\n          "))
         shutil.rmtree(root)
 
-    tooling_ok = run_tooling()
-    tooling_ok = ((not shipped("mutate") or run_mutation_tooling())
-                  and (not shipped("runners") or run_runner_selection())
-                  and (not shipped("check_proofs") or run_proofs_tooling()) and tooling_ok)
+    tooling = [run_tooling()]
+    for script, suite in (("mutate", run_mutation_tooling), ("runners", run_runner_selection),
+                          ("check_proofs", run_proofs_tooling), ("check_proofs", run_mutation_report)):
+        if shipped(script):
+            tooling.append(suite())
+    tooling_ok = all(tooling)
 
     print(f"\nselftest: {killed} killed, {survived} survived, "
           f"controls {'ok' if controls_ok else 'BROKEN'}, "

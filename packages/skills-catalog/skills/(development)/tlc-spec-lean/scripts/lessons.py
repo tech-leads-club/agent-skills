@@ -403,6 +403,9 @@ def main(argv=None):
     sp = sub.add_parser("selftest", help="Run stdlib regressions (normalization)")
     sp.set_defaults(fn=lambda root, args: _selftest_norm())
 
+    for sp in sub.choices.values():
+        sp.add_argument("--root", default=argparse.SUPPRESS, help="Same as --root before the subcommand")
+
     args = p.parse_args(argv)
     root = os.path.abspath(args.root)
     return args.fn(root, args)

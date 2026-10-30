@@ -22,6 +22,7 @@ killed, 1 otherwise, 2 usage error.
 """
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -78,7 +79,7 @@ def checks_of(path):
 
 def run_alone(root, cmd):
     """A proof the script cannot group: run it, judge by exit code, read a count when it can."""
-    p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, text=True)
+    p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, encoding="utf-8", errors="replace")
     text = p.stdout + p.stderr
     count = None
     for rx in COUNT_RES:
@@ -115,17 +116,34 @@ def git_head(root):
     return p.stdout.strip() if p.returncode == 0 else "unknown"
 
 
+def spec_size(spec):
+    try:
+        with open(spec, encoding="utf-8") as f:
+            return len(json.load(f))
+    except (OSError, ValueError, TypeError):
+        return 0
+
+
 def run_mutations(root, spec):
-    """Inject each mutation with mutate.py: [(label, proof, killed)]."""
+    """Inject each mutation with mutate.py: [(label, proof, killed)].
+
+    A run that prints fewer rows than the spec has mutations gets a failed row of its own. The exit
+    code cannot tell: a traceback exits 1, the same as a surviving mutation, and with no rows at all
+    the report would read as nothing left to kill."""
     p = subprocess.run([sys.executable, os.path.join(HERE, "mutate.py"), "--root", root, "--spec", spec],
-                       cwd=root, capture_output=True, text=True)
+                       cwd=root, capture_output=True, encoding="utf-8", errors="replace")
     rows = []
     for line in (p.stdout + p.stderr).splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) >= 3 and cells[-1].lower() in ("yes", "no", "blocked") and cells[0].lower() != "mutation":
+        if (len(cells) >= 3 and cells[-1].lower() in ("yes", "yes (timeout)", "no", "blocked")
+                and cells[0].lower() != "mutation"):
             rows.append((cells[0], cells[1], cells[-1].lower()))
+    output = (p.stdout + p.stderr).strip().splitlines()
+    last = (output[-1] if output else "no output").replace("|", "/")[:80]
     if p.returncode == 2:
-        rows.append(("spec refused", (p.stdout + p.stderr).strip().splitlines()[-1][:80], "no"))
+        rows.append(("spec refused", last, "no"))
+    elif len(rows) < max(spec_size(spec), 1):
+        rows.append((f"mutate.py failed (exit {p.returncode})", last, "no"))
     return rows
 
 
@@ -200,7 +218,7 @@ def main(argv=None):
         rows.append((cid, proof, ran, passed, result))
 
     for cmd in build_commands(checks_path):
-        p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, text=True)
+        p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, encoding="utf-8", errors="replace")
         tail = (p.stdout + p.stderr).strip().splitlines()
         error = next((ln for ln in tail if "error" in ln.lower()), tail[-1] if tail else "")
         result = "pass" if p.returncode == 0 else f"**fail** - {error.strip().replace('|', '/')[:100]}"
@@ -209,7 +227,7 @@ def main(argv=None):
         rows.append(("Build", cmd, "-", "-", result))
 
     mutations = run_mutations(root, os.path.abspath(a.mutations)) if a.mutations else []
-    survived = sum(1 for _, _, k in mutations if k != "yes")
+    survived = sum(1 for _, _, k in mutations if not k.startswith("yes"))
 
     dirty = dirty_paths(root)
     out = [f"# {a.feature} proofs", "",
@@ -229,7 +247,7 @@ def main(argv=None):
         if not res.startswith("pass"):
             print(f"  {c}: {res} - {p[:80]}")
     for lab, pr, k in mutations:
-        if k != "yes":
+        if not k.startswith("yes"):
             print(f"  mutation not killed: {lab}")
     return 0 if failed == 0 and survived == 0 and not dirty else 1
 

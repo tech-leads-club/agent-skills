@@ -14,11 +14,19 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 CD_RE = r"^(?:cd\s+(?P<cd>\S+)\s*&&\s*)?"
+
+
+def _run(cmd, cwd):
+    """Run a runner without a shell. On Windows npx, pnpm and yarn are .cmd files, which only a
+    resolved path launches."""
+    return subprocess.run([shutil.which(cmd[0]) or cmd[0], *cmd[1:]], cwd=cwd, capture_output=True,
+                          encoding="utf-8", errors="replace")
 
 
 def _split(text):
@@ -92,8 +100,8 @@ class Bun:
     def run(self, root, cwd, launcher, files):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "junit.xml")
-            subprocess.run(["bun", "test", *sorted(files), "--reporter=junit", f"--reporter-outfile={out}"],
-                           cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(["bun", "test", *sorted(files), "--reporter=junit", f"--reporter-outfile={out}"],
+                 os.path.join(root, cwd))
             return _junit(out) if os.path.exists(out) else None
 
     def select(self, cases, proof):
@@ -120,7 +128,7 @@ class Vitest(Bun):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "junit.xml")
             cmd = [*launcher.split(), "vitest", "run", *sorted(files), "--reporter=junit", f"--outputFile={out}"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, os.path.join(root, cwd))
             if not os.path.exists(out):
                 return None
             # vitest joins describe and test with " > "; its -t matches them joined by a space
@@ -145,11 +153,13 @@ class Jest(Bun):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "report.json")
             cmd = [*launcher.split(), "jest", *sorted(files), "--json", f"--outputFile={out}"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, os.path.join(root, cwd))
             if not os.path.exists(out):
                 return None
+            with open(out) as f:
+                report = json.load(f)
             cases = []
-            for suite in json.load(open(out)).get("testResults", []):
+            for suite in report.get("testResults", []):
                 for a in suite.get("assertionResults", []):
                     cases.append((suite.get("name", ""), a.get("fullName", ""), a.get("title", ""),
                                   a.get("status") == "passed"))
@@ -174,7 +184,7 @@ class Pytest:
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "junit.xml")
             cmd = [*launcher.split(), *sorted(files), f"--junitxml={out}", "-q"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, os.path.join(root, cwd))
             return _junit(out) if os.path.exists(out) else None
 
     @staticmethod
@@ -231,8 +241,7 @@ class GoTest:
         return {"key": (self.name, m.group("cd") or ".", "go"), "launcher": "go", "files": pkgs, "filter": pattern}
 
     def run(self, root, cwd, launcher, pkgs):
-        p = subprocess.run(["go", "test", "-json", *sorted(pkgs)], cwd=os.path.join(root, cwd),
-                           capture_output=True, text=True)
+        p = _run(["go", "test", "-json", *sorted(pkgs)], os.path.join(root, cwd))
         cases = []
         for line in p.stdout.splitlines():
             try:

@@ -13,7 +13,7 @@ script's job rather than the agent's:
 
   - the original bytes of every target file go to a journal inside the git dir BEFORE the
     file is touched, so an interrupted run is undone by the next invocation (or --recover)
-  - SIGINT / SIGTERM / SIGHUP restore before exiting
+  - SIGINT / SIGTERM / SIGHUP (where the platform has it) restore before exiting
   - each file is compared byte-for-byte with its original after restoring
   - each distinct proof runs once UNMUTATED first; a proof that is not green there marks its
     mutations `blocked`, never `yes`, because a proof that cannot pass cannot kill anything
@@ -50,6 +50,7 @@ import sys
 import time
 
 JOURNAL = "tlc-mutation-journal.json"
+KILL_GRACE = 10
 RUNNING = []
 
 
@@ -103,22 +104,33 @@ def short(text, n=40):
 
 
 def run_proof(cmd, root, timeout):
-    """Return (exit code or 'timeout', combined output). Kills the whole process group on timeout."""
-    proc = subprocess.Popen(cmd, shell=True, cwd=root, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, text=True, start_new_session=True)
+    """Return (exit code or 'timeout', combined output). Kills the whole process tree on timeout."""
+    proc = subprocess.Popen(cmd, shell=True, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            encoding="utf-8", errors="replace", start_new_session=True)
     RUNNING.append(proc)
     try:
         out, _ = proc.communicate(timeout=timeout)
         return proc.returncode, out
     except subprocess.TimeoutExpired:
         kill_group(proc)
-        out, _ = proc.communicate()
+        try:
+            out, _ = proc.communicate(timeout=KILL_GRACE)
+        except subprocess.TimeoutExpired:
+            print(f"mutate: WARN - a process the proof started still holds its output {KILL_GRACE} s after "
+                  "the kill; moving on without it", file=sys.stderr)
+            out = ""
         return "timeout", out or ""
     finally:
         RUNNING.remove(proc)
 
 
 def kill_group(proc):
+    if os.name == "nt":
+        # Windows has no process groups to signal; taskkill /T ends the shell and every process under it
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
+        if proc.poll() is None:
+            proc.kill()
+        return
     try:
         os.killpg(proc.pid, signal.SIGKILL)
     except ProcessLookupError:
@@ -170,6 +182,10 @@ def main(argv=None):
     p.add_argument("--tail", type=int, default=20, help="Output lines shown for a blocked proof")
     p.add_argument("--recover", action="store_true", help="Only restore an interrupted run, then exit")
     args = p.parse_args(argv)
+    # labels quote source code, which a Windows console code page cannot always encode
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
 
     try:
         root = os.path.realpath(args.root or git(".", "rev-parse", "--show-toplevel").strip())
@@ -211,8 +227,9 @@ def main(argv=None):
         print(f"\nmutate: interrupted by signal {signum} - tree restored", file=sys.stderr)
         raise SystemExit(130)
 
-    for s in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-        signal.signal(s, on_signal)
+    for name in ("SIGINT", "SIGTERM", "SIGHUP"):
+        if hasattr(signal, name):  # Windows has no SIGHUP
+            signal.signal(getattr(signal, name), on_signal)
 
     baseline = {}
     for proof in dict.fromkeys(f["proof"] for f in mutations):

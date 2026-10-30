@@ -1698,6 +1698,8 @@
         "references/memory.md",
         "references/verify-screens.md",
         "references/verify.md",
+        "scripts/__pycache__/lean_config.cpython-314.pyc",
+        "scripts/__pycache__/runners.cpython-314.pyc",
         "scripts/check_commit.py",
         "scripts/check_proofs.py",
         "scripts/fixtures/checks.md",
@@ -1714,7 +1716,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.1.0",
-      "contentHash": "66c91f40f0f8250c1a52c3242b4f4e33a5b038f5a2fda2578bf2f95df5de0b11"
+      "contentHash": "32cd1133b66e25e365126c800f1f1a874f17c4b3491c20f3c43650120d7112ef"
     },
     {
       "name": "tlc-plan",
@@ -1724,6 +1726,7 @@
       "files": [
         "SKILL.md",
         "references/plan.md",
+        "scripts/__pycache__/lean_config.cpython-314.pyc",
         "scripts/fixtures/plan.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
@@ -1732,7 +1735,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "1.1.0",
-      "contentHash": "6e6fa709ed167718184622004855fc151b47fb3878f4030fa5745c85bd292404"
+      "contentHash": "2a1f08217019fcf8f588767445d14d3572799f75586e7134b6b4342a43432e6c"
     },
     {
       "name": "tlc-prd",
@@ -1765,6 +1768,8 @@
         "references/tasks.md",
         "references/validate.md",
         "references/verify-screens.md",
+        "scripts/__pycache__/lean_config.cpython-314.pyc",
+        "scripts/__pycache__/runners.cpython-314.pyc",
         "scripts/check_commit.py",
         "scripts/check_proofs.py",
         "scripts/fixtures/checks.md",
@@ -1782,7 +1787,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "4.0.0",
-      "contentHash": "f465b52756b8f2ea082bf0dc24ab517721983106c7bf9f50d9e689c56ae1a1e2"
+      "contentHash": "8178856357da9173c4321eeb4401b110c012717e12f2fcab7aeab4905969b2fc"
     },
     {
       "name": "tlc-spec-lean",
@@ -1797,6 +1802,8 @@
         "references/plan.md",
         "references/verify-screens.md",
         "references/verify.md",
+        "scripts/__pycache__/lean_config.cpython-314.pyc",
+        "scripts/__pycache__/runners.cpython-314.pyc",
         "scripts/check_commit.py",
         "scripts/check_proofs.py",
         "scripts/fixtures/checks.md",
@@ -1814,7 +1821,7 @@
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
       "version": "2.1.0",
-      "contentHash": "51bcf485f5b981d613d660767d03f194d9117188c7615914108759a21de7b5cf"
+      "contentHash": "dec6a0e81ded23d3a3cbb9e39f425b0fd6f3a85474e9299f84a0126522639331"
     },
     {
       "name": "vercel-deploy",
