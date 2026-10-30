@@ -12,8 +12,10 @@ import {
   SKILLS_SUBDIR,
 } from '../constants'
 import type { CorePorts } from '../ports'
-import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
+import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillLockEntry, SkillMetadata, SkillsRegistry } from '../types'
 import { sanitizeName } from '../utils'
+
+import { readSkillLock } from './lockfile.service'
 
 let cachedCdnRef: string | null = null
 
@@ -463,9 +465,14 @@ export async function getDeprecatedMap(ports: CorePorts): Promise<Map<string, De
 }
 
 /**
- * Checks whether a cached skill differs from the current remote registry metadata.
+ * Checks whether an installed skill differs from the current remote registry metadata.
  *
- * @param ports - Core ports used for cache inspection and registry lookup.
+ * Installed copies are judged by the `contentHash` recorded in the project and
+ * global lockfiles, because the cache is shared: another project can refresh it
+ * while this project's copy stays stale. The cache is compared only when no
+ * lockfile records the skill.
+ *
+ * @param ports - Core ports used for cache inspection, lockfile reads, and registry lookup.
  * @param skillName - Canonical skill name to compare.
  * @returns `true` when the skill should be updated, otherwise `false`.
  *
@@ -479,6 +486,15 @@ export async function needsUpdate(ports: CorePorts, skillName: string): Promise<
 
   const metadata = await getSkillMetadata(ports, skillName)
   if (!metadata?.contentHash) return false
+
+  const installed: SkillLockEntry[] = []
+  for (const global of [false, true]) {
+    const entry = (await readSkillLock(ports, global)).skills[skillName]
+    if (entry?.agents?.length) installed.push(entry)
+  }
+  if (installed.length > 0) {
+    return installed.some((entry) => entry.contentHash !== metadata.contentHash)
+  }
 
   const cached = readCachedSkillMeta(ports, skillName)
   if (!cached?.contentHash) return true

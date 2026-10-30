@@ -43,6 +43,7 @@ type TestPorts = {
   mkdirSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => void>
   rmSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
+  readFileMock: jest.MockedFunction<(path: string, encoding: string) => Promise<string>>
   writeFileSyncMock: jest.MockedFunction<(path: string, content: string | Uint8Array, encoding?: string) => void>
   readdirSyncMock: jest.MockedFunction<(path: string, options?: { withFileTypes: true }) => DirEntry[]>
   getWithFallbackMock: jest.MockedFunction<
@@ -66,6 +67,7 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const mkdirSyncMock = jest.fn<(path: string, options?: { recursive?: boolean }) => void>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
+  const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
   const rmSyncMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>()
   const writeFileSyncMock = jest.fn<(path: string, content: string | Uint8Array, encoding?: string) => void>()
   const readdirSyncMock = jest.fn<(path: string, options?: { withFileTypes: true }) => DirEntry[]>()
@@ -102,6 +104,9 @@ const createPorts = (): TestPorts => {
       if (key.startsWith(`${path}/`)) virtualFs.delete(key)
     }
   })
+  readFileMock.mockImplementation(async (path) => {
+    throw new Error(`ENOENT: ${path}`)
+  })
   readdirSyncMock.mockReturnValue([])
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
   getLatestVersionMock.mockResolvedValue('9.9.9')
@@ -111,6 +116,7 @@ const createPorts = (): TestPorts => {
     mkdirSync: mkdirSyncMock,
     rmSync: rmSyncMock,
     readFileSync: readFileSyncMock,
+    readFile: readFileMock,
     writeFileSync: writeFileSyncMock,
     readdirSync: readdirSyncMock,
   } as unknown as FileSystemPort
@@ -157,6 +163,7 @@ const createPorts = (): TestPorts => {
     mkdirSyncMock,
     rmSyncMock,
     readFileSyncMock,
+    readFileMock,
     writeFileSyncMock,
     readdirSyncMock,
     getWithFallbackMock,
@@ -635,6 +642,90 @@ describe('update detection', () => {
     const shouldUpdate = await needsUpdate(ports, 'accessibility')
 
     expect(shouldUpdate).toBe(false)
+  })
+
+  describe('with installed lockfile entries', () => {
+    const PROJECT_LOCK = '/workspace/project/packages/cli/.agents/.skill-lock.json'
+    const GLOBAL_LOCK = '/home/tester/.agents/.skill-lock.json'
+
+    const lockWith = (entry: Record<string, unknown>) =>
+      JSON.stringify({
+        version: 2,
+        skills: {
+          accessibility: {
+            name: 'accessibility',
+            source: 'registry',
+            installedAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            agents: ['cursor'],
+            method: 'copy',
+            ...entry,
+          },
+        },
+      })
+
+    const setup = (locks: Partial<Record<typeof PROJECT_LOCK | typeof GLOBAL_LOCK, string>>) => {
+      const testPorts = createPorts()
+      const { existsSyncMock, readFileSyncMock, readFileMock, getWithFallbackMock } = testPorts
+
+      existsSyncMock.mockImplementation(
+        (path) =>
+          path === '/home/tester/.cache/agent-skills' ||
+          path === '/home/tester/.cache/agent-skills/skills' ||
+          path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+          path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+      )
+      readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
+      readFileMock.mockImplementation(async (path) => {
+        const content = locks[path as keyof typeof locks]
+        if (content === undefined) throw new Error(`ENOENT: ${path}`)
+        return content
+      })
+      getWithFallbackMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => registryFixture,
+        text: async () => JSON.stringify(registryFixture),
+      })
+
+      return testPorts
+    }
+
+    it('returns true when the project copy is stale even though another install refreshed the shared cache', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({ contentHash: 'old-hash' }) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns true when the global copy is stale and the project copy is current', async () => {
+      const { ports } = setup({
+        [PROJECT_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH }),
+        [GLOBAL_LOCK]: lockWith({ contentHash: 'old-hash', global: true }),
+      })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns true when the lockfile entry predates content hashes', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({}) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns false when every installed copy matches the remote hash', async () => {
+      const { ports } = setup({
+        [PROJECT_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH }),
+        [GLOBAL_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH, global: true }),
+      })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(false)
+    })
+
+    it('falls back to the cache when the lockfile entry has no agents', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({ contentHash: 'old-hash', agents: [] }) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(false)
+    })
   })
 
   it('returns grouped update status for a list of skills', async () => {
