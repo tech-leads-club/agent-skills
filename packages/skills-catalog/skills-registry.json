@@ -1531,6 +1531,20 @@
       "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
     },
     {
+      "name": "skill-validator",
+      "description": "Estimates a skill's TrustScore (0-100) from security and quality checks, then reports what blocks the merge and how to fix it. Use when the user says validar skill, avaliar skill, auditar skill, nota de confianca, score this skill, qual a nota da minha skill, vai passar no CI, why was my skill blocked, or review this SKILL.md before the PR. Do NOT use for criar uma skill do zero (use skill-architect), revisar codigo de aplicacao, or explicar um TrustScore que o CI ja gerou.",
+      "category": "creation",
+      "path": "(creation)/skill-validator",
+      "files": [
+        "SKILL.md",
+        "references/scoring-rubric.md",
+        "scripts/score_skill.py"
+      ],
+      "author": "github.com/may-santos",
+      "version": "2.0.0",
+      "contentHash": "fb1a4a0c64a43f2bf6d0c9291c59b136b947c9b0ec116c926c254c659ecd5501"
+    },
+    {
       "name": "social-selling",
       "description": "When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also use when the user mentions 'social selling,' 'LinkedIn selling,' 'LinkedIn DMs,' 'social prospecting,' 'LinkedIn Sales Navigator,' 'DM sequences,' 'LinkedIn outreach,' 'social pipeline,' or 'LinkedIn optimization.' This skill covers social selling strategy from profile optimization through DM-to-deal conversion. Do NOT use for technical implementation, code review, or software architecture.",
       "category": "gtm",
