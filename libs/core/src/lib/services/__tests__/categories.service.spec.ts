@@ -1,3 +1,5 @@
+import { fixturePath } from './path-fixtures'
+
 import { describe, expect, it, jest } from '@jest/globals'
 
 import { DEFAULT_CATEGORY } from '../../constants'
@@ -58,8 +60,8 @@ const createPorts = (): TestPorts => {
   } as unknown as FileSystemPort
 
   const env = {
-    cwd: jest.fn(() => '/workspace/project/packages/cli'),
-    homedir: jest.fn(() => '/home/tester'),
+    cwd: jest.fn(() => fixturePath('/workspace/project/packages/cli')),
+    homedir: jest.fn(() => fixturePath('/home/tester')),
     platform: jest.fn(() => 'linux'),
     getEnv: jest.fn(() => undefined),
   } as unknown as EnvPort
@@ -71,8 +73,8 @@ const createPorts = (): TestPorts => {
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
@@ -105,7 +107,7 @@ describe('loadCategoryMetadata', () => {
     }
 
     existsSyncMock.mockImplementation(
-      (path) => path === '/workspace/project/packages/skills-catalog/skills/_category.json',
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills/_category.json'),
     )
     readFileSyncMock.mockReturnValue(JSON.stringify(metadata))
 
@@ -122,7 +124,7 @@ describe('loadCategoryMetadata', () => {
   it('returns an empty object when metadata is invalid JSON', () => {
     const { ports, existsSyncMock, readFileSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/workspace/project/packages/skills-catalog/skills/_category.json',
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills/_category.json'),
     )
     readFileSyncMock.mockImplementation(() => {
       throw new Error('invalid json')
@@ -137,8 +139,8 @@ describe('getCategories', () => {
     const { ports, existsSyncMock, readFileSyncMock, readdirSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/workspace/project/packages/skills-catalog/skills' ||
-        path === '/workspace/project/packages/skills-catalog/skills/_category.json',
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills') ||
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills/_category.json'),
     )
     readFileSyncMock.mockReturnValue(
       JSON.stringify({
@@ -178,7 +180,9 @@ describe('getCategories', () => {
 describe('getCategoryById', () => {
   it('returns the matching category and undefined when missing', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/packages/skills-catalog/skills')
+    existsSyncMock.mockImplementation(
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills'),
+    )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
     expect(getCategoryById(ports, 'quality')).toEqual({
@@ -194,7 +198,9 @@ describe('getCategoryById', () => {
 describe('groupSkillsByCategory', () => {
   it('groups skills by existing local categories and sorts categories and skills', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/packages/skills-catalog/skills')
+    existsSyncMock.mockImplementation(
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills'),
+    )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)'), createDirEntry('(testing)')])
 
     const grouped = groupSkillsByCategory(ports, [
@@ -241,7 +247,9 @@ describe('groupSkillsByCategory', () => {
   })
   it('adds unknown categories to the group when local categories exist', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/packages/skills-catalog/skills')
+    existsSyncMock.mockImplementation(
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills'),
+    )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
     const grouped = groupSkillsByCategory(ports, [
@@ -264,8 +272,8 @@ describe('getSkillCategoryId', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/workspace/project/packages/skills-catalog/skills' ||
-        path === '/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md',
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills') ||
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md'),
     )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
@@ -274,7 +282,9 @@ describe('getSkillCategoryId', () => {
 
   it('falls back to the default category when the skill is not found', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/packages/skills-catalog/skills')
+    existsSyncMock.mockImplementation(
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills'),
+    )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
     expect(getSkillCategoryId(ports, 'missing-skill')).toBe('uncategorized')
@@ -286,8 +296,8 @@ describe('getSkillCategory', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/workspace/project/packages/skills-catalog/skills' ||
-        path === '/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md',
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills') ||
+        path === fixturePath('/workspace/project/packages/skills-catalog/skills/(quality)/accessibility/SKILL.md'),
     )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
@@ -311,7 +321,7 @@ describe('saveCategoryMetadata', () => {
     })
 
     expect(writeFileSyncMock).toHaveBeenCalledWith(
-      '/workspace/project/packages/skills-catalog/skills/_category.json',
+      fixturePath('/workspace/project/packages/skills-catalog/skills/_category.json'),
       '{\n  "(quality)": {\n    "name": "Quality",\n    "description": "Quality skills",\n    "priority": 1\n  }\n}\n',
       'utf-8',
     )
@@ -321,7 +331,9 @@ describe('saveCategoryMetadata', () => {
 describe('categoryExists', () => {
   it('returns whether the category exists', () => {
     const { ports, existsSyncMock, readdirSyncMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/packages/skills-catalog/skills')
+    existsSyncMock.mockImplementation(
+      (path) => path === fixturePath('/workspace/project/packages/skills-catalog/skills'),
+    )
     readdirSyncMock.mockReturnValue([createDirEntry('(quality)')])
 
     expect(categoryExists(ports, 'quality')).toBe(true)
