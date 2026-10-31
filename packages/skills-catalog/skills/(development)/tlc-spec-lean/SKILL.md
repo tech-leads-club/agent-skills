@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes obligations instead of the p
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '3.0.0'
+  version: '2.2.0'
 ---
 
 # Tech Lead's Club - Spec, Lean

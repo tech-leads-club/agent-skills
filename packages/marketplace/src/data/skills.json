@@ -1836,8 +1836,8 @@
           "validate.md",
           "verify-screens.md"
         ],
-        "lastModified": "2026-10-25",
-        "version": "5.0.0",
+        "lastModified": "2026-10-30",
+        "version": "4.1.0",
         "scriptRuntimes": [
           "Python"
         ],
@@ -1862,8 +1862,8 @@
           "verify-screens.md",
           "verify.md"
         ],
-        "lastModified": "2026-10-25",
-        "version": "3.0.0",
+        "lastModified": "2026-10-30",
+        "version": "2.2.0",
         "scriptRuntimes": [
           "Python"
         ],
@@ -2011,8 +2011,8 @@
           "verify-screens.md",
           "verify.md"
         ],
-        "lastModified": "2026-10-25",
-        "version": "2.0.0",
+        "lastModified": "2026-10-30",
+        "version": "1.2.0",
         "scriptRuntimes": [
           "Python"
         ],
@@ -2032,7 +2032,7 @@
         "referenceFiles": [
           "plan.md"
         ],
-        "lastModified": "2026-10-25",
+        "lastModified": "2026-10-30",
         "version": "1.1.1",
         "scriptRuntimes": [
           "Python"

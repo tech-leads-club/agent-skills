@@ -4,7 +4,7 @@ description: 'Implements work already planned - a plan.md from tlc-plan, or a sm
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 2.0.0
+  version: 1.2.0
 ---
 
 # TLC Implement
