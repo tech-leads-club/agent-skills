@@ -505,7 +505,7 @@ TOOLING = [
 
 TASKS = """# Billing Tasks
 
-{approval}**Build**: `npm run build`
+{approval}**Build**: `exit 0`
 Run unit: `npx vitest run src/billing --reporter=verbose`
 
 ## Test Coverage Matrix
@@ -559,6 +559,27 @@ def run_tooling():
         print(f"  BROKEN  {script}: {desc} - expected exit={want_code} and {want_frag!r}, "
               f"got exit={code}")
         print("          " + out.strip().replace("\n", "\n          "))
+
+    # A passing commit names what follows the build of a feature whose verification is still owed.
+    root = tempfile.mkdtemp(prefix="commit-")
+    try:
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        os.makedirs(fdir)
+        write_artifact(os.path.join(fdir, "tasks.md"), "# Billing Tasks\n\n## Checks\n")
+        for desc, verified, want in [
+            ("an unverified feature is told what follows its last task", False, True),
+            ("a verified feature is not", True, False),
+        ]:
+            if verified:
+                write_artifact(os.path.join(fdir, "verification.md"), "# Billing verification\n")
+            code, out = run_script("check_commit.py", "feat: suspend the subscription", "--root", root)
+            if code == 0 and ("check_proofs.py billing" in out) == want:
+                print(f"  ok      check_commit.py: {desc}")
+            else:
+                ok = False
+                print(f"  BROKEN  check_commit.py: {desc} - exit {code}: {out.strip()[:300]}")
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
 
     # The completion gate must not go green on an empty run. This is a control, not a mutant:
     # "no report found" once exited 0, which reads as a pass to anything checking exit codes.
@@ -626,6 +647,9 @@ def run_tooling():
             ("--execute fails with the spec unapproved", "", approval, ["--execute"], 1, "spec.md has no"),
             ("--execute fails with the tasks unapproved", approval, "**Status**: Approved\n", ["--execute"], 1,
              "tasks.md has no"),
+            ("--execute fails a Build line red before the first task", approval, approval, ["--execute"], 1,
+             "Build is red before the first task: `exit 3` exit 3"),
+            ("a Build line red before approval is not run", "", "", [], 0, "0 error"),
             ("before approval the tasks are validated without one", "", "", [], 0, ""),
             ("a run proof with no Run line fails", "", "", [], 1, "no `Run unit: <command>` line defines it"),
             ("a run proof with no expected line fails", "", "", [], 1, "names no line after `|`"),
@@ -644,6 +668,8 @@ def run_tooling():
                 tasks_md = tasks_md.replace("Run unit:", "Run e2e: `npx playwright test`\nRun unit:")
             elif "Mutations" in desc:
                 tasks_md = tasks_md.replace("**Build**:", "**Mutations**: 3\n**Build**:")
+            elif "Build line red" in desc:
+                tasks_md = tasks_md.replace("**Build**: `exit 0`", "**Build**: `exit 3`")
             write_artifact(os.path.join(fdir, "spec.md"), "# Billing Specification\n\n" + spec)
             write_artifact(os.path.join(fdir, "tasks.md"), tasks_md)
             code, out = run_script("validate_tasks.py", FEATURE, "--root", root, *argv)

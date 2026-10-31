@@ -12,7 +12,8 @@ the check that proves it - and this script makes the join checkable: a row decla
 set of 5 with 4 members assigned fails, loudly, before a line of code is written.
 
 Pure standard library, zero dependencies. Operates only on the checks.md markdown
-artifact - never on the target codebase - so it stays stack-agnostic.
+artifact, so it stays stack-agnostic - except with --execute, which runs the `Build:` line once,
+as check_proofs.py runs it, before any code is written.
 
 The requirements and the solution's shape are not this file's business: both were
 reviewed in plan.md and are gated by validate_plan.py. What this script owns is the
@@ -41,15 +42,17 @@ What it checks:
   WARN   - a Coverage row that declares no set size
   WARN   - a swept landing that is neither a check, `existing`, `n/a`, nor `Unresolved`
   WARN   - a blocking unresolved question still open
+  ERROR  - with --execute, when nothing else failed: a `Build:` command is red before building
 
 Usage:
-  python3 <skill-dir>/scripts/validate_checks.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_checks.py [target] [--root DIR] [--strict] [--execute]
 
   Invoke from the skill directory that ships this script (not the project root).
   target    Path to a checks.md, a feature directory, a feature name, or a project root.
             Omitted -> auto-detect the single feature under <root>/.specs/features/.
   --root    Project root that contains .specs/ (default: current dir).
   --strict  Treat warnings as errors.
+  --execute Before starting to build: also run the `Build:` line once.
 
 Exit codes: 0 pass, 1 errors found (or warnings under --strict), 2 usage error.
 """
@@ -440,6 +443,24 @@ def check_file(path):
     return errors, warnings
 
 
+def red_build(path, root):
+    """Each `Build:` command that fails on this tree, run once as check_proofs.py runs it."""
+    from check_proofs import read_checks, run, shell_of
+    _, _, build, _ = read_checks(path)
+    bash, _ = shell_of()
+    errors = []
+    for cmd in build:
+        code, output = run(root, cmd, bash)
+        if code:
+            lines = output.strip().splitlines()
+            first = next((ln for ln in lines if "error" in ln.lower()), lines[-1] if lines else "")
+            errors.append(
+                f"Build is red before building: `{cmd}` exit {code} - {first.strip()[:100]}. check_proofs.py "
+                f"and the gate hold the feature to this line, so name the repo's own build, type check and lint "
+                f"commands; if those are red before any change, tell the user and stop")
+    return errors
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(
         prog="validate_checks.py",
@@ -448,6 +469,7 @@ def main(argv=None):
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
     p.add_argument("--strict", action="store_true")
+    p.add_argument("--execute", action="store_true", help="Before starting to build: also run the Build line once")
     args = p.parse_args(argv)
 
     path = resolve_checks(args.target, args.root)
@@ -459,6 +481,8 @@ def main(argv=None):
         return 2
 
     errors, warnings = check_file(path)
+    if args.execute and not errors:
+        errors += red_build(path, os.path.abspath(args.root))
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:

@@ -122,8 +122,8 @@ Windows, where `python3` may be the Microsoft Store alias, run `python` or `py -
 
 | When | Command |
 | --- | --- |
-| Before starting to build | `validate_checks.py <feature>` - it also requires the plan's `**Approved**:` line |
-| Before each commit | `check_commit.py --message "<msg>"` |
+| Before starting to build | `validate_checks.py <feature> --execute` - it also requires the plan's `**Approved**:` line, and runs the `Build:` line once: red before any change stops |
+| Before each commit | `check_commit.py --message "<msg>"` - it also prints what follows the last commit |
 | Before dispatching the Verifier, and after the fix | `check_proofs.py <feature>` |
 | Before declaring done | `validate_verification.py <feature>` |
 | Before writing checks, and after the gate | `lessons.py ...` |

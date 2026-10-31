@@ -542,6 +542,46 @@ def run_tooling():
               f"got exit={code}")
         print("          " + out.strip().replace("\n", "\n          "))
 
+    # A passing commit names what follows the build of a feature whose verification is still owed.
+    root = tempfile.mkdtemp(prefix="commit-")
+    try:
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        os.makedirs(fdir)
+        write_artifact(os.path.join(fdir, "checks.md"), "# Billing checks\n\n## Checks\n")
+        for desc, verified, want in [] if not shipped("check_commit") else [
+            ("an unverified feature is told what follows its last commit", False, True),
+            ("a verified feature is not", True, False),
+        ]:
+            if verified:
+                write_artifact(os.path.join(fdir, "verification.md"), "# Billing verification\n")
+            code, out = run_script("check_commit.py", "feat: suspend the subscription", "--root", root)
+            if code == 0 and ("check_proofs.py billing" in out) == want:
+                print(f"  ok      check_commit.py: {desc}")
+            else:
+                ok = False
+                print(f"  BROKEN  check_commit.py: {desc} - exit {code}: {out.strip()[:300]}")
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+    # Before building, the Build line runs once: a command red before any change is not the gate.
+    for desc, build, argv, want_code, want_frag in [] if not shipped("validate_checks") else [
+        ("--execute passes a green Build line", "exit 0", ["--execute"], 0, "0 error"),
+        ("--execute fails a Build line red before building", "exit 3", ["--execute"], 1,
+         "Build is red before building: `exit 3` exit 3"),
+        ("without --execute the Build line is not run", "exit 3", [], 0, "0 error"),
+    ]:
+        root = scaffold()
+        path = os.path.join(root, ".specs", "features", FEATURE, "checks.md")
+        write_artifact(path, read_artifact(path).replace("Build: `bin/rubocop app/billing`", f"Build: `{build}`", 1))
+        code, out = run_script("validate_checks.py", FEATURE, "--root", root, *argv)
+        shutil.rmtree(root, ignore_errors=True)
+        if code == want_code and want_frag in out:
+            print(f"  ok      validate_checks.py: {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  validate_checks.py: {desc} - expected exit={want_code} and {want_frag!r}, "
+                  f"got exit={code}: {out.strip()[:300]}")
+
     # The completion gate must not go green on an empty run. This is a control, not a mutant:
     # "no report found" once exited 0, which reads as a pass to anything checking exit codes.
     empty = tempfile.mkdtemp(prefix="empty-root-")

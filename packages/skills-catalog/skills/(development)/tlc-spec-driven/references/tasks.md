@@ -143,7 +143,9 @@ Proof: `npx playwright test e2e/checkout.spec.ts -g "suspended account"`
   the run's output, so a renamed test or a filter that selects nothing reads `no test ran`. Put the
   verbose flag in the `Run` line when the default reporter prints only a summary. A test that cannot
   share a run - an end-to-end suite with its own server - is a lone `Proof: <command>` with a filter
-  that selects it, judged by its exit code. A suite going green settles no single claim.
+  that selects it, judged by its exit code. A runner that exits 0 when its filter selects nothing
+  (`node --test`, `dotnet test`) passes a lone proof on a typo, so with one of those even a single
+  test gets a `Run` line and a `run` proof. A suite going green settles no single claim.
 - **Runs go one at a time.** `check_proofs.py` never runs two groups or lone proofs side by side, so
   tests that share a database or a port stay safe; a group's own parallelism is the project's.
 - **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png`

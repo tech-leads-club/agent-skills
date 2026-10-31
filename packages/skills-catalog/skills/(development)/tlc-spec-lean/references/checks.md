@@ -34,7 +34,9 @@ marker (`✓`, `PASSED`, `ok`, `= .`): a renamed test, or a filter that selects 
 `no test ran` instead of passing on a green exit code. This needs a reporter that prints a line per
 test; where the default prints only a summary, put the verbose flag in the `Run` line. A test that
 cannot share a run - an end-to-end suite that starts its own server, a command that must run alone -
-is a lone `Proof: <command>`, judged by its exit code.
+is a lone `Proof: <command>`, judged by its exit code. A runner that exits 0 when its filter selects
+nothing (`node --test`, `dotnet test`) passes a lone proof on a typo, so with one of those even a
+single test gets a `Run` line and a `run` proof.
 
 Groups and lone proofs run one after another, never side by side, so tests that share a database or
 a port stay safe; the parallelism inside a group is whatever the project configured for it.
@@ -199,7 +201,9 @@ With no plan.md, add `## Out of scope` with the excluded capabilities and why.
 
 ## Gate, then keep going
 
-Run `python3 <skill-dir>/scripts/validate_checks.py <feature>`; it checks structure, and whether
-each proof is the right one stays yours. Then continue into [build.md](build.md) without waiting.
+Run `python3 <skill-dir>/scripts/validate_checks.py <feature> --execute`; it checks structure and
+runs the `Build:` line once, and whether each proof is the right one stays yours. A `Build:` command
+red before any change is not the repo's gate: name the repo's own commands, and when those are red,
+tell the user and stop. Then continue into [build.md](build.md) without waiting.
 Stop only for scope the sweep raised, a derivation that contradicts the approved plan, or a
 writability gap asking did not resolve.

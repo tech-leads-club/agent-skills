@@ -21,6 +21,7 @@ What it checks (heuristic markdown inspection, not a full parser):
   WARN   - the diagram could not be parsed confidently (cross-check skipped)
   WARN   - a `Run` line no proof reads
   ERROR  - with --execute: spec.md or tasks.md has no `**Approved**: <date> - user: "<their words>"`
+  ERROR  - with --execute, when nothing else failed: a `Build:` command is red before the first task
 
 Usage:
   python3 <skill-dir>/scripts/validate_tasks.py [target] [--root DIR] [--strict] [--execute]
@@ -277,13 +278,32 @@ def check(tasks_path):
     return errors, warnings
 
 
+def red_build(path, root):
+    """Each `Build:` command that fails on this tree, run once as check_proofs.py runs it."""
+    from check_proofs import read_checks, run, shell_of
+    _, _, build, _ = read_checks(path)
+    bash, _ = shell_of()
+    errors = []
+    for cmd in build:
+        code, output = run(root, cmd, bash)
+        if code:
+            lines = output.strip().splitlines()
+            first = next((ln for ln in lines if "error" in ln.lower()), lines[-1] if lines else "")
+            errors.append(
+                f"Build is red before the first task: `{cmd}` exit {code} - {first.strip()[:100]}. check_proofs.py "
+                f"and the gate hold the feature to this line, so name the repo's own build, type check and lint "
+                f"commands; if those are red before any change, tell the user and stop")
+    return errors
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="validate_tasks.py", description="Pre-approval checks for a feature tasks.md.")
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
     p.add_argument("--strict", action="store_true")
     p.add_argument("--execute", action="store_true",
-                   help="Before the first task: also require the spec and the tasks approved in the user's words")
+                   help="Before the first task: also require the spec and the tasks approved in the user's words, "
+                        "and run the Build line once")
     args = p.parse_args(argv)
 
     tasks_path = resolve_tasks(args.target, args.root)
@@ -297,6 +317,8 @@ def main(argv=None):
             errors.append(
                 f"{name} has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - Execute starts "
                 f"after the user approves; present it and stop, never write the approval yourself")
+        if not errors:
+            errors += red_build(tasks_path, os.path.abspath(args.root))
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:

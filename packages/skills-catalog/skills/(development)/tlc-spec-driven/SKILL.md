@@ -42,8 +42,8 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 | --- | --- |
 | Before presenting the spec | `validate_spec.py <feature>` - EARS criteria, filled assumptions, requirement IDs, and with captures: binding or quoted, cited, shown, departures approved |
 | Before presenting the tasks | `validate_tasks.py <feature>` - granularity, dependencies, `Tests` and `Gate` per task, `## Checks` with a proof each, `**Build**:`, a `Run` line and an expected line for each `run` proof |
-| Before the first task | `validate_tasks.py <feature> --execute` - the same checks, and the spec and tasks each approved in the user's words |
-| Before each commit | `check_commit.py --message "<msg>"` |
+| Before the first task | `validate_tasks.py <feature> --execute` - the same checks, the spec and tasks each approved in the user's words, and the `**Build**:` line run once: red before any change stops |
+| Before each commit | `check_commit.py --message "<msg>"` - it also prints what follows the last task |
 | After the last task, and after the fix | `check_proofs.py <feature>` - writes `proofs.md` |
 | Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, a `## Checks` row judging each check, findings closed, pictures judged in round 1 or 2, walk logged, both approvals written |
 | After editing a script or a template | `selftest.py` |

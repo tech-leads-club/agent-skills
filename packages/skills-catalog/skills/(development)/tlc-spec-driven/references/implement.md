@@ -32,7 +32,7 @@ done, commit hashes, test counts, deviations/blockers) to the orchestrator. See
 
 ### Before implementing: the approvals
 
-Run `python3 <skill-dir>/scripts/validate_tasks.py <feature> --execute`. Execute starts only when `spec.md`, and `tasks.md` when it exists, carry `**Approved**: <date> - user: "<their words>"`. A missing line means the user has not approved: present and stop, never write it yourself.
+Run `python3 <skill-dir>/scripts/validate_tasks.py <feature> --execute`. Execute starts only when `spec.md`, and `tasks.md` when it exists, carry `**Approved**: <date> - user: "<their words>"`. A missing line means the user has not approved: present and stop, never write it yourself. The same run executes the `**Build**:` line once; a command red before any change is not the repo's gate: name the repo's own commands, and when those are red, tell the user and stop.
 
 ### Before implementing: assess sub-agent delegation (MANDATORY - before the first task)
 
@@ -201,7 +201,11 @@ Each task gets its own commit immediately after verification. Never batch multip
 printf '#!/bin/sh\nexec python3 "<skill-dir>/scripts/check_commit.py" "$1"\n' > .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
 ```
 
-It writes a small hook file instead of a symlink, so it also works where symlinks do not (Windows without developer mode). On Windows, write `python` instead of `python3` in the hook.
+It writes a small hook file instead of a symlink, so it also works where symlinks do not (Windows without developer mode). On Windows, write `python` instead of `python3` in the hook. PowerShell has no `printf` or `chmod`; write the same file with `Set-Content`, and Git for Windows runs it with its own shell:
+
+```powershell
+Set-Content .git/hooks/commit-msg -NoNewline -Encoding ascii -Value "#!/bin/sh`nexec python `"<skill-dir>/scripts/check_commit.py`" `"`$1`"`n"
+```
 
 This is a plain git hook, not tied to any editor or assistant. Skip it if the project manages hooks its own way (for example a pre-commit framework); the manual check above still applies.
 
