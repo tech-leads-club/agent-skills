@@ -21,7 +21,6 @@ Usage:
 Exit codes: 0 all mutants killed and the baseline is clean, 1 otherwise.
 """
 
-import base64
 import json
 import os
 import re
@@ -29,7 +28,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES = os.path.join(HERE, "fixtures")
@@ -57,12 +55,18 @@ CASES = [
     ("validate_checks", "checks.md", "bare n/a with no reason",
      lambda s: re.sub(r"- data lifecycle: n/a[^\n]*", "- data lifecycle: n/a", s),
      1, "`n/a` with no reason"),
-    ("validate_checks", "checks.md", "remove the Mutations line",
-     lambda s: s.replace("Mutations: 3\n", ""),
-     1, "no `Mutations:` line"),
-    ("validate_checks", "checks.md", "a mutation count above the cap",
-     lambda s: s.replace("Mutations: 3\n", "Mutations: 9\n"),
-     1, "exceeds the cap of 5"),
+    ("validate_checks", "checks.md", "a run proof with no Run line",
+     lambda s: re.sub(r"^Run billing: [^\n]*\n", "", s, flags=re.M),
+     1, "no `Run billing: <command>` line defines it"),
+    ("validate_checks", "checks.md", "a run proof with no expected line",
+     lambda s: s.replace("Proof: run billing | test_failed_charge_suspends = .", "Proof: run billing"),
+     1, "names no line after `|`"),
+    ("validate_checks", "checks.md", "a run proof with an empty expected line",
+     lambda s: s.replace("Proof: run billing | test_failed_charge_suspends = .", "Proof: run billing |"),
+     1, "names no line after `|`"),
+    ("validate_checks", "checks.md", "a Run line no proof reads (warn)",
+     lambda s: s.replace("Build: `bin/rubocop app/billing`\n", "Build: `bin/rubocop app/billing`\nRun e2e: `npx playwright test`\n"),
+     0, "`Run e2e` is read by no proof"),
     ("validate_checks", "checks.md", "reference an undefined check",
      lambda s: s.replace("into it C1 ·", "into it C99 ·"),
      1, "C99 is referenced in Coverage"),
@@ -306,17 +310,23 @@ MULTI_CASES = [
       "captures/billing--card-form.running.png": lambda s: png(1440, 1200)},
      1, "take the picture at the capture's size"),
     ("validate_verification", "proofs.md with a failing proof",
-     {"proofs.md": lambda s: s.replace("| C5 | `bin/rails test -n /c5/` | 1 | 1 | pass |", "| C5 | `bin/rails test -n /c5/` | 0 | 0 | **no test ran** |")},
+     {"proofs.md": lambda s: re.sub(r"^(\| C5 \|.*\| )pass \|$", r"\1**no test ran** |", s, flags=re.M)},
      1, "C5 reads"),
     ("validate_verification", "proofs.md with no row for a check",
-     {"proofs.md": lambda s: s.replace("| C12 | `bin/rails test -n /c12/` | 1 | 1 | pass |\n", "")},
+     {"proofs.md": lambda s: re.sub(r"^\| C12 \|[^\n]*\n", "", s, flags=re.M)},
      1, "has no row for C12"),
-    ("validate_verification", "proofs.md with a surviving mutation",
-     {"proofs.md": lambda s: s.replace("| `app/webhooks/ingest.rb:31` | yes |", "| `app/webhooks/ingest.rb:31` | no |")},
-     1, "reads 'no'"),
-    ("validate_verification", "proofs.md with fewer mutations than checks.md owes",
-     {"proofs.md": lambda s: s.replace("| retry bound off by one | `app/models/billing/dunning.rb:22` | yes |\n", "")},
-     1, "owes 3 mutation rows"),
+    ("validate_verification", "proofs.md where a run group failed",
+     {"proofs.md": lambda s: s.replace("| Build |", "| Run billing | `bin/rails test test/billing -v` | **fail** - exit 1 |\n| Build |")},
+     1, "Run billing reads"),
+    ("validate_verification", "a report with no Checks table",
+     {"verification.md": lambda s: re.sub(r"## Checks\n.*?\n## Findings", "## Findings", s, flags=re.S)},
+     1, "no `## Checks` table"),
+    ("validate_verification", "a Checks table with no row for a check",
+     {"verification.md": lambda s: re.sub(r"^\| C7 \|[^\n]*\n", "", s, flags=re.M)},
+     1, "`## Checks` has no row for C7"),
+    ("validate_verification", "a Checks row that names no test",
+     {"verification.md": lambda s: s.replace("| C9 | `test/webhooks/ingest_test.rb` `test_missing_subscription_id_is_422` |", "| C9 | - |")},
+     1, "row C9 names no test"),
     ("validate_verification", "a finding with no commit in Closed",
      {"verification.md": lambda s: s.replace("| e4f5a6b C4 |", "|  |")},
      1, "is not closed"),
@@ -324,10 +334,10 @@ MULTI_CASES = [
      {"verification.md": lambda s: s.split("## Findings")[0]},
      1, "no `## Findings` section"),
     ("validate_verification", "proofs.md where the build failed",
-     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | - | - | pass |", "| Build | `bin/rubocop app/billing` | - | - | **fail** - 2 offenses |")},
+     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | pass |", "| Build | `bin/rubocop app/billing` | **fail** - 2 offenses |")},
      1, "Build reads"),
     ("validate_verification", "proofs.md with no Build row while checks.md names a build",
-     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | - | - | pass |\n", "")},
+     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | pass |\n", "")},
      1, "has no Build row"),
     ("validate_verification", "proofs.md written over uncommitted changes",
      {"proofs.md": lambda s: s.replace("**Tree**: clean", "**Tree**: dirty - apps/x.ts")},
@@ -392,15 +402,15 @@ MULTI_CASES = [
 ]
 
 # Negative controls: a gate that fires where it should not is the same bug as one that never
-# fires - it just fails loudly instead of silently, and it would make `Mutations: 0` unusable.
+# fires - it just fails loudly instead of silently.
 NEGATIVE_CONTROLS = [
-    ("validate_verification", "Mutations: 0 with no mutation rows in proofs.md is accepted",
-     {"checks.md": lambda s: s.replace("Mutations: 3", "Mutations: 0"),
-      "proofs.md": lambda s: s.split("## Mutations")[0]}),
-    ("validate_checks", "Mutations: 0 is accepted when the plan has no screen",
-     {"checks.md": lambda s: s.replace("Mutations: 3", "Mutations: 0")}),
-    ("validate_checks", "Mutations: 0 over a screen is accepted - screens take no mutation",
-     {"plan.md": with_screen, "checks.md": lambda s: s.replace("Mutations: 3", "Mutations: 0")}),
+    ("validate_checks", "a run proof needs no test selector - its expected line is one",
+     {"checks.md": lambda s: s.replace("test_failed_charge_suspends = .", "test_failed_charge_suspends PASS")},
+     "names no test selector"),
+    ("validate_checks", "an old checks.md with a Mutations line is still read",
+     {"checks.md": lambda s: s.replace("Build: `bin/rubocop", "Mutations: 3\nBuild: `bin/rubocop")}),
+    ("validate_verification", "an old checks.md with a Mutations line owes nothing",
+     {"checks.md": lambda s: s.replace("Build: `bin/rubocop", "Mutations: 3\nBuild: `bin/rubocop")}),
     ("validate_plan", "a binding source with confirmed differences is accepted",
      {"plan.md": with_binding}),
     ("validate_plan", "a binding source that matches with no differences is accepted",
@@ -495,8 +505,8 @@ TOOLING = [
 
 TASKS = """# Billing Tasks
 
-{approval}**Mutations**: 3
-**Build**: `bun run build`
+{approval}**Build**: `npm run build`
+Run unit: `npx vitest run src/billing --reporter=verbose`
 
 ## Test Coverage Matrix
 
@@ -508,7 +518,7 @@ TASKS = """# Billing Tasks
 
 | Level | Command |
 | --- | --- |
-| quick | `bun test` |
+| quick | `npx vitest run` |
 
 ## Execution Plan
 
@@ -526,7 +536,7 @@ TASKS = """# Billing Tasks
 ## Checks
 
 **C1** - A failed charge suspends the subscription (AC 1)
-Proof: `bun test src/billing.test.ts -t "suspends on a failed charge"`
+Proof: run unit | ✓ billing > suspends on a failed charge
 """
 
 
@@ -617,12 +627,25 @@ def run_tooling():
             ("--execute fails with the tasks unapproved", approval, "**Status**: Approved\n", ["--execute"], 1,
              "tasks.md has no"),
             ("before approval the tasks are validated without one", "", "", [], 0, ""),
+            ("a run proof with no Run line fails", "", "", [], 1, "no `Run unit: <command>` line defines it"),
+            ("a run proof with no expected line fails", "", "", [], 1, "names no line after `|`"),
+            ("a Run line no proof reads warns", "", "", [], 0, "`Run e2e` is read by no proof"),
+            ("an old tasks.md with a Mutations line is accepted", "", "", [], 0, "0 error"),
         ]:
             root = tempfile.mkdtemp(prefix="tasks-")
             fdir = os.path.join(root, ".specs", "features", FEATURE)
             os.makedirs(fdir)
+            tasks_md = TASKS.replace("{approval}", tasks)
+            if "no Run line" in desc:
+                tasks_md = tasks_md.replace("Run unit: `npx vitest run src/billing --reporter=verbose`\n", "")
+            elif "no expected line" in desc:
+                tasks_md = tasks_md.replace(" | ✓ billing > suspends on a failed charge", "")
+            elif "no proof reads" in desc:
+                tasks_md = tasks_md.replace("Run unit:", "Run e2e: `npx playwright test`\nRun unit:")
+            elif "Mutations" in desc:
+                tasks_md = tasks_md.replace("**Build**:", "**Mutations**: 3\n**Build**:")
             write_artifact(os.path.join(fdir, "spec.md"), "# Billing Specification\n\n" + spec)
-            write_artifact(os.path.join(fdir, "tasks.md"), TASKS.replace("{approval}", tasks))
+            write_artifact(os.path.join(fdir, "tasks.md"), tasks_md)
             code, out = run_script("validate_tasks.py", FEATURE, "--root", root, *argv)
             shutil.rmtree(root, ignore_errors=True)
             if code == want_code and want_frag in out:
@@ -639,7 +662,7 @@ def run_tooling():
     try:
         steps = [
             (["--root", root, "init"], "Initialized"),
-            (["--root", root, "add", "--feature", FEATURE, "--signal", "surviving_mutant",
+            (["--root", root, "add", "--feature", FEATURE, "--signal", "weak_test",
               "--source", "app/billing/x.rb:31", "--text", "assert the dedup path returns the row"],
              "ADDED"),
             (["--root", root, "status"], "1 total"),
@@ -662,238 +685,124 @@ def run_tooling():
                 print("  ok      lessons.py: init - add - status round-trip writes both artifacts")
     finally:
         shutil.rmtree(root, ignore_errors=True)
-    return ok
 
-
-PROOFS_TEST = ('import { describe, expect, test } from "bun:test"\n'
-               'describe("billing", () => {\n'
-               '  test("suspends on a failed charge", () => { expect("suspended").toBe("suspended") })\n'
-               '  test("keeps a paid account active", () => { expect("active").toBe("active") })\n'
-               '})\n')
-PROOFS_CHECKS = ("# Billing checks\n\nMutations: 0\nBuild: `bun --version`\n\n## Checks\n\n"
-                 "**C1** - A failed charge suspends (AC 1)\n"
-                 "Proof: `bun test -t \"suspends on a failed charge\" billing.test.ts`\n\n"
-                 "**C2** - A paid account stays active (AC 2)\n"
-                 "Proof: `bun test -t \"keeps a paid account active\" billing.test.ts`\n\n")
-
-
-def run_runner_selection():
-    """Each adapter's reading of a proof and its choice of tests, over canned reports: no runner
-    needs to be installed, and a filter that selects nothing must select nothing."""
-    import runners
-    ok = True
-
-    def expect(desc, cmd, cases, want):
-        nonlocal ok
-        adapter, parsed = runners.parse(cmd)
-        got = adapter.select(cases, parsed) if adapter else None
-        if got == want:
-            print(f"  ok      runners.py: {desc}")
+    # a store written before the signal was renamed reads as the new signal, and its lesson recurs
+    root = tempfile.mkdtemp(prefix="lessons-")
+    try:
+        text = "assert the dedup path returns the row"
+        old = {"schema": 1, "next_id": 2, "lessons": [{
+            "id": "L-001", "key": "surviving_mutant::" + text, "text": text, "signal": "surviving_mutant",
+            "scope": "", "status": "candidate", "features": ["older"], "recurrence": 1, "harmful": 0,
+            "evidence": ["app/billing/x.rb:31"], "created": "2026-10-01", "last_seen": "2099-01-01"}]}
+        os.makedirs(os.path.join(root, ".specs"))
+        write_artifact(os.path.join(root, ".specs", "lessons.json"), json.dumps(old))
+        code, out = run_script("lessons.py", "--root", root, "add", "--feature", FEATURE, "--signal", "weak_test",
+                               "--source", "app/billing/x.rb:31", "--text", text)
+        stored = read_artifact(os.path.join(root, ".specs", "lessons.json"))
+        if code == 0 and "UPDATED L-001" in out and "surviving_mutant" not in stored:
+            print("  ok      lessons.py: a surviving_mutant lesson loads as weak_test and recurs")
         else:
             ok = False
-            print(f"  BROKEN  runners.py: {desc} - expected {want}, got {got} ({adapter and adapter.name})")
-
-    py = [("test_billing", "test_billing test_suspends", "test_suspends", True),
-          ("test_billing.TestAccess", "test_billing.TestAccess test_paid", "test_paid", False)]
-    expect("pytest node id selects one test", "python3 -m pytest test_billing.py::test_suspends", py, [True])
-    expect("pytest class node id", "pytest test_billing.py::TestAccess::test_paid", py, [False])
-    expect("pytest -k with and / not", 'pytest test_billing.py -k "suspends and not paid"', py, [True])
-    expect("pytest -k matching nothing", "pytest test_billing.py -k nosuch", py, [])
-    go = [("example.com/b", "TestSuspends", "TestSuspends", True), ("example.com/b", "TestPaid", "TestPaid", False)]
-    expect("go -run anchored regex", "go test ./... -run '^TestPaid$'", go, [False])
-    js = [("/repo/j/billing.test.js", "billing suspends", "suspends", True),
-          ("/repo/k/other.test.js", "billing suspends", "suspends", True)]
-    expect("jest folder argument keeps to that folder", 'npx jest j -t "suspends"', js, [True])
-    vt = [("v/billing.test.ts", "v/billing.test.ts billing suspends", "billing suspends", True)]
-    expect("vitest -t on describe and test joined", 'npx vitest run v/billing.test.ts -t "billing suspends"', vt, [True])
-    bun = [("src/a.test.ts", "stock map counts", "counts", True)]
-    expect("bun -t matches describe and test", 'bun test src/a.test.ts -t "stock map counts"', bun, [True])
+            print(f"  BROKEN  lessons.py: surviving_mutant migration - exit={code}: {out.strip()}")
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
     return ok
+
+
+# A test runner nothing has to install: prints each argument after the exit code as a line,
+# logs that it ran, and exits with that code. `{esc}` stands for the escape byte of a colour code.
+RUNNER = ('import sys\n'
+          'open("ran.log", "a").write(" ".join(sys.argv[1:]) + "\\n")\n'
+          'for line in sys.argv[2:]:\n'
+          '    print(line.replace("{esc}", "\\x1b"))\n'
+          'sys.exit(int(sys.argv[1]))\n')
+
+
+def proofs_md(runs, proofs, build="none - fixture", head=""):
+    text = f"# Billing checks\n\n{head}Build: {build}\n"
+    text += "".join(f"Run {name}: `{cmd}`\n" for name, cmd in runs.items())
+    text += "\n## Checks\n\n"
+    return text + "".join(f"**C{i}** - claim {i} (AC {i})\nProof: {p}\n\n" for i, p in enumerate(proofs, 1))
+
+
+def result_rows(text):
+    """{first cell: result cell} of proofs.md's table."""
+    rows = {}
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if line.startswith("| ") and len(cells) == 3 and cells[0] not in ("Check", "---"):
+            rows[cells[0]] = cells[2]
+    return rows
 
 
 def run_proofs_tooling():
-    """check_proofs.py on a real bun project: one grouped run, each check matched to its tests,
-    and a filter that matches nothing reported as such instead of passing."""
-    import shutil as _sh
-    if _sh.which("bun") is None:
-        print("  skip    check_proofs.py: bun is not installed")
-        return True
+    """check_proofs.py runs the project's own commands, so it is checked with a fake runner: a
+    group runs once, each check reads its line from the group's output, and a line that is not
+    there is never a pass."""
     root = tempfile.mkdtemp(prefix="proofs-")
+    fdir = os.path.join(root, ".specs", "features", FEATURE)
+    os.makedirs(fdir)
+    write_artifact(os.path.join(root, "runner.py"), RUNNER)
+    r = '"' + sys.executable.replace("\\", "/") + '" runner.py'
+    unit = {"unit": f'{r} 0 "PASS billing suspends on a failed charge (3 ms)" "PASS billing keeps a paid account"'}
+    cases = [
+        ("a group runs once and each check reads its line",
+         proofs_md(unit, ["run unit | PASS suspends", "run unit | PASS keeps a paid account"]),
+         0, {"C1": "pass", "C2": "pass"}, 1),
+        ("a line the group never printed is no test ran",
+         proofs_md(unit, ["run unit | PASS renamed test"]), 1, {"C1": "**no test ran**"}, None),
+        ("a failed group: its passing line passes, the missing one fails, the group gets a fail row",
+         proofs_md({"unit": f'{r} 1 "PASS billing suspends" "FAIL billing keeps a paid account"'},
+                   ["run unit | PASS suspends", "run unit | PASS keeps a paid account"]),
+         1, {"C1": "pass", "C2": "**fail**", "Run unit": "**fail** - exit 1"}, None),
+        ("a proof naming a group no Run line defines",
+         proofs_md(unit, ["run unit | PASS suspends", "run e2e | PASS checkout"]),
+         1, {"C2": "**no such run**"}, None),
+        ("a lone proof is judged by its exit code",
+         proofs_md({}, [f"`{r} 0 ok`", f"`{r} 3 boom`"]), 1, {"C1": "pass", "C2": "**fail**"}, None),
+        ("a lone proof two checks name runs once",
+         proofs_md({}, [f"`{r} 0 ok`", f"`{r} 0 ok`"]), 0, {"C1": "pass", "C2": "pass"}, 1),
+        ("a coloured line still matches",
+         proofs_md({"unit": f'{r} 0 "{{esc}}[32mPASS{{esc}}[0m billing suspends"'}, ["run unit | PASS billing suspends"]),
+         0, {"C1": "pass"}, None),
+        ("the expected words must come in order",
+         proofs_md(unit, ["run unit | PASS suspends charge", "run unit | charge suspends PASS"]),
+         1, {"C1": "pass", "C2": "**no test ran**"}, None),
+        ("a POSIX shell proof runs as written, on Windows through Git Bash",
+         proofs_md({}, ["`printf a | tr a b | grep -q b`"]), 0, {"C1": "pass"}, None),
+        ("a failing build command is a fail row",
+         proofs_md(unit, ["run unit | PASS suspends"], build=f'`{r} 2 "error: 2 offenses"`'),
+         1, {"C1": "pass", "Build": "**fail** - error: 2 offenses"}, None),
+        ("an old checks.md with a Mutations line still runs",
+         proofs_md(unit, ["run unit | PASS suspends"], head="Mutations: 3\n"), 0, {"C1": "pass"}, None),
+    ]
     ok = True
     try:
-        fdir = os.path.join(root, ".specs", "features", FEATURE)
-        os.makedirs(fdir)
-        write_artifact(os.path.join(root, "billing.test.ts"), PROOFS_TEST)
-        unknown = ("# Billing checks\n\nMutations: 0\nBuild: none - fixture\n\n## Checks\n\n"
-                   "**C1** - counted (AC 1)\nProof: `sh -c 'echo \"Ran 2 tests\"'`\n\n"
-                   "**C2** - silent (AC 2)\nProof: `sh -c 'echo ok'`\n\n")
-        for checks, want, frag, desc in [
-            (unknown, 0, "count unknown", "a runner no adapter knows is judged by exit code, with its count when printed"),
-            (unknown.replace("echo ok", "exit 3"), 1, "**fail**", "a runner no adapter knows fails on its exit code"),
-            (PROOFS_CHECKS, 0, "| C2 |", "each check is matched to the test its filter selects"),
-            (PROOFS_CHECKS.replace('"keeps a paid account active" billing', '"no such test" billing'),
-             1, "no test ran", "a filter that matches no test is not a pass"),
-        ]:
+        for desc, checks, want_code, want_rows, want_runs in cases:
             write_artifact(os.path.join(fdir, "checks.md"), checks)
+            log = os.path.join(root, "ran.log")
+            if os.path.exists(log):
+                os.remove(log)
             code, out = run_script("check_proofs.py", FEATURE, "--root", root)
             written = read_artifact(os.path.join(fdir, "proofs.md"))
-            if code == want and frag in (out + written):
+            rows = result_rows(written)
+            runs = len(read_artifact(log).splitlines())
+            if (code == want_code and all(rows.get(k, "").startswith(v) for k, v in want_rows.items())
+                    and (want_runs is None or runs == want_runs) and "## Output" in written):
                 print(f"  ok      check_proofs.py: {desc}")
             else:
                 ok = False
-                print(f"  BROKEN  check_proofs.py: {desc} - expected exit={want} and {frag!r}, got exit={code}")
+                print(f"  BROKEN  check_proofs.py: {desc} - expected exit={want_code}, rows {want_rows}"
+                      f"{'' if want_runs is None else f', {want_runs} run(s)'}; got exit={code}, {runs} run(s)")
                 print("          " + (out + written).strip().replace("\n", "\n          "))
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
-    return ok
-
-
-def run_mutation_report():
-    """check_proofs.py --mutations against a stub mutate.py: a mutate.py that broke must never read
-    as a run with nothing to kill, and a mutation killed by a timeout counts as killed."""
-    root, tools = tempfile.mkdtemp(prefix="report-"), tempfile.mkdtemp(prefix="tools-")
-    ok = True
-    try:
-        for name in os.listdir(HERE):
-            if name.endswith(".py") and name != "mutate.py":
-                shutil.copy(os.path.join(HERE, name), tools)
-        fdir = os.path.join(root, ".specs", "features", FEATURE)
-        os.makedirs(fdir)
-        # UTF-8 bytes a cp1252 decode refuses (0x8D), whatever encoding the proof's own stdout has
-        write_artifact(os.path.join(root, "ok.py"),
-                       'import sys\nsys.stdout.buffer.write("Ran 1 test - \\u00cd\\n".encode("utf-8"))\n')
-        write_artifact(os.path.join(fdir, "checks.md"),
-                       "# Billing checks\n\nMutations: 2\nBuild: none - fixture\n\n## Checks\n\n"
-                       f"**C1** - counted (AC 1)\nProof: `\"{sys.executable}\" ok.py`\n\n")
-        spec = os.path.join(root, "mutations.json")
-        write_artifact(spec, json.dumps([{"file": "ok.py", "old": "a", "new": "b", "proof": "x"}] * 2))
-        table = "| Mutation | Location | Killed |\n| --- | --- | --- |\n"
-        row = "| a | `ok.py:1` | {} |\n"
-        for stub, want, frags, desc in [
-            ("raise AttributeError(\"module 'signal' has no attribute 'SIGHUP'\")", 1,
-             ["mutate.py failed (exit 1)", "SIGHUP"], "a mutate.py that crashed is a failed row, not 0 killed"),
-            ('import sys\nprint("mutate: STOP - not restored byte-for-byte: ok.py", file=sys.stderr)\nsys.exit(3)',
-             1, ["mutate.py failed (exit 3)", "not restored"], "a tree mutate.py could not restore is a failed row"),
-            (f"print({table + row.format('yes')!r})\nraise SystemExit(1)", 1,
-             ["mutate.py failed (exit 1)"], "a table shorter than the spec is a failed row"),
-            (f"print({table + row.format('yes (timeout)') + row.format('yes')!r})", 0,
-             ["| yes (timeout) |", "mutations 2 killed, 0 not"], "a mutation killed by a timeout counts as killed"),
-        ]:
-            write_artifact(os.path.join(tools, "mutate.py"), stub + "\n")
-            code, out = run_script("check_proofs.py", FEATURE, "--root", root, "--mutations", spec, here=tools)
-            proofs = os.path.join(fdir, "proofs.md")
-            written = read_artifact(proofs) if os.path.exists(proofs) else ""
-            if code == want and all(f in out + written for f in frags):
-                print(f"  ok      check_proofs.py: {desc}")
-            else:
-                ok = False
-                print(f"  BROKEN  check_proofs.py: {desc} - expected exit={want} and {frags!r}, got exit={code}")
-                print("          " + (out + written).strip().replace("\n", "\n          "))
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
-        shutil.rmtree(tools, ignore_errors=True)
-    return ok
-
-
-APP = 'def status(paid):\n    return "active" if paid else "suspended"\n\n\ndef unused():\n    return 1\n'
-PROOF = 'from app import status\nassert status(False) == "suspended"\n'
-SLOW = ('import subprocess, sys, time\nfrom app import status\n'
-        'if status(False) != "suspended":\n'
-        '    subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])\n'
-        '    time.sleep(60)\n')
-
-
-def run_mutation_tooling():
-    """mutate.py mutates the real tree, so its guarantees are checked on a real git repo.
-
-    The same-size mutation ("suspended" -> "cancelled") is deliberate: written inside the same
-    second it is invisible to a cache keyed on (mtime, size), and Python's bytecode cache is one.
-    A mutate.py that stopped moving the mtime forward would report that mutant as survived.
-    """
-    if not shutil.which("git"):
-        print("  skip    mutate.py: git is not installed")
-        return True
-    ok = True
-    root = tempfile.mkdtemp(prefix="mutation-")
-
-    def sh(*cmd):
-        subprocess.run(cmd, cwd=root, check=True, capture_output=True)
-
-    def report(passed, desc, out=""):
-        nonlocal ok
-        if passed:
-            print(f"  ok      mutate.py: {desc}")
+        code, out = run_script("check_proofs.py", FEATURE, "--root", root, "--mutations", "spec.json")
+        if code == 2:
+            print("  ok      check_proofs.py: --mutations is gone and exits 2")
         else:
             ok = False
-            print(f"  BROKEN  mutate.py: {desc}")
-            if out:
-                print("          " + out.strip().replace("\n", "\n          "))
-
-    def mutation(spec, *extra, env=None):
-        path = os.path.join(root, "..", os.path.basename(root) + ".json")
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(spec)
-        return run_script("mutate.py", "--spec", path, "--root", root, *extra, env=env)
-
-    def clean():
-        p = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True)
-        return p.stdout == ""
-
-    try:
-        for name, body in (("app.py", APP), ("test_app.py", PROOF), ("slow.py", SLOW), (".gitignore", "__pycache__/\n")):
-            with open(os.path.join(root, name), "w", encoding="utf-8") as f:
-                f.write(body)
-        sh("git", "init", "-q")
-        sh("git", "add", ".")
-        sh("git", "-c", "user.email=s@t", "-c", "user.name=selftest", "commit", "-qm", "fixture")
-        py = f'"{sys.executable}" test_app.py'
-
-        code, out = mutation(
-            '[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"cancelled\\"", "proof": %s},'
-            ' {"file": "app.py", "old": "return 1", "new": "return 2", "proof": %s},'
-            ' {"file": "app.py", "old": "return 1", "new": "return 3", "proof": "exit 1"}]'
-            % (json.dumps(py), json.dumps(py)))
-        report(code == 1 and "| `app.py:2` | yes |" in out and "| `app.py:6` | no |" in out
-               and "| `app.py:6` | blocked |" in out,
-               "kills a same-second same-size mutant, reports a survivor and a blocked proof", out)
-        report(clean(), "the tree is byte-for-byte clean after a run")
-
-        code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s}]'
-                          % json.dumps(py))
-        report(code == 0 and "1 killed, 0 survived, 0 blocked" in out, "every mutation killed exits 0", out)
-
-        code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s,'
-                             ' "label": "status suspended \\u2192 x"}]' % json.dumps(py),
-                             env={"PYTHONIOENCODING": "cp1252"})
-        report(code == 0 and "| status suspended \u2192 x |" in out,
-               "a label the console code page cannot encode still prints its row", out)
-
-        started = time.monotonic()
-        code, out = mutation('[{"file": "app.py", "old": "\\"suspended\\"", "new": "\\"x\\"", "proof": %s}]'
-                             % json.dumps(f'"{sys.executable}" slow.py'), "--timeout", "3")
-        elapsed = time.monotonic() - started
-        report(code == 0 and "| yes (timeout) |" in out and "still holds" not in out and elapsed < 30 and clean(),
-               f"a hung proof whose child holds the output is killed as one tree ({elapsed:.0f} s)", out)
-
-        code, out = mutation('[{"file": "app.py", "old": "return", "new": "pass", "proof": "true"}]')
-        report(code == 2 and "occurs 2 times" in out and clean(),
-               "an ambiguous `old` is refused before anything is mutated", out)
-
-        with open(os.path.join(root, "app.py"), "rb") as f:
-            original = f.read()
-        jpath = os.path.join(root, ".git", "tlc-mutation-journal.json")
-        with open(jpath, "w", encoding="utf-8") as f:
-            json.dump({"app.py": base64.b64encode(original).decode()}, f)
-        with open(os.path.join(root, "app.py"), "w", encoding="utf-8") as f:
-            f.write("mutated by a run that was killed\n")
-        code, out = run_script("mutate.py", "--recover", "--root", root)
-        report(code == 0 and "restored 1 file" in out and clean() and not os.path.exists(jpath),
-               "--recover restores what an interrupted run left behind", out)
+            print(f"  BROKEN  check_proofs.py: --mutations - expected exit=2, got {code}: {out.strip()[:200]}")
     finally:
         shutil.rmtree(root, ignore_errors=True)
-        spec = os.path.join(os.path.dirname(root), os.path.basename(root) + ".json")
-        if os.path.exists(spec):
-            os.remove(spec)
     return ok
 
 
@@ -1003,10 +912,8 @@ def main(argv=None):
         shutil.rmtree(root)
 
     tooling = [run_tooling()]
-    for script, suite in (("mutate", run_mutation_tooling), ("runners", run_runner_selection),
-                          ("check_proofs", run_proofs_tooling), ("check_proofs", run_mutation_report)):
-        if shipped(script):
-            tooling.append(suite())
+    if shipped("check_proofs"):
+        tooling.append(run_proofs_tooling())
     tooling_ok = all(tooling)
 
     print(f"\nselftest: {killed} killed, {survived} survived, "

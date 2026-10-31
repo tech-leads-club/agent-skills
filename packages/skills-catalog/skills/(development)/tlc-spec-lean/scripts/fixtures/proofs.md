@@ -2,28 +2,82 @@
 
 **HEAD**: e4f5a6b
 **Tree**: clean
-**Result**: 12 pass, 0 fail; mutations 3 killed, 0 not
+**Shell**: /bin/sh
+**Result**: 13 pass, 0 fail
 
-| Check | Proof | Ran | Passed | Result |
-| --- | --- | --- | --- | --- |
-| C1 | `bin/rails test -n /c1/` | 1 | 1 | pass |
-| C2 | `bin/rails test -n /c2/` | 1 | 1 | pass |
-| C3 | `bin/rails test -n /c3/` | 1 | 1 | pass |
-| C4 | `bin/rails test -n /c4/` | 1 | 1 | pass |
-| C5 | `bin/rails test -n /c5/` | 1 | 1 | pass |
-| C6 | `bin/rails test -n /c6/` | 1 | 1 | pass |
-| C7 | `bin/rails test -n /c7/` | 1 | 1 | pass |
-| C8 | `bin/rails test -n /c8/` | 1 | 1 | pass |
-| C9 | `bin/rails test -n /c9/` | 1 | 1 | pass |
-| C10 | `bin/rails test -n /c10/` | 1 | 1 | pass |
-| C11 | `bin/rails test -n /c11/` | 1 | 1 | pass |
-| C12 | `bin/rails test -n /c12/` | 1 | 1 | pass |
-| Build | `bin/rubocop app/billing` | - | - | pass |
-
-## Mutations
-
-| Mutation | Location | Killed |
+| Check | Proof | Result |
 | --- | --- | --- |
-| suspended -> cancelled | `app/models/billing/subscription.rb:88` | yes |
-| delivery-id guard removed | `app/webhooks/ingest.rb:31` | yes |
-| retry bound off by one | `app/models/billing/dunning.rb:22` | yes |
+| C1 | `run billing / test_failed_charge_suspends = .` | pass |
+| C2 | `run billing / test_every_provider_status_maps_once = .` | pass |
+| C3 | `run billing / test_unknown_status_is_recorded = .` | pass |
+| C4 | `bin/rails test test/billing/access_test.rb -n "/suspended_denies_paid_groups/"` | pass |
+| C5 | `bin/rails test test/billing/transitions_test.rb -n "/suspended_to_trialing_is_rejected/"` | pass |
+| C6 | `bin/rails test test/billing/transitions_test.rb -n "/suspended_to_active/"` | pass |
+| C7 | `bin/rails test test/webhooks/ingest_test.rb -n "/concurrent_delivery_conflicts/"` | pass |
+| C8 | `bin/rails test test/webhooks/ingest_test.rb -n "/retry_is_idempotent/"` | pass |
+| C9 | `bin/rails test test/webhooks/ingest_test.rb -n "/missing_subscription_id_is_422/"` | pass |
+| C10 | `bin/rails test test/webhooks/dispatch_test.rb -n "/dispatches_every_event_type/"` | pass |
+| C11 | `run billing / test_provider_timeout_is_inert = .` | pass |
+| C12 | `bin/rails test test/webhooks/ingest_test.rb -n "/unsigned_delivery_is_401/"` | pass |
+| Build | `bin/rubocop app/billing` | pass |
+
+## Output
+
+`Run billing` - exit 0
+
+```
+BillingDunningTest#test_failed_charge_suspends = 0.02 s = .
+BillingDunningTest#test_provider_timeout_is_inert = 0.01 s = .
+BillingStatusMapTest#test_every_provider_status_maps_once = 0.01 s = .
+BillingStatusMapTest#test_unknown_status_is_recorded = 0.01 s = .
+
+4 runs, 13 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/billing/access_test.rb -n "/suspended_denies_paid_groups/"` - exit 0
+
+```
+1 runs, 2 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/billing/transitions_test.rb -n "/suspended_to_trialing_is_rejected/"` - exit 0
+
+```
+1 runs, 1 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/billing/transitions_test.rb -n "/suspended_to_active/"` - exit 0
+
+```
+1 runs, 1 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/webhooks/ingest_test.rb -n "/concurrent_delivery_conflicts/"` - exit 0
+
+```
+1 runs, 3 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/webhooks/ingest_test.rb -n "/retry_is_idempotent/"` - exit 0
+
+```
+1 runs, 3 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/webhooks/ingest_test.rb -n "/missing_subscription_id_is_422/"` - exit 0
+
+```
+1 runs, 3 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/webhooks/dispatch_test.rb -n "/dispatches_every_event_type/"` - exit 0
+
+```
+1 runs, 5 assertions, 0 failures, 0 errors, 0 skips
+```
+
+`bin/rails test test/webhooks/ingest_test.rb -n "/unsigned_delivery_is_401/"` - exit 0
+
+```
+1 runs, 3 assertions, 0 failures, 0 errors, 0 skips
+```

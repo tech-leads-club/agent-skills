@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 check_commit.py - deterministic Conventional Commits validation.
 
 The per-task atomic-commit rule mandates Conventional Commits 1.0.0. This makes
@@ -11,7 +11,10 @@ or stdin. The file-path form matches how git passes the message file to a
 `commit-msg` hook, so this doubles as an optional git-level guard WITHOUT
 coupling the skill to any AI agent:
 
-    ln -s <skill-dir>/scripts/check_commit.py .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+    printf '#!/bin/sh\nexec python3 "<skill-dir>/scripts/check_commit.py" "$1"\n' > .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+
+A hook file rather than a symlink, so it works where symlinks do not; on Windows write `python`
+for `python3`.
 
 What it checks:
   ERROR  - header does not match  type(scope)!: description

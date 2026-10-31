@@ -87,7 +87,7 @@ if you hold the whole feature, dispatch in this turn and in parallel the screens
 criterion cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier
 ([verify.md](verify.md)), each written on the `**Dispatched:**` line with the `HEAD` before it is
 sent and marked `returned` when it is back. When both have returned, fix everything they name in
-one pass, run `check_proofs.py` with the Verifier's `mutations.json`, and when the fix changed code,
+one pass, rerun `check_proofs.py`, and when the fix changed code,
 re-save every picture at the new `HEAD` and resume the round-1 screens sub-agent for round 2 (a
 fresh one only when it cannot be resumed) - it is the last. Write each finding's closing commit, then run the gate. A commit that changes code after
 round 2 leaves a screen nobody judged: the gate says so, and it goes to the user. Close only when

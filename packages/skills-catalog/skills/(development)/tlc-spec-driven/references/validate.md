@@ -16,44 +16,41 @@ a new session and write `Verifier: self-verified (degraded - no sub-agent)`; the
 ## The round
 
 1. The orchestrator runs `python3 <skill-dir>/scripts/check_proofs.py <feature>` at `HEAD`. It runs
-   every check's proof once per runner, matches each check to the tests its filter selects, runs the
-   `**Build**:` commands, checks the pictures and the walk, and writes `proofs.md`. A red row goes back
-   to an implementer before anything else.
+   each `Run` group and each lone proof once, one at a time, finds each check's line in its group's
+   output, runs the `**Build**:` commands, checks the pictures and the walk, and writes `proofs.md`
+   with the tail of every run. A red row goes back to an implementer before anything else.
 2. The orchestrator dispatches, in the same turn and in parallel, the screens sub-agent when a
    criterion cites a capture ([verify-screens.md](verify-screens.md)) and the Verifier. Both read the
    same `HEAD`. The dispatch names the feature, the files and the diff range, and nothing about what
    to accept.
-3. Every finding from both is fixed in one pass. Then
-   `check_proofs.py <feature> --mutations .specs/features/<feature>/mutations.json` runs again, the
+3. Every finding from both is fixed in one pass. Then `check_proofs.py <feature>` runs again, the
    screens sub-agent goes back over the rows that differed (the second and last round), the closing
    commit is written into each finding, and the gate runs. There is no second Verifier: the script
-   shows the mutations killed and the proofs green at the new `HEAD`. What still fails goes to the
-   user.
+   shows the proofs green at the new `HEAD`, the fixed tests among them. What still fails goes to
+   the user.
 
 ## What the Verifier does
 
 It receives `spec.md`, tasks.md (its `## Checks`), `proofs.md`, the diff range and this file. It does
-not rerun the proofs or re-locate every assertion; `proofs.md` already says which tests ran and
-passed. It works over the real tree and fixes nothing; its writes are `verification.md`,
-`mutations.json` and throwaway examples it does not commit.
+not rerun the proofs; `proofs.md` already says which tests ran and passed, with the output that
+shows it. It works over the real tree and fixes nothing; its writes are `verification.md` and
+throwaway examples it does not commit.
 
-**Mutations.** Choose `**Mutations**: N` from tasks.md (3 by default) in production code the diff
-touched, wherever the rule lives - a rule in the browser with no test is still a rule. Take the
-decisions hardest to undo or most often gotten wrong: a returned value, a condition, a bound shifted
-by one, an order, a sign, a filter. One object per mutation in
-`.specs/features/<feature>/mutations.json` with `file`, an `old` snippet that occurs once, `new`, the
-narrowest `proof` and a `label`; then run `check_proofs.py <feature> --mutations <that file>`. It
-applies each in the real tree through `mutate.py`, runs its test and restores the file byte for byte.
-A mutation not killed is a finding: the test that should fail does not.
+**Each check's test.** For every check, open the test its proof selects - the one whose line the
+`run` proof names, or the one a lone proof's filter picks - and judge whether it would fail if the
+claim were false: it asserts the value the criterion fixes, on the cases the criterion names, at
+the layer the Test Coverage Matrix names. Write one `## Checks` row per check. A `no` is a finding:
+the test passes without holding its criterion. Look hardest where a wrong decision costs most - a
+returned value, a condition, a bound shifted by one, an order, a sign, a filter - and at rules the
+diff touched that no check names: a rule in the browser with no test is still a rule.
 
 **Own examples.** For two rules the spec states, try a value neither the spec nor the checks name -
 the other side of a boundary, an empty set, a large one. Run each at `HEAD` as a throwaway test or a
 request. A rule that breaks on yours is a finding.
 
-**Assertions that do not hold the value.** Read the criteria against the tests the checks name and
-report the ones whose assertion is looser than the value the criterion fixes, that prove a rule on
-two cases out of nine, or that sit at another level than the Test Coverage Matrix names for that
-layer. Report what you find; do not tabulate every check.
+**Assertions that do not hold the value.** Across the `## Checks` rows, report the tests whose
+assertion is looser than the value the criterion fixes, that prove a rule on two cases out of nine,
+or that sit at another level than the Test Coverage Matrix names for that layer.
 
 **The spec against the captures.** When a capture binds, a check or criterion that contradicts what
 it draws - a label spelled differently, a control it draws that no criterion builds, a state turned
@@ -68,19 +65,27 @@ Write `.specs/features/<feature>/verification.md`:
 # <Feature> verification
 
 **Verdict**: FAIL
-**Mutations**: 3 - probed C1, C4, C9
 **Proofs**: `proofs.md` at <sha>
 **Verifier**: independent sub-agent (author != verifier)
+
+## Checks
+
+| Check | Test | Holds |
+| --- | --- | --- |
+| C1 | `stock-map.service.test.ts` `counts a Transfer in on its destination` | no - asserts the count, not the sign |
+| C7 | `stock-map.service.test.ts` `counts items at zero` | no - `toBeDefined()` |
+| C9 | `transfers.e2e.test.ts` `rejects a transfer to the same location` | yes |
 
 ## Findings
 
 | Finding | Evidence | Fix | Closed |
 | --- | --- | --- | --- |
-| Transfer in is counted as out and no test fails | mutation `direction in -> out` not killed | assert the sign of a Transfer in on its destination | |
+| Transfer in is counted as out and no test fails | C1's test asserts the count, not the sign | assert the sign of a Transfer in on its destination | |
 | C7 asserts the count exists, not that it is 5 | `stock-map.service.test.ts:88` - `toBeDefined()` | assert `atZero` is 5 on the capture's data | |
 ```
 
-With nothing to report, write `None - <one line on what was probed>` under `## Findings` and
+Every check gets a `## Checks` row with the test named; the gate refuses a missing row or an empty
+`Test`. With nothing to report, write `None - <one line on what was probed>` under `## Findings` and
 `**Verdict**: PASS`. Return the findings in chat. Whoever fixes fills `Closed` with the commit that
 fixes each one and the check that now proves it; the gate refuses an empty `Closed`. A finding that
 needs a new criterion appends it to the spec with a new requirement ID and a check - never edits an
@@ -92,8 +97,9 @@ approved one.
 python3 <skill-dir>/scripts/validate_verification.py <feature>
 ```
 
-It reads `proofs.md` at `HEAD` (every check has a passing row, the build passed, the owed mutations
-are killed, the tree is clean), `screens.md` when a criterion cites a capture, the `**Walked:**`
+It reads `proofs.md` at `HEAD` (every check and run has a passing row, the build passed, the tree is
+clean), the `## Checks` table (a row with a test for every check), `screens.md` when a criterion
+cites a capture, the `**Walked:**`
 line when a check is a walk, and every finding closed. `0` means the feature is done.
 
 ## Interactive UAT (Complex scope, or when a screen cannot be walked)

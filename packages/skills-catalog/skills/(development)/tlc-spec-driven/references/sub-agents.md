@@ -99,13 +99,13 @@ waits for it rather than sending another.
 `validate.md`; the screens sub-agent gets `spec.md`, the captures, the `**Walked:**` line and
 `verify-screens.md`. Neither gets the author's reasoning.
 
-**What comes back:** the Verifier writes `verification.md` (verdict, the mutations it probed, a
-findings table with a `Closed` column) and `mutations.json`; the screens sub-agent writes
+**What comes back:** the Verifier writes `verification.md` (verdict, a `## Checks` row judging each
+check's test, a findings table with a `Closed` column); the screens sub-agent writes
 `screens.md` (a verdict per picture and one inventory each). Both return their findings in chat.
 
-**Failure handling:** every finding is fixed in one pass, then `check_proofs.py --mutations` runs
-again and the screens sub-agent re-opens only the rows that differed, writing `**Round**: 2`. There
-is no second Verifier and no third round: what still fails goes to the user. The gate is
+**Failure handling:** every finding is fixed in one pass, then `check_proofs.py` runs again and the
+screens sub-agent re-opens only the rows that differed, writing `**Round**: 2`. There is no second
+Verifier and no third round: what still fails goes to the user. The gate is
 `python3 <skill-dir>/scripts/validate_verification.py <feature>`.
 
 **Standalone fallback:** without sub-agents, run each file in a new session and write
@@ -124,7 +124,7 @@ Judge the tier by the work in front of the role, not by the role's title:
 | Design phase | High ambiguity, hard-to-reverse structural decisions | High-reasoning |
 | Batch worker - core-domain or high-ambiguity phase | Non-obvious logic, tricky edge cases, novel integration | High-reasoning |
 | Batch worker - mechanical phase | Entities, DTOs, config, wiring, straightforward CRUD against a settled pattern | Faster / cheaper |
-| Verifier | Adversarial reasoning: designs mutations and own examples, judges assertions against the spec | Mid-to-high |
+| Verifier | Adversarial reasoning: judges each check's test against its criterion, designs own examples | Mid-to-high |
 | Specify / Tasks authoring | Structured but judgment-heavy | Mid-to-high |
 
 **Rules of thumb:**

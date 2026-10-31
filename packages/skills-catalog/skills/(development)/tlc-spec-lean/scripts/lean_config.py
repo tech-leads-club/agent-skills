@@ -1,20 +1,19 @@
 """
 lean_config.py - what a feature's artifacts say the Verifier owes, read the same way by every gate.
 
-Three facts decide it: the `Mutations: N` line in checks.md and verification.md (how many
-mutations are injected, 0 to 5), whether the feature has a screen (the screen comparison), and
-whether plan.md's `## Sources` marks a source binding (the binding-source comparison).
-validate_checks.py and validate_verification.py both act on these, so they live in one place - two
-copies of the same rule drift until one gate demands what the other does not.
+Two facts decide it: whether the feature has a screen (the screen comparison), and whether plan.md's
+`## Sources` marks a source binding (the binding-source comparison). The shape of a `Run` group and
+of a proof that reads one lives here too. validate_checks.py, validate_verification.py and
+check_proofs.py act on these, so they live in one place - two copies of the same rule drift until
+one gate demands what the other does not.
 
 Every function takes lines already stripped of fenced blocks.
 """
 
 import re
 
-MAX_MUTATIONS = 5
-
-MUTATIONS_RE = re.compile(r"^\**Mutations\**\s*:\s*\**\s*`?(\d+)`?\**\s*(?:[-–—:]\s*(.*))?$", re.IGNORECASE)
+RUN_RE = re.compile(r"^\**\s*Run\s+([\w-]+)\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+RUN_PROOF_RE = re.compile(r"^run\s+([\w-]+)\s*\|\s*(.*)$", re.IGNORECASE)
 BINDING_RE = re.compile(r"(?<![-\w])binding\b", re.IGNORECASE)
 NOT_BINDING_RE = re.compile(r"\b(non|not)[- ]binding\b", re.IGNORECASE)
 CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
@@ -32,13 +31,14 @@ def plan_approved(plan_lines):
     return any(APPROVED_RE.match(s.strip()) for s in plan_lines)
 
 
-def read_mutations(lines):
-    """Return (count, reason) from the first `Mutations:` line, or (None, "") when there is none."""
+def read_runs(lines):
+    """{name: command} for every `Run <name>: <command>` line."""
+    runs = {}
     for ln in lines:
-        m = MUTATIONS_RE.match(ln.strip())
+        m = RUN_RE.match(ln.strip())
         if m:
-            return int(m.group(1)), (m.group(2) or "").strip()
-    return None, ""
+            runs[m.group(1)] = m.group(2).strip().strip("`").strip()
+    return runs
 
 
 def _section(lines, name):

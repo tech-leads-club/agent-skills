@@ -127,20 +127,30 @@ acceptance criterion - one observable claim with its concrete value - citing the
 the AC number, each with the proof that settles it:
 
 ```markdown
+**Run unit**: `npx vitest run src/billing --reporter=verbose`
+
 **C3** - A failed charge sets the status to `suspended`, never `cancelled` (BILL-02, AC 1)
-Proof: `npx vitest run src/billing/dunning.test.ts -t "failed charge suspends"`
+Proof: run unit | ✓ dunning > failed charge suspends
+
+**C4** - The checkout page still loads with a suspended account (BILL-02, AC 3)
+Proof: `npx playwright test e2e/checkout.spec.ts -g "suspended account"`
 ```
 
-- **The proof names one test.** A runner command with the file and a name filter that selects the test
-  settling that claim; a suite going green settles no single claim. A filter that selects nothing is
-  reported as `no test ran`.
+- **The proof names one test, with the project's own command.** The skill knows no test runner. Tests
+  that run together go on one `**Run <name>**:` line in the header, run once; a check that reads it
+  writes `Proof: run <name> | <the line its test prints when it passes>`, copied from a real run with
+  the pass marker (`✓`, `PASSED`, `ok`). It passes when those words appear, in order, on one line of
+  the run's output, so a renamed test or a filter that selects nothing reads `no test ran`. Put the
+  verbose flag in the `Run` line when the default reporter prints only a summary. A test that cannot
+  share a run - an end-to-end suite with its own server - is a lone `Proof: <command>` with a filter
+  that selects it, judged by its exit code. A suite going green settles no single claim.
+- **Runs go one at a time.** `check_proofs.py` never runs two groups or lone proofs side by side, so
+  tests that share a database or a port stay safe; a group's own parallelism is the project's.
 - **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png`
   (see [implement.md](implement.md), Walk). A state no capture draws is proven by a test, or by
   `Proof: walk - <what the visit shows>`.
 - **`**Build**:`** in the header names the repo's build, type check and lint commands, `;`-separated, from
   the Build gate - `**Build**: none - <why>` when there are none.
-- **`**Mutations**: N`** in the header, 0 to 5: the project's count, `3` when it declares none. The
-  Verifier injects that many, wherever a wrong rule would stay green.
 
 A screen task's `Done when` names the capture it builds, with the full path.
 
@@ -170,7 +180,7 @@ This keeps phase boundaries meaningful while letting the packing hit its target 
 
 Before showing tasks to the user, run ALL three pre-approval checks. These are NOT optional - they are gates. If any check fails, restructure the tasks and re-run until all pass.
 
-**Deterministic backing (run it, do not eyeball it).** `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` enforces the structural half of these checks: a `Where` that names multiple files (granularity smell, Check 1), a diagram edge with no matching `Depends on` within a phase and vice-versa (Check 2), a task missing its `Tests` or `Gate` field, a `Tests: none` to confirm against the matrix (Check 3), a dependency pointing to a later phase, and the `## Checks` with a proof each, the `**Build**:` line and the `**Mutations**:` count. A non-zero exit means restructure before presenting. The layer-to-test co-location judgment stays yours.
+**Deterministic backing (run it, do not eyeball it).** `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` enforces the structural half of these checks: a `Where` that names multiple files (granularity smell, Check 1), a diagram edge with no matching `Depends on` within a phase and vice-versa (Check 2), a task missing its `Tests` or `Gate` field, a `Tests: none` to confirm against the matrix (Check 3), a dependency pointing to a later phase, and the `## Checks` with a proof each, the `**Build**:` line, and a `Run` line with an expected line for each `run` proof. A non-zero exit means restructure before presenting. The layer-to-test co-location judgment stays yours.
 
 **Check 1: Task Granularity** - verify each task is atomic (see Granularity Check section).
 
@@ -204,8 +214,8 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 **Design**: `.specs/features/[feature]/design.md`
 **Status**: Draft | Approved | In Progress | Done
 **Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
-**Mutations**: 3
 **Build**: `[build command]; [type check command]; [lint command]`
+**Run unit**: `[the command that runs this feature's tests, a line per test]`
 
 ---
 
@@ -334,7 +344,7 @@ T8 → T9
 ## Checks
 
 **C1** - [one observable claim with its concrete value] ([FEAT]-01, AC 1)
-Proof: `[runner command with the file and a name filter selecting the test]`
+Proof: run unit | [the line C1's test prints when it passes, pass marker included]
 
 **C2** - [the screen in `captures/[capture].png`, reached by [gesture]] ([FEAT]-02, AC 1)
 Proof: browser captures/[capture].running.png

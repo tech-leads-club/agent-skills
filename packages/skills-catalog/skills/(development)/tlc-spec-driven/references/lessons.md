@@ -16,7 +16,7 @@
 | ---- | ----- | ------- |
 | `.specs/lessons.json` | script | Canonical machine state. Never hand-edit. |
 | `.specs/LESSONS.md` | script (rendered) | Human/agent-readable playbook. Read it; never write it by hand. |
-| `<skill-dir>/scripts/lessons.py` | package | The only way to mutate lessons. Invoke via the skill directory - never `python3 scripts/lessons.py` from the project root. |
+| `<skill-dir>/scripts/lessons.py` | package | The only way to change lessons. Invoke via the skill directory - never `python3 scripts/lessons.py` from the project root. |
 
 `confirmed` lessons are the playbook the agent loads. `candidate` lessons are tracked but NOT trusted until corroborated across `promote_threshold` distinct features (default 2). `quarantined` lessons failed when applied and are ignored.
 
@@ -34,8 +34,8 @@ For each finding in `verification.md` (and each `diverges` row the second screen
 
 | Finding | `--signal` value |
 | ------- | ---------------- |
-| A mutation the tests did not kill | `surviving_mutant` |
-| An assertion looser than its criterion, or a rule proven on too few cases | `spec_precision_gap` |
+| A check whose test passes without holding its criterion - a `no` in `## Checks`, an assertion looser than the value, a rule proven on too few cases | `weak_test` |
+| A criterion that fixed no precise outcome, so no test could hold it | `spec_precision_gap` |
 | An example of the Verifier's own that broke a rule | `ac_gap` |
 | A check or criterion that contradicts a binding capture | `spec_deviation` |
 | A red row in `proofs.md` (a proof or the build) | `gate_fail` |

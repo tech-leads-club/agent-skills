@@ -1706,15 +1706,13 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_checks.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "e693481ec768b47dd4fa12b44f40dcc3aca13b1e1d35887640a699bd7530cf54"
+      "version": "1.2.0",
+      "contentHash": "1f43ab3855e7a989abfd9451b8243e08669ce4abe13583398c64af4b0eda2fef"
     },
     {
       "name": "tlc-plan",
@@ -1731,8 +1729,8 @@
         "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "66d58bf5734ded0a7497451a98787b9466b1172ff4e4832359cdd7efadc931ae"
+      "version": "1.1.1",
+      "contentHash": "657ef5bdb69ad5e69248567222f3b7543d7e919dc5319c05d5e65d51e2ad00ef"
     },
     {
       "name": "tlc-prd",
@@ -1749,7 +1747,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
+      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the project's own tests run once at the end, and an independent Verifier (author != verifier) judges each check's test. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1773,16 +1771,14 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_spec.py",
         "scripts/validate_tasks.py",
         "scripts/validate_verification.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "4.0.0",
-      "contentHash": "d8fee67d68f8bc5f24b3d939b5e922ed37c0074529ed921916bc8af7b669757b"
+      "version": "4.1.0",
+      "contentHash": "861ae4be0cee1bba55e30d346fd086536890e28feefef008dd7241f6520b14af"
     },
     {
       "name": "tlc-spec-lean",
@@ -1805,16 +1801,14 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_checks.py",
         "scripts/validate_plan.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "2.1.0",
-      "contentHash": "22df16c30510c5042ba872378be143e2a0224bf6764709a47fbe015208341ca9"
+      "version": "2.2.0",
+      "contentHash": "6b39c1025ec203fb471ffe6f6c0a222d194a2caec5162c711158c57b4cc2f7ab"
     },
     {
       "name": "vercel-deploy",

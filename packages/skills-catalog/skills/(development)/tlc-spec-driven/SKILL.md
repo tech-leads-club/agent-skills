@@ -1,10 +1,10 @@
 ---
 name: tlc-spec-driven
-description: Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.
+description: Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the project's own tests run once at the end, and an independent Verifier (author != verifier) judges each check's test. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on "specify feature", "discuss feature", "design", "tasks", "implement", "validate", "verify work", "UAT", "record decision", "pause work", "resume work". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.
 license: CC-BY-4.0
 metadata:
   author: Felipe Rodrigues - github.com/felipfr
-  version: 4.0.0
+  version: 4.1.0
 ---
 
 # Tech Lead's Club - Spec-Driven Development
@@ -24,14 +24,14 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 
 **Loading this skill's files.** Reference files live under `references/` in this skill's own directory (where this `SKILL.md` resides). Resolve them relative to the skill directory, never the workspace root. When a step tells you to read a reference, read it to the end before acting.
 
-**Running this skill's scripts.** Every `scripts/*.py` lives under that same skill directory: run `python3 <skill-dir>/scripts/<name>.py ...`, never `python3 scripts/...` from the project root. Project data under `.specs/` is read and written relative to the project root (pass `--root` when the cwd is elsewhere). Run a script rather than read it: its messages say what to change.
+**Running this skill's scripts.** Every `scripts/*.py` lives under that same skill directory: run `python3 <skill-dir>/scripts/<name>.py ...`, never `python3 scripts/...` from the project root. Project data under `.specs/` is read and written relative to the project root (pass `--root` when the cwd is elsewhere). Run a script rather than read it: its messages say what to change. On Windows, where `python3` may be the Microsoft Store alias, run `python` or `py -3`.
 
 **Execution contract - every task, non-negotiable (holds even if you do not open the reference files):**
 
 1. **Ask, then stop for approval.** Every gray area that is the user's - scope, product behaviour, a departure from a binding source - is asked before the spec is presented; an assumption never stands in for one. Approving the spec and approving the tasks are the two stops for a human. When nobody is there to answer, end your turn with the questions. Each approval is written as `**Approved**: <date> - user: "<their words>"` in spec.md and tasks.md; one the user did not give is never written. Every answer goes into its file in the turn it arrives - the chat does not survive a compaction.
 2. Tests derive from the spec's acceptance criteria and assert spec-defined outcomes - they never mirror the implementation.
 3. The gate must pass before a task is done - the test runner decides, not self-assessment. One atomic commit per task, with `tasks.md` marked complete before it - and inside it when the repo tracks `.specs/`; where the repo ignores `.specs/`, the commit holds only the code and its tests, and never forces them in. Never batch tasks; never weaken, skip, or delete tests to make them pass.
-4. **Every criterion has a check, and every check a proof.** tasks.md `## Checks` holds one claim per criterion with the test command that selects its test. After the LAST task, `check_proofs.py` runs them all once at `HEAD`, with the build; then a fresh **Verifier** (author ≠ verifier) runs **always**, never prompted - `**Mutations**: N` mutations (3 by default) wherever a rule would stay green, examples nobody named, assertions looser than their criterion. Done means every finding is closed by a commit and `validate_verification.py` exits 0.
+4. **Every criterion has a check, and every check a proof.** tasks.md `## Checks` holds one claim per criterion with the project's own test command that selects its test - tests that run together share one `**Run <name>**:` line, and each check names the line its test prints (`Proof: run <name> | <line>`). After the LAST task, `check_proofs.py` runs each group and lone proof once at `HEAD`, one at a time, with the build; then a fresh **Verifier** (author ≠ verifier) runs **always**, never prompted - it judges whether each check's test would fail if the claim were false, tries examples nobody named, and finds assertions looser than their criterion. Done means every finding is closed by a commit and `validate_verification.py` exits 0.
 5. **A screen is held to its design.** A capture that comes with the request binds unless the user called it inspiration; its criterion cites the capture file. Each state a capture draws is saved as `captures/<capture>.running.png` from a browser window at the capture's size - an image resized afterwards shows another layout - and a fresh screens sub-agent retakes and judges it ([verify-screens.md](references/verify-screens.md)).
 6. **Where rules run.** Every rule that changes what a user sees - including filtering, searching, sorting and counting - runs in a layer the repo's tests reach.
 7. **Blast radius:** approving a spec or tasks authorizes local implementation and local commits only. `git push`, force-push, deploy, production DB changes, and other remote or destructive operations need an explicit go-ahead for that action.
@@ -41,11 +41,11 @@ Plan and implement features with precision. Granular tasks. Clear dependencies. 
 | When | Command |
 | --- | --- |
 | Before presenting the spec | `validate_spec.py <feature>` - EARS criteria, filled assumptions, requirement IDs, and with captures: binding or quoted, cited, shown, departures approved |
-| Before presenting the tasks | `validate_tasks.py <feature>` - granularity, dependencies, `Tests` and `Gate` per task, `## Checks` with a proof each, `**Build**:`, `**Mutations**:` |
+| Before presenting the tasks | `validate_tasks.py <feature>` - granularity, dependencies, `Tests` and `Gate` per task, `## Checks` with a proof each, `**Build**:`, a `Run` line and an expected line for each `run` proof |
 | Before the first task | `validate_tasks.py <feature> --execute` - the same checks, and the spec and tasks each approved in the user's words |
 | Before each commit | `check_commit.py --message "<msg>"` |
-| After the last task, and after the fix | `check_proofs.py <feature> [--mutations <mutations.json>]` - writes `proofs.md` |
-| Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, mutations killed, findings closed, pictures judged in round 1 or 2, walk logged, both approvals written |
+| After the last task, and after the fix | `check_proofs.py <feature>` - writes `proofs.md` |
+| Before declaring the feature done | `validate_verification.py <feature>` - proofs green at `HEAD`, clean tree, a `## Checks` row judging each check, findings closed, pictures judged in round 1 or 2, walk logged, both approvals written |
 | After editing a script or a template | `selftest.py` |
 
 Skip a script only when no code-execution tool is available; then perform the same checks by reading the artifact.
@@ -87,10 +87,9 @@ Skip a script only when no code-execution tool is available; then perform the sa
         ├── context.md       # User decisions for gray areas (only when discuss is triggered)
         ├── design.md        # Architecture & components (only for Large/Complex)
         ├── tasks.md         # Atomic tasks, ## Checks with a proof each, ## Handoff
-        ├── proofs.md        # written by check_proofs.py: every proof and mutation at HEAD
-        ├── mutations.json   # the Verifier's mutations, re-run after the fix
+        ├── proofs.md        # written by check_proofs.py: every proof at HEAD, and each run's output
         ├── screens.md       # the screens sub-agent's inventory and verdict, per picture
-        └── verification.md  # the Verifier's findings, each closed by a commit
+        └── verification.md  # the Verifier's judgement of each check, and its findings closed by commits
 ```
 
 **Create artifacts lazily.** Write each file only when its phase produces content - never scaffold empty `context.md`, `design.md`, or `tasks.md` up front. Absence is the correct state for a skipped phase.
@@ -125,7 +124,7 @@ Never load several feature specs or several architecture docs at once.
 
 **One worker per task-budgeted batch (~7 tasks, whole phases):** Phases stay the semantic/dependency unit; a **batch** is the execution unit - one or more *consecutive whole phases* packed to ~7 tasks. Walk phases in order, accumulate whole phases into the current batch until it reaches the budget, then start the next - **never split a phase** across workers. Each worker executes all its tasks in order (implement → gate → atomic commit), then reports a compact summary (tasks done, commit hashes, test counts, deviations). Batches run sequentially. Workers never spawn further sub-agents.
 
-**Verifier and screens sub-agent (always-on, never prompted):** after the final task, the orchestrator runs `check_proofs.py`, then dispatches both in parallel over the same `HEAD` - the Verifier with [validate.md](references/validate.md), the screens sub-agent with [verify-screens.md](references/verify-screens.md) when a criterion cites a capture. Each dispatch - batch workers included - is written on the `**Dispatched:**` line of tasks.md `## Handoff` before it is sent, so a compacted orchestrator waits instead of sending a second. Every finding is fixed in one pass; round 2 is `check_proofs.py --mutations` and the screens sub-agent on the rows that differed, with `**Round**: 2` in screens.md. No second Verifier and no third round; what still fails goes to the user. Then the gate, then lessons ([lessons.md](references/lessons.md)).
+**Verifier and screens sub-agent (always-on, never prompted):** after the final task, the orchestrator runs `check_proofs.py`, then dispatches both in parallel over the same `HEAD` - the Verifier with [validate.md](references/validate.md), the screens sub-agent with [verify-screens.md](references/verify-screens.md) when a criterion cites a capture. Each dispatch - batch workers included - is written on the `**Dispatched:**` line of tasks.md `## Handoff` before it is sent, so a compacted orchestrator waits instead of sending a second. Every finding is fixed in one pass; round 2 is `check_proofs.py` again and the screens sub-agent on the rows that differed, with `**Round**: 2` in screens.md. No second Verifier and no third round; what still fails goes to the user. Then the gate, then lessons ([lessons.md](references/lessons.md)).
 
 **Model tier per role** (only if the harness supports choosing a model per sub-agent): mechanical batches on a faster tier, core-domain batches and Design on a high-reasoning tier, the Verifier mid-to-high. Rubric in [sub-agents.md](references/sub-agents.md).
 
@@ -162,12 +161,13 @@ Facts you look up, decisions you ask. Look in the codebase and its conventions f
 | Needs | For | Without it |
 | --- | --- | --- |
 | Python 3.8+ (standard library only) | every script | the gates do not run; the phases still apply |
-| git | `mutate.py` and `check_proofs.py` (HEAD, clean tree) | no mutations and no HEAD check: say so in the report |
+| git | `check_proofs.py` (HEAD, clean tree) | no HEAD check: say so in the report |
+| Git for Windows (on Windows) | `check_proofs.py` runs proofs in its bash, because proofs are POSIX shell | proofs run in `cmd.exe` and the script warns |
 | sub-agents | batch workers, the Verifier and the screens sub-agent | run inline; verify in a new session and write `self-verified` |
 | a model that reads images | binding captures and the screens sub-agent | ask the user to describe each state; hand the pictures to the user |
 | a browser the agent can drive | the walk and the pictures | hand the steps to the user |
 
-Test runners: `check_proofs.py` groups bun, vitest, jest, pytest and go test into one run each; any other command runs alone and is judged by its exit code.
+Test runners: none is built in. `check_proofs.py` runs the commands tasks.md names as the project runs them, one at a time, with no timeout; a run's own parallelism is whatever the project configured ([tasks.md](references/tasks.md)).
 
 ## Output Behavior
 
