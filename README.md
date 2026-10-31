@@ -134,6 +134,8 @@ Each step shows a **← Back** option to return and revise your choices.
 
 > **Note**: You can use either `npx @tech-leads-club/agent-skills` or install globally and use `agent-skills` directly.
 
+→ We recommend you to use the `agents` command to setup the target agents before starting to install the skills.
+
 ```bash
 # Interactive mode (default)
 npx @tech-leads-club/agent-skills
@@ -143,16 +145,34 @@ npx @tech-leads-club/agent-skills
 agent-skills list
 agent-skills ls        # Alias
 
+# Auto-detect installed agents and set them as target (uses the home directory for detection)
+agent-skills agents --auto
+
+# Add agents to target list
+agent-skills agents --add cursor
+
+# Set entire target agents list
+agent-skills agents --set cursor claude-code
+
+# Remove agents from target list
+agent-skills agents --remove claude-code
+
+# Show current target agents list
+agent-skills agents --show
+
+# Clear target agents list
+agent-skills agents --clear
+
 # Install one skill
 agent-skills install -s tlc-spec-driven
 
 # Install multiple skills at once
 agent-skills install -s aws-advisor coding-guidelines docs-writer
 
-# Install to specific agents
+# Install to specific agents (override global target agents)
 agent-skills install -s my-skill -a cursor claude-code
 
-# Install multiple skills to multiple agents
+# Install multiple skills to multiple agents (override global target agents)
 agent-skills install -s aws-advisor nx-workspace -a cursor windsurf cline
 
 # Install globally (to ~/.gemini, ~/.claude, etc.)
