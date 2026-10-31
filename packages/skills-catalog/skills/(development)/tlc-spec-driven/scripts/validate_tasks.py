@@ -11,13 +11,15 @@ markdown artifact, so it is stack-agnostic and tool-agnostic.
 What it checks (heuristic markdown inspection, not a full parser):
   ERROR  - a required section is missing
   ERROR  - a task is missing its `Tests` or `Gate` field
-  ERROR  - no `## Checks`, a check with no `Proof:`, no `Build:` line, or no `**Mutations**: N` (0-5)
+  ERROR  - no `## Checks`, a check with no `Proof:`, or no `Build:` line
+  ERROR  - a `run <name>` proof with no `Run <name>:` line, or with no expected line after `|`
   ERROR  - a task depends on a task in a LATER phase (dependencies point back only)
   ERROR  - a dependency edge shown in the diagram has no matching `Depends on`
            (and vice-versa) when both sides are parseable
   WARN   - a task's `Where` names multiple files (granularity smell -> split it)
   WARN   - a task says `Tests: none` (confirm the coverage matrix agrees)
   WARN   - the diagram could not be parsed confidently (cross-check skipped)
+  WARN   - a `Run` line no proof reads
   ERROR  - with --execute: spec.md or tasks.md has no `**Approved**: <date> - user: "<their words>"`
 
 Usage:
@@ -37,13 +39,12 @@ import os
 import re
 import sys
 
-from lean_config import unapproved
+from lean_config import RUN_PROOF_RE, read_runs, unapproved
 
 REQUIRED_SECTIONS = ["Test Coverage Matrix", "Gate Check Commands", "Execution Plan", "Task Breakdown", "Checks"]
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 BUILD_RE = re.compile(r"^\**\s*Build\s*\**\s*:\s*(.+)$", re.IGNORECASE)
-MUTATIONS_RE = re.compile(r"^\**Mutations\**\s*:\s*\**\s*`?(\d+)", re.IGNORECASE)
 TASK_RE = re.compile(r"^#{2,4}\s+(T\d+)\s*:", re.IGNORECASE)
 EDGE_RE = re.compile(r"\bT\d+\b")
 FILE_HINT_RE = re.compile(r"[\w./-]+\.\w{1,6}\b")
@@ -168,33 +169,42 @@ def parse_diagram_edges(lines):
 
 
 def check_proofs_owed(lines):
-    """The checks the build is held to, each with the proof that settles it, the build commands,
-    and the mutation count: check_proofs.py and the completion gate read exactly these."""
-    errors = []
+    """The checks the build is held to, each with the proof that settles it, the `Run` groups those
+    proofs read, and the build commands: check_proofs.py and the completion gate read exactly these."""
+    errors, warnings = [], []
     stripped = [ln.strip() for ln in lines]
     checks, current = [], None
     for ln in stripped:
         m = CHECK_RE.match(ln)
         if m:
-            current = [m.group(1), 0]
+            current = [m.group(1), []]
             checks.append(current)
         elif current and PROOF_RE.match(ln):
-            current[1] += 1
+            current[1].append(PROOF_RE.match(ln).group(1).strip().strip("`").strip())
     if section_present(lines, "Checks") and not checks:
         errors.append("## Checks has no check - one `**C<n>** - <claim> (<requirement id>)` per criterion, "
                       "each followed by `Proof: <the test command that selects its test>`")
+    runs, read = read_runs(stripped), set()
     for cid, proofs in checks:
         if not proofs:
             errors.append(f"{cid}: no `Proof:` line - name the test command whose filter selects the test that settles it")
+        for text in proofs:
+            rm = RUN_PROOF_RE.match(text) or re.match(r"^run\s+([\w-]+)\s*$", text, re.IGNORECASE)
+            if not rm or (rm.re is not RUN_PROOF_RE and rm.group(1) not in runs):
+                continue
+            read.add(rm.group(1))
+            if rm.group(1) not in runs:
+                errors.append(f"{cid}: proof reads `run {rm.group(1)}` and no `Run {rm.group(1)}: <command>` line defines it")
+            if rm.re is not RUN_PROOF_RE or not rm.group(2).strip("`").strip():
+                errors.append(f"{cid}: `run {rm.group(1)}` names no line after `|` - write the line the run prints "
+                              f"when this test passes, pass marker included")
+    for name in runs:
+        if name not in read:
+            warnings.append(f"`Run {name}` is read by no proof - point a check at it or drop it")
     if not any(BUILD_RE.match(ln) for ln in stripped):
         errors.append("no `Build:` line - name the repo's build, type check and lint commands, `;`-separated "
                       "(or `Build: none - <why>`); check_proofs.py runs them")
-    m = next((MUTATIONS_RE.match(ln) for ln in stripped if MUTATIONS_RE.match(ln)), None)
-    if not m:
-        errors.append("no `**Mutations**: N` line in the header - 3 unless the project declares another count")
-    elif int(m.group(1)) > 5:
-        errors.append(f"Mutations: {m.group(1)} - the count is 0 to 5")
-    return errors
+    return errors, warnings
 
 
 def check(tasks_path):
@@ -206,7 +216,9 @@ def check(tasks_path):
         if not section_present(lines, name):
             errors.append(f"missing required section: ## {name}")
 
-    errors += check_proofs_owed(lines)
+    owed_errors, owed_warnings = check_proofs_owed(lines)
+    errors += owed_errors
+    warnings += owed_warnings
 
     tasks = parse_tasks(lines)
     if not tasks:

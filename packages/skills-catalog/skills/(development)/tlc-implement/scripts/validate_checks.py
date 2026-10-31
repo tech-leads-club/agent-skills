@@ -19,11 +19,11 @@ reviewed in plan.md and are gated by validate_plan.py. What this script owns is 
 derivation from them, which is where omissions surface.
 
 What it checks:
-  ERROR  - no `Mutations:` line, or one above 5
   ERROR  - no `Build:` line naming the repo's build, type check and lint commands (or `none - <why>`)
   ERROR  - a sibling plan.md with no `**Approved**: <date> - user: "<their words>"` line
   ERROR  - a required section is missing (Checks, Coverage, Swept)
   ERROR  - a check with no `Proof:` line
+  ERROR  - a `run <name>` proof with no `Run <name>:` line, or with no expected line after `|`
   ERROR  - a duplicate check id
   ERROR  - no checks parsed at all
   ERROR  - a Coverage row with an empty member cell
@@ -34,8 +34,9 @@ What it checks:
   ERROR  - a check id referenced in Coverage or Swept that is not defined
   ERROR  - a plan criterion cites a binding capture and no check proving it cites that capture
   WARN   - a route in plan.md's Surface that nothing here mentions
-  WARN   - a proof that names no test selector (a whole suite settles no single claim; `browser`
-           and `walk` proofs are exempt)
+  WARN   - a proof that names no test selector (a whole suite settles no single claim; `browser`,
+           `walk` and `run` proofs are exempt - a run proof's expected line is its selector)
+  WARN   - a `Run` line no proof reads
   WARN   - a claim carrying a vague word instead of a concrete value
   WARN   - a Coverage row that declares no set size
   WARN   - a swept landing that is neither a check, `existing`, `n/a`, nor `Unresolved`
@@ -58,7 +59,7 @@ import os
 import re
 import sys
 
-from lean_config import MAX_MUTATIONS, plan_approved, plan_marks_binding, read_mutations
+from lean_config import RUN_PROOF_RE, plan_approved, plan_marks_binding, read_runs
 
 REQUIRED_SECTIONS = ["Checks", "Coverage", "Swept"]
 
@@ -275,13 +276,6 @@ def check_file(path):
     lines = strip_fences(raw)
     errors, warnings = [], []
 
-    # Mutation count.
-    mutations, _ = read_mutations(lines)
-    if mutations is None:
-        errors.append("no `Mutations:` line - the verification report has to name the mutation count in force")
-    elif mutations > MAX_MUTATIONS:
-        errors.append(f"`Mutations: {mutations}` exceeds the cap of {MAX_MUTATIONS} - more mutations repeat the "
-                      "experiment; a whole-repo mutation run belongs to CI, not to the Verifier")
     if not any(re.match(r"^\**\s*Build\s*\**\s*:\s*\S", ln.strip(), re.IGNORECASE) for ln in lines):
         errors.append("no `Build:` line - name the repo's build, type check and lint commands (or `Build: none - <why>`); "
                       "a green test suite does not show the code compiles")
@@ -300,14 +294,26 @@ def check_file(path):
         errors.append(f"L{line_no}: duplicate check id {cid} - ids are referenced downstream and must be unique")
     if not checks:
         errors.append("no checks parsed - expected lines shaped `**C1** - <claim>` followed by `Proof: <command>`")
-        return errors, warnings, mutations
+        return errors, warnings
 
+    runs, read = read_runs(lines), set()
     for cid, c in sorted(checks.items(), key=lambda kv: int(kv[0][1:])):
         if not c["proofs"]:
             errors.append(f"{cid} has no `Proof:` line - no proof, no check (L{c['line']})")
         for pr in c["proofs"]:
             low = pr.lower()
             if SCREEN_PROOF_RE.match(low):
+                continue
+            text = pr.strip("`").strip()
+            rm = RUN_PROOF_RE.match(text) or re.match(r"^run\s+([\w-]+)\s*$", text, re.IGNORECASE)
+            if rm and (rm.re is RUN_PROOF_RE or rm.group(1) in runs):
+                read.add(rm.group(1))
+                if rm.group(1) not in runs:
+                    errors.append(f"{cid}: proof reads `run {rm.group(1)}` and no `Run {rm.group(1)}: <command>` "
+                                  f"line defines it (L{c['line']})")
+                if rm.re is not RUN_PROOF_RE or not rm.group(2).strip("`").strip():
+                    errors.append(f"{cid}: `run {rm.group(1)}` names no line after `|` - write the line the run "
+                                  f"prints when this test passes, pass marker included (L{c['line']})")
                 continue
             if not any(tok in low for tok in SELECTOR_TOKENS):
                 warnings.append(
@@ -317,6 +323,9 @@ def check_file(path):
         vague = VAGUE_RE.search(c["claim"])
         if vague:
             warnings.append(f"{cid}: claim uses '{vague.group(0)}' instead of a concrete value")
+    for name in runs:
+        if name not in read:
+            warnings.append(f"`Run {name}` is read by no proof - point a check at it or drop it")
 
     referenced = set()
 
@@ -428,7 +437,7 @@ def check_file(path):
         if ln.strip().startswith("|") and re.search(r"\|\s*blocks\s*\|", ln, re.IGNORECASE):
             warnings.append(f"L{i}: an unresolved question is marked `blocks` - it cannot be settled while building")
 
-    return errors, warnings, mutations
+    return errors, warnings
 
 
 def main(argv=None):
@@ -449,13 +458,13 @@ def main(argv=None):
         )
         return 2
 
-    errors, warnings, mutations = check_file(path)
+    errors, warnings = check_file(path)
     for w in warnings:
         print(f"  WARN  {w}")
     for e in errors:
         print(f"  ERROR {e}")
     fail = errors or (warnings and args.strict)
-    print(f"\nvalidate_checks: {len(errors)} error(s), {len(warnings)} warning(s) in {path} [mutations: {'none' if mutations is None else mutations}]")
+    print(f"\nvalidate_checks: {len(errors)} error(s), {len(warnings)} warning(s) in {path}")
     return 1 if fail else 0
 
 

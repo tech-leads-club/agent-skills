@@ -10,11 +10,36 @@ check. A plan section nothing points back at is dead or unproven.
 
 ## Find the real commands first
 
-Prefer a command CI already runs. Where nothing exists for what a check needs, ask. A proof names
-a specific test, not a whole suite.
-Repeat `Proof:` when one test cannot settle the whole claim.
+Prefer a command CI already runs, written as the project runs it - its script, its runner, its
+flags. Where nothing exists for what a check needs, ask. A proof names a specific test, not a whole
+suite. Repeat `Proof:` when one test cannot settle the whole claim.
 
-Under `Mutations:`, a `Build:` line names the repo's own build, type check and lint commands - the
+When several checks' tests run in one command, name the command once as a group and point each
+check at the line its test prints:
+
+```markdown
+Run unit: `npx vitest run src/billing --reporter=verbose`
+Run api: `python -m pytest tests/api -v`
+
+**C1** - A failed charge sets status to Suspended, never Cancelled (AC 1)
+Proof: run unit | ✓ billing > suspends on a failed charge
+
+**C2** - Retrying a delivery returns 200 and changes nothing (AC 5)
+Proof: run api | test_retry_is_idempotent PASSED
+```
+
+`check_proofs.py` runs each group once and passes a check when every word after `|` appears, in
+that order, on one line of the group's output. Copy the line from a real run and keep the pass
+marker (`✓`, `PASSED`, `ok`, `= .`): a renamed test, or a filter that selects nothing, then reads
+`no test ran` instead of passing on a green exit code. This needs a reporter that prints a line per
+test; where the default prints only a summary, put the verbose flag in the `Run` line. A test that
+cannot share a run - an end-to-end suite that starts its own server, a command that must run alone -
+is a lone `Proof: <command>`, judged by its exit code.
+
+Groups and lone proofs run one after another, never side by side, so tests that share a database or
+a port stay safe; the parallelism inside a group is whatever the project configured for it.
+
+Under the title, a `Build:` line names the repo's own build, type check and lint commands - the
 ones CI or the package manifest runs over the code this feature touches - separated by `;`.
 `check_proofs.py` runs them at `HEAD`: a green test suite does not show that the code compiles.
 `Build: none - <why>` when the repo has none.
@@ -24,7 +49,7 @@ ones CI or the package manifest runs over the code this feature touches - separa
 - someone could observe the outcome
 - it carries a concrete value - a status code, a field, a bound
 - one run settles it
-- you can name the proof - the test or command whose exit code decides
+- you can name the proof - the test or command that decides, by the line it prints or its exit code
 
 Missing one, ask. A vague check becomes a vague assertion that passes.
 
@@ -110,19 +135,13 @@ none, a rule that changes an outcome - a dispatch over a status, a boundary, a s
 mapping with more than one row, a guard, an order - gets a test at its own layer, and code that only
 forwards its arguments gets none of its own: a test over it re-asserts the framework.
 
-## The mutation count
-
-The first line under the title is `Mutations: N`, 0 to 5, copied from the project's `AGENTS.md`
-(`mutations:`), `3` when it declares none. Screens take no mutation. What the count does and does
-not change: [SKILL.md](../SKILL.md) rule 6.
-
 ## Template: `.specs/features/<feature>/checks.md`
 
 ````markdown
 # <Feature> checks
 
-Mutations: 3
 Build: `<build command>`; `<lint command>`
+Run unit: `<the command that runs this feature's tests, a line per test>`
 Plan: `.specs/features/<feature>/plan.md`
 
 ## Intent
@@ -137,7 +156,7 @@ user when this ships.>
 ### S1 - <slice>
 
 **C1** - A failed charge sets status to Suspended, never Cancelled (AC 1)
-Proof: `bin/rails test test/billing/dunning_test.rb -n "/failed_charge_suspends/"`
+Proof: run unit | <the line C1's test prints when it passes, pass marker included>
 
 **C2** - Every provider status maps to exactly one local status (AC 4)
 Proof: `bin/rails test test/billing/status_map_test.rb -n "/every_provider_status/"`

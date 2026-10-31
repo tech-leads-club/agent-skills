@@ -198,8 +198,10 @@ Each task gets its own commit immediately after verification. Never batch multip
 
 ```bash
 # from the repo root, one time (resolve <skill-dir> to the directory that contains this skill's SKILL.md):
-ln -sf <skill-dir>/scripts/check_commit.py .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+printf '#!/bin/sh\nexec python3 "<skill-dir>/scripts/check_commit.py" "$1"\n' > .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
 ```
+
+It writes a small hook file instead of a symlink, so it also works where symlinks do not (Windows without developer mode). On Windows, write `python` instead of `python3` in the hook.
 
 This is a plain git hook, not tied to any editor or assistant. Skip it if the project manages hooks its own way (for example a pre-commit framework); the manual check above still applies.
 
@@ -226,10 +228,10 @@ Save each state a capture draws beside it as `captures/<capture>.running.png`, t
 
 When the last task of the feature is committed, the orchestrator - never a batch worker - closes it:
 
-1. **Run the proofs.** `python3 <skill-dir>/scripts/check_proofs.py <feature>` runs every check's proof once per runner at `HEAD`, the `**Build**:` commands, and checks the pictures and the walk; it writes `proofs.md`. A red row goes back to an implementer before anyone verifies.
+1. **Run the proofs.** `python3 <skill-dir>/scripts/check_proofs.py <feature>` runs each `Run` group and each lone proof once at `HEAD`, one at a time, finds each check's line in its group's output, runs the `**Build**:` commands, and checks the pictures and the walk; it writes `proofs.md` with the tail of every run. A red row goes back to an implementer before anyone verifies.
 2. **Dispatch two fresh sub-agents in parallel, over the same `HEAD`:** the **Verifier** with [validate.md](validate.md), and when a criterion cites a capture, the **screens sub-agent** with [verify-screens.md](verify-screens.md). Author ≠ verifier: neither is the author, and neither fixes anything. Write both on the `**Dispatched:**` line of tasks.md `## Handoff` before sending them, with the `HEAD`, and mark each `returned` when it does.
 3. **Fix every finding in one pass,** each closed by a commit the report's `Closed` column cites.
-4. **Round 2 is the script:** `check_proofs.py <feature> --mutations mutations.json` with the Verifier's mutations, and the screens sub-agent again on the rows that read `differs` only, which writes `**Round**: 2`. There is no second Verifier and no third round. What still fails goes to the user.
+4. **Round 2 is the script:** `check_proofs.py <feature>` again over the fixes, and the screens sub-agent again on the rows that read `differs` only, which writes `**Round**: 2`. There is no second Verifier and no third round. What still fails goes to the user.
 5. **Gate:** `python3 <skill-dir>/scripts/validate_verification.py <feature>` exits 0, then distill lessons ([lessons.md](lessons.md)). Close only when every sub-agent you dispatched has returned.
 
 ## Execution Template

@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes obligations instead of the p
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '2.1.0'
+  version: '3.0.0'
 ---
 
 # Tech Lead's Club - Spec, Lean
@@ -42,14 +42,17 @@ These hold even if no reference file is read. Each one lives here; the reference
    additive; the path and `Changes underneath` are kept true in the commit that changes them.
 5. The Verifier is a fresh sub-agent, never the author, and it always runs, once per feature,
    beside the screens sub-agent. `check_proofs.py` settles the mechanical part - every proof run
-   and passing at `HEAD`, the pictures, the walk, the mutations killed - and the Verifier spends
-   its time on judgement: mutations where a wrong rule would stay green, examples nobody named,
-   assertions looser than their criterion. The work is done when every finding is closed by a
-   commit and `proofs.md` is green at `HEAD`.
-6. The mutation count is declared in `checks.md` (`Mutations:`, 3 by default) and decides how many
-   rules the Verifier probes, not how good the work is: code quality, the tests behind every check
-   and a complete `Coverage` join are owed whatever N is. The checks are the floor; an edge case or
-   guard no check names is still the work.
+   and passing at `HEAD`, the build, the pictures, the walk - and the Verifier spends its time on
+   judgement: it opens the test each check's proof selects and says whether that test would fail
+   if the claim were false, then tries examples nobody named and assertions looser than their
+   criterion. The work is done when every finding is closed by a commit and `proofs.md` is green
+   at `HEAD`.
+6. A proof is the project's own test command; the skill knows no test runner. Tests that run
+   together go on one `Run <name>: <command>` line, run once, and each check that reads it writes
+   `Proof: run <name> | <the line the run prints when its test passes>`, pass marker included, so
+   a filter that selects nothing reads `no test ran` instead of a green exit code. A command run
+   alone is judged by its exit code. The checks are the floor; an edge case or guard no check
+   names is still the work.
 7. The completion gate is a script: `validate_verification.py` exits 0. The final report opens
    with its last line; a red gate is said first, never left for the reader to find.
 8. An approved spec authorizes local edits and local commits. `git push`, deploy and production
@@ -73,25 +76,13 @@ These hold even if no reference file is read. Each one lives here; the reference
     new session, re-read this file and the current phase's reference, then resume from the files
     ([memory.md](references/memory.md)).
 
-## Configuration
-
-The project declares it in `AGENTS.md` or equivalent; `checks.md` copies the count onto its
-`Mutations:` line.
-
-```markdown
-## tlc-spec-lean
-
-mutations: 3
-```
+## Who checks what
 
 | Part | Runs | Cannot catch |
 | --- | --- | --- |
-| `check_proofs.py` (always) | every proof once per runner at `HEAD`, each check matched to the tests its filter selects, pictures and walk checked, mutations injected | a test that passes for the wrong reason |
-| The Verifier (always) | N mutations wherever a rule lives, two examples nobody named, assertions looser than their criterion, checks that contradict a binding capture ([verify.md](references/verify.md)) | the rules no mutation probed |
+| `check_proofs.py` (always) | every `Run` group and lone proof once at `HEAD`, one at a time, each check's line found in its run's output, the build, pictures and walk checked | a test that passes for the wrong reason |
+| The Verifier (always) | each check's test read against its criterion, two examples nobody named, assertions looser than their criterion, checks that contradict a binding capture ([verify.md](references/verify.md)) | a wrong rule whose test reads as right |
 | The screens sub-agent (a criterion cites a capture) | an inventory of each capture against the author's picture, every row `same` or `differs`, at a named `HEAD` ([verify-screens.md](references/verify-screens.md)) | spacing, colour and type weight; detail smaller than a screenshot shows; screens no capture draws |
-
-Screens take no mutation; spend N where a wrong implementation costs most. Where N looks too low
-for the feature, say so in one line and let the user raise it.
 
 ## Artifacts
 
@@ -105,9 +96,8 @@ for the feature, say so in one line and let the user raise it.
     ├── checks.md               # claims + proofs, the coverage join, swept, handoff
     ├── captures/               # binding source files, and the author's <capture>.running.png
     ├── screens.md              # the screens sub-agent's inventory and verdict, per picture
-    ├── proofs.md               # written by check_proofs.py: every proof and mutation at HEAD
-    ├── mutations.json          # the Verifier's mutations, re-run after the fix
-    └── verification.md         # the Verifier's findings, each closed by a commit
+    ├── proofs.md               # written by check_proofs.py: every proof at HEAD, and each run's output
+    └── verification.md         # the Verifier's judgement of each check, and its findings closed by commits
 ```
 
 For a change under roughly three files with no one-way door, write only `checks.md` with an
@@ -128,14 +118,15 @@ Decisions and lessons: [memory.md](references/memory.md).
 
 Resolve `<skill-dir>` as the directory containing this `SKILL.md` and run
 `python3 <skill-dir>/scripts/<name>.py`. Pass `--root` when cwd is not the project root. A non-zero
-exit means stop and fix. Run a script rather than read it: its messages say what to change.
+exit means stop and fix. Run a script rather than read it: its messages say what to change. On
+Windows, where `python3` may be the Microsoft Store alias, run `python` or `py -3`.
 
 | When | Command |
 | --- | --- |
 | Before presenting the plan | `validate_plan.py <feature>` |
 | Before starting to build | `validate_checks.py <feature>` - it also requires the plan's `**Approved**:` line |
 | Before each commit | `check_commit.py --message "<msg>"` |
-| Before dispatching the Verifier, and after the fix | `check_proofs.py <feature> [--mutations <mutations.json>]` |
+| Before dispatching the Verifier, and after the fix | `check_proofs.py <feature>` |
 | Before declaring done | `validate_verification.py <feature>` |
 | At distillation | `lessons.py add ...` |
 | After editing a validator or template | `selftest.py` |
@@ -148,14 +139,15 @@ mutant to be killed; the fixtures are also a worked example of a passing artifac
 | Needs | For | Without it |
 | --- | --- | --- |
 | Python 3.8+ (standard library only) | every script | the gates do not run; the phases still apply |
-| git | `mutate.py` and `check_proofs.py` (HEAD, clean tree) | no mutations and no HEAD check: say so in the report |
+| git | `check_proofs.py` (HEAD, clean tree) | no HEAD check: say so in the report |
+| Git for Windows (on Windows) | `check_proofs.py` runs proofs in its bash, because proofs are POSIX shell | proofs run in `cmd.exe` and the script warns |
 | sub-agents | the Verifier and the screens sub-agent | run their file in a new session and write `self-verified`; the gate warns |
 | a model that reads images | the screens sub-agent | hand the pictures and the captures to the user |
 | a browser the agent can drive | saving `<capture>.running.png` and the walk | hand the steps to the user |
 
-Test runners: `check_proofs.py` groups bun, vitest, jest, pytest and go test into one run each
-([scripts/runners.py](scripts/runners.py)); any other command runs alone and is judged by its exit
-code.
+Test runners: none is built in. `check_proofs.py` runs the commands `checks.md` names as the
+project runs them, one at a time, with no timeout; a run's own parallelism is whatever the project
+configured ([checks.md](references/checks.md)).
 
 ## Output
 

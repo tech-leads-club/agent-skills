@@ -4,7 +4,7 @@ description: 'Turns a request, ticket, PRD, design or thread into one plan a hum
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 1.1.0
+  version: 1.1.1
 ---
 
 # TLC Plan
@@ -108,7 +108,8 @@ python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed 
 ## Scripts
 
 Resolve `<skill-dir>` as the directory containing this `SKILL.md`. Pass `--root` when cwd is not
-the project root. Run a script rather than read it: its messages say what to change.
+the project root. Run a script rather than read it: its messages say what to change. On Windows,
+where `python3` may be the Microsoft Store alias, run `python` or `py -3`.
 
 | When | Command |
 | --- | --- |

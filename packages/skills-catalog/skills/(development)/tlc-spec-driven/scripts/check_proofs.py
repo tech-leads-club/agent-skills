@@ -1,94 +1,131 @@
 #!/usr/bin/env python3
 """
-check_proofs.py - run every proof checks.md names, once per runner, and write proofs.md.
+check_proofs.py - run every proof checks.md names, as the project runs it, and write proofs.md.
 
 The mechanical half of verification: did each named test run, and pass, at HEAD; do the build,
 type check and lint on checks.md's `Build:` line pass; does each screen check have its picture and
-a `matches` row in screens.md; is each walk logged; are the mutations killed. A model doing this by hand spends most of the Verifier's time on it and gets it less
-right than a script, so the Verifier reads proofs.md and spends its time on judgement.
+a `matches` row in screens.md; is each walk logged. A model doing this by hand spends most of the
+Verifier's time on it and gets it less right than a script, so the Verifier reads proofs.md and
+spends its time on judgement.
 
-Test proofs are grouped by runner and working directory and run in one invocation per group with
-a per-test report (runners.py: bun, vitest, jest, pytest, go), then each check is matched to the
-test cases its filter selects. A runner no adapter knows runs proof by proof and is judged by its
-exit code, with the count read from its summary when it prints one (`count unknown` otherwise).
+It knows no test runner. A proof is the project's own command, run as written:
+
+  Run unit: `npx vitest run src/billing --reporter=verbose`   one command, run once
+  Proof: run unit | ✓ failed charge suspends                  the line the run must print
+  Proof: `bin/rails test test/billing/dunning_test.rb`         run alone, judged by its exit code
+
+A `run` proof passes when every word after `|` appears, in that order, on one line of the run's
+output. The words carry the runner's pass marker, so a filter that selects nothing, or a test that
+was renamed, reads `no test ran` instead of a green exit code. Commands run one at a time, each
+once, with no timeout: a run's own parallelism is whatever the project configured for it. On
+Windows they run in Git for Windows' bash, because proofs are written for a POSIX shell.
 
 Usage:
-  python3 <skill-dir>/scripts/check_proofs.py <feature> [--root DIR] [--mutations FILE]
+  python3 <skill-dir>/scripts/check_proofs.py <feature> [--root DIR]
 
-  --mutations  a mutate.py spec; each mutation is injected and its proof run (mutate.py)
-
-Writes .specs/features/<feature>/proofs.md. Exit 0 every proof passed and every mutation was
-killed, 1 otherwise, 2 usage error.
+Writes .specs/features/<feature>/proofs.md. Exit 0 every proof passed on a clean tree, 1 otherwise,
+2 usage error.
 """
 
 import argparse
-import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
-import runners
-from lean_config import checks_file
+from lean_config import RUN_PROOF_RE, RUN_RE, checks_file
 
-HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
-PICTURE_RE = re.compile(r"`?([\w./-]+\.running\.png)`?")
-COUNT_RES = [  # tests that ran, read from a runner's own summary when it has no JUnit report
-    re.compile(r"Ran (\d+) tests?"),
-    re.compile(r"(\d+) passed"),
-    re.compile(r"Tests:\s+(?:\d+ \w+, )*(\d+) passed"),
-    re.compile(r"(\d+) runs?,"),
-]
-
-
 BUILD_RE = re.compile(r"^\**\s*Build\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+PICTURE_RE = re.compile(r"`?([\w./-]+\.running\.png)`?")
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
+TAIL = 15
 
 
-def build_commands(path):
-    """The commands on checks.md's `Build:` line, or [] for `none`."""
-    with open(path, encoding="utf-8") as f:
-        lines = f.readlines()
-    for raw in lines:
-        m = BUILD_RE.match(raw.strip())
-        if m:
-            text = m.group(1).strip()
-            if text.lower().startswith("none"):
-                return []
-            return [c.strip().strip("`").strip() for c in text.split(";") if c.strip().strip("`").strip()]
-    return []
+def _unquote(text):
+    return text.strip().strip("`").strip()
 
 
-def checks_of(path):
-    """[(check id, [proof text])] in file order."""
-    checks, current = [], None
+def read_checks(path):
+    """(checks [(id, [proof])], runs {name: command}, build commands, walked) outside fenced blocks."""
+    checks, runs, build, walked = [], {}, None, False
+    current, in_fence = None, False
     with open(path, encoding="utf-8") as f:
         lines = f.readlines()
     for raw in lines:
         line = raw.strip()
+        if line.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        walked = walked or "**Walked:**" in line
         m = CHECK_RE.match(line)
         if m:
             current = (m.group(1), [])
             checks.append(current)
             continue
+        r = RUN_RE.match(line)
+        if r:
+            runs[r.group(1)] = _unquote(r.group(2))
+            continue
+        b = BUILD_RE.match(line)
+        if b and build is None:
+            text = b.group(1).strip()
+            build = [] if text.lower().startswith("none") else [_unquote(c) for c in text.split(";") if _unquote(c)]
+            continue
         p = PROOF_RE.match(line)
         if p and current:
-            current[1].append(p.group(1).strip().strip("`").strip())
-    return checks
+            current[1].append(_unquote(p.group(1)))
+    return checks, runs, build or [], walked
 
 
-def run_alone(root, cmd):
-    """A proof the script cannot group: run it, judge by exit code, read a count when it can."""
-    p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, encoding="utf-8", errors="replace")
-    text = p.stdout + p.stderr
-    count = None
-    for rx in COUNT_RES:
-        m = rx.search(text)
-        if m:
-            count = int(m.group(1))
-            break
-    return p.returncode, count
+def find_bash():
+    """Git for Windows' bash.exe, or None. The `bash` on PATH may be WSL's launcher, which runs the
+    proof inside Linux against other paths, so the one beside git comes first."""
+    try:
+        p = subprocess.run(["git", "--exec-path"], capture_output=True, encoding="utf-8", errors="replace")
+        if p.returncode == 0:
+            # <git>/mingw64/libexec/git-core -> <git>/bin/bash.exe
+            bash = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(p.stdout.strip()))), "bin", "bash.exe")
+            if os.path.isfile(bash):
+                return bash
+    except OSError:
+        pass
+    bash = shutil.which("bash")
+    if bash and "\\system32\\" not in bash.lower() and "windowsapps" not in bash.lower():
+        return bash
+    return None
+
+
+def shell_of():
+    """(bash path or None, label for proofs.md). POSIX keeps /bin/sh; Windows prefers Git Bash."""
+    if os.name != "nt":
+        return None, "/bin/sh"
+    bash = find_bash()
+    if bash:
+        return bash, bash
+    print("check_proofs: WARN - no Git for Windows bash found; proofs run in cmd.exe, which does not "
+          "read POSIX shell syntax", file=sys.stderr)
+    return None, "cmd.exe (no Git Bash found)"
+
+
+def run(root, cmd, bash):
+    """(exit code, output with ANSI codes stripped)."""
+    argv = [bash, "-c", cmd] if bash else cmd
+    p = subprocess.run(argv, shell=bash is None, cwd=root, capture_output=True, encoding="utf-8", errors="replace")
+    return p.returncode, ANSI_RE.sub("", p.stdout + p.stderr)
+
+
+def sees(output, expected):
+    """Every word of `expected` on one line of `output`, in order, anything between them."""
+    words = expected.split()
+    if not words:
+        return False
+    rx = re.compile(".*?".join(re.escape(w) for w in words))
+    return any(rx.search(line) for line in output.splitlines())
 
 
 def screens_verdicts(fdir):
@@ -117,42 +154,19 @@ def git_head(root):
     return p.stdout.strip() if p.returncode == 0 else "unknown"
 
 
-def spec_size(spec):
-    try:
-        with open(spec, encoding="utf-8") as f:
-            return len(json.load(f))
-    except (OSError, ValueError, TypeError):
-        return 0
+def tail(output):
+    # a fence inside the output would close the block proofs.md puts it in
+    return [ln.replace("```", "'''") for ln in output.strip().splitlines()[-TAIL:]] or ["(no output)"]
 
 
-def run_mutations(root, spec):
-    """Inject each mutation with mutate.py: [(label, proof, killed)].
-
-    A run that prints fewer rows than the spec has mutations gets a failed row of its own. The exit
-    code cannot tell: a traceback exits 1, the same as a surviving mutation, and with no rows at all
-    the report would read as nothing left to kill."""
-    p = subprocess.run([sys.executable, os.path.join(HERE, "mutate.py"), "--root", root, "--spec", spec],
-                       cwd=root, capture_output=True, encoding="utf-8", errors="replace")
-    rows = []
-    for line in (p.stdout + p.stderr).splitlines():
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if (len(cells) >= 3 and cells[-1].lower() in ("yes", "yes (timeout)", "no", "blocked")
-                and cells[0].lower() != "mutation"):
-            rows.append((cells[0], cells[1], cells[-1].lower()))
-    output = (p.stdout + p.stderr).strip().splitlines()
-    last = (output[-1] if output else "no output").replace("|", "/")[:80]
-    if p.returncode == 2:
-        rows.append(("spec refused", last, "no"))
-    elif len(rows) < max(spec_size(spec), 1):
-        rows.append((f"mutate.py failed (exit {p.returncode})", last, "no"))
-    return rows
+def cell(text, width=110):
+    return text.replace("|", "/").replace("`", "")[:width]
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("feature")
     ap.add_argument("--root", default=".")
-    ap.add_argument("--mutations")
     a = ap.parse_args(argv)
     root = os.path.abspath(a.root)
     fdir = os.path.join(root, ".specs", "features", a.feature)
@@ -160,97 +174,88 @@ def main(argv=None):
     if not os.path.exists(checks_path):
         print(f"check_proofs: no checks.md (or tasks.md) under {fdir}", file=sys.stderr)
         return 2
-    checks = checks_of(checks_path)
-    with open(checks_path, encoding="utf-8") as f:
-        walked = "**Walked:**" in f.read()
+    checks, runs, build, walked = read_checks(checks_path)
     screens = screens_verdicts(fdir)
+    bash, shell_label = shell_of()
 
-    groups, plan = {}, []
+    used_runs, lone = [], []
+    for _, proofs in checks:
+        for proof in proofs:
+            m = RUN_PROOF_RE.match(proof)
+            if m and m.group(1) in runs and m.group(1) not in used_runs:
+                used_runs.append(m.group(1))
+            elif not m and proof and not proof.lower().startswith(("browser", "walk")) and proof not in lone:
+                lone.append(proof)
+    results = {}  # command -> (exit code, output)
+    for name in used_runs:
+        results.setdefault(runs[name], run(root, runs[name], bash))
+    for proof in lone:
+        results.setdefault(proof, run(root, proof, bash))
+
+    rows = []
     for cid, proofs in checks:
         for proof in proofs or [""]:
             low = proof.lower()
-            if low.startswith("browser"):
-                plan.append((cid, proof, "browser", None))
+            m = RUN_PROOF_RE.match(proof)
+            result = "pass"
+            if not proof:
+                result, proof = "**no proof**", "(none)"
+            elif low.startswith("browser"):
+                pic = PICTURE_RE.search(proof)
+                pic = os.path.basename(pic.group(1)) if pic else None
+                on_disk = pic and any(pic in fs for _, _, fs in os.walk(fdir))
+                verdict = screens.get(pic or "", "")
+                if not on_disk:
+                    result = "**no picture**"
+                elif not verdict.startswith("matches"):
+                    result = f"**{verdict or 'not judged'}** (screens.md)"
             elif low.startswith("walk"):
-                plan.append((cid, proof, "walk", None))
-            elif not proof:
-                plan.append((cid, "(none)", "none", None))
-            else:
-                adapter, parsed = runners.parse(proof)
-                if adapter:
-                    group = groups.setdefault(parsed["key"], (adapter, parsed, set()))
-                    group[2].update(parsed["files"])
-                plan.append((cid, proof, "grouped" if adapter else "alone", (adapter, parsed)))
-
-    cases = {key: adapter.run(root, first["key"][1], first["launcher"], files)
-             for key, (adapter, first, files) in groups.items()}
-    rows, failed = [], 0
-    for cid, proof, kind, grouped in plan:
-        ran, passed, result = "-", "-", "pass"
-        if kind == "none":
-            result = "**no proof**"
-        elif kind == "browser":
-            m = PICTURE_RE.search(proof)
-            pic = os.path.basename(m.group(1)) if m else None
-            on_disk = pic and any(pic in fs for _, _, fs in os.walk(fdir))
-            verdict = screens.get(pic or "", "")
-            if not on_disk:
-                result = "**no picture**"
-            elif not verdict.startswith("matches"):
-                result = f"**{verdict or 'not judged'}** (screens.md)"
-        elif kind == "walk":
-            result = "pass (Walked)" if walked else "**no Walked line**"
-        elif kind == "grouped" and cases.get(grouped[1]["key"]) is not None:
-            picked = grouped[0].select(cases[grouped[1]["key"]], grouped[1])
-            ran, passed = len(picked), sum(picked)
-            if not picked:
-                result = "**no test ran**"
-            elif passed < ran:
+                result = "pass (Walked)" if walked else "**no Walked line**"
+            elif m:
+                if m.group(1) not in runs:
+                    result = f"**no such run** - no `Run {m.group(1)}:` line"
+                else:
+                    code, output = results[runs[m.group(1)]]
+                    if not sees(output, _unquote(m.group(2))):
+                        result = "**fail**" if code else "**no test ran**"
+            elif results[proof][0]:
                 result = "**fail**"
-        else:
-            code, count = run_alone(root, proof)
-            ran = count if count is not None else "count unknown"
-            if code != 0:
-                result = "**fail**"
-            elif count == 0:
-                result = "**no test ran**"
-        if not result.startswith("pass"):
-            failed += 1
-        rows.append((cid, proof, ran, passed, result))
+            rows.append((cid, proof, result))
 
-    for cmd in build_commands(checks_path):
-        p = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, encoding="utf-8", errors="replace")
-        tail = (p.stdout + p.stderr).strip().splitlines()
-        error = next((ln for ln in tail if "error" in ln.lower()), tail[-1] if tail else "")
-        result = "pass" if p.returncode == 0 else f"**fail** - {error.strip().replace('|', '/')[:100]}"
-        if p.returncode != 0:
-            failed += 1
-        rows.append(("Build", cmd, "-", "-", result))
-
-    mutations = run_mutations(root, os.path.abspath(a.mutations)) if a.mutations else []
-    survived = sum(1 for _, _, k in mutations if not k.startswith("yes"))
+    for name in used_runs:
+        code, _ = results[runs[name]]
+        if code:
+            rows.append((f"Run {name}", runs[name], f"**fail** - exit {code}"))
+    for cmd in build:
+        code, output = run(root, cmd, bash)
+        lines = output.strip().splitlines()
+        error = next((ln for ln in lines if "error" in ln.lower()), lines[-1] if lines else "")
+        rows.append(("Build", cmd, "pass" if code == 0 else f"**fail** - {cell(error.strip(), 100)}"))
+    failed = sum(1 for _, _, res in rows if not res.startswith("pass"))
 
     dirty = dirty_paths(root)
     out = [f"# {a.feature} proofs", "",
            f"**HEAD**: {git_head(root)}",
            f"**Tree**: {'clean' if not dirty else 'dirty - ' + ', '.join(dirty[:5])}",
-           f"**Result**: {len(rows) - failed} pass, {failed} fail; mutations {len(mutations) - survived} killed, "
-           f"{survived} not", "",
-           "| Check | Proof | Ran | Passed | Result |", "| --- | --- | --- | --- | --- |"]
-    out += [f"| {c} | `{p.replace('`', '')[:110]}` | {r} | {s} | {res} |" for c, p, r, s, res in rows]
-    if a.mutations:
-        out += ["", "## Mutations", "", "| Mutation | Location | Killed |", "| --- | --- | --- |"]
-        out += [f"| {lab} | `{pr.replace('`', '')}` | {k} |" for lab, pr, k in mutations]
+           f"**Shell**: {shell_label}",
+           f"**Result**: {len(rows) - failed} pass, {failed} fail", "",
+           "| Check | Proof | Result |", "| --- | --- | --- |"]
+    out += [f"| {c} | `{cell(p)}` | {res} |" for c, p, res in rows]
+    if results:
+        out += ["", "## Output", ""]
+        for name in used_runs:
+            code, output = results[runs[name]]
+            out += [f"`Run {name}` - exit {code}", "", "```", *tail(output), "```", ""]
+        for proof in lone:
+            code, output = results[proof]
+            out += [f"`{cell(proof)}` - exit {code}", "", "```", *tail(output), "```", ""]
     with open(os.path.join(fdir, "proofs.md"), "w", encoding="utf-8") as f:
-        f.write("\n".join(out) + "\n")
-    print("\n".join(out[2:5]))
-    for c, p, r, s, res in rows:
+        f.write("\n".join(out).rstrip() + "\n")
+    print("\n".join(out[2:6]))
+    for c, p, res in rows:
         if not res.startswith("pass"):
             print(f"  {c}: {res} - {p[:80]}")
-    for lab, pr, k in mutations:
-        if not k.startswith("yes"):
-            print(f"  mutation not killed: {lab}")
-    return 0 if failed == 0 and survived == 0 and not dirty else 1
+    return 0 if failed == 0 and not dirty else 1
 
 
 if __name__ == "__main__":

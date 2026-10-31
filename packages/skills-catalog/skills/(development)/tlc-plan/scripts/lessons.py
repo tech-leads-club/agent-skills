@@ -41,11 +41,14 @@ RENDER_REL = os.path.join(".specs", "LESSONS.md")
 
 SIGNALS = {
     "ac_gap": "Acceptance criterion not covered / failed",
-    "surviving_mutant": "Mutant survived (weak test)",
+    "weak_test": "Test passes without holding its criterion",
     "spec_precision_gap": "Spec did not define a precise outcome",
     "spec_deviation": "Implementation diverged from spec/design (SPEC_DEVIATION)",
     "gate_fail": "Build-level gate check failed",
 }
+
+# stores written before a signal was renamed still carry the old name
+RENAMED_SIGNALS = {"surviving_mutant": "weak_test"}
 
 DEFAULTS = {"promote_threshold": 2, "window_days": 45, "quarantine_threshold": 2}
 
@@ -87,6 +90,12 @@ def _load(root):
     data.setdefault("schema", 1)
     data.setdefault("next_id", 1)
     data.setdefault("lessons", [])
+    for lesson in data["lessons"]:
+        old = lesson.get("signal")
+        if old in RENAMED_SIGNALS:
+            lesson["signal"] = RENAMED_SIGNALS[old]
+            if lesson.get("key", "").startswith(old + "::"):
+                lesson["key"] = lesson["signal"] + lesson["key"][len(old):]
     return data
 
 
@@ -148,7 +157,7 @@ def _key(signal, text):
 
 
 def _auto_prune(data):
-    """Drop candidates that never recurred within the window. Mutates data."""
+    """Drop candidates that never recurred within the window. Edits data in place."""
     threshold = data["promote_threshold"]
     window = data["window_days"]
     now = _dt.datetime.now(_dt.timezone.utc)
@@ -253,7 +262,7 @@ def cmd_add(root, args):
         print("ERROR: --feature is required (the feature the signal came from).", file=sys.stderr)
         return 2
     if not source:
-        print("ERROR: --source is required (file:line / AC id / mutant id / SPEC_DEVIATION ref).", file=sys.stderr)
+        print("ERROR: --source is required (file:line / AC id / check id / SPEC_DEVIATION ref).", file=sys.stderr)
         print("       A lesson with no grounding in verification.md is an opinion, not a lesson. Refused.", file=sys.stderr)
         return 2
     if len(text) < 12:
@@ -379,7 +388,7 @@ def main(argv=None):
     sp = sub.add_parser("add", help="Record a grounded lesson")
     sp.add_argument("--feature", required=True)
     sp.add_argument("--signal", required=True, choices=sorted(SIGNALS))
-    sp.add_argument("--source", required=True, help="file:line / AC id / mutant id / SPEC_DEVIATION ref")
+    sp.add_argument("--source", required=True, help="file:line / AC id / check id / SPEC_DEVIATION ref")
     sp.add_argument("--text", required=True, help="One terse, actionable sentence")
     sp.add_argument("--scope", default="", help="Optional: path/layer/tag for retrieval filtering")
     sp.set_defaults(fn=cmd_add)
