@@ -59,6 +59,8 @@ jobs:
 
       - name: Validate Skills Structure
         uses: ./.github/actions/validate-skills
+        with:
+          base: ${{ env.NX_BASE }}
 
       - name: Security Scan
         id: security-scan
