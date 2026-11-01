@@ -1,16 +1,15 @@
 # Coding Principles
 
-Behavioral bias, not checklist. Read before every implementation.
+A behavioural bias, not a checklist. Read it before every implementation.
 
 ---
 
 ## Before Coding
 
-- State assumptions explicitly. If uncertain, ask.
-- Multiple interpretations exist? Present all-don't pick silently.
-- Simpler approach exists? Say so. Push back when warranted.
-- Something unclear? Stop. Name what's confusing. Ask.
-- User's approach seems wrong? Disagree honestly. Don't be sycophantic.
+- State your assumptions. When you are unsure and the choice is the user's, ask.
+- Several readings exist? Name them all. Never pick one in silence.
+- A simpler approach exists? Say so, and push back when it is warranted.
+- The user's approach looks wrong? Disagree honestly. Agreement you do not hold helps nobody.
 
 ---
 
@@ -18,55 +17,66 @@ Behavioral bias, not checklist. Read before every implementation.
 
 ### Simplicity
 
-- No features beyond what was asked
-- No abstractions for single-use code
-- No "flexibility" or "configurability" not requested
-- No error handling for impossible scenarios
-- 200 lines that could be 50? Rewrite it.
+- No feature beyond the request.
+- No abstraction for code used once.
+- No flexibility or configuration nobody asked for.
+- No error handling for a state that cannot happen.
+- 200 lines that could be 50? Rewrite them.
 
 ### Surgical Changes
 
-- Don't "improve" adjacent code, comments, or formatting
-- Don't refactor things that aren't broken
-- Match existing style, even if you'd do differently
-- Unrelated dead code noticed? Mention it-don't delete it
-- Remove ONLY imports/variables/functions YOUR changes orphaned
-- Don't remove pre-existing dead code unless asked
+- Do not improve adjacent code, comments or formatting.
+- Do not refactor what is not broken.
+- Match the existing style, even when you would write it differently.
+- Mention unrelated dead code. Do not delete it.
+- Remove only the imports, variables and functions your change orphaned.
 
 ### Test Integrity
 
-- NEVER weaken an existing test assertion to make it pass
-- NEVER delete a test to reduce failure count
-- NEVER use the test framework's skip/disable/pending mechanism to bypass a failing test
-- NEVER modify a task's tests afterward to make the implementation pass
-- If a test is genuinely wrong, STOP and confirm with the user before changing it
-- Tests are the spec - implementation conforms to tests, not the other way around
+`check_commit.py` refuses most of these on the commit. The rules hold anyway.
+
+- Never weaken an assertion to make it pass.
+- Never delete a test to reduce the failure count.
+- Never use the framework's skip or pending mechanism to get past a failing test.
+- Never change a task's tests afterwards to make the code pass.
+- When a test is wrong per the spec, stop and confirm with the user before you change it.
+- The tests are the spec. The code conforms to the tests, never the reverse.
 
 ### Goal-Driven
 
-- Transform vague tasks into verifiable goals
-- Multi-step work? State brief plan with verify checkpoints
-- Every changed line must trace directly to user's request
+- Turn a vague task into a goal you can check.
+- Every changed line traces to the request.
 
 ---
 
 ## After Each Change
 
-Ask: "Would senior engineer call this overcomplicated?"
-If yes → simplify before proceeding.
+Ask: "Would a senior engineer call this overcomplicated?" If yes, simplify before you go on.
 
 ---
 
-## Writing Voice (specs, ADRs, reports, commits, summaries)
+## Writing Rules
 
-The artifacts this skill produces should read like a decided engineer wrote them, not like generated boilerplate.
+These rules hold this skill's own text, and every artifact it writes: specs, decisions, reports, commit bodies and summaries. `lint_prose.py` checks the skill's text on every `selftest.py` run. Each rule is a count or an exact match.
 
-- **Lead with the verdict.** Validation reports and chat summaries open with PASS/FAIL and the one thing that matters, not a warm-up paragraph.
-- **Decisions are definitive.** An ADR or a recorded decision states what you chose: "we will", not "we might" or "we should probably". If it still hedges, it is not a decision yet.
-- **Cut filler and mechanical hedging.** Drop "it is worth noting", "as you can see", "in order to", and reflexive "may/might/could" on claims you are actually sure about. Reserve hedging for genuine uncertainty; using it everywhere signals nothing.
-- **One idea per sentence; short sentences.** Prefer the plain verb over the nominalization ("evaluated", not "performed an evaluation of"). Keep subject-verb-object near the front.
-- **Do not announce the phase.** Produce the artifact; do not narrate "I will now run Specify."
-- **Avoid the em dash as a default connector.** A comma, colon, or two sentences usually read cleaner.
-- **Writing in Portuguese:** keep sentences short; do not carry the long, multi-clause subordinate structure of Portuguese into the artifact. Plain and direct beats formal.
+1. **At most 20 words per sentence.** A longer sentence carries two ideas. Split it.
+2. **At most 6 sentences per paragraph, list item or table cell.** Each paragraph holds one topic.
+3. **No semicolons.** A semicolon joins two sentences. Write two.
+4. **No `e.g.`, `i.e.`, `etc.`, `vs.` or `cf.`** Their periods read as the end of a sentence. Write "such as", "that is" or "and others".
+5. **No em dash or en dash.** A dash usually hides a second sentence. Use a comma, a colon or a full stop.
+6. **One term for one thing.** The skill calls each thing by one name:
+   - "criterion" and "criteria", never `AC` or `acceptance criterion`
+   - "sub-agent", never `subagent`
+   - "user" for the person the skill serves, never `human`
+   - "author" for whoever writes the plan or the code, never `builder` or `implementer`
 
-None of this means dumbing down the content - only the prose carrying it.
+Then write in a decided voice:
+
+- **Lead with the verdict.** A report opens with PASS or FAIL and the one thing that matters.
+- **State decisions as decisions.** Write "we will", never "we might". A decision that still hedges is not one yet.
+- **Use active voice and the plain verb.** Write "evaluated", never "performed an evaluation of". Name who acts.
+- **Cut filler.** Drop "it is worth noting", "as you can see" and "in order to". Keep hedging for real uncertainty.
+- **Do not announce the phase.** Produce the artifact instead of narrating "I will now run Specify".
+- **In Portuguese**, keep sentences short. Do not carry long chains of subordinate clauses into the artifact.
+
+None of this simplifies the content. It simplifies only the prose that carries it.

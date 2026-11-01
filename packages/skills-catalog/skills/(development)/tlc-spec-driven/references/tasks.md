@@ -1,484 +1,171 @@
 # Tasks
 
-**Goal**: Break into GRANULAR, ATOMIC tasks. Clear dependencies. Right tools. Sequential phase execution plan.
+**Goal**: Cut the plan into tasks. Each task is one test cycle: its code, the tests that prove it, one gate and one commit.
 
-**Skip this phase when:** There are ≤3 obvious steps. In that case, tasks are implicit - go straight to Execute and list them inline in your implementation plan.
+**When:** Large and Complex scopes. A Medium feature keeps its checks in `spec.md` and commits one step at a time.
 
-## Why Granular Tasks?
+## What a Task Is
 
-| Vague Task (BAD) | Granular Tasks (GOOD)             |
-| ---------------- | --------------------------------- |
-| "Create form"    | T1: Create email input component  |
-|                  | T2: Add email validation function |
-|                  | T3: Create submit button          |
-|                  | T4: Add form state management     |
-|                  | T5: Connect form to API           |
-| "Implement auth" | T1: Create login form             |
-|                  | T2: Create register form          |
-|                  | T3: Add token storage utility     |
-|                  | T4: Create auth API service       |
-|                  | T5: Add route protection          |
+`validate_tasks.py` holds every rule below. `check_commit.py` measures each one again on the commit.
 
-**Benefits of granular:**
+- **One test cycle.** A task creates or changes code and adds the tests that prove it. A test belongs to the task whose code it proves. The closing e2e task is the only test-only task.
+- **Its files, declared.** `**Files**:` lists every path once, as `Create:`, `Modify:`, `Delete:` or `Test:`. A `Modify:` or `Delete:` file exists today, or an earlier task creates it. A `Create:` file exists nowhere yet. The commit may stage only these files and `.specs/`.
+- **A removal is declared too.** A file the task removes is a `Delete:` line, and the commit deletes it. A test leaves the same way, so the approved plan shows it.
+- **The design is built.** Each design `**Location**:` lands in a task. A `(new)` location needs a `Create:` of that file, or of a file under that folder. An `(existing)` location needs any file a task lists there.
+- **Three code files at most.** A task over that splits where a reviewer could reject one part and keep the other. When it truly cannot split, the task writes `**Size**: large - <why>`, and the reason stays visible.
+- **Setup is not a task.** Every task names criterion IDs in `**Requirement**:`. Setup, config and scaffolding fold into the first task that needs them.
+- **Whole, never shrunk.** "For now", "placeholder", "TODO", "temporary" and "por enquanto" fail the gate. What a task leaves out is another task.
+- **Order lives in the phases.** A task depends only on tasks that come before it. Phases are numbered 1, 2, 3 and hold 10 tasks at most. A feature holds 21 tasks at most, or writes `**Size**: large - <why>` under its title.
 
-- **Agents don't err** - Single focus, no ambiguity
-- **Easy to test** - Each task = one verifiable outcome
-- **Clean commits** - Each task = one atomic, revertable commit
-- **Errors isolated** - One failure doesn't block everything
-
-**Rule**: One task = ONE of these:
-
-- One component
-- One function
-- One API endpoint
-- One file change
-
----
+These limits come from code review. A review finds most defects in a change of a few hundred lines and loses them past that. The commit budget is 200 changed lines of code with a warning, and 400 with an error.
 
 ## Process
 
-### 1. Review Design
+### 1. Read the Design and Its Review
 
-Read `.specs/features/[feature]/design.md` before creating tasks.
+Read `.specs/features/[feature]/design.md` and `review.md` before you write a task. The design says `**Reviewed**: review.md`, or `not run - <why>`, with every finding resolved. An escalated finding carries the user's answer, and the tasks follow it.
 
-### 1.5. Generate the Test Coverage Matrix (ALWAYS)
+### 2. Write the Test Coverage Matrix
 
-This step ALWAYS runs - there is no precondition. Decide which of two paths to take, then generate the three sections below.
+**Read the project's testing rules first.** Look at `AGENTS.md` and any rules file the project uses. Look at `CONTRIBUTING.md`, the testing parts of `docs/`, and the README. Look at coverage thresholds in the test runner config and in CI.
 
-**Step 0 - Read project quality/testing guidelines (ALWAYS, before anything else).**
+- **Rules found:** the matrix follows them. Existing tests fill in style, location and framework only. Name the files you read.
+- **No rules found:** cover every criterion and every edge case. Domain logic maps one to one to criteria. Routes cover the happy path, the edge cases and the error paths. This may go deeper than the repo does today, and that is intended.
 
-Before sampling tests or inferring anything, scan the project for documented quality and testing standards. Stack-agnostic sources to check (illustrative, not exhaustive):
+**Find the commands in the repo.** Never invent a command or assume an ecosystem. Read the build manifests, the test config and the CI workflows. Capture the lint, format and type check commands too, because the Build gate runs them. With no tests in the repo at all, ask the user which test types and commands to use.
 
-- Agent/AI convention files, if the repo has any: `AGENTS.md` (the vendor-neutral standard) and any tool-specific rules file or rules directory the project happens to use
-- Contributor guides: `CONTRIBUTING.md`, `docs/` (testing, quality, or standards subdocs), README testing section
-- Tool configuration: coverage thresholds in the test runner config (e.g., `jest.config.*`, `vitest.config.*`, `pytest.ini`, `.nycrc`, `Makefile` coverage targets, CI coverage gates)
+**Each layer names the globs of its code.** `validate_tasks.py` matches every `Create:` and `Modify:` path against these globs. A path in a layer that requires tests needs that test type in the task's `**Tests**:`. A path that matches no layer fails, so add its layer. `**/` also matches no folder at all.
 
-**If guidelines are found:** the Coverage Expectation (see matrix below) conforms to them. Existing test samples fill gaps in style/location/framework only. Cite the specific files found in the matrix provenance note.
+### 3. Write the Checks
 
-**If no guidelines are found:** apply the strong default - cover every spec AC and every listed edge case; domain/business logic maps 1:1 to spec ACs; routes/e2e cover happy + edge + error paths. This default may exceed the current repo's depth, which is intentional.
-
-**Decision:**
-
-- **Existing tests in the repo** → infer the matrix and gate commands by sampling the codebase.
-- **No tests at all** → ask the user: "What test types will this project use (unit / integration / e2e / none)? What commands run them?"
-
-**How to infer (path 1 - existing tests):**
-
-1. **Sample test files.** Locate 5-10 existing test files. Map each file's location relative to its source file to identify which code layers are exercised and at what level (unit, integration, e2e). Use these samples for style, location patterns, framework, and test type - and as a **floor** (never produce tests less thorough than existing ones for the same layer). Existing tests are NOT a ceiling on thoroughness; the thoroughness target comes from the spec ACs, listed edge cases, and guidelines (or strong default). The Coverage Expectation column captures the target per layer.
-2. **Discover commands from the repo.** Do NOT invent commands and do NOT assume an ecosystem. Read the project's own build/task manifests, test config, and CI workflows to extract the actual commands - for example: `package.json` / `project.json` (JS/TS), `Makefile`, `pyproject.toml` / `tox.ini` / `pytest` (Python), `Cargo.toml` (Rust), `go test` invocations (Go), `pom.xml` / `build.gradle` (Java/Kotlin), `Gemfile` / `Rakefile` (Ruby), `composer.json` (PHP), `.github/workflows` / `.gitlab-ci.yml`. The list is illustrative; detect what this repo actually uses. Capture the **linter/formatter** command too (e.g. the configured `lint`/`format`/`typecheck` script, or a `.pre-commit-config`, `.golangci.yml`, `ruff`/`eslint`/`biome` config) - the Build gate runs it alongside the tests.
-
-**Output contract - render these two sections verbatim into `tasks.md`** (the exact headings downstream phases reference):
-
----
-
-## Test Coverage Matrix
-
-> Generated from codebase, project guidelines, and spec - confirm before Execute. Guidelines found: [list files, e.g. `AGENTS.md`, `jest.config.ts` - or "none - strong defaults applied"].
-
-| Code Layer | Required Test Type | Coverage Expectation | Location Pattern | Run Command |
-| ---------- | ------------------ | -------------------- | ---------------- | ----------- |
-| [layer] | [unit/integration/e2e/none] | [depth target for this layer] | [glob or path pattern] | [command] |
-
-**Coverage Expectation values** - set from guidelines first; use strong defaults when no guideline applies:
-
-| Layer type | Strong default (no guideline) |
-| ---------- | ----------------------------- |
-| Domain / business-logic (service, use-case, domain model) | All branches; 1:1 to spec ACs; every listed edge case has a test |
-| Route / controller / e2e / integration | All routes in scope: happy path + every listed edge case + error/failure paths |
-| Repository / data-access | Key query paths + error handling; infer from existing repo tests |
-| Entity / config / schema | none - build gate only |
-
-These defaults may exceed the current repo's depth. That is intentional - they are a **target**, not a reflection of what already exists.
-
-*Example (filled in):*
-
-| Code Layer | Required Test Type | Coverage Expectation | Location Pattern | Run Command |
-| ---------- | ------------------ | -------------------- | ---------------- | ----------- |
-| Service | unit | All branches; 1:1 to spec ACs; all listed edge cases | `src/**/__test__/*.spec.ts` | `yarn test:unit` |
-| Repository | integration | Key query paths + error paths | `src/**/__test__/*.e2e-spec.ts` | `yarn test:e2e` |
-| Controller/Resolver | e2e | All routes: happy + edge + error | `src/**/__test__/*.e2e-spec.ts` | `yarn test:e2e` |
-| Entity / Config | none | - (build gate only) | - | build gate only |
-
-## Gate Check Commands
-
-> Generated from codebase - confirm before Execute.
-
-| Gate Level | When to Use | Command |
-| ---------- | ----------- | ------- |
-| Quick | After tasks with unit tests only | [unit test command] |
-| Full | After tasks with e2e/integration tests | [unit + e2e commands] |
-| Build | After phase completion or config/entity-only tasks | [build + lint + all tests] |
-
----
-
-**Co-located tests:** Every task that creates or modifies a code layer with a required test type MUST include writing/updating those tests in the same task. Tests are NOT separate tasks. The tests must satisfy the layer's **Coverage Expectation** from the matrix - not merely exist.
-
-| Task creates...                           | Done When must include...                                                                                          |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Code layer with "unit" requirement        | Unit tests written satisfying the layer's Coverage Expectation (e.g., 1:1 AC mapping for domain logic; all listed edge cases covered) + quick gate passes |
-| Code layer with "e2e" requirement         | E2E tests written satisfying the layer's Coverage Expectation (e.g., every route the task adds: happy path + edge + error paths) + full gate passes |
-| Code layer with "integration" requirement | Integration tests written satisfying the layer's Coverage Expectation + full gate passes                           |
-| Code layer with "none" requirement        | Gate check at appropriate level                                                                                    |
-
-### 1.6. Write the Checks (ALWAYS)
-
-The checks are what the build is held to and what `check_proofs.py` runs at the end. Write one per
-acceptance criterion - one observable claim with its concrete value - citing the requirement ID and
-the AC number, each with the proof that settles it:
+The checks are what the build is held to, and what `check_proofs.py` runs at the end. Write one or more per criterion. Each is one claim with its concrete value, and it ends with the criterion IDs it settles:
 
 ```markdown
 **Run unit**: `npx vitest run src/billing --reporter=verbose`
 
-**C3** - A failed charge sets the status to `suspended`, never `cancelled` (BILL-02, AC 1)
+**C3** - A failed charge sets the status to `suspended`, never `cancelled` (BILL-02)
 Proof: run unit | ✓ dunning > failed charge suspends
 
-**C4** - The checkout page still loads with a suspended account (BILL-02, AC 3)
+**C4** - The checkout page still loads with a suspended account (BILL-03)
 Proof: `npx playwright test e2e/checkout.spec.ts -g "suspended account"`
 ```
 
-- **The proof names one test, with the project's own command.** The skill knows no test runner. Tests
-  that run together go on one `**Run <name>**:` line in the header, run once; a check that reads it
-  writes `Proof: run <name> | <the line its test prints when it passes>`, copied from a real run with
-  the pass marker (`✓`, `PASSED`, `ok`). It passes when those words appear, in order, on one line of
-  the run's output, so a renamed test or a filter that selects nothing reads `no test ran`. Put the
-  verbose flag in the `Run` line when the default reporter prints only a summary. A test that cannot
-  share a run - an end-to-end suite with its own server - is a lone `Proof: <command>` with a filter
-  that selects it, judged by its exit code. A runner that exits 0 when its filter selects nothing
-  (`node --test`, `dotnet test`) passes a lone proof on a typo, so with one of those even a single
-  test gets a `Run` line and a `run` proof. A suite going green settles no single claim.
-- **Runs go one at a time.** `check_proofs.py` never runs two groups or lone proofs side by side, so
-  tests that share a database or a port stay safe; a group's own parallelism is the project's.
-- **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png`
-  (see [implement.md](implement.md), Walk). A state no capture draws is proven by a test, or by
-  `Proof: walk - <what the visit shows>`.
-- **`**Build**:`** in the header names the repo's build, type check and lint commands, `;`-separated, from
-  the Build gate - `**Build**: none - <why>` when there are none.
+- **The proof names one test, with the project's own command.** Tests that run together go on one `**Run <name>**:` line, and run once. A check that reads it writes `Proof: run <name> | <the line its test prints>`. Copy that line from a real run, pass marker included (`✓`, `PASSED`, `ok`).
+- **Why the expected line.** The proof passes when those words appear in order on one line of the output. A renamed test, or a filter that selects nothing, then reads `no test ran`. Put the verbose flag in the `Run` line when the default reporter prints only a summary.
+- **A lone proof.** Some tests cannot share a run, such as an e2e suite with its own server. Each is a lone `Proof: <command>`, judged by its exit code. Some runners exit 0 when the filter selects nothing (`node --test`, `dotnet test`). With those, give even a single test a `Run` line and a `run` proof.
+- **Runs go one at a time.** `check_proofs.py` never runs two side by side, so tests that share a database or a port stay safe.
+- **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png` ([implement.md](implement.md)). A state no capture draws is proven by a test, or by `Proof: walk - <what the visit shows>`.
+- **`**Build**:`** names the repo's build, type check and lint commands, separated by `;` inside the code span. Write `**Build**: none - <why>` when there are none.
 
-A screen task's `Done when` names the capture it builds, with the full path.
+`validate_tasks.py` refuses a check that cites no criterion, a criterion with no check, and a criterion no task names.
 
-### 2. Break Into Atomic Tasks
+### 4. Write the Tasks in Phases
 
-**Task = ONE deliverable**. Examples:
+Group the tasks into ordered phases under `## Tasks`. A phase completes before the next starts, and tasks run in order within a phase. Number tasks T1, T2, T3 across the whole file.
 
-- ✅ "Create UserService interface" (one file, one concept)
-- ❌ "Implement user management" (too vague, multiple files)
+**Each phase sits near the worker budget.** Execute packs whole phases into batches of about 7 tasks, and never splits a phase. A phase over 10 tasks fails the gate, so split it at a real dependency seam.
 
-### 3. Define Dependencies
+There is no hand-drawn diagram. The phases are the only record of order, and `plan_batches.py` draws the map from them.
 
-What MUST be done before this task can start?
+### 5. Run the Gates
 
-### 4. Create Execution Plan
+1. `python3 <skill-dir>/scripts/validate_tasks.py <feature>`. Fix every error. Never present tasks that fail.
+2. `python3 <skill-dir>/scripts/plan_batches.py <feature>`. It prints the phase map and the batches. Show both with the tasks.
 
-Group tasks into ordered phases. Each phase depends on the ones before it; tasks execute sequentially within a phase.
+### 6. Present and Stop
 
-**Size phases near the worker budget.** During Execute, phases are packed into task-budgeted batches (~7 tasks per sub-agent, whole phases - see [sub-agents.md](sub-agents.md)). Because a batch cut may only land on a phase boundary, a phase that is much larger than the budget forces an over-sized worker. Keep each phase from greatly exceeding the budget:
+This is the second stop for the user, after the spec. Show the tasks, the phase map and the batches. When the user approves, run `python3 <skill-dir>/scripts/approve.py <feature> tasks --user "<their words>"`. It sets `**Status**: Approved` and stamps the hash of the file. You never stamp words the user did not give.
 
-- If a phase would hold **more than ~10 tasks (≈1.5× the budget)**, split it into cohesive sub-phases at a genuine dependency/cohesion seam - not at an arbitrary task index.
-- Only leave a phase over-sized when its tasks are one tight dependency chain that genuinely cannot be split. That is a legitimate (if fat) single-worker phase, not a smell.
-
-This keeps phase boundaries meaningful while letting the packing hit its target worker count.
-
-### 5. Validate Before Presenting (MANDATORY)
-
-Before showing tasks to the user, run ALL three pre-approval checks. These are NOT optional - they are gates. If any check fails, restructure the tasks and re-run until all pass.
-
-**Deterministic backing (run it, do not eyeball it).** `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` enforces the structural half of these checks: a `Where` that names multiple files (granularity smell, Check 1), a diagram edge with no matching `Depends on` within a phase and vice-versa (Check 2), a task missing its `Tests` or `Gate` field, a `Tests: none` to confirm against the matrix (Check 3), a dependency pointing to a later phase, and the `## Checks` with a proof each, the `**Build**:` line, and a `Run` line with an expected line for each `run` proof. A non-zero exit means restructure before presenting. The layer-to-test co-location judgment stays yours.
-
-**Check 1: Task Granularity** - verify each task is atomic (see Granularity Check section).
-
-**Check 2: Diagram-Definition Cross-Check** - verify the execution diagram matches every task's `Depends on` field (see Diagram-Definition Cross-Check section).
-
-**Check 3: Test Co-location Validation** - verify every task's `Tests` field matches the **Test Coverage Matrix** generated above (see Test Co-location Validation section).
-
-A failing check means restructure before presenting - do not show failing tasks to the user and ask them to approve.
-
-**Note on the generated matrix:** The two sections (`Test Coverage Matrix`, `Gate Check Commands`) are provisional - generated from codebase sampling or user input and included in this file for user confirmation as part of task approval. They become authoritative once the user approves the tasks.
-
-### 6. Present and stop
-
-Present the tasks for approval and stop: this is the second stop for a human, after the spec. When the user approves, set `**Status**: Approved` and write `**Approved**: <YYYY-MM-DD> - user: "<their words>"`; an approval the user did not give is never written.
+**A change after the approval.** During Execute the plan can change: a task splits, a file joins a task, or a task takes `**Size**: large`. Record it with `approve.py <feature> tasks --amend "<what changed and why>"`, then commit tasks.md alone. A change to what the user decided goes back to them: a criterion, a check's claim or the scope. Until then, `validate_tasks.py` and `check_commit.py` refuse tasks.md, because its hash no longer matches.
 
 ---
 
 ## Template: `.specs/features/[feature]/tasks.md`
 
-```markdown
+````markdown
 # [Feature] Tasks
 
 ## Execution Protocol (MANDATORY -- do not skip)
 
-Implement these tasks with the `tlc-spec-driven` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, the walk, check_proofs, the Verifier and the screens sub-agent).
-
-**If the skill cannot be activated, STOP and tell the user - do not proceed without it.**
+Implement these tasks with the `tlc-spec-driven` skill: activate it by name and follow its Execute flow and Critical Rules. Do not search for skill files by filesystem path. If the skill cannot be activated, STOP and tell the user.
 
 ---
 
+**Spec**: `.specs/features/[feature]/spec.md`
 **Design**: `.specs/features/[feature]/design.md`
 **Status**: Draft | Approved | In Progress | Done
-**Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
+**Approved**: [approve.py writes this line when the user approves]
 **Build**: `[build command]; [type check command]; [lint command]`
-**Run unit**: `[the command that runs this feature's tests, a line per test]`
-
----
-
-<!-- The two sections below are generated by step 1.5 of the Tasks process and filled in during task creation. Do not manually populate them - they are produced by the agent from codebase sampling. -->
+**Run unit**: `[the command that runs this feature's unit tests, verbose]`
 
 ## Test Coverage Matrix
 
-[Generated in step 1.5 - see process above]
+Rules read: [files, or "none - strong defaults applied"]
+
+| Layer | Paths | Tests | Coverage Expectation | Test Location |
+| --- | --- | --- | --- | --- |
+| Service | `src/**/*.service.ts` | unit | All branches, one to one to criteria, every edge case | `src/**/*.service.spec.ts` |
+| Controller | `src/**/*.controller.ts` | e2e | Every route: happy, edge and error paths | `test/**/*.e2e-spec.ts` |
+| Entity / Config | `src/**/*.entity.ts`, `src/config/**` | none | Build gate only | - |
 
 ## Gate Check Commands
 
-[Generated in step 1.5 - see process above]
+| Level | When to Use | Command |
+| --- | --- | --- |
+| quick | A task with unit tests only | `[unit test command]` |
+| full | A task with integration or e2e tests | `[unit and e2e commands]` |
+| build | The last task of a phase, or a task with no tests | `[build, lint and all tests]` |
 
----
-
-## Execution Plan
-
-Phases are ordered and run sequentially - each phase completes before the next begins, and tasks within a phase execute in order.
+## Tasks
 
 ### Phase 1: Foundation
 
-Tasks that must be done first, in order.
+#### T1: [Create the X service with its rule]
 
-```
-T1 → T2 → T3
-```
-
-### Phase 2: Core Implementation
-
-Builds on the foundation.
-
-```
-T4 → T5 → T6 → T7
-```
-
-### Phase 3: Integration
-
-Bringing it all together.
-
-```
-T8 → T9
-```
-
----
-
-## Task Breakdown
-
-### T1: [Create X Interface]
-
-**What**: [One sentence: exact deliverable]
-**Where**: `src/path/to/file.ts`
+**What**: [One sentence: the exact deliverable]
+**Files**:
+- Create: `src/billing/x.service.ts`
+- Test: `src/billing/x.service.spec.ts`
 **Depends on**: None
-**Reuses**: `src/existing/BaseInterface.ts`
-**Requirement**: [FEAT]-01
-
-**Done when**:
-
-- [ ] Interface defined with all methods from design
-- [ ] Types exported correctly
-- [ ] No TypeScript errors
-
-**Tests**: [unit/e2e/integration/none - from coverage matrix]
-**Gate**: [quick/full/build - from gate check commands]
-
----
-
-### T2: [Implement Y Service]
-
-**What**: [Exact deliverable]
-**Where**: `src/services/YService.ts`
-**Depends on**: T1
-**Reuses**: `src/services/BaseService.ts` patterns
-
-**Done when**:
-
-- [ ] Implements interface from T1
-- [ ] Handles error cases from design
-- [ ] Gate check passes: `[quick gate command from the Gate Check Commands above]`
-- [ ] Test count: [N] tests pass (no silent deletions)
-
+**Requirement**: [FEAT]-01, [FEAT]-02
+**Reuses**: `src/billing/base.service.ts#BaseService`
 **Tests**: unit
 **Gate**: quick
+**Done when**:
+- [ ] [A binary, testable outcome]
+- [ ] Gate passes: `[quick command]`
 
----
+### Phase 2: Integration
 
-### T3: [Create Z Component]
+#### T2: [Expose X on the route]
 
-**What**: [Exact deliverable]
-**Where**: `src/components/ZComponent.tsx`
+**What**: [One sentence]
+**Files**:
+- Modify: `src/billing/billing.controller.ts`
+- Test: `test/billing.e2e-spec.ts`
 **Depends on**: T1
-**Reuses**: `src/components/BaseComponent.tsx`
-
-**Done when**:
-
-- [ ] Component renders correctly
-- [ ] Handles props from interface
-- [ ] Follows existing component patterns
-- [ ] Gate check passes: `[quick gate command from the Gate Check Commands above]`
-- [ ] Test count: [N] tests pass (no silent deletions)
-
-**Tests**: unit
-**Gate**: quick
-
----
-
-### T4: [Add A Feature to Y]
-
-**What**: [Exact deliverable]
-**Where**: `src/services/YService.ts` (modify)
-**Depends on**: T2, T3
-**Reuses**: Existing service patterns
-
-**Done when**:
-
-- [ ] Feature works per acceptance criteria
-- [ ] Gate check passes: `[full gate command from the Gate Check Commands above]`
-- [ ] Test count: [N] tests pass (no silent deletions)
-
-**Tests**: integration
+**Requirement**: [FEAT]-03
+**Tests**: e2e
 **Gate**: full
-
-**Commit**: `feat([scope]): [description]`
-
----
+**Done when**:
+- [ ] [A binary, testable outcome]
 
 ## Checks
 
-**C1** - [one observable claim with its concrete value] ([FEAT]-01, AC 1)
-Proof: run unit | [the line C1's test prints when it passes, pass marker included]
+**C1** - [one observable claim with its concrete value] ([FEAT]-01)
+Proof: run unit | [the line its test prints when it passes, pass marker included]
 
-**C2** - [the screen in `captures/[capture].png`, reached by [gesture]] ([FEAT]-02, AC 1)
+**C2** - [the screen in `captures/[capture].png`, reached by [gesture]] ([FEAT]-03)
 Proof: browser captures/[capture].running.png
-
----
 
 ## Handoff
 
-The feature's live state, written as it happens - a compaction gives no warning.
+The feature's live state, written as it happens. A compaction gives no warning.
 
-**Settled mid-build:** [each answer the user gave during Execute, in their words, the turn it arrived - or none]
-**Dispatched:** [each sub-agent before it is sent: batch worker, Verifier, screens round 1 or 2 - at which `HEAD`, and `returned` when it does]
-**Walked:** [each story's Independent Test as you did it - what the screen showed, and how the user reaches each state: sign-in, data, path]
-
----
-
-## Phase Execution Map
-
-Visual representation of task ordering. Phases run in sequence, and tasks within a phase run in order:
-
-```
-Phase 1 → Phase 2 → Phase 3
-
-Phase 1:  T1 ------→ T2 ------→ T3
-Phase 2:  T4 ------→ T5 ------→ T6 ------→ T7
-Phase 3:  T8 ------→ T9
-```
-
-Execution is strictly sequential - there is no intra-phase parallelism. A single agent (or batch worker) works one task at a time, in order.
-
-**How phase-based execution works:**
-
-At Execute, the agent counts total tasks and packs phases into **task-budgeted batches** (~7 tasks
-per worker, whole phases - the benchmarked sweet spot is ~20 tasks → ~3 workers). A **phase** is the
-semantic/dependency unit; a **batch** is one or more *consecutive whole phases* assigned to one
-worker. The cut only ever lands on a phase boundary - a phase is never split across workers. When
-packing yields more than one batch (> ~8 tasks), the agent offers to dispatch batch sub-agents.
-Batches run sequentially: each worker executes ALL its tasks in order, then reports a compact summary
-before the next batch starts. This right-sizes the worker count by workload instead of by phase
-count (one-per-phase is too fragmented; expensive and slow). See [sub-agents.md](sub-agents.md) for
-the full model - packing algorithm, offer-then-confirm, worker payload, compact summary contract,
-failure handling, and context sizing guidance.
-
-When the whole feature fits a single batch (≤ ~8 tasks), execution happens inline in the main window
-with no sub-agents spawned.
-
-**The orchestrating agent's role during Execute:**
-1. Count total tasks and pack phases into ~7-task batches - offer batch sub-agents if that yields more than one batch and the user accepts
-2. Dispatch the next batch (to a worker, or execute inline), written on the Handoff's `**Dispatched:**` line first
-3. Receive the compact batch summary
-4. Update tasks.md with results
-5. If the batch summary shows all tasks complete: proceed to the next batch
-6. If a task failed: decide fix/escalate before dispatching the next batch
-
----
-
-## Task Granularity Check
-
-Before approving tasks, verify they are granular enough:
-
-| Task                            | Scope         | Status       |
-| ------------------------------- | ------------- | ------------ |
-| T1: Create email input          | 1 component   | ✅ Granular  |
-| T2: Add validation function     | 1 function    | ✅ Granular  |
-| T3: Create form with all fields | 5+ components | ❌ Split it! |
-| T4: Connect to API              | 1 function    | ✅ Granular  |
-
-**Granularity check**:
-
-- ✅ 1 component / 1 function / 1 endpoint = Good
-- ⚠️ 2-3 related things in same file = OK if cohesive
-- ❌ Multiple components or files = MUST split
-
----
-
-## Diagram-Definition Cross-Check
-
-Before approving tasks, verify the execution diagram is consistent with the task definitions. These are independent artifacts that can drift - the diagram is drawn for visual clarity while task bodies are written for precision. Both must agree.
-
-For each task, check:
-
-| Task | Depends On (task body) | Diagram Shows | Status |
-| ---- | ---------------------- | ------------- | ------ |
-| T[N] | [deps from body] | [deps from diagram arrows] | ✅ Match or ❌ Mismatch |
-
-**Rules:**
-
-- Every `Depends on` in a task body must have a corresponding arrow in the diagram.
-- Every arrow in the diagram must correspond to a `Depends on` in the target task's body.
-- A task must never depend on a task in a later phase - dependencies point backward or within the same phase only.
-
----
-
-## Test Co-location Validation
-
-Before approving tasks, verify EVERY task's `Tests` field is consistent with the **Test Coverage Matrix** generated above. This is a hard gate - tasks that fail this check MUST be fixed.
-
-For each task, check: does the task create or modify a code layer that has a required test type in the coverage matrix? If yes, the task's `Tests` field MUST match.
-
-| Task | Code Layer Created/Modified | Matrix Requires | Task Says | Status |
-| ---- | --------------------------- | --------------- | --------- | ------ |
-| T[N]: [name] | [layer from coverage matrix] | [test type] | [task's Tests field] | ✅ OK or ❌ VIOLATION |
-
-**Rules:**
-
-- "Tested in another task" is NOT a valid justification for `Tests: none`. That is test deferral - the exact anti-pattern this validation prevents.
-- `Tests: none` is only valid when the coverage matrix says "none" for that code layer.
-- If a task creates MULTIPLE code layers (e.g., service + controller), use the HIGHEST test type required by any of them.
-- Any ❌ VIOLATION → restructure the task to include its required tests before proceeding.
-
-**Resolving compilation dependencies:**
-
-When a task creates code that can't be tested until a later task completes (e.g., a controller that needs module wiring before its e2e tests can run), do NOT defer the tests to a separate task. Instead, restructure:
-
-1. **Merge forward:** Move the untestable task's tests into the earliest task where they become runnable (e.g., the wiring task includes wiring + e2e tests for the controller it enables).
-2. **Merge backward:** Absorb the blocking dependency into the current task so it becomes self-testable (e.g., controller task includes its own module registration).
-
-Pick whichever option keeps tasks atomic and cohesive. The goal: no task produces unverified code. If code can't be tested in the task that creates it, the task boundaries are wrong.
-
----
-
-## Tips
-
-- **Phases are ordered** - Each phase completes before the next; tasks run in order within a phase
-- **Reuses = Token saver** - Always reference existing code
-- **Dependencies are gates** - Clear what blocks what
-- **Done when = Testable** - If you can't verify it, rewrite it
-- **Requirement ID = Traceable** - Every task traces back to a spec requirement
-- **One commit per task** - Plan the commit message format in advance
-
----
-
-## Task Verification Standards
-
-Every task MUST follow the `Done when` + `Tests` + `Gate` fields defined in the **Task Breakdown** template above. Each `Done when` entry must be specific, testable (binary pass/fail), and reference the gate check command from the `Gate Check Commands` section. Include the expected test count to prevent silent deletions.
+**Settled mid-build:** [each answer the user gave during Execute, in their words - or none]
+**Dispatched:** [each sub-agent before it is sent, with its `HEAD`, and `returned` when it does]
+**Walked:** [each story's Independent Test as you did it, and how the user reaches each state]
+**Blocked:** [when a gate exits 3: the one thing in the way]
+**Tried:** [what you changed, read and searched]
+**Need:** [the one input that unblocks it]
+````

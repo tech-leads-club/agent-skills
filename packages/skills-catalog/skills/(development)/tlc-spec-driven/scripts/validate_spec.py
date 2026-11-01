@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 """
-validate_spec.py - deterministic closure-gate checks for a feature spec.md.
+validate_spec.py - the gate a spec.md passes before it is shown to the user.
 
-Turns the Requirement Closure Gate (Specify phase) into a checkable pass/fail
-run BEFORE a spec is presented for confirmation, instead of trusting the model
-to remember the checks. Pure standard library, zero dependencies. Operates only
-on the spec.md markdown artifact - never on the target codebase - so it stays
-stack-agnostic and tool-agnostic.
+It reads the spec through specs.py, so the shape it accepts is the one every other gate reads. Pure
+standard library; it reads the spec, its captures and .specs/STATE.md, never the codebase.
 
-What it checks (heuristic markdown inspection, not a full parser):
-  ERROR  - a required section is missing
-  ERROR  - an acceptance criterion has no SHALL (not testable / not EARS-shaped)
-  ERROR  - an Assumptions row has an empty "Chosen default" or "Rationale" cell
-  ERROR  - a Requirement Traceability row has a malformed ID
-  ERROR  - a capture under captures/ with no Sources line, non-binding with no quote of the user,
-           not cited by a criterion, or not shown as an image (`![..](captures/..)`)
-  ERROR  - a binding source and no `## Differences from the source`, or a row not confirmed under an
-           active AD-NNN in .specs/STATE.md
-  WARN   - an AC has SHALL but no recognizable EARS lead keyword
-  WARN   - template placeholder rows are still present (spec not filled in)
-  WARN   - open questions are not explicitly resolved
+What it checks:
+  ERROR  - no `**Scope**: Small | Medium | Large | Complex` line, or a scope below the floor the spec
+           itself sets: more than 3 criteria or 1 story owes Medium; more than 8 criteria or 2 stories
+           owe Large
+  ERROR  - a required section is missing (`## Implicit Requirements` too, for Large and Complex)
+  ERROR  - a story not written `### P<n>: <title>`, or with no `**Acceptance Criteria**:` field
+  ERROR  - a criterion with no ID of its own, or an ID used twice
+  ERROR  - a criterion with no SHALL or more than one: one criterion is one behaviour
+  ERROR  - a criterion with when, while or if inside it: the condition leads, `WHEN ... THEN the system
+           SHALL ...`; an IF with no THEN
+  ERROR  - a vague word in a criterion (quickly, gracefully, adequado, ...): it leaves no value to test
+  ERROR  - a semicolon in a criterion: two behaviours in one line
+  ERROR  - `## Implicit Requirements` without a row per dimension, or a row that lands on no criterion
+           and gives no `N/A - <reason>`
+  ERROR  - an Assumptions row with no chosen default or no rationale
+  ERROR  - a template placeholder left in (`[Feature]`, `[role]`, ...)
+  ERROR  - captures: not binding and not quoted as inspiration, not cited by a criterion, not shown,
+           or a departure from a binding source with no active AD-NNN
+  ERROR  - the spec changed after the user approved it: the hash on its `**Approved**` line no longer
+           matches (approve.py writes the line)
+  WARN   - the open questions are not `none` (fine to present; the spec cannot be approved like this)
+  WARN   - an obsolete `## Requirement Traceability` section (IDs live on the criteria now)
 
 Usage:
-  python3 <skill-dir>/scripts/validate_spec.py [target] [--root DIR] [--strict]
+  python3 <skill-dir>/scripts/validate_spec.py [feature] [--root DIR] [--strict]
 
-  Invoke from the skill directory that ships this script (not the project root).
-  target    Path to a spec.md, a feature directory, or a project root.
-            Omitted -> auto-detect the single feature under <root>/.specs/features/.
-  --root    Project root that contains .specs/ (default: current dir).
-  --strict  Treat warnings as errors.
-
-Exit codes: 0 pass, 1 errors found (or warnings under --strict), 2 usage error.
+Exit codes: 0 pass, 1 errors (or warnings under --strict), 2 usage error, 3 the same errors twice in a row.
 """
 
 import argparse
@@ -39,209 +40,148 @@ import re
 import sys
 
 from lean_config import BINDING_RE, NOT_BINDING_RE
+from specs import (ID_RE, SCOPES, VAGUE_RE, approval_errors, feature_dir, finish, norm, read_spec,
+                   without_code)
 
 IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 USER_QUOTE_RE = re.compile(r"\buser\b[^\"“]*[\"“][^\"”]{3,}[\"”]", re.IGNORECASE)
 AD_ID_RE = re.compile(r"\bAD-\d{3,}\b")
-
-REQUIRED_SECTIONS = [
-    "Problem Statement",
-    "Out of Scope",
-    "Assumptions & Open Questions",
-    "User Stories",
-    "Requirement Traceability",
+PLACEHOLDER_RE = re.compile(r"(?<![!\]])\[[A-Z][^\]\n]*\](?![(\[])")
+REQUIRED_SECTIONS = ["Problem Statement", "Out of Scope", "Assumptions & Open Questions", "User Stories"]
+DIMENSIONS = [
+    "Input validation & bounds", "Failure / partial-failure states", "Idempotency / retry / duplicate handling",
+    "Auth boundaries & rate limits", "Concurrency / ordering", "Data lifecycle / expiry", "Observability",
+    "External-dependency failure", "State-transition integrity",
 ]
-
-ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-\d+$")
-PLACEHOLDER_RE = re.compile(r"^\s*\[.+\]\s*$")
-STATUS_VALUES = {"pending", "in design", "in tasks", "implementing", "verified"}
+# The scope a spec owes by its own size: (criteria above, stories above, scope).
+FLOORS = [(8, 2, "Large"), (3, 1, "Medium")]
 
 
-def resolve_spec(target, root):
-    """Return the path to a spec.md from a file, dir, or auto-detect."""
-    if target:
-        if os.path.isfile(target):
-            return target
-        if os.path.isdir(target):
-            cand = os.path.join(target, "spec.md")
-            if os.path.isfile(cand):
-                return cand
-            # maybe it's a project root
-            return _autodetect(target)
-        # Not a path: treat as a feature name under <root>/.specs/features/<name>/
-        cand = os.path.join(root, ".specs", "features", target, "spec.md")
-        if os.path.isfile(cand):
-            return cand
-        return None
-    return _autodetect(root)
+def scope_floor(n_criteria, n_stories):
+    for crit, stories, scope in FLOORS:
+        if n_criteria > crit or n_stories > stories:
+            return scope
+    return "Small"
 
 
-def _autodetect(root):
-    base = os.path.join(root, ".specs", "features")
-    if not os.path.isdir(base):
-        return None
-    features = [
-        d for d in sorted(os.listdir(base))
-        if os.path.isfile(os.path.join(base, d, "spec.md"))
-    ]
-    if len(features) == 1:
-        return os.path.join(base, features[0], "spec.md")
-    if len(features) == 0:
-        return None
-    # Ambiguous: signal the caller with the list.
-    raise SystemExit(
-        "validate_spec: multiple features found; pass one explicitly:\n  "
-        + "\n  ".join(os.path.join(base, f, "spec.md") for f in features)
-    )
+def check_criterion(c, errors):
+    text = without_code(c.text)
+    where = f"spec.md L{c.line} {c.id}"
+    shalls = len(re.findall(r"\bshall\b", text, re.IGNORECASE))
+    if shalls == 0:
+        errors.append(f"{where}: no SHALL - a criterion states what the system SHALL do")
+    elif shalls > 1:
+        errors.append(f"{where}: {shalls} SHALLs - one criterion is one behaviour; split it and give each its own ID")
+    lead = re.match(r"^(WHEN|WHILE|WHERE|IF)\b", text, re.IGNORECASE)
+    if not lead and re.search(r"\b(when|while|if)\b", text, re.IGNORECASE):
+        errors.append(f"{where}: a condition inside the sentence - lead with it: `WHEN <trigger> THEN the system SHALL ...`, "
+                      f"`WHILE <state> ...` or `IF <condition> THEN ...`")
+    if lead and lead.group(1).upper() == "IF" and not re.search(r"\bthen\b", text, re.IGNORECASE):
+        errors.append(f"{where}: IF with no THEN - `IF <condition> THEN the system SHALL <response>`")
+    for m in VAGUE_RE.finditer(text):
+        errors.append(f"{where}: `{m.group(1)}` - name the value a test can hold (a bound, a status, a message)")
+    if ";" in text:
+        errors.append(f"{where}: a semicolon joins two behaviours - split them into two criteria")
+    if text.lstrip().startswith("["):
+        errors.append(f"{where}: template text left in the criterion")
 
 
-def split_row(line):
-    cells = line.strip().strip("|").split("|")
-    return [c.strip() for c in cells]
-
-
-def is_separator(line):
-    return bool(re.match(r"^\s*\|?[\s:|-]+\|?\s*$", line)) and "-" in line
-
-
-def section_bounds(lines, name):
-    """Return (start, end) line indices for a `## name` section body."""
-    start = None
-    for i, ln in enumerate(lines):
-        if re.match(r"^#{1,3}\s+" + re.escape(name) + r"\s*$", ln.strip()):
-            start = i + 1
-            break
-    if start is None:
-        return None
-    end = len(lines)
-    for j in range(start, len(lines)):
-        if re.match(r"^#{1,3}\s+\S", lines[j]):
-            end = j
-            break
-    return (start, end)
-
-
-def classify_ears(text):
-    """Return (ok, note). ok requires a SHALL; note records the EARS pattern."""
-    t = text.strip()
-    low = t.lower()
-    has_shall = bool(re.search(r"\bshall\b", low))
-    if not has_shall:
-        return (False, "no SHALL")
-    kws = []
-    if re.search(r"\bwhile\b", low):
-        kws.append("WHILE")
-    if re.search(r"\bwhen\b", low):
-        kws.append("WHEN")
-    if re.match(r"^\s*if\b", low) or re.search(r"\bif\b.*\bthen\b", low):
-        kws.append("IF/THEN")
-    if re.search(r"\bwhere\b", low):
-        kws.append("WHERE")
-    if len(kws) >= 2:
-        return (True, "complex (" + "+".join(kws) + ")")
-    if kws:
-        pattern = {
-            "WHILE": "state-driven",
-            "WHEN": "event-driven",
-            "IF/THEN": "unwanted-behavior",
-            "WHERE": "optional-feature",
-        }[kws[0]]
-        return (True, pattern)
-    if re.match(r"^\s*the\b", low):
-        return (True, "ubiquitous")
-    return (True, "warn: SHALL present but no EARS lead keyword")
-
-
-def check(spec_path):
-    with open(spec_path, "r", encoding="utf-8") as f:
-        text = f.read()
-    lines = text.splitlines()
-    errors, warnings = [], []
-
-    # 1. Required sections.
-    for name in REQUIRED_SECTIONS:
-        if section_bounds(lines, name) is None:
-            errors.append(f"missing required section: ## {name}")
-
-    # 2. Acceptance criteria are EARS-shaped (have a SHALL).
-    in_ac = False
-    for i, ln in enumerate(lines, start=1):
-        stripped = ln.strip()
-        if re.match(r"^\*{0,2}Acceptance Criteria\*{0,2}\s*:?\s*$", stripped):
-            in_ac = True
+def check_sweep(doc, ids, errors):
+    body = doc.section("Implicit Requirements")
+    tables = doc.tables(*body) if body else []
+    if not tables:
+        errors.append("`## Implicit Requirements` has no table - `| Dimension | Lands on |`, one row per dimension")
+        return
+    t = tables[0]
+    errors += [f"spec.md {e}" for e in t.errors]
+    dim, lands = t.key("dimension"), t.key("lands on")
+    if not dim or not lands:
+        errors.append(f"spec.md L{t.line}: the table's columns are `Dimension` and `Lands on`")
+        return
+    rows = {norm(r[dim]): (n, r[lands]) for n, r in t.rows}
+    for name in DIMENSIONS:
+        if norm(name) not in rows:
+            errors.append(f"`## Implicit Requirements` has no row `{name}`")
             continue
-        if in_ac:
-            m = re.match(r"^\s*\d+\.\s+(.*)$", ln)
-            if m:
-                item = m.group(1).strip()
-                if PLACEHOLDER_RE.match(item):
-                    continue  # untouched template row
-                ok, note = classify_ears(item)
-                if not ok:
-                    errors.append(f"L{i}: acceptance criterion has no SHALL (not testable): {item[:70]}")
-                elif note.startswith("warn"):
-                    warnings.append(f"L{i}: AC has SHALL but no EARS keyword (WHEN/WHILE/WHERE/IF or ubiquitous 'The … shall'): {item[:60]}")
-            elif stripped == "" or re.match(r"^#{1,3}\s", ln) or stripped.startswith("**"):
-                in_ac = False
+        n, cell = rows[norm(name)]
+        cited = re.findall(r"\b[A-Z][A-Z0-9]*-\d{2,}\b", cell)
+        if re.match(r"^n/?a\s+-\s+\S.{2,}", cell.strip(), re.IGNORECASE):
+            continue
+        if not cited:
+            errors.append(f"spec.md L{n}: `{name}` lands on no criterion - cite its IDs, or write `N/A - <reason>`")
+        for cid in cited:
+            if cid not in ids:
+                errors.append(f"spec.md L{n}: `{name}` cites {cid}, and no criterion has that ID")
 
-    # 3. Assumptions table cells filled.
-    b = section_bounds(lines, "Assumptions & Open Questions")
-    if b:
-        rows = [lines[i] for i in range(*b) if lines[i].strip().startswith("|")]
-        data = [r for r in rows if not is_separator(r)]
-        # drop the header row (first table row)
-        if data:
-            data = data[1:]
-        template_seen = False
-        for r in data:
-            cells = split_row(r)
-            if len(cells) < 3:
-                continue
-            assumption, chosen, rationale = cells[0], cells[1], cells[2]
-            if PLACEHOLDER_RE.match(assumption) and PLACEHOLDER_RE.match(chosen):
-                template_seen = True
-                continue
-            if not chosen or PLACEHOLDER_RE.match(chosen):
-                errors.append(f"assumption '{assumption[:40]}' has empty 'Chosen default'")
-            if not rationale or PLACEHOLDER_RE.match(rationale):
-                errors.append(f"assumption '{assumption[:40]}' has empty 'Rationale'")
-        if template_seen:
-            warnings.append("Assumptions table still contains template placeholder rows")
-        # open questions line
-        oq = [lines[i] for i in range(*b) if "open questions" in lines[i].lower()]
-        oq_clean = re.sub(r"[*_]", "", " ".join(oq)).lower()
-        if not oq:
-            warnings.append("no 'Open questions:' line in Assumptions section")
-        elif not re.search(r"open questions.*:\s*none", oq_clean):
-            warnings.append("open questions do not read as resolved ('Open questions: none')")
 
-    # 4. Requirement traceability IDs.
-    b = section_bounds(lines, "Requirement Traceability")
-    if b:
-        rows = [lines[i] for i in range(*b) if lines[i].strip().startswith("|")]
-        data = [r for r in rows if not is_separator(r)]
-        if data:
-            data = data[1:]
-        template_seen = False
-        real_ids = 0
-        for r in data:
-            cells = split_row(r)
-            if not cells:
+def check_assumptions(doc, errors, warnings):
+    body = doc.section("Assumptions & Open Questions")
+    if not body:
+        return
+    for t in doc.tables(*body):
+        errors += [f"spec.md {e}" for e in t.errors]
+        first, chosen, why = t.key("assumption"), t.key("chosen default"), t.key("rationale")
+        if not chosen or not why:
+            continue
+        for n, r in t.rows:
+            if not r[first] and not r[chosen]:
                 continue
-            rid = cells[0]
-            if PLACEHOLDER_RE.match(rid) or "[" in rid:
-                template_seen = True
-                continue
-            if not rid:
-                continue
-            if not ID_RE.match(rid):
-                errors.append(f"malformed requirement ID: '{rid}' (expected e.g. AUTH-01)")
-            else:
-                real_ids += 1
-        if template_seen and real_ids == 0:
-            warnings.append("Requirement Traceability has only template rows (no real IDs yet)")
+            if not r[chosen].strip():
+                errors.append(f"spec.md L{n}: assumption `{r[first][:40]}` has no chosen default")
+            if not r[why].strip():
+                errors.append(f"spec.md L{n}: assumption `{r[first][:40]}` has no rationale")
+    lines = [s for _, s in doc.text(*body) if "open questions" in s.lower()]
+    if not lines or not re.search(r"open questions\W*:\s*none", norm(" ".join(lines))):
+        warnings.append("open questions are not `none` - present the spec with them; it cannot be approved like this")
 
-    errors += check_sources(lines, spec_path)
+
+def check(spec_path, stamped=True):
+    """The spec's errors and warnings. `stamped=False` leaves out its approval, for approve.py."""
+    spec = read_spec(spec_path)
+    doc, criteria = spec["doc"], spec["criteria"]
+    errors, warnings = list(spec["errors"]), []
+
+    scope = spec["scope"]
+    if not scope or scope.value.strip() not in SCOPES:
+        errors.append("no `**Scope**: Small | Medium | Large | Complex` line under the title")
+        declared = None
+    else:
+        declared = scope.value.strip()
+        floor = scope_floor(len(criteria), len(spec["stories"]))
+        if SCOPES.index(declared) < SCOPES.index(floor):
+            errors.append(f"`**Scope**: {declared}` - {len(criteria)} criteria in {len(spec['stories'])} stories "
+                          f"owe at least {floor}")
+
+    for name in REQUIRED_SECTIONS + (["Implicit Requirements"] if declared in ("Large", "Complex") else []):
+        if doc.section(name) is None:
+            errors.append(f"missing required section: ## {name}")
+    if doc.section("User Stories") and not criteria and not spec["errors"]:
+        errors.append("no criterion under `## User Stories`")
+
+    seen = {}
+    for c in criteria:
+        if not ID_RE.match(c.id):
+            errors.append(f"spec.md L{c.line}: `{c.id}` is not an ID - `AUTH-01`")
+        if c.id in seen:
+            errors.append(f"spec.md L{c.line}: {c.id} is already used at L{seen[c.id]} - one ID per criterion")
+        seen.setdefault(c.id, c.line)
+        check_criterion(c, errors)
+
+    if doc.section("Implicit Requirements") or declared in ("Large", "Complex"):
+        check_sweep(doc, set(seen), errors)
+    check_assumptions(doc, errors, warnings)
+    if doc.section("Requirement Traceability"):
+        warnings.append("`## Requirement Traceability` is obsolete - each criterion carries its ID; delete the section")
+
+    for i, raw in enumerate(doc.lines, start=1):
+        m = PLACEHOLDER_RE.search(without_code(raw))
+        if m:
+            errors.append(f"spec.md L{i}: template placeholder `{m.group(0)}` left in")
+    errors += check_sources(doc.raw, spec_path)
+    if stamped:
+        with open(spec_path, encoding="utf-8") as f:
+            errors += approval_errors(os.path.dirname(os.path.abspath(spec_path)), False, {"spec.md": f.read()},
+                                      ("spec.md",))
     return errors, warnings
 
 
@@ -272,6 +212,12 @@ def _active_decisions(spec_path):
         cur = parent
 
 
+def _rows(lines, name):
+    body = _body(lines, name)
+    rows = [r for r in body if r.startswith("|") and not re.match(r"^\|?[\s:|-]+\|?$", r)]
+    return [[c.strip() for c in r.strip("|").split("|")] for r in rows[1:]]
+
+
 def check_sources(lines, spec_path):
     """A capture that comes with the request binds; it is non-binding only on the user's quoted word.
     With a binding source, every capture is cited by a criterion and shown in the spec, and every
@@ -282,7 +228,7 @@ def check_sources(lines, spec_path):
         if os.path.isdir(cdir) else []
     sources = _body(lines, "Sources")
     binding = any(BINDING_RE.search(x) and not NOT_BINDING_RE.search(x) for x in sources)
-    if images and section_bounds(lines, "Sources") is None:
+    if images and not any(re.match(r"^##\s+Sources\s*$", ln.strip()) for ln in lines):
         errors.append("captures/ holds the design but there is no `## Sources` section - one line per capture, "
                       "`![<name>](captures/<file>) - binding - <what it draws>`")
     stories = "\n".join(_body(lines, "User Stories"))
@@ -296,22 +242,18 @@ def check_sources(lines, spec_path):
             errors.append(f"Sources: `{f}` is not binding and no line quotes the user calling it inspiration - "
                           "write `non-binding - user: \"<their words>\"` only when they said so")
         if binding and f.split(".")[0] not in stories:
-            errors.append(f"no acceptance criterion cites the capture `{f}` - each screen's criterion names its "
-                          "capture file, or the builder never aims at the picture")
+            errors.append(f"no criterion cites the capture `{f}` - each screen's criterion names its capture file")
         if f not in shown:
             errors.append(f"the capture `{f}` is not shown in the spec - put `![<name>](captures/{f})` on its "
                           "Sources line so whoever approves sees the screen")
     if binding:
-        b = section_bounds(lines, "Differences from the source")
-        if b is None:
+        if not any(re.match(r"^##\s+Differences from the source\s*$", ln.strip()) for ln in lines):
             errors.append("a source binds but there is no `## Differences from the source` section - list every way "
                           "the product departs from it, or `None - the product matches the source`")
         else:
             active = _active_decisions(spec_path)
-            rows = [lines[i] for i in range(*b) if lines[i].strip().startswith("|") and not is_separator(lines[i])][1:]
-            for r in rows:
-                cells = split_row(r)
-                if not cells or not cells[0] or PLACEHOLDER_RE.match(cells[0]):
+            for cells in _rows(lines, "Differences from the source"):
+                if not cells or not cells[0] or cells[0].startswith("["):
                     continue
                 confirmed = cells[-1]
                 if not re.match(r"^\W*y(es)?\b", confirmed, re.IGNORECASE):
@@ -324,25 +266,22 @@ def check_sources(lines, spec_path):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="validate_spec.py", description="Closure-gate checks for a feature spec.md.")
+    p = argparse.ArgumentParser(prog="validate_spec.py", description="The gate a spec.md passes before it is shown.")
     p.add_argument("target", nargs="?", default=None)
     p.add_argument("--root", default=".")
     p.add_argument("--strict", action="store_true")
     args = p.parse_args(argv)
 
-    spec = resolve_spec(args.target, args.root)
-    if not spec:
-        print("validate_spec: could not locate a spec.md. Pass a path or run from the project root.", file=sys.stderr)
+    fdir = feature_dir(args.target, args.root, "spec.md")
+    spec = os.path.join(fdir, "spec.md") if fdir else None
+    if args.target and os.path.isfile(args.target):
+        spec = args.target
+    if not spec or not os.path.isfile(spec):
+        print("validate_spec: could not locate a spec.md. Pass a feature, or run from the project root.",
+              file=sys.stderr)
         return 2
-
     errors, warnings = check(spec)
-    for w in warnings:
-        print(f"  WARN  {w}")
-    for e in errors:
-        print(f"  ERROR {e}")
-    fail = errors or (warnings and args.strict)
-    print(f"\nvalidate_spec: {len(errors)} error(s), {len(warnings)} warning(s) in {spec}")
-    return 1 if fail else 0
+    return finish("validate_spec", fdir, errors, warnings, args.strict, spec)
 
 
 if __name__ == "__main__":

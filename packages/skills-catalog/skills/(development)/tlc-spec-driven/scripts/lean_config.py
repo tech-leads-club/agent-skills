@@ -21,30 +21,6 @@ CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 SCREEN_CRITERION_RE = re.compile(r"\bSHALL\s+(?:NOT\s+)?(?:show|display|render|hide)\b", re.IGNORECASE)
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*`?browser\b", re.IGNORECASE)
 CRITERION_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
-APPROVED_RE = re.compile(
-    r"^\**\s*Approved\s*\**\s*:\s*\**\s*\d{4}-\d{2}-\d{2}\b.*\buser\s*:\s*[\"“][^\"”]*\S[^\"”]*[\"”]",
-    re.IGNORECASE)
-APPROVED_FILES = ("spec.md", "tasks.md")
-
-
-def unapproved(fdir):
-    """spec.md and tasks.md each owe `**Approved**: <date> - user: "<their words>"`. The approval is
-    the user's, so it carries their words; the chat that held it does not survive a compaction."""
-    missing = []
-    for name in APPROVED_FILES:
-        path = os.path.join(fdir, name)
-        if not os.path.exists(path):
-            continue
-        with open(path, encoding="utf-8", errors="replace") as f:
-            lines, in_fence = [], False
-            for ln in f.read().splitlines():
-                if ln.strip().startswith("```"):
-                    in_fence = not in_fence
-                elif not in_fence:
-                    lines.append(ln.strip())
-        if not any(APPROVED_RE.match(ln) for ln in lines):
-            missing.append(name)
-    return missing
 
 
 def checks_file(fdir):

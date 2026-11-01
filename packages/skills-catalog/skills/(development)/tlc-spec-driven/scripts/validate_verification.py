@@ -19,7 +19,7 @@ What it checks:
   ERROR  - a browser proof that names no `.running.png`, or one that is not on disk
   ERROR  - a `walk` proof and no `**Walked:**` line in the Handoff
   ERROR  - screens.md with no `**Round**:` line, or a round past 2
-  ERROR  - spec.md or tasks.md with no `**Approved**: <date> - user: "<their words>"` line
+  ERROR  - spec.md or tasks.md not approved by approve.py, or changed since its approval
   WARN   - the report says self-verified (author == verifier: a degraded gate)
 
 Usage:
@@ -36,7 +36,8 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, unapproved
+from lean_config import _section, checks_file, plan_file, plan_owes_pictures
+from specs import approval_errors, spin_guard, stop_text
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
@@ -362,10 +363,7 @@ def _check_feature(fdir, name):
         errors += _screens_verdicts(fdir, name)
         errors += _screen_evidence(fdir, plan, name)
     errors += _walk_logged(checks_lines, name)
-    for doc in unapproved(fdir):
-        errors.append(
-            f"{name}: {doc} has no `**Approved**: <YYYY-MM-DD> - user: \"<their words>\"` line - the spec and "
-            f"the tasks are approved by the user, in their words, before Execute")
+    errors += [f"{name}: {e}" for e in approval_errors(fdir, required=True)]
     return errors, warnings
 
 
@@ -447,6 +445,9 @@ def main(argv=None):
     checked = ", ".join(name for _, name in targets) or "(none)"
     fail = all_errors or (all_warnings and args.strict)
     print(f"\nvalidate_verification: {len(all_errors)} error(s), {len(all_warnings)} warning(s) across [{checked}]")
+    if len(targets) == 1 and spin_guard("validate_verification", targets[0][0], all_errors):
+        print(stop_text("validate_verification"))
+        return 3
     return 1 if fail else 0
 
 

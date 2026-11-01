@@ -45,6 +45,7 @@ SIGNALS = {
     "spec_precision_gap": "Spec did not define a precise outcome",
     "spec_deviation": "Implementation diverged from spec/design (SPEC_DEVIATION)",
     "gate_fail": "Build-level gate check failed",
+    "plan_gap": "Plan review finding fixed before Tasks (review.md)",
 }
 
 # stores written before a signal was renamed still carry the old name
@@ -262,8 +263,8 @@ def cmd_add(root, args):
         print("ERROR: --feature is required (the feature the signal came from).", file=sys.stderr)
         return 2
     if not source:
-        print("ERROR: --source is required (file:line / AC id / check id / SPEC_DEVIATION ref).", file=sys.stderr)
-        print("       A lesson with no grounding in verification.md is an opinion, not a lesson. Refused.", file=sys.stderr)
+        print("ERROR: --source is required (file:line / criterion id / check id / review finding / SPEC_DEVIATION ref).", file=sys.stderr)
+        print("       A lesson with no grounding in verification.md or review.md is an opinion, not a lesson. Refused.", file=sys.stderr)
         return 2
     if len(text) < 12:
         print("ERROR: --text too short. State the actionable lesson in one terse sentence.", file=sys.stderr)

@@ -2,160 +2,131 @@
 
 **File:** `.specs/STATE.md`
 
-A single file with two section-scoped parts. Each section has its own lifecycle; writes are always targeted - never whole-file overwrites.
+One file with two sections. Each section has its own life, and each write targets its own section. Never overwrite the whole file.
+
+`python3 <skill-dir>/scripts/validate_state.py` checks the file and compares it with the version at `HEAD`. `check_commit.py` runs it whenever a commit stages STATE.md.
 
 ---
 
 ## Sections
 
-### `## Decisions` - append-only log
+### `## Decisions`: an Append-Only Log
 
-Records **project-level** decisions only: conventions, patterns, constraints, or cross-cutting technology choices that future features must follow or supersede.
+It records **project-level** decisions only. These are conventions, patterns, constraints or cross-cutting technology choices that later features must follow or supersede.
 
-**Not project-level → stays in the feature's `design.md` Tech Decisions table.**  
-Heuristic: would a different feature need to know about this? If yes → project-level. If no → feature-local.
+**A feature-local decision stays in the feature's `design.md`.** Ask whether a different feature would need to know it. If yes, it is project-level.
 
-**Record sparingly - the log stays useful only by staying small.** Even a project-level decision earns an `AD-NNN` entry only when all three hold:
+**Record sparingly, because the log stays useful only while it stays small.** An entry earns an `AD-NNN` only when all three hold:
 
-1. **Hard to reverse** - changing course later carries real cost.
-2. **Surprising without context** - a future reader will look at the result and wonder "why did they do it this way?"
-3. **The product of a real trade-off** - there were genuine alternatives and you chose one for specific reasons.
+1. **Hard to reverse.** Changing course later has a real cost.
+2. **Surprising without context.** A future reader would ask why it was done this way.
+3. **A real trade-off.** There were real alternatives, and one won for stated reasons.
 
-If any one is missing, skip it: an easily-reversed choice you will just reverse; an unsurprising one nobody questions; a no-alternative choice records nothing beyond "we did the obvious thing." What typically qualifies: architectural shape, integration patterns between areas, technology choices that carry lock-in, boundary and ownership decisions, and deliberate deviations from the obvious path. A choice that clears all three but is only feature-local still stays in `design.md`.
+When any one is missing, skip it. Typical entries are architectural shape, integration patterns, choices with lock-in, ownership boundaries, and deliberate departures from the obvious path.
 
-**Format** (one entry per decision):
+**Format.** One entry per decision, as `validate_state.py` reads it:
 
 ```markdown
 ## Decisions
 
 ### AD-001
 - **Decision**: [what was decided - one sentence]
-- **Reason**: [why this option was chosen]
+- **Reason**: [why this option won]
 - **Trade-off**: [what was given up]
-- **Scope**: [which features / packages / layers this governs]
+- **Scope**: [which features, packages or layers it governs]
 - **Date**: YYYY-MM-DD
-- **Status**: active | superseded by AD-NNN
+- **Status**: active
 ```
 
-**Supersession rule:** When a new decision replaces an old one, append a new `AD-NNN` entry and update the old entry's `status` field to `superseded by AD-NNN`. Never delete old entries - the history is the audit trail.
+**Rules the gate holds:**
+
+- Entries are numbered AD-001, AD-002 and on, in order, with no gap and no repeat.
+- Every entry has all six fields. Date is `YYYY-MM-DD`. Status is `active` or `superseded by AD-NNN`.
+- A superseding entry exists and comes after the entry it supersedes.
+- Against `HEAD`, no entry disappears. Decision, Reason, Trade-off, Scope and Date never change. A superseded entry never goes back to active.
+
+**To change a decision, supersede it.** Append a new `AD-NNN`, then set the old entry's Status to `superseded by AD-NNN`. The history is the audit trail.
 
 ---
 
-### `## Handoff` - pause snapshot (~500 tokens, overwritten each pause)
+### `## Handoff`: a Pause Snapshot
 
-Written only when the user pauses or a session ends on purpose. A compaction gives no warning, so the live state of a feature is never here: it is the feature's own files - `spec.md` and `tasks.md` (`**Approved**:` lines, completion marks, `## Handoff` with `**Settled mid-build:**`, `**Dispatched:**` and `**Walked:**`), `proofs.md`, `verification.md`, `screens.md` - and git. On resume, this snapshot is a starting hypothesis reconciled against them (see Resume below).
-
-**Format:**
+About 500 tokens, overwritten at each pause. Write it only when the user pauses or a session ends on purpose. A compaction gives no warning, so the live state of a feature never lives here. It lives in the feature's own files and in git. On resume this snapshot is a starting guess, reconciled against them.
 
 ```markdown
 ## Handoff
 
-- **Feature**: [feature name / .specs path]
-- **Phase / Task**: [e.g., Phase 2 / T4 - implement repository layer]
-- **Completed**: [comma-separated task IDs or "none"]
-- **In-progress** (file:line): [e.g., `src/billing/subscription.service.ts:88` - mid-write]
-- **Next step**: [one sentence - exactly what to do next]
-- **Blockers**: [none | description]
-- **Uncommitted files**: [list or "none"]
-- **Branch**: [git branch name]
+- **Feature**: [feature name or .specs path]
+- **Phase / Task**: [Phase 2 / T4 - implement the repository layer]
+- **Completed**: [task IDs, or none]
+- **In-progress** (file:line): [`src/billing/subscription.service.ts:88` - mid-write]
+- **Next step**: [one sentence]
+- **Blockers**: [none, or the Blocked, Tried and Need lines]
+- **Uncommitted files**: [list, or none]
+- **Branch**: [git branch]
 ```
 
 ---
 
-## File shape
-
-```markdown
-# STATE
-
-## Decisions
-
-[AD-NNN entries…]
-
-## Handoff
-
-[latest snapshot…]
-```
-
-If the file does not yet exist, create it with both section headers and empty bodies.
-
----
-
-## Read / Write Triggers
+## Read and Write Triggers
 
 | Trigger | Section | Operation |
-| ------- | ------- | --------- |
-| Design phase, Step 1 (Load Context) | `## Decisions` | **Read** - conform to active decisions or supersede |
-| Design phase, Tech Decisions step | `## Decisions` | **Append** - only for project-level decisions |
-| Pause work / end of session | `## Handoff` | **Replace** - overwrite Handoff section only |
-| Resume work / start of session | `## Handoff` | **Read** - load snapshot, then reconcile with git before acting |
-| Resume work / start of session | `## Decisions` | **Read** - re-confirm active constraints before designing |
-| After a compaction | both, then the feature's files | **Read** - the same Resume procedure |
+| --- | --- | --- |
+| Design, when you load context | `## Decisions` | Read: conform to active decisions, or supersede |
+| Design, a project-level decision | `## Decisions` | Append, then run `validate_state.py` |
+| Pause, end of session | `## Handoff` | Replace the Handoff body only |
+| Resume, new session or after a compaction | both, then the feature's files | Read, then reconcile with git |
+
+## The Section-Scoped Write Rule
+
+Find the target section's header. Replace only the text between it and the next `##` header, or the end of the file.
+
+- Design appends to `## Decisions` and never touches `## Handoff`.
+- A pause replaces `## Handoff` and never rewrites, reorders or drops a decision.
+
+Breaking this rule loses data without a sound. `validate_state.py` catches a lost decision when you run it or when the commit stages STATE.md.
 
 ---
 
-## Section-scoped write rule (critical)
-
-One file holds two lifecycles. Writes MUST target their section only:
-
-- **Design appends** to `## Decisions`. It MUST NOT touch `## Handoff`.
-- **Pause replaces** `## Handoff`. It MUST NOT rewrite, reorder, or drop any entry in `## Decisions`.
-
-The correct technique: locate the target section header, replace only the content between it and the next `##` header (or end of file). Never overwrite the full file.
-
-Violating this rule causes one of two failures:
-1. A pause write clobbers the decisions log → decisions are silently lost.
-2. A design append touches the handoff snapshot → mid-task state is corrupted.
-
-Both are silent data loss. The section-scoped write rule is the single correctness invariant of this memory layer.
-
----
-
-## Pause / Resume Procedure
+## Pause and Resume
 
 ### Pause
 
-1. Locate the `## Handoff` section in `.specs/STATE.md`.
-2. Replace its body (everything between `## Handoff` and the next `##` or EOF) with the current snapshot.
-3. Do NOT modify anything above or before `## Handoff`.
-4. Commit or stash outstanding changes as appropriate.
+1. Find `## Handoff` in `.specs/STATE.md`.
+2. Replace its body with the current snapshot.
+3. Leave everything above it as it is.
+4. Commit or stash outstanding changes as fits the work.
 
-### Resume - a new session, or after a compaction
+### Resume, in a New Session or After a Compaction
 
-A compaction is a resume: the summary keeps the task and drops the rules.
+A compaction is a resume. The summary keeps the task and drops the rules.
 
 1. Re-read `SKILL.md`, then the reference for the phase the files show (table below).
-2. Read `.specs/STATE.md` - both sections - and re-confirm active decisions: nothing superseded since?
-3. Read the feature's files. The `STATE.md` `## Handoff`, when present, is a **hypothesis**, not ground truth.
-4. **Reconcile with git before editing anything:**
-   - Current branch vs Handoff `Branch`
-   - `git status --porcelain` (uncommitted / unexpected paths)
-   - Recent commits on the branch (messages and touched files)
-   - `tasks.md` completion marks and, when present, gate evidence / commit references
-5. **Resolve conflicts with evidence, not narrative:**
-   - A task with a green gate and an atomic commit already on the branch → do **not** redo it; mark it complete in `tasks.md` if the file still shows it open, then continue from the next incomplete task
-   - Partial unverified work in the working tree → preserve it, re-run the relevant gate, then finish the status+commit cycle
-   - Stale or missing Handoff → rebuild next-step from git + the feature's files
-   - Unexplained local changes you cannot map to the current task → STOP and ask; do not discard them
-6. After a compaction in the middle of a run, continue when the files and git agree, and stop only on a conflict. In a new session, propose the reconciled next step to the user before writing any code.
+2. Read both sections of `.specs/STATE.md`, and confirm which decisions are active.
+3. Read the feature's files. A Handoff, when present, is a guess, not ground truth.
+4. Reconcile with git before you edit anything: the branch, `git status --porcelain`, recent commits, and the task marks.
+5. Settle conflicts with evidence:
+   - A task with a green gate and its commit on the branch is done. Mark it, and go on.
+   - Partial work in the tree is kept. Run its gate again, then finish the cycle.
+   - A stale or missing Handoff is rebuilt from git and the feature's files.
+   - Local changes you cannot map to the current task stop you. Ask before you discard anything.
+6. After a compaction, continue when the files and git agree, and stop only on a conflict. In a new session, propose the next step before you write code.
 
-**Where the files put you** - the first row that holds:
+**Where the files put you.** Take the first row that holds:
 
 | The files show | Next |
 | --- | --- |
-| `spec.md` with no `**Approved**:` line | Specify: open questions still the user's - present the spec with them and stop |
-| no `tasks.md`, and the scope owes one | Design or Tasks |
+| a `**Blocked:**` line in the Handoff | tell the user, with the Blocked, Tried and Need lines |
+| `spec.md` with no `**Approved**:` line | Specify: present the spec with its open questions and stop |
+| `spec.md` that `validate_spec.py` says changed after its approval | show the user the change and stop. Their answer is stamped with `approve.py` |
+| `design.md` with no `**Reviewed**:` line, or `dispatched` with no `review.md` | the plan review ([review.md](review.md)). Wait for a reviewer already sent |
+| a `review.md` finding with no resolution | resolve it ([review.md](review.md)) |
+| the scope owes `design.md` or `tasks.md`, and the file is missing | Design, or Tasks |
 | `tasks.md` with no `**Approved**:` line | present the tasks and stop |
-| an open task | Execute it; one whose commit is on the branch is done - mark it |
-| every task done, no `**Walked:**` line (a feature with a screen) | the walk and the pictures (implement.md step 9) |
-| no `proofs.md`, or one at another commit than `HEAD` before any dispatch | `check_proofs.py` (step 10.1) |
-| `**Dispatched:**` names a sub-agent whose file is not on disk (`verification.md`, `screens.md`, a batch's commits) | wait for it; send it again only when it cannot return - a new session - and say so on the line |
-| `verification.md` with an open finding, or `screens.md` `**Round**: 1` that diverges | the fix pass, then round 2 |
-| `screens.md` `**Round**: 2` | the script and the gate; what still fails goes to the user - there is no third round |
-
----
-
-## AD-NNN numbering
-
-- Numbers are sequential, project-scoped, and permanent - never reused.
-- The counter starts at `AD-001`. Check existing entries before assigning the next number.
-- If `.specs/STATE.md` does not exist, the first decision is `AD-001`.
+| `tasks.md` that `validate_tasks.py` says changed after its approval | amend it with `approve.py --amend` and commit it alone, or take a change to what the user decided back to them |
+| an open task | do it. A task whose commit is on the branch is done, so mark it |
+| every task done, a screen, and no `**Walked:**` line | the walk and the pictures ([implement.md](implement.md), step 9) |
+| no `proofs.md`, or one at another commit than `HEAD` | `check_proofs.py` |
+| `**Dispatched:**` names a sub-agent whose file is not on disk | wait for it. Send it again only in a new session, and say so on the line |
+| `verification.md` with an open finding, or `screens.md` round 1 that diverges | the fix pass, then round 2 |
+| `screens.md` with `**Round**: 2` | the script and the gate. What still fails goes to the user |
