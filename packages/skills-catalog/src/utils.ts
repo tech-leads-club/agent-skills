@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-export const IGNORED_FILES = ['.DS_Store', '.gitkeep', 'Thumbs.db', '.gitignore']
+export const IGNORED_FILES = ['.DS_Store', '.gitkeep', 'Thumbs.db', '.gitignore', '__pycache__']
 export const CATEGORY_FOLDER_PATTERN = /^\(([a-z][a-z0-9-]*)\)$/
 export const CATEGORY_METADATA_FILE = '_category.json'
 export const SKILL_NAME_SLUG_PATTERN = /^[a-z][a-z0-9-]*$/
@@ -109,7 +109,7 @@ export function getFilesInDirectory(dir: string): string[] {
   function walk(currentDir: string, prefix = '') {
     const entries = readdirSync(currentDir, { withFileTypes: true })
     for (const entry of entries) {
-      if (IGNORED_FILES.includes(entry.name) || entry.name.startsWith('.')) continue
+      if (IGNORED_FILES.includes(entry.name) || entry.name.startsWith('.') || entry.name.endsWith('.pyc')) continue
       const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name
 
       if (entry.isDirectory()) {
