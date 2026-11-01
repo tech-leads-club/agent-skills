@@ -35,6 +35,7 @@ import subprocess
 import sys
 
 from lean_config import RUN_PROOF_RE, RUN_RE, checks_file
+from specs import spin_guard, stop_text
 
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
@@ -252,9 +253,12 @@ def main(argv=None):
     with open(os.path.join(fdir, "proofs.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(out).rstrip() + "\n")
     print("\n".join(out[2:6]))
-    for c, p, res in rows:
-        if not res.startswith("pass"):
-            print(f"  {c}: {res} - {p[:80]}")
+    red = [f"{c}: {res} - {p[:80]}" for c, p, res in rows if not res.startswith("pass")]
+    for line in red:
+        print(f"  {line}")
+    if spin_guard("check_proofs", fdir, red + (["dirty tree"] if dirty else [])):
+        print(stop_text("check_proofs"))
+        return 3
     return 0 if failed == 0 and not dirty else 1
 
 
