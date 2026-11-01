@@ -1,63 +1,56 @@
 # Specify: Discuss Gray Areas
 
-**Goal:** Capture HOW the user envisions the feature when the spec has ambiguous areas. This is NOT a separate phase - it's triggered within Specify when the agent detects gray areas that need user input.
+**Goal:** Capture HOW the user pictures the feature where the spec has gray areas. This is not a phase of its own. It runs inside Specify.
 
-**Trigger:** Automatically when gray areas are detected during spec creation, or explicitly via "discuss feature", "how should this work?", "capture context"
+**When it runs.** It runs when user-facing behaviour could go more than one way and the user has not said which. It also runs on request: "discuss feature", "how should this work?", "capture context".
 
-**When to trigger (auto-detect):** The spec contains user-facing behavior that could go multiple ways AND the user hasn't expressed a preference. If the spec is clear and unambiguous, skip this entirely.
+**When it does not run.** It skips a trivial feature, such as a pure read endpoint or a config tweak. It runs whenever any [implicit-requirement dimension](specify.md#implicit-requirement-dimensions) is present. That means persistence or state, external calls, auth, payments, concurrency or state transitions.
 
-**When NOT to trigger:** Genuinely trivial features - a pure read endpoint, a config tweak, features with no [implicit-requirement dimensions](specify.md#implicit-requirement-dimensions) present (no persistence/state, external calls, auth, payments, concurrency, or state transitions). When any dimension is present, trigger discuss.
+## Why It Exists
 
-## Why This Phase Exists
+The spec captures WHAT to build, and the design captures the architecture. Neither captures what the user pictured for the gray areas. That includes layout, interaction, error handling style and tone. Without this step the agent guesses.
 
-Specifications capture WHAT to build. Design captures the architecture. But neither captures the user's vision for ambiguous areas - layout preferences, interaction patterns, error handling style, content tone. Without this, the agent guesses. With this, the agent builds what the user actually imagined.
-
-The output - `context.md` - feeds directly into Design and Tasks:
-
-- **Design reads it** to know what decisions are locked vs. flexible
-- **Tasks reads it** to include specific behaviors in task definitions
+Its output, `context.md`, feeds Design and Tasks. Design reads which decisions are locked. Tasks reads the behaviours each task must hold.
 
 ## Process
 
-### 1. Analyze the Feature
+### 1. Find the Gray Areas
 
-Read `.specs/features/[feature]/spec.md` and identify the domain:
+Read `.specs/features/[feature]/spec.md` and name its domain:
 
-| Domain                         | Gray areas to explore                                         |
-| ------------------------------ | ------------------------------------------------------------- |
-| Something users **SEE**        | Layout, density, interactions, empty states, visual hierarchy |
-| Something users **CALL** (API) | Response format, errors, auth, versioning, rate limiting      |
-| Something users **RUN** (CLI)  | Output format, flags, modes, error handling, verbosity        |
-| Something users **READ**       | Structure, tone, depth, flow, navigation                      |
-| Something being **ORGANIZED**  | Grouping criteria, naming, duplicates, exceptions             |
-| Something with **backend / state / contract** | Failure & partial-failure states, idempotency/retry/dedup, auth boundaries & rate limits, data lifecycle/expiry, concurrency/ordering - see [implicit-requirement dimensions](specify.md#implicit-requirement-dimensions) |
+| Domain | Gray areas to explore |
+| --- | --- |
+| Something users **SEE** | Layout, density, interactions, empty states, visual hierarchy |
+| Something users **CALL** (API) | Response format, errors, auth, versioning, rate limits |
+| Something users **RUN** (CLI) | Output format, flags, modes, error handling, verbosity |
+| Something users **READ** | Structure, tone, depth, flow, navigation |
+| Something being **ORGANIZED** | Grouping, naming, duplicates, exceptions |
+| Backend, state or a contract | Failure states, retries and duplicates, auth, data lifecycle, ordering ([specify.md](specify.md#implicit-requirement-dimensions)) |
 
-Generate 3-4 **feature-specific** gray areas. Not generic categories, but concrete decisions for THIS feature.
+Name 3 or 4 gray areas specific to THIS feature, never generic categories.
 
-### 2. Ask them
+### 2. Ask Them, Once
 
-Put every gray area that is the user's to the user before the spec is presented: concrete options,
-your recommendation first with one line of why, so the user can accept or override in a word.
-Resolve anything the code answers yourself. A low-stakes default that is not a product decision is
-stated as an assumption for the user to correct, never asked. "You decide" is an answer: record the
-default with `user delegated`.
+Put every gray area that is the user's in one message, before the spec is presented. Give concrete options, your recommendation first, with one line of why. The user can then accept or override in a word.
 
-When the user declines an area, write it to the spec's **Assumptions & Open Questions** with your
-default, the rationale and `user declined` - never silently dropped. When nobody is there to
-answer, end your turn with the questions; a product decision is not made by assuming it.
+- Resolve what the code answers yourself.
+- A low-stakes default that is not a product decision is an assumption for the user to correct. Never ask it.
+- "You decide" is an answer. Record the default with `user delegated`.
+- A declined area goes to the spec's Assumptions with your default, the rationale and `user declined`. It is never dropped.
+- When nobody is there to answer, end your turn with the questions. An assumption never makes a product decision.
 
-### 3. Scope Guardrail
+### 3. Hold the Scope
 
-The feature boundary from spec.md is **fixed**. Discussion clarifies HOW to implement, never WHETHER to add new capabilities.
+The feature boundary from spec.md is fixed. Discussion settles HOW to build, never WHETHER to add a capability.
 
-**Allowed:** "How should posts be displayed?" (clarifying ambiguity)
-**Not allowed:** "Should we also add comments?" (new capability)
+- **Allowed:** "How should posts be displayed?" It settles a gray area.
+- **Not allowed:** "Should we also add comments?" It adds a capability.
 
-When user suggests scope creep: "That sounds like a separate feature. I'll note it in Deferred Ideas. Back to [current area]."
+When the user suggests more scope, say: "That sounds like a separate feature. I'll note it in Deferred Ideas." Then go back to the current area.
 
 ### 4. Write context.md
 
-Write it in the turn the answers arrive, with the user's words for each decision; an answer left in the chat is lost to a compaction.
+Write it in the turn the answers arrive, with the user's words for each decision. An answer left in the chat is lost to a compaction.
 
 ---
 
@@ -68,63 +61,36 @@ Write it in the turn the answers arrive, with the user's words for each decision
 
 **Gathered:** [date]
 **Spec:** `.specs/features/[feature]/spec.md`
-**Status:** Ready for design
-
----
 
 ## Feature Boundary
 
-[Clear statement of what this feature delivers - the scope anchor from spec.md]
-
----
+[What this feature delivers - the scope anchor from spec.md]
 
 ## Implementation Decisions
 
-### [Area 1 that was discussed]
+### [Area 1]
 
-- [Specific decision made]
-- [Another decision if applicable]
-
-### [Area 2 that was discussed]
-
-- [Specific decision made]
-
-### [Area 3 that was discussed]
-
-- [Specific decision made]
+- [Decision, with the user's words]
 
 ### Agent's Discretion
 
-[Areas where user explicitly said "you decide" - agent has flexibility here during design/implementation]
+[Areas where the user said "you decide"]
 
-### Declined / Undiscussed Gray Areas → Assumptions
+### Declined Gray Areas → Assumptions
 
-[Gray areas the user declined to discuss or that were not covered. Each entry is written to the spec's Assumptions & Open Questions section with the agent's chosen default and rationale - not left silently unresolved.]
-
----
+[Each declined area, also written to the spec's Assumptions with the default and rationale]
 
 ## Specific References
 
-[Any "I want it like X" moments, product references, specific behaviors, interaction patterns mentioned during discussion]
-
-[If none: "No specific requirements - open to standard approaches"]
-
----
+[Each "I want it like X" moment, or "none - open to standard approaches"]
 
 ## Deferred Ideas
 
-[Ideas that came up during discussion but belong in other features/phases. Captured here so they're not lost, but explicitly out of scope]
-
-[If none: "None - discussion stayed within feature scope"]
+[Ideas that belong to other features, or "none"]
 ```
-
----
 
 ## Tips
 
-- **Look it up, don't ask** - Resolve anything discoverable from the code yourself; ask only genuine product decisions
-- **Decisions, not vision** - "Card-based layout with subtle shadows" is a decision. "Should feel modern" is not.
-- **Scope is sacred** - Deferred Ideas captures scope creep without losing ideas
-- **User = visionary, Agent = builder** - Ask about how they imagine it, not about technical implementation
-- **Don't ask about:** Technical architecture, performance, implementation details - that's Design's job
-- **Confirm before Design** - User approves context.md before moving to design phase
+- **Look it up, never ask it.** Resolve what the code answers. Ask only product decisions.
+- **Decisions, not vision.** "Cards with a subtle shadow" is a decision. "Should feel modern" is not.
+- **The user pictures, the author builds.** Ask how they picture it, never about architecture. That is Design's job.
