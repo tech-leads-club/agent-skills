@@ -6,7 +6,7 @@ A member whose card fails keeps full access until someone notices in the provide
 which took 11 days on the last three cases. Support absorbs the refund argument and the member
 learns that paying is optional.
 
-When this ships, a failed charge suspends access within one billing cycle and the member sees why.
+When this ships, a failed charge suspends access within one ledger cycle and the member sees why.
 
 ## Shape
 
@@ -14,8 +14,8 @@ Reuses `Webhooks::Verifier` and the existing 90-day pruning job for delivery row
 
 1. provider `POST /webhooks/provider` -> `Webhooks::Verifier` (exists) - signature, then the envelope
 2. `Webhooks::Ingest` (exists) - dedups on `provider_delivery_id`, persists `WebhookDelivery` (door 3)
-3. `Billing::StatusMap` (new) - provider status -> local status
-4. `Billing::Subscription` (exists) - applies the transition, persists `status`
+3. `Ledger::StatusMap` (new) - provider status -> local status
+4. `Ledger::Subscription` (exists) - applies the transition, persists `status`
 5. out: `200` `{}`, and `AccessPolicy` (exists) reads `status` on the next request - no call from here
 
 ```mermaid
@@ -23,8 +23,8 @@ sequenceDiagram
     participant P as provider
     participant V as Webhooks::Verifier
     participant I as Webhooks::Ingest
-    participant M as Billing::StatusMap
-    participant S as Billing::Subscription
+    participant M as Ledger::StatusMap
+    participant S as Ledger::Subscription
     participant A as AccessPolicy
     P->>V: 1. POST /webhooks/provider
     V->>I: 2. verified envelope
@@ -38,7 +38,7 @@ sequenceDiagram
 
 | Front | What changes |
 | --- | --- |
-| domain | new term: `Suspended` - a subscription whose last charge failed and whose access is revoked, lives in `Billing` |
+| domain | new term: `Suspended` - a subscription whose last charge failed and whose access is revoked, lives in `Ledger` |
 | domain | existing term: `Active` meant "has a subscription row", now means "has a subscription row and the last charge succeeded" - `AccessPolicy#grant?` and the admin index branch on it today |
 | stored data | backfill now: every existing row gets `active`; the unique index runs against 40k delivery rows and fails if a duplicate already exists, so dedup the table first |
 
@@ -78,7 +78,7 @@ A failed charge suspends the subscription and paid access is denied.
 
 1. WHEN the provider reports a failed charge THEN the system SHALL set the subscription status to `Suspended`
    - first failed charge on an `Active` subscription → `Suspended`; a second one while `Suspended` → stays `Suspended`, no new transition
-2. IF the reported provider status is unknown THEN the system SHALL leave the status unchanged and record a `billing.status_unmapped` event
+2. IF the reported provider status is unknown THEN the system SHALL leave the status unchanged and record a `ledger.status_unmapped` event
 3. WHILE a subscription is `Suspended` the system SHALL deny access to paid access groups
 4. The system SHALL never move a subscription directly from `Suspended` to `Trialing`
 
@@ -112,4 +112,4 @@ Replay of a delivery is a no-op; a payload without a subscription id or a valid 
 
 - TLC-412 - the suspension rule and the 11-day evidence
 - provider webhook reference - the 9 statuses and the 5 event types
-- ![card form](captures/billing--card-form.png) `captures/billing--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form's wording
+- ![card form](captures/ledger--card-form.png) `captures/ledger--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form's wording

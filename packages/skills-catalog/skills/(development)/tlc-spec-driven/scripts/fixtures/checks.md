@@ -1,8 +1,8 @@
 # Dunning on failed charge - checks
 
-Build: `bin/rubocop app/billing`
-Run billing: `bin/rails test test/billing/dunning_test.rb test/billing/status_map_test.rb -v`
-Plan: `.specs/features/billing/plan.md`
+Build: `bin/rubocop app/ledger`
+Run ledger: `bin/rails test test/ledger/dunning_test.rb test/ledger/status_map_test.rb -v`
+Plan: `.specs/features/ledger/plan.md`
 
 ## Intent
 
@@ -13,22 +13,22 @@ Plan: `.specs/features/billing/plan.md`
 ### S1 - Suspension on a failed charge
 
 **C1** - A failed charge sets status to `Suspended`, never `Cancelled` (BILL-01, AC 1)
-Proof: run billing | test_failed_charge_suspends = .
+Proof: run ledger | test_failed_charge_suspends = .
 
 **C2** - Every provider status maps to exactly one local status (BILL-01, AC 1)
-Proof: run billing | test_every_provider_status_maps_once = .
+Proof: run ledger | test_every_provider_status_maps_once = .
 
-**C3** - An unknown provider status leaves the status unchanged and records `billing.status_unmapped` (BILL-01, AC 2)
-Proof: run billing | test_unknown_status_is_recorded = .
+**C3** - An unknown provider status leaves the status unchanged and records `ledger.status_unmapped` (BILL-01, AC 2)
+Proof: run ledger | test_unknown_status_is_recorded = .
 
 **C4** - A `Suspended` subscription denies access to paid access groups (BILL-01, AC 3)
-Proof: `bin/rails test test/billing/access_test.rb -n "/suspended_denies_paid_groups/"`
+Proof: `bin/rails test test/ledger/access_test.rb -n "/suspended_denies_paid_groups/"`
 
 **C5** - `Suspended` cannot transition directly to `Trialing` (BILL-01, AC 4)
-Proof: `bin/rails test test/billing/transitions_test.rb -n "/suspended_to_trialing_is_rejected/"`
+Proof: `bin/rails test test/ledger/transitions_test.rb -n "/suspended_to_trialing_is_rejected/"`
 
 **C6** - A `Suspended` subscription returns to `Active` on a successful charge (BILL-01, AC 1)
-Proof: `bin/rails test test/billing/transitions_test.rb -n "/suspended_to_active/"`
+Proof: `bin/rails test test/ledger/transitions_test.rb -n "/suspended_to_active/"`
 
 **C7** - Two concurrent failed-charge deliveries produce one suspension and the second returns `409` (BILL-01, AC 1)
 Proof: `bin/rails test test/webhooks/ingest_test.rb -n "/concurrent_delivery_conflicts/"`
@@ -45,7 +45,7 @@ Proof: `bin/rails test test/webhooks/ingest_test.rb -n "/missing_subscription_id
 Proof: `bin/rails test test/webhooks/dispatch_test.rb -n "/dispatches_every_event_type/"`
 
 **C11** - The provider timing out does not change local state (BILL-01, AC 1)
-Proof: run billing | test_provider_timeout_is_inert = .
+Proof: run ledger | test_provider_timeout_is_inert = .
 
 **C12** - A delivery with no valid signature returns `401` and persists nothing (BILL-02, AC 7)
 Proof: `bin/rails test test/webhooks/ingest_test.rb -n "/unsigned_delivery_is_401/"`

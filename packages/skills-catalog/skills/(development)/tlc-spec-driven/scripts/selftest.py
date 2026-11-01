@@ -31,7 +31,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES = os.path.join(HERE, "fixtures")
-FEATURE = "billing"
+FEATURE = "ledger"
 
 
 def shipped(script):
@@ -41,13 +41,13 @@ def shipped(script):
 # (validator, artifact, description, mutation, expected exit, expected message fragment)
 CASES = [
     ("validate_checks", "checks.md", "no Build line",
-     lambda s: s.replace("Build: `bin/rubocop app/billing`\n", "", 1),
+     lambda s: s.replace("Build: `bin/rubocop app/ledger`\n", "", 1),
      1, "no `Build:` line"),
     ("validate_checks", "checks.md", "drop one member from a size-5 set",
      lambda s: s.replace(" · `trial_will_end` C10 | - |", " | - |", 1),
      1, "declares 5 members but only 4"),
     ("validate_checks", "checks.md", "remove a check's Proof line",
-     lambda s: re.sub(r"\nProof: `bin/rails test test/billing/access_test\.rb[^\n]*\n", "\n", s),
+     lambda s: re.sub(r"\nProof: `bin/rails test test/ledger/access_test\.rb[^\n]*\n", "\n", s),
      1, "C4 has no `Proof:` line"),
     ("validate_checks", "checks.md", "delete the concurrency sweep line",
      lambda s: s.replace("- concurrency: C7\n", ""),
@@ -56,16 +56,16 @@ CASES = [
      lambda s: re.sub(r"- data lifecycle: n/a[^\n]*", "- data lifecycle: n/a", s),
      1, "`n/a` with no reason"),
     ("validate_checks", "checks.md", "a run proof with no Run line",
-     lambda s: re.sub(r"^Run billing: [^\n]*\n", "", s, flags=re.M),
-     1, "no `Run billing: <command>` line defines it"),
+     lambda s: re.sub(r"^Run ledger: [^\n]*\n", "", s, flags=re.M),
+     1, "no `Run ledger: <command>` line defines it"),
     ("validate_checks", "checks.md", "a run proof with no expected line",
-     lambda s: s.replace("Proof: run billing | test_failed_charge_suspends = .", "Proof: run billing"),
+     lambda s: s.replace("Proof: run ledger | test_failed_charge_suspends = .", "Proof: run ledger"),
      1, "names no line after `|`"),
     ("validate_checks", "checks.md", "a run proof with an empty expected line",
-     lambda s: s.replace("Proof: run billing | test_failed_charge_suspends = .", "Proof: run billing |"),
+     lambda s: s.replace("Proof: run ledger | test_failed_charge_suspends = .", "Proof: run ledger |"),
      1, "names no line after `|`"),
     ("validate_checks", "checks.md", "a Run line no proof reads (warn)",
-     lambda s: s.replace("Build: `bin/rubocop app/billing`\n", "Build: `bin/rubocop app/billing`\nRun e2e: `npx playwright test`\n"),
+     lambda s: s.replace("Build: `bin/rubocop app/ledger`\n", "Build: `bin/rubocop app/ledger`\nRun e2e: `npx playwright test`\n"),
      0, "`Run e2e` is read by no proof"),
     ("validate_checks", "checks.md", "reference an undefined check",
      lambda s: s.replace("into it C1 ·", "into it C99 ·"),
@@ -77,7 +77,7 @@ CASES = [
      lambda s: s.replace("| C2, table-driven over all 9 | - |", "| C2, table-driven over all 9 | `paused` |"),
      1, "Unproven is '`paused`'"),
     ("validate_checks", "checks.md", "proof with no test selector (warn)",
-     lambda s: s.replace('Proof: `bin/rails test test/billing/access_test.rb -n "/suspended_denies_paid_groups/"`',
+     lambda s: s.replace('Proof: `bin/rails test test/ledger/access_test.rb -n "/suspended_denies_paid_groups/"`',
                          "Proof: `bin/rails test`"),
      0, "names no test selector"),
     ("validate_checks", "checks.md", "vague claim (warn)",
@@ -126,8 +126,8 @@ CASES = [
      1, "no Who column"),
     ("validate_plan", "plan.md", "a Flow hop naming a module that neither exists nor is a door (warn)",
      lambda s: s.replace(
-         "3. `Billing::StatusMap` (new) - provider status -> local status",
-         "3. `Billing::StatusMapFactory` - provider status -> local status"),
+         "3. `Ledger::StatusMap` (new) - provider status -> local status",
+         "3. `Ledger::StatusMapFactory` - provider status -> local status"),
      0, "without marking it as existing or as a"),
     ("validate_checks", "plan.md", "a route reviewed in the plan that no check mentions (warn)",
      lambda s: s.replace("`POST /webhooks/provider`", "`POST /webhooks/provider/v2`"),
@@ -152,15 +152,15 @@ CASES = [
      0, "0 warning"),
     ("validate_plan", "plan.md", "flowchart node neither existing nor a door (warn)",
      lambda s: s.replace(
-         "3. `Billing::StatusMap` (new) - provider status -> local status",
-         "```mermaid\nflowchart TD\n    A[\"Billing::StatusMap\"] --> B[\"Billing::Ledger\"]\n```"),
+         "3. `Ledger::StatusMap` (new) - provider status -> local status",
+         "```mermaid\nflowchart TD\n    A[\"Ledger::StatusMap\"] --> B[\"Ledger::Ledger\"]\n```"),
      0, "belongs in the diff"),
     ("validate_plan", "plan.md", "a path with no drawing",
      lambda s: re.sub(r"```mermaid\nsequenceDiagram\n.*?```\n", "", s, flags=re.S),
      1, "does not draw it"),
     ("validate_plan", "plan.md", "a module on the path missing from its drawing",
-     lambda s: s.replace("    participant M as Billing::StatusMap\n", "").replace("I->>M", "I->>S").replace("M->>S", "S->>S"),
-     1, "`Billing::StatusMap` is on the path but not in its drawing"),
+     lambda s: s.replace("    participant M as Ledger::StatusMap\n", "").replace("I->>M", "I->>S").replace("M->>S", "S->>S"),
+     1, "`Ledger::StatusMap` is on the path but not in its drawing"),
     ("validate_plan", "plan.md", "no data drawing and no `Data: none`",
      lambda s: re.sub(r"```mermaid\nerDiagram\n.*?```\n", "", s, flags=re.S),
      1, "no `erDiagram` of the data"),
@@ -168,10 +168,10 @@ CASES = [
      lambda s: s.replace("New: `WebhookDelivery` and its link to `Subscription`. ", ""),
      1, "has no `New:` line"),
     ("validate_plan", "plan.md", "a capture the plan does not show as an image",
-     lambda s: s.replace("![card form](captures/billing--card-form.png) ", ""),
+     lambda s: s.replace("![card form](captures/ledger--card-form.png) ", ""),
      1, "is not shown in the plan"),
     ("validate_plan", "plan.md", "a single-module path owes no drawing",
-     lambda s: re.sub(r"```mermaid\nsequenceDiagram\n.*?```\n", "single module - `Billing::Subscription`\n", s, flags=re.S),
+     lambda s: re.sub(r"```mermaid\nsequenceDiagram\n.*?```\n", "single module - `Ledger::Subscription`\n", s, flags=re.S),
      0, "0 error"),
     ("validate_plan", "plan.md", "open question left unresolved (warn)",
      lambda s: s.replace("**Open questions:** none - all resolved or logged above.",
@@ -184,7 +184,7 @@ CASES = [
 ]
 
 LAST_AC = "7. IF a delivery carries no valid provider signature THEN the system SHALL return `401` and persist nothing\n"
-SHOW_AC = "9. WHEN a member opens Billing THEN the system SHALL show `Card declined` above the plans\n"
+SHOW_AC = "9. WHEN a member opens Ledger THEN the system SHALL show `Card declined` above the plans\n"
 
 
 def write_artifact(path, content):
@@ -226,7 +226,7 @@ def with_binding_bare(s):
 
 
 # The capture sits in the feature folder, where the scaffold always writes it.
-CAPTURE = ".specs/features/billing/captures/billing--card-form.png"
+CAPTURE = ".specs/features/ledger/captures/ledger--card-form.png"
 DIFFERENCES = (
     "## Differences from the source\n\n| Source shows | Product shows | Confirmed |\n| --- | --- | --- |\n"
     "| Update card | Atualizar cartão | y - AD-002 |\n"
@@ -234,13 +234,13 @@ DIFFERENCES = (
 )
 STATE = (
     "# Project state\n\n## Decisions\n\n| ID | Decision | Rationale | Status | Date |\n| --- | --- | --- | --- | --- |\n"
-    "| AD-002 | Billing copy is Portuguese, not the design's English | asked \"Which language?\", answered Portuguese | active | 2026-10-23 |\n"
-    "| AD-003 | Billing ships without the invoice link | asked \"Invoice link now?\", answered TLC-420 | active | 2026-10-23 |\n"
-    "| AD-004 | Billing shows a download link | superseded by AD-003 | superseded by AD-003 | 2026-10-22 |\n"
+    "| AD-002 | Ledger copy is Portuguese, not the design's English | asked \"Which language?\", answered Portuguese | active | 2026-10-23 |\n"
+    "| AD-003 | Ledger ships without the invoice link | asked \"Invoice link now?\", answered TLC-420 | active | 2026-10-23 |\n"
+    "| AD-004 | Ledger shows a download link | superseded by AD-003 | superseded by AD-003 | 2026-10-22 |\n"
 )
-SCREEN_AC = f"8. WHEN a member opens Billing THEN the system SHALL show the screen in `{CAPTURE}`\n"
-SCREEN_CHECK = (f"\n**C99** - A member opening Billing sees the screen in `{CAPTURE}` (AC 8)\n"
-                "Proof: `bin/rails test test/system/billing_test.rb -n \"/billing screen matches capture/\"`\n")
+SCREEN_AC = f"8. WHEN a member opens Ledger THEN the system SHALL show the screen in `{CAPTURE}`\n"
+SCREEN_CHECK = (f"\n**C99** - A member opening Ledger sees the screen in `{CAPTURE}` (AC 8)\n"
+                "Proof: `bin/rails test test/system/ledger_test.rb -n \"/ledger screen matches capture/\"`\n")
 
 
 def with_screen_check(s):
@@ -256,12 +256,12 @@ def with_diff(old, new):
     return lambda s: with_binding(s).replace(old, new)
 
 
-RUNNING = "screens/billing.running.png"
+RUNNING = "screens/ledger.running.png"
 
 
 def screens_md(verdict, round_line="**Round**: 1\n"):
     return lambda s: (
-        "# Billing screens\n\n**Verifier**: independent sub-agent (author != verifier)\n" + round_line + "\n"
+        "# Ledger screens\n\n**Verifier**: independent sub-agent (author != verifier)\n" + round_line + "\n"
         "| Screen | Compared with | Verdict | Finding |\n| --- | --- | --- | --- |\n"
         f"| `{RUNNING}` | AC 9 | {verdict} | - |\n")
 
@@ -295,7 +295,7 @@ MULTI_CASES = [
     ("validate_verification", "a cited capture with no running screenshot beside it",
      {"plan.md": lambda s: with_screen(with_binding(s)), "screens.md": screens_md("matches"),
       "screens/other.running.png": lambda s: "png"},
-     1, "has no `billing--card-form.running.png`"),
+     1, "has no `ledger--card-form.running.png`"),
     ("validate_verification", "a browser proof names a screenshot that is not on disk",
      {"plan.md": with_screen, "screens.md": screens_md("matches"),
       "checks.md": with_browser_shot("screens/missing.running.png"), RUNNING: lambda s: "png"},
@@ -310,8 +310,8 @@ MULTI_CASES = [
      1, "no `screens.md`"),
     ("validate_verification", "a picture taken at another size than its capture",
      {"plan.md": lambda s: with_screen(with_binding(s)), "screens.md": screens_md("matches"),
-      "captures/billing--card-form.png": lambda s: png(1024, 839),
-      "captures/billing--card-form.running.png": lambda s: png(1440, 1200)},
+      "captures/ledger--card-form.png": lambda s: png(1024, 839),
+      "captures/ledger--card-form.running.png": lambda s: png(1440, 1200)},
      1, "take the picture at the capture's size"),
     ("validate_verification", "proofs.md with a failing proof",
      {"proofs.md": lambda s: re.sub(r"^(\| C5 \|.*\| )pass \|$", r"\1**no test ran** |", s, flags=re.M)},
@@ -320,8 +320,8 @@ MULTI_CASES = [
      {"proofs.md": lambda s: re.sub(r"^\| C12 \|[^\n]*\n", "", s, flags=re.M)},
      1, "has no row for C12"),
     ("validate_verification", "proofs.md where a run group failed",
-     {"proofs.md": lambda s: s.replace("| Build |", "| Run billing | `bin/rails test test/billing -v` | **fail** - exit 1 |\n| Build |")},
-     1, "Run billing reads"),
+     {"proofs.md": lambda s: s.replace("| Build |", "| Run ledger | `bin/rails test test/ledger -v` | **fail** - exit 1 |\n| Build |")},
+     1, "Run ledger reads"),
     ("validate_verification", "a report with no Checks table",
      {"verification.md": lambda s: re.sub(r"## Checks\n.*?\n## Findings", "## Findings", s, flags=re.S)},
      1, "no `## Checks` table"),
@@ -338,28 +338,28 @@ MULTI_CASES = [
      {"verification.md": lambda s: s.split("## Findings")[0]},
      1, "no `## Findings` section"),
     ("validate_verification", "proofs.md where the build failed",
-     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | pass |", "| Build | `bin/rubocop app/billing` | **fail** - 2 offenses |")},
+     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/ledger` | pass |", "| Build | `bin/rubocop app/ledger` | **fail** - 2 offenses |")},
      1, "Build reads"),
     ("validate_verification", "proofs.md with no Build row while checks.md names a build",
-     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/billing` | pass |\n", "")},
+     {"proofs.md": lambda s: s.replace("| Build | `bin/rubocop app/ledger` | pass |\n", "")},
      1, "has no Build row"),
     ("validate_verification", "proofs.md written over uncommitted changes",
      {"proofs.md": lambda s: s.replace("**Tree**: clean", "**Tree**: dirty - apps/x.ts")},
      1, "ran on uncommitted changes"),
     ("validate_verification", "a .jpg capture with no running picture beside it",
-     {"plan.md": lambda s: with_screen(with_binding(s)).replace("billing--card-form.png", "billing--card-form.jpg"),
-      "captures/billing--card-form.jpg": lambda s: "jpg", "screens.md": screens_md("matches")},
-     1, "has no `billing--card-form.running.png`"),
+     {"plan.md": lambda s: with_screen(with_binding(s)).replace("ledger--card-form.png", "ledger--card-form.jpg"),
+      "captures/ledger--card-form.jpg": lambda s: "jpg", "screens.md": screens_md("matches")},
+     1, "has no `ledger--card-form.running.png`"),
     ("validate_verification", "a walk proof with no Walked line in the Handoff",
      {"checks.md": with_walk_proof},
      1, "no `**Walked:**` line"),
     ("validate_verification", "screens.md with no Round line",
      {"plan.md": with_binding, "screens.md": screens_md("matches", ""),
-      "captures/billing--card-form.running.png": lambda s: "png"},
+      "captures/ledger--card-form.running.png": lambda s: "png"},
      1, "no `**Round**:` line"),
     ("validate_verification", "screens.md in a third round",
      {"plan.md": with_binding, "screens.md": screens_md("matches", "**Round**: 3\n"),
-      "captures/billing--card-form.running.png": lambda s: "png"},
+      "captures/ledger--card-form.running.png": lambda s: "png"},
      1, "there is no third round"),
     ("validate_plan", "a binding source with no Differences section",
      {"plan.md": lambda s: with_binding(s).replace(DIFFERENCES, "")},
@@ -385,7 +385,7 @@ MULTI_CASES = [
                                   with_binding(s), flags=re.S)},
      1, "has no rows"),
     ("validate_plan", "a capture a criterion cites that does not exist",
-     {"plan.md": with_diff(f"`{CAPTURE}`", "`.specs/features/billing/captures/nope.png`")},
+     {"plan.md": with_diff(f"`{CAPTURE}`", "`.specs/features/ledger/captures/nope.png`")},
      1, "does not exist"),
     ("validate_plan", "a design-file link where an exported capture belongs",
      {"plan.md": with_diff(f"`{CAPTURE}`", "`https://design.example.com/file/abc?node-id=12-34`")},
@@ -398,7 +398,7 @@ MULTI_CASES = [
      1, "no line quotes the user"),
     ("validate_plan", "a capture in captures/ that Sources never mentions and nothing binds",
      {"plan.md": lambda s: s.replace(
-         '- ![card form](captures/billing--card-form.png) `captures/billing--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form\'s wording\n', "")},
+         '- ![card form](captures/ledger--card-form.png) `captures/ledger--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form\'s wording\n', "")},
      1, "no line quotes the user"),
     ("validate_checks", "a screen criterion cites a capture and no check cites it",
      {"plan.md": with_binding},
@@ -422,8 +422,8 @@ NEGATIVE_CONTROLS = [
          DIFFERENCES, "## Differences from the source\n\nNone - the product matches the source\n\n")}),
     ("validate_plan", "a capture the Sources line binds needs no quote",
      {"plan.md": lambda s: with_binding(s).replace(
-         '- ![card form](captures/billing--card-form.png) `captures/billing--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form\'s wording',
-         "- ![card form](captures/billing--card-form.png) `captures/billing--card-form.png` - binding - the card form")}),
+         '- ![card form](captures/ledger--card-form.png) `captures/ledger--card-form.png` - non-binding - user: "only the tone, the layout is ours" - the card form\'s wording',
+         "- ![card form](captures/ledger--card-form.png) `captures/ledger--card-form.png` - binding - the card form")}),
     ("validate_plan", "a Surface route anyone may call owes no refusal status",
      {"plan.md": lambda s: s.replace(
          "| `200`, `401`, `409`, `422` | the provider, with a valid signature; anything else gets `401` |",
@@ -433,11 +433,11 @@ NEGATIVE_CONTROLS = [
     ("validate_verification", "a plan with a binding source and matching pictures is accepted",
      {"plan.md": with_binding,
       "screens.md": screens_md("matches"),
-      "captures/billing--card-form.running.png": lambda s: "png"}),
+      "captures/ledger--card-form.running.png": lambda s: "png"}),
     ("validate_verification", "a picture at twice its capture's size is the same layout",
      {"plan.md": lambda s: with_screen(with_binding(s)), "screens.md": screens_md("matches"),
-      "captures/billing--card-form.png": lambda s: png(1024, 839),
-      "captures/billing--card-form.running.png": lambda s: png(2048, 1678),
+      "captures/ledger--card-form.png": lambda s: png(1024, 839),
+      "captures/ledger--card-form.running.png": lambda s: png(2048, 1678),
       RUNNING: lambda s: png(1024, 839)}),
     ("validate_verification", "a screen no capture draws owes no picture and no screens.md",
      {"plan.md": with_screen}),
@@ -445,12 +445,12 @@ NEGATIVE_CONTROLS = [
      {"verification.md": lambda s: s.split("## Findings")[0] + "## Findings\n\nNone - every rule probed held\n"}),
     ("validate_verification", "a browser proof whose screenshot exists is accepted",
      {"plan.md": with_screen, "screens.md": screens_md("matches"),
-      "checks.md": with_browser_shot("screens/billing.running.png"), RUNNING: lambda s: "png"}),
+      "checks.md": with_browser_shot("screens/ledger.running.png"), RUNNING: lambda s: "png"}),
     ("validate_verification", "a screen judged in screens.md is accepted",
      {"plan.md": with_screen, "screens.md": screens_md("matches"), RUNNING: lambda s: "png"}),
     ("validate_verification", "a capture judged again in round 2 is accepted",
      {"plan.md": with_binding, "screens.md": screens_md("matches", "**Round**: 2\n"),
-      "captures/billing--card-form.running.png": lambda s: "png"}),
+      "captures/ledger--card-form.running.png": lambda s: "png"}),
     ("validate_checks", "a walk proof needs no test selector and no picture",
      {"checks.md": with_walk_proof}, "names no test selector"),
     ("validate_verification", "a walk proof with its visit in the Walked line is accepted",
@@ -467,7 +467,7 @@ def scaffold():
             shutil.copyfile(os.path.join(FIXTURES, name), os.path.join(fdir, name))
     # A capture the binding cases cite; the gates check that it exists, never its format.
     os.makedirs(os.path.join(fdir, "captures"))
-    open(os.path.join(fdir, "captures", "billing--card-form.png"), "wb").close()
+    open(os.path.join(fdir, "captures", "ledger--card-form.png"), "wb").close()
     with open(os.path.join(root, ".specs", "STATE.md"), "w", encoding="utf-8") as f:
         f.write(STATE)
     return root
@@ -510,7 +510,7 @@ TOOLING = [
 APPROVAL = '**Approved**: 2026-10-25 - user: "Aprovado, pode seguir." - hash: {hash}\n'
 STALE = '**Approved**: 2026-10-25 - user: "Aprovado, pode seguir." - hash: 000000000000\n'
 
-SPEC = """# Billing Specification
+SPEC = """# Ledger Specification
 
 {approval}**Scope**: Medium
 
@@ -536,7 +536,7 @@ A failed charge leaves the member with access they did not pay for.
 
 ### P1: Suspend on a failed charge
 
-**User Story**: As a member, I want my access to follow my payment so that billing stays fair.
+**User Story**: As a member, I want my access to follow my payment so that ledger stays fair.
 
 **Acceptance Criteria**:
 
@@ -554,19 +554,19 @@ MEDIUM_CHECKS = """
 ## Checks
 
 **Build**: `exit 0`
-Run unit: `npx vitest run src/billing --reporter=verbose`
+Run unit: `npx vitest run src/ledger --reporter=verbose`
 
 **C1** - A failed charge suspends the subscription (BILL-01)
-Proof: run unit | ✓ billing > suspends on a failed charge
+Proof: run unit | ✓ ledger > suspends on a failed charge
 
 **C2** - A gateway timeout keeps the status and logs it (BILL-02)
-Proof: run unit | ✓ billing > keeps the status on a timeout
+Proof: run unit | ✓ ledger > keeps the status on a timeout
 """
 
-TASKS = """# Billing Tasks
+TASKS = """# Ledger Tasks
 
 {approval}**Build**: `exit 0`
-Run unit: `npx vitest run src/billing --reporter=verbose`
+Run unit: `npx vitest run src/ledger --reporter=verbose`
 
 ## Test Coverage Matrix
 
@@ -588,8 +588,8 @@ Run unit: `npx vitest run src/billing --reporter=verbose`
 
 **What**: suspend the subscription when the gateway reports a failed charge, keep it on a timeout
 **Files**:
-- Modify: `src/billing.ts`
-- Test: `src/billing.test.ts`
+- Modify: `src/ledger.ts`
+- Test: `src/ledger.test.ts`
 **Depends on**: None
 **Requirement**: BILL-01, BILL-02
 **Tests**: unit
@@ -600,19 +600,19 @@ Run unit: `npx vitest run src/billing --reporter=verbose`
 ## Checks
 
 **C1** - A failed charge suspends the subscription (BILL-01)
-Proof: run unit | ✓ billing > suspends on a failed charge
+Proof: run unit | ✓ ledger > suspends on a failed charge
 
 **C2** - A gateway timeout keeps the status and logs it (BILL-02)
-Proof: run unit | ✓ billing > keeps the status on a timeout
+Proof: run unit | ✓ ledger > keeps the status on a timeout
 
 ## Handoff
 
 **Dispatched:** none
 """
 
-DESIGN = """# Billing Design
+DESIGN = """# Ledger Design
 
-**Spec**: `.specs/features/billing/spec.md`
+**Spec**: `.specs/features/ledger/spec.md`
 **Approach**: suspend in the charge service - user: "vai de service"
 **Chosen over**: a nightly job - it leaves a paid-through window open for a day
 **Breaks if**: the gateway reports a failed charge after the period has ended
@@ -630,15 +630,15 @@ The charge service suspends the subscription when the gateway reports a failed c
 
 | Component | Location | How to Use |
 | --- | --- | --- |
-| Charge service | `src/billing.ts` | Extend |
+| Charge service | `src/ledger.ts` | Extend |
 
 ## Components
 
 ### Suspension
 
 - **Purpose**: suspend the subscription on a failed charge
-- **Location**: `src/billing.ts` (existing)
-- **Reuses**: `src/billing.ts#charge`
+- **Location**: `src/ledger.ts` (existing)
+- **Reuses**: `src/ledger.ts#charge`
 
 ## Error Handling Strategy
 
@@ -650,10 +650,10 @@ The charge service suspends the subscription when the gateway reports a failed c
 
 | Concern | Location (file:line) | Impact | Mitigation |
 | --- | --- | --- | --- |
-| No test on the charge path | `src/billing.ts:2` | a regression ships | T1 adds one |
+| No test on the charge path | `src/ledger.ts:2` | a regression ships | T1 adds one |
 """
 
-REVIEW = """# Billing Plan Review
+REVIEW = """# Ledger Plan Review
 
 **Reviewer**: independent sub-agent (author != reviewer)
 
@@ -669,7 +669,7 @@ The charge service calls the gateway and records the result.
 
 | ID | Severity | Where | Finding | Evidence | Smallest fix | Resolution |
 | --- | --- | --- | --- | --- | --- | --- |
-| R1 | Major | design.md `## Error Handling Strategy` | a duplicate webhook charges twice | `src/billing.ts:2` | dedupe on the event id | fixed - design.md `## Error Handling Strategy` adds the duplicate row |
+| R1 | Major | design.md `## Error Handling Strategy` | a duplicate webhook charges twice | `src/ledger.ts:2` | dedupe on the event id | fixed - design.md `## Error Handling Strategy` adds the duplicate row |
 """
 
 STATE_MD = """# STATE
@@ -680,7 +680,7 @@ STATE_MD = """# STATE
 - **Decision**: suspend in the charge service
 - **Reason**: one place owns the status
 - **Trade-off**: the service grows
-- **Scope**: billing
+- **Scope**: ledger
 - **Date**: 2026-10-20
 - **Status**: active
 
@@ -688,7 +688,7 @@ STATE_MD = """# STATE
 - **Decision**: log every gateway timeout
 - **Reason**: support reads the log
 - **Trade-off**: log volume
-- **Scope**: billing
+- **Scope**: ledger
 - **Date**: 2026-10-21
 - **Status**: active
 
@@ -696,20 +696,20 @@ STATE_MD = """# STATE
 """
 
 RESOLVED = "fixed - design.md `## Error Handling Strategy` adds the duplicate row"
-BILLING_TS = "export function charge() {\n  return 1\n}\n"
+LEDGER_TS = "export function charge() {\n  return 1\n}\n"
 LEGACY_TS = "export const legacy = 1\n"
-BILLING_TEST = "import { charge } from './billing'\nexpect(charge()).toBe(1)\nexpect(charge()).not.toBe(0)\n"
+LEDGER_TEST = "import { charge } from './ledger'\nexpect(charge()).toBe(1)\nexpect(charge()).not.toBe(0)\n"
 
 
 def feature_root(files, code=None):
-    """A temp project: .specs/features/billing/<files>, and the code files under the root."""
+    """A temp project: .specs/features/ledger/<files>, and the code files under the root."""
     root = tempfile.mkdtemp(prefix="feature-")
     fdir = os.path.join(root, ".specs", "features", FEATURE)
     os.makedirs(fdir)
     for name, text in files.items():
         if text is not None:
             write_artifact(os.path.join(fdir, name) if name != "STATE.md" else os.path.join(root, ".specs", name), text)
-    for path, text in (code if code is not None else {"src/billing.ts": BILLING_TS, "src/legacy.ts": LEGACY_TS}).items():
+    for path, text in (code if code is not None else {"src/ledger.ts": LEDGER_TS, "src/legacy.ts": LEGACY_TS}).items():
         os.makedirs(os.path.dirname(os.path.join(root, path)), exist_ok=True)
         write_artifact(os.path.join(root, path), text)
     return root
@@ -731,7 +731,7 @@ def many_tasks(n):
                    f"**Requirement**: BILL-{i + 3:02d}\n**Tests**: unit\n**Gate**: quick\n**Done when**:\n- [ ] done\n\n"
                    for i in range(n))
     checks = "".join(f"**C{i + 3}** - charge {i} suspends (BILL-{i + 3:02d})\n"
-                     f"Proof: run unit | ✓ billing > charge {i}\n\n" for i in range(n))
+                     f"Proof: run unit | ✓ ledger > charge {i}\n\n" for i in range(n))
     tasks = TASKS.replace("{approval}", APPROVAL).replace("## Checks\n", body + "## Checks\n", 1)
     tasks = tasks.replace("## Handoff", checks + "## Handoff")
     return {"spec.md": spec, "tasks.md": tasks, "design.md": DESIGN.replace("**Reviewed**: review.md",
@@ -755,7 +755,7 @@ def run_spec_driven_cases():
     spec_large = SPEC.replace("{approval}", "").replace("Medium", "Large") + SWEEP
     plan = {**tasks_files(), "design.md": DESIGN, "review.md": REVIEW}
     four = TASKS.replace("{approval}", APPROVAL).replace(
-        "- Modify: `src/billing.ts`\n", "- Modify: `src/billing.ts`\n- Create: `src/a.ts`\n- Create: `src/b.ts`\n"
+        "- Modify: `src/ledger.ts`\n", "- Modify: `src/ledger.ts`\n- Create: `src/a.ts`\n- Create: `src/b.ts`\n"
                                         "- Create: `src/c.ts`\n")
     cases = [
         # validate_spec
@@ -783,15 +783,15 @@ def run_spec_driven_cases():
         ("validate_spec.py", "an assumption with no default fails", {"spec.md": SPEC.replace("{approval}", "").replace("| no retry |", "|  |")}, [], 1, "no chosen default"),
         # validate_design
         ("validate_design.py", "a design whose citations are on disk passes", {"design.md": DESIGN}, [], 0, "0 error"),
-        ("validate_design.py", "a reused path not on disk fails", {"design.md": DESIGN.replace("| Charge service | `src/billing.ts` |", "| Charge service | `src/charges.ts` |")}, [], 1, "`src/charges.ts` is not on disk"),
-        ("validate_design.py", "a cited line past the end fails", {"design.md": DESIGN.replace("`src/billing.ts:2`", "`src/billing.ts:40`")}, [], 1, "past the end of `src/billing.ts`"),
-        ("validate_design.py", "an unmarked location fails", {"design.md": DESIGN.replace("`src/billing.ts` (existing)", "`src/billing.ts`")}, [], 1, "mark the location `(new)` or `(existing)`"),
-        ("validate_design.py", "a new file already on disk fails", {"design.md": DESIGN.replace("`src/billing.ts` (existing)", "`src/billing.ts` (new)")}, [], 1, "is marked `(new)` and is already on disk"),
-        ("validate_design.py", "an existing location not on disk fails", {"design.md": DESIGN.replace("`src/billing.ts` (existing)", "`src/suspension.ts` (existing)")}, [], 1, "`src/suspension.ts` is not on disk"),
-        ("validate_design.py", "a reused file with no symbol fails", {"design.md": DESIGN.replace("`src/billing.ts#charge`", "`src/billing.ts`")}, [], 1, "names no symbol"),
-        ("validate_design.py", "a reused symbol the file lacks fails", {"design.md": DESIGN.replace("#charge`", "#refund`")}, [], 1, "`refund` is not in `src/billing.ts`"),
-        ("validate_design.py", "a reused folder fails", {"design.md": DESIGN.replace("`src/billing.ts#charge`", "`src/#charge`")}, [], 1, "is a folder"),
-        ("validate_design.py", "a symbol in a Location column is checked", {"design.md": DESIGN.replace("| Charge service | `src/billing.ts` |", "| Charge service | `src/billing.ts#refund` |")}, [], 1, "`refund` is not in"),
+        ("validate_design.py", "a reused path not on disk fails", {"design.md": DESIGN.replace("| Charge service | `src/ledger.ts` |", "| Charge service | `src/charges.ts` |")}, [], 1, "`src/charges.ts` is not on disk"),
+        ("validate_design.py", "a cited line past the end fails", {"design.md": DESIGN.replace("`src/ledger.ts:2`", "`src/ledger.ts:40`")}, [], 1, "past the end of `src/ledger.ts`"),
+        ("validate_design.py", "an unmarked location fails", {"design.md": DESIGN.replace("`src/ledger.ts` (existing)", "`src/ledger.ts`")}, [], 1, "mark the location `(new)` or `(existing)`"),
+        ("validate_design.py", "a new file already on disk fails", {"design.md": DESIGN.replace("`src/ledger.ts` (existing)", "`src/ledger.ts` (new)")}, [], 1, "is marked `(new)` and is already on disk"),
+        ("validate_design.py", "an existing location not on disk fails", {"design.md": DESIGN.replace("`src/ledger.ts` (existing)", "`src/suspension.ts` (existing)")}, [], 1, "`src/suspension.ts` is not on disk"),
+        ("validate_design.py", "a reused file with no symbol fails", {"design.md": DESIGN.replace("`src/ledger.ts#charge`", "`src/ledger.ts`")}, [], 1, "names no symbol"),
+        ("validate_design.py", "a reused symbol the file lacks fails", {"design.md": DESIGN.replace("#charge`", "#refund`")}, [], 1, "`refund` is not in `src/ledger.ts`"),
+        ("validate_design.py", "a reused folder fails", {"design.md": DESIGN.replace("`src/ledger.ts#charge`", "`src/#charge`")}, [], 1, "is a folder"),
+        ("validate_design.py", "a symbol in a Location column is checked", {"design.md": DESIGN.replace("| Charge service | `src/ledger.ts` |", "| Charge service | `src/ledger.ts#refund` |")}, [], 1, "`refund` is not in"),
         ("validate_design.py", "an approach the user did not choose fails", {"design.md": DESIGN.replace(' - user: "vai de service"', "")}, [], 1, "the approach is the user's call"),
         ("validate_design.py", "no Breaks if line fails", {"design.md": DESIGN.replace("**Breaks if**: the gateway reports a failed charge after the period has ended\n", "")}, [], 1, "**Breaks if**:"),
         ("validate_design.py", "a placeholder left in fails", {"design.md": DESIGN.replace("suspend the subscription on a failed charge", "[What this component does]")}, [], 1, "template placeholder"),
@@ -802,7 +802,7 @@ def run_spec_driven_cases():
         ("validate_tasks.py", "a review not run with a reason warns", edit(plan, "design.md", "**Reviewed**: review.md", "**Reviewed**: not run - no sub-agent"), [], 0, "plan review not run"),
         ("validate_tasks.py", "an open finding fails", edit(plan, "review.md", RESOLVED, ""), [], 1, "R1 is open"),
         ("validate_tasks.py", "a contest with nothing readable fails", edit(plan, "review.md", RESOLVED, "contested - it was intentional"), [], 1, "contested with nothing the reviewer could read"),
-        ("validate_tasks.py", "a contest that cites a file passes", edit(plan, "review.md", RESOLVED, "contested - `src/billing.ts:2` already dedupes"), [], 0, "0 error"),
+        ("validate_tasks.py", "a contest that cites a file passes", edit(plan, "review.md", RESOLVED, "contested - `src/ledger.ts:2` already dedupes"), [], 0, "0 error"),
         ("validate_tasks.py", "an escalation without the user's words fails", edit(plan, "review.md", RESOLVED, "escalated - asked"), [], 1, "escalated with no answer"),
         ("validate_tasks.py", "an escalation answered in the user's words passes", edit(plan, "review.md", RESOLVED, 'escalated - user: "dedupe by event id"'), [], 0, "0 error"),
         ("validate_tasks.py", "a nit fails", edit(plan, "review.md", "| R1 | Major |", "| R1 | Nit |"), [], 1, "Blocker and Major only"),
@@ -810,25 +810,25 @@ def run_spec_driven_cases():
         ("validate_tasks.py", "a review in the author's context fails", edit(plan, "review.md", "independent sub-agent (author != reviewer)", "self-reviewed"), [], 1, "not an independent"),
         ("validate_tasks.py", "a finding Where outside the plan files fails", edit(plan, "review.md", "| R1 | Major | design.md `## Error Handling Strategy` |", "| R1 | Major | the error table |"), [], 1, "start it with the plan file"),
         # validate_tasks: the design is built by the tasks
-        ("validate_tasks.py", "a new location no task creates fails", edit(plan, "design.md", "`src/billing.ts` (existing)", "`src/suspension.ts` (new)"), [], 1, "(new) is created by no task"),
-        ("validate_tasks.py", "a new location a task creates passes", edit(edit(plan, "design.md", "`src/billing.ts` (existing)", "`src/suspension.ts` (new)"), "tasks.md", "- Modify: `src/billing.ts`\n", "- Modify: `src/billing.ts`\n- Create: `src/suspension.ts`\n"), [], 0, "0 error"),
-        ("validate_tasks.py", "an existing location no task changes fails", edit(plan, "design.md", "`src/billing.ts` (existing)", "`src/legacy.ts` (existing)"), [], 1, "(existing) is changed by no task"),
-        ("validate_tasks.py", "a folder location built by a file in it passes", edit(plan, "design.md", "`src/billing.ts` (existing)", "`src/` (existing)"), [], 0, "0 error"),
+        ("validate_tasks.py", "a new location no task creates fails", edit(plan, "design.md", "`src/ledger.ts` (existing)", "`src/suspension.ts` (new)"), [], 1, "(new) is created by no task"),
+        ("validate_tasks.py", "a new location a task creates passes", edit(edit(plan, "design.md", "`src/ledger.ts` (existing)", "`src/suspension.ts` (new)"), "tasks.md", "- Modify: `src/ledger.ts`\n", "- Modify: `src/ledger.ts`\n- Create: `src/suspension.ts`\n"), [], 0, "0 error"),
+        ("validate_tasks.py", "an existing location no task changes fails", edit(plan, "design.md", "`src/ledger.ts` (existing)", "`src/legacy.ts` (existing)"), [], 1, "(existing) is changed by no task"),
+        ("validate_tasks.py", "a folder location built by a file in it passes", edit(plan, "design.md", "`src/ledger.ts` (existing)", "`src/` (existing)"), [], 0, "0 error"),
         # validate_tasks: size, shape, trace
         ("validate_tasks.py", "the old layout fails", edit(tasks_files(), "tasks.md", "## Tasks\n\n### Phase 1: Core\n\n#### T1", "## Task Breakdown\n\n### T1"), [], 1, "old `## Execution Plan`"),
         ("validate_tasks.py", "four code files in a task fail", {**tasks_files(), "tasks.md": four}, [], 1, "4 code files"),
         ("validate_tasks.py", "four code files with Size large pass", {**tasks_files(), "tasks.md": four.replace("**Gate**: quick\n", "**Gate**: quick\n**Size**: large - one schema change spans four modules\n", 1)}, [], 0, "0 error"),
-        ("validate_tasks.py", "a test-only task fails", edit(tasks_files(), "tasks.md", "- Modify: `src/billing.ts`\n", ""), [], 1, "creates or changes no code"),
-        ("validate_tasks.py", "tests with no Test file fail", edit(tasks_files(), "tasks.md", "- Test: `src/billing.test.ts`\n", ""), [], 1, "no `Test:` file"),
+        ("validate_tasks.py", "a test-only task fails", edit(tasks_files(), "tasks.md", "- Modify: `src/ledger.ts`\n", ""), [], 1, "creates or changes no code"),
+        ("validate_tasks.py", "tests with no Test file fail", edit(tasks_files(), "tasks.md", "- Test: `src/ledger.test.ts`\n", ""), [], 1, "no `Test:` file"),
         ("validate_tasks.py", "a file outside the matrix fails", edit(tasks_files(), "tasks.md", "`src/**/*.ts`", "`lib/**/*.ts`"), [], 1, "matches no layer"),
-        ("validate_tasks.py", "a layer that needs tests and Tests none fails", edit(edit(tasks_files(), "tasks.md", "**Tests**: unit", "**Tests**: none"), "tasks.md", "- Test: `src/billing.test.ts`\n", ""), [], 1, "requires unit tests"),
-        ("validate_tasks.py", "a Modify file not on disk fails", edit(tasks_files(), "tasks.md", "Modify: `src/billing.ts`", "Modify: `src/charges.ts`"), [], 1, "`Modify: src/charges.ts` is not on disk"),
-        ("validate_tasks.py", "a Create file already on disk fails", edit(tasks_files(), "tasks.md", "Modify: `src/billing.ts`", "Create: `src/billing.ts`"), [], 1, "is already on disk"),
+        ("validate_tasks.py", "a layer that needs tests and Tests none fails", edit(edit(tasks_files(), "tasks.md", "**Tests**: unit", "**Tests**: none"), "tasks.md", "- Test: `src/ledger.test.ts`\n", ""), [], 1, "requires unit tests"),
+        ("validate_tasks.py", "a Modify file not on disk fails", edit(tasks_files(), "tasks.md", "Modify: `src/ledger.ts`", "Modify: `src/charges.ts`"), [], 1, "`Modify: src/charges.ts` is not on disk"),
+        ("validate_tasks.py", "a Create file already on disk fails", edit(tasks_files(), "tasks.md", "Modify: `src/ledger.ts`", "Create: `src/ledger.ts`"), [], 1, "is already on disk"),
         ("validate_tasks.py", "a task that modifies what an earlier task creates passes", edit(many_tasks(2), "tasks.md", "- Create: `src/c1.ts`\n- Test: `src/c1.test.ts`\n**Depends on**: None", "- Modify: `src/c0.ts`\n- Test: `src/c1.test.ts`\n**Depends on**: T2"), [], 0, "0 error"),
         ("validate_tasks.py", "two tasks that create one file fail", edit(many_tasks(2), "tasks.md", "- Create: `src/c1.ts`", "- Create: `src/c0.ts`"), [], 1, "T2 creates it"),
-        ("validate_tasks.py", "a Delete of a file on disk passes", edit(tasks_files(), "tasks.md", "- Modify: `src/billing.ts`\n", "- Modify: `src/billing.ts`\n- Delete: `src/legacy.ts`\n"), [], 0, "0 error"),
-        ("validate_tasks.py", "a Delete of a file not on disk fails", edit(tasks_files(), "tasks.md", "- Modify: `src/billing.ts`\n", "- Modify: `src/billing.ts`\n- Delete: `src/gone.ts`\n"), [], 1, "`Delete: src/gone.ts` is not on disk"),
-        ("validate_tasks.py", "a file listed twice in a task fails", edit(tasks_files(), "tasks.md", "- Modify: `src/billing.ts`\n", "- Modify: `src/billing.ts`\n- Modify: `src/billing.ts`\n"), [], 1, "is listed twice"),
+        ("validate_tasks.py", "a Delete of a file on disk passes", edit(tasks_files(), "tasks.md", "- Modify: `src/ledger.ts`\n", "- Modify: `src/ledger.ts`\n- Delete: `src/legacy.ts`\n"), [], 0, "0 error"),
+        ("validate_tasks.py", "a Delete of a file not on disk fails", edit(tasks_files(), "tasks.md", "- Modify: `src/ledger.ts`\n", "- Modify: `src/ledger.ts`\n- Delete: `src/gone.ts`\n"), [], 1, "`Delete: src/gone.ts` is not on disk"),
+        ("validate_tasks.py", "a file listed twice in a task fails", edit(tasks_files(), "tasks.md", "- Modify: `src/ledger.ts`\n", "- Modify: `src/ledger.ts`\n- Modify: `src/ledger.ts`\n"), [], 1, "is listed twice"),
         ("validate_tasks.py", "a dependency on a later task fails", edit(tasks_files(), "tasks.md", "**Depends on**: None", "**Depends on**: T2"), [], 1, "does not come before it"),
         ("validate_tasks.py", "an unknown Requirement fails", edit(tasks_files(), "tasks.md", "BILL-01, BILL-02", "BILL-01, BILL-02, BILL-09"), [], 1, "BILL-09 is not a criterion"),
         ("validate_tasks.py", "a criterion in no task fails", edit(tasks_files(), "tasks.md", "BILL-01, BILL-02", "BILL-01"), [], 1, "BILL-02 is in no task"),
@@ -848,8 +848,8 @@ def run_spec_driven_cases():
         ("validate_tasks.py", "--execute fails a Build line red before the first task", edit(tasks_files(), "tasks.md", "**Build**: `exit 0`", "**Build**: `exit 3`"), ["--execute"], 1, "Build is red before the first task"),
         ("validate_tasks.py", "a Medium feature with checks in the spec passes --execute", {"spec.md": SPEC.replace("{approval}", APPROVAL) + MEDIUM_CHECKS}, ["--execute"], 0, "0 error"),
         ("validate_tasks.py", "a Medium spec with a criterion unchecked fails --execute", {"spec.md": SPEC.replace("{approval}", APPROVAL) + MEDIUM_CHECKS.replace("(BILL-02)", "(BILL-01)")}, ["--execute"], 1, "BILL-02 has no check"),
-        ("validate_tasks.py", "a run proof with no Run line fails", edit(tasks_files(), "tasks.md", "Run unit: `npx vitest run src/billing --reporter=verbose`\n", ""), [], 1, "no `Run unit: <command>` line defines it"),
-        ("validate_tasks.py", "a run proof with no expected line fails", edit(tasks_files(), "tasks.md", " | ✓ billing > suspends on a failed charge", ""), [], 1, "names no line after `|`"),
+        ("validate_tasks.py", "a run proof with no Run line fails", edit(tasks_files(), "tasks.md", "Run unit: `npx vitest run src/ledger --reporter=verbose`\n", ""), [], 1, "no `Run unit: <command>` line defines it"),
+        ("validate_tasks.py", "a run proof with no expected line fails", edit(tasks_files(), "tasks.md", " | ✓ ledger > suspends on a failed charge", ""), [], 1, "names no line after `|`"),
         ("validate_tasks.py", "a Run line no proof reads warns", edit(tasks_files(), "tasks.md", "Run unit:", "Run e2e: `npx playwright test`\nRun unit:"), [], 0, "`Run e2e` is read by no proof"),
         # validate_state
         ("validate_state.py", "a whole decisions log passes", {"STATE.md": STATE_MD}, ["--no-head"], 0, "0 error"),
@@ -979,7 +979,7 @@ def run_commit_cases():
     if not shipped("check_commit") or shutil.which("git") is None:
         return True
     ok = True
-    base_code = {"src/billing.ts": BILLING_TS, "src/billing.test.ts": BILLING_TEST}
+    base_code = {"src/ledger.ts": LEDGER_TS, "src/ledger.test.ts": LEDGER_TEST}
     tick = ("- [ ] a failed charge", "- [x] a failed charge")
     big = "".join(f"export const v{i} = {i}\n" for i in range(450))
 
@@ -998,17 +998,17 @@ def run_commit_cases():
 
     from specs import content_hash
     tasks_done = TASKS.replace("{approval}", APPROVAL).replace(*tick)
-    ok_change = {"src/billing.ts": BILLING_TS + "export const suspended = 'suspended'\n",
-                 "src/billing.test.ts": BILLING_TEST + "expect(suspended).toBe('suspended')\n",
-                 ".specs/features/billing/tasks.md": tasks_done}
-    spec_path = ".specs/features/billing/spec.md"
+    ok_change = {"src/ledger.ts": LEDGER_TS + "export const suspended = 'suspended'\n",
+                 "src/ledger.test.ts": LEDGER_TEST + "expect(suspended).toBe('suspended')\n",
+                 ".specs/features/ledger/tasks.md": tasks_done}
+    spec_path = ".specs/features/ledger/spec.md"
     spec = SPEC.replace("{approval}", APPROVAL)
     approved = spec.replace("{hash}", content_hash(spec))
     paused = approved.replace("set the status to `suspended`", "set the status to `paused`")
     reapproved = spec.replace("set the status to `suspended`", "set the status to `paused`").replace(
         "Aprovado, pode seguir.", "pode pausar")
     large = TASKS.replace("**Gate**: quick\n", "**Gate**: quick\n**Size**: large - generated constants table\n")
-    deleting = TASKS.replace("- Test: `src/billing.test.ts`\n", "- Test: `src/billing.test.ts`\n- Delete: `src/legacy.ts`\n"
+    deleting = TASKS.replace("- Test: `src/ledger.test.ts`\n", "- Test: `src/ledger.test.ts`\n- Delete: `src/legacy.ts`\n"
                              "- Delete: `src/old.test.ts`\n")
     done_deleting = deleting.replace("{approval}", APPROVAL).replace(*tick)
     old = {"src/legacy.ts": LEGACY_TS, "src/old.test.ts": "expect(1).toBe(1)\n"}
@@ -1016,15 +1016,15 @@ def run_commit_cases():
         ("a task's own files with its test pass", change(ok_change), 0, "OK"),
         ("a file the task does not list fails", change({**ok_change, "src/other.ts": "x\n"}), 1, "`src/other.ts` is staged"),
         ("no test file changed fails", change({k: v for k, v in ok_change.items() if "test" not in k}), 1, "no test file changes"),
-        ("a skip marker fails", change({**ok_change, "src/billing.test.ts": BILLING_TEST + "it.skip('x', () => {})\n"}), 1, "a skip or only marker"),
-        ("a suppression with no issue fails", change({**ok_change, "src/billing.ts": BILLING_TS + "// eslint-disable-next-line\n"}), 1, "a suppression added"),
-        ("a suppression with an issue passes", change({**ok_change, "src/billing.ts": BILLING_TS + "// eslint-disable-next-line BILL-123\n"}), 0, "OK"),
-        ("an assertion removed fails", change({**ok_change, "src/billing.test.ts": "import { charge } from './billing'\nexpect(charge()).toBe(1)\n// keep\n"}), 1, "assertion(s) fewer"),
-        ("a test file deleted fails", change({k: v for k, v in ok_change.items() if "test" not in k}, ["src/billing.test.ts"]), 1, "this commit deletes it"),
-        ("450 lines of code fail", change({**ok_change, "src/billing.ts": big}), 1, "over 400"),
-        ("450 lines with an approved Size large pass", change({**ok_change, "src/billing.ts": big, ".specs/features/billing/tasks.md":
+        ("a skip marker fails", change({**ok_change, "src/ledger.test.ts": LEDGER_TEST + "it.skip('x', () => {})\n"}), 1, "a skip or only marker"),
+        ("a suppression with no issue fails", change({**ok_change, "src/ledger.ts": LEDGER_TS + "// eslint-disable-next-line\n"}), 1, "a suppression added"),
+        ("a suppression with an issue passes", change({**ok_change, "src/ledger.ts": LEDGER_TS + "// eslint-disable-next-line BILL-123\n"}), 0, "OK"),
+        ("an assertion removed fails", change({**ok_change, "src/ledger.test.ts": "import { charge } from './ledger'\nexpect(charge()).toBe(1)\n// keep\n"}), 1, "assertion(s) fewer"),
+        ("a test file deleted fails", change({k: v for k, v in ok_change.items() if "test" not in k}, ["src/ledger.test.ts"]), 1, "this commit deletes it"),
+        ("450 lines of code fail", change({**ok_change, "src/ledger.ts": big}), 1, "over 400"),
+        ("450 lines with an approved Size large pass", change({**ok_change, "src/ledger.ts": big, ".specs/features/ledger/tasks.md":
             large.replace("{approval}", APPROVAL).replace(*tick)}, tasks=large), 0, "OK"),
-        ("Size large written in the code commit fails", change({**ok_change, "src/billing.ts": big, ".specs/features/billing/tasks.md":
+        ("Size large written in the code commit fails", change({**ok_change, "src/ledger.ts": big, ".specs/features/ledger/tasks.md":
             large.replace("{approval}", APPROVAL.replace("{hash}", content_hash(TASKS.replace("{approval}", "")))).replace(*tick)}), 1,
             "tasks.md changed after it was approved"),
         ("a commit that ticks no task fails", change({k: v for k, v in ok_change.items() if "tasks.md" not in k}), 1, "ticks no task"),
@@ -1036,11 +1036,11 @@ def run_commit_cases():
         ("a new approval alone passes", change({spec_path: reapproved}), 0, "OK"),
         ("a commit that drops the approval fails", change({spec_path: SPEC.replace("{approval}", "")}), 1,
             "removes the approval of spec.md"),
-        ("a plan commit that closes no task passes", change({".specs/features/billing/tasks.md": TASKS.replace("{approval}", APPROVAL)
+        ("a plan commit that closes no task passes", change({".specs/features/ledger/tasks.md": TASKS.replace("{approval}", APPROVAL)
             .replace("**Dispatched:** none", "**Dispatched:** Verifier at abc123")}), 0, "OK"),
-        ("a declared Delete passes", change({**ok_change, ".specs/features/billing/tasks.md": done_deleting},
+        ("a declared Delete passes", change({**ok_change, ".specs/features/ledger/tasks.md": done_deleting},
             ["src/legacy.ts", "src/old.test.ts"], tasks=deleting, code=old), 0, "OK"),
-        ("a Delete left on disk fails", change({**ok_change, ".specs/features/billing/tasks.md": done_deleting},
+        ("a Delete left on disk fails", change({**ok_change, ".specs/features/ledger/tasks.md": done_deleting},
             ["src/old.test.ts"], tasks=deleting, code=old), 1, "`Delete: src/legacy.ts` is not deleted"),
     ]
     for desc, (go, task, tasks, code), want_code, want_frag in cases:
@@ -1155,15 +1155,15 @@ def run_tooling():
     try:
         fdir = os.path.join(root, ".specs", "features", FEATURE)
         os.makedirs(fdir)
-        write_artifact(os.path.join(fdir, "tasks.md"), "# Billing Tasks\n\n## Checks\n")
+        write_artifact(os.path.join(fdir, "tasks.md"), "# Ledger Tasks\n\n## Checks\n")
         for desc, verified, want in [
             ("an unverified feature is told what follows its last task", False, True),
             ("a verified feature is not", True, False),
         ]:
             if verified:
-                write_artifact(os.path.join(fdir, "verification.md"), "# Billing verification\n")
+                write_artifact(os.path.join(fdir, "verification.md"), "# Ledger verification\n")
             code, out = run_script("check_commit.py", "feat: suspend the subscription", "--root", root)
-            if code == 0 and ("check_proofs.py billing" in out) == want:
+            if code == 0 and ("check_proofs.py ledger" in out) == want:
                 print(f"  ok      check_commit.py: {desc}")
             else:
                 ok = False
@@ -1242,7 +1242,7 @@ def run_tooling():
         steps = [
             (["--root", root, "init"], "Initialized"),
             (["--root", root, "add", "--feature", FEATURE, "--signal", "weak_test",
-              "--source", "app/billing/x.rb:31", "--text", "assert the dedup path returns the row"],
+              "--source", "app/ledger/x.rb:31", "--text", "assert the dedup path returns the row"],
              "ADDED"),
             (["--root", root, "status"], "1 total"),
             (["status", "--root", root], "1 total"),
@@ -1272,11 +1272,11 @@ def run_tooling():
         old = {"schema": 1, "next_id": 2, "lessons": [{
             "id": "L-001", "key": "surviving_mutant::" + text, "text": text, "signal": "surviving_mutant",
             "scope": "", "status": "candidate", "features": ["older"], "recurrence": 1, "harmful": 0,
-            "evidence": ["app/billing/x.rb:31"], "created": "2026-10-01", "last_seen": "2099-01-01"}]}
+            "evidence": ["app/ledger/x.rb:31"], "created": "2026-10-01", "last_seen": "2099-01-01"}]}
         os.makedirs(os.path.join(root, ".specs"))
         write_artifact(os.path.join(root, ".specs", "lessons.json"), json.dumps(old))
         code, out = run_script("lessons.py", "--root", root, "add", "--feature", FEATURE, "--signal", "weak_test",
-                               "--source", "app/billing/x.rb:31", "--text", text)
+                               "--source", "app/ledger/x.rb:31", "--text", text)
         stored = read_artifact(os.path.join(root, ".specs", "lessons.json"))
         if code == 0 and "UPDATED L-001" in out and "surviving_mutant" not in stored:
             print("  ok      lessons.py: a surviving_mutant lesson loads as weak_test and recurs")
@@ -1298,7 +1298,7 @@ RUNNER = ('import sys\n'
 
 
 def proofs_md(runs, proofs, build="none - fixture", head=""):
-    text = f"# Billing checks\n\n{head}Build: {build}\n"
+    text = f"# Ledger checks\n\n{head}Build: {build}\n"
     text += "".join(f"Run {name}: `{cmd}`\n" for name, cmd in runs.items())
     text += "\n## Checks\n\n"
     return text + "".join(f"**C{i}** - claim {i} (AC {i})\nProof: {p}\n\n" for i, p in enumerate(proofs, 1))
@@ -1323,7 +1323,7 @@ def run_proofs_tooling():
     os.makedirs(fdir)
     write_artifact(os.path.join(root, "runner.py"), RUNNER)
     r = '"' + sys.executable.replace("\\", "/") + '" runner.py'
-    unit = {"unit": f'{r} 0 "PASS billing suspends on a failed charge (3 ms)" "PASS billing keeps a paid account"'}
+    unit = {"unit": f'{r} 0 "PASS ledger suspends on a failed charge (3 ms)" "PASS ledger keeps a paid account"'}
     cases = [
         ("a group runs once and each check reads its line",
          proofs_md(unit, ["run unit | PASS suspends", "run unit | PASS keeps a paid account"]),
@@ -1331,7 +1331,7 @@ def run_proofs_tooling():
         ("a line the group never printed is no test ran",
          proofs_md(unit, ["run unit | PASS renamed test"]), 1, {"C1": "**no test ran**"}, None),
         ("a failed group: its passing line passes, the missing one fails, the group gets a fail row",
-         proofs_md({"unit": f'{r} 1 "PASS billing suspends" "FAIL billing keeps a paid account"'},
+         proofs_md({"unit": f'{r} 1 "PASS ledger suspends" "FAIL ledger keeps a paid account"'},
                    ["run unit | PASS suspends", "run unit | PASS keeps a paid account"]),
          1, {"C1": "pass", "C2": "**fail**", "Run unit": "**fail** - exit 1"}, None),
         ("a proof naming a group no Run line defines",
@@ -1342,7 +1342,7 @@ def run_proofs_tooling():
         ("a lone proof two checks name runs once",
          proofs_md({}, [f"`{r} 0 ok`", f"`{r} 0 ok`"]), 0, {"C1": "pass", "C2": "pass"}, 1),
         ("a coloured line still matches",
-         proofs_md({"unit": f'{r} 0 "{{esc}}[32mPASS{{esc}}[0m billing suspends"'}, ["run unit | PASS billing suspends"]),
+         proofs_md({"unit": f'{r} 0 "{{esc}}[32mPASS{{esc}}[0m ledger suspends"'}, ["run unit | PASS ledger suspends"]),
          0, {"C1": "pass"}, None),
         ("the expected words must come in order",
          proofs_md(unit, ["run unit | PASS suspends charge", "run unit | charge suspends PASS"]),
