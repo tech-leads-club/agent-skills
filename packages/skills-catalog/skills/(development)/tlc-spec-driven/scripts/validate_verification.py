@@ -36,7 +36,7 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures
+from lean_config import _section, checks_file, plan_file, plan_owes_pictures
 from specs import approval_errors, spin_guard, stop_text
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
