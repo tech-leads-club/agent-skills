@@ -1,69 +1,66 @@
 # Design
 
-**Goal**: Define HOW to build it. Architecture, components, what to reuse.
+**Goal**: Define HOW to build it: the approach, the components, and what to reuse.
 
-**Skip this phase when:** The change is straightforward - no architectural decisions, no new patterns, no component interactions to plan. For simple features, design happens inline during Execute.
+**When:** Large and Complex scopes. A Medium feature designs inline during Execute.
 
 ## Process
 
 ### 1. Load Context
 
-Read `.specs/features/[feature]/spec.md` before designing. If `.specs/features/[feature]/context.md` exists, load it too - it contains implementation decisions that constrain the design (layout choices, behavior preferences, interaction patterns). Decisions marked as "Agent's Discretion" are yours to decide.
+Read `.specs/features/[feature]/spec.md` before you design. Read `context.md` too when it exists. Its decisions constrain the design, and the ones marked "Agent's Discretion" are yours.
 
-**Mandatory: read `.specs/STATE.md` `## Decisions` now.** This MUST happen before any architectural choices are made. Every `active` `AD-NNN` entry is a project-level constraint this design must conform to. If a decision from a prior feature conflicts with what is best for this feature, you have two options - both require an explicit choice:
+**Read `.specs/STATE.md` `## Decisions` now, before any architectural choice.** Every `active` `AD-NNN` is a constraint this design meets. When a past decision conflicts with this feature, choose one of two paths:
 
-1. **Conform** - Design within the active constraint.
-2. **Supersede** - Append a new `AD-NNN` entry to `.specs/STATE.md` `## Decisions` that supersedes the old one (set the old entry's `status` to `superseded by AD-NNN`) and document the reason. The new decision becomes the project standard going forward.
+1. **Conform.** Design within the decision.
+2. **Supersede.** Append a new `AD-NNN` that supersedes the old one, and set the old Status to `superseded by AD-NNN`. Run `python3 <skill-dir>/scripts/validate_state.py`.
 
-Silently ignoring an active decision is not an option - it creates invisible inconsistency across features.
+Ignoring an active decision is not a path. It creates inconsistency nobody sees.
 
-**Also load confirmed lessons** relevant to this feature: `python3 <skill-dir>/scripts/lessons.py list --status confirmed` (filter with `--scope`/`--query`). These are past verification failures distilled into guidance - apply them while designing. Load only `confirmed`. Skip silently if no store or no code tool. See [lessons.md](lessons.md).
+**Load confirmed lessons** for this area: `python3 <skill-dir>/scripts/lessons.py list --status confirmed`. They are past failures turned into guidance ([lessons.md](lessons.md)).
 
-### 1.5. Research (Optional but Recommended)
+### 2. Research When the Ground Is New
 
-If the feature involves unfamiliar technology, patterns, or integrations, research before designing. Document findings briefly in the design doc or as inline notes. This prevents incorrect assumptions from propagating into tasks.
-
-Follow the **Knowledge Verification Chain** (see SKILL.md) in strict order:
+Research before you design when the feature touches unfamiliar technology, patterns or integrations. Follow this order:
 
 ```
 Codebase → Project docs → Context7 MCP → Web search → Flag as uncertain
 ```
 
-**CRITICAL: NEVER assume or fabricate information.** If you cannot find an answer through the chain, explicitly say "I don't know" or "I couldn't find documentation for this". Inventing an API, a pattern, or a behavior that doesn't exist is far worse than admitting uncertainty. Wrong assumptions propagate through design → tasks → implementation and cause cascading failures.
+**Never assume or invent.** When the chain finds nothing, say "I could not find documentation for this". A wrong assumption here spreads into the tasks and the code.
 
-Good triggers for research: new libraries, unfamiliar APIs, performance-sensitive features, security-sensitive features, patterns you haven't used in this codebase before.
+**Flag concerns while you read the code.** Write each one in `## Risks & Concerns` with its `file:line` and a mitigation. Look for fragile code, tech debt, security risks, performance bottlenecks and untested paths this feature depends on.
 
-**Concern flagging (MUST do while reading code):** While walking the codebase via the Knowledge Verification Chain, flag any concerns you encounter in the areas this feature touches. Capture each finding in the `## Risks & Concerns` section of `design.md`:
+### 3. Choose the Approach With the User
 
-- **Fragile code** - tight coupling, large functions, implicit state
-- **Tech debt** - hacks, workarounds, deprecated APIs
-- **Security risks** - unvalidated input, auth gaps, exposed secrets
-- **Performance bottlenecks** - N+1 queries, unbounded loops, missing indexes
-- **Test coverage gaps** - untested paths the feature depends on
+Present 2 or 3 approaches that deliver the same scope. Lead with your recommendation, then give the strongest case against it. Each approach states the condition under which it fails. The choice is the user's, and it is the only stop in Design.
 
-Every flagged concern MUST include a mitigation - how the design (or a follow-up task) addresses it.
+Record the choice in design.md:
 
-### 2. Define Architecture
+- `**Approach**: <chosen> - user: "<their words>"`.
+- `**Chosen over**:` each rejected approach and why.
+- `**Breaks if**:` the assumption that, if false, breaks the chosen approach. The plan reviewer tests it against the code.
 
-**Large/Complex only - approach exploration:** Before committing to a single architecture, present 2-3 viable approaches with trade-offs and a recommendation. Lead with the recommendation to avoid analysis paralysis. All approaches must deliver the same scoped thing (no alternative scopes). Confirm the chosen approach with the user before detailing components. Medium features: skip - design inline.
+### 4. Define the Architecture
 
-Overview of how components interact, drawn in mermaid: a `sequenceDiagram` for a request and its answer, a `flowchart` when it branches or hands off to a queue or job.
+Draw how the components interact in mermaid. Use a `sequenceDiagram` for a request and its answer. Use a `flowchart` when it branches or hands off to a queue or a job.
 
-**Where the rules run.** Every rule that changes what a user sees - a state, a total, a count, filtering, searching, sorting - runs in a layer the repo's tests reach, as its `AGENTS.md` or test docs say. Filtering, searching, sorting and counting are rules, not presentation: put in the browser, they ship with no test behind them.
+**Where the rules run.** A rule that changes what a user sees runs in a layer the repo's tests reach. That covers a state, a total, a count, filtering, searching and sorting. Put in the browser, such a rule ships with no test behind it.
 
-### 3. Identify Code Reuse
+### 5. Reuse First, Then Components and Data
 
-**CRITICAL**: What existing code can we leverage? This saves tokens and reduces errors.
+List the existing code this feature uses in `## Code Reuse Analysis`, with paths that exist today. For each component, give Purpose, Location, Interfaces, Dependencies and what it reuses. Mark every location `(new)` or `(existing)`, because a path cited as existing is a claim about the tree. Define data models before the tasks.
 
-Flag any concerns found here per step 1.5 into `## Risks & Concerns`.
+- **A reuse names its symbol.** Write `**Reuses**: \`path/to/file.ts#Symbol\``, the function, class or type the component builds on. `validate_design.py` opens the file and finds the symbol. A folder is not a reuse, so cite the file that defines it.
+- **A component is something a task builds.** Code the feature only calls is reuse, not a component. `validate_tasks.py` refuses a `(new)` location no task creates and an `(existing)` one no task changes.
 
-### 4. Define Components and Interfaces
+### 6. Read It Cold Before Tasks
 
-Each component: Purpose, Location, Interfaces, Dependencies, What it reuses.
+1. Run `python3 <skill-dir>/scripts/validate_design.py <feature>`. It checks every path and symbol the design cites, and the approach lines.
+2. Have one fresh sub-agent read the plan as [review.md](review.md) says. Resolve every finding.
+3. Write `**Reviewed**: review.md`. Tasks starts after that.
 
-### 5. Define Data Models
-
-If the feature involves data, define models before implementation.
+The rest of the design is not a stop for the user. It reaches them with the tasks.
 
 ---
 
@@ -73,41 +70,35 @@ If the feature involves data, define models before implementation.
 # [Feature] Design
 
 **Spec**: `.specs/features/[feature]/spec.md`
-**Status**: Draft | Approved
+**Approach**: [chosen approach] - user: "[their words]"
+**Chosen over**: [approach B - why not. approach C - why not]
+**Breaks if**: [the assumption that, if false, breaks the chosen approach]
+**Reviewed**: [review.md | not run - why]
 
 ---
 
 ## Architecture Overview
 
-[Brief description of the architecture approach]
+[Brief description of the approach]
 
 ```mermaid
 graph TD
     A[User Action] --> B[Component A]
     B --> C[Service Layer]
     C --> D[Data Store]
-    B --> E[Component B]
 ```
-````
 
 ---
 
 ## Code Reuse Analysis
 
-### Existing Components to Leverage
-
 | Component            | Location            | How to Use                |
 | -------------------- | ------------------- | ------------------------- |
-| [Existing Component] | `src/path/to/file`  | [Extend/Import/Reference] |
-| [Existing Utility]   | `src/utils/file`    | [How it helps]            |
-| [Existing Pattern]   | `src/patterns/file` | [Apply same pattern]      |
+| [Existing Component] | `src/path/to/file.ts#Symbol` | [Extend/Import/Reference] |
 
-### Integration Points
-
-| System         | Integration Method                      |
-| -------------- | --------------------------------------- |
-| [Existing API] | [How new feature connects]              |
-| [Database]     | [How data connects to existing schemas] |
+| System         | Integration Method         |
+| -------------- | -------------------------- |
+| [Existing API] | [How new feature connects] |
 
 ---
 
@@ -116,45 +107,20 @@ graph TD
 ### [Component Name]
 
 - **Purpose**: [What this component does - one sentence]
-- **Location**: `src/path/to/component/`
+- **Location**: `src/path/to/component/` (new | existing)
 - **Interfaces**:
   - `methodName(param: Type): ReturnType` - [description]
-  - `methodName(param: Type): ReturnType` - [description]
-- **Dependencies**: [What it needs to function]
-- **Reuses**: [Existing code this builds upon]
-
-### [Component Name]
-
-- **Purpose**: [What this component does]
-- **Location**: `src/path/to/component/`
-- **Interfaces**:
-  - `methodName(param: Type): ReturnType`
-- **Dependencies**: [Dependencies]
-- **Reuses**: [Existing code]
+- **Dependencies**: [What it needs]
+- **Reuses**: `src/path/to/file.ts#Symbol` [the existing code it builds on, or none]
 
 ---
 
 ## Data Models (if applicable)
 
-### [Model Name]
-
 ```typescript
 interface ModelName {
   id: string
-  field1: string
-  field2: number
   createdAt: Date
-}
-```
-
-**Relationships**: [How this relates to other models]
-
-### [Model Name]
-
-```typescript
-interface AnotherModel {
-  id: string
-  // ...
 }
 ```
 
@@ -165,7 +131,6 @@ interface AnotherModel {
 | Error Scenario | Handling      | User Impact      |
 | -------------- | ------------- | ---------------- |
 | [Scenario 1]   | [How handled] | [What user sees] |
-| [Scenario 2]   | [How handled] | [What user sees] |
 
 ---
 
@@ -173,7 +138,7 @@ interface AnotherModel {
 
 | Concern | Location (file:line) | Impact | Mitigation |
 | ------- | -------------------- | ------ | ---------- |
-| [Fragile code / tech debt / security / perf / test gap] | `src/path/file.ts:42` | [What breaks or degrades] | [How the design or a follow-up task addresses it] |
+| [Fragile code / tech debt / security / perf / test gap] | `src/path/file.ts:42` | [What breaks] | [How the design or a task handles it] |
 
 > None found - is a valid entry.
 
@@ -184,18 +149,6 @@ interface AnotherModel {
 | Decision          | Choice          | Rationale     |
 | ----------------- | --------------- | ------------- |
 | [What we decided] | [What we chose] | [Why - brief] |
+````
 
-> **Project-level decisions:** If a decision here sets a convention, pattern, or constraint that future features must follow, append it to `.specs/STATE.md` `## Decisions` as the next `AD-NNN` entry (see [memory.md](memory.md)). Feature-local decisions stay only in this table.
-
----
-
-## Tips
-
-- **Load context first** - If context.md exists, decisions there are locked
-- **Research when uncertain** - 5 minutes of research prevents hours of rework
-- **Reuse is king** - Every component should reference existing patterns
-- **Interfaces first** - Define contracts before implementation
-- **Keep it visual** - Diagrams save 1000 words
-- **Small components** - If component does 3+ things, split it
-- **Flag concerns inline** - Risks found during research go in Risks & Concerns with a mitigation
-- **Confirm before Tasks** - User approves design before breaking into tasks
+A decision that sets a convention later features must follow goes to `.specs/STATE.md` as the next `AD-NNN` ([memory.md](memory.md)). A feature-local decision stays in the Tech Decisions table.
