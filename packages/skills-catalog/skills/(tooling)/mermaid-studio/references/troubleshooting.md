@@ -449,7 +449,7 @@ node $SKILL_DIR/scripts/batch.mjs --timeout 60000
 
 %% GOOD — use Mermaid defaults (don't set fontFamily at all)
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#eef2ff', 'lineColor': '#94a3b8'
+  'primaryColor': '#4f46e5', 'lineColor': '#94a3b8'
 }}}%%
 
 %% GOOD — if you must set a font, use web-safe ones

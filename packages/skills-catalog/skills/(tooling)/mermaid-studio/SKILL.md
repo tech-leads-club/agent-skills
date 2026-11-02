@@ -15,7 +15,7 @@ Expert-level Mermaid diagram creation, validation, and multi-format rendering. C
 
 Every diagram MUST follow these principles. They are not optional — they define the difference between a mediocre diagram and a gold-standard one.
 
-**Contrast comes first:** Check text against the element's effective rendered background, not just `primaryColor`. Use at least 4.5:1 contrast for normal text or 3:1 for large text (at least 18 pt, or 14 pt bold). In light palettes, explicitly set dark `primaryTextColor`, `nodeTextColor`, `actorTextColor`, and `noteTextColor` with compatible fills; never combine white labels with light `mainBkg`, `actorBkg`, or `noteBkgColor`. Keep light labels on dark fills when using dark themes. Whenever creating or changing a palette, render and visually inspect a representative flowchart and sequence diagram, including nodes, participants, messages, notes, and loop labels. See `references/themes.md` for the checks and Mermaid's fallback behavior.
+**Contrast comes first:** Check text against the element's effective rendered background, not just `primaryColor`. Use at least 4.5:1 contrast for normal text or 3:1 for large text (at least 18 pt, or 14 pt bold). Preserve each palette's identity: keep light labels on dark fills, and explicitly override `nodeTextColor`, `actorTextColor`, or `noteTextColor` when that element has a light fill. Do not infer a label's background from `primaryColor` alone. Whenever creating or changing a palette, render and visually inspect a representative flowchart and sequence diagram, including nodes, participants, messages, notes, and loop labels. See `references/themes.md` for the checks and Mermaid's fallback behavior.
 
 ### Rule 1: Always Use an Init Directive for Professional Styling
 
@@ -25,15 +25,15 @@ Every diagram MUST follow these principles. They are not optional — they defin
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#eef2ff', 'primaryTextColor': '#1e293b',
+  'primaryColor': '#4f46e5', 'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',
-  'secondaryColor': '#d1fae5', 'tertiaryColor': '#fef3c7',
+  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',
   'background': '#ffffff', 'mainBkg': '#f8fafc',
   'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',
   'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',
   'edgeLabelBackground': '#ffffff', 'textColor': '#334155',
-  'nodeTextColor': '#1e293b', 'actorBkg': '#f8fafc',
-  'actorTextColor': '#1e293b', 'noteBkgColor': '#fef3c7',
+  'nodeTextColor': '#1e293b',
+  'actorTextColor': '#1e293b',
   'noteTextColor': '#1e293b'
 }}}%%
 ```
@@ -178,16 +178,17 @@ Follow these principles in order of priority:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#eef2ff', 'primaryTextColor': '#1e293b',
+  'primaryColor': '#4f46e5', 'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',
-  'secondaryColor': '#d1fae5', 'tertiaryColor': '#fef3c7',
+  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',
   'background': '#ffffff', 'mainBkg': '#f8fafc',
   'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',
   'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',
-  'edgeLabelBackground': '#ffffff', 'textColor': '#334155',
-  'nodeTextColor': '#1e293b', 'actorBkg': '#f8fafc',
-  'actorTextColor': '#1e293b', 'noteBkgColor': '#fef3c7',
-  'noteTextColor': '#1e293b'
+  'edgeLabelBackground': '#ffffff',
+  'nodeTextColor': '#1e293b',
+  'actorTextColor': '#1e293b',
+  'noteTextColor': '#1e293b',
+  'textColor': '#334155'
 }}}%%
 flowchart TD
     Start([Start]) --> Input[/User Input/]
@@ -348,7 +349,7 @@ node $SKILL_DIR/scripts/batch.mjs \
 
 **mermaid-cli native (5):** `default` | `forest` | `dark` | `neutral` | `base`
 
-Custom theme: `--theme base --config '{"theme":"base","themeVariables":{"primaryColor":"#eef2ff","lineColor":"#94a3b8"}}'`
+Custom theme: `--theme base --config '{"theme":"base","themeVariables":{"primaryColor":"#4f46e5","lineColor":"#94a3b8"}}'`
 
 For the full theme catalog, read `references/themes.md`. The render script auto-selects the best engine (mmdc primary, beautiful-mermaid fallback, Puppeteer for icon packs).
 
