@@ -1,3 +1,34 @@
+## 0.17.18 (2026-10-31)
+
+### 🚀 Features
+
+- **skills-catalog:** run the build line before building, name what follows ([f69e6154b](https://github.com/tech-leads-club/agent-skills/commit/f69e6154b))
+- **skills-catalog:** run proofs with the project's own test commands and drop mutations ([b9caf0c01](https://github.com/tech-leads-club/agent-skills/commit/b9caf0c01))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.17 (2026-10-30)
+
+### 🩹 Fixes
+
+- **skills-catalog:** clean dist before build so a rebuild does not nest skills/skills ([eabc1bef7](https://github.com/tech-leads-club/agent-skills/commit/eabc1bef7))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.16 (2026-10-30)
+
+### 🩹 Fixes
+
+- **skills-catalog:** run tlc scripts on windows and fail a broken mutation run ([de9114ceb](https://github.com/tech-leads-club/agent-skills/commit/de9114ceb))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
 ## 0.17.15 (2026-10-26)
 
 ### 🚀 Features

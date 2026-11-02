@@ -1,3 +1,5 @@
+import { fixturePath, fixturePathPrefix, joinFixturePath } from './path-fixtures'
+
 import { createHash } from 'node:crypto'
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
@@ -43,6 +45,7 @@ type TestPorts = {
   mkdirSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean }) => void>
   rmSyncMock: jest.MockedFunction<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>
   readFileSyncMock: jest.MockedFunction<(path: string, encoding: string) => string>
+  readFileMock: jest.MockedFunction<(path: string, encoding: string) => Promise<string>>
   writeFileSyncMock: jest.MockedFunction<(path: string, content: string | Uint8Array, encoding?: string) => void>
   readdirSyncMock: jest.MockedFunction<(path: string, options?: { withFileTypes: true }) => DirEntry[]>
   getWithFallbackMock: jest.MockedFunction<
@@ -66,6 +69,7 @@ const createPorts = (): TestPorts => {
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const mkdirSyncMock = jest.fn<(path: string, options?: { recursive?: boolean }) => void>()
   const readFileSyncMock = jest.fn<(path: string, encoding: string) => string>()
+  const readFileMock = jest.fn<(path: string, encoding: string) => Promise<string>>()
   const rmSyncMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => void>()
   const writeFileSyncMock = jest.fn<(path: string, content: string | Uint8Array, encoding?: string) => void>()
   const readdirSyncMock = jest.fn<(path: string, options?: { withFileTypes: true }) => DirEntry[]>()
@@ -87,7 +91,9 @@ const createPorts = (): TestPorts => {
 
   const virtualFs = new Map<string, string | Uint8Array>()
 
-  existsSyncMock.mockImplementation((path) => virtualFs.has(path) || path === '/home/tester/.cache/agent-skills')
+  existsSyncMock.mockImplementation(
+    (path) => virtualFs.has(path) || path === fixturePath('/home/tester/.cache/agent-skills'),
+  )
   mkdirSyncMock.mockReturnValue(undefined)
   writeFileSyncMock.mockImplementation((path, content) => {
     virtualFs.set(path, content)
@@ -99,8 +105,11 @@ const createPorts = (): TestPorts => {
   rmSyncMock.mockImplementation((path) => {
     virtualFs.delete(path)
     for (const key of [...virtualFs.keys()]) {
-      if (key.startsWith(`${path}/`)) virtualFs.delete(key)
+      if (key.startsWith(fixturePathPrefix(path))) virtualFs.delete(key)
     }
+  })
+  readFileMock.mockImplementation(async (path) => {
+    throw new Error(`ENOENT: ${path}`)
   })
   readdirSyncMock.mockReturnValue([])
   getEnvMock.mockImplementation((key) => (key === 'SKILLS_CDN_REF' ? 'main' : undefined))
@@ -111,6 +120,7 @@ const createPorts = (): TestPorts => {
     mkdirSync: mkdirSyncMock,
     rmSync: rmSyncMock,
     readFileSync: readFileSyncMock,
+    readFile: readFileMock,
     writeFileSync: writeFileSyncMock,
     readdirSync: readdirSyncMock,
   } as unknown as FileSystemPort
@@ -120,8 +130,8 @@ const createPorts = (): TestPorts => {
   } as unknown as HttpPort
 
   const env = {
-    cwd: jest.fn(() => '/workspace/project/packages/cli'),
-    homedir: jest.fn(() => '/home/tester'),
+    cwd: jest.fn(() => fixturePath('/workspace/project/packages/cli')),
+    homedir: jest.fn(() => fixturePath('/home/tester')),
     platform: jest.fn(() => 'linux'),
     getEnv: getEnvMock,
   } as unknown as EnvPort
@@ -144,8 +154,8 @@ const createPorts = (): TestPorts => {
     logger,
     packageResolver,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
@@ -157,6 +167,7 @@ const createPorts = (): TestPorts => {
     mkdirSyncMock,
     rmSyncMock,
     readFileSyncMock,
+    readFileMock,
     writeFileSyncMock,
     readdirSyncMock,
     getWithFallbackMock,
@@ -195,18 +206,18 @@ beforeEach(() => {
 describe('registry cache path helpers', () => {
   it('returns the absolute skill cache path', () => {
     const { ports } = createPorts()
-    expect(getSkillCachePath(ports, 'my-skill')).toBe('/home/tester/.cache/agent-skills/skills/my-skill')
+    expect(getSkillCachePath(ports, 'my-skill')).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/my-skill'))
   })
 
   it('returns the absolute base cache directory', () => {
     const { ports } = createPorts()
-    expect(getCacheDir(ports)).toBe('/home/tester/.cache/agent-skills')
+    expect(getCacheDir(ports)).toBe(fixturePath('/home/tester/.cache/agent-skills'))
   })
 
   it('reads cached content hash from metadata file', () => {
     const { ports, existsSyncMock, readFileSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+      (path) => path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json'),
     )
     readFileSyncMock.mockReturnValue('{"contentHash":"disk-hash","downloadedAt":100}')
 
@@ -240,9 +251,9 @@ describe('fetchRegistry', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/registry.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/registry.json'),
     )
     readFileSyncMock.mockReturnValue(JSON.stringify({ fetchedAt, registry: registryFixture }))
 
@@ -258,9 +269,9 @@ describe('fetchRegistry', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/registry.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/registry.json'),
     )
     readFileSyncMock.mockReturnValue(JSON.stringify({ fetchedAt: Date.now(), registry: staleRegistry }))
     getWithFallbackMock.mockResolvedValue({
@@ -293,9 +304,9 @@ describe('fetchRegistry', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/registry.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/registry.json'),
     )
     readFileSyncMock.mockReturnValue(JSON.stringify({ fetchedAt, registry: staleRegistry }))
     getWithFallbackMock.mockResolvedValue({
@@ -329,9 +340,9 @@ describe('downloadSkill', () => {
 
     const cachedPath = await downloadSkill(ports, registryFixture.skills[0])
 
-    expect(cachedPath).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    expect(cachedPath).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'))
     expect(writeFileSyncMock).toHaveBeenCalledWith(
-      '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md'),
       Buffer.from(SKILL_CONTENT),
     )
   })
@@ -356,9 +367,9 @@ describe('downloadSkill', () => {
       contentHash,
     })
 
-    expect(cachedPath).toBe('/home/tester/.cache/agent-skills/skills/demo')
+    expect(cachedPath).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/demo'))
     expect(writeFileSyncMock).toHaveBeenCalledWith(
-      '/home/tester/.cache/agent-skills/skills/demo/assets/docker/wallpaper.jpg',
+      fixturePath('/home/tester/.cache/agent-skills/skills/demo/assets/docker/wallpaper.jpg'),
       Buffer.from(jpeg),
     )
   })
@@ -380,16 +391,16 @@ describe('downloadSkill', () => {
 
   it('prunes cached files that are no longer listed in skill metadata', async () => {
     const { ports, existsSyncMock, getWithFallbackMock, readdirSyncMock, rmSyncMock } = createPorts()
-    const skillDir = '/home/tester/.cache/agent-skills/skills/accessibility'
+    const skillDir = fixturePath('/home/tester/.cache/agent-skills/skills/accessibility')
     const deleted = new Set<string>()
 
     existsSyncMock.mockImplementation(
       (path) =>
         !deleted.has(path) &&
-        (path === '/home/tester/.cache/agent-skills' ||
-          path === '/home/tester/.cache/agent-skills/skills' ||
+        (path === fixturePath('/home/tester/.cache/agent-skills') ||
+          path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
           path === skillDir ||
-          path.startsWith(`${skillDir}/`)),
+          path.startsWith(fixturePathPrefix(skillDir))),
     )
     rmSyncMock.mockImplementation((path) => {
       deleted.add(path)
@@ -403,11 +414,11 @@ describe('downloadSkill', () => {
               { name: 'scripts', isDirectory: () => true },
               { name: '.skill-meta.json', isDirectory: () => false },
             ]
-          : path === `${skillDir}/scripts`
+          : path === joinFixturePath(skillDir, 'scripts')
             ? [{ name: 'old.sh', isDirectory: () => false }]
             : []
 
-      return entries.filter((entry) => !deleted.has(`${path}/${entry.name}`))
+      return entries.filter((entry) => !deleted.has(joinFixturePath(path, entry.name)))
     })
     getWithFallbackMock.mockResolvedValue({
       ok: true,
@@ -423,11 +434,11 @@ describe('downloadSkill', () => {
     })
 
     expect(cachedPath).toBe(skillDir)
-    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/orphan.md`, { force: true })
-    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/scripts/old.sh`, { force: true })
-    expect(rmSyncMock).toHaveBeenCalledWith(`${skillDir}/scripts`, { recursive: true, force: true })
-    expect(rmSyncMock).not.toHaveBeenCalledWith(`${skillDir}/SKILL.md`, expect.anything())
-    expect(rmSyncMock).not.toHaveBeenCalledWith(`${skillDir}/.skill-meta.json`, expect.anything())
+    expect(rmSyncMock).toHaveBeenCalledWith(joinFixturePath(skillDir, 'orphan.md'), { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith(joinFixturePath(skillDir, 'scripts', 'old.sh'), { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith(joinFixturePath(skillDir, 'scripts'), { recursive: true, force: true })
+    expect(rmSyncMock).not.toHaveBeenCalledWith(joinFixturePath(skillDir, 'SKILL.md'), expect.anything())
+    expect(rmSyncMock).not.toHaveBeenCalledWith(joinFixturePath(skillDir, '.skill-meta.json'), expect.anything())
   })
 })
 
@@ -436,7 +447,7 @@ describe('remote registry listing', () => {
     const { ports, existsSyncMock, getWithFallbackMock } = createPorts()
 
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      (path) => path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md'),
     )
     getWithFallbackMock.mockResolvedValue({
       ok: true,
@@ -451,7 +462,7 @@ describe('remote registry listing', () => {
       {
         name: 'accessibility',
         description: 'Improve accessibility',
-        path: '/home/tester/.cache/agent-skills/skills/accessibility',
+        path: fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'),
         category: 'quality',
       },
     ])
@@ -573,10 +584,10 @@ describe('update detection', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json'),
     )
     readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
     getWithFallbackMock.mockResolvedValue({
@@ -596,10 +607,10 @@ describe('update detection', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json'),
     )
     readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
@@ -619,10 +630,10 @@ describe('update detection', () => {
 
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json'),
     )
     readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
@@ -637,19 +648,114 @@ describe('update detection', () => {
     expect(shouldUpdate).toBe(false)
   })
 
+  describe('with installed lockfile entries', () => {
+    const PROJECT_LOCK = '/workspace/project/packages/cli/.agents/.skill-lock.json'
+    const GLOBAL_LOCK = '/home/tester/.agents/.skill-lock.json'
+
+    const lockWith = (entry: Record<string, unknown>) =>
+      JSON.stringify({
+        version: 2,
+        skills: {
+          accessibility: {
+            name: 'accessibility',
+            source: 'registry',
+            installedAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            agents: ['cursor'],
+            method: 'copy',
+            ...entry,
+          },
+        },
+      })
+
+    const setup = (locks: Partial<Record<typeof PROJECT_LOCK | typeof GLOBAL_LOCK, string>>) => {
+      const testPorts = createPorts()
+      const { existsSyncMock, readFileSyncMock, readFileMock, getWithFallbackMock } = testPorts
+
+      existsSyncMock.mockImplementation(
+        (path) =>
+          path === '/home/tester/.cache/agent-skills' ||
+          path === '/home/tester/.cache/agent-skills/skills' ||
+          path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
+          path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+      )
+      readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
+      readFileMock.mockImplementation(async (path) => {
+        const content = locks[path as keyof typeof locks]
+        if (content === undefined) throw new Error(`ENOENT: ${path}`)
+        return content
+      })
+      getWithFallbackMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => registryFixture,
+        text: async () => JSON.stringify(registryFixture),
+      })
+
+      return testPorts
+    }
+
+    it('returns true when the project copy is stale even though another install refreshed the shared cache', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({ contentHash: 'old-hash' }) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns true when the global copy is stale and the project copy is current', async () => {
+      const { ports } = setup({
+        [PROJECT_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH }),
+        [GLOBAL_LOCK]: lockWith({ contentHash: 'old-hash', global: true }),
+      })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns true when the lockfile entry predates content hashes', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({}) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(true)
+    })
+
+    it('returns false when every installed copy matches the remote hash', async () => {
+      const { ports } = setup({
+        [PROJECT_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH }),
+        [GLOBAL_LOCK]: lockWith({ contentHash: SKILL_CONTENT_HASH, global: true }),
+      })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(false)
+    })
+
+    it('falls back to the cache when the lockfile entry has no agents', async () => {
+      const { ports } = setup({ [PROJECT_LOCK]: lockWith({ contentHash: 'old-hash', agents: [] }) })
+
+      expect(await needsUpdate(ports, 'accessibility')).toBe(false)
+    })
+  })
+
   it('returns grouped update status for a list of skills', async () => {
     const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
 
     existsSyncMock.mockImplementation((path) => {
-      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
-      if (path.endsWith('/alpha/SKILL.md') || path.endsWith('/beta/SKILL.md')) return true
-      if (path.endsWith('/alpha/.skill-meta.json') || path.endsWith('/beta/.skill-meta.json')) return true
+      if (
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills')
+      )
+        return true
+      if (path.endsWith(joinFixturePath('alpha', 'SKILL.md')) || path.endsWith(joinFixturePath('beta', 'SKILL.md')))
+        return true
+      if (
+        path.endsWith(joinFixturePath('alpha', '.skill-meta.json')) ||
+        path.endsWith(joinFixturePath('beta', '.skill-meta.json'))
+      )
+        return true
       return false
     })
 
     readFileSyncMock.mockImplementation((path) => {
-      if (path.endsWith('/alpha/.skill-meta.json')) return '{"contentHash":"old-alpha","downloadedAt":100}'
-      if (path.endsWith('/beta/.skill-meta.json')) return '{"contentHash":"hash-beta","downloadedAt":100}'
+      if (path.endsWith(joinFixturePath('alpha', '.skill-meta.json')))
+        return '{"contentHash":"old-alpha","downloadedAt":100}'
+      if (path.endsWith(joinFixturePath('beta', '.skill-meta.json')))
+        return '{"contentHash":"hash-beta","downloadedAt":100}'
       return ''
     })
 
@@ -693,7 +799,7 @@ describe('cache management', () => {
   it('reports cache presence based on SKILL.md availability', () => {
     const { ports, existsSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      (path) => path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md'),
     )
 
     expect(isSkillCached(ports, 'accessibility')).toBe(true)
@@ -704,10 +810,10 @@ describe('cache management', () => {
     const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock } = createPorts()
     existsSyncMock.mockImplementation(
       (path) =>
-        path === '/home/tester/.cache/agent-skills' ||
-        path === '/home/tester/.cache/agent-skills/skills' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md' ||
-        path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json',
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json'),
     )
     readFileSyncMock.mockReturnValue(`{"contentHash":"${SKILL_CONTENT_HASH}","downloadedAt":100}`)
     getWithFallbackMock.mockResolvedValue({
@@ -719,7 +825,7 @@ describe('cache management', () => {
 
     const path = await ensureSkillDownloaded(ports, 'accessibility')
 
-    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    expect(path).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'))
     const skillFileDownloads = getWithFallbackMock.mock.calls.filter(([url]) =>
       String(url).includes('/skills/(quality)/accessibility/'),
     )
@@ -731,10 +837,14 @@ describe('cache management', () => {
       createPorts()
 
     existsSyncMock.mockImplementation((path) => {
-      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility') return true
+      if (
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills')
+      )
+        return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md')) return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json')) return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility')) return true
       return false
     })
     readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
@@ -748,7 +858,7 @@ describe('cache management', () => {
 
     const path = await ensureSkillDownloaded(ports, 'accessibility')
 
-    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    expect(path).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'))
     // Overwrite in place — never wipe the cache before a successful refresh.
     expect(rmSyncMock).not.toHaveBeenCalled()
     expect(writeFileSyncMock).toHaveBeenCalled()
@@ -758,10 +868,14 @@ describe('cache management', () => {
     const { ports, existsSyncMock, readFileSyncMock, getWithFallbackMock, rmSyncMock } = createPorts()
 
     existsSyncMock.mockImplementation((path) => {
-      if (path === '/home/tester/.cache/agent-skills' || path === '/home/tester/.cache/agent-skills/skills') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json') return true
-      if (path === '/home/tester/.cache/agent-skills/skills/accessibility') return true
+      if (
+        path === fixturePath('/home/tester/.cache/agent-skills') ||
+        path === fixturePath('/home/tester/.cache/agent-skills/skills')
+      )
+        return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md')) return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/.skill-meta.json')) return true
+      if (path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility')) return true
       return false
     })
     readFileSyncMock.mockReturnValue('{"contentHash":"old-hash","downloadedAt":100}')
@@ -807,7 +921,7 @@ describe('cache management', () => {
   it('keeps the local cache when registry metadata is unavailable', async () => {
     const { ports, existsSyncMock, getWithFallbackMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md',
+      (path) => path === fixturePath('/home/tester/.cache/agent-skills/skills/accessibility/SKILL.md'),
     )
     getWithFallbackMock.mockResolvedValue({
       ok: true,
@@ -818,16 +932,16 @@ describe('cache management', () => {
 
     const path = await ensureSkillDownloaded(ports, 'accessibility')
 
-    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
+    expect(path).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'))
   })
 
   it('forces redownload by clearing skill cache first', async () => {
     const { ports, existsSyncMock, getWithFallbackMock, rmSyncMock } = createPorts()
     existsSyncMock.mockImplementation((path) =>
       [
-        '/home/tester/.cache/agent-skills',
-        '/home/tester/.cache/agent-skills/skills',
-        '/home/tester/.cache/agent-skills/skills/accessibility',
+        fixturePath('/home/tester/.cache/agent-skills'),
+        fixturePath('/home/tester/.cache/agent-skills/skills'),
+        fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'),
       ].includes(path),
     )
     getWithFallbackMock.mockResolvedValue({
@@ -840,8 +954,8 @@ describe('cache management', () => {
 
     const path = await forceDownloadSkill(ports, 'accessibility')
 
-    expect(path).toBe('/home/tester/.cache/agent-skills/skills/accessibility')
-    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
+    expect(path).toBe(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'))
+    expect(rmSyncMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'), {
       recursive: true,
       force: true,
     })
@@ -854,14 +968,16 @@ describe('cache management', () => {
     clearSkillCache(ports, 'accessibility')
     clearRegistryCache(ports)
 
-    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills', {
+    expect(rmSyncMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cache/agent-skills'), {
       recursive: true,
       force: true,
     })
-    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/skills/accessibility', {
+    expect(rmSyncMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cache/agent-skills/skills/accessibility'), {
       recursive: true,
       force: true,
     })
-    expect(rmSyncMock).toHaveBeenCalledWith('/home/tester/.cache/agent-skills/registry.json', { force: true })
+    expect(rmSyncMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cache/agent-skills/registry.json'), {
+      force: true,
+    })
   })
 })

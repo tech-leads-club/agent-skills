@@ -88,7 +88,6 @@ graph TD
     C --> D[Data Store]
     B --> E[Component B]
 ```
-````
 
 ---
 
@@ -188,6 +187,7 @@ interface AnotherModel {
 > **Project-level decisions:** If a decision here sets a convention, pattern, or constraint that future features must follow, append it to `.specs/STATE.md` `## Decisions` as the next `AD-NNN` entry (see [memory.md](memory.md)). Feature-local decisions stay only in this table.
 
 ---
+````
 
 ## Tips
 

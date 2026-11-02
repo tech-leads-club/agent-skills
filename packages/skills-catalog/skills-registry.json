@@ -1669,7 +1669,7 @@
     },
     {
       "name": "tlc-discover",
-      "description": "Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room. Use when the user says \"research this\", \"help me understand this problem\", \"should we build this\", \"discovery\", \"explore this problem\", or \"tlc-discover\". Do NOT use to cut a finished design into tasks, or to implement.",
+      "description": "Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring a new project, planning or designing a big project or system, or asked for a \"design doc\". Do NOT use for clear features or projects (use tlc-spec-lean or tlc-spec-driven).",
       "category": "development",
       "path": "(development)/tlc-discover",
       "files": [
@@ -1677,8 +1677,8 @@
         "references/document-format.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.9.0",
-      "contentHash": "518ab626fc8bac4ed1d0c5170b617d1adaec28a83634c1a462c7529d42170d3a"
+      "version": "0.9.2",
+      "contentHash": "a2426c1b3b34dcd2b2d241be4d3050e4751d772fd49146e57223b036eeae6076"
     },
     {
       "name": "tlc-generative-engine-optimization",
@@ -1720,15 +1720,13 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_checks.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "66c91f40f0f8250c1a52c3242b4f4e33a5b038f5a2fda2578bf2f95df5de0b11"
+      "version": "1.2.0",
+      "contentHash": "28efe469462e37cbf1ff3c64a08068e507f16ab07251529fc2dc134a53b7d5f0"
     },
     {
       "name": "tlc-plan",
@@ -1745,8 +1743,8 @@
         "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "6e6fa709ed167718184622004855fc151b47fb3878f4030fa5745c85bd292404"
+      "version": "1.1.1",
+      "contentHash": "7b3deced549d6cd3b812ed675760c69027166b6ce5e9b293b073f1570b747152"
     },
     {
       "name": "tlc-prd",
@@ -1763,7 +1761,7 @@
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the proofs run once at the end, and an independent Verifier (author != verifier) spends its time on mutations and judgement. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
+      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the project's own tests run once at the end, and an independent Verifier (author != verifier) judges each check's test. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
@@ -1787,16 +1785,14 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_spec.py",
         "scripts/validate_tasks.py",
         "scripts/validate_verification.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "4.0.0",
-      "contentHash": "f465b52756b8f2ea082bf0dc24ab517721983106c7bf9f50d9e689c56ae1a1e2"
+      "version": "4.1.0",
+      "contentHash": "e8c2380a57817ef2406da1977668a39ba7721bdcb5c430fb87f2f82d6b34ae18"
     },
     {
       "name": "tlc-spec-lean",
@@ -1819,16 +1815,14 @@
         "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
         "scripts/lessons.py",
-        "scripts/mutate.py",
-        "scripts/runners.py",
         "scripts/selftest.py",
         "scripts/validate_checks.py",
         "scripts/validate_plan.py",
         "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "2.1.0",
-      "contentHash": "51bcf485f5b981d613d660767d03f194d9117188c7615914108759a21de7b5cf"
+      "version": "2.2.0",
+      "contentHash": "65cf4acff0a88093eafc9d34a36ca3a03a74c78301b1b4025e517ecc18e66a44"
     },
     {
       "name": "vercel-deploy",

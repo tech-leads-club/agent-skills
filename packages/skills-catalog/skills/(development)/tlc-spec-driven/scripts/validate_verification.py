@@ -11,7 +11,7 @@ What it checks:
   ERROR  - proofs.md written at another commit than HEAD, or over uncommitted changes
   ERROR  - a check in checks.md with no row in proofs.md, or a row that is not `pass`
   ERROR  - checks.md names `Build:` commands and proofs.md has no Build row, or one that failed
-  ERROR  - fewer mutation rows in proofs.md than checks.md's `Mutations:`, or one not killed
+  ERROR  - no `## Checks` table in verification.md, a check with no row in it, or a row with no test
   ERROR  - no `## Findings` section in verification.md, or a finding with no commit in `Closed`
   ERROR  - pictures owed (a criterion cites a capture, or a check is proven in the browser) and no
            screens.md, a row in it that does not read `matches`, a cited capture with no
@@ -36,7 +36,7 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, read_mutations, unapproved
+from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, unapproved
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
@@ -274,8 +274,8 @@ def _git_head(root):
 
 
 def _check_with_proofs(fdir, name, lines, checks_lines):
-    """The report format where check_proofs.py ran the proofs and the mutations: proofs.md holds
-    the evidence, verification.md the Verifier's findings, each closed by a commit."""
+    """The report format where check_proofs.py ran the proofs: proofs.md holds the evidence,
+    verification.md the Verifier's judgement of each check and its findings, each closed by a commit."""
     errors, warnings = [], []
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fdir))))
     plines = strip_fences(_read(os.path.join(fdir, "proofs.md")))
@@ -293,32 +293,40 @@ def _check_with_proofs(fdir, name, lines, checks_lines):
         errors.append(f"{name}: proofs.md ran on uncommitted changes - commit them and run check_proofs.py again")
 
     ids = {mm.group(1) for mm in (CHECK_ID_RE.match(ln.strip()) for ln in checks_lines) if mm}
-    seen, killed_rows = set(), []
+    seen = set()
     for header, rows in find_tables(plines):
-        result, check, killed = column(header, "result"), column(header, "check"), column(header, "killed")
+        result, check = column(header, "result"), column(header, "check")
         if result is not None and check is not None:
             for r in rows:
                 if check < len(r):
                     seen.add(r[check])
                 if result < len(r) and not r[result].lower().startswith("pass"):
                     errors.append(f"{name}: proofs.md - {r[check]} reads '{r[result][:40]}'")
-        if killed is not None:
-            killed_rows += [r for r in rows if killed < len(r)]
-            for r in rows:
-                if killed < len(r) and not r[killed].lower().startswith("yes"):
-                    errors.append(f"{name}: proofs.md - mutation '{r[0][:50]}' reads '{r[killed]}'")
     for cid in sorted(ids - seen, key=lambda c: int(c[1:])):
         errors.append(f"{name}: proofs.md has no row for {cid} - run check_proofs.py again")
     build = next((ln.strip() for ln in checks_lines if re.match(r"^\**\s*Build\s*\**\s*:", ln.strip(), re.IGNORECASE)), "")
     if build and "none" not in build.lower()[:15] and "Build" not in seen:
         errors.append(f"{name}: checks.md names `Build:` commands and proofs.md has no Build row - run check_proofs.py again")
 
-    owed, _ = read_mutations(checks_lines)
-    if owed and len(killed_rows) < owed:
-        errors.append(
-            f"{name}: `Mutations: {owed}` owes {owed} mutation rows and proofs.md has {len(killed_rows)} - run "
-            f"check_proofs.py --mutations with the Verifier's spec"
-        )
+    judged = {}
+    for header, rows in find_tables(_section(lines, "Checks")):
+        check, test = column(header, "check"), column(header, "test")
+        if check is None or test is None:
+            continue
+        for r in rows:
+            if check < len(r):
+                judged[r[check].strip("*` ")] = r[test].strip() if test < len(r) else ""
+    if ids and not judged:
+        errors.append(f"{name}: verification.md has no `## Checks` table - the Verifier opens the test each check's "
+                      f"proof selects and writes whether it holds the criterion")
+    elif judged:
+        for cid in sorted(ids, key=lambda c: int(c[1:])):
+            if cid not in judged:
+                errors.append(f"{name}: verification.md `## Checks` has no row for {cid} - judge its test against "
+                              f"the criterion")
+            elif judged[cid] in ("", "-"):
+                errors.append(f"{name}: verification.md `## Checks` row {cid} names no test - write the test the "
+                              f"proof selects, file and name")
 
     findings = _section(lines, "Findings")
     if not findings:

@@ -1,3 +1,13 @@
+## 0.1.10 (2026-10-30)
+
+### 🩹 Fixes
+
+- **release:** write the new version into the built manifests before publish ([29e5cf487](https://github.com/tech-leads-club/agent-skills/commit/29e5cf487))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
 ## 0.1.9 (2026-10-14)
 
 ### 🩹 Fixes

@@ -1,10 +1,10 @@
 ---
 name: tlc-discover
-description: 'Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room. Use when the user says "research this", "help me understand this problem", "should we build this", "discovery", "explore this problem", or "tlc-discover". Do NOT use to cut a finished design into tasks, or to implement.'
+description: 'Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring a new project, planning or designing a big project or system, or asked for a "design doc". Do NOT use for clear features or projects (use tlc-spec-lean or tlc-spec-driven).'
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 0.9.0
+  version: 0.9.2
 ---
 
 # TLC Discover
