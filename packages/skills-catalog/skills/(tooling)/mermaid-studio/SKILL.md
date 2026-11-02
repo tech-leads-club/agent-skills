@@ -3,7 +3,7 @@ name: mermaid-studio
 description: Expert Mermaid diagram creation, validation, and rendering with dual-engine output (SVG/PNG/ASCII). Supports all 20+ diagram types including C4 architecture, AWS architecture-beta with service icons, flowcharts, sequence, ERD, state, class, mindmap, timeline, git graph, sankey, and more. Features code-to-diagram analysis, batch rendering, 15+ themes, and syntax validation. Use when users ask to create diagrams, visualize architecture, render mermaid files, generate ASCII diagrams, document system flows, model databases, draw AWS infrastructure, analyze code structure, or anything involving "mermaid", "diagram", "flowchart", "architecture diagram", "sequence diagram", "ERD", "C4", "ASCII diagram". Do NOT use for non-Mermaid image generation, data plotting with chart libraries, or general documentation writing.
 license: CC-BY-4.0
 metadata:
-  author: Felipe Rodrigues - github.com/felipfr
+  author: Felipe Rodrigues - github.com/felipfr; contrast issue reported by github.com/felipe-silva-azos
   version: 1.0.1
 ---
 
@@ -15,6 +15,8 @@ Expert-level Mermaid diagram creation, validation, and multi-format rendering. C
 
 Every diagram MUST follow these principles. They are not optional — they define the difference between a mediocre diagram and a gold-standard one.
 
+**Contrast comes first:** Check text against the element's effective rendered background, not just `primaryColor`. Use at least 4.5:1 contrast for normal text or 3:1 for large text (at least 18 pt, or 14 pt bold). In light palettes, explicitly set dark `primaryTextColor`, `nodeTextColor`, `actorTextColor`, and `noteTextColor` with compatible fills; never combine white labels with light `mainBkg`, `actorBkg`, or `noteBkgColor`. Keep light labels on dark fills when using dark themes. Whenever creating or changing a palette, render and visually inspect a representative flowchart and sequence diagram, including nodes, participants, messages, notes, and loop labels. See `references/themes.md` for the checks and Mermaid's fallback behavior.
+
 ### Rule 1: Always Use an Init Directive for Professional Styling
 
 **NEVER** create a diagram without an `%%{init}` directive or frontmatter config. The default Mermaid theme produces harsh black lines and generic colors. Always apply a curated palette.
@@ -23,13 +25,16 @@ Every diagram MUST follow these principles. They are not optional — they defin
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#4f46e5', 'primaryTextColor': '#ffffff',
+  'primaryColor': '#eef2ff', 'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',
-  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',
+  'secondaryColor': '#d1fae5', 'tertiaryColor': '#fef3c7',
   'background': '#ffffff', 'mainBkg': '#f8fafc',
   'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',
   'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',
-  'edgeLabelBackground': '#ffffff', 'textColor': '#334155'
+  'edgeLabelBackground': '#ffffff', 'textColor': '#334155',
+  'nodeTextColor': '#1e293b', 'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b', 'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b'
 }}}%%
 ```
 
@@ -173,13 +178,16 @@ Follow these principles in order of priority:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#4f46e5', 'primaryTextColor': '#fff',
+  'primaryColor': '#eef2ff', 'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3', 'lineColor': '#94a3b8',
-  'secondaryColor': '#10b981', 'tertiaryColor': '#f59e0b',
+  'secondaryColor': '#d1fae5', 'tertiaryColor': '#fef3c7',
   'background': '#ffffff', 'mainBkg': '#f8fafc',
   'nodeBorder': '#cbd5e1', 'clusterBkg': '#f1f5f9',
   'clusterBorder': '#e2e8f0', 'titleColor': '#1e293b',
-  'edgeLabelBackground': '#ffffff'
+  'edgeLabelBackground': '#ffffff', 'textColor': '#334155',
+  'nodeTextColor': '#1e293b', 'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b', 'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b'
 }}}%%
 flowchart TD
     Start([Start]) --> Input[/User Input/]
@@ -340,7 +348,7 @@ node $SKILL_DIR/scripts/batch.mjs \
 
 **mermaid-cli native (5):** `default` | `forest` | `dark` | `neutral` | `base`
 
-Custom theme: `--theme base --config '{"theme":"base","themeVariables":{"primaryColor":"#4f46e5","lineColor":"#94a3b8"}}'`
+Custom theme: `--theme base --config '{"theme":"base","themeVariables":{"primaryColor":"#eef2ff","lineColor":"#94a3b8"}}'`
 
 For the full theme catalog, read `references/themes.md`. The render script auto-selects the best engine (mmdc primary, beautiful-mermaid fallback, Puppeteer for icon packs).
 

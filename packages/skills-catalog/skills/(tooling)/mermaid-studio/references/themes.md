@@ -23,27 +23,29 @@ Two rendering engines provide different theme sets:
 15 curated themes with consistent design:
 
 **Light themes:**
-| Theme | Style | Best for |
-|-------|-------|----------|
-| `zinc-light` | Clean gray tones | Professional documents |
-| `tokyo-night-light` | Warm light | General use |
-| `catppuccin-latte` | Soft pastels | Friendly docs |
-| `nord-light` | Arctic cool tones | Technical docs |
-| `github-light` | GitHub-style | READMEs, GitHub pages |
-| `solarized-light` | Warm yellows | Long reading |
+
+| Theme               | Style             | Best for               |
+| ------------------- | ----------------- | ---------------------- |
+| `zinc-light`        | Clean gray tones  | Professional documents |
+| `tokyo-night-light` | Warm light        | General use            |
+| `catppuccin-latte`  | Soft pastels      | Friendly docs          |
+| `nord-light`        | Arctic cool tones | Technical docs         |
+| `github-light`      | GitHub-style      | READMEs, GitHub pages  |
+| `solarized-light`   | Warm yellows      | Long reading           |
 
 **Dark themes:**
-| Theme | Style | Best for |
-|-------|-------|----------|
-| `zinc-dark` | Dark gray | Dark mode docs |
-| `tokyo-night` | Vibrant dark | Developer tools |
-| `tokyo-night-storm` | Deep blue-dark | Presentations |
-| `catppuccin-mocha` | Rich dark | Dark mode, cozy feel |
-| `nord` | Arctic dark | Technical, minimal |
-| `dracula` | Purple-tinted dark | Developer-favorite |
-| `github-dark` | GitHub dark mode | Dark READMEs |
-| `solarized-dark` | Warm dark | Extended reading |
-| `one-dark` | Atom-inspired | Code-adjacent docs |
+
+| Theme               | Style              | Best for             |
+| ------------------- | ------------------ | -------------------- |
+| `zinc-dark`         | Dark gray          | Dark mode docs       |
+| `tokyo-night`       | Vibrant dark       | Developer tools      |
+| `tokyo-night-storm` | Deep blue-dark     | Presentations        |
+| `catppuccin-mocha`  | Rich dark          | Dark mode, cozy feel |
+| `nord`              | Arctic dark        | Technical, minimal   |
+| `dracula`           | Purple-tinted dark | Developer-favorite   |
+| `github-dark`       | GitHub dark mode   | Dark READMEs         |
+| `solarized-dark`    | Warm dark          | Extended reading     |
+| `one-dark`          | Atom-inspired      | Code-adjacent docs   |
 
 ### Theme Selection Guide
 
@@ -61,6 +63,20 @@ Two rendering engines provide different theme sets:
 
 When using the `base` theme, you can override any variable:
 
+### Contrast Before Styling
+
+Measure contrast against each element's **effective rendered fill**, including class and inline overrides: at least 4.5:1 for normal text, or 3:1 for large text (at least 18 pt, or 14 pt bold). `primaryTextColor` alone does not describe every label. Mermaid's [theme variable fallbacks](https://mermaid.js.org/config/theming.html) use `mainBkg` for flowchart nodes and sequence participants, while `nodeTextColor` and `actorTextColor` fall back to `primaryTextColor`. White primary text can therefore end up on a light fill even when `primaryColor` is dark.
+
+For light palettes, use compatible light primary/secondary/tertiary fills and explicit dark `primaryTextColor`, `nodeTextColor`, `actorTextColor`, and `noteTextColor`. Pair `actorBkg` and `noteBkgColor` with those labels. For dark themes or saturated custom elements, retain light text only when it contrasts with the actual fill; do not globally replace white text with dark text.
+
+Whenever creating or changing a palette:
+
+1. Render a flowchart with a normal node, decision, edge label, and subgraph title.
+2. Render a sequence diagram with participants, a message, a note, and a loop or alt label.
+3. Inspect the SVG's computed text and fill colors and check their contrast, then visually inspect both diagrams. Check additional diagram-specific elements used in the deliverable too.
+
+The default pair `#1e293b` on `#f8fafc` gives approximately **13.98:1**; white on the same fill gives only **1.05:1**.
+
 ### Via Frontmatter
 
 ```mermaid
@@ -68,12 +84,17 @@ When using the `base` theme, you can override any variable:
 config:
   theme: base
   themeVariables:
-    primaryColor: "#4f46e5"
-    primaryTextColor: "#ffffff"
+    primaryColor: "#eef2ff"
+    primaryTextColor: "#1e293b"
+    nodeTextColor: "#1e293b"
+    actorBkg: "#f8fafc"
+    actorTextColor: "#1e293b"
+    noteBkgColor: "#fef3c7"
+    noteTextColor: "#1e293b"
     primaryBorderColor: "#3730a3"
     lineColor: "#6b7280"
-    secondaryColor: "#10b981"
-    tertiaryColor: "#f59e0b"
+    secondaryColor: "#d1fae5"
+    tertiaryColor: "#fef3c7"
     background: "#ffffff"
     mainBkg: "#f8fafc"
     nodeBorder: "#e2e8f0"
@@ -90,12 +111,17 @@ flowchart LR
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#4f46e5',
-  'primaryTextColor': '#fff',
+  'primaryColor': '#eef2ff',
+  'primaryTextColor': '#1e293b',
+  'nodeTextColor': '#1e293b',
+  'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b',
+  'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3',
   'lineColor': '#6b7280',
-  'secondaryColor': '#10b981',
-  'tertiaryColor': '#f59e0b'
+  'secondaryColor': '#d1fae5',
+  'tertiaryColor': '#fef3c7'
 }}}%%
 ```
 
@@ -107,7 +133,7 @@ node $SKILL_DIR/scripts/render.mjs \
   --output diagram.svg \
   --format svg \
   --theme base \
-  --config '{"theme":"base","themeVariables":{"primaryColor":"#4f46e5"}}'
+  --config '{"theme":"base","themeVariables":{"primaryColor":"#eef2ff"}}'
 ```
 
 ## Available Theme Variables
@@ -178,10 +204,10 @@ flowchart LR
 
     A --> B --> C --> D
 
-    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef success fill:#10b981,stroke:#059669,color:#1e293b
     classDef warning fill:#f59e0b,stroke:#d97706,color:#000
-    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
-    classDef info fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef error fill:#dc2626,stroke:#b91c1c,color:#fff
+    classDef info fill:#2563eb,stroke:#1d4ed8,color:#fff
     classDef default fill:#f8fafc,stroke:#e2e8f0,color:#1e293b
 ```
 
@@ -190,9 +216,9 @@ flowchart LR
 ```mermaid
 flowchart LR
     A --> B --> C
-    style A fill:#f97316,stroke:#ea580c,color:#fff
-    style B fill:#8b5cf6,stroke:#7c3aed,color:#fff
-    style C fill:#06b6d4,stroke:#0891b2,color:#fff
+    style A fill:#f97316,stroke:#ea580c,color:#1e293b
+    style B fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style C fill:#06b6d4,stroke:#0891b2,color:#1e293b
 ```
 
 ### Link Styles (Flowchart)
@@ -211,11 +237,16 @@ flowchart LR
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#3b82f6',
-  'primaryTextColor': '#ffffff',
+  'primaryColor': '#eef2ff',
+  'primaryTextColor': '#1e293b',
+  'nodeTextColor': '#1e293b',
+  'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b',
+  'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b',
   'primaryBorderColor': '#2563eb',
-  'secondaryColor': '#10b981',
-  'tertiaryColor': '#f59e0b',
+  'secondaryColor': '#d1fae5',
+  'tertiaryColor': '#fef3c7',
   'lineColor': '#6b7280',
   'background': '#ffffff',
   'mainBkg': '#f8fafc',
@@ -233,9 +264,12 @@ Uses AWS orange for primary with **soft slate lines** instead of the harsh defau
 %%{init: {'theme': 'base', 'themeVariables': {
   'primaryColor': '#FF9900',
   'primaryTextColor': '#232F3E',
+  'nodeTextColor': '#232F3E', 'actorBkg': '#FFF8F0',
+  'actorTextColor': '#232F3E', 'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#232F3E', 'textColor': '#232F3E',
   'primaryBorderColor': '#c47600',
-  'secondaryColor': '#527FFF',
-  'tertiaryColor': '#DD344C',
+  'secondaryColor': '#dbeafe',
+  'tertiaryColor': '#fee2e2',
   'lineColor': '#94a3b8',
   'background': '#ffffff',
   'mainBkg': '#FFF8F0',
@@ -250,11 +284,16 @@ Uses AWS orange for primary with **soft slate lines** instead of the harsh defau
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#374151',
-  'primaryTextColor': '#ffffff',
+  'primaryColor': '#f3f4f6',
+  'primaryTextColor': '#1e293b',
+  'nodeTextColor': '#1e293b',
+  'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b',
+  'noteBkgColor': '#f3f4f6',
+  'noteTextColor': '#1e293b',
   'primaryBorderColor': '#1f2937',
-  'secondaryColor': '#6b7280',
-  'tertiaryColor': '#9ca3af',
+  'secondaryColor': '#e5e7eb',
+  'tertiaryColor': '#f3f4f6',
   'lineColor': '#94a3b8',
   'background': '#ffffff',
   'mainBkg': '#f9fafb',
@@ -271,11 +310,16 @@ A fresh, modern palette for SaaS architecture diagrams:
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#4f46e5',
-  'primaryTextColor': '#ffffff',
+  'primaryColor': '#eef2ff',
+  'primaryTextColor': '#1e293b',
+  'nodeTextColor': '#1e293b',
+  'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b',
+  'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3',
-  'secondaryColor': '#10b981',
-  'tertiaryColor': '#f59e0b',
+  'secondaryColor': '#d1fae5',
+  'tertiaryColor': '#fef3c7',
   'lineColor': '#94a3b8',
   'background': '#ffffff',
   'mainBkg': '#f8fafc',
@@ -333,8 +377,8 @@ Use accent colors for primary flows while keeping secondary lines soft:
 | Purpose              | bgColor   | fontColor | borderColor |
 | -------------------- | --------- | --------- | ----------- |
 | Primary emphasis     | `#4f46e5` | `#ffffff` | `#3730a3`   |
-| Success / Data store | `#059669` | `#ffffff` | `#047857`   |
-| Warning / External   | `#d97706` | `#ffffff` | `#b45309`   |
+| Success / Data store | `#047857` | `#ffffff` | `#065f46`   |
+| Warning / External   | `#d97706` | `#1e293b` | `#b45309`   |
 | Neutral / Supporting | `#64748b` | `#ffffff` | `#475569`   |
 
 ## Look Options
@@ -364,7 +408,7 @@ config:
   look: classic
   layout: dagre
   themeVariables:
-    primaryColor: "#4f46e5"
+    primaryColor: "#eef2ff"
     lineColor: "#94a3b8"
 ---
 flowchart TD
@@ -372,10 +416,11 @@ flowchart TD
 ```
 
 **Layout engines:**
-| Engine | When to use |
-|--------|-------------|
-| `dagre` | Default — good for most diagrams |
-| `elk` | Complex diagrams with many crossings (requires plugin) |
+
+| Engine  | When to use                                            |
+| ------- | ------------------------------------------------------ |
+| `dagre` | Default — good for most diagrams                       |
+| `elk`   | Complex diagrams with many crossings (requires plugin) |
 
 ## Modern Design Principles
 
@@ -405,6 +450,7 @@ Use max 3-4 colors per diagram and map them to meaning:
 Do NOT use `system-ui`, `-apple-system`, or `Segoe UI` in `fontFamily` theme variables. These fonts are not available in headless Chromium (used by `mmdc` for rendering) and will silently fall back to a serif font like Times New Roman, making the diagram look unprofessional.
 
 **Safe font stacks for `fontFamily`:**
+
 - Default (best): `'trebuchet ms', 'verdana', 'arial', sans-serif` — this is Mermaid's built-in default and works everywhere
 - If you must customize: `'verdana', 'arial', 'helvetica', sans-serif`
 

@@ -355,8 +355,11 @@ C4Container
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
   'primaryColor': '#FF9900', 'primaryTextColor': '#232F3E',
+  'nodeTextColor': '#232F3E', 'actorBkg': '#FFF8F0',
+  'actorTextColor': '#232F3E', 'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#232F3E', 'textColor': '#232F3E',
   'primaryBorderColor': '#c47600', 'lineColor': '#94a3b8',
-  'secondaryColor': '#527FFF', 'tertiaryColor': '#DD344C',
+  'secondaryColor': '#dbeafe', 'tertiaryColor': '#fee2e2',
   'background': '#ffffff', 'mainBkg': '#FFF8F0',
   'nodeBorder': '#c47600', 'clusterBkg': '#FFF8F0',
   'clusterBorder': '#d4a574', 'edgeLabelBackground': '#ffffff'

@@ -91,9 +91,9 @@ flowchart TD
 flowchart LR
     A[Success]:::success --> B[Warning]:::warning --> C[Error]:::error
 
-    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef success fill:#10b981,stroke:#059669,color:#1e293b
     classDef warning fill:#f59e0b,stroke:#d97706,color:#000
-    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef error fill:#dc2626,stroke:#b91c1c,color:#fff
 ```
 
 ### Click Events
@@ -733,7 +733,7 @@ config:
   look: classic
   layout: dagre
   themeVariables:
-    primaryColor: "#4f46e5"
+    primaryColor: "#eef2ff"
     lineColor: "#94a3b8"
 ---
 flowchart LR
@@ -750,8 +750,13 @@ flowchart LR
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#4f46e5', 'lineColor': '#94a3b8',
-  'primaryTextColor': '#fff', 'primaryBorderColor': '#3730a3'
+  'primaryColor': '#eef2ff', 'lineColor': '#94a3b8',
+  'primaryTextColor': '#1e293b',
+  'nodeTextColor': '#1e293b',
+  'actorBkg': '#f8fafc',
+  'actorTextColor': '#1e293b',
+  'noteBkgColor': '#fef3c7',
+  'noteTextColor': '#1e293b', 'primaryBorderColor': '#3730a3'
 }}}%%
 ```
 
