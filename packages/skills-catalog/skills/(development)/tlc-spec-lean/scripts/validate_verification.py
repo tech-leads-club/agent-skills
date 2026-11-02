@@ -8,7 +8,8 @@ pass/fail run as the closing step. It reads the artifacts, never the target code
 
 What it checks:
   ERROR  - no verification.md, or no proofs.md (run check_proofs.py)
-  ERROR  - proofs.md written at another commit than HEAD, or over uncommitted changes
+  ERROR  - proofs.md written at another commit than HEAD, or over uncommitted changes; a commit
+           since that changes only .specs/ keeps it, unless it changes the file the proofs are read from
   ERROR  - a check in checks.md with no row in proofs.md, or a row that is not `pass`
   ERROR  - checks.md names `Build:` commands and proofs.md has no Build row, or one that failed
   ERROR  - no `## Checks` table in verification.md, a check with no row in it, or a row with no test
@@ -303,6 +304,35 @@ def _git_head(root):
     return p.stdout.strip() if p.returncode == 0 else None
 
 
+def _proofs_still_hold(root, sha, source):
+    """Why proofs written at `sha` do not hold at HEAD, or None when they do.
+
+    Committing the report moves HEAD without touching the code the proofs ran on. A commit that
+    changes only `.specs/` keeps the proofs, except one that changes `source`, the file the proofs
+    are read from: an edited proof has not run."""
+    def git(*cmd):
+        return subprocess.run(["git", *cmd], cwd=root, capture_output=True, text=True)
+    try:
+        top = git("rev-parse", "--show-toplevel")
+        if top.returncode != 0:
+            return "git cannot compare it with HEAD"
+        if git("merge-base", "--is-ancestor", sha, "HEAD").returncode != 0:
+            return f"{sha} is not an ancestor of HEAD"
+        diff = git("diff", "--name-only", "-z", sha, "HEAD")
+    except OSError:
+        return "git cannot compare it with HEAD"
+    if diff.returncode != 0:
+        return "git cannot compare it with HEAD"
+    top = os.path.realpath(top.stdout.strip())
+
+    def rel(p):
+        return os.path.relpath(os.path.realpath(p), top).replace(os.sep, "/")
+
+    specs, own = rel(os.path.join(root, ".specs")) + "/", rel(source)
+    changed = [f for f in diff.stdout.split("\0") if f and (f == own or not f.startswith(specs))]
+    return f"{', '.join(changed[:4])} changed since" if changed else None
+
+
 def _check_with_proofs(fdir, name, lines, checks_lines):
     """The report format where check_proofs.py ran the proofs: proofs.md holds the evidence,
     verification.md the Verifier's judgement of each check and its findings, each closed by a commit."""
@@ -316,7 +346,10 @@ def _check_with_proofs(fdir, name, lines, checks_lines):
     if not m:
         errors.append(f"{name}: proofs.md names no `**HEAD**` - run check_proofs.py again")
     elif head and not (head.startswith(m.group(1)) or m.group(1).startswith(head)):
-        errors.append(f"{name}: proofs.md was written at {m.group(1)} and HEAD is {head} - run check_proofs.py again")
+        stale = _proofs_still_hold(root, m.group(1), os.path.join(fdir, "checks.md"))
+        if stale:
+            errors.append(f"{name}: proofs.md was written at {m.group(1)} and HEAD is {head}, {stale} - "
+                          f"run check_proofs.py again")
 
     tree = re.search(r"\*\*Tree\*\*\s*:\s*(\S+)", pbody)
     if tree and tree.group(1).lower().startswith("dirty"):
