@@ -1,10 +1,10 @@
 ---
 name: tlc-discover
-description: 'Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring, planning or designing a big project or system, or asked for a "design doc". Not for clear features or projects: use tlc-spec-lean or tlc-spec-driven.'
+description: 'Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring a new project, planning or designing a big project or system, or asked for a "design doc". Do NOT use for clear features or projects (use tlc-spec-lean or tlc-spec-driven).'
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 0.9.1
+  version: 0.9.2
 ---
 
 # TLC Discover
