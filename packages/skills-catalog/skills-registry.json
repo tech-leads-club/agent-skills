@@ -1655,7 +1655,7 @@
     },
     {
       "name": "tlc-discover",
-      "description": "Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room. Use when the user says \"research this\", \"help me understand this problem\", \"should we build this\", \"discovery\", \"explore this problem\", or \"tlc-discover\". Do NOT use to cut a finished design into tasks, or to implement.",
+      "description": "Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring, planning or designing a big project or system, or asked for a \"design doc\". Not for clear features or projects: use tlc-spec-lean or tlc-spec-driven.",
       "category": "development",
       "path": "(development)/tlc-discover",
       "files": [
@@ -1663,8 +1663,8 @@
         "references/document-format.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.9.0",
-      "contentHash": "518ab626fc8bac4ed1d0c5170b617d1adaec28a83634c1a462c7529d42170d3a"
+      "version": "0.9.1",
+      "contentHash": "e0a9303d74a9fa75243d6b61c481c0cd247d1ae177944e9d6532713eea7b9a80"
     },
     {
       "name": "tlc-generative-engine-optimization",
@@ -1778,7 +1778,7 @@
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
       "version": "4.1.0",
-      "contentHash": "eec8e8fe815116e4dedfe61ffaf7287abeb0fd23f344aa58c888c643686a2d40"
+      "contentHash": "e8c2380a57817ef2406da1977668a39ba7721bdcb5c430fb87f2f82d6b34ae18"
     },
     {
       "name": "tlc-spec-lean",
