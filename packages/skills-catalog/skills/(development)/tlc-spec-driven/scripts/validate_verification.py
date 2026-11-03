@@ -8,7 +8,11 @@ pass/fail run as the closing step. It reads the artifacts, never the target code
 
 What it checks:
   ERROR  - no verification.md, or no proofs.md (run check_proofs.py)
-  ERROR  - proofs.md written at another commit than HEAD, or over uncommitted changes
+  ERROR  - proofs.md written over uncommitted changes, or stale: code changed after the commit it names
+           (committed or not), or this feature's spec.md or tasks.md has another content hash than there,
+           or than the `**Plan**` line of proofs.md records
+           A commit that touches only .specs/ keeps it valid, so the evidence can be committed
+  WARN   - the repository tracks .specs/ and proofs.md, verification.md or screens.md is not committed
   ERROR  - a check in checks.md with no row in proofs.md, or a row that is not `pass`
   ERROR  - checks.md names `Build:` commands and proofs.md has no Build row, or one that failed
   ERROR  - no `## Checks` table in verification.md, a check with no row in it, or a row with no test
@@ -33,11 +37,10 @@ Exit codes: 0 ok, 1 the feature is not done, 2 usage error.
 import argparse
 import os
 import re
-import subprocess
 import sys
 
 from lean_config import _section, checks_file, plan_file, plan_owes_pictures
-from specs import approval_errors, spin_guard, stop_text
+from specs import approval_errors, evidence_uncommitted, plan_drift, proof_drift, spin_guard, stop_text
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
@@ -266,14 +269,6 @@ CHECK_ID_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]")
 SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
 
 
-def _git_head(root):
-    try:
-        p = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True, text=True)
-    except OSError:
-        return None
-    return p.stdout.strip() if p.returncode == 0 else None
-
-
 def _check_with_proofs(fdir, name, lines, checks_lines):
     """The report format where check_proofs.py ran the proofs: proofs.md holds the evidence,
     verification.md the Verifier's judgement of each check and its findings, each closed by a commit."""
@@ -283,11 +278,18 @@ def _check_with_proofs(fdir, name, lines, checks_lines):
     pbody = "\n".join(plines)
 
     m = re.search(r"\*\*HEAD\*\*\s*:\s*`?([0-9a-f]{4,40})", pbody)
-    head = _git_head(root)
     if not m:
         errors.append(f"{name}: proofs.md names no `**HEAD**` - run check_proofs.py again")
-    elif head and not (head.startswith(m.group(1)) or m.group(1).startswith(head)):
-        errors.append(f"{name}: proofs.md was written at {m.group(1)} and HEAD is {head} - run check_proofs.py again")
+    else:
+        errors += [f"{name}: {e}" for e in proof_drift(root, fdir, m.group(1))]
+    plan = re.search(r"\*\*Plan\*\*\s*:\s*(.+)", pbody)
+    moved = [n for n in plan_drift(fdir, plan.group(1)) if not any(n in e for e in errors)] if plan else []
+    for n in moved:
+        errors.append(f"{name}: {n} changed its checks or its plan after the proofs ran - run check_proofs.py again")
+    unsaved = evidence_uncommitted(root, fdir)
+    if unsaved:
+        warnings.append(f"{name}: {', '.join(unsaved)} not committed - commit them alone, `.specs/` files only. "
+                        f"The gate still passes after that commit")
 
     tree = re.search(r"\*\*Tree\*\*\s*:\s*(\S+)", pbody)
     if tree and tree.group(1).lower().startswith("dirty"):
