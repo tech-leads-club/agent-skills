@@ -874,7 +874,166 @@ def run_spec_driven_cases():
             print(f"  BROKEN  {script}: {desc} - expected exit={want_code} and {want_frag!r}, got exit={code}: "
                   f"{out.strip()[-500:]}")
     return run_spin_case() and run_approve_cases() and run_commit_cases() and run_state_head_case() and \
-        run_batches_cases() and run_prose_cases() and ok
+        run_proofs_drift_cases() and run_untracked_cases() and run_batches_cases() and run_prose_cases() and ok
+
+
+def run_untracked_cases():
+    """A repo that keeps .specs/ out of git: the gates read the files from disk, check_commit.py
+    finds the task from the staged files, and proofs.md's Plan line stands in for the history."""
+    if not shipped("check_commit") or shutil.which("git") is None:
+        return True
+    from specs import plan_hashes
+
+    def git(root, *args):
+        subprocess.run(["git", *args], cwd=root, capture_output=True)
+
+    def untrack(root):
+        git(root, "rm", "-r", "-q", "--cached", ".specs")
+        write_artifact(os.path.join(root, ".gitignore"), ".specs/\n")
+        git(root, "add", "-A")
+        git(root, "commit", "-qm", "chore: keep specs local")
+
+    fdir_of = lambda root: os.path.join(root, ".specs", "features", FEATURE)  # noqa: E731
+    tick = ("- [ ] a failed charge", "- [x] a failed charge")
+    code = {"src/ledger.ts": LEDGER_TS + "export const suspended = 'suspended'\n",
+            "src/ledger.test.ts": LEDGER_TEST + "expect(suspended).toBe('suspended')\n"}
+
+    def commit_case(writes, spec_edit=None):
+        def go(root):
+            untrack(root)
+            path = os.path.join(fdir_of(root), "tasks.md")
+            write_artifact(path, read_artifact(path).replace(*tick))
+            if spec_edit:
+                path = os.path.join(fdir_of(root), "spec.md")
+                write_artifact(path, read_artifact(path).replace(*spec_edit))
+            for rel, text in writes.items():
+                write_artifact(os.path.join(root, rel), text)
+            git(root, "add", "-A")
+            return run_script("check_commit.py", "feat: suspend the subscription", "--root", root)
+        return go
+
+    def proofs_case(tasks_edit=None):
+        def go(root):
+            untrack(root)
+            fdir = fdir_of(root)
+            head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True,
+                                  text=True).stdout.strip()
+            plan = ", ".join(f"{n} {h}" for n, h in plan_hashes(fdir).items())
+            write_artifact(os.path.join(fdir, "proofs.md"),
+                           f"# {FEATURE} proofs\n\n**HEAD**: {head}\n**Tree**: clean\n**Plan**: {plan}\n")
+            if tasks_edit:
+                path = os.path.join(fdir, "tasks.md")
+                write_artifact(path, read_artifact(path).replace(*tasks_edit))
+            from validate_verification import _check_with_proofs
+            errors, _ = _check_with_proofs(fdir, FEATURE, [], [])
+            moved = [e for e in errors if "changed its checks or its plan" in e]
+            return (1 if moved else 0), "\n".join(moved) or "no drift"
+        return go
+
+    cases = [
+        ("check_commit.py", "a hook with no --task finds the task from the staged files", commit_case(code), 0, "OK"),
+        ("check_commit.py", "staged files that fit no task fail", commit_case({"src/other.ts": "x\n"}), 1,
+         "no task's Files fits the staged files"),
+        ("check_commit.py", "an approved criterion edited on disk fails", commit_case(
+            code, ("`suspended`", "`paused`")), 1, "spec.md changed after the user approved it"),
+        ("validate_verification.py", "proofs with the plan unchanged hold", proofs_case(), 0, "no drift"),
+        ("validate_verification.py", "a check changed after the proofs fails with no git history", proofs_case(
+            ("suspends the subscription (BILL-01)", "pauses the subscription (BILL-01)")), 1,
+         "tasks.md changed its checks or its plan"),
+    ]
+    ok = True
+    for script, desc, go, want_code, want_frag in cases:
+        root = git_root({**tasks_files(), "STATE.md": STATE_MD}, {"src/ledger.ts": LEDGER_TS,
+                                                                    "src/ledger.test.ts": LEDGER_TEST})
+        try:
+            code_, out = go(root)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+        if code_ == want_code and want_frag in out:
+            print(f"  ok      {script}: untracked .specs/ - {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  {script}: untracked .specs/ - {desc} - expected exit={want_code} and {want_frag!r}, "
+                  f"got exit={code_}: {out.strip()[-400:]}")
+    return ok
+
+
+def run_proofs_drift_cases():
+    """Proofs stay valid across commits that touch only .specs/, so the evidence can be committed.
+    They go stale when code moves, committed or not, or when the feature's checks change."""
+    if not shipped("validate_verification") or shutil.which("git") is None:
+        return True
+
+    def git(root, *args):
+        subprocess.run(["git", *args], cwd=root, capture_output=True)
+
+    def commit(root, msg="docs: the evidence"):
+        git(root, "add", "-A")
+        git(root, "commit", "-qm", msg)
+
+    def layout():
+        """The spec-driven layout under git, with proofs.md naming HEAD and left uncommitted."""
+        root = scaffold()
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        for old, new in (("checks.md", "tasks.md"), ("plan.md", "spec.md")):
+            text = read_artifact(os.path.join(fdir, old))
+            os.remove(os.path.join(fdir, old))
+            title, rest = text.split("\n", 1)
+            write_artifact(os.path.join(fdir, new),
+                           f"{title}\n\n**Approved**: 2026-10-25 - user: \"ok\" - hash: {{hash}}\n{rest}")
+        os.makedirs(os.path.join(root, "app"))
+        write_artifact(os.path.join(root, "app", "ledger.rb"), "def charge = 1\n")
+        for args in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            git(root, *args)
+        commit(root, "feat: ledger")
+        head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True,
+                              text=True).stdout.strip()
+        proofs = os.path.join(fdir, "proofs.md")
+        write_artifact(proofs, re.sub(r"\*\*HEAD\*\*: \S+", f"**HEAD**: {head}", read_artifact(proofs)))
+        return root, fdir
+
+    def code_change(root, fdir, then_commit):
+        commit(root)
+        write_artifact(os.path.join(root, "app", "ledger.rb"), "def charge = 2\n")
+        if then_commit:
+            commit(root, "fix: charge")
+
+    def plan_change(root, fdir, old, new):
+        commit(root)
+        path = os.path.join(fdir, "tasks.md")
+        text = read_artifact(path)
+        if old not in text:
+            raise ValueError(f"fixture edit did not apply: {old[:40]!r} in tasks.md")
+        write_artifact(path, text.replace(old, new, 1))
+        commit(root, "docs: the plan")
+
+    cases = [
+        ("proofs at HEAD with the evidence uncommitted pass and warn", lambda r, f: None, 0, "not committed"),
+        ("a commit of only .specs/ keeps the proofs valid", lambda r, f: commit(r), 0, "0 error"),
+        ("a code commit after the proofs fails", lambda r, f: code_change(r, f, True), 1,
+         "code changed after the proofs ran"),
+        ("an uncommitted code change fails", lambda r, f: code_change(r, f, False), 1,
+         "code changed after the proofs ran"),
+        ("a check claim changed in tasks.md after the proofs fails", lambda r, f: plan_change(
+            r, f, "never `Cancelled`", "never `Archived`"), 1, "changed its checks or its plan"),
+        ("a Handoff line written after the proofs passes", lambda r, f: plan_change(
+            r, f, "## Handoff\n", "## Handoff\n\n**Dispatched:** Verifier at HEAD\n"), 0, "0 error"),
+    ]
+    ok = True
+    for desc, mutate, want_code, want_frag in cases:
+        root, fdir = layout()
+        try:
+            mutate(root, fdir)
+            code, out = run("validate_verification", root)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+        if code == want_code and want_frag in out:
+            print(f"  ok      validate_verification.py: {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  validate_verification.py: {desc} - expected exit={want_code} and {want_frag!r}, "
+                  f"got exit={code}: {out.strip()[-400:]}")
+    return ok
 
 
 def run_approve_cases():
