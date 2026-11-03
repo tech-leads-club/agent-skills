@@ -65,7 +65,11 @@ Whoever fixes fills `Closed` with the fixing commit and the check that now prove
 python3 <skill-dir>/scripts/validate_verification.py <feature>
 ```
 
-It reads `proofs.md` at `HEAD`. Every check and run needs a passing row, a passing build and a clean tree. It reads the `## Checks` table. It reads `screens.md` when a criterion cites a capture, and the `**Walked:**` line when a check is a walk. Every finding must be closed. Exit 0 means the feature is done.
+It reads `proofs.md` and the commit it names. Every check and run needs a passing row, a passing build and a clean tree. It reads the `## Checks` table. It reads `screens.md` when a criterion cites a capture, and the `**Walked:**` line when a check is a walk. Every finding must be closed. Exit 0 means the feature is done.
+
+**The proofs hold until the code moves.** A commit that stages only `.specs/` files keeps them valid. A change outside `.specs/` after their commit makes them stale, committed or not. So does a change to this feature's checks or plan, measured by the hash of spec.md and tasks.md. Run `check_proofs.py` again in both cases.
+
+**Commit the evidence alone.** After exit 0, commit `proofs.md`, `verification.md` and `screens.md` when the repo tracks `.specs/`. Stage only `.specs/` files, and the gate still exits 0 after that commit. It warns while the evidence is not committed.
 
 ## Interactive UAT (Complex Scope, or a Screen Nobody Can Walk)
 
