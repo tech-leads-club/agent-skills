@@ -23,8 +23,15 @@ Windows they run in Git for Windows' bash, because proofs are written for a POSI
 Usage:
   python3 <skill-dir>/scripts/check_proofs.py <feature> [--root DIR]
 
-Writes .specs/features/<feature>/proofs.md. Exit 0 every proof passed on a clean tree, 1 otherwise,
-2 usage error.
+Writes .specs/features/<feature>/proofs.md with the commit the proofs ran at. Exit 0 every proof
+passed with no uncommitted change outside .specs/, 1 otherwise, 2 usage error.
+
+proofs.md also records the content hash of spec.md and tasks.md, so a later change to the checks
+or the plan shows even where git does not track .specs/.
+
+proofs.md is evidence, and it may be committed. A later commit that touches only .specs/ keeps it
+valid: validate_verification.py accepts proofs from an earlier commit while nothing outside .specs/
+changed since and this feature's spec.md and tasks.md keep their content hash.
 """
 
 import argparse
@@ -35,7 +42,7 @@ import subprocess
 import sys
 
 from lean_config import RUN_PROOF_RE, RUN_RE, checks_file
-from specs import spin_guard, stop_text
+from specs import changed_outside_specs, plan_hashes, spin_guard, stop_text
 
 CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
@@ -144,10 +151,7 @@ def screens_verdicts(fdir):
 
 def dirty_paths(root):
     """Uncommitted paths outside .specs/: the proofs ran on the working tree, not on HEAD."""
-    p = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True)
-    if p.returncode != 0:
-        return []
-    return [ln[3:] for ln in p.stdout.splitlines() if ln[3:] and not ln[3:].startswith(".specs/")]
+    return changed_outside_specs(root)
 
 
 def git_head(root):
@@ -238,6 +242,7 @@ def main(argv=None):
     out = [f"# {a.feature} proofs", "",
            f"**HEAD**: {git_head(root)}",
            f"**Tree**: {'clean' if not dirty else 'dirty - ' + ', '.join(dirty[:5])}",
+           f"**Plan**: {', '.join(f'{n} {h}' for n, h in plan_hashes(fdir).items()) or 'none'}",
            f"**Shell**: {shell_label}",
            f"**Result**: {len(rows) - failed} pass, {failed} fail", "",
            "| Check | Proof | Result |", "| --- | --- | --- |"]
