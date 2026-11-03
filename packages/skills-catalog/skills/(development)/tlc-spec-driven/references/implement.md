@@ -69,7 +69,7 @@ Run the command for the task's `**Gate**:` level from `## Gate Check Commands`. 
 
 1. Tick every `**Done when**:` box of the task in `tasks.md`.
 2. Stage the task's files only. Stage `tasks.md` in the same commit when the repo tracks `.specs/`. Where `.specs/` is ignored, the commit holds only the code and its tests.
-3. Run `python3 <skill-dir>/scripts/check_commit.py --message "<message>"`. Add `--task T<n>` when `.specs/` is not tracked. It checks the message. It measures the staged diff against the task: its files, its tests, the anti-cheat rules and the size budget. It also refuses a spec or tasks.md that no longer matches its approval.
+3. Run `python3 <skill-dir>/scripts/check_commit.py --message "<message>"`. When git does not track `.specs/`, it finds the task from the staged files. Add `--task T<n>` when two tasks list the same files. It checks the message. It measures the staged diff against the task: its files, its tests, the anti-cheat rules and the size budget. It also refuses a spec or tasks.md that no longer matches its approval.
 4. Commit. One task is one commit. Never batch tasks.
 
 **A plan change is its own commit.** A new approval, an amendment or a Handoff update stages only `.specs/` files and closes no task. `check_commit.py` runs the approval and decision checks on it, and refuses one that also stages code. When a task outgrows its files or its size, amend the plan first, commit that alone, then commit the code.
@@ -121,6 +121,7 @@ The orchestrator closes it, never a batch worker:
 3. **Fix every finding in one pass.** The report's `Closed` column cites the commit for each one.
 4. **Round 2 is the script.** Run `check_proofs.py` again over the fixes. Send the screens sub-agent again on the rows that read `differs` only, and it writes `**Round**: 2`. There is no second Verifier and no third round. What still fails goes to the user.
 5. **Gate.** `python3 <skill-dir>/scripts/validate_verification.py <feature>` exits 0. Then distill lessons ([lessons.md](lessons.md)). Close only when every sub-agent you sent has returned.
+6. **Commit the evidence.** When the repo tracks `.specs/`, commit `proofs.md`, `verification.md`, `screens.md` and the lessons, with `.specs/` files only. The proofs stay valid after a commit like that, and the tree is clean.
 
 ## Pause or End of Session
 
