@@ -4,7 +4,7 @@
 
 One file with two sections. Each section has its own life, and each write targets its own section. Never overwrite the whole file.
 
-`python3 <skill-dir>/scripts/validate_state.py` checks the file and compares it with the version at `HEAD`. `check_commit.py` runs it whenever a commit stages STATE.md.
+`python3 <skill-dir>/scripts/validate_state.py` checks the file and compares it with the version at `HEAD`. `check_commit.py` runs it whenever a commit stages STATE.md. With `.specs/` out of git there is no version at `HEAD`, so only the file itself is checked.
 
 ---
 
@@ -126,7 +126,8 @@ A compaction is a resume. The summary keeps the task and drops the rules.
 | `tasks.md` that `validate_tasks.py` says changed after its approval | amend it with `approve.py --amend` and commit it alone, or take a change to what the user decided back to them |
 | an open task | do it. A task whose commit is on the branch is done, so mark it |
 | every task done, a screen, and no `**Walked:**` line | the walk and the pictures ([implement.md](implement.md), step 9) |
-| no `proofs.md`, or one at another commit than `HEAD` | `check_proofs.py` |
+| no `proofs.md`, or one `validate_verification.py` calls stale | `check_proofs.py` |
 | `**Dispatched:**` names a sub-agent whose file is not on disk | wait for it. Send it again only in a new session, and say so on the line |
 | `verification.md` with an open finding, or `screens.md` round 1 that diverges | the fix pass, then round 2 |
 | `screens.md` with `**Round**: 2` | the script and the gate. What still fails goes to the user |
+| the gate exits 0 and warns the evidence is not committed | commit it alone, `.specs/` files only |
