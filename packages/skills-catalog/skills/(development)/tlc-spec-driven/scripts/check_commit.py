@@ -29,7 +29,8 @@ What it checks in the message:
 
 What it checks in the staged diff, when a feature is in progress (one feature with checks and no
 verification.md, or --feature). The task comes from --task, or from the staged tasks.md: the task
-whose `Done when` boxes this commit ticks.
+whose `Done when` boxes this commit ticks. When git does not track tasks.md, it is the one task whose
+Files lists every staged file, with its Create, Modify and Delete files all staged.
   ERROR  - the commit closes more than one task, or closes none and stages a file outside `.specs/`
   ERROR  - a staged file the task's `Files` does not list (`.specs/` aside)
   ERROR  - a `Create:` file not added, a `Modify:` file not changed, or a `Delete:` file not deleted
@@ -228,7 +229,8 @@ def line_count(root, ref):
 
 def check_approvals(root, fdir, files):
     """The staged spec.md and tasks.md still match their approval, and a new approval or amendment
-    travels in a commit of its own, so no change to the plan hides in a code commit."""
+    travels in a commit of its own, so no change to the plan hides in a code commit. A file git does
+    not track is read from disk, so a repo that keeps .specs/ out of git is held to its approval too."""
     errors, staged, stamp_changed = [], {}, False
     for name in APPROVED_FILES:
         rel = os.path.relpath(os.path.join(fdir, name), root).replace(os.sep, "/")
@@ -246,12 +248,32 @@ def check_approvals(root, fdir, files):
         if any(m[0] == "approved" for m in before) and not any(m[0] == "approved" for m in now):
             errors.append(f"this commit removes the approval of {name} - only approve.py replaces it, with the "
                           f"user's words")
-    errors += approval_errors(fdir, False, staged, tuple(staged))
+    errors += approval_errors(fdir, False, staged)
     outside = sorted(p for p in files if not p.startswith(".specs/"))
     if stamp_changed and outside:
         errors.append(f"this commit writes an approval or an amendment and stages {', '.join(outside[:3])} - commit "
                       f"the plan change alone, then the code")
     return errors
+
+
+def task_from_files(tasks_path, files, errors):
+    """With tasks.md out of git, no tick shows which task a commit closes. The staged files do: the
+    one task whose Files lists every staged file, and whose Create, Modify and Delete files are all
+    staged. Two such tasks need --task."""
+    staged = {p for p in files if not p.startswith(".specs/")}
+    if not staged:
+        return None
+    fits = [t.id for t in read_tasks(tasks_path)["tasks"]
+            if staged <= set(t.paths("Create", "Modify", "Delete", "Test"))
+            and set(t.paths("Create", "Modify", "Delete")) <= staged]
+    if len(fits) == 1:
+        return fits[0]
+    if fits:
+        errors.append(f"tasks.md is not tracked and {', '.join(fits)} each fit the staged files - pass --task T<n>")
+    else:
+        errors.append("tasks.md is not tracked and no task's Files fits the staged files - stage one task's files, "
+                      "or pass --task T<n>")
+    return None
 
 
 def check_staged(root, fdir, task_id):
@@ -267,7 +289,7 @@ def check_staged(root, fdir, task_id):
         if not task_id:
             closed = closed_tasks(root, fdir)
             if closed is None:
-                errors.append("tasks.md is not tracked, so the task cannot be read from this commit - pass --task T<n>")
+                task_id = task_from_files(tasks_path, files, errors)
             elif len(closed) > 1:
                 errors.append(f"this commit closes {', '.join(closed)} - one task, one commit")
             elif closed:
