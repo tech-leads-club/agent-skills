@@ -548,6 +548,114 @@ def approval_errors(fdir, required, texts=None, only=APPROVED_FILES):
     return errors
 
 
+# ---------------------------------------------------------------- proofs against the tree
+
+def git(root, *args):
+    """git's stdout, or None when git is missing or the command fails."""
+    try:
+        p = subprocess.run(["git", *args], cwd=root, capture_output=True, encoding="utf-8", errors="replace",
+                           timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return p.stdout if p.returncode == 0 else None
+
+
+def changed_outside_specs(root, since=None):
+    """Paths outside `.specs/` that changed after the commit `since`, or that are not committed.
+    The proofs run the project's code, and nothing under `.specs/` is code, so only these make proofs
+    stale. Paths are relative to the repository's top, so `.specs/` is matched under the project's
+    own prefix. [] without git."""
+    prefix = git(root, "rev-parse", "--show-prefix")
+    if prefix is None:
+        return []
+    specs = prefix.strip() + ".specs/"
+    paths = set()
+    if since:
+        diff = git(root, "diff", "--name-only", "-z", since, "HEAD")
+        paths.update(p for p in (diff or "").split("\0") if p)
+    status = (git(root, "status", "--porcelain=v1", "-z", "--untracked-files=all") or "").split("\0")
+    i = 0
+    while i < len(status):
+        entry = status[i]
+        if len(entry) > 3:
+            paths.add(entry[3:])
+            if entry[0] in "RC":
+                i += 1
+                if i < len(status) and status[i]:
+                    paths.add(status[i])
+        i += 1
+    return sorted(p for p in paths if not p.startswith(specs))
+
+
+def proof_drift(root, fdir, commit):
+    """Why proofs that ran at `commit` no longer prove the tree. A commit that touches only `.specs/`
+    keeps them valid, so the feature's evidence can be committed after the proofs ran. Code changed
+    since, committed or not, makes them stale. So does this feature's spec.md or tasks.md with
+    another content hash than at `commit`: its checks or its plan moved. [] without git."""
+    if git(root, "rev-parse", "--git-dir") is None:
+        return []
+    full = (git(root, "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}") or "").strip()
+    if not full:
+        return [f"proofs.md names {commit}, a commit this repository does not have - run check_proofs.py again"]
+    head = (git(root, "rev-parse", "HEAD") or "").strip()
+    if full != head and git(root, "merge-base", "--is-ancestor", full, "HEAD") is None:
+        return [f"proofs.md ran at {commit}, which is not in the history of HEAD - run check_proofs.py again"]
+    errors = []
+    moved = changed_outside_specs(root, full)
+    if moved:
+        errors.append(f"code changed after the proofs ran at {commit}: {', '.join(moved[:5])}"
+                      f"{' ...' if len(moved) > 5 else ''} - commit it and run check_proofs.py again")
+    for name in APPROVED_FILES:
+        path = os.path.join(fdir, name)
+        rel = os.path.relpath(path, root).replace(os.sep, "/")
+        then = git(root, "show", f"{full}:./{rel}")
+        if then is None or not os.path.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            now = f.read()
+        if content_hash(then) != content_hash(now):
+            errors.append(f"{name} changed its checks or its plan after the proofs ran at {commit} - run "
+                          f"check_proofs.py again")
+    return errors
+
+
+def plan_hashes(fdir):
+    """{name: content hash} of this feature's spec.md and tasks.md, as check_proofs.py records them."""
+    out = {}
+    for name in APPROVED_FILES:
+        path = os.path.join(fdir, name)
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as f:
+                out[name] = content_hash(f.read())
+    return out
+
+
+def plan_drift(fdir, recorded):
+    """The files whose content hash moved since check_proofs.py recorded it in proofs.md's `**Plan**`
+    line. It holds where git does not track .specs/, because the record lives in the file."""
+    now = plan_hashes(fdir)
+    pairs = re.findall(r"([\w.-]+\.md)\s+([0-9a-f]{12})", recorded or "")
+    return [name for name, digest in pairs if now.get(name) not in (None, digest)]
+
+
+def evidence_uncommitted(root, fdir, names=("proofs.md", "verification.md", "screens.md")):
+    """The feature's evidence files that a repository tracking `.specs/` has not committed yet."""
+    tracked = git(root, "ls-files", "--", os.path.relpath(fdir, root))
+    if not tracked or not tracked.strip():
+        return []
+    out = []
+    for name in names:
+        path = os.path.join(fdir, name)
+        if not os.path.isfile(path):
+            continue
+        rel = os.path.relpath(path, root)
+        if git(root, "check-ignore", "-q", rel) is not None:
+            continue
+        if (git(root, "status", "--porcelain", "--", rel) or "").strip():
+            out.append(name)
+    return out
+
+
 # ---------------------------------------------------------------- spin guard and report
 
 def _state_file(fdir):
