@@ -91,12 +91,16 @@ The spec declares `**Scope**:`, and `validate_spec.py` holds it to the spec's ow
         ├── design.md        # Approach, architecture and components (Large and Complex)
         ├── review.md        # the plan reviewer's paraphrase and findings, each resolved
         ├── tasks.md         # Phases of tasks, ## Checks with a proof each, ## Handoff
-        ├── proofs.md        # written by check_proofs.py: every proof at HEAD
+        ├── proofs.md        # written by check_proofs.py: every proof, and the commit it ran at
         ├── screens.md       # the screens sub-agent's verdict, per picture
         └── verification.md  # the Verifier's judgement of each check, and its findings closed
 ```
 
 **Create files when their phase has content.** Never scaffold an empty `context.md`, `design.md` or `tasks.md`. A missing file is the right state for a skipped phase.
+
+**The evidence is committed with the feature.** When the repo tracks `.specs/`, commit `proofs.md`, `verification.md` and `screens.md` after the gate passes. That commit stages only `.specs/` files, and the proofs stay valid after it. A change outside `.specs/` after the proofs makes them stale, so `check_proofs.py` runs again.
+
+**When `.specs/` stays out of git.** Ignore it in `.gitignore`, or on one machine only in `.git/info/exclude`. A folder that is untracked and not ignored keeps the tree dirty for any clean-tree check. The gates then read every file from disk. `check_commit.py` finds the task from the staged files, and `proofs.md` records the hash of the plan it ran. Git no longer keeps the history of approvals and decisions, or the evidence in the pull request.
 
 ## Workflow
 
