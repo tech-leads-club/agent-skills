@@ -874,7 +874,78 @@ def run_spec_driven_cases():
             print(f"  BROKEN  {script}: {desc} - expected exit={want_code} and {want_frag!r}, got exit={code}: "
                   f"{out.strip()[-500:]}")
     return run_spin_case() and run_approve_cases() and run_commit_cases() and run_state_head_case() and \
-        run_proofs_drift_cases() and run_untracked_cases() and run_batches_cases() and run_prose_cases() and ok
+        run_proofs_drift_cases() and run_untracked_cases() and run_slice_cases() and run_batches_cases() and \
+        run_prose_cases() and ok
+
+
+def run_slice_cases():
+    """slice_task.py keeps what a task names and drops the rest, and refuses a plan the gates refuse."""
+    if not shipped("slice_task"):
+        return True
+
+    def edit_all(files, name, pairs):
+        for old, new in pairs:
+            files = edit(files, name, old, new)
+        return files
+
+    two = edit_all({**tasks_files(), "design.md": DESIGN}, "spec.md", [(
+        "2. **BILL-02** IF the gateway times out THEN the system SHALL keep the status and log `charge_timeout`\n",
+        "2. **BILL-02** IF the gateway times out THEN the system SHALL keep the status and log `charge_timeout`\n"
+        "3. **BILL-03** WHEN a subscription is suspended THEN the system SHALL send the member a notice\n")])
+    two = edit_all(two, "tasks.md", [
+        ("## Checks\n", "### Phase 2: Notices\n\n#### T2: Send the suspension notice\n\n"
+         "**What**: send the member a notice when the subscription is suspended\n**Files**:\n"
+         "- Create: `src/notices.ts`\n- Test: `src/notices.test.ts`\n**Depends on**: T1\n"
+         "**Requirement**: BILL-03\n**Tests**: unit\n**Gate**: quick\n**Done when**:\n"
+         "- [ ] a suspension sends one notice\n\n## Checks\n"),
+        ("## Handoff\n", "**C3** - A suspension sends the member a notice (BILL-03)\n"
+         "Proof: run unit | ✓ notices > sends one notice\n\n## Handoff\n")])
+    two = edit_all(two, "design.md", [
+        ("| Charge service | `src/ledger.ts` | Extend |\n",
+         "| Charge service | `src/ledger.ts` | Extend |\n| Mailer | `src/mailer.ts` | Import |\n"),
+        ("## Error Handling Strategy", "### Notices\n\n- **Purpose**: tell the member about a suspension\n"
+         "- **Location**: `src/notices.ts` (new)\n- **Reuses**: `src/mailer.ts#send`\n\n## Error Handling Strategy"),
+        ("| a regression ships | T1 adds one |\n",
+         "| a regression ships | T1 adds one |\n| A notice sent twice | `src/notices.ts:1` | spam | T2 asserts one |\n")])
+
+    def slice_of(files, *tasks):
+        root = feature_root(files)
+        try:
+            return run_script("slice_task.py", FEATURE, *tasks, "--root", root)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def holds(out, present, absent):
+        return all(x in out for x in present) and not any(x in out for x in absent)
+
+    cases = [
+        ("T1's slice keeps its component, criteria and checks, and drops T2's",
+         lambda: slice_of(two, "T1"), 0, (["### Suspension", "**BILL-01**", "**C1**", "**C2**"],
+                                          ["### Notices", "**BILL-03**", "**C3**", "src/mailer.ts", "T2:"])),
+        ("T2's slice keeps its component, the code it reuses, its risk and its check",
+         lambda: slice_of(two, "T2"), 0, (["### Notices", "**BILL-03**", "**C3**", "`src/mailer.ts`", "sent twice"],
+                                          ["### Suspension", "**C1**", "**BILL-01**", "`src/ledger.ts:2`"])),
+        ("a batch slice holds both tasks in plan order, and each section once",
+         lambda: slice_of(two, "T2", "T1"), 0, (["T1:", "T2:", "### Suspension", "### Notices"], [])),
+        ("a stale approval refuses the slice", lambda: slice_of({**two, "spec.md": SPEC.replace("{approval}", STALE)},
+                                                                "T1"), 1, (["changed after the user approved it"], [])),
+        ("an unapproved plan refuses the slice", lambda: slice_of({**two, "tasks.md": two["tasks.md"].replace(
+            APPROVAL, "")}, "T1"), 1, (["tasks.md is not approved"], [])),
+        ("a task the plan does not hold exits 2", lambda: slice_of(two, "T9"), 2, (["T9 not in tasks.md"], [])),
+    ]
+    ok = True
+    for desc, go, want_code, (present, absent) in cases:
+        code, out = go()
+        good = code == want_code and holds(out, present, absent)
+        if good and desc.startswith("a batch"):
+            good = out.index("T1:") < out.index("T2:") and out.count("## Test Coverage Matrix") == 1
+        print(f"  {'ok     ' if good else 'BROKEN '} slice_task.py: {desc}" + ("" if good else
+              f" - expected exit={want_code}, got exit={code}: {out.strip()[-500:]}"))
+        ok = ok and good
+    first, second = slice_of(two, "T1", "T2"), slice_of(two, "T1", "T2")
+    same = first == second and first[0] == 0
+    print(f"  {'ok     ' if same else 'BROKEN '} slice_task.py: two runs print the same slice")
+    return ok and same
 
 
 def run_untracked_cases():
