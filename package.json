@@ -58,7 +58,7 @@
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@modelcontextprotocol/inspector": "^2.0.0",
+    "@modelcontextprotocol/inspector": "^2.14.0",
     "@nx/devkit": "23.1.1",
     "@nx/esbuild": "23.1.1",
     "@nx/eslint": "23.1.1",

@@ -41,7 +41,7 @@
     "@modelcontextprotocol/server": "^2.4.0",
     "fuse.js": "^7.1.0",
     "ky": "^1.14.3",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@jest/globals": "30.3.0"
