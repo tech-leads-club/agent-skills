@@ -27,46 +27,41 @@ const RegistrySchema = z.object({
     .optional(),
 })
 
-export type RegistrySnapshot = { data: Registry; etag?: string }
+export type RegistrySnapshot = { data: Registry; version: string; etag?: string }
 
-async function getRegistryUrl(signal?: AbortSignal): Promise<string> {
-  const cdnRef = await resolveCdnRef(signal)
-  return buildRegistryUrl(cdnRef)
-}
-
-async function parseRegistry(response: Response): Promise<RegistrySnapshot> {
+async function parseRegistry(response: Response, version: string): Promise<RegistrySnapshot> {
   const etag = response.headers.get('etag') ?? undefined
   const raw = RegistrySchema.parse(await response.json())
-  return { data: { ...raw, deprecated: raw.deprecated ?? [] }, etag }
+  return { data: { ...raw, deprecated: raw.deprecated ?? [] }, version, etag }
 }
 
 /**
- * Fetches the registry. With a previous snapshot it revalidates by ETag, and a
- * `304 Not Modified` returns that same snapshot object.
+ * Fetches the registry of the current catalog version. When that version is the previous
+ * snapshot's, it revalidates by ETag, and a `304 Not Modified` returns that same snapshot object.
  */
 export async function fetchRegistry(
   previous: RegistrySnapshot | null,
   signal?: AbortSignal,
 ): Promise<RegistrySnapshot> {
-  const registryUrl = await getRegistryUrl(signal)
+  const version = await resolveCdnRef(signal)
+  const registryUrl = buildRegistryUrl(version)
 
-  if (previous) {
+  if (previous && previous.version === version) {
     const headers: Record<string, string> = previous.etag ? { 'If-None-Match': previous.etag } : {}
     const response = await ky.get(registryUrl, { headers, throwHttpErrors: false, signal })
     if (response.status === 304) {
-      process.stderr.write('[registry] 304 Not Modified\n')
+      process.stderr.write(`[registry] ${version} not modified\n`)
       return previous
     }
     if (response.status !== 200) throw new Error(`[registry] refresh failed with status ${response.status}`)
-    process.stderr.write('[registry] 200 - registry updated\n')
-    return parseRegistry(response)
+    process.stderr.write(`[registry] ${version} updated\n`)
+    return parseRegistry(response, version)
   }
 
-  process.stderr.write('[registry] cold start fetch\n')
+  process.stderr.write(`[registry] fetching catalog ${version}\n`)
   const response = await ky.get(registryUrl, { retry: { limit: 3 }, throwHttpErrors: false, signal })
-  if (response.status !== 200) throw new Error(`[registry] cold start fetch failed with status ${response.status}`)
-  process.stderr.write('[registry] cold start fetch complete\n')
-  return parseRegistry(response)
+  if (response.status !== 200) throw new Error(`[registry] fetch of ${version} failed with status ${response.status}`)
+  return parseRegistry(response, version)
 }
 
 export function buildIndexes(registry: Registry): Indexes {

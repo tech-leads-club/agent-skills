@@ -36,7 +36,7 @@ describe('createCatalog', () => {
     const loadRegistry = jest
       .fn<CatalogDeps['loadRegistry']>()
       .mockRejectedValueOnce(new Error('ECONNREFUSED'))
-      .mockResolvedValueOnce({ data: registryA })
+      .mockResolvedValueOnce({ data: registryA, version: '1.0.0' })
     const catalog = createCatalog({ loadRegistry })
 
     await expect(catalog.list()).rejects.toBeInstanceOf(CatalogUnavailableError)
@@ -47,7 +47,7 @@ describe('createCatalog', () => {
   })
 
   it('lets a call join the load that warm started', async () => {
-    const loadRegistry = jest.fn<CatalogDeps['loadRegistry']>().mockResolvedValue({ data: registryA })
+    const loadRegistry = jest.fn<CatalogDeps['loadRegistry']>().mockResolvedValue({ data: registryA, version: '1.0.0' })
     const catalog = createCatalog({ loadRegistry })
 
     catalog.warm()
@@ -72,7 +72,7 @@ describe('createCatalog', () => {
     let now = 1_000
     const loadRegistry = jest
       .fn<CatalogDeps['loadRegistry']>()
-      .mockResolvedValueOnce({ data: registryA })
+      .mockResolvedValueOnce({ data: registryA, version: '1.0.0' })
       .mockImplementationOnce(() => never<RegistrySnapshot>())
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
@@ -88,8 +88,8 @@ describe('createCatalog', () => {
     let now = 1_000
     const loadRegistry = jest
       .fn<CatalogDeps['loadRegistry']>()
-      .mockResolvedValueOnce({ data: registryA })
-      .mockResolvedValueOnce({ data: registryB })
+      .mockResolvedValueOnce({ data: registryA, version: '1.0.0' })
+      .mockResolvedValueOnce({ data: registryB, version: '1.0.0' })
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
     await catalog.list()
@@ -104,7 +104,7 @@ describe('createCatalog', () => {
     let now = 1_000
     const loadRegistry = jest
       .fn<CatalogDeps['loadRegistry']>()
-      .mockResolvedValueOnce({ data: registryA })
+      .mockResolvedValueOnce({ data: registryA, version: '1.0.0' })
       .mockRejectedValueOnce(new Error('offline'))
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
@@ -152,7 +152,7 @@ describe('createCatalog', () => {
   })
 
   it('searches the loaded index', async () => {
-    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB }) })
+    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB, version: '1.0.0' }) })
 
     const results = await catalog.search('beta', 5)
 
@@ -160,7 +160,7 @@ describe('createCatalog', () => {
   })
 
   it('returns the whole registry', async () => {
-    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB }) })
+    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB, version: '1.0.0' }) })
 
     await expect(catalog.registry()).resolves.toBe(registryB)
   })
@@ -169,8 +169,8 @@ describe('createCatalog', () => {
     const fetchBytes = jest.fn<(url: string) => Promise<Uint8Array>>()
     const verify = jest.fn<CatalogDeps['verifyFiles']>().mockResolvedValue(new Map([['SKILL.md', new Uint8Array([1])]]))
     const catalog = createCatalog({
-      loadRegistry: () => Promise.resolve({ data: registryA }),
-      skillsBaseUrl: () => Promise.resolve('https://cdn.test/skills/'),
+      loadRegistry: () => Promise.resolve({ data: registryA, version: '1.0.0' }),
+      skillsBaseUrl: () => 'https://cdn.test/skills/',
       fetchBytes,
       verifyFiles: verify,
     })
@@ -186,7 +186,7 @@ describe('createCatalog', () => {
 describe('createCatalog revalidation', () => {
   it('passes the current snapshot to the refresh and keeps the index when it comes back unchanged', async () => {
     let now = 1_000
-    const first = { data: registryA, etag: '"v1"' }
+    const first = { data: registryA, version: '1.0.0', etag: '"v1"' }
     const loadRegistry = jest
       .fn<CatalogDeps['loadRegistry']>()
       .mockResolvedValueOnce(first)
