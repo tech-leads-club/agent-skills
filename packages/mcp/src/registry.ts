@@ -2,8 +2,8 @@ import Fuse from 'fuse.js'
 import ky from 'ky'
 import { z } from 'zod'
 
-import { CACHE_TTL_MS } from './constants'
 import { buildRegistryUrl, resolveCdnRef } from './cdn'
+import { CACHE_TTL_MS } from './constants'
 import type { Indexes, IndexSkill, Registry, RegistryCache, SkillEntry } from './types'
 
 import { extractTriggers } from './utils'
@@ -23,19 +23,21 @@ const RegistrySchema = z.object({
   version: z.string(),
   categories: z.record(z.string(), z.object({ name: z.string(), description: z.string() })),
   skills: z.array(SkillEntrySchema),
-  deprecated: z.array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) })).optional(),
+  deprecated: z
+    .array(z.object({ name: z.string(), message: z.string(), alternatives: z.array(z.string()) }))
+    .optional(),
 })
 
 let cache: RegistryCache | null = null
 
-async function getRegistryUrl(): Promise<string> {
-  const cdnRef = await resolveCdnRef()
+async function getRegistryUrl(signal?: AbortSignal): Promise<string> {
+  const cdnRef = await resolveCdnRef(signal)
   return buildRegistryUrl(cdnRef)
 }
 
-export async function getRegistry(): Promise<Registry> {
+export async function getRegistry(signal?: AbortSignal): Promise<Registry> {
   const now = Date.now()
-  const registryUrl = await getRegistryUrl()
+  const registryUrl = await getRegistryUrl(signal)
 
   if (cache !== null && now - cache.fetchedAt < CACHE_TTL_MS) {
     process.stderr.write('[registry] cache hit (within TTL)\n')
@@ -48,7 +50,7 @@ export async function getRegistry(): Promise<Registry> {
       const headers: Record<string, string> = {}
       if (cache.etag !== undefined) headers['If-None-Match'] = cache.etag
 
-      const response = await ky.get(registryUrl, { headers, throwHttpErrors: false })
+      const response = await ky.get(registryUrl, { headers, throwHttpErrors: false, signal })
 
       if (response.status === 304) {
         process.stderr.write('[registry] 304 Not Modified — refreshing fetchedAt\n')
@@ -75,7 +77,7 @@ export async function getRegistry(): Promise<Registry> {
   }
 
   process.stderr.write('[registry] cold start fetch\n')
-  const response = await ky.get(registryUrl, { retry: { limit: 3 }, throwHttpErrors: false })
+  const response = await ky.get(registryUrl, { retry: { limit: 3 }, throwHttpErrors: false, signal })
   if (response.status !== 200) throw new Error(`[registry] cold start fetch failed with status ${response.status}`)
   const etag = response.headers.get('etag') ?? undefined
   const raw = RegistrySchema.parse(await response.json())

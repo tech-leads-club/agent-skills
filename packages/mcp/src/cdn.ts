@@ -23,7 +23,7 @@ export function buildSkillsBaseUrl(cdnRef: string): string {
  * Prefers SKILLS_CDN_REF (local/dev pin), otherwise the published npm "latest" version.
  * why: avoid mutable @latest URLs for skill content (supply-chain / cache poisoning).
  */
-export async function resolveCdnRef(): Promise<string> {
+export async function resolveCdnRef(signal?: AbortSignal): Promise<string> {
   if (resolvedCdnRef) return resolvedCdnRef
   if (resolvePromise) return resolvePromise
 
@@ -35,7 +35,7 @@ export async function resolveCdnRef(): Promise<string> {
       return envRef
     }
 
-    const response = await fetch(`https://registry.npmjs.org/${SKILLS_CATALOG_PACKAGE}/latest`)
+    const response = await fetch(`https://registry.npmjs.org/${SKILLS_CATALOG_PACKAGE}/latest`, { signal })
     if (!response.ok) {
       throw new Error(`[cdn] failed to resolve ${SKILLS_CATALOG_PACKAGE} version: HTTP ${response.status}`)
     }
