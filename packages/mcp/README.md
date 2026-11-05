@@ -68,7 +68,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 - Returns `structuredContent` validated against the tool's `outputSchema`, with a JSON text fallback
 - Omits the full `description` from results — `usage_hint` carries the gist, and `read_skill` provides the rest
 - Minimum match character length of 2 to avoid noise
-- Empty query → `UserError("Query cannot be empty")`
+- Empty query → tool error naming `query` (see [Error Reference](#-error-reference))
 - No matches (or only `weak` ones) → empty array with explanatory message
 
 ### `read_skill`
@@ -83,8 +83,8 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 - Reference list covers every file the registry declares for the skill except `SKILL.md`, whatever directory it sits in — the registry's file list is the contract, not a folder-name convention
 - Returns two separate content blocks: main content + compact reference list (capped at 50 paths)
 - Skill with only one file returns a single content block (no empty second block)
-- Invalid `skill_name` → `UserError("Skill '{name}' not found. Use search_skills to find valid names.")`
-- CDN failure → `UserError("CDN unavailable. Try again shortly.")`
+- Invalid `skill_name` → tool error: "Skill '{name}' not found. Use search_skills to find valid names."
+- CDN failure → tool error: "CDN unavailable or skill integrity check failed. Try again shortly."
 
 ### `fetch_skill_files`
 
@@ -95,8 +95,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 
 - Validates **all** paths against `skill.files[]` before any network call — rejects with the full list of invalid paths
 - Accepts any path from `read_skill`'s list; paths not declared for that skill are rejected
-- Fetches valid files in parallel (`Promise.allSettled`)
-- Partial failure: returns successful content and notes failed paths — does not abort the entire response
+- Fetches the skill's files in parallel and verifies them against the registry checksum before returning any of them. A failed download or a checksum mismatch returns a tool error
 - **Response budget of 50,000 chars (~12.5k tokens):** files are emitted in the requested order; anything beyond the budget is truncated or omitted, and the response names what was left out so the agent can request it in a follow-up call. Without this, five large reference files could exceed the 25k-token cap agents apply to tool responses.
 - Use this for files meant to be **read**. For files meant to be **run**, use `prepare_skill_files`.
 
