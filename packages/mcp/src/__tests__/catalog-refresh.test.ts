@@ -4,7 +4,7 @@ import { type CatalogDeps, createCatalog } from '../catalog'
 import { createRegistry } from '../tools/__tests__/helpers'
 import type { Registry } from '../types'
 
-const DIST_TAGS_URL = 'https://registry.npmjs.org/-/package/@tech-leads-club/skills-catalog/dist-tags'
+const LATEST_URL = 'https://registry.npmjs.org/@tech-leads-club/skills-catalog/latest'
 const registryUrl = (version: string) =>
   `https://cdn.jsdelivr.net/npm/@tech-leads-club/skills-catalog@${version}/skills-registry.json`
 
@@ -26,10 +26,10 @@ function stubNetwork(distTags: Array<string | Error>) {
     const headers = new Headers(init?.headers ?? request.headers)
     calls.push({ url: request.url, ifNoneMatch: headers.get('if-none-match') })
 
-    if (request.url === DIST_TAGS_URL) {
+    if (request.url === LATEST_URL) {
       const next = distTags[Math.min(tagIndex++, distTags.length - 1)]
       if (next instanceof Error) throw next
-      return Response.json({ latest: next })
+      return Response.json({ name: '@tech-leads-club/skills-catalog', version: next })
     }
 
     const version = Object.keys(registries).find((candidate) => request.url === registryUrl(candidate))
@@ -112,7 +112,7 @@ describe('catalog version refresh', () => {
     const names = await namesAfterRefresh(catalog)
 
     expect(names).toEqual(['alpha-skill'])
-    expect(network.calls.map((call) => call.url)).not.toContain(DIST_TAGS_URL)
+    expect(network.calls.map((call) => call.url)).not.toContain(LATEST_URL)
   })
 
   it('keeps the current registry when the dist-tag lookup fails', async () => {
@@ -122,7 +122,7 @@ describe('catalog version refresh', () => {
     const names = await namesAfterRefresh(catalog)
 
     expect(names).toEqual(['alpha-skill'])
-    expect(network.calls.filter((call) => call.url === DIST_TAGS_URL).length).toBeGreaterThanOrEqual(2)
+    expect(network.calls.filter((call) => call.url === LATEST_URL).length).toBeGreaterThanOrEqual(2)
   })
 
   it('revalidates with If-None-Match while the dist-tag is unchanged', async () => {
