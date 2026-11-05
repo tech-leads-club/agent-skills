@@ -4,6 +4,7 @@ import { buildIndexes } from '../registry'
 import { createRegistry } from '../tools/__tests__/helpers'
 import { ListSkillsOutputSchema } from '../tools/list-tool'
 import { SearchSkillsOutputSchema } from '../tools/search-tool'
+import { ReadSkillOutputSchema } from '../tools/skill-tool'
 import type { Registry } from '../types'
 import { connectInProcess } from './support/mcp-client'
 
@@ -127,5 +128,77 @@ describe('list_skills', () => {
     const result = await callTool(fakeCatalog(sampleRegistry), 'list_skills', {})
 
     expect(result.isError).toBe(true)
+  })
+})
+
+const skillRegistry = createRegistry([
+  {
+    name: 'docs-writer',
+    description: 'Write docs.',
+    files: ['SKILL.md', 'references/style.md', 'scripts/check.sh'],
+  },
+])
+const skillFiles = {
+  'docs-writer': {
+    'SKILL.md': '---\nname: docs-writer\ndescription: Write docs.\n---\n\n# Docs writer\n\nRead references/style.md.\n',
+    'references/style.md': '# Style\n',
+    'scripts/check.sh': 'echo ok\n',
+  },
+}
+
+describe('read_skill', () => {
+  it('returns isError naming search_skills for an unknown skill', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'read_skill', { skill_name: 'nope' })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('search_skills')
+  })
+
+  it('returns the instructions without frontmatter and the bundled files as structuredContent', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'read_skill', { skill_name: 'docs-writer' })
+
+    expect(result.structuredContent).toEqual({
+      skill_name: 'docs-writer',
+      instructions: '# Docs writer\n\nRead references/style.md.\n',
+      reference_files: ['references/style.md', 'scripts/check.sh'],
+    })
+    expect(ReadSkillOutputSchema.safeParse(result.structuredContent).success).toBe(true)
+  })
+
+  it('keeps the 0.1.11 text blocks: the instructions, then the file list', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'read_skill', { skill_name: 'docs-writer' })
+
+    expect(result.content.map((block) => block.text)).toEqual([
+      '# Docs writer\n\nRead references/style.md.\n',
+      'references/style.md\nscripts/check.sh',
+    ])
+  })
+
+  it('returns the CDN message when a file download fails without a checksum mismatch', async () => {
+    const catalog: Catalog = {
+      ...fakeCatalog(skillRegistry, skillFiles),
+      read: async () => {
+        throw new Error("Failed to download skill files for 'docs-writer': SKILL.md")
+      },
+    }
+
+    const result = await callTool(catalog, 'read_skill', { skill_name: 'docs-writer' })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toBe('CDN unavailable or skill integrity check failed. Try again shortly.')
+  })
+
+  it('passes a checksum mismatch through as the tool error', async () => {
+    const catalog: Catalog = {
+      ...fakeCatalog(skillRegistry, skillFiles),
+      read: async () => {
+        throw new Error("Checksum mismatch for skill 'docs-writer': expected a, got b.")
+      },
+    }
+
+    const result = await callTool(catalog, 'read_skill', { skill_name: 'docs-writer' })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toBe("Checksum mismatch for skill 'docs-writer': expected a, got b.")
   })
 })

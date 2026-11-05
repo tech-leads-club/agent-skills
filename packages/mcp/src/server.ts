@@ -4,6 +4,7 @@ import type { Catalog } from './catalog'
 import { CACHE_TTL_MS } from './constants'
 import { registerListTool } from './tools/list-tool'
 import { registerSearchTool } from './tools/search-tool'
+import { registerSkillTool } from './tools/skill-tool'
 
 export const SERVER_INSTRUCTIONS = [
   'Catalog of agent skills: packaged instructions, references and scripts for specific tasks.',
@@ -32,6 +33,7 @@ export function createServer(deps: { catalog: Catalog; version: string }): McpSe
 
   registerSearchTool(server, deps.catalog)
   registerListTool(server, deps.catalog)
+  registerSkillTool(server, deps.catalog)
 
   return server
 }

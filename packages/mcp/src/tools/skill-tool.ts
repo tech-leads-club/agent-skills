@@ -1,10 +1,8 @@
-import { type FastMCP, UserError } from 'fastmcp'
-import ky from 'ky'
+import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
-import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
-import { decodeSkillText, fetchAndVerifySkillFiles } from '../integrity'
-import type { Indexes } from '../types'
+import type { Catalog } from '../catalog'
+import { decodeSkillText } from '../integrity'
 import { buildReadSkillOutput, getMainSkillFile, getReferenceFiles, stripFrontmatter } from './core/skill'
 
 const TOOL_DESCRIPTION =
@@ -12,39 +10,51 @@ const TOOL_DESCRIPTION =
   'Input: the exact name from search_skills, or one the user named directly.\n' +
   'Then: apply the instructions. Only fetch a bundled file if they tell you to.'
 
-export function registerSkillTool(server: FastMCP, getIndexes: () => Indexes): void {
-  server.addTool({
-    name: 'read_skill',
-    description: TOOL_DESCRIPTION,
-    parameters: z.object({ skill_name: z.string() }),
-    annotations: { title: 'Read Skill Instructions', readOnlyHint: true, openWorldHint: true },
-    execute: async (args) => {
-      const skill = getIndexes().map.get(args.skill_name)
-      if (!skill) throw new UserError(`Skill '${args.skill_name}' not found. Use search_skills to find valid names.`)
-      const mainFile = getMainSkillFile(skill, args.skill_name)
+const CDN_FAILURE_MESSAGE = 'CDN unavailable or skill integrity check failed. Try again shortly.'
 
-      let verifiedFiles: Map<string, Uint8Array>
-      try {
-        const cdnRef = await resolveCdnRef()
-        const skillsBaseUrl = buildSkillsBaseUrl(cdnRef)
-        verifiedFiles = await fetchAndVerifySkillFiles(skill, skillsBaseUrl, async (url) => {
-          return new Uint8Array(await ky.get(url).arrayBuffer())
-        })
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        if (message.includes('Checksum mismatch')) {
-          throw new UserError(message)
-        }
-        throw new UserError('CDN unavailable or skill integrity check failed. Try again shortly.')
-      }
+export const ReadSkillOutputSchema = z.object({
+  skill_name: z.string(),
+  instructions: z.string(),
+  reference_files: z.array(z.string()),
+})
 
-      const mainBytes = verifiedFiles.get(mainFile)
-      if (mainBytes === undefined) {
-        throw new UserError(`Skill '${args.skill_name}' is missing ${mainFile} after integrity verification.`)
-      }
+export async function readVerifiedSkill(catalog: Catalog, skillName: string) {
+  const skill = await catalog.get(skillName)
+  if (!skill) throw new Error(`Skill '${skillName}' not found. Use search_skills to find valid names.`)
 
-      const referenceFiles = getReferenceFiles(skill)
-      return buildReadSkillOutput(stripFrontmatter(decodeSkillText(mainBytes)), referenceFiles)
+  try {
+    return { skill, files: await catalog.read(skill) }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(message.includes('Checksum mismatch') ? message : CDN_FAILURE_MESSAGE, { cause: error })
+  }
+}
+
+export function registerSkillTool(server: McpServer, catalog: Catalog): void {
+  server.registerTool(
+    'read_skill',
+    {
+      description: TOOL_DESCRIPTION,
+      inputSchema: z.object({ skill_name: z.string() }),
+      outputSchema: ReadSkillOutputSchema,
+      annotations: { title: 'Read Skill Instructions', readOnlyHint: true, openWorldHint: true },
     },
-  })
+    async ({ skill_name }) => {
+      const { skill, files } = await readVerifiedSkill(catalog, skill_name)
+      const mainFile = getMainSkillFile(skill, skill_name)
+      const mainBytes = files.get(mainFile)
+      if (mainBytes === undefined) {
+        throw new Error(`Skill '${skill_name}' is missing ${mainFile} after integrity verification.`)
+      }
+
+      const instructions = stripFrontmatter(decodeSkillText(mainBytes))
+      const referenceFiles = getReferenceFiles(skill)
+      const output = buildReadSkillOutput(instructions, referenceFiles)
+
+      return {
+        content: typeof output === 'string' ? [{ type: 'text', text: output }] : output.content,
+        structuredContent: { skill_name, instructions, reference_files: referenceFiles },
+      }
+    },
+  )
 }
