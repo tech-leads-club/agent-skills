@@ -12,15 +12,26 @@ function section(heading: string): string {
   return readme.slice(start, next < 0 ? undefined : next)
 }
 
+function codeBlockAfter(text: string, marker: string): string {
+  const at = text.indexOf(marker)
+  if (at < 0) throw new Error(`README section has no "${marker}"`)
+  const open = text.indexOf('```', at)
+  const close = text.indexOf('```', open + 3)
+  return text.slice(open, close)
+}
+
 describe('README', () => {
   it('documents the global install for the four clients', () => {
     const install = section('### Global Install (Long-running sessions)')
 
-    expect(install).toContain('npm i -g @tech-leads-club/agent-skills-mcp')
-    expect(install).toContain('"command": "agent-skills-mcp"')
-    expect(install).toContain('claude mcp add agent-skills -- agent-skills-mcp')
-    expect(install).toContain('"type": "stdio"')
-    expect(install).toContain('[mcp_servers.agent-skills]')
-    expect(install).toContain('command = "agent-skills-mcp"')
+    expect(codeBlockAfter(install, '### Global Install')).toContain('npm i -g @tech-leads-club/agent-skills-mcp')
+    expect(codeBlockAfter(install, 'Generic MCP config')).toContain('"command": "agent-skills-mcp"')
+    expect(codeBlockAfter(install, 'Claude Code (CLI)')).toContain('claude mcp add agent-skills -- agent-skills-mcp')
+    const vscode = codeBlockAfter(install, 'VS Code (GitHub Copilot)')
+    expect(vscode).toContain('"type": "stdio"')
+    expect(vscode).toContain('"command": "agent-skills-mcp"')
+    const codex = codeBlockAfter(install, 'Codex')
+    expect(codex).toContain('[mcp_servers.agent-skills]')
+    expect(codex).toContain('command = "agent-skills-mcp"')
   })
 })
