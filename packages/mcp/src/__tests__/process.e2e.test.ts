@@ -1,4 +1,5 @@
-import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { copyFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import {
@@ -43,8 +44,7 @@ function networkEnv(): NodeJS.ProcessEnv {
 type ToolResult = { content: Array<{ text?: string }>; isError?: boolean }
 
 function rssMiB(pid: number): number {
-  const status = readFileSync(`/proc/${pid}/status`, 'utf8')
-  const kib = Number(/VmRSS:\s+(\d+)/.exec(status)?.[1])
+  const kib = Number(execFileSync('ps', ['-o', 'rss=', '-p', String(pid)], { encoding: 'utf8' }).trim())
   return kib / 1024
 }
 
