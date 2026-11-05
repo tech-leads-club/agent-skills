@@ -228,6 +228,54 @@ claude mcp add agent-skills -- npx -y @tech-leads-club/agent-skills-mcp
 }
 ```
 
+### Global Install (Long-running sessions)
+
+`npx` keeps an `npm exec` process alive next to every server it starts. Each client session runs its own server, so that launcher is paid once per open chat. If you keep many chats or agents open for long periods, install the package once and point the client at the binary:
+
+```bash
+npm i -g @tech-leads-club/agent-skills-mcp
+```
+
+Generic MCP config:
+
+```json
+{
+  "mcpServers": {
+    "agent-skills": {
+      "command": "agent-skills-mcp"
+    }
+  }
+}
+```
+
+Claude Code (CLI):
+
+```bash
+claude mcp add agent-skills -- agent-skills-mcp
+```
+
+VS Code (GitHub Copilot), in `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "agent-skills": {
+      "type": "stdio",
+      "command": "agent-skills-mcp"
+    }
+  }
+}
+```
+
+Codex, in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.agent-skills]
+command = "agent-skills-mcp"
+```
+
+A global install does not update itself. Run `npm i -g @tech-leads-club/agent-skills-mcp@latest` to pick up a new release.
+
 ## ⚡ Caching
 
 The registry is fetched from [jsDelivr CDN](https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills-registry.json) and cached in memory:
@@ -273,6 +321,7 @@ npm run start:dev          # Build + Inspector (uses ../../dist/packages/mcp)
 ## ⚙️ Requirements
 
 - Node.js ≥ 24
+- Behind an HTTP proxy, set `HTTPS_PROXY` (and `NO_PROXY` if needed). On Node.js 24.14 or later the server routes its requests through it with no extra flag. On earlier 24.x releases, also set `NODE_USE_ENV_PROXY=1`.
 
 ## 📄 License & repo
 
