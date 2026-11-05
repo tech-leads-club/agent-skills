@@ -280,23 +280,28 @@ A global install does not update itself. Run `npm i -g @tech-leads-club/agent-sk
 
 The registry is fetched from [jsDelivr CDN](https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills-registry.json) and cached in memory:
 
-- **TTL:** 15 minutes — cache hit returns immediately with no network call
-- **ETag revalidation:** on TTL expiry, sends `If-None-Match`; a `304 Not Modified` renews the TTL without re-downloading the payload
-- **Cold start retry:** 3 attempts with exponential backoff — server won't start if CDN is unreachable
-- **Stale fallback:** if CDN fails after warmup, stale cache is returned rather than erroring
-- All cache events are logged to `stderr` (never `stdout` — stdout is reserved for JSON-RPC)
+- **Startup:** the server answers the MCP handshake at once and loads the registry in the background. Tools wait for that load for up to 10 seconds.
+- **Cold start retry:** 3 retries with exponential backoff within that window. If the load still fails, the tool returns an error and the next tool call starts a new load.
+- **TTL:** 15 minutes. Within it, tools use the cached registry with no network call.
+- **ETag revalidation:** once the TTL expires, tools keep serving the cached registry while it is revalidated in the background with `If-None-Match`. A `304 Not Modified` keeps the current data.
+- **Stale fallback:** if the revalidation fails, the cached registry keeps serving.
+- All cache events are logged to `stderr` (never `stdout`, which is reserved for JSON-RPC).
 
 ## 🔒 Error Reference
 
-| Scenario                               | Behaviour                                                                       |
-| :------------------------------------- | :------------------------------------------------------------------------------ |
-| Registry CDN unreachable at cold start | Retries 3× with exponential backoff, then server exits with error               |
-| Registry CDN unreachable after warmup  | Stale cache returned; warning logged to `stderr`                                |
-| Malformed registry JSON                | Logged to `stderr`; stale cache used if available                               |
-| `skill_name` not in registry           | `UserError`: "Skill '{name}' not found. Use search_skills to find valid names." |
-| `file_paths` contains invalid path     | `UserError` listing all invalid paths — no files fetched                        |
-| `search_skills` with empty query       | `UserError`: "Query cannot be empty"                                            |
-| One parallel file fetch fails          | Partial success: successful files returned, failed path noted in output         |
+Tool errors come back as a tool result with `isError: true` and the message below, so the agent can correct itself.
+
+| Scenario                                                                    | Behaviour                                                                                  |
+| :-------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| Registry CDN unreachable before the first load                              | Tool error: "Skill catalog unavailable. Try again shortly." The next call retries the load |
+| Registry CDN unreachable after the first load                               | Cached registry keeps serving; the failure is logged to `stderr`                           |
+| Malformed registry JSON                                                     | Same as an unreachable CDN, logged to `stderr`                                             |
+| `skill_name` not in registry                                                | Tool error: "Skill '{name}' not found. Use search_skills to find valid names."             |
+| `file_paths` contains a path not listed by `read_skill`                     | Tool error listing the invalid paths, and no file is fetched                               |
+| Argument missing, out of bounds or not declared by the tool                 | Tool error naming the argument                                                             |
+| A skill file fails to download                                              | Tool error: "CDN unavailable or skill integrity check failed. Try again shortly."          |
+| Skill content does not match its checksum                                   | Tool error naming the skill and both checksums                                             |
+| Catalog unavailable on the `/use` prompt or the `skills://catalog` resource | JSON-RPC error `-32603` with "Skill catalog unavailable. Try again shortly."               |
 
 ## 🧪 Development
 
