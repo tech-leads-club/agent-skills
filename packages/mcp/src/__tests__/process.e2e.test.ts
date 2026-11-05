@@ -104,6 +104,22 @@ describe('built server process', () => {
   })
 
   it('returns the catalog unavailable error when the CDN is unreachable', async () => {
+    const hanging = await proxy('hang')
+    const startedAt = Date.now()
+    const server = start('legacy', proxiedEnv(hanging.url))
+    await initializeLegacy(server)
+
+    const response = await server.rpc('tools/call', { name: 'search_skills', arguments: { query: 'react' } })
+    const answeredAfter = Date.now() - startedAt
+    const result = response.result as ToolResult
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toBe('Skill catalog unavailable. Try again shortly.')
+    expect(answeredAfter).toBeGreaterThanOrEqual(5_000)
+    expect(answeredAfter).toBeLessThan(11_500)
+  }, 20_000)
+
+  it('returns the catalog unavailable error at once when the proxy refuses', async () => {
     const refusing = await proxy('refuse')
     const server = start('legacy', proxiedEnv(refusing.url))
     await initializeLegacy(server)
