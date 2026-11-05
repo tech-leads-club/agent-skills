@@ -1,9 +1,14 @@
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import type { Catalog } from '../catalog'
 import { CatalogUnavailableError } from '../catalog'
 import { buildIndexes } from '../registry'
 import { createRegistry } from '../tools/__tests__/helpers'
 import { FetchSkillFilesOutputSchema } from '../tools/fetcher-tool'
 import { ListSkillsOutputSchema } from '../tools/list-tool'
+import { PrepareSkillFilesOutputSchema } from '../tools/prepare-tool'
 import { SearchSkillsOutputSchema } from '../tools/search-tool'
 import { ReadSkillOutputSchema } from '../tools/skill-tool'
 import type { Registry } from '../types'
@@ -247,5 +252,251 @@ describe('fetch_skill_files', () => {
     })
 
     expect(result.isError).toBe(true)
+  })
+})
+
+const TOOLS_0_1_11 = [
+  {
+    name: 'search_skills',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          minLength: 1,
+        },
+      },
+      required: ['query'],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: 'Find Skills by Intent',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: 'list_skills',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        explicit_request: {
+          type: 'boolean',
+          const: true,
+        },
+        description_max_chars: {
+          default: 120,
+          type: 'integer',
+          minimum: 40,
+          maximum: 240,
+        },
+      },
+      required: ['explicit_request'],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: 'Browse Skill Catalog',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
+  },
+  {
+    name: 'read_skill',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        skill_name: {
+          type: 'string',
+        },
+      },
+      required: ['skill_name'],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: 'Read Skill Instructions',
+      readOnlyHint: true,
+      openWorldHint: true,
+    },
+  },
+  {
+    name: 'fetch_skill_files',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        skill_name: {
+          type: 'string',
+        },
+        file_paths: {
+          minItems: 1,
+          maxItems: 5,
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      },
+      required: ['skill_name', 'file_paths'],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: 'Fetch Skill Reference Files',
+      readOnlyHint: true,
+      openWorldHint: true,
+    },
+  },
+  {
+    name: 'prepare_skill_files',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        skill_name: {
+          type: 'string',
+        },
+        file_paths: {
+          minItems: 1,
+          maxItems: 20,
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        dry_run: {
+          type: 'boolean',
+        },
+      },
+      required: ['skill_name'],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: 'Stage Skill Files for Execution',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+]
+
+type ListedTool = { name: string; inputSchema: Record<string, unknown>; outputSchema?: unknown; annotations?: unknown }
+
+async function listTools(): Promise<ListedTool[]> {
+  const client = await connectInProcess(fakeCatalog(skillRegistry, skillFiles))
+  const response = await client.rpc('tools/list')
+  return (response.result?.tools ?? []) as ListedTool[]
+}
+
+describe('tools/list', () => {
+  it('lists the five tools in the 0.1.11 order', async () => {
+    const tools = await listTools()
+
+    expect(tools.map((tool) => tool.name)).toEqual([
+      'search_skills',
+      'list_skills',
+      'read_skill',
+      'fetch_skill_files',
+      'prepare_skill_files',
+    ])
+  })
+
+  it('keeps each tool input and hints from 0.1.11', async () => {
+    const tools = await listTools()
+    const surface = tools.map(({ name, inputSchema, annotations }) => {
+      const schema = { ...inputSchema }
+      delete schema.$schema
+      return { name, inputSchema: schema, annotations }
+    })
+
+    expect(surface).toEqual(TOOLS_0_1_11)
+  })
+
+  it('declares an outputSchema on every tool', async () => {
+    const tools = await listTools()
+
+    for (const tool of tools) {
+      expect(tool.outputSchema).toEqual(expect.objectContaining({ type: 'object' }))
+    }
+  })
+})
+
+describe('prepare_skill_files', () => {
+  let stagingDir: string
+  const previous = process.env.SKILLS_STAGING_DIR
+
+  beforeEach(() => {
+    stagingDir = mkdtempSync(join(tmpdir(), 'mcp-staging-'))
+    process.env.SKILLS_STAGING_DIR = stagingDir
+  })
+
+  afterEach(() => {
+    rmSync(stagingDir, { recursive: true, force: true })
+    if (previous === undefined) delete process.env.SKILLS_STAGING_DIR
+    else process.env.SKILLS_STAGING_DIR = previous
+  })
+
+  it('previews a dry run as structuredContent without writing', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'prepare_skill_files', {
+      skill_name: 'docs-writer',
+      dry_run: true,
+    })
+    const payload = result.structuredContent as { dry_run: boolean; skill_dir: string; files: Array<{ path: string }> }
+
+    expect(PrepareSkillFilesOutputSchema.safeParse(payload).success).toBe(true)
+    expect(payload.dry_run).toBe(true)
+    expect(payload.skill_dir.startsWith(stagingDir)).toBe(true)
+    expect(payload.files.map((file) => file.path)).toEqual(['references/style.md', 'scripts/check.sh'])
+    expect(result.content[0].text).toContain('Dry run — nothing was written.')
+  })
+
+  it('stages the files, links them and reports them as structuredContent', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'prepare_skill_files', {
+      skill_name: 'docs-writer',
+      file_paths: ['scripts/check.sh'],
+    })
+    const payload = result.structuredContent as {
+      dry_run: boolean
+      files: Array<{ path: string; uri: string; written?: boolean }>
+    }
+
+    expect(PrepareSkillFilesOutputSchema.safeParse(payload).success).toBe(true)
+    expect(payload.dry_run).toBe(false)
+    expect(payload.files).toHaveLength(1)
+    expect(payload.files[0].written).toBe(true)
+    expect(result.content.filter((block) => block.type === 'resource_link')).toHaveLength(1)
+    const stagedPath = decodeURIComponent(new URL(payload.files[0].uri).pathname)
+    expect(readFileSync(stagedPath, 'utf8')).toBe('echo ok\n')
+  })
+
+  it('refuses a path read_skill does not list', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'prepare_skill_files', {
+      skill_name: 'docs-writer',
+      file_paths: ['scripts/unknown.sh'],
+    })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Unknown paths')
+  })
+})
+
+describe('structured output', () => {
+  it('returns structuredContent matching the outputSchema of every tool', async () => {
+    const catalog = fakeCatalog(skillRegistry, skillFiles)
+    const calls: Array<[string, Record<string, unknown>, { safeParse: (value: unknown) => { success: boolean } }]> = [
+      ['search_skills', { query: 'docs' }, SearchSkillsOutputSchema],
+      ['list_skills', { explicit_request: true }, ListSkillsOutputSchema],
+      ['read_skill', { skill_name: 'docs-writer' }, ReadSkillOutputSchema],
+      [
+        'fetch_skill_files',
+        { skill_name: 'docs-writer', file_paths: ['references/style.md'] },
+        FetchSkillFilesOutputSchema,
+      ],
+      ['prepare_skill_files', { skill_name: 'docs-writer', dry_run: true }, PrepareSkillFilesOutputSchema],
+    ]
+
+    for (const [name, args, schema] of calls) {
+      const result = await callTool(catalog, name, args)
+
+      expect(result.isError).not.toBe(true)
+      expect(schema.safeParse(result.structuredContent).success).toBe(true)
+    }
   })
 })

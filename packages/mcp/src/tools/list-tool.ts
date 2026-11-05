@@ -8,7 +8,7 @@ const TOOL_DESCRIPTION =
   'Browse the whole catalog, grouped by category.\n' +
   'Only when the user explicitly asks to see every skill. To resolve a task, use search_skills.'
 
-export const ListSkillsParamsSchema = z.object({
+export const ListSkillsParamsSchema = z.strictObject({
   explicit_request: z.literal(true),
   description_max_chars: z.number().int().min(40).max(240).default(120),
 })

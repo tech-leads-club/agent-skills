@@ -35,7 +35,7 @@ export function registerSkillTool(server: McpServer, catalog: Catalog): void {
     'read_skill',
     {
       description: TOOL_DESCRIPTION,
-      inputSchema: z.object({ skill_name: z.string() }),
+      inputSchema: z.strictObject({ skill_name: z.string() }),
       outputSchema: ReadSkillOutputSchema,
       annotations: { title: 'Read Skill Instructions', readOnlyHint: true, openWorldHint: true },
     },

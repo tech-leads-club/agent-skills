@@ -22,7 +22,7 @@ export function registerFetcherTool(server: McpServer, catalog: Catalog): void {
     'fetch_skill_files',
     {
       description: TOOL_DESCRIPTION,
-      inputSchema: z.object({ skill_name: z.string(), file_paths: z.array(z.string()).min(1).max(5) }),
+      inputSchema: z.strictObject({ skill_name: z.string(), file_paths: z.array(z.string()).min(1).max(5) }),
       outputSchema: FetchSkillFilesOutputSchema,
       annotations: { title: 'Fetch Skill Reference Files', readOnlyHint: true, openWorldHint: true },
     },

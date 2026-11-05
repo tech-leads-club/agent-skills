@@ -27,7 +27,7 @@ export function registerSearchTool(server: McpServer, catalog: Catalog): void {
     'search_skills',
     {
       description: TOOL_DESCRIPTION,
-      inputSchema: z.object({ query: z.string().min(1) }),
+      inputSchema: z.strictObject({ query: z.string().min(1) }),
       outputSchema: SearchSkillsOutputSchema,
       annotations: { title: 'Find Skills by Intent', readOnlyHint: true, openWorldHint: false },
     },
