@@ -205,7 +205,7 @@ describe('built server process', () => {
     server.child.kill('SIGTERM')
     const exit = await server.exited
 
-    expect(exit.signal ?? exit.code).not.toBeNull()
+    expect(exit.signal).toBe('SIGTERM')
     expect(exit.at - signalledAt).toBeLessThan(2000)
   })
 
