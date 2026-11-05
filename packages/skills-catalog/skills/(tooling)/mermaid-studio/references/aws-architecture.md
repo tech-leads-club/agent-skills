@@ -359,7 +359,8 @@ C4Container
   'secondaryColor': '#527FFF', 'tertiaryColor': '#DD344C',
   'background': '#ffffff', 'mainBkg': '#FFF8F0',
   'nodeBorder': '#c47600', 'clusterBkg': '#FFF8F0',
-  'clusterBorder': '#d4a574', 'edgeLabelBackground': '#ffffff'
+  'clusterBorder': '#d4a574', 'edgeLabelBackground': '#ffffff',
+  'titleColor': '#1e293b'
 }}}%%
 flowchart LR
     subgraph AWS["AWS Cloud"]
