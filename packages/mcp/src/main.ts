@@ -18,9 +18,12 @@ const handle = serveStdio(() => createServer({ catalog, version }))
 process.stderr.write(`[agent-skills-mcp] ${version} listening on stdio\n`)
 catalog.warm()
 
+const EXIT_GRACE_MS = 1000
+
 const shutdown = () => {
   catalog.close()
   void handle.close()
+  setTimeout(() => process.exit(0), EXIT_GRACE_MS).unref()
 }
 process.stdin.once('end', shutdown)
 process.stdin.once('close', shutdown)

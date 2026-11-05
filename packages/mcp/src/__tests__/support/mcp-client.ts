@@ -98,8 +98,8 @@ export interface SpawnedServer extends RpcClient {
   exited: Promise<{ code: number | null; signal: NodeJS.Signals | null; at: number }>
 }
 
-export function spawnServer(era: Era, env: NodeJS.ProcessEnv): SpawnedServer {
-  const child = spawn(process.execPath, [BUILT_MAIN], { env, stdio: ['pipe', 'pipe', 'pipe'] })
+export function spawnServer(era: Era, env: NodeJS.ProcessEnv, mainPath = BUILT_MAIN): SpawnedServer {
+  const child = spawn(process.execPath, [mainPath], { env, stdio: ['pipe', 'pipe', 'pipe'] })
   const { client, receive } = createRpc((message) => child.stdin.write(`${JSON.stringify(message)}\n`), era)
   let buffer = ''
   let errors = ''
