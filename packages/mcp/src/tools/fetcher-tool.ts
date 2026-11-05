@@ -1,52 +1,48 @@
-import { type FastMCP, UserError } from 'fastmcp'
-import ky from 'ky'
+import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
-import { buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
-import { decodeSkillText, fetchAndVerifySkillFiles } from '../integrity'
-import type { Indexes } from '../types'
-import { buildReferenceFilesOutput, getInvalidReferencePaths } from './core/fetcher'
+import type { Catalog } from '../catalog'
+import { decodeSkillText } from '../integrity'
+import { buildReferenceFilesOutput, getInvalidReferencePaths, selectReferenceFiles } from './core/fetcher'
+import { readVerifiedSkill } from './skill-tool'
 
 const TOOL_DESCRIPTION = `Step 3, for files the instructions tell you to READ (typically references/). Returns their text.
 Input: skill_name + up to 5 paths from read_skill's list. Never invent a path.
 Oversized responses are truncated and name what was left out — ask for fewer paths.
 For files the instructions tell you to RUN, use prepare_skill_files instead.`
 
-export function registerFetcherTool(server: FastMCP, getIndexes: () => Indexes): void {
-  server.addTool({
-    name: 'fetch_skill_files',
-    description: TOOL_DESCRIPTION,
-    parameters: z.object({ skill_name: z.string(), file_paths: z.array(z.string()).min(1).max(5) }),
-    annotations: { title: 'Fetch Skill Reference Files', readOnlyHint: true, openWorldHint: true },
-    execute: async (args) => {
-      const skill = getIndexes().map.get(args.skill_name)
-      if (!skill) throw new UserError(`Skill '${args.skill_name}' not found.`)
+export const FetchSkillFilesOutputSchema = z.object({
+  skill_name: z.string(),
+  files: z.array(z.object({ path: z.string(), text: z.string(), truncated: z.boolean() })),
+  omitted: z.array(z.string()),
+})
 
-      const invalidPaths = getInvalidReferencePaths(skill, args.file_paths)
+export function registerFetcherTool(server: McpServer, catalog: Catalog): void {
+  server.registerTool(
+    'fetch_skill_files',
+    {
+      description: TOOL_DESCRIPTION,
+      inputSchema: z.object({ skill_name: z.string(), file_paths: z.array(z.string()).min(1).max(5) }),
+      outputSchema: FetchSkillFilesOutputSchema,
+      annotations: { title: 'Fetch Skill Reference Files', readOnlyHint: true, openWorldHint: true },
+    },
+    async ({ skill_name, file_paths }) => {
+      const skill = await catalog.get(skill_name)
+      if (!skill) throw new Error(`Skill '${skill_name}' not found. Use search_skills to find valid names.`)
 
+      const invalidPaths = getInvalidReferencePaths(skill, file_paths)
       if (invalidPaths.length > 0) {
-        throw new UserError(
-          `Invalid paths: [${invalidPaths.join(', ')}]. Only paths from read_skill are valid references.`,
-        )
+        throw new Error(`Invalid paths: [${invalidPaths.join(', ')}]. Only paths from read_skill are valid references.`)
       }
 
-      try {
-        const cdnRef = await resolveCdnRef()
-        const skillsBaseUrl = buildSkillsBaseUrl(cdnRef)
-        // why: verify the whole skill set before returning any reference bytes
-        const verified = await fetchAndVerifySkillFiles(skill, skillsBaseUrl, async (url) => {
-          return new Uint8Array(await ky.get(url).arrayBuffer())
-        })
-        const asText = new Map([...verified].map(([filePath, bytes]) => [filePath, decodeSkillText(bytes)]))
+      const { files } = await readVerifiedSkill(catalog, skill_name)
+      const asText = new Map([...files].map(([filePath, bytes]) => [filePath, decodeSkillText(bytes)]))
+      const { files: selected, omitted } = selectReferenceFiles(file_paths, asText)
 
-        return buildReferenceFilesOutput(args.file_paths, asText)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        if (message.includes('Checksum mismatch')) {
-          throw new UserError(message)
-        }
-        throw new UserError('CDN unavailable or skill integrity check failed. Try again shortly.')
+      return {
+        content: [{ type: 'text', text: buildReferenceFilesOutput(file_paths, asText) }],
+        structuredContent: { skill_name, files: selected, omitted },
       }
     },
-  })
+  )
 }

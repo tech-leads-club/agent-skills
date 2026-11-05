@@ -2,6 +2,7 @@ import type { Catalog } from '../catalog'
 import { CatalogUnavailableError } from '../catalog'
 import { buildIndexes } from '../registry'
 import { createRegistry } from '../tools/__tests__/helpers'
+import { FetchSkillFilesOutputSchema } from '../tools/fetcher-tool'
 import { ListSkillsOutputSchema } from '../tools/list-tool'
 import { SearchSkillsOutputSchema } from '../tools/search-tool'
 import { ReadSkillOutputSchema } from '../tools/skill-tool'
@@ -200,5 +201,51 @@ describe('read_skill', () => {
 
     expect(result.isError).toBe(true)
     expect(result.content[0].text).toBe("Checksum mismatch for skill 'docs-writer': expected a, got b.")
+  })
+})
+
+describe('fetch_skill_files', () => {
+  it('returns the 0.1.11 text and the files as structuredContent', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'fetch_skill_files', {
+      skill_name: 'docs-writer',
+      file_paths: ['references/style.md'],
+    })
+
+    expect(result.content[0].text).toBe('## references/style.md\n\n# Style\n')
+    expect(result.structuredContent).toEqual({
+      skill_name: 'docs-writer',
+      files: [{ path: 'references/style.md', text: '# Style\n', truncated: false }],
+      omitted: [],
+    })
+    expect(FetchSkillFilesOutputSchema.safeParse(result.structuredContent).success).toBe(true)
+  })
+
+  it('refuses a path read_skill does not list', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'fetch_skill_files', {
+      skill_name: 'docs-writer',
+      file_paths: ['../../etc/passwd'],
+    })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Invalid paths: [../../etc/passwd]')
+  })
+
+  it('returns isError naming search_skills for an unknown skill', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'fetch_skill_files', {
+      skill_name: 'nope',
+      file_paths: ['references/style.md'],
+    })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('search_skills')
+  })
+
+  it('refuses more than 5 paths', async () => {
+    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'fetch_skill_files', {
+      skill_name: 'docs-writer',
+      file_paths: ['a', 'b', 'c', 'd', 'e', 'f'],
+    })
+
+    expect(result.isError).toBe(true)
   })
 })

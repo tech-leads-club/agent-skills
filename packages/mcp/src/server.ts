@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/server'
 
 import type { Catalog } from './catalog'
 import { CACHE_TTL_MS } from './constants'
+import { registerFetcherTool } from './tools/fetcher-tool'
 import { registerListTool } from './tools/list-tool'
 import { registerSearchTool } from './tools/search-tool'
 import { registerSkillTool } from './tools/skill-tool'
@@ -34,6 +35,7 @@ export function createServer(deps: { catalog: Catalog; version: string }): McpSe
   registerSearchTool(server, deps.catalog)
   registerListTool(server, deps.catalog)
   registerSkillTool(server, deps.catalog)
+  registerFetcherTool(server, deps.catalog)
 
   return server
 }
