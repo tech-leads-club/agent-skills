@@ -154,10 +154,26 @@ const skillFiles = {
 
 describe('read_skill', () => {
   it('returns isError naming search_skills for an unknown skill', async () => {
-    const result = await callTool(fakeCatalog(skillRegistry, skillFiles), 'read_skill', { skill_name: 'nope' })
+    const calls: Array<[string, Record<string, unknown>]> = [
+      ['read_skill', { skill_name: 'nope' }],
+      ['fetch_skill_files', { skill_name: 'nope', file_paths: ['references/style.md'] }],
+      ['prepare_skill_files', { skill_name: 'nope' }],
+      ['prepare_skill_files', { skill_name: 'nope', dry_run: true }],
+    ]
+
+    for (const [name, args] of calls) {
+      const result = await callTool(fakeCatalog(skillRegistry, skillFiles), name, args)
+
+      expect({ name, isError: result.isError }).toEqual({ name, isError: true })
+      expect(result.content[0].text).toContain('search_skills')
+    }
+  })
+
+  it('rejects an argument the input schema does not declare, as a tool error', async () => {
+    const result = await callTool(fakeCatalog(sampleRegistry), 'search_skills', { query: 'react', limit: 3 })
 
     expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('search_skills')
+    expect(result.content[0].text).toContain('limit')
   })
 
   it('returns the instructions without frontmatter and the bundled files as structuredContent', async () => {
