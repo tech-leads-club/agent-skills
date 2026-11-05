@@ -78,6 +78,8 @@ Write every acceptance criterion in **EARS** (Easy Approach to Requirements Synt
 
 **Rules:** one requirement per criterion (never bundle two behaviors); use concrete values (a specific status code, a specific message, a bound) rather than "quickly" or "gracefully"; every criterion contains a SHALL and is measurable. `python3 <skill-dir>/scripts/validate_spec.py` flags any criterion without a SHALL and any that matches no recognized pattern.
 
+**Retirement is not a criterion.** A note that describes what this change removes (a phrase, a path, a test title, or a file name) is not an acceptance criterion and gets no check. The proof that lasts is the behavior that remains.
+
 ### 4. Screens and their design
 
 Skip this step when the feature puts no screen in front of a user.

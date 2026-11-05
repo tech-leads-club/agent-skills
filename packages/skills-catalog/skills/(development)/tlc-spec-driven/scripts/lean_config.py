@@ -17,7 +17,12 @@ RUN_RE = re.compile(r"^\**\s*Run\s+([\w-]+)\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUN_PROOF_RE = re.compile(r"^run\s+([\w-]+)\s*\|\s*(.*)$", re.IGNORECASE)
 BINDING_RE = re.compile(r"(?<![-\w])binding\b", re.IGNORECASE)
 NOT_BINDING_RE = re.compile(r"\b(non|not)[- ]binding\b", re.IGNORECASE)
-CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
+# A capture is the screenshot a criterion says to compare, under captures/.
+# An image path in a prohibition, such as `/home/abertura.jpg`, is not one.
+CAPTURE_RE = re.compile(
+    r"`((?:[^`\s]+/)?captures/[^`\s]+\.(?:png|jpe?g|webp|gif))`",
+    re.IGNORECASE,
+)
 SCREEN_CRITERION_RE = re.compile(r"\bSHALL\s+(?:NOT\s+)?(?:show|display|render|hide)\b", re.IGNORECASE)
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*`?browser\b", re.IGNORECASE)
 CRITERION_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
@@ -101,8 +106,8 @@ def plan_criteria(plan_lines):
 def plan_has_screen(plan_lines, checks_lines=()):
     """True when the feature puts a screen in front of a user.
 
-    A criterion that cites a capture or says the system SHALL show, display, render or hide
-    something is a screen criterion; so is a `browser` proof in checks.md.
+    A criterion that cites a capture under `captures/` or says the system SHALL show, display,
+    render or hide something is a screen criterion; so is a `browser` proof in checks.md.
     """
     for text in plan_criteria(plan_lines):
         if CAPTURE_RE.search(text) or SCREEN_CRITERION_RE.search(text):
@@ -111,8 +116,8 @@ def plan_has_screen(plan_lines, checks_lines=()):
 
 
 def plan_owes_pictures(plan_lines, checks_lines=()):
-    """True when the feature owes running pictures: a criterion cites a capture, or a check is
-    proven in the browser. A screen state no capture draws is proven by a test or a walk."""
+    """True when the feature owes running pictures: a criterion cites a capture under `captures/`,
+    or a check is proven in the browser. A screen state no capture draws is proven by a test or a walk."""
     if any(CAPTURE_RE.search(text) for text in plan_criteria(plan_lines)):
         return True
     return any(PROOF_RE.match(s.strip()) for s in checks_lines)

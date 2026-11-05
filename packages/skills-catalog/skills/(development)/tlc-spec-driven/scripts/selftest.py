@@ -185,6 +185,7 @@ CASES = [
 
 LAST_AC = "7. IF a delivery carries no valid provider signature THEN the system SHALL return `401` and persist nothing\n"
 SHOW_AC = "9. WHEN a member opens Billing THEN the system SHALL show `Card declined` above the plans\n"
+PROHIBITED_IMAGE_AC = "8. The system SHALL NOT open `/home/abertura.jpg`\n"
 
 
 def write_artifact(path, content):
@@ -214,6 +215,10 @@ def png(width, height):
 
 def with_screen(s):
     return s.replace(LAST_AC, LAST_AC + SHOW_AC, 1)
+
+
+def with_prohibited_image(s):
+    return s.replace(LAST_AC, LAST_AC + PROHIBITED_IMAGE_AC, 1)
 
 
 def with_binding_bare(s):
@@ -437,6 +442,9 @@ NEGATIVE_CONTROLS = [
       RUNNING: lambda s: png(1024, 839)}),
     ("validate_verification", "a screen no capture draws owes no picture and no screens.md",
      {"plan.md": with_screen}),
+    ("validate_verification", "an image path in a prohibition criterion is not a capture",
+     {"plan.md": with_prohibited_image},
+     "screens.md"),
     ("validate_verification", "proofs.md green and no finding is accepted",
      {"verification.md": lambda s: s.split("## Findings")[0] + "## Findings\n\nNone - every rule probed held\n"}),
     ("validate_verification", "a browser proof whose screenshot exists is accepted",

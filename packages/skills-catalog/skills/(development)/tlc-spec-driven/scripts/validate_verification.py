@@ -36,7 +36,7 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, unapproved
+from lean_config import CAPTURE_RE, _section, checks_file, plan_file, plan_marks_binding, plan_owes_pictures, unapproved
 
 PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
@@ -44,7 +44,6 @@ BROWSER_PROOF_RE = re.compile(r"^`?browser\b", re.IGNORECASE)
 WALK_PROOF_RE = re.compile(r"^`?walk\b", re.IGNORECASE)
 WALKED_RE = re.compile(r"^\s*[-*]?\s*\**walked\**\s*:", re.IGNORECASE)
 SHOT_RE = re.compile(r"[\w./-]+\.running\.png")
-CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 ROUND_RE = re.compile(r"^\**\s*Round\s*\**\s*:\s*\**\s*(\d+)", re.IGNORECASE)
 MAX_ROUNDS = 2
 

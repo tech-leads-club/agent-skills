@@ -148,6 +148,7 @@ Proof: `npx playwright test e2e/checkout.spec.ts -g "suspended account"`
   test gets a `Run` line and a `run` proof. A suite going green settles no single claim.
 - **Runs go one at a time.** `check_proofs.py` never runs two groups or lone proofs side by side, so
   tests that share a database or a port stay safe; a group's own parallelism is the project's.
+- **Retirement is not a check.** A note that describes what this change removes (a phrase, a path, a test title, or a file name) is not an acceptance criterion and gets no check. The proof that lasts is the behavior that remains.
 - **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png`
   (see [implement.md](implement.md), Walk). A state no capture draws is proven by a test, or by
   `Proof: walk - <what the visit shows>`.

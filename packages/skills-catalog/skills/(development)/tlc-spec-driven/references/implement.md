@@ -159,6 +159,7 @@ After the gate check passes:
    - **Not shallow.** An assertion is shallow if it would still pass under a plausible *wrong* implementation: tautologies, "no error thrown" as the only assertion (unless that IS the spec), call counts or spies where the criterion demands the resulting state, happy path only when the task lists edge cases. For a payload (event, returned object, persisted record), assert each field the spec names.
    - **Every test traces to the spec.** Each maps to a spec AC, a listed edge case or a "Done when" criterion. Remove speculative tests and tests of framework or library behaviour.
    - **The check's proof selects it.** The `Proof:` line of each check this task settles, in tasks.md `## Checks`, names this test with a filter that selects it.
+   - **Replacing an old test is this task's diff.** Do not add a test whose only job is to re-read a file and assert that an old title, phrase, or path stays absent. The proof that lasts is the behavior that remains.
 
    **Anti-patterns - known verification cheats (any of these fails the self-check):**
 
@@ -168,6 +169,7 @@ After the gate check passes:
    | Asserting call count / spy invocation instead of the resulting state | Proves the method ran, not that it did the right thing |
    | Weakening an assertion (making it less specific) to force a pass | Moves the goalposts instead of fixing the code |
    | Deleting or skipping a test to make the suite pass | Destroys coverage permanently; a failing test is a signal, not noise |
+   | A test that only asserts a removed title, phrase, or path stays absent | The swap of the old tests is the task diff; absence of a retired literal is not proof |
    | Speculative "what if" tests with no spec anchor | Expands scope beyond the ceiling |
    | Testing framework or library behavior | Tests a dependency, not the feature |
 
