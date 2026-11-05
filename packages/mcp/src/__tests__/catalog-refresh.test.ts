@@ -122,6 +122,7 @@ describe('catalog version refresh', () => {
     const names = await namesAfterRefresh(catalog)
 
     expect(names).toEqual(['alpha-skill'])
+    expect(network.calls.filter((call) => call.url === DIST_TAGS_URL).length).toBeGreaterThanOrEqual(2)
   })
 
   it('revalidates with If-None-Match while the dist-tag is unchanged', async () => {

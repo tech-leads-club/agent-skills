@@ -47,6 +47,10 @@ describe('MCP dependency versions', () => {
       'fast-uri': '3.1.9',
     }
 
+    expect(installedVersions('hono').length).toBeGreaterThan(0)
+    expect(installedVersions('undici').length).toBeGreaterThan(0)
+    expect(installedVersions('fast-uri').length).toBeGreaterThan(0)
+
     const vulnerable = Object.entries(minimums).flatMap(([name, minimum]) =>
       installedVersions(name)
         .filter((version) => !atLeast(version, minimum))
