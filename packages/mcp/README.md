@@ -277,13 +277,15 @@ A global install does not update itself. Run `npm i -g @tech-leads-club/agent-sk
 
 ## ⚡ Caching
 
-The registry is fetched from [jsDelivr CDN](https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills-registry.json) and cached in memory:
+The server reads the catalog from the [`@tech-leads-club/skills-catalog`](https://www.npmjs.com/package/@tech-leads-club/skills-catalog) npm package, served by [jsDelivr](https://www.jsdelivr.com/package/npm/@tech-leads-club/skills-catalog) at an exact version (`…/skills-catalog@<version>/skills-registry.json`), and caches it in memory:
 
+- **Catalog version:** taken from the npm dist-tag `latest`, and checked again every 15 minutes. When a new version is published, the next refresh switches to it, so a long-running server picks it up without a restart. Set `SKILLS_CDN_REF` to pin a version instead.
+- **Consistent reads:** a skill's files always come from the same catalog version as the registry entry that listed it.
 - **Startup:** the server answers the MCP handshake at once and loads the registry in the background. Tools wait for that load for up to 10 seconds.
 - **Cold start retry:** 3 retries with exponential backoff within that window. If the load still fails, the tool returns an error and the next tool call starts a new load.
 - **TTL:** 15 minutes. Within it, tools use the cached registry with no network call.
-- **ETag revalidation:** once the TTL expires, tools keep serving the cached registry while it is revalidated in the background with `If-None-Match`. A `304 Not Modified` keeps the current data.
-- **Stale fallback:** if the revalidation fails, the cached registry keeps serving.
+- **ETag revalidation:** once the TTL expires, tools keep serving the cached registry while it is refreshed in the background. If the version is unchanged, the registry is revalidated with `If-None-Match`, and a `304 Not Modified` keeps the current data.
+- **Stale fallback:** if the version lookup or the revalidation fails, the cached registry keeps serving.
 - All cache events are logged to `stderr` (never `stdout`, which is reserved for JSON-RPC).
 
 ## 🔒 Error Reference

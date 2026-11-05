@@ -34,4 +34,12 @@ describe('README', () => {
     expect(codex).toContain('[mcp_servers.agent-skills]')
     expect(codex).toContain('command = "agent-skills-mcp"')
   })
+
+  it('documents the catalog version refresh', () => {
+    const caching = section('## ⚡ Caching')
+
+    expect(caching).toContain('npm dist-tag `latest`')
+    expect(caching).toContain('checked again every 15 minutes')
+    expect(caching).not.toContain('@latest/packages/skills-catalog')
+  })
 })
