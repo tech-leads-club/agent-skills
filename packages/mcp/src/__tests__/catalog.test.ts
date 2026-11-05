@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals'
 
 import { CATALOG_LOAD_TIMEOUT_MS, type CatalogDeps, CatalogUnavailableError, createCatalog } from '../catalog'
+import type { RegistrySnapshot } from '../registry'
 import { createRegistry } from '../tools/__tests__/helpers'
-import type { Registry } from '../types'
 
 const registryA = createRegistry([{ name: 'alpha-skill', description: 'Alpha skill for tests.' }])
 const registryB = createRegistry([
@@ -18,7 +18,7 @@ describe('createCatalog', () => {
   })
 
   it('fails with CatalogUnavailableError when the registry does not load within the timeout', async () => {
-    const catalog = createCatalog({ loadRegistry: () => never<Registry>(), timeoutMs: 30 })
+    const catalog = createCatalog({ loadRegistry: () => never<RegistrySnapshot>(), timeoutMs: 30 })
 
     const result = catalog.list()
 
@@ -34,9 +34,9 @@ describe('createCatalog', () => {
 
   it('requests the registry again on the next call after a failed load', async () => {
     const loadRegistry = jest
-      .fn<(signal: AbortSignal) => Promise<Registry>>()
+      .fn<CatalogDeps['loadRegistry']>()
       .mockRejectedValueOnce(new Error('ECONNREFUSED'))
-      .mockResolvedValueOnce(registryA)
+      .mockResolvedValueOnce({ data: registryA })
     const catalog = createCatalog({ loadRegistry })
 
     await expect(catalog.list()).rejects.toBeInstanceOf(CatalogUnavailableError)
@@ -47,7 +47,7 @@ describe('createCatalog', () => {
   })
 
   it('lets a call join the load that warm started', async () => {
-    const loadRegistry = jest.fn<(signal: AbortSignal) => Promise<Registry>>().mockResolvedValue(registryA)
+    const loadRegistry = jest.fn<CatalogDeps['loadRegistry']>().mockResolvedValue({ data: registryA })
     const catalog = createCatalog({ loadRegistry })
 
     catalog.warm()
@@ -58,7 +58,7 @@ describe('createCatalog', () => {
   })
 
   it('starts a new load on the next call when the warm load failed', async () => {
-    const loadRegistry = jest.fn<(signal: AbortSignal) => Promise<Registry>>().mockRejectedValue(new Error('offline'))
+    const loadRegistry = jest.fn<CatalogDeps['loadRegistry']>().mockRejectedValue(new Error('offline'))
     const catalog = createCatalog({ loadRegistry })
 
     catalog.warm()
@@ -71,9 +71,9 @@ describe('createCatalog', () => {
   it('serves the current data at once and refreshes in the background after the TTL', async () => {
     let now = 1_000
     const loadRegistry = jest
-      .fn<(signal: AbortSignal) => Promise<Registry>>()
-      .mockResolvedValueOnce(registryA)
-      .mockImplementationOnce(() => never<Registry>())
+      .fn<CatalogDeps['loadRegistry']>()
+      .mockResolvedValueOnce({ data: registryA })
+      .mockImplementationOnce(() => never<RegistrySnapshot>())
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
     await catalog.list()
@@ -87,9 +87,9 @@ describe('createCatalog', () => {
   it('switches to the refreshed registry once the background refresh lands', async () => {
     let now = 1_000
     const loadRegistry = jest
-      .fn<(signal: AbortSignal) => Promise<Registry>>()
-      .mockResolvedValueOnce(registryA)
-      .mockResolvedValueOnce(registryB)
+      .fn<CatalogDeps['loadRegistry']>()
+      .mockResolvedValueOnce({ data: registryA })
+      .mockResolvedValueOnce({ data: registryB })
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
     await catalog.list()
@@ -103,8 +103,8 @@ describe('createCatalog', () => {
   it('keeps the current data when the background refresh fails', async () => {
     let now = 1_000
     const loadRegistry = jest
-      .fn<(signal: AbortSignal) => Promise<Registry>>()
-      .mockResolvedValueOnce(registryA)
+      .fn<CatalogDeps['loadRegistry']>()
+      .mockResolvedValueOnce({ data: registryA })
       .mockRejectedValueOnce(new Error('offline'))
     const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
 
@@ -121,7 +121,7 @@ describe('createCatalog', () => {
     const catalog = createCatalog({
       loadRegistry: (signal) => {
         received = signal
-        return never<Registry>()
+        return never<RegistrySnapshot>()
       },
     })
 
@@ -133,7 +133,7 @@ describe('createCatalog', () => {
   })
 
   it('searches the loaded index', async () => {
-    const catalog = createCatalog({ loadRegistry: () => Promise.resolve(registryB) })
+    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB }) })
 
     const results = await catalog.search('beta', 5)
 
@@ -141,7 +141,7 @@ describe('createCatalog', () => {
   })
 
   it('returns the whole registry', async () => {
-    const catalog = createCatalog({ loadRegistry: () => Promise.resolve(registryB) })
+    const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB }) })
 
     await expect(catalog.registry()).resolves.toBe(registryB)
   })
@@ -150,7 +150,7 @@ describe('createCatalog', () => {
     const fetchBytes = jest.fn<(url: string) => Promise<Uint8Array>>()
     const verify = jest.fn<CatalogDeps['verifyFiles']>().mockResolvedValue(new Map([['SKILL.md', new Uint8Array([1])]]))
     const catalog = createCatalog({
-      loadRegistry: () => Promise.resolve(registryA),
+      loadRegistry: () => Promise.resolve({ data: registryA }),
       skillsBaseUrl: () => Promise.resolve('https://cdn.test/skills/'),
       fetchBytes,
       verifyFiles: verify,
@@ -161,5 +161,27 @@ describe('createCatalog', () => {
 
     expect(verify).toHaveBeenCalledWith(skill, 'https://cdn.test/skills/', fetchBytes)
     expect(files.get('SKILL.md')).toEqual(new Uint8Array([1]))
+  })
+})
+
+describe('createCatalog revalidation', () => {
+  it('passes the current snapshot to the refresh and keeps the index when it comes back unchanged', async () => {
+    let now = 1_000
+    const first = { data: registryA, etag: '"v1"' }
+    const loadRegistry = jest
+      .fn<CatalogDeps['loadRegistry']>()
+      .mockResolvedValueOnce(first)
+      .mockImplementationOnce(async (_signal, previous) => previous ?? first)
+    const catalog = createCatalog({ loadRegistry, ttlMs: 100, now: () => now })
+
+    const before = await catalog.search('alpha', 5)
+    now += 101
+    await catalog.list()
+    await new Promise((resolve) => setImmediate(resolve))
+    const after = await catalog.search('alpha', 5)
+
+    expect(loadRegistry.mock.calls[0][1]).toBeNull()
+    expect(loadRegistry.mock.calls[1][1]).toBe(first)
+    expect(after).toEqual(before)
   })
 })

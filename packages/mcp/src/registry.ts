@@ -3,8 +3,7 @@ import ky from 'ky'
 import { z } from 'zod'
 
 import { buildRegistryUrl, resolveCdnRef } from './cdn'
-import { CACHE_TTL_MS } from './constants'
-import type { Indexes, IndexSkill, Registry, RegistryCache, SkillEntry } from './types'
+import type { Indexes, IndexSkill, Registry, SkillEntry } from './types'
 
 import { extractTriggers } from './utils'
 
@@ -28,63 +27,46 @@ const RegistrySchema = z.object({
     .optional(),
 })
 
-let cache: RegistryCache | null = null
+export type RegistrySnapshot = { data: Registry; etag?: string }
 
 async function getRegistryUrl(signal?: AbortSignal): Promise<string> {
   const cdnRef = await resolveCdnRef(signal)
   return buildRegistryUrl(cdnRef)
 }
 
-export async function getRegistry(signal?: AbortSignal): Promise<Registry> {
-  const now = Date.now()
+async function parseRegistry(response: Response): Promise<RegistrySnapshot> {
+  const etag = response.headers.get('etag') ?? undefined
+  const raw = RegistrySchema.parse(await response.json())
+  return { data: { ...raw, deprecated: raw.deprecated ?? [] }, etag }
+}
+
+/**
+ * Fetches the registry. With a previous snapshot it revalidates by ETag, and a
+ * `304 Not Modified` returns that same snapshot object.
+ */
+export async function fetchRegistry(
+  previous: RegistrySnapshot | null,
+  signal?: AbortSignal,
+): Promise<RegistrySnapshot> {
   const registryUrl = await getRegistryUrl(signal)
 
-  if (cache !== null && now - cache.fetchedAt < CACHE_TTL_MS) {
-    process.stderr.write('[registry] cache hit (within TTL)\n')
-    return cache.data
-  }
-
-  if (cache !== null) {
-    process.stderr.write('[registry] cache TTL expired, attempting conditional fetch\n')
-    try {
-      const headers: Record<string, string> = {}
-      if (cache.etag !== undefined) headers['If-None-Match'] = cache.etag
-
-      const response = await ky.get(registryUrl, { headers, throwHttpErrors: false, signal })
-
-      if (response.status === 304) {
-        process.stderr.write('[registry] 304 Not Modified — refreshing fetchedAt\n')
-        cache = { ...cache, fetchedAt: now }
-        return cache.data
-      }
-
-      if (response.status === 200) {
-        const etag = response.headers.get('etag') ?? undefined
-        const raw = RegistrySchema.parse(await response.json())
-        const data: Registry = { ...raw, deprecated: raw.deprecated ?? [] }
-        process.stderr.write('[registry] 200 — updated cache with new data\n')
-        cache = { data, etag, fetchedAt: now }
-        return cache.data
-      }
-
-      process.stderr.write(`[registry] unexpected status ${response.status} — returning stale cache\n`)
-      cache = { ...cache, fetchedAt: now }
-      return cache.data
-    } catch (err) {
-      process.stderr.write(`[registry] CDN failure (stale cache available): ${String(err)}\n`)
-      return cache.data
+  if (previous) {
+    const headers: Record<string, string> = previous.etag ? { 'If-None-Match': previous.etag } : {}
+    const response = await ky.get(registryUrl, { headers, throwHttpErrors: false, signal })
+    if (response.status === 304) {
+      process.stderr.write('[registry] 304 Not Modified\n')
+      return previous
     }
+    if (response.status !== 200) throw new Error(`[registry] refresh failed with status ${response.status}`)
+    process.stderr.write('[registry] 200 - registry updated\n')
+    return parseRegistry(response)
   }
 
   process.stderr.write('[registry] cold start fetch\n')
   const response = await ky.get(registryUrl, { retry: { limit: 3 }, throwHttpErrors: false, signal })
   if (response.status !== 200) throw new Error(`[registry] cold start fetch failed with status ${response.status}`)
-  const etag = response.headers.get('etag') ?? undefined
-  const raw = RegistrySchema.parse(await response.json())
-  const data: Registry = { ...raw, deprecated: raw.deprecated ?? [] }
-  cache = { data, etag, fetchedAt: now }
   process.stderr.write('[registry] cold start fetch complete\n')
-  return cache.data
+  return parseRegistry(response)
 }
 
 export function buildIndexes(registry: Registry): Indexes {

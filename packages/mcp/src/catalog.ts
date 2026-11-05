@@ -4,7 +4,7 @@ import ky from 'ky'
 import { buildSkillsBaseUrl, resolveCdnRef } from './cdn'
 import { CACHE_TTL_MS } from './constants'
 import { fetchAndVerifySkillFiles } from './integrity'
-import { buildIndexes, getRegistry } from './registry'
+import { type RegistrySnapshot, buildIndexes, fetchRegistry } from './registry'
 import type { Indexes, IndexSkill, Registry, SkillEntry } from './types'
 
 export const CATALOG_LOAD_TIMEOUT_MS = 10_000
@@ -27,7 +27,7 @@ export interface Catalog {
 }
 
 export interface CatalogDeps {
-  loadRegistry: (signal: AbortSignal) => Promise<Registry>
+  loadRegistry: (signal: AbortSignal, previous: RegistrySnapshot | null) => Promise<RegistrySnapshot>
   skillsBaseUrl: () => Promise<string>
   fetchBytes: (url: string) => Promise<Uint8Array>
   verifyFiles: typeof fetchAndVerifySkillFiles
@@ -36,10 +36,10 @@ export interface CatalogDeps {
   now: () => number
 }
 
-type Snapshot = { registry: Registry; indexes: Indexes; loadedAt: number }
+type Snapshot = { source: RegistrySnapshot; indexes: Indexes; loadedAt: number }
 
 const defaultDeps: CatalogDeps = {
-  loadRegistry: (signal) => getRegistry(signal),
+  loadRegistry: (signal, previous) => fetchRegistry(previous, signal),
   skillsBaseUrl: async () => buildSkillsBaseUrl(await resolveCdnRef()),
   fetchBytes: async (url) => new Uint8Array(await ky.get(url).arrayBuffer()),
   verifyFiles: fetchAndVerifySkillFiles,
@@ -57,9 +57,9 @@ export function createCatalog(overrides: Partial<CatalogDeps> = {}): Catalog {
   function load(): Promise<Snapshot> {
     if (loading) return loading
     const signal = AbortSignal.any([lifetime.signal, AbortSignal.timeout(deps.timeoutMs)])
-    const attempt = untilAborted(deps.loadRegistry(signal), signal).then((registry) => {
-      const indexes = registry === snapshot?.registry ? snapshot.indexes : buildIndexes(registry)
-      snapshot = { registry, indexes, loadedAt: deps.now() }
+    const attempt = untilAborted(deps.loadRegistry(signal, snapshot?.source ?? null), signal).then((source) => {
+      const indexes = source === snapshot?.source ? snapshot.indexes : buildIndexes(source.data)
+      snapshot = { source, indexes, loadedAt: deps.now() }
       return snapshot
     })
     loading = attempt
@@ -95,7 +95,7 @@ export function createCatalog(overrides: Partial<CatalogDeps> = {}): Catalog {
     list: async () => [...(await current()).indexes.map.values()],
     get: async (name) => (await current()).indexes.map.get(name),
     search: async (query, limit) => (await current()).indexes.fuse.search(query).slice(0, limit),
-    registry: async () => (await current()).registry,
+    registry: async () => (await current()).source.data,
     read: async (skill) => deps.verifyFiles(skill, await deps.skillsBaseUrl(), deps.fetchBytes),
   }
 }
