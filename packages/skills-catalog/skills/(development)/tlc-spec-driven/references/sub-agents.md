@@ -26,7 +26,9 @@ A phase over 10 tasks fails `validate_tasks.py`. Split it at a real dependency s
 
 When the user declines, or the feature fits one batch, run inline.
 
-**What a worker receives:** the task definitions of every phase in its batch. It also gets the Test Coverage Matrix and the Gate Check Commands. It gets [coding-principles.md](coding-principles.md) and the spec and design parts it needs.
+**What a worker receives:** [coding-principles.md](coding-principles.md) and the slice of its batch, pasted into the prompt. Run `python3 <skill-dir>/scripts/slice_task.py <feature> <every task of the batch>`. The slice holds the tasks and their checks, the criteria they name, and the design components their files build. It adds the parts of the plan every task needs. Nobody picks the parts by hand.
+
+**A gap in the slice is a gap in the plan.** The worker reads the code freely, but not the full plan files. When the slice lacks what a task needs, the worker stops with Blocked, Tried and Need. It names what is missing. The fix goes into the plan, so the next slice carries it.
 
 **What a worker does:** it runs every task of its batch in order. Each task goes through the full cycle in [implement.md](implement.md). It never spawns a sub-agent. Then it reports:
 

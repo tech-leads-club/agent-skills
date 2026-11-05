@@ -21,6 +21,8 @@ Every task runs the same cycle: plan, test, implement, gate, commit. Verificatio
 
 Take the next open task in order, or the one the user names. Its `**Depends on**:` tasks are done. When one is not, do it first.
 
+Then read its slice: `python3 <skill-dir>/scripts/slice_task.py <feature> <Tn>`. It replaces `spec.md`, `design.md` and `tasks.md` for this task. It refuses a plan that is not approved or changed since, so a slice is always the approved plan. A Medium feature has no `tasks.md`, so it works from the spec.
+
 ### 2. State the Plan in Three Lines
 
 ```

@@ -119,12 +119,13 @@ Load only what the current step needs:
 - `.specs/STATE.md` Decisions at Specify and Design, and again on resume. Its Handoff on resume only.
 - Confirmed lessons at Specify and Design: `python3 <skill-dir>/scripts/lessons.py list --status confirmed` ([lessons.md](references/lessons.md)).
 - `spec.md`, `context.md`, `design.md` and `tasks.md` when the step works from them.
+- During Execute, a task reads its slice instead: `slice_task.py <feature> <Tn>` prints the part of the plan the task names.
 
 Never load several feature specs or several architecture documents at once.
 
 ## Sub-Agent Delegation
 
-**Batch workers.** `python3 <skill-dir>/scripts/plan_batches.py <feature>` packs whole phases into batches of about 7 tasks. One batch runs inline. More than one batch means you offer one worker per batch, and you wait for the user to accept. Batches run in order, and workers never spawn sub-agents.
+**Batch workers.** `python3 <skill-dir>/scripts/plan_batches.py <feature>` packs whole phases into batches of about 7 tasks. One batch runs inline. More than one batch means you offer one worker per batch, and you wait for the user to accept. Batches run in order, and workers never spawn sub-agents. Each worker gets the slice of its batch from `slice_task.py`.
 
 **Plan reviewer.** It always runs when `design.md` exists, before Tasks, and nobody needs to ask for it. Write `**Reviewed**: dispatched` in design.md before you send it ([review.md](references/review.md)).
 
