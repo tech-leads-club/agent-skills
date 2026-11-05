@@ -103,8 +103,8 @@ export function createCatalog(overrides: Partial<CatalogDeps> = {}): Catalog {
 function untilAborted<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const onAbort = () => reject(signal.reason)
+    work.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
     if (signal.aborted) return onAbort()
     signal.addEventListener('abort', onAbort, { once: true })
-    work.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
   })
 }

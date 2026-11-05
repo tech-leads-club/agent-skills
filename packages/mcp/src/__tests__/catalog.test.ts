@@ -132,6 +132,25 @@ describe('createCatalog', () => {
     expect(received?.aborted).toBe(true)
   })
 
+  it('fails a call made after close with CatalogUnavailableError and no unhandled rejection', async () => {
+    const unhandled: unknown[] = []
+    const onUnhandled = (reason: unknown) => unhandled.push(reason)
+    process.on('unhandledRejection', onUnhandled)
+    const catalog = createCatalog({
+      loadRegistry: (signal) => Promise.reject(signal.reason ?? new Error('aborted')),
+    })
+
+    try {
+      catalog.close()
+      await expect(catalog.list()).rejects.toBeInstanceOf(CatalogUnavailableError)
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(unhandled).toEqual([])
+    } finally {
+      process.off('unhandledRejection', onUnhandled)
+    }
+  })
+
   it('searches the loaded index', async () => {
     const catalog = createCatalog({ loadRegistry: () => Promise.resolve({ data: registryB }) })
 
