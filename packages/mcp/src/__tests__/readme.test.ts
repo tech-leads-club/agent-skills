@@ -39,7 +39,7 @@ describe('README', () => {
     const caching = section('## ⚡ Caching')
 
     expect(caching).toContain('npm dist-tag `latest`')
-    expect(caching).toContain('checked again every 15 minutes')
+    expect(caching).toContain('checked again on the first tool call after the 15-minute TTL expires')
     expect(caching).not.toContain('@latest/packages/skills-catalog')
   })
 })

@@ -279,7 +279,7 @@ A global install does not update itself. Run `npm i -g @tech-leads-club/agent-sk
 
 The server reads the catalog from the [`@tech-leads-club/skills-catalog`](https://www.npmjs.com/package/@tech-leads-club/skills-catalog) npm package, served by [jsDelivr](https://www.jsdelivr.com/package/npm/@tech-leads-club/skills-catalog) at an exact version (`…/skills-catalog@<version>/skills-registry.json`), and caches it in memory:
 
-- **Catalog version:** taken from the npm dist-tag `latest`, and checked again every 15 minutes. When a new version is published, the next refresh switches to it, so a long-running server picks it up without a restart. Set `SKILLS_CDN_REF` to pin a version instead.
+- **Catalog version:** taken from the npm dist-tag `latest`. It is checked again on the first tool call after the 15-minute TTL expires. That call still gets the cached catalog, and the calls after the background refresh get the new version, so a long-running server picks up a new release without a restart. Set `SKILLS_CDN_REF` to pin a version instead.
 - **Consistent reads:** a skill's files always come from the same catalog version as the registry entry that listed it.
 - **Startup:** the server answers the MCP handshake at once and loads the registry in the background. Tools wait for that load for up to 10 seconds.
 - **Cold start retry:** 3 retries with exponential backoff within that window. If the load still fails, the tool returns an error and the next tool call starts a new load.
