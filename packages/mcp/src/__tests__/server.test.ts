@@ -12,7 +12,7 @@ import { PrepareSkillFilesOutputSchema } from '../tools/prepare-tool'
 import { SearchSkillsOutputSchema } from '../tools/search-tool'
 import { ReadSkillOutputSchema } from '../tools/skill-tool'
 import type { Registry } from '../types'
-import { connectInProcess } from './support/mcp-client'
+import { connectInProcess, findWorkspaceRoot } from './support/mcp-client'
 
 type ToolResult = {
   content: Array<{ type: string; text?: string }>
@@ -498,5 +498,122 @@ describe('structured output', () => {
       expect(result.isError).not.toBe(true)
       expect(schema.safeParse(result.structuredContent).success).toBe(true)
     }
+  })
+})
+
+const PROMPTS_0_1_11 = [
+  {
+    arguments: [
+      {
+        name: 'task',
+        description:
+          'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")',
+        required: true,
+      },
+    ],
+    description: 'Find the best skill in the catalog for a task.',
+    name: 'skills',
+  },
+  {
+    arguments: [
+      {
+        name: 'task',
+        description:
+          'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")',
+        required: true,
+      },
+    ],
+    description: 'Alias for /skills.',
+    name: 'find-skill',
+  },
+  {
+    arguments: [
+      {
+        name: 'name',
+        description: 'Exact skill name (for example: docs-writer)',
+        required: true,
+      },
+      {
+        name: 'context',
+        description: 'Optional — describe what specifically you need help with',
+        required: false,
+      },
+    ],
+    description: 'Load and apply a specific skill by exact name.',
+    name: 'use',
+  },
+  {
+    description: 'Show examples for using the agent-skills catalog prompts.',
+    name: 'skills-help',
+  },
+]
+
+const RESOURCES_0_1_11 = [
+  {
+    description:
+      'Full agent-skills registry in JSON format. Contains all available skills with their names, descriptions, categories, and file paths.',
+    mimeType: 'application/json',
+    name: 'Skills Catalog',
+    uri: 'skills://catalog',
+  },
+]
+
+describe('prompts and resources', () => {
+  it('lists the four prompts', async () => {
+    const client = await connectInProcess(fakeCatalog(skillRegistry, skillFiles))
+    const response = await client.rpc('prompts/list')
+
+    expect(response.result?.prompts).toEqual(PROMPTS_0_1_11)
+  })
+
+  it('lists the skills catalog resource as application/json', async () => {
+    const client = await connectInProcess(fakeCatalog(skillRegistry, skillFiles))
+    const response = await client.rpc('resources/list')
+
+    expect(response.result?.resources).toEqual(RESOURCES_0_1_11)
+  })
+
+  it('reads the registry as JSON from skills://catalog', async () => {
+    const client = await connectInProcess(fakeCatalog(skillRegistry, skillFiles))
+    const response = await client.rpc('resources/read', { uri: 'skills://catalog' })
+    const contents = response.result?.contents as Array<{ uri: string; mimeType: string; text: string }>
+
+    expect(contents[0].uri).toBe('skills://catalog')
+    expect(contents[0].mimeType).toBe('application/json')
+    expect(JSON.parse(contents[0].text)).toEqual(skillRegistry)
+  })
+
+  it('points the use prompt at read_skill for a known skill', async () => {
+    const client = await connectInProcess(fakeCatalog(skillRegistry, skillFiles))
+    const response = await client.rpc('prompts/get', { name: 'use', arguments: { name: 'docs-writer' } })
+    const messages = response.result?.messages as Array<{ content: { text: string } }>
+
+    expect(messages[0].content.text).toContain('Call read_skill with skill_name="docs-writer"')
+  })
+
+  it('answers the use prompt with the catalog error when the catalog is unavailable', async () => {
+    const client = await connectInProcess(unavailableCatalog())
+    const response = await client.rpc('prompts/get', { name: 'use', arguments: { name: 'docs-writer' } })
+
+    expect(response.error?.code).toBe(-32603)
+    expect(response.error?.message).toContain('Skill catalog unavailable. Try again shortly.')
+  })
+
+  it('answers the catalog resource with the catalog error when the catalog is unavailable', async () => {
+    const client = await connectInProcess(unavailableCatalog())
+    const response = await client.rpc('resources/read', { uri: 'skills://catalog' })
+
+    expect(response.error?.code).toBe(-32603)
+    expect(response.error?.message).toContain('Skill catalog unavailable. Try again shortly.')
+  })
+})
+
+describe('package manifest', () => {
+  it('depends on the official SDK and not on fastmcp', () => {
+    const manifestPath = join(findWorkspaceRoot(), 'packages', 'mcp', 'package.json')
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dependencies: Record<string, string> }
+
+    expect(manifest.dependencies['@modelcontextprotocol/server']).toBeDefined()
+    expect(manifest.dependencies.fastmcp).toBeUndefined()
   })
 })

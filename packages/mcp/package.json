@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
-    "fastmcp": "^4.12.1",
     "fuse.js": "^7.1.0",
     "ky": "^1.14.3",
     "zod": "^4.3.6"

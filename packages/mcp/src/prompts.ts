@@ -1,77 +1,46 @@
-import type { FastMCP } from 'fastmcp'
+import type { McpServer } from '@modelcontextprotocol/server'
+import { z } from 'zod'
 
-import type { Indexes, SkillEntry } from './types'
+import type { Catalog } from './catalog'
+import type { SkillEntry } from './types'
 
-export function registerPrompts(server: FastMCP, getIndexes: () => Indexes): void {
-  registerCatalogPrompt(server)
-  registerDiscoveryAliasPrompt(server)
-  registerUsePrompt(server, getIndexes)
-  registerHelpPrompt(server)
-}
+const TASK_DESCRIPTION =
+  'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")'
 
-function registerCatalogPrompt(server: FastMCP): void {
-  server.addPrompt({
-    name: 'skills',
-    description: 'Find the best skill in the catalog for a task.',
-    arguments: [
-      {
-        name: 'task',
-        description:
-          'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")',
-        required: true,
-      },
-    ],
-    load: async (args) => buildCatalogPromptMessages(args?.task),
-  })
-}
+export function registerPrompts(server: McpServer, catalog: Catalog): void {
+  const taskArgs = z.object({ task: z.string().describe(TASK_DESCRIPTION) })
 
-function registerDiscoveryAliasPrompt(server: FastMCP): void {
-  server.addPrompt({
-    name: 'find-skill',
-    description: 'Alias for /skills.',
-    arguments: [
-      {
-        name: 'task',
-        description:
-          'Describe what you are trying to accomplish (e.g. "optimize React performance", "create an architecture diagram")',
-        required: true,
-      },
-    ],
-    load: async (args) => buildCatalogPromptMessages(args?.task),
-  })
-}
+  server.registerPrompt(
+    'skills',
+    { description: 'Find the best skill in the catalog for a task.', argsSchema: taskArgs },
+    async ({ task }) => buildCatalogPromptMessages(task),
+  )
 
-function registerUsePrompt(server: FastMCP, getIndexes: () => Indexes): void {
-  server.addPrompt({
-    name: 'use',
-    description: 'Load and apply a specific skill by exact name.',
-    arguments: [
-      {
-        name: 'name',
-        description: 'Exact skill name (for example: docs-writer)',
-        required: true,
-      },
-      {
-        name: 'context',
-        description: 'Optional — describe what specifically you need help with',
-        required: false,
-      },
-    ],
-    load: async (args) => {
-      const skillName = args?.name?.trim()
-      const skill = skillName ? getIndexes().map.get(skillName) : undefined
+  server.registerPrompt('find-skill', { description: 'Alias for /skills.', argsSchema: taskArgs }, async ({ task }) =>
+    buildCatalogPromptMessages(task),
+  )
 
-      if (!skill) return buildUsePromptNotFoundMessages(skillName)
-      return buildSkillPromptMessages(skill, args?.context)
+  server.registerPrompt(
+    'use',
+    {
+      description: 'Load and apply a specific skill by exact name.',
+      argsSchema: z.object({
+        name: z.string().describe('Exact skill name (for example: docs-writer)'),
+        context: z.string().optional().describe('Optional — describe what specifically you need help with'),
+      }),
     },
-  })
-}
+    async ({ name, context }) => {
+      const skillName = name.trim()
+      const skill = skillName ? await catalog.get(skillName) : undefined
+      if (!skill) return buildUsePromptNotFoundMessages(skillName)
+      return buildSkillPromptMessages(skill, context)
+    },
+  )
 
-function registerHelpPrompt(server: FastMCP): void {
-  server.addPrompt({
-    name: 'skills-help',
-    description: 'Show examples for using the agent-skills catalog prompts.',
-    load: async () => ({
+  server.registerPrompt(
+    'skills-help',
+    { description: 'Show examples for using the agent-skills catalog prompts.' },
+    async () => ({
       messages: [
         {
           role: 'user',
@@ -92,12 +61,12 @@ function registerHelpPrompt(server: FastMCP): void {
         },
       ],
     }),
-  })
+  )
 }
 
-export function buildCatalogPromptMessages(
-  task?: string,
-): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+export function buildCatalogPromptMessages(task?: string): {
+  messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }>
+} {
   const taskText = task?.trim() ?? ''
   const instructions = [
     `Call search_skills with a concise intent phrase describing: ${taskText}`,
@@ -127,9 +96,9 @@ export function buildSkillPromptMessages(
   }
 }
 
-export function buildUsePromptNotFoundMessages(
-  skillName?: string,
-): { messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }> } {
+export function buildUsePromptNotFoundMessages(skillName?: string): {
+  messages: Array<{ role: 'user'; content: { type: 'text'; text: string } }>
+} {
   const requested = skillName && skillName.length > 0 ? skillName : '(empty)'
   return {
     messages: [
