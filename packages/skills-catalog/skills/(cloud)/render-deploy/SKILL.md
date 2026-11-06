@@ -317,7 +317,7 @@ databases:
 
 Service type details: [references/service-types.md](references/service-types.md)
 Runtime options: [references/runtimes.md](references/runtimes.md)
-Template examples: [assets/](assets/)
+Template examples: assets/
 
 ### Step 2.5: Immediate Next Steps (Always Provide)
 
