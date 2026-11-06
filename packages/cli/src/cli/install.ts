@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
 import {
   AGENT_TYPES,
   ensureSkillDownloaded,
@@ -7,9 +7,10 @@ import {
   getRemoteSkills,
   installSkills,
 } from '@tech-leads-club/core'
-import type { AgentType, InstallOptions, SkillInfo } from '@tech-leads-club/core'
+import chalk from 'chalk'
 
 import { ports } from '../ports'
+import { getTargetAgents, reportNoTargetAgents } from '../services/target-agents'
 
 interface InstallCliOptions {
   skill?: string[]
@@ -32,7 +33,9 @@ async function downloadSkills(skillNames: string[], forceDownload: boolean): Pro
       continue
     }
 
-    const path = forceDownload ? await forceDownloadSkill(ports, skillName) : await ensureSkillDownloaded(ports, skillName)
+    const path = forceDownload
+      ? await forceDownloadSkill(ports, skillName)
+      : await ensureSkillDownloaded(ports, skillName)
     if (path) {
       selectedSkills.push({ ...skill, path })
     } else {
@@ -81,14 +84,20 @@ export async function runCliInstall(options: InstallCliOptions): Promise<void> {
     process.exit(1)
   }
 
-  const rawAgents = options.agent || ['cursor', 'claude-code', 'windsurf']
-  const invalidAgents = rawAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
+  const { agents: targetAgents, source } = await getTargetAgents(options.agent)
+  if (targetAgents.length === 0) {
+    reportNoTargetAgents('install', 'installation')
+  }
+
+  console.log(chalk.blue(`⏳ Using ${source} to identify target agents: ${targetAgents.join(', ')}`))
+
+  const invalidAgents = targetAgents.filter((a) => !AGENT_TYPES.includes(a as AgentType))
   if (invalidAgents.length > 0) {
     console.error(chalk.red(`❌ Unknown agent(s): ${invalidAgents.join(', ')}`))
     console.error(chalk.dim(`   Valid agents: ${AGENT_TYPES.join(', ')}`))
     process.exit(1)
   }
-  const agents = rawAgents as AgentType[]
+  const agents = targetAgents as AgentType[]
   const method = options.symlink ? 'symlink' : 'copy'
 
   console.log(chalk.blue(`⏳ Installing ${skills.length} skill(s) to ${agents.length} agent(s)...`))
