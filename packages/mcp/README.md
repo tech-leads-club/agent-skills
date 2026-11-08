@@ -68,7 +68,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 - Returns `structuredContent` validated against the tool's `outputSchema`, with a JSON text fallback
 - Omits the full `description` from results — `usage_hint` carries the gist, and `read_skill` provides the rest
 - Minimum match character length of 2 to avoid noise
-- Empty query → `UserError("Query cannot be empty")`
+- Empty query → tool error naming `query` (see [Error Reference](#-error-reference))
 - No matches (or only `weak` ones) → empty array with explanatory message
 
 ### `read_skill`
@@ -83,8 +83,8 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 - Reference list covers every file the registry declares for the skill except `SKILL.md`, whatever directory it sits in — the registry's file list is the contract, not a folder-name convention
 - Returns two separate content blocks: main content + compact reference list (capped at 50 paths)
 - Skill with only one file returns a single content block (no empty second block)
-- Invalid `skill_name` → `UserError("Skill '{name}' not found. Use search_skills to find valid names.")`
-- CDN failure → `UserError("CDN unavailable. Try again shortly.")`
+- Invalid `skill_name` → tool error: "Skill '{name}' not found. Use search_skills to find valid names."
+- CDN failure → tool error: "CDN unavailable or skill integrity check failed. Try again shortly."
 
 ### `fetch_skill_files`
 
@@ -95,8 +95,7 @@ Search is powered by **Fuse.js**: per-token fuzzy matching over name, extracted 
 
 - Validates **all** paths against `skill.files[]` before any network call — rejects with the full list of invalid paths
 - Accepts any path from `read_skill`'s list; paths not declared for that skill are rejected
-- Fetches valid files in parallel (`Promise.allSettled`)
-- Partial failure: returns successful content and notes failed paths — does not abort the entire response
+- Fetches the skill's files in parallel and verifies them against the registry checksum before returning any of them. A failed download or a checksum mismatch returns a tool error
 - **Response budget of 50,000 chars (~12.5k tokens):** files are emitted in the requested order; anything beyond the budget is truncated or omitted, and the response names what was left out so the agent can request it in a follow-up call. Without this, five large reference files could exceed the 25k-token cap agents apply to tool responses.
 - Use this for files meant to be **read**. For files meant to be **run**, use `prepare_skill_files`.
 
@@ -228,27 +227,82 @@ claude mcp add agent-skills -- npx -y @tech-leads-club/agent-skills-mcp
 }
 ```
 
+### Global Install (Long-running sessions)
+
+`npx` keeps an `npm exec` process alive next to every server it starts. Each client session runs its own server, so that launcher is paid once per open chat. If you keep many chats or agents open for long periods, install the package once and point the client at the binary:
+
+```bash
+npm i -g @tech-leads-club/agent-skills-mcp
+```
+
+Generic MCP config:
+
+```json
+{
+  "mcpServers": {
+    "agent-skills": {
+      "command": "agent-skills-mcp"
+    }
+  }
+}
+```
+
+Claude Code (CLI):
+
+```bash
+claude mcp add agent-skills -- agent-skills-mcp
+```
+
+VS Code (GitHub Copilot), in `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "agent-skills": {
+      "type": "stdio",
+      "command": "agent-skills-mcp"
+    }
+  }
+}
+```
+
+Codex, in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.agent-skills]
+command = "agent-skills-mcp"
+```
+
+A global install does not update itself. Run `npm i -g @tech-leads-club/agent-skills-mcp@latest` to pick up a new release.
+
 ## ⚡ Caching
 
-The registry is fetched from [jsDelivr CDN](https://cdn.jsdelivr.net/gh/tech-leads-club/agent-skills@latest/packages/skills-catalog/skills-registry.json) and cached in memory:
+The server reads the catalog from the [`@tech-leads-club/skills-catalog`](https://www.npmjs.com/package/@tech-leads-club/skills-catalog) npm package, served by [jsDelivr](https://www.jsdelivr.com/package/npm/@tech-leads-club/skills-catalog) at an exact version (`…/skills-catalog@<version>/skills-registry.json`), and caches it in memory:
 
-- **TTL:** 15 minutes — cache hit returns immediately with no network call
-- **ETag revalidation:** on TTL expiry, sends `If-None-Match`; a `304 Not Modified` renews the TTL without re-downloading the payload
-- **Cold start retry:** 3 attempts with exponential backoff — server won't start if CDN is unreachable
-- **Stale fallback:** if CDN fails after warmup, stale cache is returned rather than erroring
-- All cache events are logged to `stderr` (never `stdout` — stdout is reserved for JSON-RPC)
+- **Catalog version:** taken from the npm dist-tag `latest`. It is checked again on the first tool call after the 15-minute TTL expires. That call still gets the cached catalog, and the calls after the background refresh get the new version, so a long-running server picks up a new release without a restart. Set `SKILLS_CDN_REF` to pin a version instead.
+- **Consistent reads:** a skill's files always come from the same catalog version as the registry entry that listed it.
+- **Startup:** the server answers the MCP handshake at once and loads the registry in the background. Tools wait for that load for up to 10 seconds.
+- **Cold start retry:** 3 retries with exponential backoff within that window. If the load still fails, the tool returns an error and the next tool call starts a new load.
+- **TTL:** 15 minutes. Within it, tools use the cached registry with no network call.
+- **ETag revalidation:** once the TTL expires, tools keep serving the cached registry while it is refreshed in the background. If the version is unchanged, the registry is revalidated with `If-None-Match`, and a `304 Not Modified` keeps the current data.
+- **Stale fallback:** if the version lookup or the revalidation fails, the cached registry keeps serving.
+- All cache events are logged to `stderr` (never `stdout`, which is reserved for JSON-RPC).
 
 ## 🔒 Error Reference
 
-| Scenario                               | Behaviour                                                                       |
-| :------------------------------------- | :------------------------------------------------------------------------------ |
-| Registry CDN unreachable at cold start | Retries 3× with exponential backoff, then server exits with error               |
-| Registry CDN unreachable after warmup  | Stale cache returned; warning logged to `stderr`                                |
-| Malformed registry JSON                | Logged to `stderr`; stale cache used if available                               |
-| `skill_name` not in registry           | `UserError`: "Skill '{name}' not found. Use search_skills to find valid names." |
-| `file_paths` contains invalid path     | `UserError` listing all invalid paths — no files fetched                        |
-| `search_skills` with empty query       | `UserError`: "Query cannot be empty"                                            |
-| One parallel file fetch fails          | Partial success: successful files returned, failed path noted in output         |
+Tool errors come back as a tool result with `isError: true` and the message below, so the agent can correct itself.
+
+| Scenario                                                                    | Behaviour                                                                                  |
+| :-------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| Registry CDN unreachable before the first load                              | Tool error: "Skill catalog unavailable. Try again shortly." The next call retries the load |
+| Registry CDN unreachable after the first load                               | Cached registry keeps serving; the failure is logged to `stderr`                           |
+| Malformed registry JSON                                                     | Same as an unreachable CDN, logged to `stderr`                                             |
+| `skill_name` not in registry                                                | Tool error: "Skill '{name}' not found. Use search_skills to find valid names."             |
+| `file_paths` contains a path not listed by `read_skill`                     | Tool error listing the invalid paths, and no file is fetched                               |
+| Argument missing, out of bounds or not declared by the tool                 | Tool error naming the argument                                                             |
+| A skill file fails to download                                              | Tool error: "CDN unavailable or skill integrity check failed. Try again shortly."          |
+| Skill content does not match its checksum                                   | Tool error naming the skill and both checksums                                             |
+| Catalog unavailable on the `/use` prompt or the `skills://catalog` resource | JSON-RPC error `-32603` with "Skill catalog unavailable. Try again shortly."               |
 
 ## 🧪 Development
 
@@ -273,6 +327,7 @@ npm run start:dev          # Build + Inspector (uses ../../dist/packages/mcp)
 ## ⚙️ Requirements
 
 - Node.js ≥ 24
+- Behind an HTTP proxy, set `HTTPS_PROXY` (and `NO_PROXY` if needed). On Node.js 24.14 or later the server routes its requests through it with no extra flag. On earlier 24.x releases, also set `NODE_USE_ENV_PROXY=1`.
 
 ## 📄 License & repo
 

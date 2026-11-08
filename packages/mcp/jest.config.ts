@@ -5,7 +5,7 @@ const config: Config = {
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/__tests__/helpers\\.ts$'],
+  testPathIgnorePatterns: ['/node_modules/', '/__tests__/helpers\\.ts$', '/__tests__/support/'],
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',

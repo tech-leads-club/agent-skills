@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 
-import { buildCdnNpmBase, buildRegistryUrl, buildSkillsBaseUrl, resetCdnRefForTests, resolveCdnRef } from '../cdn'
+import { buildCdnNpmBase, buildRegistryUrl, buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
 import { computeContentHash, decodeSkillText, fetchAndVerifySkillFiles } from '../integrity'
 
 describe('computeContentHash', () => {
@@ -85,7 +85,6 @@ describe('fetchAndVerifySkillFiles', () => {
 
 describe('cdn pinning', () => {
   afterEach(() => {
-    resetCdnRefForTests()
     delete process.env.SKILLS_CDN_REF
   })
 
