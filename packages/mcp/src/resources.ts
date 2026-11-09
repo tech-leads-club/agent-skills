@@ -1,17 +1,20 @@
-import type { FastMCP } from 'fastmcp'
+import type { McpServer } from '@modelcontextprotocol/server'
 
-import type { Registry } from './types'
+import type { Catalog } from './catalog'
 
-export function registerResources(server: FastMCP, getRegistryFn: () => Promise<Registry>): void {
-  server.addResource({
-    uri: 'skills://catalog',
-    name: 'Skills Catalog',
-    description:
-      'Full agent-skills registry in JSON format. Contains all available skills with their names, descriptions, categories, and file paths.',
-    mimeType: 'application/json',
-    load: async () => {
-      const registry = await getRegistryFn()
-      return { text: JSON.stringify(registry, null, 2) }
+export function registerResources(server: McpServer, catalog: Catalog): void {
+  server.registerResource(
+    'Skills Catalog',
+    'skills://catalog',
+    {
+      description:
+        'Full agent-skills registry in JSON format. Contains all available skills with their names, descriptions, categories, and file paths.',
+      mimeType: 'application/json',
     },
-  })
+    async (uri) => ({
+      contents: [
+        { uri: uri.href, mimeType: 'application/json', text: JSON.stringify(await catalog.registry(), null, 2) },
+      ],
+    }),
+  )
 }

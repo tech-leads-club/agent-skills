@@ -1,3 +1,16 @@
+## 0.17.19 (2026-11-02)
+
+### 🩹 Fixes
+
+- **skills-catalog:** use Do NOT use for in tlc-discover so the marketplace parses it ([30c7d0a4d](https://github.com/tech-leads-club/agent-skills/commit/30c7d0a4d))
+- **skills-catalog:** rewrite tlc-discover description so agents discover it ([09083fd4d](https://github.com/tech-leads-club/agent-skills/commit/09083fd4d))
+- **tlc-spec-driven:** include full design template in markdown fence ([9f769150e](https://github.com/tech-leads-club/agent-skills/commit/9f769150e))
+
+### ❤️ Thank You
+
+- Fernando Paladini @paladini
+- Waldemar Neto @waldemarnt
+
 ## 0.17.18 (2026-10-31)
 
 ### 🚀 Features

@@ -16,7 +16,10 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
     <div className="skill-card-hover bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-          <Link href={`/skills/${skill.id}/`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <Link
+            href={`/skills/${skill.id}/`}
+            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
             {skill.name}
           </Link>
         </h3>
@@ -51,7 +54,7 @@ export function SkillCard({ skill, categoryName }: SkillCardProps) {
 
       {/* Install command */}
       <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-2.5 flex items-center justify-between gap-2">
-        <code className="text-xs text-sky-400 font-mono truncate">npx agent-skills install --skill {skill.id}</code>
+        <code className="text-xs text-sky-400 font-mono truncate">{installCommand}</code>
         <CopyButton
           text={installCommand}
           className="!bg-white/10 !text-white !px-3 !py-1 !text-xs hover:!bg-white/20"

@@ -166,9 +166,7 @@ export default function HomePage() {
                     {skill.description}
                   </p>
                   <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-2.5 flex items-center justify-between gap-2 mt-auto">
-                    <code className="text-xs text-sky-400 font-mono truncate">
-                      npx agent-skills install --skill {skill.id}
-                    </code>
+                    <code className="text-xs text-sky-400 font-mono truncate">{installCommand}</code>
                     <CopyButton text={installCommand} className="!px-2.5 !py-1 !text-xs" />
                   </div>
                   <div className="flex justify-end">

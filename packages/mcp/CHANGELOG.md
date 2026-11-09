@@ -1,3 +1,17 @@
+## 0.1.12 (2026-11-05)
+
+### 🚀 Features
+
+- **mcp:** move to the official MCP SDK and cut per-instance memory ([#270](https://github.com/tech-leads-club/agent-skills/pull/270))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues
+
+## 0.1.11 (2026-11-02)
+
+This was a version bump only for @tech-leads-club/agent-skills-mcp to align it with other projects, there were no code changes.
+
 ## 0.1.10 (2026-10-30)
 
 ### 🩹 Fixes

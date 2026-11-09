@@ -1,4 +1,9 @@
-import { MAX_REFERENCE_RESPONSE_CHARS, buildReferenceFilesOutput, getInvalidReferencePaths } from '../core/fetcher'
+import {
+  MAX_REFERENCE_RESPONSE_CHARS,
+  buildReferenceFilesOutput,
+  getInvalidReferencePaths,
+  selectReferenceFiles,
+} from '../core/fetcher'
 import { createSkillEntry } from './helpers'
 
 describe('fetcher-core', () => {
@@ -80,5 +85,28 @@ describe('fetcher-core', () => {
 
   it('should expose a budget that stays under the 25k-token tool response cap', () => {
     expect(MAX_REFERENCE_RESPONSE_CHARS).toBeLessThanOrEqual(100_000)
+  })
+
+  it('should select whole files within the budget, mark the cut file and list the rest as omitted', () => {
+    const contents = new Map([
+      ['references/a.md', 'a'.repeat(10)],
+      ['references/b.md', 'b'.repeat(3_000)],
+      ['references/c.md', 'c'],
+    ])
+
+    const selection = selectReferenceFiles(['references/a.md', 'references/b.md', 'references/c.md'], contents, 2_500)
+
+    expect(selection.files).toEqual([
+      { path: 'references/a.md', text: 'a'.repeat(10), truncated: false },
+      { path: 'references/b.md', text: 'b'.repeat(2_490), truncated: true },
+    ])
+    expect(selection.omitted).toEqual(['references/c.md'])
+  })
+
+  it('should list a requested path with no content as omitted', () => {
+    const selection = selectReferenceFiles(['references/a.md', 'references/x.md'], new Map([['references/a.md', 'a']]))
+
+    expect(selection.files).toEqual([{ path: 'references/a.md', text: 'a', truncated: false }])
+    expect(selection.omitted).toEqual(['references/x.md'])
   })
 })
