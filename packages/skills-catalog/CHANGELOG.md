@@ -1,3 +1,21 @@
+## 0.17.20 (2026-11-10)
+
+### 🚀 Features
+
+- **skills-catalog:** bump tlc-discover to 0.13.0 ([962545ecc](https://github.com/tech-leads-club/agent-skills/commit/962545ecc))
+
+### 🩹 Fixes
+
+- **skills-catalog:** make tlc-discover's validator safe on Windows ([d4ab26545](https://github.com/tech-leads-club/agent-skills/commit/d4ab26545))
+- **skills-catalog:** fix five false results in tlc-discover's validator ([2bc9342e2](https://github.com/tech-leads-club/agent-skills/commit/2bc9342e2))
+- **skills-catalog:** close the design file in tlc-discover's validator ([3260737d0](https://github.com/tech-leads-club/agent-skills/commit/3260737d0))
+- **skills-catalog:** publish tlc-discover as 0.10.0 ([3f0fd39ee](https://github.com/tech-leads-club/agent-skills/commit/3f0fd39ee))
+
+### ❤️ Thank You
+
+- Claude Opus 5.5
+- Waldemar Neto @waldemarnt
+
 ## 0.17.19 (2026-11-02)
 
 ### 🩹 Fixes
