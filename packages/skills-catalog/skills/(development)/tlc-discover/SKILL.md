@@ -4,7 +4,7 @@ description: 'Thinks through new or large projects: turns a vague idea into a de
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: 0.13.0
+  version: 0.10.0
 ---
 
 # TLC Discover

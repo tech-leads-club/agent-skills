@@ -1664,8 +1664,8 @@
         "scripts/validate_design.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.13.0",
-      "contentHash": "69251111ce2616b3f956c467927c09393787922359fe36fec24ebb11a9be1e83"
+      "version": "0.10.0",
+      "contentHash": "77a1abb3723d2f1859768de721d1f628c1f858ef6ebc9f5249b13c3a09fc6436"
     },
     {
       "name": "tlc-generative-engine-optimization",
