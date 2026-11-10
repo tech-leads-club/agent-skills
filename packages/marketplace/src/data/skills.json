@@ -1988,8 +1988,8 @@
         "referenceFiles": [
           "document-format.md"
         ],
-        "lastModified": "2026-11-02",
-        "version": "0.13.0",
+        "lastModified": "2026-11-10",
+        "version": "0.10.0",
         "scriptRuntimes": [
           "Python"
         ],
