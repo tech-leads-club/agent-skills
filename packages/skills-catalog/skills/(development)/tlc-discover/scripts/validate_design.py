@@ -55,7 +55,8 @@ NOT_IDS = re.compile(r"^(?:D\d+|Q[1-4]|H[1-6]|V\d+|UTF-?\d+|SHA-?\d+|ISO-?\d+|HT
 
 
 def slug(text):
-    text = re.sub(r"[`*_]", "", text.strip().lower())
+    # Drop Markdown formatting, but keep underscores inside identifiers: `pay_invoice` -> #pay_invoice
+    text = re.sub(r"[`*]|(?<!\w)_+|_+(?!\w)", "", text.strip().lower())
     out = []
     for ch in text:
         cat = unicodedata.category(ch)
@@ -83,6 +84,18 @@ def words(text):
 
 def cells(row):
     return [c.strip() for c in row.strip().strip("|").split("|")]
+
+
+def mentions(text, names):
+    """Names (lowercase) referenced in text. Longer names claim their span first, so
+    'pay invoice' does not also count as a mention of 'invoice'."""
+    found = set()
+    for name in sorted(names, key=len, reverse=True):
+        pattern = re.compile(r"\b%s\b" % re.escape(name))
+        if pattern.search(text):
+            found.add(name)
+            text = pattern.sub(lambda m: " " * len(m.group(0)), text)
+    return found
 
 
 def label_re(names):
@@ -205,7 +218,9 @@ def main(path):
                 c = cells(line)
                 index_rows.append((m.group(1).strip(), c[-1], ln))
         sect = [(ln, text) for ln, lv, text in heads if span[0] < ln < span[1] and lv == 3]
-        if [n.lower() for n, _, _ in index_rows] != [t.lower() for _, t in sect]:
+        # one slice is one section and no index
+        single_without_index = not index_rows and len(sect) == 1
+        if not single_without_index and [n.lower() for n, _, _ in index_rows] != [t.lower() for _, t in sect]:
             err("slice index and slice sections differ in names or order: index=%s sections=%s"
                 % ([n for n, _, _ in index_rows], [t for _, t in sect]))
         idx_status = {n.lower(): s for n, s, _ in index_rows}
@@ -262,14 +277,22 @@ def main(path):
                 break
         if len(slices) > 1 and not order_names:
             err("no Order line under the slice index")
+        elif len(slices) > 1:
+            missing = [slices[k]["name"] for k in slices if k not in order_names]
+            unknown = [n for n in order_names if n not in slices]
+            repeated = sorted({n for n in order_names if order_names.count(n) > 1})
+            if missing:
+                err("Order line leaves out slices: %s" % ", ".join(missing))
+            if unknown:
+                err("Order line names what is not a slice: %s" % ", ".join(unknown))
+            if repeated:
+                err("Order line names a slice more than once: %s" % ", ".join(repeated))
         pos = {n: i for i, n in enumerate(order_names)}
         for key, info in slices.items():
-            dep = info["depends"].lower()
-            for other in slices:
-                if other != key and re.search(r"\b%s\b" % re.escape(other), dep):
-                    if key in pos and other in pos and pos[other] > pos[key]:
-                        err("order does not hold: '%s' depends on '%s', which comes later"
-                            % (info["name"], slices[other]["name"]), info["line"])
+            for other in mentions(info["depends"].lower(), slices) - {key}:
+                if key in pos and other in pos and pos[other] > pos[key]:
+                    err("order does not hold: '%s' depends on '%s', which comes later"
+                        % (info["name"], slices[other]["name"]), info["line"])
 
     # ---- open table against slice status and header ------------------------
     span = section("open")
@@ -281,15 +304,15 @@ def main(path):
             if len(c) < 3:
                 continue
             cell = c[2].lower()
-            # "go-live of A, B and C" blocks only release; a mixed cell separates with ";"
+            # "go-live of A, B and C" blocks only release; a mixed cell separates with ";".
+            # Release-only segments are dropped here, so what remains blocks the spec, and a
+            # slice it names cannot be clear, whatever its status says about go-live.
             parts = cell.split(";")
             segments = [seg for seg in parts if not any(g in seg for g in GO_LIVE)
                         or re.search(r"\bspec\b", seg)]
-            blocks = " ; ".join(segments)
-            for key, info in slices.items():
-                if re.search(r"\b%s\b" % re.escape(key), blocks) and \
-                        info["status"].lower().startswith(CLEAR) and \
-                        not any(g in info["status"].lower() for g in GO_LIVE):
+            for key in mentions(" ; ".join(segments), slices):
+                info = slices[key]
+                if info["status"].lower().startswith(CLEAR):
                     err("Open says something blocks '%s', but the slice status is '%s'"
                         % (info["name"], info["status"]), ln)
     ready = label_re(L["ready"])
