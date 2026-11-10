@@ -91,7 +91,8 @@ def label_re(names):
 
 
 def main(path):
-    raw = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        raw = f.read()
     lines = raw.splitlines()
     prose = list(strip_code(lines))
     errors, warnings = [], []
