@@ -397,6 +397,9 @@ def main(path):
 
 
 if __name__ == "__main__":
+    # On Windows a piped stdout uses the ANSI code page, and printing a "→" from the document would crash.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if len(sys.argv) != 2:
         print(__doc__)
         sys.exit(2)
