@@ -50,10 +50,10 @@ Batches run strictly sequentially: a batch never starts until the previous batch
 
 **What a batch worker receives:**
 
-- The task definitions for **every** phase in its batch (from `tasks.md`)
-- The Test Coverage Matrix and Gate Check Commands (from `tasks.md`)
+- The slice of its batch, pasted into the prompt: `python3 <skill-dir>/scripts/slice_task.py <feature> T4 T5 ...` with **every** task of the batch. It carries the task definitions, the Test Coverage Matrix and Gate Check Commands, the acceptance criteria of the tasks' requirements with the Edge Cases, and the `design.md` sections the tasks list in `**Design sections**:`
 - `references/coding-principles.md`
-- Relevant `spec.md` and `design.md` context for the feature (not all specs)
+
+A slice that fails (a requirement with no criterion, a heading with no section) is fixed in the document before the batch is dispatched, never sent incomplete. For a task with no `**Design sections**:` line the slice says so, and the worker reads `design.md` in full for that task. Otherwise the worker opens a full document only when the slice is not enough, and says why in its summary. Specify, Design, Tasks, the Verifier and the screens sub-agent keep reading the documents in full.
 
 **What a batch worker does:**
 

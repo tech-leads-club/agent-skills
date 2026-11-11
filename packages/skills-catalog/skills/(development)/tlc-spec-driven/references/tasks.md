@@ -163,6 +163,8 @@ A screen task's `Done when` names the capture it builds, with the full path.
 - ✅ "Create UserService interface" (one file, one concept)
 - ❌ "Implement user management" (too vague, multiple files)
 
+**Name the design sections a task uses.** `**Design sections**: <heading>; <heading>` lists the start of each `design.md` heading the task needs (a section brings its subsections; `Error Handling Strategy` and `Tech Decisions` always come along, unlisted). The header's `**Design**:` says which document; this field says which part of it. With `**Requirement**:` it lets Execute hand a task its slice instead of the three documents (see [implement.md](implement.md)). The field is optional: a task without it is read against the full design.
+
 ### 3. Define Dependencies
 
 What MUST be done before this task can start?
@@ -272,6 +274,7 @@ T8 → T9
 **Depends on**: None
 **Reuses**: `src/existing/BaseInterface.ts`
 **Requirement**: [FEAT]-01
+**Design sections**: [heading in design.md]; [another heading]
 
 **Done when**:
 
