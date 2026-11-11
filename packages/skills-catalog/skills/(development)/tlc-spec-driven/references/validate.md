@@ -98,9 +98,10 @@ python3 <skill-dir>/scripts/validate_verification.py <feature>
 ```
 
 It reads `proofs.md` at `HEAD` (every check and run has a passing row, the build passed, the tree is
-clean), the `## Checks` table (a row with a test for every check), `screens.md` when a criterion
-cites a capture, the `**Walked:**`
-line when a check is a walk, and every finding closed. `0` means the feature is done.
+clean). Proofs written at an earlier commit still count when every commit since changes only
+`.specs/` and leaves `tasks.md` alone, so committing the report does not rerun them. Then it reads
+the `## Checks` table (a row with a test for every check), `screens.md` when a criterion cites a
+capture, the `**Walked:**` line when a check is a walk, and every finding closed. `0` means the feature is done.
 
 ## Interactive UAT (Complex scope, or when a screen cannot be walked)
 

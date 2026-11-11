@@ -47,7 +47,7 @@ Where the files put you - the first row that holds:
 | no `checks.md` | Checks |
 | a check not closed | Build; a check whose commit is on the branch is closed - mark it |
 | a screen and no `**Walked:**` line | the walk and the pictures (build.md) |
-| no `proofs.md`, or one at another commit than `HEAD`, and nothing dispatched | `check_proofs.py` |
+| no `proofs.md`, or one at a commit that code or `checks.md` changed after, and nothing dispatched | `check_proofs.py` |
 | `**Dispatched:**` names a sub-agent whose report is not on disk (`verification.md`, `screens.md`) | wait for it; send it again only when it cannot return - a new session - and say so on the line |
 | an open finding, or `screens.md` `**Round**: 1` that diverges or names an older `HEAD` | the fix pass, then round 2 |
 | `screens.md` `**Round**: 2` | the script and the gate; what still fails goes to the user - there is no third round |

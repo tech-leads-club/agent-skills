@@ -147,7 +147,7 @@ A compaction is a resume: the summary keeps the task and drops the rules.
 | `tasks.md` with no `**Approved**:` line | present the tasks and stop |
 | an open task | Execute it; one whose commit is on the branch is done - mark it |
 | every task done, no `**Walked:**` line (a feature with a screen) | the walk and the pictures (implement.md step 9) |
-| no `proofs.md`, or one at another commit than `HEAD` before any dispatch | `check_proofs.py` (step 10.1) |
+| no `proofs.md`, or one at a commit that code or `tasks.md` changed after, before any dispatch | `check_proofs.py` (step 10.1) |
 | `**Dispatched:**` names a sub-agent whose file is not on disk (`verification.md`, `screens.md`, a batch's commits) | wait for it; send it again only when it cannot return - a new session - and say so on the line |
 | `verification.md` with an open finding, or `screens.md` `**Round**: 1` that diverges | the fix pass, then round 2 |
 | `screens.md` `**Round**: 2` | the script and the gate; what still fails goes to the user - there is no third round |

@@ -634,6 +634,56 @@ def run_tooling():
             ok = False
             print(f"  BROKEN  validate_verification.py: judged HEAD - kept: {kept.strip()[:200]} | stale: {stale.strip()[:200]}")
 
+    # Committing the report moves HEAD: proofs written at an ancestor hold while every change since is
+    # under .specs/, and a code change, an edited proof or a commit off this line asks for a new run.
+    if shipped("validate_verification") and shutil.which("git"):
+        def proofs_at_ancestor(change):
+            root, fdir, source = (lambda r: (r, os.path.join(r, ".specs", "features", FEATURE), "checks.md"))(scaffold())
+            vdir = os.path.join(fdir, "verification.md")
+
+            def git(*cmd):
+                return subprocess.run(["git", *cmd], cwd=root, capture_output=True, text=True).stdout.strip()
+
+            def commit(message):
+                git("add", "-A")
+                git("-c", "user.email=s@t", "-c", "user.name=selftest", "commit", "-qm", message)
+                return git("rev-parse", "--short", "HEAD")
+
+            git("init", "-q")
+            write_artifact(os.path.join(root, "app.ts"), "export const ok = true\n")
+            proven = commit("feat: the code")
+            if change == "off this line":
+                git("checkout", "-q", "-b", "side")
+                write_artifact(os.path.join(root, "side.ts"), "export const side = true\n")
+                proven = commit("feat: a commit HEAD does not contain")
+                git("checkout", "-q", "-")
+            proofs = os.path.join(fdir, "proofs.md")
+            write_artifact(proofs, read_artifact(proofs).replace("e4f5a6b", proven))
+            commit("docs: the proofs")
+            edits = {"report": (vdir, "\n"), "code": (os.path.join(root, "app.ts"), "export const late = true\n"),
+                     "proof": (os.path.join(fdir, source), "\n"), "off this line": (vdir, "\n")}
+            target, extra = edits[change]
+            write_artifact(target, (read_artifact(target) if os.path.exists(target) else "") + extra)
+            commit("docs: the report" if target == vdir else "fix: after the proofs")
+            code, out = run("validate_verification", root)
+            shutil.rmtree(root, ignore_errors=True)
+            return code, out, source
+
+        for change, want in [("report", None), ("code", "app.ts changed since"),
+                             ("proof", "%s changed since"), ("off this line", "is not an ancestor of HEAD")]:
+            code, out, source = proofs_at_ancestor(change)
+            frag = want and (want % f".specs/features/{FEATURE}/{source}" if "%s" in want else want)
+            good = (code == 0 and "proofs.md was written at" not in out) if frag is None else (code == 1 and frag in out)
+            said = {"report": "a report commit keeps them", "code": "a code commit drops them",
+                    "proof": "a commit to the proofs' own file drops them",
+                    "off this line": "proofs from a commit off HEAD's line fail"}[change]
+            if good:
+                print(f"  ok      validate_verification.py: proofs at an ancestor: {said}")
+            else:
+                ok = False
+                print(f"  BROKEN  validate_verification.py: proofs at an ancestor: {said} - "
+                      f"expected {frag or 'a pass'}, got exit {code}: {out.strip()[:300]}")
+
     # the lessons store has to survive a real round-trip on disk, not only its unit checks
     if not shipped("lessons"):
         return ok
