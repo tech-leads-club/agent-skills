@@ -61,6 +61,20 @@ Two rendering engines provide different theme sets:
 
 When using the `base` theme, you can override any variable:
 
+### Contrast Before Styling
+
+Measure contrast against each element's **effective rendered fill**, including class and inline overrides: at least 4.5:1 for normal text, or 3:1 for large text (at least 18 pt, or 14 pt bold). `primaryTextColor` alone does not describe every label. Mermaid's [theme variable fallbacks](https://mermaid.js.org/config/theming.html) use `mainBkg` for flowchart nodes and sequence participants, while `nodeTextColor` and `actorTextColor` fall back to `primaryTextColor`. White primary text can therefore end up on a light fill even when `primaryColor` is dark.
+
+Preserve the palette's primary, secondary, and tertiary colors when they are already legible. Use element-specific text overrides for mismatched fills: dark `nodeTextColor` and `actorTextColor` on light `mainBkg`, and `noteTextColor` matched to `noteBkgColor`. Some renderers use `primaryTextColor` for labels even when `mainBkg` differs from `primaryColor`; match it to the rendered node fill and verify every diagram type used. Keep general `textColor` and `titleColor` readable on the canvas. Do not globally replace white text with dark text or convert every palette to pastel colors.
+
+Whenever creating or changing a palette:
+
+1. Render a flowchart with a normal node, decision, edge label, and subgraph title.
+2. Render a sequence diagram with participants, a message, a note, and a loop or alt label.
+3. Inspect the SVG's computed text and fill colors and check their contrast, then visually inspect both diagrams. Check additional diagram-specific elements used in the deliverable too.
+
+The default pair `#1e293b` on `#f8fafc` gives approximately **13.98:1**; white on the same fill gives only **1.05:1**.
+
 ### Via Frontmatter
 
 ```mermaid
@@ -69,7 +83,7 @@ config:
   theme: base
   themeVariables:
     primaryColor: "#4f46e5"
-    primaryTextColor: "#ffffff"
+    primaryTextColor: "#1e293b"
     primaryBorderColor: "#3730a3"
     lineColor: "#6b7280"
     secondaryColor: "#10b981"
@@ -81,6 +95,10 @@ config:
     clusterBorder: "#cbd5e1"
     titleColor: "#1e293b"
     edgeLabelBackground: "#ffffff"
+    nodeTextColor: "#1e293b"
+    actorTextColor: "#1e293b"
+    noteTextColor: "#1e293b"
+    textColor: "#334155"
 ---
 flowchart LR
     A --> B
@@ -178,10 +196,10 @@ flowchart LR
 
     A --> B --> C --> D
 
-    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef success fill:#10b981,stroke:#059669,color:#1e293b
     classDef warning fill:#f59e0b,stroke:#d97706,color:#000
-    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
-    classDef info fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef error fill:#ef4444,stroke:#dc2626,color:#000
+    classDef info fill:#3b82f6,stroke:#2563eb,color:#000
     classDef default fill:#f8fafc,stroke:#e2e8f0,color:#1e293b
 ```
 
@@ -190,9 +208,9 @@ flowchart LR
 ```mermaid
 flowchart LR
     A --> B --> C
-    style A fill:#f97316,stroke:#ea580c,color:#fff
-    style B fill:#8b5cf6,stroke:#7c3aed,color:#fff
-    style C fill:#06b6d4,stroke:#0891b2,color:#fff
+    style A fill:#f97316,stroke:#ea580c,color:#1e293b
+    style B fill:#8b5cf6,stroke:#7c3aed,color:#000
+    style C fill:#06b6d4,stroke:#0891b2,color:#1e293b
 ```
 
 ### Link Styles (Flowchart)
@@ -212,7 +230,7 @@ flowchart LR
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
   'primaryColor': '#3b82f6',
-  'primaryTextColor': '#ffffff',
+  'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#2563eb',
   'secondaryColor': '#10b981',
   'tertiaryColor': '#f59e0b',
@@ -221,7 +239,12 @@ flowchart LR
   'mainBkg': '#f8fafc',
   'nodeBorder': '#e2e8f0',
   'clusterBkg': '#f1f5f9',
-  'clusterBorder': '#cbd5e1'
+  'clusterBorder': '#cbd5e1',
+  'nodeTextColor': '#1e293b',
+  'actorTextColor': '#1e293b',
+  'noteTextColor': '#1e293b',
+  'textColor': '#1e293b',
+  'titleColor': '#1e293b'
 }}}%%
 ```
 
@@ -242,7 +265,8 @@ Uses AWS orange for primary with **soft slate lines** instead of the harsh defau
   'nodeBorder': '#c47600',
   'clusterBkg': '#FFF8F0',
   'clusterBorder': '#d4a574',
-  'edgeLabelBackground': '#ffffff'
+  'edgeLabelBackground': '#ffffff',
+  'titleColor': '#1e293b'
 }}}%%
 ```
 
@@ -251,7 +275,7 @@ Uses AWS orange for primary with **soft slate lines** instead of the harsh defau
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
   'primaryColor': '#374151',
-  'primaryTextColor': '#ffffff',
+  'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#1f2937',
   'secondaryColor': '#6b7280',
   'tertiaryColor': '#9ca3af',
@@ -261,7 +285,12 @@ Uses AWS orange for primary with **soft slate lines** instead of the harsh defau
   'nodeBorder': '#d1d5db',
   'clusterBkg': '#f3f4f6',
   'clusterBorder': '#9ca3af',
-  'edgeLabelBackground': '#ffffff'
+  'edgeLabelBackground': '#ffffff',
+  'nodeTextColor': '#1e293b',
+  'actorTextColor': '#1e293b',
+  'noteTextColor': '#1e293b',
+  'textColor': '#334155',
+  'titleColor': '#1e293b'
 }}}%%
 ```
 
@@ -272,7 +301,7 @@ A fresh, modern palette for SaaS architecture diagrams:
 ```
 %%{init: {'theme': 'base', 'themeVariables': {
   'primaryColor': '#4f46e5',
-  'primaryTextColor': '#ffffff',
+  'primaryTextColor': '#1e293b',
   'primaryBorderColor': '#3730a3',
   'secondaryColor': '#10b981',
   'tertiaryColor': '#f59e0b',
@@ -284,7 +313,10 @@ A fresh, modern palette for SaaS architecture diagrams:
   'clusterBorder': '#e2e8f0',
   'titleColor': '#1e293b',
   'edgeLabelBackground': '#ffffff',
-  'textColor': '#334155'
+  'textColor': '#334155',
+  'nodeTextColor': '#1e293b',
+  'actorTextColor': '#1e293b',
+  'noteTextColor': '#1e293b'
 }}}%%
 ```
 
@@ -333,8 +365,8 @@ Use accent colors for primary flows while keeping secondary lines soft:
 | Purpose              | bgColor   | fontColor | borderColor |
 | -------------------- | --------- | --------- | ----------- |
 | Primary emphasis     | `#4f46e5` | `#ffffff` | `#3730a3`   |
-| Success / Data store | `#059669` | `#ffffff` | `#047857`   |
-| Warning / External   | `#d97706` | `#ffffff` | `#b45309`   |
+| Success / Data store | `#059669` | `#000000` | `#047857`   |
+| Warning / External   | `#d97706` | `#1e293b` | `#b45309`   |
 | Neutral / Supporting | `#64748b` | `#ffffff` | `#475569`   |
 
 ## Look Options

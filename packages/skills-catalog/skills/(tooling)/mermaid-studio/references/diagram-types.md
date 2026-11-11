@@ -91,9 +91,9 @@ flowchart TD
 flowchart LR
     A[Success]:::success --> B[Warning]:::warning --> C[Error]:::error
 
-    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef success fill:#10b981,stroke:#059669,color:#1e293b
     classDef warning fill:#f59e0b,stroke:#d97706,color:#000
-    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef error fill:#ef4444,stroke:#dc2626,color:#000
 ```
 
 ### Click Events
