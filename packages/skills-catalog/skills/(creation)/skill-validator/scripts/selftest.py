@@ -129,7 +129,8 @@ def drift_guard() -> tuple[bool, str]:
     path = find_catalog_validator(HERE)
     if path is None:
         return True, "skipped (tools/validate-skills.ts not in tree)"
-    text = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as handle:
+        text = handle.read()
     catalog_triggers = parse_ts_string_array(text, "triggerKeywords")
     catalog_negatives = parse_ts_string_array(text, "negativeKeywords")
     if catalog_triggers is None or catalog_negatives is None:
