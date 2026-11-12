@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals'
 import { join } from 'node:path'
 
+const actualFs = await import('node:fs/promises')
+const actualOs = await import('node:os')
+
 const mockMkdir = jest.fn<() => Promise<void>>()
 const mockReadFile = jest.fn<(path: string, encoding: string) => Promise<string>>()
 const mockWriteFile = jest.fn<(path: string, data: string, encoding: string) => Promise<void>>()
@@ -10,6 +13,7 @@ const mockRename = jest.fn<(oldPath: string, newPath: string) => Promise<void>>(
 const mockRm = jest.fn<(path: string, options?: { force?: boolean }) => Promise<void>>()
 
 jest.unstable_mockModule('node:fs/promises', () => ({
+  ...actualFs,
   mkdir: mockMkdir,
   readFile: mockReadFile,
   writeFile: mockWriteFile,
@@ -18,6 +22,7 @@ jest.unstable_mockModule('node:fs/promises', () => ({
 }))
 
 jest.unstable_mockModule('node:os', () => ({
+  ...actualOs,
   homedir: mockHomedir,
 }))
 
@@ -43,11 +48,21 @@ describe('config service', () => {
     it('should return default config when file does not exist', async () => {
       mockReadFile.mockRejectedValue(new Error('ENOENT: no such file'))
       const config = await loadConfig()
-      expect(config).toEqual({ firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' })
+      expect(config).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
     })
 
     it('should load and validate existing config', async () => {
-      const existingConfig = { firstLaunchComplete: true, shortcutsOverlayDismissed: true, version: '1.0.0' }
+      const existingConfig = {
+        firstLaunchComplete: true,
+        shortcutsOverlayDismissed: true,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
       const config = await loadConfig()
       expect(mockReadFile).toHaveBeenCalledWith(expectedConfigPath, 'utf-8')
@@ -58,25 +73,73 @@ describe('config service', () => {
       const partialConfig = { firstLaunchComplete: true }
       mockReadFile.mockResolvedValue(JSON.stringify(partialConfig))
       const config = await loadConfig()
-      expect(config).toEqual({ firstLaunchComplete: true, shortcutsOverlayDismissed: false, version: '1.0.0' })
+      expect(config).toEqual({
+        firstLaunchComplete: true,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
     })
 
     it('should return defaults when config is invalid JSON', async () => {
       mockReadFile.mockResolvedValue('invalid json{')
       const config = await loadConfig()
-      expect(config).toEqual({ firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' })
+      expect(config).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
     })
 
     it('should return defaults when config is not an object', async () => {
       mockReadFile.mockResolvedValue(JSON.stringify('string value'))
       const config = await loadConfig()
-      expect(config).toEqual({ firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' })
+      expect(config).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
+    })
+
+    it('should filter out invalid target agents', async () => {
+      const existingConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['invalid', 'cursor'],
+      }
+      mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
+      const config = await loadConfig()
+      expect(config).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['cursor'],
+      })
+    })
+
+    it('should return defaults when targetAgents is not an array', async () => {
+      mockReadFile.mockResolvedValue(JSON.stringify({ targetAgents: 'string value' }))
+      const config = await loadConfig()
+      expect(config).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
     })
   })
 
   describe('saveConfig', () => {
     it('should create directory, save config to temp file, and rename', async () => {
-      const existingConfig = { firstLaunchComplete: false, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const existingConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
       mockMkdir.mockResolvedValue(undefined)
       mockWriteFile.mockResolvedValue(undefined)
@@ -88,12 +151,22 @@ describe('config service', () => {
       const writeCall = mockWriteFile.mock.calls[0] as [string, string, string]
       expect(writeCall[0]).toBe(`${expectedConfigPath}.tmp`)
       const savedConfig = JSON.parse(writeCall[1])
-      expect(savedConfig).toEqual({ firstLaunchComplete: true, shortcutsOverlayDismissed: false, version: '1.0.0' })
+      expect(savedConfig).toEqual({
+        firstLaunchComplete: true,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: [],
+      })
       expect(mockRename).toHaveBeenCalledWith(`${expectedConfigPath}.tmp`, expectedConfigPath)
     })
 
     it('should merge partial updates with existing config', async () => {
-      const existingConfig = { firstLaunchComplete: true, shortcutsOverlayDismissed: false, version: '1.0.0' }
+      const existingConfig = {
+        firstLaunchComplete: true,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['cursor'],
+      }
       mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
       mockMkdir.mockResolvedValue(undefined)
       mockWriteFile.mockResolvedValue(undefined)
@@ -103,7 +176,50 @@ describe('config service', () => {
       const writeCall = mockWriteFile.mock.calls[0] as [string, string, string]
 
       const savedConfig = JSON.parse(writeCall[1])
-      expect(savedConfig).toEqual({ firstLaunchComplete: true, shortcutsOverlayDismissed: true, version: '1.0.0' })
+      expect(savedConfig).toEqual({
+        firstLaunchComplete: true,
+        shortcutsOverlayDismissed: true,
+        version: '1.0.0',
+        targetAgents: ['cursor'],
+      })
+      expect(mockRename).toHaveBeenCalledWith(`${expectedConfigPath}.tmp`, expectedConfigPath)
+    })
+  })
+
+  describe('targetAgents handling', () => {
+    it('should load targetAgents when provided in file', async () => {
+      const existingConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['cursor'],
+      }
+      mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
+      const config = await loadConfig()
+      expect(config).toEqual(existingConfig)
+    })
+
+    it('should save targetAgents when provided in config', async () => {
+      const existingConfig = {
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['cursor'],
+      }
+      mockReadFile.mockResolvedValue(JSON.stringify(existingConfig))
+      mockMkdir.mockResolvedValue(undefined)
+      mockWriteFile.mockResolvedValue(undefined)
+      mockRename.mockResolvedValue(undefined)
+      await saveConfig({ targetAgents: ['github-copilot', 'cursor'] })
+      expect(mockWriteFile).toHaveBeenCalledTimes(1)
+      const writeCall = mockWriteFile.mock.calls[0] as [string, string, string]
+      const savedConfig = JSON.parse(writeCall[1])
+      expect(savedConfig).toEqual({
+        firstLaunchComplete: false,
+        shortcutsOverlayDismissed: false,
+        version: '1.0.0',
+        targetAgents: ['github-copilot', 'cursor'],
+      })
       expect(mockRename).toHaveBeenCalledWith(`${expectedConfigPath}.tmp`, expectedConfigPath)
     })
   })
