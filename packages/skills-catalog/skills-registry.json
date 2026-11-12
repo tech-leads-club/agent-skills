@@ -1675,11 +1675,12 @@
       "path": "(development)/tlc-discover",
       "files": [
         "SKILL.md",
-        "references/document-format.md"
+        "references/document-format.md",
+        "scripts/validate_design.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.9.2",
-      "contentHash": "a2426c1b3b34dcd2b2d241be4d3050e4751d772fd49146e57223b036eeae6076"
+      "version": "0.10.0",
+      "contentHash": "e76c2dc3b32297bb54aaf511266f96273fecd94dbdc9f18d2fcc93be5c250748"
     },
     {
       "name": "tlc-generative-engine-optimization",

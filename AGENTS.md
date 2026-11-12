@@ -121,6 +121,18 @@ skills/(category)/{skill-name}/
 
 Always use the Nx generator (`nx g @tech-leads-club/skill-plugin:skill`) to create skills. Keep `SKILL.md` under 500 lines; offload reference material to `references/`.
 
+### Skill Scripts Must Run on Windows, macOS and Linux
+
+Every script you add to or change in a skill's `scripts/` must work unchanged on all three. Users install skills into any of the supported agents on any OS, and a script that only runs on one platform breaks the skill for everyone else.
+
+- **Language**: Python 3 (standard library only) or Node.js (`.mjs`, no dependencies). No new Bash, PowerShell or other shell-only scripts. The existing `.sh` scripts are legacy: port them when you touch them.
+- **Invocation**: `SKILL.md` says how to run each script, defines `<skill-dir>` as the directory containing the `SKILL.md`, and gives the Windows command alongside (`python` or `py -3`, since `python3` may be the Microsoft Store alias).
+- **Paths**: build them with `pathlib`/`os.path` (Python) or `node:path` (Node). Never hard-code `/` or `\` separators, `/tmp`, `~` or home-directory layouts.
+- **Text I/O**: open files with an explicit `encoding="utf-8"`, accept both LF and CRLF, and make stdout safe for non-ASCII output (`sys.stdout.reconfigure(encoding="utf-8", errors="replace")` in Python), because Windows writes piped output in the ANSI code page and crashes on characters like `→`.
+- **Subprocesses**: pass arguments as a list, never through a shell string (`shell=True`, `exec`). Do not assume `bash`, `grep`, `sed`, `which` or other Unix tools exist; resolve executables with `shutil.which` and handle their absence.
+- **Exit codes**: `0` for success, non-zero for findings or failure, with a message that says which.
+- **Verify**: run the script on the platforms you can, and at least simulate Windows output with `PYTHONIOENCODING=cp1252` (without `-I`, which ignores it) and a CRLF input file.
+
 ### Skill Quality Standards
 
 **When creating a new skill or modifying an existing one, you MUST use the `skill-architect` skill** to ensure it follows best practices. If the `skill-architect` skill is not installed, follow these mandatory description rules:
