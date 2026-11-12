@@ -1,0 +1,2 @@
+scripts/selftest.py:HARDCODED_SECRET # mutant fixture written into a temp skill; this file must not execute it
+scripts/selftest.py:REMOTE_CODE_EXEC # mutant fixture written into a temp skill; this file must not execute it
