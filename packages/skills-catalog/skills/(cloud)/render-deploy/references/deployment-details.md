@@ -188,12 +188,12 @@ render deploys create <service-id> --wait
 
 ### Templates by Framework
 
-- Node.js Express: [../assets/node-express.yaml](../assets/node-express.yaml)
-- Next.js + Postgres: [../assets/nextjs-postgres.yaml](../assets/nextjs-postgres.yaml)
-- Django + Worker: [../assets/python-django.yaml](../assets/python-django.yaml)
-- Static Site: [../assets/static-site.yaml](../assets/static-site.yaml)
-- Go API: [../assets/go-api.yaml](../assets/go-api.yaml)
-- Docker: [../assets/docker.yaml](../assets/docker.yaml)
+- Node.js Express: ../assets/node-express.yaml
+- Next.js + Postgres: ../assets/nextjs-postgres.yaml
+- Django + Worker: ../assets/python-django.yaml
+- Static Site: ../assets/static-site.yaml
+- Go API: ../assets/go-api.yaml
+- Docker: ../assets/docker.yaml
 
 ### Documentation
 
