@@ -8,12 +8,12 @@ parser is a one-level YAML subset so CI and sandbox images stay stdlib-only.
 Security is a local regex heuristic. It catches common, obvious findings only.
 
 Usage:
-    python score_skill.py <skill-path> [--ai-quality-score 0-100] [--json]
-    python score_skill.py <skill-path> --json-out /tmp/trustscore.json
+    python3 score_skill.py <skill-path> [--ai-quality-score 0-100] [--json]
+    python3 score_skill.py <skill-path> --json-out /tmp/trustscore.json
 
 Exit codes:
     0 skill not blocked (estimated merge-eligible)
-    1 skill blocked (blocking finding or score below the merge threshold)
+    1 skill blocked (hard best-practice rule or critical/high security finding)
     2 usage error or unreadable skill package
 """
 
@@ -30,6 +30,7 @@ from typing import Any
 
 
 def joined(*parts: str) -> str:
+    # Split detector literals so this file is not flagged when it scores itself.
     return "".join(parts)
 
 
@@ -41,13 +42,10 @@ WEIGHT_SECURITY_BP = 40
 WEIGHT_QUALITY_BP = 60
 QUALITY_GROUP_WEIGHTS_BP = {
     "estrutura": 30,
-    "conteudo": 35,
+    "conteudo": 30,
     "evals": 15,
-    "qualidade": 20,
+    "qualidade": 25,
 }
-GATE_GROUPS = {"estrutura", "conteudo"}
-GROUP_PASS_THRESHOLD = 70
-MERGE_THRESHOLD = 70
 SECURITY_PENALTIES = {
     "critical": 20,
     "high": 10,
@@ -64,15 +62,23 @@ CLASSIFICATION_BANDS = (
     (0, "CRITICAL_TRUST"),
 )
 NAME_MAX_CHARS = 64
-DESCRIPTION_MIN_CHARS = 50
-DESCRIPTION_WARN_CHARS = 500
+DESCRIPTION_MIN_CHARS = 100
 DESCRIPTION_MAX_CHARS = 1024
 LINES_MAX = 500
-LINES_WARN = 400
-TOKEN_CHAR_ESTIMATE = 4
-TOKENS_MAX = 2000
 REFERENCE_BROKEN_CAP = 10
-KEBAB = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+UNREFERENCED_CAP = 10
+KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+HARD_RULE_CODES = {
+    "FRONTMATTER_MISSING",
+    "NAME_MISSING",
+    "NAME_FORMAT",
+    "NAME_RESERVED",
+    "DESCRIPTION_MISSING",
+    "DESCRIPTION_TOO_LONG",
+    "DESCRIPTION_ANGLE_BRACKETS",
+    "DESCRIPTION_NO_TRIGGER",
+    "DESCRIPTION_NO_NEGATIVE",
+}
 SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv"}
 TEXT_EXTENSIONS = {
     "",
@@ -110,7 +116,6 @@ REF_PREFIXES = ("references/", "scripts/", "assets/", "templates/", "evals/")
 EXPECTED_SECTIONS = (
     ("purpose", ("purpose", "proposito")),
     ("instructions", ("instructions", "instrucoes")),
-    ("examples", ("examples", "exemplos")),
     ("overview", ("overview", "visao geral")),
     ("when_to_use", ("when to use", "quando usar")),
     ("quick_start", ("quick start", "inicio rapido")),
@@ -118,6 +123,7 @@ EXPECTED_SECTIONS = (
     ("best_practices", ("best practices", "boas praticas")),
     ("resources", ("resources", "recursos")),
 )
+EXAMPLES_ALIASES = ("examples", "exemplos")
 VAGUE_PHRASES = (
     "helps with",
     "does stuff",
@@ -131,9 +137,6 @@ VAGUE_PHRASES = (
 )
 RESERVED_NAME_PARTS = ("claude", "anthropic")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
-FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
-ISO_DATE_RE = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
-BR_DATE_RE = re.compile(r"\b\d{2}/\d{2}/20\d{2}\b")
 MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 TICK_PATH_RE = re.compile(
     r"`((?:references|scripts|assets|templates|evals)/[A-Za-z0-9._/-]+)`"
@@ -141,13 +144,36 @@ TICK_PATH_RE = re.compile(
 ALLOWLIST_RE = re.compile(
     r"^([^:#\s][^:#]*):([A-Z][A-Z0-9_]*)\s+#\s+(\S.*)$"
 )
-TRIGGER_RE = rx(
-    r"use\s+when|use\s+quando|quando\s+o\s+usu[aá]rio|when\s+the\s+user",
-    flags=re.I,
+TRIGGER_KEYWORDS = (
+    "use when",
+    "use for",
+    "use this",
+    "trigger",
+    "ask for",
+    "asks to",
+    "says",
+    "mentions",
 )
-NEGATIVE_RE = rx(
-    r"do\s+not\s+use|don't\s+use|n[aã]o\s+use|n[aã]o\s+usar",
-    flags=re.I,
+TRIGGER_KEYWORDS_PT = (
+    "use quando",
+    "quando o usuario",
+)
+NEGATIVE_KEYWORDS = (
+    "do not use",
+    "don't use",
+    "not for",
+    "not intended for",
+)
+NEGATIVE_KEYWORDS_PT = (
+    "nao use",
+    "nao usar",
+)
+TROUBLESHOOTING_ALIASES = (
+    "troubleshooting",
+    "error handling",
+    "tratamento de erros",
+    "erros",
+    "problemas",
 )
 MULTILINE_DESC_RE = re.compile(r"^description\s*:\s*[|>]", re.I | re.M)
 
@@ -501,22 +527,6 @@ def band_for(score: int) -> str:
     return "CRITICAL_TRUST"
 
 
-def badge_for(score: int, findings: list[Finding], blocked: bool) -> str | None:
-    if score < MERGE_THRESHOLD:
-        return None
-    if score >= 90:
-        badge = "gold"
-    elif score >= 80:
-        badge = "silver"
-    else:
-        badge = "bronze"
-    if badge == "gold" and any(not item.blocking for item in findings):
-        badge = "silver"
-    if blocked and badge == "gold":
-        badge = "silver"
-    return badge
-
-
 def load_allowlist(root: str) -> dict[tuple[str, str], str]:
     path = os.path.join(root, ".trustscore-allowlist")
     text = read_text(path)
@@ -539,6 +549,11 @@ def allowed(allowlist: dict[tuple[str, str], str], rel: str, code: str) -> str |
     return allowlist.get((rel, code))
 
 
+def has_keyword(text: str, keywords: tuple[str, ...]) -> bool:
+    folded_text = fold(text)
+    return any(fold(keyword) in folded_text for keyword in keywords)
+
+
 def finding(
     code: str,
     group: str,
@@ -550,7 +565,9 @@ def finding(
     line: int | None = None,
     severity: str | None = None,
 ) -> Finding:
-    blocking = group == "security" and severity in BLOCKING_SEVERITIES
+    blocking = (group == "security" and severity in BLOCKING_SEVERITIES) or (
+        code in HARD_RULE_CODES
+    )
     return Finding(
         code=code,
         group=group,
@@ -677,7 +694,7 @@ def estrutura_findings(root: str, entries: list[str], name: str) -> list[Finding
                 "estrutura",
                 15,
                 f"pasta '{folder_name}' fora de kebab-case",
-                "Renomeie para letras minúsculas, dígitos e hífens, começando com letra.",
+                "Renomeie para letras minúsculas, dígitos e hífens.",
                 path=folder_name,
             )
         )
@@ -714,9 +731,17 @@ def heading_text(line: str) -> str | None:
     return fold(match.group(2))
 
 
+def body_headings(body: str) -> list[str]:
+    return [item for item in (heading_text(line) for line in body.splitlines()) if item]
+
+
+def has_section(body: str, aliases: tuple[str, ...]) -> bool:
+    present = body_headings(body)
+    return any(any(alias in heading for alias in aliases) for heading in present)
+
+
 def missing_sections(body: str) -> list[str]:
-    headings = [heading_text(line) for line in body.splitlines()]
-    present = [item for item in headings if item]
+    present = body_headings(body)
     missing: list[str] = []
     for label, aliases in EXPECTED_SECTIONS:
         if any(any(alias in heading for alias in aliases) for heading in present):
@@ -740,6 +765,21 @@ def referenced_paths(body: str) -> list[str]:
             seen.add(item)
             unique.append(item)
     return unique
+
+
+def unreferenced_reference_files(root: str, body: str) -> list[str]:
+    ref_root = os.path.join(root, "references")
+    if not os.path.isdir(ref_root):
+        return []
+    mentioned = set(referenced_paths(body))
+    body_folded = fold(body)
+    orphans: list[str] = []
+    for path in iter_files(ref_root):
+        rel = posix_rel(root, path)
+        if rel in mentioned or fold(rel) in body_folded:
+            continue
+        orphans.append(rel)
+    return orphans
 
 
 def conteudo_findings(
@@ -791,7 +831,7 @@ def conteudo_findings(
                     "conteudo",
                     15,
                     f"name '{name}' não está em kebab-case",
-                    "Use letras minúsculas, dígitos e hífens, começando com letra.",
+                    "Use letras minúsculas, dígitos e hífens. Dígito no início é válido.",
                     path=skill_rel,
                 )
             )
@@ -866,17 +906,6 @@ def conteudo_findings(
                     path=skill_rel,
                 )
             )
-        elif length > DESCRIPTION_WARN_CHARS:
-            hits.append(
-                finding(
-                    "DESCRIPTION_LONG",
-                    "conteudo",
-                    5,
-                    f"description com {length} caracteres, acima de {DESCRIPTION_WARN_CHARS}",
-                    "Aperte o texto. Acima de 500 já atrapalha o progressive disclosure.",
-                    path=skill_rel,
-                )
-            )
         if "<" in description or ">" in description:
             hits.append(
                 finding(
@@ -900,25 +929,25 @@ def conteudo_findings(
                     path=skill_rel,
                 )
             )
-        if not TRIGGER_RE.search(description):
+        if not has_keyword(description, TRIGGER_KEYWORDS + TRIGGER_KEYWORDS_PT):
             hits.append(
                 finding(
                     "DESCRIPTION_NO_TRIGGER",
                     "conteudo",
                     5,
-                    "description sem cláusula Use when",
-                    "Inclua frases reais que devem ativar a skill.",
+                    "description sem cláusula de trigger",
+                    "Inclua frases reais que devem ativar a skill (Use when, Use this, etc.).",
                     path=skill_rel,
                 )
             )
-        if not NEGATIVE_RE.search(description):
+        if not has_keyword(description, NEGATIVE_KEYWORDS + NEGATIVE_KEYWORDS_PT):
             hits.append(
                 finding(
                     "DESCRIPTION_NO_NEGATIVE",
                     "conteudo",
                     5,
-                    "description sem cláusula Do NOT use for",
-                    "Inclua gatilhos negativos para não sobrepor skills vizinhas.",
+                    "description sem cláusula de escopo negativo",
+                    "Inclua gatilhos negativos (Do NOT use, not for, not intended for).",
                     path=skill_rel,
                 )
             )
@@ -936,30 +965,6 @@ def conteudo_findings(
                 path=skill_rel,
             )
         )
-    elif line_count > LINES_WARN:
-        hits.append(
-            finding(
-                "LINES_NEAR_LIMIT",
-                "conteudo",
-                5,
-                f"corpo com {line_count} linhas, acima de {LINES_WARN}",
-                "Considere descarregar detalhe em references/.",
-                path=skill_rel,
-            )
-        )
-
-    token_estimate = 0 if stripped == "" else (len(stripped) + TOKEN_CHAR_ESTIMATE - 1) // TOKEN_CHAR_ESTIMATE
-    if token_estimate > TOKENS_MAX:
-        hits.append(
-            finding(
-                "TOKENS_EXCEEDED",
-                "conteudo",
-                10,
-                f"corpo com cerca de {token_estimate} tokens, acima de {TOKENS_MAX}",
-                "Encurte o corpo. Progressive disclosure existe por causa disto.",
-                path=skill_rel,
-            )
-        )
 
     for section in missing_sections(body):
         hits.append(
@@ -968,7 +973,31 @@ def conteudo_findings(
                 "conteudo",
                 2,
                 f"seção '{section}' ausente",
-                "Inclua a seção. As nove não são todas obrigatórias, mas cada ausência custa 2.",
+                f"Considere adicionar a seção '{section}'; é recomendada, não obrigatória.",
+                path=skill_rel,
+            )
+        )
+
+    if not has_section(body, EXAMPLES_ALIASES):
+        hits.append(
+            finding(
+                "EXAMPLES_MISSING",
+                "conteudo",
+                5,
+                "seção de examples ausente",
+                "Considere pares concretos de entrada/saída; é recomendado, não obrigatório.",
+                path=skill_rel,
+            )
+        )
+
+    if not has_section(body, TROUBLESHOOTING_ALIASES):
+        hits.append(
+            finding(
+                "TROUBLESHOOTING_MISSING",
+                "conteudo",
+                5,
+                "seção de error handling / troubleshooting ausente",
+                "Considere uma seção de Troubleshooting; é recomendada, não obrigatória.",
                 path=skill_rel,
             )
         )
@@ -992,22 +1021,21 @@ def conteudo_findings(
         )
         broken += 1
 
-    fences = [(match.start(), match.end()) for match in FENCE_RE.finditer(body)]
-    for pattern in (ISO_DATE_RE, BR_DATE_RE):
-        for match in pattern.finditer(body):
-            if any(start <= match.start() < end for start, end in fences):
-                continue
-            hits.append(
-                finding(
-                    "HARDCODED_DATE",
-                    "conteudo",
-                    5,
-                    f"data hardcoded {match.group(0)} fora de bloco de código",
-                    "Remova a data. Conteúdo temporal envelhece e engana o agente.",
-                    path=skill_rel,
-                    line=line_of(body, match.start()),
-                )
+    unreferenced = 0
+    for rel in unreferenced_reference_files(root, body):
+        if unreferenced >= UNREFERENCED_CAP:
+            break
+        hits.append(
+            finding(
+                "UNREFERENCED_FILE",
+                "conteudo",
+                5,
+                f"arquivo em references/ não mencionado: {rel}",
+                "Cite o arquivo no SKILL.md ou remova-o do pacote.",
+                path=rel,
             )
+        )
+        unreferenced += 1
     return hits
 
 
@@ -1191,14 +1219,14 @@ def make_group(name: str, findings: list[Finding] | None) -> GroupResult:
         return GroupResult(
             name=name,
             weight_bp=weight,
-            gate=name in GATE_GROUPS,
+            gate=False,
             score=None,
             applicable=False,
         )
     return GroupResult(
         name=name,
         weight_bp=weight,
-        gate=name in GATE_GROUPS,
+        gate=False,
         score=group_score(findings),
         applicable=True,
         findings=findings,
@@ -1208,26 +1236,27 @@ def make_group(name: str, findings: list[Finding] | None) -> GroupResult:
 def blocking_reasons(
     security: GroupResult,
     groups: dict[str, GroupResult],
-    score: int,
 ) -> list[str]:
     reasons: list[str] = []
-    for item in security.findings:
-        if item.blocking:
-            where = item.path or ""
-            if item.line:
-                where = f"{where}:{item.line}"
+    items = [
+        *security.findings,
+        *groups["estrutura"].findings,
+        *groups["conteudo"].findings,
+        *groups["evals"].findings,
+    ]
+    for item in items:
+        if not item.blocking:
+            continue
+        where = item.path or ""
+        if item.line:
+            where = f"{where}:{item.line}"
+        if item.group == "security":
             label = f"Segurança [{item.severity}]"
-            if where:
-                label += f" {where}"
-            reasons.append(f"{label} — {item.message}")
-    for name in ("estrutura", "conteudo"):
-        group = groups[name]
-        if group.applicable and group.score is not None and group.score < GROUP_PASS_THRESHOLD:
-            reasons.append(
-                f"Grupo '{GROUP_LABELS[name]}' ficou em {group.score}, abaixo do gate {GROUP_PASS_THRESHOLD}."
-            )
-    if score < MERGE_THRESHOLD:
-        reasons.append(f"TrustScore {score} abaixo do limiar {MERGE_THRESHOLD}.")
+        else:
+            label = f"{GROUP_LABELS[item.group]} [{item.code}]"
+        if where:
+            label += f" {where}"
+        reasons.append(f"{label} — {item.message}")
     return reasons
 
 
@@ -1236,7 +1265,6 @@ def prioritized_fixes(findings: list[Finding]) -> list[Finding]:
         findings,
         key=lambda item: (
             not item.blocking,
-            0 if item.group in GATE_GROUPS else 1,
             -item.penalty,
             item.code,
             item.path or "",
@@ -1322,7 +1350,7 @@ def evaluate(skill_path: str, ai_quality_score: int | None = None) -> dict[str, 
         *groups["conteudo"].findings,
         *groups["evals"].findings,
     ]
-    reasons = blocking_reasons(security, groups, score)
+    reasons = blocking_reasons(security, groups)
     blocked = bool(reasons)
     report = {
         "path": root,
@@ -1330,7 +1358,6 @@ def evaluate(skill_path: str, ai_quality_score: int | None = None) -> dict[str, 
         "error": None,
         "trust_score": score,
         "band": band_for(score),
-        "badge": badge_for(score, all_findings, blocked),
         "blocked": blocked,
         "merge_eligible": not blocked,
         "blocking_reasons": reasons,
@@ -1368,8 +1395,6 @@ def format_report(report: dict[str, Any]) -> str:
     lines: list[str] = []
     lines.append("Merge: BLOCKED" if report["blocked"] else "Merge: eligible")
     lines.append(f"TrustScore: {report['trust_score']}/100 — {report['band']}")
-    if report.get("badge"):
-        lines.append(f"Badge: {report['badge']}")
 
     security = report["security"]
     lines.append("")
@@ -1379,12 +1404,11 @@ def format_report(report: dict[str, Any]) -> str:
     for name in ("estrutura", "conteudo", "qualidade", "evals"):
         group = report["groups"][name]
         label = GROUP_LABELS[name]
-        extra = " [gate]" if group["gate"] else ""
         if not group["applicable"]:
             state = "não aplicável, peso redistribuído" if name == "evals" else "não pontuado, peso redistribuído"
-            lines.append(f"  - {label} ({group['weight_bp']}%){extra}: {state}")
+            lines.append(f"  - {label} ({group['weight_bp']}%): {state}")
             continue
-        lines.append(f"  - {label} ({group['weight_bp']}%){extra}: {group['score']}/100")
+        lines.append(f"  - {label} ({group['weight_bp']}%): {group['score']}/100")
 
     lines.append("")
     if report["blocking_reasons"]:
@@ -1413,7 +1437,7 @@ def format_report(report: dict[str, Any]) -> str:
     if security["score"] == 100:
         lines.append("")
         lines.append(
-            "Caveat: a passada de segurança é heurística (regex). Um scanner de CI com YARA/AST ainda pode achar mais."
+            "Caveat: a passada de segurança é heurística (regex). Padrões óbvios são pegos; payloads ofuscados podem passar."
         )
     if report.get("allowlist_suppressed"):
         lines.append("")

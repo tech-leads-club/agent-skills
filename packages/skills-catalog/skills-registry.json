@@ -1538,11 +1538,12 @@
       "files": [
         "SKILL.md",
         "references/scoring-rubric.md",
-        "scripts/score_skill.py"
+        "scripts/score_skill.py",
+        "scripts/selftest.py"
       ],
-      "author": "github.com/may-santos",
-      "version": "2.0.0",
-      "contentHash": "fb1a4a0c64a43f2bf6d0c9291c59b136b947c9b0ec116c926c254c659ecd5501"
+      "author": "may-santos",
+      "version": "2.1.0",
+      "contentHash": "047aadaa5efe9a12edfec1efad7954e76bf26d36a434b0b61b9aff6be4365625"
     },
     {
       "name": "social-selling",

@@ -110,6 +110,7 @@ export function getFilesInDirectory(dir: string): string[] {
     const entries = readdirSync(currentDir, { withFileTypes: true })
     for (const entry of entries) {
       if (IGNORED_FILES.includes(entry.name) || entry.name.startsWith('.')) continue
+      if (entry.name === '__pycache__' || entry.name.endsWith('.pyc')) continue
       const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name
 
       if (entry.isDirectory()) {
