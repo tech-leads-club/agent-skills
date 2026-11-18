@@ -960,4 +960,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # Windows writes piped output in the ANSI code page, which cannot encode every character a plan holds.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     raise SystemExit(main())

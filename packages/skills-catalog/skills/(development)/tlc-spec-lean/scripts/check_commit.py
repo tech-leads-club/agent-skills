@@ -110,7 +110,7 @@ def untracked(root):
     """Untracked, unignored paths outside .specs/ - what no commit will carry. None without git."""
     try:
         proc = subprocess.run(["git", "status", "--porcelain", "--untracked-files=normal"],
-                              cwd=root, capture_output=True, text=True)
+                              cwd=root, capture_output=True, encoding="utf-8", errors="replace")
     except OSError:
         return None
     if proc.returncode != 0:
@@ -159,7 +159,7 @@ def commits_since(root, rev):
     """Commits after `rev` that touch code (not .specs/). Unknown history counts as none."""
     try:
         proc = subprocess.run(["git", "rev-list", f"{rev}..HEAD", "--", ".", ":(exclude).specs"],
-                              cwd=root, capture_output=True, text=True)
+                              cwd=root, capture_output=True, encoding="utf-8", errors="replace")
     except OSError:
         return []
     return proc.stdout.split() if proc.returncode == 0 else []
@@ -201,4 +201,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # Windows writes piped output in the ANSI code page, which cannot encode every character a plan holds.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     raise SystemExit(main())
