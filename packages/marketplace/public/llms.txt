@@ -1,6 +1,6 @@
 # Agent Skills
 
-> 94 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
+> 95 packaged instruction sets that extend AI coding agents with reviewed workflows and domain expertise. Each skill is a Markdown file plus optional scripts, templates and reference docs, installable into 19 agents including Cursor, Claude Code, GitHub Copilot, Windsurf and Cline.
 
 Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`. Add `--agent <id>` to target one agent, or `--global` to install for every project. Source: https://github.com/tech-leads-club/agent-skills
 
@@ -8,7 +8,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 
 - [Architecture](https://agent-skills.techleads.club/categories/architecture/): 14 skills. Skills for software architecture, patterns, and system design
 - [Cloud & Infrastructure](https://agent-skills.techleads.club/categories/cloud/): 5 skills. Skills for cloud management, AWS, and DevOps
-- [Skill & Agent Creation](https://agent-skills.techleads.club/categories/creation/): 6 skills. Skills for creating new skills and subagents
+- [Skill & Agent Creation](https://agent-skills.techleads.club/categories/creation/): 7 skills. Skills for creating new skills and subagents
 - [Decision Making](https://agent-skills.techleads.club/categories/decision-making/): 2 skills. Skills for critical thinking, structured dissent, and decision quality
 - [Design](https://agent-skills.techleads.club/categories/design/): 4 skills. Skills for UI/UX design and design systems
 - [Go-to-Market](https://agent-skills.techleads.club/categories/gtm/): 18 skills. Skills for GTM, pricing, outbound, inbound, paid, retention, and GTM operations
@@ -116,6 +116,7 @@ Install any skill with `npx @tech-leads-club/agent-skills install --skill <id>`.
 - [SEO optimization](https://agent-skills.techleads.club/skills/seo/): Optimize for search engine visibility and ranking
 - [Shopify Developer Reference](https://agent-skills.techleads.club/skills/shopify-developer/): Complete Shopify development reference covering Liquid templating, OS 2.0 themes, GraphQL APIs, Hydrogen, Functions, and performance optimization (API v2026-01)
 - [Skill Architect](https://agent-skills.techleads.club/skills/skill-architect/): Expert guide for designing and building high-quality skills from scratch through structured conversation
+- [Skill Validator](https://agent-skills.techleads.club/skills/skill-validator/): Estimates a skill's TrustScore (0-100) from security and quality checks, then reports what blocks the merge and how to fix it
 - [Social Selling Skill](https://agent-skills.techleads.club/skills/social-selling/): When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also
 - [Solo Founder GTM: The Complete Playbook for Scaling Without Hiring](https://agent-skills.techleads.club/skills/solo-founder-gtm/): When the user is a solo founder building their GTM motion, wants to scale without hiring, or needs to design an AI agent team for go-to-market. Also
 - [Spec-Driven Implementation Evaluation](https://agent-skills.techleads.club/skills/spec-driven-eval/): Scores how completely an implementation fulfills a PRD/spec, case by case, and produces a single comparable final grade. Invoke only when explicitly named (e.g. run spec-driven-eval); do not auto-trigger
