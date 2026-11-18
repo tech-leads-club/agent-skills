@@ -1,3 +1,18 @@
+## 0.17.21 (2026-11-18)
+
+### 🚀 Features
+
+- **skills-catalog:** record the request and the fix pass in tlc-spec-lean ([586a794ef](https://github.com/tech-leads-club/agent-skills/commit/586a794ef))
+- **skills-catalog:** bump tlc-spec-lean to 3.1.0, leave implementation to the model ([dd6878eb6](https://github.com/tech-leads-club/agent-skills/commit/dd6878eb6))
+
+### 🩹 Fixes
+
+- **skills-catalog:** keep tlc-spec-lean scripts from crashing on Windows output ([3e11e2555](https://github.com/tech-leads-club/agent-skills/commit/3e11e2555))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
 ## 0.17.20 (2026-11-10)
 
 ### 🚀 Features
