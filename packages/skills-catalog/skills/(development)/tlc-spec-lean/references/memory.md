@@ -1,7 +1,8 @@
 # Memory
 
-Decisions that constrain future features outlive a session in `.specs/STATE.md`. Where a feature
-stopped is in its `plan.md` lines and in git.
+Decisions that constrain future features outlive a session in `.specs/STATE.md`. The user's
+request is in the feature's `request.md`. Where a feature stopped is in its `plan.md` lines - in
+`request.md`'s, when the change skipped the plan - and in git.
 
 ## `.specs/STATE.md`
 
@@ -31,17 +32,19 @@ old row's status to `superseded by AD-NNN`) and say why.
 ## Resuming work - a new session, or after a compaction
 
 A compaction is a resume: the summary keeps the task and drops the rules. Re-read `SKILL.md` and the
-reference for the phase the files show, then `.specs/STATE.md` and the feature's `plan.md`, and
+reference for the phase the files show, then `.specs/STATE.md`, the feature's `request.md` and
+its `plan.md`, and
 reconcile them against git: the commits are fact; a note written before a crash is intent. After a
 compaction in the middle of a run, continue when the files and git agree, and stop only on a
 conflict. In a new session, propose the next step before writing code.
 
-Where the files put you - the first row that holds:
+Where the files put you - the first row that holds; the lines are in `plan.md`, or in `request.md`
+when there is no plan:
 
 | The files show | Next |
 | --- | --- |
 | `plan.md` whose `**Approved**:` line holds no date and quote yet | the plan: open questions are still the user's - present it and stop |
 | `**Review:**` not yet `sent at <hash>` | Build: the first slice no commit message names yet; the uncommitted changes in the tree belong to it - read them before building on them |
 | `**Review:** sent at <hash>` and no `review.md` | wait for the reviewer; send it again only when it cannot return - a new session - and say so on the line |
-| `review.md` and no commit after the `**Review:**` hash | the fix pass |
-| a commit after the `**Review:**` hash | the report |
+| `review.md` and no `**Fix pass:** done` line | the fix pass |
+| `**Fix pass:** done` | the report |

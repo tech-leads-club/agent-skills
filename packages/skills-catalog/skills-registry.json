@@ -1799,8 +1799,8 @@
         "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "3.1.0",
-      "contentHash": "65edabf44bb3516879c3354ae5456e1b9f948311020da67dd5851f9d1266f4d6"
+      "version": "3.2.0",
+      "contentHash": "788382a643dcb946c6062764e7a5af73995aaf2724357b1c478fa494b1723262"
     },
     {
       "name": "vercel-deploy",

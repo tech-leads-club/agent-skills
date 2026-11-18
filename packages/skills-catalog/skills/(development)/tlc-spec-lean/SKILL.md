@@ -4,7 +4,7 @@ description: 'Spec-driven feature work that freezes what must be true and frees 
 license: CC-BY-4.0
 metadata:
   author: Tech Leads Club - github.com/tech-leads-club
-  version: '3.1.0'
+  version: '3.2.0'
 ---
 
 # Tech Lead's Club - Spec, Lean
@@ -55,12 +55,14 @@ These hold even if no reference file is read.
    ([review.md](references/review.md)).
 6. An approved plan authorizes local edits and local commits. `git push`, deploy and production
    data changes need an explicit go-ahead for that action.
-7. **The files hold the run; the chat does not survive a compaction.** Each answer goes into the
-   plan in the turn it arrives; what the user settles while you build goes on the plan's
-   `**Settled mid-build:**` line in their words; a choice you make while building that a later
-   feature must follow goes into `.specs/STATE.md` when you make it; the review goes on the
-   `**Review:**` line before it is sent. After a compaction or in a new session, re-read this file
-   and the current phase's reference, then resume from the files ([memory.md](references/memory.md)).
+7. **The files hold the run; the chat does not survive a compaction.** The user's request goes into
+   `request.md` verbatim before anything else - the reviewer gets it from there, never from memory.
+   Each answer goes into the plan in the turn it arrives; what the user settles while you build goes
+   on the plan's `**Settled mid-build:**` line in their words; a choice you make while building that
+   a later feature must follow goes into `.specs/STATE.md` when you make it; the review goes on the
+   `**Review:**` line before it is sent, and the fix pass on the `**Fix pass:**` line before it is
+   committed. After a compaction or in a new session, re-read this file and the current phase's
+   reference, then resume from the files ([memory.md](references/memory.md)).
 
 ## Artifacts
 
@@ -68,13 +70,16 @@ These hold even if no reference file is read.
 .specs/
 ├── STATE.md                    # Decisions log (AD-NNN)
 └── features/<feature>/
-    ├── plan.md                 # problem, shape, surface, doors, criteria; approval, settled, review lines
+    ├── request.md              # the user's request, verbatim, saved before anything else
+    ├── plan.md                 # problem, shape, surface, doors, criteria; approval, settled, review, fix pass lines
     ├── captures/               # binding source files
     └── review.md               # the reviewer's verdict and findings
 ```
 
 For a change under roughly three files with no one-way door, skip `plan.md`: ask the product
-decisions, build, and still send the review with the request as its only spec.
+decisions and write each answer under the request in `request.md`, build, and still send the
+review with `request.md` as its only spec. `request.md` then carries the `**Review:**` and
+`**Fix pass:**` lines the plan would ([review.md](references/review.md)).
 
 ## Phases
 
