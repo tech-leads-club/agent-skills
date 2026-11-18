@@ -1783,33 +1783,24 @@
     },
     {
       "name": "tlc-spec-lean",
-      "description": "Spec-driven feature work that freezes obligations instead of the plan: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors, then proof-backed checks, then build, then an independent Verifier. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"write the checks\", \"build this plan\", or \"verify work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
+      "description": "Spec-driven feature work that freezes what must be true and frees how it is built: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors; then the build, one vertical slice at a time, each committed; then one review by a fresh sub-agent and one fix pass. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"build this plan\", or \"review this work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
       "category": "development",
       "path": "(development)/tlc-spec-lean",
       "files": [
         "SKILL.md",
         "references/build.md",
-        "references/checks.md",
         "references/memory.md",
         "references/plan.md",
-        "references/verify-screens.md",
-        "references/verify.md",
+        "references/review.md",
         "scripts/check_commit.py",
-        "scripts/check_proofs.py",
-        "scripts/fixtures/checks.md",
         "scripts/fixtures/plan.md",
-        "scripts/fixtures/proofs.md",
-        "scripts/fixtures/verification.md",
         "scripts/lean_config.py",
-        "scripts/lessons.py",
         "scripts/selftest.py",
-        "scripts/validate_checks.py",
-        "scripts/validate_plan.py",
-        "scripts/validate_verification.py"
+        "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "2.2.0",
-      "contentHash": "65cf4acff0a88093eafc9d34a36ca3a03a74c78301b1b4025e517ecc18e66a44"
+      "version": "3.1.0",
+      "contentHash": "65edabf44bb3516879c3354ae5456e1b9f948311020da67dd5851f9d1266f4d6"
     },
     {
       "name": "vercel-deploy",
