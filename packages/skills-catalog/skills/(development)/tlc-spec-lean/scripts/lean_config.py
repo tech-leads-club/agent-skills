@@ -1,11 +1,9 @@
 """
-lean_config.py - what a feature's artifacts say the Verifier owes, read the same way by every gate.
+lean_config.py - how plan.md says a source binds, shared with the sibling skills' copies.
 
-Two facts decide it: whether the feature has a screen (the screen comparison), and whether plan.md's
-`## Sources` marks a source binding (the binding-source comparison). The shape of a `Run` group and
-of a proof that reads one lives here too. validate_checks.py, validate_verification.py and
-check_proofs.py act on these, so they live in one place - two copies of the same rule drift until
-one gate demands what the other does not.
+validate_plan.py reads whether plan.md's `## Sources` marks a source binding from here. The
+screen and proof helpers below serve the sibling skills that ship this same file; this skill has
+no checks.md since 3.0.0 and does not call them.
 
 Every function takes lines already stripped of fenced blocks.
 """
