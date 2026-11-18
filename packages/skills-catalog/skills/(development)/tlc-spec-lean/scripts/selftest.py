@@ -534,7 +534,7 @@ TOOLING = [
 
 
 def run_commit_followups():
-    """check_commit.py after an OK: untracked files, and send / wait / fix / report from plan.md."""
+    """check_commit.py after an OK: untracked files, and send / wait / fix / report from plan.md or request.md."""
     ok = True
     root = tempfile.mkdtemp(prefix="commit-")
 
@@ -578,11 +578,37 @@ def run_commit_followups():
         step("a sent review with no review.md is waited for", [wait], [send, fix])
 
         write_artifact(os.path.join(fdir, "review.md"), "# Billing review\n\nVerdict: approve.\n")
-        step("review.md with no commit after the Review hash is the fix pass", [fix], [send, wait])
+        step("review.md with no Fix pass line is the fix pass", [fix, "in plan.md"], [send, wait])
 
         write_artifact(os.path.join(root, "app.ts"), "export const charge = 2\n")
         commit("fix: charge in cents")
-        step("a code commit after the Review hash leaves the report", [report], [fix, send, wait])
+        step("a code commit alone does not close the fix pass", [fix], [report, send, wait])
+
+        closed = reviewed.replace("\n", "\n**Fix pass:** done - no changes needed\n", 1)
+        write_artifact(os.path.join(fdir, "plan.md"), closed)
+        step("a Fix pass line leaves the report, with no code commit after it", [report], [fix, send, wait])
+
+        # A change that skipped the plan: request.md carries the same lines.
+        os.remove(os.path.join(fdir, "plan.md"))
+        os.remove(os.path.join(fdir, "review.md"))
+        request = "# Billing\n\nThe user's request:\n\n> charge once\n"
+        write_artifact(os.path.join(fdir, "request.md"), request)
+        step("request.md with no plan.md and no Review line is told to send the review", [send], [wait, fix])
+
+        write_artifact(os.path.join(fdir, "request.md"), request + f"\n**Review:** sent at {base}\n")
+        write_artifact(os.path.join(fdir, "review.md"), "# Billing review\n\nVerdict: approve.\n")
+        step("a reviewed request.md is the fix pass, written in request.md", [fix, "in request.md"],
+             [send, wait, report])
+
+        write_artifact(os.path.join(fdir, "request.md"),
+                       request + f"\n**Review:** sent at {base}\n**Fix pass:** done - no changes needed\n")
+        step("a Fix pass line in request.md leaves the report", [report], [fix, send, wait])
+
+        os.makedirs(os.path.join(root, ".specs", "features", "draft"))
+        write_artifact(os.path.join(root, ".specs", "features", "draft", "request.md"), request)
+        write_artifact(os.path.join(root, ".specs", "features", "draft", "plan.md"),
+                       plan.replace("**Approved**:", "**Pending**:", 1))
+        step("a request.md beside an unapproved plan.md owes no build step", [report], ["`draft`"])
 
         os.makedirs(os.path.join(root, ".playwright-mcp"))
         write_artifact(os.path.join(root, ".playwright-mcp", "page.png"), "x")

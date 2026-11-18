@@ -28,8 +28,10 @@ After a passing message it prints what the run still owes, because a command's o
 agent after a compaction, where a rule it read hours earlier may not:
   - untracked files outside .specs/ - not in any commit; the build ends with a clean tree (rule 4),
     so commit them, delete them, or ignore them. Browser and test tools leave output behind.
-  - per feature with an approved plan.md, the next step its lines show: send the review, wait for
-    it, or close it with the one fix pass and the report.
+  - per feature with an approved plan.md - or a request.md and no plan.md, when the change skipped
+    the plan - the next step its lines show: send the review, wait for it, make the one fix pass,
+    or report. The `**Fix pass:**` line, not a later commit, says the fix pass happened, so a
+    review that needs no change closes too.
 
 Usage:
   python3 <skill-dir>/scripts/check_commit.py --message "feat(auth): add email validation" [--root DIR]
@@ -50,6 +52,7 @@ HEADER_RE = re.compile(r"^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<bang>!)?: (?
 TRAILER_RE = re.compile(r"^\s*(co-authored-by|made-with)\s*:", re.IGNORECASE | re.MULTILINE)
 APPROVED_RE = re.compile(r"^\**\s*Approved\s*\**\s*:\s*\**\s*\d{4}-\d{2}-\d{2}\b", re.IGNORECASE)
 REVIEW_SENT_RE = re.compile(r"^\**\s*Review\s*:?\s*\**\s*:?\s*sent at\s+`?([0-9a-f]{4,40})`?", re.IGNORECASE)
+FIX_DONE_RE = re.compile(r"^\**\s*Fix pass\s*:?\s*\**\s*:?\s*done\b", re.IGNORECASE)
 
 
 def read_message(args):
@@ -125,19 +128,28 @@ def plan_lines(path):
 
 
 def next_steps(root):
-    """(feature, what follows) for each feature whose plan is approved and whose run is not over."""
+    """(feature, what follows) for each feature whose run has started and is not reported yet.
+
+    The run's lines live in plan.md once it is approved, or in request.md when the change skipped
+    the plan. A plan.md not yet approved owes no build step.
+    """
     base = os.path.join(root, ".specs", "features")
     if not os.path.isdir(base):
         return []
     out = []
     for name in sorted(os.listdir(base)):
         plan = os.path.join(base, name, "plan.md")
-        if not os.path.isfile(plan):
-            continue
-        lines = plan_lines(plan)
-        if not any(APPROVED_RE.match(s) for s in lines):
+        request = os.path.join(base, name, "request.md")
+        if os.path.isfile(plan):
+            lines, where = plan_lines(plan), "plan.md"
+            if not any(APPROVED_RE.match(s) for s in lines):
+                continue
+        elif os.path.isfile(request):
+            lines, where = plan_lines(request), "request.md"
+        else:
             continue
         sent = next((REVIEW_SENT_RE.match(s) for s in lines if REVIEW_SENT_RE.match(s)), None)
+        fixed = any(FIX_DONE_RE.match(s) for s in lines)
         reviewed = os.path.isfile(os.path.join(base, name, "review.md"))
         if not sent:
             out.append((name, "after its last build commit, send the review (references/review.md): "
@@ -146,23 +158,14 @@ def next_steps(root):
         elif not reviewed:
             out.append((name, f"the review was sent at {sent.group(1)}; wait for it, then make the one "
                               "fix pass"))
-        elif not commits_since(root, sent.group(1)):
-            out.append((name, "this is the one fix pass after review.md: commit it, leave the tree clean, "
-                              "then report - there is no second review"))
+        elif not fixed:
+            out.append((name, f"this is the one fix pass after review.md: write `**Fix pass:** done - "
+                              f"<what it changed, or no changes needed>` in {where}, commit, leave the "
+                              "tree clean, then report - there is no second review"))
         else:
-            out.append((name, "the fix pass is already committed; what remains is the report - a further "
-                              "change is outside the one pass, so name it there"))
+            out.append((name, "the fix pass is recorded; what remains is the report - a further change "
+                              "is outside the one pass, so name it there"))
     return out
-
-
-def commits_since(root, rev):
-    """Commits after `rev` that touch code (not .specs/). Unknown history counts as none."""
-    try:
-        proc = subprocess.run(["git", "rev-list", f"{rev}..HEAD", "--", ".", ":(exclude).specs"],
-                              cwd=root, capture_output=True, encoding="utf-8", errors="replace")
-    except OSError:
-        return []
-    return proc.stdout.split() if proc.returncode == 0 else []
 
 
 def main(argv=None):

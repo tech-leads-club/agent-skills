@@ -10,6 +10,9 @@ Artifacts).
 
 ## Before asking anything
 
+- Save the user's request verbatim to `.specs/features/<feature>/request.md` - every sentence, as
+  given, with the captures it came with listed by path. The plan is written from it, and the
+  reviewer reads it from there after the chat is gone.
 - Read `.specs/STATE.md` `## Decisions`. Every `active` `AD-NNN` constrains the shape: conform, or
   append an entry that supersedes it and say why.
 - Open every binding source in full - every capture, frame and state - before the first
@@ -226,6 +229,7 @@ Every unresolved decision is a criterion, an `Assumptions` row, or an open quest
 **Approved**: <written when the user approves - YYYY-MM-DD - user: "their words">
 **Settled mid-build:** <what the user settles while it is built, in their words; or none>
 **Review:** <written when the review is sent - sent at <HEAD short hash>>
+**Fix pass:** <written when the fix pass is made - done - <what it changed, or no changes needed>>
 
 ## Problem
 
