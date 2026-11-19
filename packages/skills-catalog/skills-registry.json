@@ -996,9 +996,9 @@
         "scripts/setup.sh",
         "scripts/validate.mjs"
       ],
-      "author": "Felipe Rodrigues - github.com/felipfr",
+      "author": "Felipe Rodrigues - github.com/felipfr; contrast issue reported by github.com/felipe-silva-azos",
       "version": "1.0.1",
-      "contentHash": "8a240b980cee9287a20ec6ea1e4837c5d6e43c756ab17fcebbf6b1087a609815"
+      "contentHash": "913fce8c7f4e12cccee3a46eb8a628884b75b22fff6ed43b6110926ff837f39d"
     },
     {
       "name": "modular-decomposition",
