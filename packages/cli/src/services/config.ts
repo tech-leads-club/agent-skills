@@ -2,22 +2,31 @@ import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
+import { AGENT_TYPES, type AgentType } from '@tech-leads-club/core'
+
 import { CONFIG_DIR, CONFIG_FILE, CURRENT_CONFIG_VERSION } from '../utils/constants'
 
 export interface UserConfig {
   firstLaunchComplete: boolean
   shortcutsOverlayDismissed: boolean
   version: string
+  targetAgents: AgentType[]
 }
 
 const DEFAULT_CONFIG: UserConfig = {
   firstLaunchComplete: false,
   shortcutsOverlayDismissed: false,
   version: CURRENT_CONFIG_VERSION,
+  targetAgents: [],
 }
 
 function getConfigPath(): string {
   return join(homedir(), CONFIG_DIR, CONFIG_FILE)
+}
+
+function validateTargetAgents(agents: unknown): AgentType[] {
+  if (!Array.isArray(agents)) return []
+  return agents.filter((agent) => AGENT_TYPES.includes(agent))
 }
 
 function validateConfig(config: unknown): UserConfig {
@@ -28,6 +37,7 @@ function validateConfig(config: unknown): UserConfig {
     firstLaunchComplete: Boolean(partial.firstLaunchComplete),
     shortcutsOverlayDismissed: Boolean(partial.shortcutsOverlayDismissed),
     version: String(partial.version || CURRENT_CONFIG_VERSION),
+    targetAgents: validateTargetAgents(partial.targetAgents),
   }
 }
 
