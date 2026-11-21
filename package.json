@@ -82,7 +82,7 @@
     "jest-environment-node": "^30.3.0",
     "jest-util": "^30.3.0",
     "jsonc-eslint-parser": "^2.4.2",
-    "next": "16.2.12",
+    "next": "16.4.6",
     "nx": "23.1.1",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
@@ -98,9 +98,10 @@
   },
   "overrides": {
     "brace-expansion": "5.0.9",
+    "handlebars": "4.7.10",
     "next": {
       "postcss": "8.5.25",
-      "sharp": "0.35.3"
+      "sharp": "0.35.5"
     }
   },
   "nx": {
