@@ -1,3 +1,19 @@
+## 0.17.22 (2026-11-21)
+
+### 🚀 Features
+
+- **skills-catalog:** add skill-validator ([5ace2758e](https://github.com/tech-leads-club/agent-skills/commit/5ace2758e))
+
+### 🩹 Fixes
+
+- **skills-catalog:** close catalog validator file in skill-validator drift guard ([aae2592c5](https://github.com/tech-leads-club/agent-skills/commit/aae2592c5))
+- **skills-catalog:** align skill-validator with catalog best-practice gates ([8618e1fb2](https://github.com/tech-leads-club/agent-skills/commit/8618e1fb2))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- may-santos
+
 ## 0.17.21 (2026-11-18)
 
 ### 🚀 Features
