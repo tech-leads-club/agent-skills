@@ -1,17 +1,18 @@
 # Plan
 
-The one artifact a human reads to understand the work and object to it, before any claim
-carries a test selector. Two halves: what must be true, then what is being built. They share a
-file because they are one review: deriving the checks in the same pass that decides the shape
-produces checks that ratify whatever was already assumed.
+The one artifact a human reads to understand the work and object to it, before any code. Two
+halves: what must be true, then what is being built. They share a file because they are one
+review. The builder and the reviewer hold the work against this file, so what it leaves out
+reaches nobody: the questions asked here decide more of the result than anything after.
 
-Skip this file when the change is under roughly three files with no one-way door; write the
-intent paragraph straight into `checks.md`.
+Skip this file when the change is under roughly three files with no one-way door (SKILL.md,
+Artifacts).
 
 ## Before asking anything
 
-- Load confirmed lessons: `python3 <skill-dir>/scripts/lessons.py --root <project> list --status confirmed`
-  (add `--scope` or `--query` for the area). Confirmed only. No store yet: skip.
+- Save the user's request verbatim to `.specs/features/<feature>/request.md` - every sentence, as
+  given, with the captures it came with listed by path. The plan is written from it, and the
+  reviewer reads it from there after the chat is gone.
 - Read `.specs/STATE.md` `## Decisions`. Every `active` `AD-NNN` constrains the shape: conform, or
   append an entry that supersedes it and say why.
 - Open every binding source in full - every capture, frame and state - before the first
@@ -33,7 +34,7 @@ answer; "anyone evaluating the product has to enter a card first" is a problem s
 disagree with. Copy the evidence the source gives literally, or say it gives none.
 
 Close the section with what is different for a user when this ships. That line is the goal the
-checks are held against.
+build and the review are held against.
 
 ## How to ask
 
@@ -74,8 +75,8 @@ decide. There is no table for it in the plan.
 | a collection being organised | grouping, naming, ordering, duplicates, the exception that does not fit |
 
 The two that hide best: the error shape (decided by whoever writes the first handler) and the empty
-state (invisible until a new account opens the page). State, persistence and contracts are the
-nine dimensions in [checks.md](checks.md), not this list.
+state (invisible until a new account opens the page). State, persistence and contracts go in
+`Shape`, `Surface` and `Landing`, not this list.
 
 ## Write the criteria in EARS
 
@@ -110,8 +111,16 @@ add criteria only for what the source cannot show: what a control does, states n
 the rules behind a form. Labels and sentences a capture draws are copied from it, character for
 character, in criteria and Assumptions alike; a state the capture does not draw reuses them, not a
 paraphrase. Its sample data - names, quantities, dates - is not transcribed: the builder recreates
-it with the capture open. A binding source is also the measure of scope: build what it draws, minus
-what `## Differences from the source` lists.
+it with the capture open. Whether the running app should hold that sample data when the work is
+handed over, so the user can open the captured states, is the user's call: ask it. A binding source
+is also the measure of scope: build what it draws, minus what `## Differences from the source`
+lists.
+
+**A capture is a viewport, not the whole request.** Read each sentence of the request against the
+captures. A column past the right edge, a row below the fold, a state no capture draws, a total the
+request names and the frame cuts off - each is still the request's, and gets a criterion or a
+question. For a screen, the criterion says what the user sees, not only what a response carries: a
+value computed and sorted on but never shown is a requirement that went missing.
 
 **Which references bind.** A capture, screenshot, design frame or live site that comes with the
 request binds: it is the result the user expects, and the user does not have to say so. It is
@@ -185,7 +194,7 @@ When stored data changes, the `erDiagram` also carries the one-way constraints `
 
 Only a route this adds or whose signature changes: route, what goes in, what comes out, statuses,
 and who may call it. The statuses include what a caller who may not call gets (redirect, 401, 403
-or 404); `Who: anyone` owes none. No check numbers here. `None - nothing consumed outside` is
+or 404); `Who: anyone` owes none. No criterion or check numbers here. `None - nothing consumed outside` is
 complete.
 
 ## Landing - the one-way doors
@@ -218,6 +227,9 @@ Every unresolved decision is a criterion, an `Assumptions` row, or an open quest
 # <Feature>
 
 **Approved**: <written when the user approves - YYYY-MM-DD - user: "their words">
+**Settled mid-build:** <what the user settles while it is built, in their words; or none>
+**Review:** <written when the review is sent - sent at <HEAD short hash>>
+**Fix pass:** <written when the fix pass is made - done - <what it changed, or no changes needed>>
 
 ## Problem
 
@@ -330,11 +342,16 @@ approved by the user.>
 
 Present the plan and stop: this is the one default stop for a human. Name `Shape`, any `Landing`
 door with a live alternative, and anything that changes existing data or a consumed contract.
-When the user approves, write `**Approved**: <YYYY-MM-DD> - user: "<their words>"` under the
-title; one the user did not give is never written, and `validate_checks.py` refuses to start
-without it. Then continue into [checks.md](checks.md).
+Answers to your questions are not the approval: they change the plan, so write them in, present
+the plan that holds them, and stop again - do not offer to start building once they arrive, and
+never quote them on the `**Approved**:` line. When the user approves, write
+`**Approved**: <YYYY-MM-DD> - user: "<their words>"` under the title; one the user did not give is
+never written, and nothing is built without it. Then continue into [build.md](build.md).
 
 ## Notes
 
-- P1 is a vertical slice, not a layer. Priority orders the work and never scales down verification.
+- A slice is an outcome a user can watch, cut through every layer it needs - route, rule, tests,
+  screen - and the build takes them in order, each committed. "The API" or "the screen" is a
+  layer, not a slice. S1 is the thinnest path a user can walk end to end; the next slices widen it.
+  P1 is a vertical slice too. Priority orders the work and never scales down the review.
 - A criterion you cannot imagine a test for is not ready.

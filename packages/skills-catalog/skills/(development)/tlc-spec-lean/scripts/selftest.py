@@ -116,7 +116,7 @@ CASES = [
      1, "names no status code"),
     ("validate_plan", "plan.md", "check ids written into Surface before checks exist",
      lambda s: s.replace("anything else gets `401` |", "anything else gets `401` | C7, C8, C9 |"),
-     1, "does not exist yet"),
+     1, "Surface names a check id"),
     ("validate_plan", "plan.md", "a restricted Surface route with no status for the callers it refuses",
      lambda s: s.replace("| `200`, `401`, `409`, `422` |", "| `200`, `409`, `422` |"),
      1, "names no code for the rest"),
@@ -516,10 +516,109 @@ TOOLING = [
      ["feat: Suspend the subscription"], 1, "start lowercase"),
     ("check_commit.py", "an unknown type fails",
      ["wip: suspend the subscription"], 1, "is not one of"),
+    ("check_commit.py", "a description ending in a period fails",
+     ["fix: stop the double charge."], 1, "end with a period"),
+    ("check_commit.py", "a breaking marker without its footer fails",
+     ["feat!: drop the legacy plan ids"], 1, "BREAKING CHANGE"),
+    ("check_commit.py", "an agent trailer fails",
+     ["fix: stop the double charge\n\nCo-Authored-By: An Agent <agent@example.com>"], 1, "agent trailer"),
+    ("check_commit.py", "an agent trailer the repo asks for passes with --allow-trailers",
+     ["fix: stop the double charge\n\nCo-Authored-By: An Agent <agent@example.com>", "--allow-trailers"],
+     0, "OK"),
+    ("check_commit.py", "the message as --message passes",
+     ["--message", "docs(billing): note the grace period"], 0, "OK"),
     ("lessons.py", "normalization regressions pass", ["selftest"], 0, "ok"),
     ("lessons.py", "--root before the subcommand is the documented form",
      ["--root", tempfile.gettempdir(), "list", "--status", "confirmed"], 0, ""),
 ]
+
+
+def run_commit_followups():
+    """check_commit.py after an OK: untracked files, and send / wait / fix / report from plan.md or request.md."""
+    ok = True
+    root = tempfile.mkdtemp(prefix="commit-")
+
+    def git(*cmd):
+        return subprocess.run(["git", *cmd], cwd=root, capture_output=True, text=True).stdout.strip()
+
+    def commit(message):
+        # .specs/ stays untracked, as in a repo that ignores nothing for it: the filter is under test
+        git("add", "-A", "--", ".", ":(exclude).specs")
+        git("-c", "user.email=s@t", "-c", "user.name=selftest", "commit", "-qm", message)
+        return git("rev-parse", "--short", "HEAD")
+
+    def step(desc, present, absent=()):
+        nonlocal ok
+        code, out = run_script("check_commit.py", "fix: stop the double charge", "--root", root)
+        if code == 0 and all(p in out for p in present) and not any(a in out for a in absent):
+            print(f"  ok      check_commit.py: {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  check_commit.py: {desc} - want {present!r} and none of {absent!r}, "
+                  f"got exit={code}: {out.strip()[:400]}")
+
+    send, wait, fix, report = "send the review", "wait for it", "one fix pass after review.md", "the report"
+    try:
+        fdir = os.path.join(root, ".specs", "features", FEATURE)
+        os.makedirs(fdir)
+        plan = read_artifact(os.path.join(FIXTURES, "plan.md"))
+        git("init", "-q")
+        write_artifact(os.path.join(root, ".gitignore"), "ignored/\n")
+        write_artifact(os.path.join(root, "app.ts"), "export const charge = 1\n")
+        base = commit("feat: charge once")
+
+        write_artifact(os.path.join(fdir, "plan.md"), plan.replace("**Approved**:", "**Pending**:", 1))
+        step("a plan not yet approved owes no build step", [], [send, wait, fix, report])
+
+        write_artifact(os.path.join(fdir, "plan.md"), plan)
+        step("an approved plan with no Review line is told to send the review", [send], [wait, fix])
+
+        reviewed = plan.replace("\n", f"\n**Review:** sent at {base}\n", 1)
+        write_artifact(os.path.join(fdir, "plan.md"), reviewed)
+        step("a sent review with no review.md is waited for", [wait], [send, fix])
+
+        write_artifact(os.path.join(fdir, "review.md"), "# Billing review\n\nVerdict: approve.\n")
+        step("review.md with no Fix pass line is the fix pass", [fix, "in plan.md"], [send, wait])
+
+        write_artifact(os.path.join(root, "app.ts"), "export const charge = 2\n")
+        commit("fix: charge in cents")
+        step("a code commit alone does not close the fix pass", [fix], [report, send, wait])
+
+        closed = reviewed.replace("\n", "\n**Fix pass:** done - no changes needed\n", 1)
+        write_artifact(os.path.join(fdir, "plan.md"), closed)
+        step("a Fix pass line leaves the report, with no code commit after it", [report], [fix, send, wait])
+
+        # A change that skipped the plan: request.md carries the same lines.
+        os.remove(os.path.join(fdir, "plan.md"))
+        os.remove(os.path.join(fdir, "review.md"))
+        request = "# Billing\n\nThe user's request:\n\n> charge once\n"
+        write_artifact(os.path.join(fdir, "request.md"), request)
+        step("request.md with no plan.md and no Review line is told to send the review", [send], [wait, fix])
+
+        write_artifact(os.path.join(fdir, "request.md"), request + f"\n**Review:** sent at {base}\n")
+        write_artifact(os.path.join(fdir, "review.md"), "# Billing review\n\nVerdict: approve.\n")
+        step("a reviewed request.md is the fix pass, written in request.md", [fix, "in request.md"],
+             [send, wait, report])
+
+        write_artifact(os.path.join(fdir, "request.md"),
+                       request + f"\n**Review:** sent at {base}\n**Fix pass:** done - no changes needed\n")
+        step("a Fix pass line in request.md leaves the report", [report], [fix, send, wait])
+
+        os.makedirs(os.path.join(root, ".specs", "features", "draft"))
+        write_artifact(os.path.join(root, ".specs", "features", "draft", "request.md"), request)
+        write_artifact(os.path.join(root, ".specs", "features", "draft", "plan.md"),
+                       plan.replace("**Approved**:", "**Pending**:", 1))
+        step("a request.md beside an unapproved plan.md owes no build step", [report], ["`draft`"])
+
+        os.makedirs(os.path.join(root, ".playwright-mcp"))
+        write_artifact(os.path.join(root, ".playwright-mcp", "page.png"), "x")
+        os.makedirs(os.path.join(root, "ignored"))
+        write_artifact(os.path.join(root, "ignored", "trace.zip"), "x")
+        step("an untracked tool output is named, an ignored one and .specs/ are not",
+             ["Untracked, in no commit: .playwright-mcp/"], ["ignored/", ".specs/"])
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+    return ok
 
 
 def run_tooling():
@@ -542,26 +641,10 @@ def run_tooling():
               f"got exit={code}")
         print("          " + out.strip().replace("\n", "\n          "))
 
-    # A passing commit names what follows the build of a feature whose verification is still owed.
-    root = tempfile.mkdtemp(prefix="commit-")
-    try:
-        fdir = os.path.join(root, ".specs", "features", FEATURE)
-        os.makedirs(fdir)
-        write_artifact(os.path.join(fdir, "checks.md"), "# Billing checks\n\n## Checks\n")
-        for desc, verified, want in [] if not shipped("check_commit") else [
-            ("an unverified feature is told what follows its last commit", False, True),
-            ("a verified feature is not", True, False),
-        ]:
-            if verified:
-                write_artifact(os.path.join(fdir, "verification.md"), "# Billing verification\n")
-            code, out = run_script("check_commit.py", "feat: suspend the subscription", "--root", root)
-            if code == 0 and ("check_proofs.py billing" in out) == want:
-                print(f"  ok      check_commit.py: {desc}")
-            else:
-                ok = False
-                print(f"  BROKEN  check_commit.py: {desc} - exit {code}: {out.strip()[:300]}")
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
+    # A passing commit names what the run still owes: an untracked file no commit carries, and the
+    # next step the plan's lines show. Each step is a control for the others: one message, not all.
+    if shipped("check_commit") and shutil.which("git"):
+        ok = run_commit_followups() and ok
 
     # Before building, the Build line runs once: a command red before any change is not the gate.
     for desc, build, argv, want_code, want_frag in [] if not shipped("validate_checks") else [
@@ -903,4 +986,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # Windows writes piped output in the ANSI code page, which cannot encode every character a plan holds.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     raise SystemExit(main())
