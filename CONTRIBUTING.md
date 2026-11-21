@@ -332,7 +332,7 @@ Open `http://localhost:3000` in your browser. For more details on the marketplac
 
 Two conventions hold when changing this package:
 
-- **Keep tool modules thin; put logic in `src/tools/core/`.** Core functions are pure and directly unit-tested. Test files must not import a tool module, because tool modules import `fastmcp` at runtime and its ESM-only dependency breaks under Jest. This is why the tools are so small.
+- **Keep tool modules thin; put logic in `src/tools/core/`.** Core functions are pure and directly unit-tested. Tool behaviour is tested through the real server: `src/__tests__/server.test.ts` connects to `createServer` in-process with a fake `Catalog`, and `src/__tests__/process.e2e.test.ts` drives the built `dist/packages/mcp/main.js` over stdio. `nx test` builds the package first.
 - **Anything that costs the agent tokens or touches the filesystem needs a reason in the code.** The response budget, the frontmatter strip and the revision-keyed staging directory all exist for a measured reason recorded next to them; keep that up to date if you change the behaviour.
 
 `npm run start:dev:mcp` builds the server and opens the MCP Inspector against it.

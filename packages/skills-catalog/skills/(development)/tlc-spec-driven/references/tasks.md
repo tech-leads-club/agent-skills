@@ -120,6 +120,42 @@ These defaults may exceed the current repo's depth. That is intentional - they a
 | Code layer with "integration" requirement | Integration tests written satisfying the layer's Coverage Expectation + full gate passes                           |
 | Code layer with "none" requirement        | Gate check at appropriate level                                                                                    |
 
+### 1.6. Write the Checks (ALWAYS)
+
+The checks are what the build is held to and what `check_proofs.py` runs at the end. Write one per
+acceptance criterion - one observable claim with its concrete value - citing the requirement ID and
+the AC number, each with the proof that settles it:
+
+```markdown
+**Run unit**: `npx vitest run src/billing --reporter=verbose`
+
+**C3** - A failed charge sets the status to `suspended`, never `cancelled` (BILL-02, AC 1)
+Proof: run unit | ✓ dunning > failed charge suspends
+
+**C4** - The checkout page still loads with a suspended account (BILL-02, AC 3)
+Proof: `npx playwright test e2e/checkout.spec.ts -g "suspended account"`
+```
+
+- **The proof names one test, with the project's own command.** The skill knows no test runner. Tests
+  that run together go on one `**Run <name>**:` line in the header, run once; a check that reads it
+  writes `Proof: run <name> | <the line its test prints when it passes>`, copied from a real run with
+  the pass marker (`✓`, `PASSED`, `ok`). It passes when those words appear, in order, on one line of
+  the run's output, so a renamed test or a filter that selects nothing reads `no test ran`. Put the
+  verbose flag in the `Run` line when the default reporter prints only a summary. A test that cannot
+  share a run - an end-to-end suite with its own server - is a lone `Proof: <command>` with a filter
+  that selects it, judged by its exit code. A runner that exits 0 when its filter selects nothing
+  (`node --test`, `dotnet test`) passes a lone proof on a typo, so with one of those even a single
+  test gets a `Run` line and a `run` proof. A suite going green settles no single claim.
+- **Runs go one at a time.** `check_proofs.py` never runs two groups or lone proofs side by side, so
+  tests that share a database or a port stay safe; a group's own parallelism is the project's.
+- **A state a capture draws** is proven by its picture: `Proof: browser captures/<capture>.running.png`
+  (see [implement.md](implement.md), Walk). A state no capture draws is proven by a test, or by
+  `Proof: walk - <what the visit shows>`.
+- **`**Build**:`** in the header names the repo's build, type check and lint commands, `;`-separated, from
+  the Build gate - `**Build**: none - <why>` when there are none.
+
+A screen task's `Done when` names the capture it builds, with the full path.
+
 ### 2. Break Into Atomic Tasks
 
 **Task = ONE deliverable**. Examples:
@@ -146,26 +182,21 @@ This keeps phase boundaries meaningful while letting the packing hit its target 
 
 Before showing tasks to the user, run ALL three pre-approval checks. These are NOT optional - they are gates. If any check fails, restructure the tasks and re-run until all pass.
 
-**Deterministic backing (run it, do not eyeball it).** `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` enforces the structural half of these checks so they cannot drift: it flags a `Where` that names multiple files (granularity smell, Check 1), a diagram edge with no matching `Depends on` within a phase and vice-versa (Check 2), a task missing its `Tests` or `Gate` field, a `Tests: none` to confirm against the matrix (Check 3), and any dependency pointing to a later phase. A non-zero exit means restructure before presenting. The script checks structure; you still build the two tables below (the layer-to-test co-location judgment is yours). If no code-execution tool is available, run the checks by reading `tasks.md`.
+**Deterministic backing (run it, do not eyeball it).** `python3 <skill-dir>/scripts/validate_tasks.py <tasks-path-or-feature>` enforces the structural half of these checks: a `Where` that names multiple files (granularity smell, Check 1), a diagram edge with no matching `Depends on` within a phase and vice-versa (Check 2), a task missing its `Tests` or `Gate` field, a `Tests: none` to confirm against the matrix (Check 3), a dependency pointing to a later phase, and the `## Checks` with a proof each, the `**Build**:` line, and a `Run` line with an expected line for each `run` proof. A non-zero exit means restructure before presenting. The layer-to-test co-location judgment stays yours.
 
 **Check 1: Task Granularity** - verify each task is atomic (see Granularity Check section).
 
-**Check 2: Diagram-Definition Cross-Check** - verify the execution diagram matches every task's `Depends on` field (see Diagram-Definition Cross-Check section). Build the cross-check table and include it in the output.
+**Check 2: Diagram-Definition Cross-Check** - verify the execution diagram matches every task's `Depends on` field (see Diagram-Definition Cross-Check section).
 
-**Check 3: Test Co-location Validation** - verify every task's `Tests` field matches the **Test Coverage Matrix** generated above (see Test Co-location Validation section). Build the validation table and include it in the output.
+**Check 3: Test Co-location Validation** - verify every task's `Tests` field matches the **Test Coverage Matrix** generated above (see Test Co-location Validation section).
 
-**Output both tables with the tasks** so the user can see the validation results. Any ❌ means you MUST restructure before presenting - do not show failing tasks to the user and ask them to approve.
+A failing check means restructure before presenting - do not show failing tasks to the user and ask them to approve.
 
 **Note on the generated matrix:** The two sections (`Test Coverage Matrix`, `Gate Check Commands`) are provisional - generated from codebase sampling or user input and included in this file for user confirmation as part of task approval. They become authoritative once the user approves the tasks.
 
-### 6. ASK About MCPs and Skills
+### 6. Present and stop
 
-**CRITICAL**: Before execution, ask the user:
-
-> "For each task, which tools should I use?"
->
-> **Available MCPs**: [list from project or user]
-> **Available Skills**: [list from project or user]
+Present the tasks for approval and stop: this is the second stop for a human, after the spec. When the user approves, set `**Status**: Approved` and write `**Approved**: <YYYY-MM-DD> - user: "<their words>"`; an approval the user did not give is never written.
 
 ---
 
@@ -176,7 +207,7 @@ Before showing tasks to the user, run ALL three pre-approval checks. These are N
 
 ## Execution Protocol (MANDATORY -- do not skip)
 
-Implement these tasks with the `tlc-spec-driven` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, adequacy review, Verifier, discrimination sensor).
+Implement these tasks with the `tlc-spec-driven` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, the walk, check_proofs, the Verifier and the screens sub-agent).
 
 **If the skill cannot be activated, STOP and tell the user - do not proceed without it.**
 
@@ -184,6 +215,9 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Design**: `.specs/features/[feature]/design.md`
 **Status**: Draft | Approved | In Progress | Done
+**Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
+**Build**: `[build command]; [type check command]; [lint command]`
+**Run unit**: `[the command that runs this feature's tests, a line per test]`
 
 ---
 
@@ -239,11 +273,6 @@ T8 → T9
 **Reuses**: `src/existing/BaseInterface.ts`
 **Requirement**: [FEAT]-01
 
-**Tools**:
-
-- MCP: `filesystem` (or NONE)
-- Skill: NONE
-
 **Done when**:
 
 - [ ] Interface defined with all methods from design
@@ -261,11 +290,6 @@ T8 → T9
 **Where**: `src/services/YService.ts`
 **Depends on**: T1
 **Reuses**: `src/services/BaseService.ts` patterns
-
-**Tools**:
-
-- MCP: `filesystem`, `context7`
-- Skill: NONE
 
 **Done when**:
 
@@ -285,11 +309,6 @@ T8 → T9
 **Where**: `src/components/ZComponent.tsx`
 **Depends on**: T1
 **Reuses**: `src/components/BaseComponent.tsx`
-
-**Tools**:
-
-- MCP: `filesystem`
-- Skill: NONE
 
 **Done when**:
 
@@ -311,11 +330,6 @@ T8 → T9
 **Depends on**: T2, T3
 **Reuses**: Existing service patterns
 
-**Tools**:
-
-- MCP: `filesystem`, `github`
-- Skill: `api-design`
-
 **Done when**:
 
 - [ ] Feature works per acceptance criteria
@@ -326,6 +340,26 @@ T8 → T9
 **Gate**: full
 
 **Commit**: `feat([scope]): [description]`
+
+---
+
+## Checks
+
+**C1** - [one observable claim with its concrete value] ([FEAT]-01, AC 1)
+Proof: run unit | [the line C1's test prints when it passes, pass marker included]
+
+**C2** - [the screen in `captures/[capture].png`, reached by [gesture]] ([FEAT]-02, AC 1)
+Proof: browser captures/[capture].running.png
+
+---
+
+## Handoff
+
+The feature's live state, written as it happens - a compaction gives no warning.
+
+**Settled mid-build:** [each answer the user gave during Execute, in their words, the turn it arrived - or none]
+**Dispatched:** [each sub-agent before it is sent: batch worker, Verifier, screens round 1 or 2 - at which `HEAD`, and `returned` when it does]
+**Walked:** [each story's Independent Test as you did it - what the screen showed, and how the user reaches each state: sign-in, data, path]
 
 ---
 
@@ -361,7 +395,7 @@ with no sub-agents spawned.
 
 **The orchestrating agent's role during Execute:**
 1. Count total tasks and pack phases into ~7-task batches - offer batch sub-agents if that yields more than one batch and the user accepts
-2. Dispatch the next batch (to a worker, or execute inline)
+2. Dispatch the next batch (to a worker, or execute inline), written on the Handoff's `**Dispatched:**` line first
 3. Receive the compact batch summary
 4. Update tasks.md with results
 5. If the batch summary shows all tasks complete: proceed to the next batch
@@ -438,7 +472,6 @@ Pick whichever option keeps tasks atomic and cohesive. The goal: no task produce
 
 - **Phases are ordered** - Each phase completes before the next; tasks run in order within a phase
 - **Reuses = Token saver** - Always reference existing code
-- **Tools per task** - MCPs and Skills prevent wrong approaches
 - **Dependencies are gates** - Clear what blocks what
 - **Done when = Testable** - If you can't verify it, rewrite it
 - **Requirement ID = Traceable** - Every task traces back to a spec requirement

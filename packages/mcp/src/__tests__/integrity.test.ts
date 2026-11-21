@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
-import { computeContentHash, fetchAndVerifySkillFiles } from '../integrity'
-import { buildCdnNpmBase, buildRegistryUrl, buildSkillsBaseUrl, resetCdnRefForTests, resolveCdnRef } from '../cdn'
+import { buildCdnNpmBase, buildRegistryUrl, buildSkillsBaseUrl, resolveCdnRef } from '../cdn'
+import { computeContentHash, decodeSkillText, fetchAndVerifySkillFiles } from '../integrity'
 
 describe('computeContentHash', () => {
   it('matches the registry algorithm for sorted path + bytes', () => {
@@ -42,10 +42,10 @@ describe('fetchAndVerifySkillFiles', () => {
         contentHash,
       },
       'https://cdn.example/skills/',
-      async () => '# ok',
+      async () => Buffer.from('# ok'),
     )
 
-    expect(verified.get('SKILL.md')).toBe('# ok')
+    expect(decodeSkillText(verified.get('SKILL.md') as Uint8Array)).toBe('# ok')
   })
 
   it('rejects checksum mismatch', async () => {
@@ -58,15 +58,33 @@ describe('fetchAndVerifySkillFiles', () => {
           contentHash: 'deadbeef',
         },
         'https://cdn.example/skills/',
-        async () => '# tampered',
+        async () => Buffer.from('# tampered'),
       ),
     ).rejects.toThrow(/Checksum mismatch/)
+  })
+
+  it('accepts binary bytes that are not valid UTF-8', async () => {
+    const jpeg = Uint8Array.from([0xff, 0xd8, 0xff, 0x00, 0xc0])
+    const files = new Map<string, Uint8Array>([['assets/docker/wallpaper.jpg', jpeg]])
+    const contentHash = computeContentHash(files)
+
+    const verified = await fetchAndVerifySkillFiles(
+      {
+        name: 'demo',
+        path: '(web-automation)/demo',
+        files: ['assets/docker/wallpaper.jpg'],
+        contentHash,
+      },
+      'https://cdn.example/skills/',
+      async () => jpeg,
+    )
+
+    expect(Buffer.from(verified.get('assets/docker/wallpaper.jpg') as Uint8Array)).toEqual(Buffer.from(jpeg))
   })
 })
 
 describe('cdn pinning', () => {
   afterEach(() => {
-    resetCdnRefForTests()
     delete process.env.SKILLS_CDN_REF
   })
 

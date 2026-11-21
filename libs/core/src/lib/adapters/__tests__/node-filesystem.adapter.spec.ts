@@ -31,6 +31,8 @@ describe('NodeFileSystemAdapter', () => {
       const content = await readFile(filePath, 'utf-8')
 
       expect(content).toBe('hello sync')
+      adapter.writeFileSync(filePath, Uint8Array.from([0xff, 0xd8, 0xff, 0x00]))
+      expect(await readFile(filePath)).toEqual(Buffer.from([0xff, 0xd8, 0xff, 0x00]))
       expect(adapter.existsSync(filePath)).toBe(true)
     } finally {
       await rm(tempDir, { recursive: true, force: true })

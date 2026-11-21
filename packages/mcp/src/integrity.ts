@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
  * Computes the registry contentHash for an in-memory skill file set.
  * Must match packages/skills-catalog/src/utils.ts computeSkillHash (sorted path + bytes).
  */
-export function computeContentHash(files: ReadonlyMap<string, string | Buffer>): string {
+export function computeContentHash(files: ReadonlyMap<string, string | Uint8Array>): string {
   const hash = createHash('sha256')
   const sortedPaths = [...files.keys()].sort()
 
@@ -18,29 +18,34 @@ export function computeContentHash(files: ReadonlyMap<string, string | Buffer>):
   return hash.digest('hex')
 }
 
+/** Decodes verified skill bytes for text-only responses. Binary files must stay as bytes. */
+export function decodeSkillText(bytes: Uint8Array): string {
+  return new TextDecoder('utf-8', { fatal: false }).decode(bytes)
+}
+
 /**
  * Downloads every file listed for a skill and verifies the aggregate contentHash.
- * Returns the verified file map on success.
+ * Returns the verified file map on success, as the original bytes.
  */
 export async function fetchAndVerifySkillFiles(
   skill: { name: string; path: string; files: string[]; contentHash: string },
   skillsBaseUrl: string,
-  fetchText: (url: string) => Promise<string>,
-): Promise<Map<string, string>> {
-  const contents = new Map<string, string>()
+  fetchBytes: (url: string) => Promise<Uint8Array>,
+): Promise<Map<string, Uint8Array>> {
+  const contents = new Map<string, Uint8Array>()
 
   const results = await Promise.allSettled(
     skill.files.map(async (filePath) => {
       const url = `${skillsBaseUrl}${skill.path}/${filePath}`
-      const text = await fetchText(url)
-      return { filePath, text }
+      const bytes = await fetchBytes(url)
+      return { filePath, bytes }
     }),
   )
 
   const failures: string[] = []
   for (const [index, result] of results.entries()) {
     if (result.status === 'fulfilled') {
-      contents.set(result.value.filePath, result.value.text)
+      contents.set(result.value.filePath, result.value.bytes)
     } else {
       failures.push(skill.files[index])
     }

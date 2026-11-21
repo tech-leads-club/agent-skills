@@ -24,4 +24,5 @@ export const routes = {
   agent: (id: string) => pathFor(['agents', id]),
   specDriven: () => pathFor(['tlc-spec-driven']),
   aiDevFlow: () => pathFor(['tlc-ai-dev-flow']),
+  mcp: () => pathFor(['mcp']),
 } as const

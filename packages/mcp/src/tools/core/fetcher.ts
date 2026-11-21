@@ -16,20 +16,25 @@ export function getInvalidReferencePaths(skill: SkillEntry, filePaths: string[])
   return filePaths.filter((path) => !validReferencePaths.has(path))
 }
 
+export type ReferenceFileSelection = {
+  files: Array<{ path: string; text: string; truncated: boolean }>
+  omitted: string[]
+  missing: string[]
+  budgetOmitted: string[]
+}
+
 /**
- * Assembles the reference-file response within a character budget.
- * Files are emitted in the requested order; once the budget runs out the remaining
- * paths are reported back with an instruction the agent can act on.
+ * Picks the reference files that fit a character budget, in the requested order.
+ * Once the budget runs out the remaining paths are reported as omitted.
  */
-export function buildReferenceFilesOutput(
+export function selectReferenceFiles(
   requestedPaths: string[],
   contents: ReadonlyMap<string, string>,
   budgetChars: number = MAX_REFERENCE_RESPONSE_CHARS,
-): string {
-  const parts: string[] = []
+): ReferenceFileSelection {
+  const files: ReferenceFileSelection['files'] = []
   const missing: string[] = []
-  const omitted: string[] = []
-  let truncated: string | undefined
+  const budgetOmitted: string[] = []
   let used = 0
   let budgetExhausted = false
 
@@ -42,36 +47,54 @@ export function buildReferenceFilesOutput(
     }
 
     if (budgetExhausted) {
-      omitted.push(filePath)
+      budgetOmitted.push(filePath)
       continue
     }
 
     const remaining = budgetChars - used
 
     if (content.length <= remaining) {
-      parts.push(`## ${filePath}\n\n${content}`)
+      files.push({ path: filePath, text: content, truncated: false })
       used += content.length
       continue
     }
 
     if (remaining >= MIN_USEFUL_TRUNCATION_CHARS) {
-      parts.push(
-        `## ${filePath} [truncated: first ${remaining} of ${content.length} chars]\n\n${content.slice(0, remaining)}`,
-      )
-      truncated = filePath
+      files.push({ path: filePath, text: content.slice(0, remaining), truncated: true })
     } else {
-      omitted.push(filePath)
+      budgetOmitted.push(filePath)
     }
 
     budgetExhausted = true
   }
 
+  return { files, omitted: [...missing, ...budgetOmitted], missing, budgetOmitted }
+}
+
+/**
+ * Assembles the reference-file response within a character budget.
+ * Files are emitted in the requested order; once the budget runs out the remaining
+ * paths are reported back with an instruction the agent can act on.
+ */
+export function buildReferenceFilesOutput(
+  requestedPaths: string[],
+  contents: ReadonlyMap<string, string>,
+  budgetChars: number = MAX_REFERENCE_RESPONSE_CHARS,
+): string {
+  const { files, missing, budgetOmitted } = selectReferenceFiles(requestedPaths, contents, budgetChars)
+  const parts = files.map((file) =>
+    file.truncated
+      ? `## ${file.path} [truncated: first ${file.text.length} of ${contents.get(file.path)?.length} chars]\n\n${file.text}`
+      : `## ${file.path}\n\n${file.text}`,
+  )
+  const truncated = files.find((file) => file.truncated)?.path
+
   const notes: string[] = []
   if (missing.length > 0) notes.push(`Failed to fetch: ${missing.join(', ')}`)
-  if (truncated !== undefined || omitted.length > 0) {
+  if (truncated !== undefined || budgetOmitted.length > 0) {
     const detail = [
       truncated !== undefined ? `'${truncated}' was cut short` : undefined,
-      omitted.length > 0 ? `not returned: ${omitted.join(', ')}` : undefined,
+      budgetOmitted.length > 0 ? `not returned: ${budgetOmitted.join(', ')}` : undefined,
     ]
       .filter(Boolean)
       .join('; ')

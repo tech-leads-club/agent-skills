@@ -78,7 +78,51 @@ Write every acceptance criterion in **EARS** (Easy Approach to Requirements Synt
 
 **Rules:** one requirement per criterion (never bundle two behaviors); use concrete values (a specific status code, a specific message, a bound) rather than "quickly" or "gracefully"; every criterion contains a SHALL and is measurable. `python3 <skill-dir>/scripts/validate_spec.py` flags any criterion without a SHALL and any that matches no recognized pattern.
 
-### 4. Requirement Closure Gate (before confirm)
+### 4. Screens and their design
+
+Skip this step when the feature puts no screen in front of a user.
+
+**Walk each screen's decisions.** Every screen carries the same ones: empty, loading, error and
+unauthorised states; the order of its content; the window widths it must work at (the captures'
+sizes, or asked when no capture settles it); what a long list or a wide table does - what scrolls
+and what stays in view; what a destructive action confirms; what each control does when used. Each
+lands on a criterion, an existing behaviour you name, or a question.
+
+**A control owes a gesture.** Every control gets a criterion naming who acts, which control, and
+what the page shows afterwards. A screenshot shows the button, never what it does.
+
+**Which references bind.** A capture, screenshot, design frame or live site that comes with the
+request binds: it is the result the user expects, and the user does not have to say so. It is
+`non-binding` only when the user called it inspiration, and its `Sources` line quotes them:
+`non-binding - user: "<their words>"`. Something the source draws that the stored model cannot hold
+- a code, a field - is a departure you ask about, never a reason to make the source non-binding.
+
+**A binding source lives in files.** Export each frame or state to
+`.specs/features/[feature]/captures/` and show each one on its `Sources` line,
+`![<name>](captures/<file>) - binding - <what it draws>`, so whoever approves sees the screen.
+
+**A screen with a binding source points at it.** Each screen or state the source draws gets one
+criterion naming the gesture that reaches it and its capture file:
+
+```
+3. WHEN a member uses "Update card" THEN the system SHALL show the form in
+   `.specs/features/billing/captures/card-form.png`
+```
+
+The builder matches the image for composition and look. Do not retype the screen into criteria;
+add criteria for what the source cannot show: what a control does, states nobody captured, the rules
+behind a form. Labels and sentences the capture draws are copied character for character; its sample
+data - names, quantities, dates - is not transcribed: the builder recreates it with the capture open.
+
+**Departing from a binding source is the user's call.** Removing, renaming or changing something it
+draws is asked, with your recommendation. The answer becomes an `AD-NNN` in `.specs/STATE.md` whose
+rationale quotes the question and the option chosen, and each departure gets a row in
+`## Differences from the source` citing it.
+
+**A screen with no reference gets outcomes, not layout.** Say what a user can see and do, never where
+things sit; layout is the builder's call, held to the design system.
+
+### 5. Requirement Closure Gate (before confirm)
 
 Before presenting the spec for confirmation, run the three checks below. The spec is not presentable for confirmation until every item is resolved or assumption-logged - this is the guarantee that no requirement leaves the spec silently unclear.
 
@@ -86,13 +130,19 @@ Before presenting the spec for confirmation, run the three checks below. The spe
 
 1. **Unambiguity + precision (hard).** Every AC must (a) have a single interpretation and (b) define a precise, spec-defined expected outcome. Any AC that fails either check: resolve with the user, split it, or log it as an explicit assumption with the chosen interpretation and rationale. No AC proceeds readable two ways or with an undefined outcome.
 
-2. **Open-questions / assumptions closure.** Enumerate every unresolved decision that surfaced during clarification. Each must be either (a) resolved with the user OR (b) recorded as an **assumption** (chosen default + rationale) in the spec's Assumptions & Open Questions section. Nothing proceeds unmarked.
+2. **Open-questions / assumptions closure.** Enumerate every unresolved decision that surfaced during clarification. A decision that is the user's - scope, product behaviour, a departure from a binding source - is asked before the spec is presented, with your recommendation; when nobody is there to answer, end your turn with the questions. An assumption never stands in for one of those to save a question. Only a default the code settles, or one the user delegated ("you decide"), is recorded as an **assumption** (chosen default + rationale). Nothing proceeds unmarked.
 
-3. **Declined gray areas become assumptions.** Any gray area the user declined to discuss or that went undiscussed is written to the spec's Assumptions & Open Questions section (agent's chosen default + rationale) - never silently dropped. See [discuss.md](discuss.md).
+3. **Declined gray areas become assumptions.** A gray area the user declined to discuss is written to the spec's Assumptions & Open Questions section (agent's chosen default + rationale, `user declined`) - never silently dropped. See [discuss.md](discuss.md).
+
+4. **The request, sentence by sentence.** Read the request again, one sentence at a time: each one lands on a criterion, an `Out of Scope` row or an open question. A sentence that lands nowhere is the requirement that goes missing, and nobody downstream reads the request again.
 
 Fix inline. This gate is bounded to THIS feature's stated dimensions and actual behavior - never to "anything imaginable." The Out of Scope table and anti-scope-creep rules remain the counterweights: the gate clarifies existing requirements, it never invents new ones.
 
-**Deterministic backing (run before you present the spec).** The structural half of this gate is enforced by a script so it cannot drift when a step is forgotten: `python3 <skill-dir>/scripts/validate_spec.py <spec-path-or-feature>` checks that required sections exist, every AC is EARS-shaped (has a SHALL), no Assumptions row has an empty default or rationale, and requirement IDs are well-formed. A non-zero exit means fix before confirming. The script checks structure; you still own the judgment calls (is the interpretation right, is the outcome precise). If no code-execution tool is available, run the same checks by reading the spec.
+**Deterministic backing (run before you present the spec).** `python3 <skill-dir>/scripts/validate_spec.py <spec-path-or-feature>` checks the structure: required sections, EARS-shaped ACs, filled assumptions, well-formed requirement IDs, and with captures, that each is binding or quoted as inspiration, cited by a criterion, shown in the spec, and that every departure is confirmed under an active `AD-NNN`. A non-zero exit means fix before confirming. The judgment calls stay yours.
+
+**Then present the spec and stop.** Approval of the spec is a stop for a human: lead with the questions that block, then the defaults you picked for the user to correct.
+
+Each answer goes into the spec in the turn it arrives - a criterion, an Assumptions row with `y`, or an `AD-NNN` for a departure - not at the end of the conversation. When the user approves, write `**Approved**: <YYYY-MM-DD> - user: "<their words>"` under the title. An approval the user did not give is never written; `validate_tasks.py --execute` refuses to start without it.
 
 ---
 
@@ -100,6 +150,8 @@ Fix inline. This gate is bounded to THIS feature's stated dimensions and actual 
 
 ```markdown
 # [Feature Name] Specification
+
+**Approved**: [written when the user approves - YYYY-MM-DD - user: "their words"]
 
 ## Problem Statement
 
@@ -207,6 +259,21 @@ Each requirement gets a unique ID for tracking across design, tasks, and validat
 
 ---
 
+## Differences from the source
+
+Only when a source binds. Every way the product departs from what it draws, each one approved.
+
+| Source shows | Product shows | Confirmed |
+| ------------ | ------------- | --------- |
+| [label, control or state in the capture] | [what the product shows instead, or nothing] | y - [AD-NNN] |
+
+## Sources
+
+- [ticket or document] - [what it settles]
+- ![[capture]](captures/[capture].png) - binding - [what it draws]
+
+---
+
 ## Success Criteria
 
 How we know the feature is successful:
@@ -225,4 +292,4 @@ How we know the feature is successful:
 - **Edge cases matter** - What breaks? What's empty? What's huge?
 - **Out of Scope prevents creep** - If it's not here, it doesn't get built
 - **Closure gate before confirm** - Three checks: unambiguity + precision, open-questions/assumptions closure, declined gray areas logged; scope-tiered; bounded to stated dimensions; never invents requirements
-- **Confirm after the gate passes** - Present the spec for user confirmation only after the closure gate passes (no unresolved-and-unmarked items remain) and `validate_spec.py` exits clean; user approves spec before moving to discuss phase
+- **Confirm after the gate passes** - Present the spec for user confirmation only after the closure gate passes and `validate_spec.py` exits clean; the user approves the spec before Design or Tasks

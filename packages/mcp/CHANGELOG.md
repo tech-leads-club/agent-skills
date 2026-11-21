@@ -1,3 +1,47 @@
+## 0.1.12 (2026-11-05)
+
+### 🚀 Features
+
+- **mcp:** move to the official MCP SDK and cut per-instance memory ([#270](https://github.com/tech-leads-club/agent-skills/pull/270))
+
+### ❤️ Thank You
+
+- Felipe Rodrigues
+
+## 0.1.11 (2026-11-02)
+
+This was a version bump only for @tech-leads-club/agent-skills-mcp to align it with other projects, there were no code changes.
+
+## 0.1.10 (2026-10-30)
+
+### 🩹 Fixes
+
+- **release:** write the new version into the built manifests before publish ([29e5cf487](https://github.com/tech-leads-club/agent-skills/commit/29e5cf487))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.1.9 (2026-10-14)
+
+### 🩹 Fixes
+
+- **core:** download skill files as raw bytes ([b63673845](https://github.com/tech-leads-club/agent-skills/commit/b63673845))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.1.8 (2026-10-08)
+
+### 🩹 Fixes
+
+- **marketplace:** point public links to the custom domain and trim the /skills/ payload ([#224](https://github.com/tech-leads-club/agent-skills/pull/224))
+
+### ❤️ Thank You
+
+- William R. Fernandes
+
 ## 0.1.7 (2026-08-30)
 
 This was a version bump only for @tech-leads-club/agent-skills-mcp to align it with other projects, there were no code changes.

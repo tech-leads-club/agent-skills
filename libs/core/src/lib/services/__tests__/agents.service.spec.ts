@@ -1,3 +1,5 @@
+import { fixturePath } from './path-fixtures'
+
 import { describe, expect, it, jest } from '@jest/globals'
 import { join } from 'node:path'
 
@@ -24,7 +26,7 @@ type TestPorts = {
 }
 
 const createPorts = (): TestPorts => {
-  const homedirMock = jest.fn(() => '/home/tester')
+  const homedirMock = jest.fn(() => fixturePath('/home/tester'))
   const existsSyncMock = jest.fn<(path: string) => boolean>()
   const readdirSyncMock =
     jest.fn<(path: string, options?: { withFileTypes: true }) => { name: string; isDirectory(): boolean }[]>()
@@ -37,7 +39,7 @@ const createPorts = (): TestPorts => {
     readdirSync: readdirSyncMock,
   } as unknown as FileSystemPort
   const env = {
-    cwd: jest.fn(() => '/workspace/project'),
+    cwd: jest.fn(() => fixturePath('/workspace/project')),
     homedir: homedirMock,
     platform: jest.fn(() => 'linux'),
     getEnv: jest.fn(() => undefined),
@@ -50,8 +52,8 @@ const createPorts = (): TestPorts => {
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
@@ -93,14 +95,14 @@ describe('agents service', () => {
       displayName: 'Cursor',
       description: 'AI-first code editor built on VS Code',
       skillsDir: '.cursor/skills',
-      globalSkillsDir: join('/home/tester', '.cursor/skills'),
+      globalSkillsDir: join(fixturePath('/home/tester'), '.cursor/skills'),
     })
     expect(getAgentConfig(ports, 'opencode')).toMatchObject({
       name: 'opencode',
       displayName: 'OpenCode',
       description: 'Open-source AI coding terminal',
       skillsDir: '.opencode/skills',
-      globalSkillsDir: join('/home/tester', '.config/opencode/skills'),
+      globalSkillsDir: join(fixturePath('/home/tester'), '.config/opencode/skills'),
     })
   })
 
@@ -111,7 +113,7 @@ describe('agents service', () => {
 
     expect(config.detectInstalled()).toBe(false)
     expect(homedirMock).toHaveBeenCalled()
-    expect(existsSyncMock).toHaveBeenCalledWith('/home/tester/.cursor')
+    expect(existsSyncMock).toHaveBeenCalledWith(fixturePath('/home/tester/.cursor'))
   })
 
   it('returns an empty list when no supported agents are installed', () => {
@@ -123,7 +125,7 @@ describe('agents service', () => {
   it('detects only the agents whose install locations exist', () => {
     const { ports, existsSyncMock } = createPorts()
     existsSyncMock.mockImplementation(
-      (path) => path === '/home/tester/.cursor' || path === '/workspace/project/.opencode',
+      (path) => path === fixturePath('/home/tester/.cursor') || path === fixturePath('/workspace/project/.opencode'),
     )
 
     expect(detectInstalledAgents(ports)).toEqual(['cursor', 'opencode'])

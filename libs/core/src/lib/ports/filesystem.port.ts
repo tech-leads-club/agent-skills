@@ -22,12 +22,16 @@ export interface FileSystemPort {
   writeFile(path: string, content: string, encoding: string): Promise<void>
 
   /**
-   * Writes a text file to disk synchronously, replacing any existing content.
+   * Writes a file to disk synchronously, replacing any existing content.
+   *
+   * Pass a string with an encoding for text. Pass bytes with no encoding for
+   * binary files so the on-disk content matches the registry content hash.
    *
    * @param path - Absolute or relative file path to write.
-   * @param content - Text content to persist.
-   * @param encoding - Text encoding used to encode the file contents.
+   * @param content - Text content or raw bytes to persist.
+   * @param encoding - Text encoding used when `content` is a string.
    */
+  writeFileSync(path: string, content: Uint8Array): void
   writeFileSync(path: string, content: string, encoding: string): void
 
   /**

@@ -39,8 +39,12 @@ export class NodeFileSystemAdapter implements FileSystemPort {
   /**
    * @inheritdoc
    */
-  public writeFileSync(path: string, content: string, encoding: string): void {
-    writeFileSync(path, content, encoding as BufferEncoding)
+  public writeFileSync(path: string, content: string | Uint8Array, encoding?: string): void {
+    if (typeof content !== 'string') {
+      writeFileSync(path, content)
+      return
+    }
+    writeFileSync(path, content, (encoding ?? 'utf-8') as BufferEncoding)
   }
 
   /**

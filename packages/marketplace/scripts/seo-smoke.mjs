@@ -200,6 +200,7 @@ const expectedUrls = [
   `${ORIGIN}/agents/`,
   `${ORIGIN}/tlc-spec-driven/`,
   `${ORIGIN}/tlc-ai-dev-flow/`,
+  `${ORIGIN}/mcp/`,
   ...data.skills.map((skill) => `${ORIGIN}/skills/${skill.id}/`),
   ...data.agents.map((agent) => `${ORIGIN}/agents/${agent.id}/`),
 ]
@@ -235,6 +236,7 @@ for (const skill of data.skills) {
 }
 if (!llms.includes(`${ORIGIN}/tlc-ai-dev-flow/`)) fail('llms.txt missing TLC AI Dev Flow landing')
 if (!llms.includes(`${ORIGIN}/tlc-spec-driven/`)) fail('llms.txt missing TLC Spec-Driven landing')
+if (!llms.includes(`${ORIGIN}/mcp/`)) fail('llms.txt missing MCP landing')
 
 if (!/name="robots" content="noindex/i.test(read('404.html'))) {
   fail('404.html is missing a noindex robots directive')

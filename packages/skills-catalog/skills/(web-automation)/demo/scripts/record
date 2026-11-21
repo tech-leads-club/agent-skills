@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Usage: $SKILL_DIR/scripts/record <name> | .demos/<name> | .demos/<name>/script.mjs
+set -euo pipefail
+
+# Follows symlinks without GNU `readlink -f`, which macOS lacks.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  LINK="$(readlink "$SOURCE")"
+  case "$LINK" in /*) SOURCE="$LINK" ;; *) SOURCE="$(dirname "$SOURCE")/$LINK" ;; esac
+done
+SKILL_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "not in a git repository: run from the project to record" >&2; exit 1; }
+DEMOS="$ROOT/.demos"
+
+ARG="${1:?usage: record <name> | .demos/<name> | .demos/<name>/script.mjs}"
+shift
+ARG="${ARG%/}"
+ARG="${ARG%/script.mjs}"
+NAME="$(basename "$ARG")"
+DIR="$DEMOS/$NAME"
+[ -f "$DIR/script.mjs" ] || { echo "demo script not found: $DIR/script.mjs" >&2; exit 1; }
+
+if command -v sha256sum >/dev/null 2>&1; then SHA256=sha256sum; else SHA256="shasum -a 256"; fi
+HASH="$(cd "$SKILL_DIR/assets" && cat docker/Dockerfile docker/package.json docker/record.sh docker/wallpaper.jpg lib.mjs config.mjs | $SHA256 | cut -c1-12)"
+IMAGE="tlc-demo:$HASH"
+
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  echo "building $IMAGE" >&2
+  docker build -q -t "$IMAGE" -f "$SKILL_DIR/assets/docker/Dockerfile" "$SKILL_DIR/assets" >&2
+fi
+
+# app.url falls back to http://localhost:$PORT, from the environment or the project .env.
+if [ -z "${PORT:-}" ] && [ -f "$ROOT/.env" ]; then
+  PORT="$(set -a; . "$ROOT/.env"; set +a; printf '%s' "${PORT:-}")"
+fi
+
+# `theme: system` in demo.config.mjs resolves against the host's color scheme.
+HOST_THEME=light
+if command -v gsettings >/dev/null 2>&1 && gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | grep -q dark; then
+  HOST_THEME=dark
+elif [ "$(uname -s)" = Darwin ] && defaults read -g AppleInterfaceStyle 2>/dev/null | grep -q Dark; then
+  HOST_THEME=dark
+fi
+
+# Linux shares the host network. Docker Desktop (macOS) can't, so record.sh forwards
+# the container's localhost to host.docker.internal instead.
+if [ "$(uname -s)" = Darwin ]; then
+  NETWORK=(--add-host=host.docker.internal:host-gateway -e APP_LOOPBACK_HOST=host.docker.internal)
+else
+  NETWORK=(--network host)
+fi
+
+# Run as the host user so files in .demos stay owned by them.
+docker run --rm --init \
+  "${NETWORK[@]}" --shm-size=1g \
+  --user "$(id -u):$(id -g)" \
+  -v "$DEMOS:/demos" \
+  -e HOST_THEME="$HOST_THEME" \
+  -e PORT="${PORT:-}" \
+  "$IMAGE" "/demos/$NAME" "$@" \
+  2>&1 | sed "s#/demos/#$DEMOS/#"

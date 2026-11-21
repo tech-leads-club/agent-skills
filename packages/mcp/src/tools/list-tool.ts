@@ -1,14 +1,14 @@
-import type { FastMCP } from 'fastmcp'
+import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
-import type { Indexes } from '../types'
+import type { Catalog } from '../catalog'
 import { buildListSkillsResponse } from './core/list'
 
 const TOOL_DESCRIPTION =
   'Browse the whole catalog, grouped by category.\n' +
   'Only when the user explicitly asks to see every skill. To resolve a task, use search_skills.'
 
-export const ListSkillsParamsSchema = z.object({
+export const ListSkillsParamsSchema = z.strictObject({
   explicit_request: z.literal(true),
   description_max_chars: z.number().int().min(40).max(240).default(120),
 })
@@ -24,15 +24,18 @@ export const ListSkillsOutputSchema = z.object({
   ),
 })
 
-export function registerListTool(server: FastMCP, getIndexes: () => Indexes): void {
-  server.addTool({
-    name: 'list_skills',
-    description: TOOL_DESCRIPTION,
-    parameters: ListSkillsParamsSchema,
-    // why: declaring outputSchema makes the server emit MCP structuredContent (spec 2025-06-18+)
-    // instead of an opaque JSON string, so clients can consume the catalog without re-parsing text.
-    outputSchema: ListSkillsOutputSchema,
-    annotations: { title: 'Browse Skill Catalog', readOnlyHint: true, openWorldHint: false },
-    execute: async (args) => buildListSkillsResponse(getIndexes().map.values(), args.description_max_chars),
-  })
+export function registerListTool(server: McpServer, catalog: Catalog): void {
+  server.registerTool(
+    'list_skills',
+    {
+      description: TOOL_DESCRIPTION,
+      inputSchema: ListSkillsParamsSchema,
+      outputSchema: ListSkillsOutputSchema,
+      annotations: { title: 'Browse Skill Catalog', readOnlyHint: true, openWorldHint: false },
+    },
+    async ({ description_max_chars }) => {
+      const payload = buildListSkillsResponse(await catalog.list(), description_max_chars)
+      return { content: [{ type: 'text', text: JSON.stringify(payload) }], structuredContent: payload }
+    },
+  )
 }

@@ -1,5 +1,7 @@
-import { buildCatalogPromptMessages, buildSkillPromptMessages, buildUsePromptNotFoundMessages, registerPrompts } from '../prompts'
+import type { Catalog } from '../catalog'
+import { buildCatalogPromptMessages, buildSkillPromptMessages, buildUsePromptNotFoundMessages } from '../prompts'
 import type { SkillEntry } from '../types'
+import { connectInProcess } from './support/mcp-client'
 
 describe('buildCatalogPromptMessages', () => {
   it('returns search-first instructions for catalog discovery', () => {
@@ -57,16 +59,7 @@ describe('buildUsePromptNotFoundMessages', () => {
 })
 
 describe('registerPrompts', () => {
-  it('registers simple entrypoint prompts and handles missing args', async () => {
-    const promptDefs: Array<{ name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> }> = []
-    const server = {
-      addPrompt: (
-        prompt: { name: string; load: (args?: { name?: string; context?: string; task?: string }) => Promise<unknown> },
-      ) => {
-        promptDefs.push(prompt)
-      },
-    }
-
+  it('registers simple entrypoint prompts and answers unknown names with the fallback', async () => {
     const skill: SkillEntry = {
       name: 'component-flattening-analysis',
       description: 'Analyze component flattening opportunities.',
@@ -75,17 +68,29 @@ describe('registerPrompts', () => {
       files: ['SKILL.md'],
       contentHash: 'def456',
     }
+    const unused = async (): Promise<never> => {
+      throw new Error('not used by prompts')
+    }
+    const catalog: Catalog = {
+      warm: () => undefined,
+      close: () => undefined,
+      get: async (name) => (name === skill.name ? skill : undefined),
+      list: unused,
+      search: unused,
+      registry: unused,
+      read: unused,
+    }
+    const client = await connectInProcess(catalog)
 
-    registerPrompts(server as never, () => ({ fuse: {} as never, map: new Map([[skill.name, skill]]) }))
+    const listed = await client.rpc('prompts/list')
+    const names = (listed.result?.prompts as Array<{ name: string }>).map((entry) => entry.name)
+    expect(names).toEqual(expect.arrayContaining(['skills', 'find-skill', 'use', 'skills-help']))
 
-    expect(promptDefs.map((entry) => entry.name)).toEqual(expect.arrayContaining(['skills', 'find-skill', 'use', 'skills-help']))
+    const known = await client.rpc('prompts/get', { name: 'use', arguments: { name: skill.name } })
+    expect(known.result?.messages).toBeDefined()
+    expect(known.result?.messages).toEqual(buildSkillPromptMessages(skill).messages)
 
-    const usePrompt = promptDefs.find((entry) => entry.name === 'use')
-    expect(usePrompt).toBeDefined()
-    await expect(usePrompt?.load({ name: skill.name, context: undefined })).resolves.toEqual(
-      buildSkillPromptMessages(skill),
-    )
-
-    await expect(usePrompt?.load(undefined)).resolves.toEqual(buildUsePromptNotFoundMessages(undefined))
+    const unknown = await client.rpc('prompts/get', { name: 'use', arguments: { name: 'absent-skill' } })
+    expect(unknown.result?.messages).toEqual(buildUsePromptNotFoundMessages('absent-skill').messages)
   })
 })

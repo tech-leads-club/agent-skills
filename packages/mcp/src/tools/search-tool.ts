@@ -1,7 +1,7 @@
-import type { FastMCP } from 'fastmcp'
+import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
-import type { Indexes } from '../types'
+import type { Catalog } from '../catalog'
 import { buildSearchSkillsResponse } from './core/search'
 
 const TOOL_DESCRIPTION = `Step 1 of 3. Call before answering any task request, to check whether a skill applies.
@@ -22,19 +22,18 @@ export const SearchSkillsOutputSchema = z.object({
   message: z.string().optional(),
 })
 
-export function registerSearchTool(server: FastMCP, getIndexes: () => Indexes): void {
-  server.addTool({
-    name: 'search_skills',
-    description: TOOL_DESCRIPTION,
-    parameters: z.object({ query: z.string().min(1) }),
-    // why: declaring outputSchema makes the server emit MCP structuredContent (spec 2025-06-18+)
-    // alongside the JSON text fallback, so clients get a validated contract instead of a blob.
-    outputSchema: SearchSkillsOutputSchema,
-    annotations: { title: 'Find Skills by Intent', readOnlyHint: true, openWorldHint: false },
-    execute: async (args) => {
-      const { fuse } = getIndexes()
-      const results = fuse.search(args.query).slice(0, 5)
-      return buildSearchSkillsResponse(results)
+export function registerSearchTool(server: McpServer, catalog: Catalog): void {
+  server.registerTool(
+    'search_skills',
+    {
+      description: TOOL_DESCRIPTION,
+      inputSchema: z.strictObject({ query: z.string().min(1) }),
+      outputSchema: SearchSkillsOutputSchema,
+      annotations: { title: 'Find Skills by Intent', readOnlyHint: true, openWorldHint: false },
     },
-  })
+    async ({ query }) => {
+      const payload = buildSearchSkillsResponse(await catalog.search(query, 5))
+      return { content: [{ type: 'text', text: JSON.stringify(payload) }], structuredContent: payload }
+    },
+  )
 }

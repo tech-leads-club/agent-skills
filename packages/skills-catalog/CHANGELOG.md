@@ -1,3 +1,174 @@
+## 0.17.22 (2026-11-21)
+
+### 🚀 Features
+
+- **skills-catalog:** add skill-validator ([5ace2758e](https://github.com/tech-leads-club/agent-skills/commit/5ace2758e))
+
+### 🩹 Fixes
+
+- **skills-catalog:** close catalog validator file in skill-validator drift guard ([aae2592c5](https://github.com/tech-leads-club/agent-skills/commit/aae2592c5))
+- **skills-catalog:** align skill-validator with catalog best-practice gates ([8618e1fb2](https://github.com/tech-leads-club/agent-skills/commit/8618e1fb2))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- may-santos
+
+## 0.17.21 (2026-11-18)
+
+### 🚀 Features
+
+- **skills-catalog:** record the request and the fix pass in tlc-spec-lean ([586a794ef](https://github.com/tech-leads-club/agent-skills/commit/586a794ef))
+- **skills-catalog:** bump tlc-spec-lean to 3.1.0, leave implementation to the model ([dd6878eb6](https://github.com/tech-leads-club/agent-skills/commit/dd6878eb6))
+
+### 🩹 Fixes
+
+- **skills-catalog:** keep tlc-spec-lean scripts from crashing on Windows output ([3e11e2555](https://github.com/tech-leads-club/agent-skills/commit/3e11e2555))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.20 (2026-11-10)
+
+### 🚀 Features
+
+- **skills-catalog:** bump tlc-discover to 0.13.0 ([962545ecc](https://github.com/tech-leads-club/agent-skills/commit/962545ecc))
+
+### 🩹 Fixes
+
+- **skills-catalog:** make tlc-discover's validator safe on Windows ([d4ab26545](https://github.com/tech-leads-club/agent-skills/commit/d4ab26545))
+- **skills-catalog:** fix five false results in tlc-discover's validator ([2bc9342e2](https://github.com/tech-leads-club/agent-skills/commit/2bc9342e2))
+- **skills-catalog:** close the design file in tlc-discover's validator ([3260737d0](https://github.com/tech-leads-club/agent-skills/commit/3260737d0))
+- **skills-catalog:** publish tlc-discover as 0.10.0 ([3f0fd39ee](https://github.com/tech-leads-club/agent-skills/commit/3f0fd39ee))
+
+### ❤️ Thank You
+
+- Claude Opus 5.5
+- Waldemar Neto @waldemarnt
+
+## 0.17.19 (2026-11-02)
+
+### 🩹 Fixes
+
+- **skills-catalog:** use Do NOT use for in tlc-discover so the marketplace parses it ([30c7d0a4d](https://github.com/tech-leads-club/agent-skills/commit/30c7d0a4d))
+- **skills-catalog:** rewrite tlc-discover description so agents discover it ([09083fd4d](https://github.com/tech-leads-club/agent-skills/commit/09083fd4d))
+- **tlc-spec-driven:** include full design template in markdown fence ([9f769150e](https://github.com/tech-leads-club/agent-skills/commit/9f769150e))
+
+### ❤️ Thank You
+
+- Fernando Paladini @paladini
+- Waldemar Neto @waldemarnt
+
+## 0.17.18 (2026-10-31)
+
+### 🚀 Features
+
+- **skills-catalog:** run the build line before building, name what follows ([f69e6154b](https://github.com/tech-leads-club/agent-skills/commit/f69e6154b))
+- **skills-catalog:** run proofs with the project's own test commands and drop mutations ([b9caf0c01](https://github.com/tech-leads-club/agent-skills/commit/b9caf0c01))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.17 (2026-10-30)
+
+### 🩹 Fixes
+
+- **skills-catalog:** clean dist before build so a rebuild does not nest skills/skills ([eabc1bef7](https://github.com/tech-leads-club/agent-skills/commit/eabc1bef7))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.16 (2026-10-30)
+
+### 🩹 Fixes
+
+- **skills-catalog:** run tlc scripts on windows and fail a broken mutation run ([de9114ceb](https://github.com/tech-leads-club/agent-skills/commit/de9114ceb))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.15 (2026-10-26)
+
+### 🚀 Features
+
+- **skills-catalog:** keep lean-skill approvals and screen verdicts after compaction ([eec04107f](https://github.com/tech-leads-club/agent-skills/commit/eec04107f))
+- **skills-catalog:** bump tlc-spec-driven to 4.0.0 ([ef2672d67](https://github.com/tech-leads-club/agent-skills/commit/ef2672d67))
+
+### 🩹 Fixes
+
+- **skills-catalog:** keep tlc-spec-driven approvals across compaction ([65ca25bf3](https://github.com/tech-leads-club/agent-skills/commit/65ca25bf3))
+- **skills-catalog:** describe tlc-spec-driven by what the user feels ([4e5db8a3a](https://github.com/tech-leads-club/agent-skills/commit/4e5db8a3a))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.14 (2026-10-25)
+
+### 🚀 Features
+
+- **skills-catalog:** bump tlc-plan and tlc-implement to 1.0.0 ([3be478be8](https://github.com/tech-leads-club/agent-skills/commit/3be478be8))
+- **skills-catalog:** bump tlc-spec-lean to 2.0.0 ([2fca1d197](https://github.com/tech-leads-club/agent-skills/commit/2fca1d197))
+
+### 🩹 Fixes
+
+- **skills-catalog:** close files in tlc-spec-lean scripts ([783f80563](https://github.com/tech-leads-club/agent-skills/commit/783f80563))
+- **tlc-spec-driven:** make the batching example match its own rule ([#163](https://github.com/tech-leads-club/agent-skills/issues/163))
+
+### ❤️ Thank You
+
+- Antonio Fulgêncio @antoniofulg
+- Claude Opus 5 (1M context)
+- Waldemar Neto @waldemarnt
+
+## 0.17.13 (2026-10-16)
+
+### 🚀 Features
+
+- **skills-catalog:** bump tlc-spec-lean to 1.2.0 ([a25a9ebbb](https://github.com/tech-leads-club/agent-skills/commit/a25a9ebbb))
+
+### 🩹 Fixes
+
+- **skills-catalog:** keep checks.md in the tlc-spec-lean 1.2.0 bump ([afaccaebd](https://github.com/tech-leads-club/agent-skills/commit/afaccaebd))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.12 (2026-10-14)
+
+### 🩹 Fixes
+
+- **skills-catalog:** publish the English tlc-prd wording ([7f93bf3b1](https://github.com/tech-leads-club/agent-skills/commit/7f93bf3b1))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.11 (2026-10-14)
+
+### 🚀 Features
+
+- **skills-catalog:** add tlc-prd skill ([ad039e00f](https://github.com/tech-leads-club/agent-skills/commit/ad039e00f))
+
+### ❤️ Thank You
+
+- Waldemar Neto @waldemarnt
+
+## 0.17.10 (2026-10-14)
+
+### 🚀 Features
+
+- **skills-catalog:** add demo skill for recording feature videos ([e9b8a9b13](https://github.com/tech-leads-club/agent-skills/commit/e9b8a9b13))
+
+### ❤️ Thank You
+
+- William Calderipe @wcalderipe
+
 ## 0.17.9 (2026-09-18)
 
 ### 🚀 Features

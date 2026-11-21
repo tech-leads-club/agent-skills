@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: absoluteUrl(routes.about()), changeFrequency: 'monthly', priority: 0.5 },
     { url: absoluteUrl(routes.specDriven()), changeFrequency: 'weekly', priority: 0.9 },
     { url: absoluteUrl(routes.aiDevFlow()), changeFrequency: 'weekly', priority: 0.9 },
+    { url: absoluteUrl(routes.mcp()), changeFrequency: 'weekly', priority: 0.9 },
     ...populatedCategories().map((category) => ({
       url: absoluteUrl(routes.category(category.id)),
       changeFrequency: 'weekly' as const,

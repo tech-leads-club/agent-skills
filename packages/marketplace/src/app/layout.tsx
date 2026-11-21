@@ -129,6 +129,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   >
                     Agents
                   </Link>
+                  <Link
+                    href={routes.mcp()}
+                    className="text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors hidden md:block"
+                  >
+                    MCP
+                  </Link>
                   <a
                     href="https://github.com/tech-leads-club/agent-skills"
                     target="_blank"
@@ -167,6 +173,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Link>
                 <Link href={routes.aiDevFlow()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
                   AI Dev Flow
+                </Link>
+                <Link href={routes.mcp()} className="text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  MCP
                 </Link>
               </nav>
               <p className="text-center text-gray-600 dark:text-gray-400">

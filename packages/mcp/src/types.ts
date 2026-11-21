@@ -20,13 +20,6 @@ export interface Registry {
   deprecated: Array<{ name: string; message: string; alternatives: string[] }>
 }
 
-/** Registry cache data. */
-export interface RegistryCache {
-  data: Registry
-  etag?: string
-  fetchedAt: number
-}
-
 /** Skill shape used in the Fuse search index (no score yet). */
 export interface IndexSkill {
   name: string

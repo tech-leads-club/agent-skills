@@ -2,15 +2,9 @@
 
 Load this file only when writing `.design/<name>.md` — after the verdict is confirmed, or after recording a committed decision. Do not load it during the interview.
 
-Section headings stay as they are — readers and tools find them by name — while the prose follows the language of the document and identifiers are never translated. The document is for humans first, and for anyone who plans from it without having been in the room.
+This file is the shape of the document. The rules for what goes in it - one home per fact, what earns a place, the identifier ceiling, the size budget - are in `SKILL.md` under "What the document holds" and are not repeated here.
 
-The document holds the fundamental decisions - product, API, schema, direction - and nothing the plan can derive from them. Three rules keep it that size:
-
-1. **Each decision is stated once, at the highest level that owns it.** Key decisions is the home of everything hard to reverse; a slice refers to it, never restates it. The same fact in two sections is a defect, not a convenience.
-2. **Identifier ceiling: route, table, column, class, glossary term.** Nothing below - method, token, file path, CSS selector - appears. If a plan cannot name the method from the route and the class, that is the plan's problem.
-3. **The document says what will exist, not what will be done.** State tables, contracts and schemas define a slice. Lists of files to add and methods to change are the plan's output.
-
-The design is organised **by slice**, never by kind of view. A slice is a staffable vertical: what it delivers, its status, its state table, and only the other views it has content for. A reader who wants to understand one operation reads one section.
+**Headings follow the language of the document.** The set and the order below are fixed; the words are translated, and identifiers and slice names never are. A Portuguese set is given after the template; for any other language, translate the same set. The validator recognises the English and Portuguese sets.
 
 Replace every placeholder with a concrete value, or omit the section. A heading with "N/A" under it does not appear.
 
@@ -21,123 +15,197 @@ Write `.design/<name>.md`.
 ````markdown
 # <Title>
 
-> Plan from this document. Each slice below carries its own shape - copy it, do not re-derive it.
-> Status: <draft | confirmed by <who>, <date> | declined - <reason>, <who>, <date> | superseded by <path>>
+| | |
+|---|---|
+| **Status** | <draft \| confirmed by <who, role>, <date>, in <document> \| declined - <reason>, <who>, <date> \| superseded by <path>> |
+| **Record** | <only when this file is not the source of record: where the record lives> |
+| **Ready to plan?** | <n slices clear, n with defaults taken, n waiting on rfc / spike / design - and what that blocks> |
+| **Blocks go-live** | <what must be settled before release even though the build can start - omit the row when nothing> |
+| **Review** | <date or trigger> - <who looks, with role> |
 
-## Situation
+**How to read.** From Summary to Open is the design the team aligns on. Slices cuts the work: one section per slice, with its rules, its contract and the data that matters. The spec of each feature starts from its slice and details the rest against the code.
 
-- Project: <in steady use | not shipped yet | in active construction>
-- Decision: <open | committed by <who>, <when>, in <roadmap, cycle, document>>
-- In flight: <what this copies as precedent; what is specified elsewhere and stays out> - one sentence each, no commit hashes, no method names
-- At stake: <what being wrong costs - reverted in an afternoon | expensive | one-way>
+## Summary
 
-## Problem
+<Two or three sentences a person outside the room understands: what exists today, what this builds, what it deliberately does not.>
 
-<Pain: who hurts, named; what it costs today, in a unit the business feels; what happens if nothing changes. Absence: who cannot do this, and what they do instead. Construction: what this piece was promised to make possible, what stalls without it, and why now rather than after the next piece. The number that moved the decision, in one line, with where it came from - or the line that says it is unmeasured and what people told you instead. No solution proposed. What exists that this has to fit is Shape's question, not Problem's.>
+<The design in three or four numbered ideas, one line each.>
 
-## Success
+**What is expensive to get wrong:** <the door, and what changing it later costs>.
 
-- Worked if: <outcome, in the problem's own unit>
-- Going wrong: <what the early signal looks like when the bet is failing>
-- Review: <date or trigger> - <who looks>
+## Context and problem
 
-## Boundary
+**Where the project is.** <in steady use | not shipped yet | in active construction - and what that means for this problem.>
 
-In: <what this covers>.
+**<Lead-in for each fact of the problem.>** <Pain: who hurts, named; what it costs today, in a unit the business feels; what happens if nothing changes. Absence: who cannot do this, and what they do instead. Construction: what this piece was promised to make possible, what stalls without it, and why now rather than after the next piece. One short labelled paragraph per fact. No solution proposed.>
 
-Out: <excluded> - <why>. <One line per item.>
+**What this reuses.** <The precedent it copies and what stays out, one sentence each. No commit hashes.>
 
-Unchanged: <existing identifiers a reader might expect to change and that do not - so nobody hunts>.
+<### Evidence - only when the reader needs more than one number to trust the problem. Usage numbers in a table with the reading of each and the source; what the code does today as a labelled list. The number that would change the verdict, in one line. Never the decision's working.>
 
-## Prior art
+## How we will know it worked
 
-- <the seam that repeats across independent teams> - <we take it | we do not, because>
-- <the failure they report> - <which Key decision exists to stop it>
-- <what they do that we do not> - <the condition of theirs we do not share>
+| What to watch | Target | How to measure |
+|---|---|---|
+| <outcome, in the problem's own unit> | <value, and by when> | <the event, column or report - or "not measurable yet", and then it is a row in Open> |
 
-## Shape
+**Signs it is going wrong:** <what the early signal looks like, as a short list>.
 
-<Four sentences at most: what the record is, what the operation does, what is the door and what it would cost to change, the heavier alternative and its condition. No layers - the repository's rules already say them; a sentence only where this departs from them. No precedents - Situation already named them. No identifier below route, table or class.>
+## Scope
 
-<The heavier alternative and the condition that would make it win, in one sentence. A paragraph only when it is live.>
+**In**
+
+- <what this covers, one item per line>
+
+**Out**
+
+| Left out | Why / where it lands |
+|---|---|
+| <excluded> | <reason, or the slice of work that owns it> |
+
+**Unchanged** (so nobody hunts): <existing identifiers a reader might expect to change and that do not, as a list>.
+
+## How it works
+
+### Overview
+
+<One diagram of the whole: who calls what, in the order it happens. A flowchart for components, or the journey as a flow of screens when the work is a user-visible sequence. Then three or four lines saying what each arrow means. For a journey, the numbered steps below the diagram, one line each.>
+
+### <Lifecycle - only with three or more states, or two or more writers>
+
+<State diagram of the record the design is about, and one line saying which states carry access, cost or whatever the product cares about.>
+
+### Data model
+
+<Entity diagram when the design relates more than one record, checked against the code.>
+
+| Record | Role | New? | Detail in |
+|---|---|---|---|
+| `<table or record>` | <what it is for, in a clause> | <new \| gains `<column>` \| exists> | [<Slice>](#<anchor>) |
+
+### Vocabulary
+
+| Term | Means |
+|---|---|
+| **<term this document coins>** | <one line. Only terms the document invents or uses in a special sense. A term from the product or the roadmap is explained in a clause the first time it appears, not here> |
+
+### <Heavier alternative | Lighter alternative>
+
+<The other shape in one sentence.>
+
+- **Why not now:** <the present-tense condition that does not hold>
+- **When it wins:** <what would have to become true>
+- **What this design does not survive:** <what would force the rewrite>
 
 ## Key decisions
 
-1. **<the hard-to-reverse decision, one bold sentence>.** <Where it lives and why - one or two sentences. No method names.>
+<One line saying these are the hard-to-reverse decisions and that slices cite them by code.>
 
-<Five to eight. This is the only place these decisions are stated; slices refer to them by number.>
+| | Decision | Slices it affects |
+|---|---|---|
+| D1 | <the decision as a short name> | <slice, slice> |
 
-## Work
+### D1 — <the same short name>
+
+**Rule.** <The invariant, one or two sentences. What must hold, never how. The record or constraint that carries it is in the slice's Data, not here.>
+
+**Consequence.** <What follows for a caller or for the next piece of work.>
+
+**Careful.** <Only where the obvious precedent would break the rule: name the precedent and say not to copy it.>
+
+**Alternative.** <Only when a reader might reasonably raise it: the option, and the condition under which it wins.>
+
+<Five to eight. If it needs more, the shape has not been found. Most decisions are Rule and Consequence and nothing else; a decision with all four labels is the exception.>
+
+## Open
+
+<One line: what needs somebody to decide or act before this can ship, each with an owner. Defaults taken are not here: they live in their slice.>
+
+| Item | Where it stands | Blocks | Where |
+|---|---|---|---|
+| <question, or the thing not verified> | <rfc - not decided \| spike \| needs design \| cited from memory, not re-read \| pending with <who, role>> | <the spec of <slice>, or go-live of <slice> - every one it blocks> | [<Slice>](#<anchor>) |
+
+## Slices
 
 | Slice | Delivers | Status |
 |---|---|---|
-| [<Slice>](#<anchor>) | <what exists when it is done, one line> | clear \| open — <n> defaults taken \| rfc \| spike \| design |
+| [<Slice>](#<anchor>) | <what exists when it is done, one line> | clear \| clear — <n> defaults taken \| clear — go-live waits on <open item> \| blocked by <slice or open item> \| rfc \| spike \| design |
 
-Order: <slice → slice → slice>.
+**Order:** <slice → slice → slice>. <What runs in parallel and what it blocks.>
 
-Already handled by existing code: <journey state → what handles it>, ...
+**Already handled by existing code** (not a task):
 
-Derivable from the repository, left to the plan: <convention>, <convention> - <"all as <existing record> does them">.
+- <journey state> → <what handles it>
+
+**Left to the spec** (derivable from the repository, all as <existing record> does them): <conventions, in one line>.
+
+---
 
 ### <Slice - a domain term or a code identifier, never a prose verb>
 
-**Delivers** <one sentence>. **Status: <clear | open | rfc | spike | design>.** <One clause if it is the door.>
+> **Delivers:** <one sentence>.
+> **Status:** <status> · **Applies:** D<n> (<short name>), D<n> (<short name>) · **Depends on:** <slices, or nothing> · **Screens:** <only for a slice with interface>
 
-| State | What should happen | Caller sees |
+**Behaviour**
+
+| Situation | What happens | Response |
 |---|---|---|
-| <each journey state this slice answers> | <the product outcome: what is saved, refused, unchanged> | <code, and the reason string where the string is a decision> |
+| <the states that earn a place: the product decision, the race, the failure that must leave nothing behind> | <the product outcome: what is saved, refused, unchanged> | <code, and the reason string where the string is a decision> |
 
-<Third column omitted for a slice with no caller. A slice whose states are all one kind - parent deletes - collapses to two columns.>
+<Usually four to six rows. Input validation and the errors every API has are the spec's. Third column omitted for a slice with no caller.>
 
-`<METHOD> <path>` `<request>` → `<code>` `<response>`
-<One line per endpoint this slice adds. Failure codes are in the state table, not here.>
+**Contract**
 
-<Schema - only where this slice creates or alters a table.>
+`<METHOD> <path>` `<essential request>` → `<code>` `<response>` — <who consumes it>
+<One line per endpoint this slice adds or changes. Then any contract that is not HTTP: provider events subscribed to, a record another channel reads, a public interface another module calls.>
 
-Table `<name>`; <no existing table changes | <table>: <before → after>>.
+**Data** <only where this slice creates or alters a record>
 
-| Column | Type | Null | References | Note |
-|---|---|---|---|---|
-| `<column>` | <type> | yes \| no | `<table.column>` | <enum values, index, who writes it> |
+<New record `<name>`: <its role>. `<existing record>` gains `<field>`.>
 
-<Entity diagram when the slice relates more than one record, checked against the code.>
+| Field or constraint | What it means |
+|---|---|
+| `<record.field>` | <only fields and constraints that carry a decision: the unique that is a business rule, the nullable id whose null means something> |
 
-<Flow - only where this slice holds a one-way door. Participants are layers, not files; steps are the refusal, the read, the transaction, the race - not validation details.>
+<No types, nullability or indexes: those are the spec's.>
+
+**Events** <only where the slice emits one>: `<event name>` — <what it carries, when another team will read it>.
+
+**Flow** <only where this slice holds a one-way door. Participants are layers, not files; steps are the refusal, the read, the transaction, the race.>
 
 ```mermaid
 sequenceDiagram
   participant C as Client
   participant S as <Service>
-  participant P as <Repository>
   participant DB
   C->>S: <operation>
   alt <refusal>
     S-->>C: <code> — nothing read
   end
-  S->>P: <read>
-  P-->>S: <codes if it cannot proceed>
-  S->>P: <write>
-  P->>DB: BEGIN · <write> · <write>
+  S->>DB: BEGIN · <write> · <write> · COMMIT
   alt <another call got there first>
-    P->>DB: ROLLBACK — <what is not left behind>
+    DB-->>S: <what loses>
     S-->>C: <conflict>
   else
-    P->>DB: COMMIT
     S-->>C: <created>
   end
 ```
 
-<States diagram - only with three or more states, or two or more writers. Two states and one writer are a sentence in Key decisions.>
+**Alternatives considered**
 
-Alternatives considered: <option> - wins if <condition>. <One line, only for alternatives a reader might reasonably raise. Costly alternatives are already in Key decisions.>
+- <option> — wins if <condition>. <Only reversible alternatives a reader might raise. Costly ones are in Key decisions.>
 
-<Open, default taken - numbered, only in a slice whose status is open:>
-1. <question> - <default>
+**Open — defaults taken** <only in a slice that has them>
 
-<RFC / spike / design - only in a slice whose status says so:>
-- RFC: <question> - <what it blocks>. Not decided.
+1. <question>. **Default: <default>.** <Why, in a clause.>
+
+**<RFC | Spike | Needs design>** <only in a slice whose status says so>
+
+- RFC: <question> - <who decides> - <what it blocks>. Not decided. <Recommended direction, if there is one.>
 - Spike: <question only building answers> - <what each answer changes> - <when it stops>
 - Design: <screen or flow> - <the states the drawing has to answer for>
+
+---
 
 ### <Next slice>
 
@@ -145,37 +213,56 @@ Alternatives considered: <option> - wins if <condition>. <One line, only for alt
 
 ## Migration
 
-<Only when Situation says the product is in use. Existing rows, backfill, deploy order, what an old client sees before it updates. In construction, omit.>
+<Only when the product is in use. Existing rows, backfill, deploy order, what an old client sees before it updates. Each step in the mechanism the repository uses to change data, and only what that mechanism can do - run once or again, schema or data. In construction, omit.>
 
-## Sources
+## References
 
-<Only the documents the research stood on. Not code paths.>
+<### What others learned - only when the research went beyond the vendor's own documentation. A table: practice, do we, why. What the vendor recommends is cited in the decision that follows it, not listed here.>
 
-- <roadmap, decision record, earlier design document, external reference> - <what it settles>
+- <roadmap, decision record, earlier design document, external reference> — <what it settles>. <Mark anything cited from memory and not re-read.>
 ````
+
+## Headings in Portuguese
+
+| English | Português |
+|---|---|
+| How to read | Como ler |
+| Summary | Resumo |
+| Context and problem | Contexto e problema |
+| Evidence | Evidência |
+| How we will know it worked | Como saberemos que funcionou |
+| Scope · In · Out · Unchanged | Escopo · Dentro · Fora · Não muda |
+| How it works · Overview · Lifecycle · Data model · Vocabulary | Como funciona · Visão geral · Ciclo de vida · Modelo de dados · Vocabulário |
+| Heavier alternative · Lighter alternative | Alternativa mais pesada · Alternativa mais leve |
+| Key decisions · Rule · Consequence · Careful · Alternative | Decisões-chave · Regra · Consequência · Cuidado · Alternativa |
+| Open | Em aberto |
+| Slices · Order · Already handled by existing code · Left to the spec | Fatias · Ordem · Já resolvido pelo código existente · Deixado para a spec |
+| Delivers · Status · Applies · Depends on · Screens | Entrega · Status · Aplica · Depende de · Telas |
+| Behaviour · Contract · Data · Events · Flow | Comportamento · Contrato · Dados · Eventos · Fluxo |
+| Alternatives considered · Open — defaults taken | Alternativas consideradas · Em aberto — defaults assumidos |
+| Migration · References · What others learned | Migração · Referências · O que aprendemos com quem já fez |
+| clear · blocked by · defaults taken · go-live waits on | clara · bloqueada por · defaults assumidos · go-live aguarda |
+
+Slice names are not translated: they are domain terms or code identifiers.
 
 ## Section notes
 
-**Status** in the header is the verdict and the only place it appears: who confirmed it and when, or that it was declined and why. The reasoning - the cheaper paths, the four outcomes weighed - stays in the conversation.
+Only what the template cannot show by itself.
 
-**Situation › In flight** names what this copies and what stays out, one sentence each. It is where commit hashes and method names leak in first; neither belongs.
+**Never omitted when the verdict is build:** the header, Summary, Context and problem, How we will know it worked, Scope, How it works with its Overview, Key decisions, Slices. A declined document is the header, Summary, Context and problem and Scope; what would have to become true to reopen it goes in Scope.
 
-**Problem** is for the human. It carries the number that moved the decision in one line, or the line saying it is unmeasured. It does not describe what exists that the design has to fit - that is direction, and direction is Shape's.
+**The header** is the only place the verdict appears. "Ready to plan?" counts the slices by status and says what the rest are waiting on; it does not say yes while an undecided item blocks the first slice.
 
-**Journey has no section.** Its states are asked in the interview, as product; in the document each lands in the slice that answers it, as that slice's state table. A state no slice touches is one line under Work naming what already handles it.
+**How we will know it worked** always has the measurement beside the target. A target nobody can measure yet says so in that cell and has a row in Open. When nobody defined success, the section says exactly that in one line and Open carries the row with who decides.
 
-**Boundary › Unchanged** is where "leaves untouched" lives. Out says what is not built; Unchanged says what is not touched. Both stop a planner inventing a task.
+**Scope**: Out is what is not built, Unchanged is what is not touched. Both stop a spec inventing a task.
 
-**Shape** is four sentences at most: the thing, the operation, the door, the alternative. If it names a method, it is implementation. If it restates a Key decision, it is repetition. If it says which layers it follows, it is the repository's rules leaking in - a sentence only where the design departs from them.
+**Vocabulary** holds only the terms this document coins or uses in a special sense. A term from the product or the roadmap is explained in a clause where it first appears. An external numbering scheme gets one line saying where its list lives.
 
-**Key decisions** is the single home of everything hard to reverse: five to eight, prose, numbered. A slice that needs one of them says "Key decision 2" and moves on. A slice that restates one has doubled the document's maintenance and halved its readability.
+**Journey** has no section. When the work is a user-visible sequence, the Overview shows it as a flow with the steps one line each; the states land in the behaviour tables of the slices.
 
-**Work** is the index and the body: one row per slice, one section per slice, in the same order. A slice is named by a domain term or a code identifier - "Pay Invoice", never "Settle" - and the prose inside it calls the record what the glossary calls it, every time.
+**Open** has no defaults in it. Its Blocks column names every slice an item blocks and whether it blocks the spec or only go-live. A slice whose spec is blocked says `blocked by` in its status; one whose release alone waits stays `clear` and says what go-live waits on.
 
-**A slice is its state table plus what only it can say.** The state table is the acceptance criteria. The contract is one line per endpoint. Schema appears where the slice creates a table; a flow where it holds a door; a states diagram only past two states or one writer. There is no Adds/Changes list - the plan derives files and methods from the contract, the schema and the flow - and no per-slice decisions table: what is costly is in Key decisions, what is reversible and worth a reader's objection is one "Alternatives considered" line.
+**References** is a short list, each entry with what it settles. It links another document; it never copies its tables. Every provider page a decision relies on is here with the date it was read.
 
-**Diagrams** appear where relationship or order is the content. Participants are layers, not file paths; steps are the refusal, the read, the transaction and the race, not the trim and the existence check. Every diagram is read back against the repository before it lands.
-
-**Invariant, not mechanism.** A Key decision says what must hold - "one Payment per Invoice, a lost race leaves no orphan" - and, where the obvious precedent would break it, says not to copy that precedent. It does not say how: the SQL predicate, the lock, the transaction shape are the plan's. Code appears almost nowhere; the literals that are product decisions - enum values, paths, response shapes - already live in the state table, the contract and the schema.
-
-**Sources** is the bibliography of the research: the roadmap, the decision records, earlier design documents, external references. Code paths are cited inline where they settle a fact and are not listed here.
+**Before handing over**, run `scripts/validate_design.py` on the file and follow "Before you hand it over" in `SKILL.md`.

@@ -43,6 +43,13 @@ describe('staging', () => {
     await expect(readFile(join(dir, 'references', 'guide.md'), 'utf8')).resolves.toBe('# Guide')
   })
 
+  it('should write binary files without UTF-8 replacement', async () => {
+    const jpeg = Uint8Array.from([0xff, 0xd8, 0xff, 0x00, 0xc0])
+    await stageSkillFiles('demo', HASH_A, new Map([['assets/docker/wallpaper.jpg', jpeg]]))
+    const target = join(getSkillStagingDir('demo', HASH_A), 'assets', 'docker', 'wallpaper.jpg')
+    expect(await readFile(target)).toEqual(Buffer.from(jpeg))
+  })
+
   it('should create nested directories', async () => {
     await stageSkillFiles('demo', HASH_A, new Map([['scripts/nested/deep/tool.py', 'print(1)']]))
     const dir = getSkillStagingDir('demo', HASH_A)

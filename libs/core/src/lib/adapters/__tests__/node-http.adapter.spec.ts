@@ -15,6 +15,13 @@ describe('NodeHttpAdapter', () => {
         return
       }
 
+      if (req.url === '/jpeg') {
+        res.statusCode = 200
+        res.setHeader('content-type', 'image/jpeg')
+        res.end(Buffer.from([0xff, 0xd8, 0xff, 0x00, 0xc0]))
+        return
+      }
+
       res.statusCode = 200
       res.end('fallback-ok')
     })
@@ -57,5 +64,12 @@ describe('NodeHttpAdapter', () => {
 
     expect(response.ok).toBe(true)
     await expect(response.text()).resolves.toBe('fallback-ok')
+  })
+
+  it('returns raw bytes for a binary body', async () => {
+    const adapter = new NodeHttpAdapter()
+    const response = await adapter.get(`${serverUrl}/jpeg`)
+
+    expect(Buffer.from(await response.bytes())).toEqual(Buffer.from([0xff, 0xd8, 0xff, 0x00, 0xc0]))
   })
 })

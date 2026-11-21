@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-lessons.py - deterministic bookkeeping for the tlc-spec-driven lessons layer.
+lessons.py - deterministic bookkeeping for the .specs lessons layer.
 
 The LLM supplies judgment (which failure happened, how to phrase the lesson, what
 signal grounds it). This script owns everything mechanical: IDs, distinct-feature
@@ -18,10 +18,10 @@ cwd at the project root (the dir that contains .specs), or pass --root.
 
 Commands:
   add        Record a grounded lesson from a verification signal.
-  list       Print lessons (default: confirmed) for loading at Specify/Design.
+  list       Print lessons (default: confirmed) for loading at Plan/Checks.
   penalize   Mark a confirmed lesson as having failed when applied (-> quarantine).
   prune      Drop stale uncorroborated candidates (also runs automatically on add/list).
-  status     Print counts (used by the self-check in validate.md).
+  status     Print counts (used by the self-check in verify.md).
   init       Create empty store + rendered file.
   selftest   Run stdlib regressions (normalization).
 
@@ -41,11 +41,14 @@ RENDER_REL = os.path.join(".specs", "LESSONS.md")
 
 SIGNALS = {
     "ac_gap": "Acceptance criterion not covered / failed",
-    "surviving_mutant": "Discrimination sensor mutant survived (weak test)",
+    "weak_test": "Test passes without holding its criterion",
     "spec_precision_gap": "Spec did not define a precise outcome",
     "spec_deviation": "Implementation diverged from spec/design (SPEC_DEVIATION)",
     "gate_fail": "Build-level gate check failed",
 }
+
+# stores written before a signal was renamed still carry the old name
+RENAMED_SIGNALS = {"surviving_mutant": "weak_test"}
 
 DEFAULTS = {"promote_threshold": 2, "window_days": 45, "quarantine_threshold": 2}
 
@@ -87,6 +90,12 @@ def _load(root):
     data.setdefault("schema", 1)
     data.setdefault("next_id", 1)
     data.setdefault("lessons", [])
+    for lesson in data["lessons"]:
+        old = lesson.get("signal")
+        if old in RENAMED_SIGNALS:
+            lesson["signal"] = RENAMED_SIGNALS[old]
+            if lesson.get("key", "").startswith(old + "::"):
+                lesson["key"] = lesson["signal"] + lesson["key"][len(old):]
     return data
 
 
@@ -148,7 +157,7 @@ def _key(signal, text):
 
 
 def _auto_prune(data):
-    """Drop candidates that never recurred within the window. Mutates data."""
+    """Drop candidates that never recurred within the window. Edits data in place."""
     threshold = data["promote_threshold"]
     window = data["window_days"]
     now = _dt.datetime.now(_dt.timezone.utc)
@@ -211,7 +220,7 @@ def _render(root, data):
         return out
 
     lines += block(
-        "Confirmed (load these at Specify/Design)",
+        "Confirmed (load these at Plan/Checks)",
         by_status["confirmed"],
         "Corroborated across multiple features. Safe to apply as guidance.",
     )
@@ -253,8 +262,8 @@ def cmd_add(root, args):
         print("ERROR: --feature is required (the feature the signal came from).", file=sys.stderr)
         return 2
     if not source:
-        print("ERROR: --source is required (file:line / AC id / mutant id / SPEC_DEVIATION ref).", file=sys.stderr)
-        print("       A lesson with no grounding in validation.md is an opinion, not a lesson. Refused.", file=sys.stderr)
+        print("ERROR: --source is required (file:line / AC id / check id / SPEC_DEVIATION ref).", file=sys.stderr)
+        print("       A lesson with no grounding in verification.md is an opinion, not a lesson. Refused.", file=sys.stderr)
         return 2
     if len(text) < 12:
         print("ERROR: --text too short. State the actionable lesson in one terse sentence.", file=sys.stderr)
@@ -369,7 +378,7 @@ def cmd_status(root, args):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for tlc-spec-driven.")
+    p = argparse.ArgumentParser(prog="lessons.py", description="Deterministic lessons bookkeeping for .specs/lessons.json.")
     p.add_argument("--root", default=".", help="Project root containing .specs/ (default: current dir)")
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -379,7 +388,7 @@ def main(argv=None):
     sp = sub.add_parser("add", help="Record a grounded lesson")
     sp.add_argument("--feature", required=True)
     sp.add_argument("--signal", required=True, choices=sorted(SIGNALS))
-    sp.add_argument("--source", required=True, help="file:line / AC id / mutant id / SPEC_DEVIATION ref")
+    sp.add_argument("--source", required=True, help="file:line / AC id / check id / SPEC_DEVIATION ref")
     sp.add_argument("--text", required=True, help="One terse, actionable sentence")
     sp.add_argument("--scope", default="", help="Optional: path/layer/tag for retrieval filtering")
     sp.set_defaults(fn=cmd_add)
@@ -402,6 +411,9 @@ def main(argv=None):
 
     sp = sub.add_parser("selftest", help="Run stdlib regressions (normalization)")
     sp.set_defaults(fn=lambda root, args: _selftest_norm())
+
+    for sp in sub.choices.values():
+        sp.add_argument("--root", default=argparse.SUPPRESS, help="Same as --root before the subcommand")
 
     args = p.parse_args(argv)
     root = os.path.abspath(args.root)

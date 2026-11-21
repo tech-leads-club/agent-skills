@@ -1,0 +1,80 @@
+name: Skill scripts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/skills-catalog/skills/**/scripts/**'
+      - '.github/workflows/skill-scripts.yml'
+  pull_request:
+    paths:
+      - 'packages/skills-catalog/skills/**/scripts/**'
+      - '.github/workflows/skill-scripts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skill-scripts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selftest:
+    name: selftest (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Every skill's selftest.py
+        shell: bash
+        run: |
+          tests=$(find packages/skills-catalog/skills -path '*/scripts/selftest.py' | sort)
+          if [ -z "$tests" ]; then
+            echo "::error::no scripts/selftest.py found under packages/skills-catalog/skills"
+            exit 1
+          fi
+          failed=()
+          while IFS= read -r test; do
+            dir=$(dirname "$test")
+            skill=$(basename "$(dirname "$dir")")
+            echo "::group::$skill"
+            if (cd "$dir" && python selftest.py); then
+              result=ok
+            else
+              result=FAILED
+              failed+=("$skill")
+              echo "::error title=$skill::selftest.py failed on $RUNNER_OS"
+            fi
+            echo "::endgroup::"
+            echo "$result  $skill" | tee -a results.txt
+          done <<< "$tests"
+          echo
+          cat results.txt
+          [ ${#failed[@]} -eq 0 ]
+
+      - name: commit-msg hook written from PowerShell
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $skill = (Resolve-Path 'packages/skills-catalog/skills/(development)/tlc-spec-lean').Path
+          $repo = Join-Path $env:RUNNER_TEMP 'hook-repo'
+          git init -q $repo
+          Set-Location $repo
+          git config user.email ci@example.com
+          git config user.name ci
+          Set-Content .git/hooks/commit-msg -NoNewline -Encoding ascii -Value "#!/bin/sh`nexec python `"$skill/scripts/check_commit.py`" `"`$1`"`n"
+          git commit -q --allow-empty -m 'Not a conventional message.'
+          if ($LASTEXITCODE -eq 0) { throw 'the hook let a malformed message through' }
+          git commit -q --allow-empty -m 'chore: hook written from powershell'
+          if ($LASTEXITCODE -ne 0) { throw 'the hook rejected a valid message' }

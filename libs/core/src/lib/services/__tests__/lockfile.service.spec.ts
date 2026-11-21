@@ -1,3 +1,5 @@
+import { fixturePath } from './path-fixtures'
+
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import type {
@@ -41,8 +43,8 @@ const createPorts = (): TestPorts => {
   const renameMock = jest.fn<(oldPath: string, newPath: string) => Promise<void>>()
   const rmMock = jest.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>()
   const writeFileMock = jest.fn<(path: string, content: string, encoding: string) => Promise<void>>()
-  const cwdMock = jest.fn(() => '/workspace/project/packages/cli')
-  const homedirMock = jest.fn(() => '/home/tester')
+  const cwdMock = jest.fn(() => fixturePath('/workspace/project/packages/cli'))
+  const homedirMock = jest.fn(() => fixturePath('/home/tester'))
 
   const fs = {
     mkdir: mkdirMock,
@@ -67,8 +69,8 @@ const createPorts = (): TestPorts => {
     logger: {} as LoggerPort,
     packageResolver: {} as PackageResolverPort,
     paths: {
-      getWorkspaceRoot: jest.fn(() => '/workspace/project'),
-      getSkillsCatalogPath: jest.fn(() => '/workspace/project/packages/skills-catalog/skills'),
+      getWorkspaceRoot: jest.fn(() => fixturePath('/workspace/project')),
+      getSkillsCatalogPath: jest.fn(() => fixturePath('/workspace/project/packages/skills-catalog/skills')),
       getLocalSkillsDirectory: jest.fn(() => null),
     } as unknown as PathsPort,
     shell: {} as ShellPort,
@@ -94,7 +96,7 @@ afterEach(() => {
 describe('readSkillLock', () => {
   it('reads and parses a valid lockfile', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
 
     const expectedLock: SkillLockFile = {
       version: 2,
@@ -116,12 +118,12 @@ describe('readSkillLock', () => {
     const result = await readSkillLock(ports)
 
     expect(result).toEqual(expectedLock)
-    expect(readFileMock).toHaveBeenCalledWith('/workspace/project/.agents/.skill-lock.json', 'utf-8')
+    expect(readFileMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.agents/.skill-lock.json'), 'utf-8')
   })
 
   it('returns an empty lockfile when the file is missing', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockRejectedValue(new Error('missing'))
 
     const result = await readSkillLock(ports)
@@ -131,7 +133,7 @@ describe('readSkillLock', () => {
 
   it('returns an empty lockfile when the file contains corrupted JSON', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue('invalid json{{{')
 
     const result = await readSkillLock(ports)
@@ -141,7 +143,7 @@ describe('readSkillLock', () => {
 
   it('migrates a v1 lockfile to v2 defaults', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue(
       JSON.stringify({
         version: 1,
@@ -174,7 +176,7 @@ describe('readSkillLock', () => {
 describe('writeSkillLock', () => {
   it('serializes the lockfile and creates the directory before an atomic rename', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockRejectedValue(new Error('missing'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
@@ -194,21 +196,21 @@ describe('writeSkillLock', () => {
 
     await writeSkillLock(ports, lock)
 
-    expect(mkdirMock).toHaveBeenCalledWith('/workspace/project/.agents', { recursive: true })
+    expect(mkdirMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.agents'), { recursive: true })
     expect(writeFileMock).toHaveBeenCalledWith(
-      '/workspace/project/.agents/.skill-lock.json.tmp',
+      fixturePath('/workspace/project/.agents/.skill-lock.json.tmp'),
       JSON.stringify(lock, null, 2),
       'utf-8',
     )
     expect(renameMock).toHaveBeenCalledWith(
-      '/workspace/project/.agents/.skill-lock.json.tmp',
-      '/workspace/project/.agents/.skill-lock.json',
+      fixturePath('/workspace/project/.agents/.skill-lock.json.tmp'),
+      fixturePath('/workspace/project/.agents/.skill-lock.json'),
     )
   })
 
   it('creates a backup before overwriting an existing lockfile', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue('{"version":2,"skills":{}}')
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
@@ -218,7 +220,7 @@ describe('writeSkillLock', () => {
 
     expect(writeFileMock).toHaveBeenNthCalledWith(
       1,
-      '/workspace/project/.agents/.skill-lock.json.backup',
+      fixturePath('/workspace/project/.agents/.skill-lock.json.backup'),
       '{"version":2,"skills":{}}',
       'utf-8',
     )
@@ -226,7 +228,7 @@ describe('writeSkillLock', () => {
 
   it('removes the temp file and rethrows when the atomic rename fails', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, rmMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockRejectedValue(new Error('missing'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
@@ -235,14 +237,14 @@ describe('writeSkillLock', () => {
 
     await expect(writeSkillLock(ports, { version: 2, skills: {} })).rejects.toThrow('rename failed')
 
-    expect(rmMock).toHaveBeenCalledWith('/workspace/project/.agents/.skill-lock.json.tmp', { force: true })
+    expect(rmMock).toHaveBeenCalledWith(fixturePath('/workspace/project/.agents/.skill-lock.json.tmp'), { force: true })
   })
 })
 
 describe('addSkillToLock', () => {
   it('creates a new skill entry with the expected fields', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockRejectedValue(new Error('missing'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
@@ -274,7 +276,7 @@ describe('addSkillToLock', () => {
 
   it('updates an existing entry without duplicating it', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
@@ -319,7 +321,7 @@ describe('addSkillToLock', () => {
 
   it('merges agents instead of overwriting when adding to existing skill', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
@@ -354,7 +356,7 @@ describe('addSkillToLock', () => {
 describe('removeAgentFromLock', () => {
   it('removes only the specified agent from a multi-agent skill', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
@@ -389,7 +391,7 @@ describe('removeAgentFromLock', () => {
 
   it('deletes the entire entry when removing the last agent', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
@@ -422,7 +424,7 @@ describe('removeAgentFromLock', () => {
 
   it('returns false when the skill is not present', async () => {
     const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
     const removed = await removeAgentFromLock(ports, 'missing-skill', 'cursor')
@@ -433,7 +435,7 @@ describe('removeAgentFromLock', () => {
 
   it('returns false when the agent is not in the skill entry', async () => {
     const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
 
     const existingLock: SkillLockFile = {
       version: 2,
@@ -462,7 +464,7 @@ describe('removeAgentFromLock', () => {
 describe('removeSkillFromLock', () => {
   it('removes an existing skill and returns true', async () => {
     const { ports, existsSyncMock, mkdirMock, readFileMock, renameMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     mkdirMock.mockResolvedValue(undefined)
     writeFileMock.mockResolvedValue(undefined)
     renameMock.mockResolvedValue(undefined)
@@ -492,7 +494,7 @@ describe('removeSkillFromLock', () => {
 
   it('returns false when the skill is not present', async () => {
     const { ports, existsSyncMock, readFileMock, writeFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
     const removed = await removeSkillFromLock(ports, 'missing-skill')
@@ -505,7 +507,7 @@ describe('removeSkillFromLock', () => {
 describe('getSkillFromLock', () => {
   it('returns the matching skill entry', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
 
     const entry: SkillLockEntry = {
       name: 'accessibility',
@@ -533,7 +535,7 @@ describe('getSkillFromLock', () => {
 
   it('returns null when the skill is missing', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
     const result = await getSkillFromLock(ports, 'missing-skill')
@@ -545,7 +547,7 @@ describe('getSkillFromLock', () => {
 describe('getAllLockedSkills', () => {
   it('returns all persisted lock entries', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
 
     const skills = {
       accessibility: {
@@ -571,7 +573,7 @@ describe('getAllLockedSkills', () => {
 
   it('returns an empty record when no skills are stored', async () => {
     const { ports, existsSyncMock, readFileMock } = createPorts()
-    existsSyncMock.mockImplementation((path) => path === '/workspace/project/package.json')
+    existsSyncMock.mockImplementation((path) => path === fixturePath('/workspace/project/package.json'))
     readFileMock.mockResolvedValue(JSON.stringify({ version: 2, skills: {} }))
 
     const result = await getAllLockedSkills(ports)

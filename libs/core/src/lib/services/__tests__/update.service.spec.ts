@@ -1,3 +1,5 @@
+import { fixturePath, fixturePathPrefix, joinFixturePath } from './path-fixtures'
+
 import { createHash } from 'node:crypto'
 
 import { describe, expect, it, jest } from '@jest/globals'
@@ -23,9 +25,9 @@ import { updateSkills } from '../update.service'
  * swallowed downstream. Fake ports are also how registry.service.spec.ts is written.
  */
 const SKILL = 'tlc-spec-driven'
-const HOME = '/home/tester'
-const CACHE_DIR = `${HOME}/.cache/agent-skills`
-const SKILL_CACHE = `${CACHE_DIR}/skills/${SKILL}`
+const HOME = fixturePath('/home/tester')
+const CACHE_DIR = joinFixturePath(HOME, '.cache', 'agent-skills')
+const SKILL_CACHE = joinFixturePath(CACHE_DIR, 'skills', SKILL)
 const SKILL_BODY = '# spec driven\n'
 
 // why: downloads are checksum-verified against the registry, so the fixture hash has to be the
@@ -65,11 +67,11 @@ const makeLock = (agents: AgentType[], global: boolean): SkillLockFile => ({
 })
 
 const createPorts = (locks: { local?: SkillLockFile; global?: SkillLockFile } = {}) => {
-  const virtualFs = new Map<string, string>()
-  const dirs = new Set<string>([CACHE_DIR, `${CACHE_DIR}/skills`])
+  const virtualFs = new Map<string, string | Uint8Array>()
+  const dirs = new Set<string>([CACHE_DIR, joinFixturePath(CACHE_DIR, 'skills')])
 
-  if (locks.local) virtualFs.set('/project/.agents/.skill-lock.json', JSON.stringify(locks.local))
-  if (locks.global) virtualFs.set(`${HOME}/.agents/.skill-lock.json`, JSON.stringify(locks.global))
+  if (locks.local) virtualFs.set(fixturePath('/project/.agents/.skill-lock.json'), JSON.stringify(locks.local))
+  if (locks.global) virtualFs.set(joinFixturePath(HOME, '.agents', '.skill-lock.json'), JSON.stringify(locks.global))
 
   const fs = {
     // hazard: a blanket "true" here makes isSkillCached() claim every skill is cached, which
@@ -79,20 +81,20 @@ const createPorts = (locks: { local?: SkillLockFile; global?: SkillLockFile } = 
       (path: string) =>
         virtualFs.has(path) ||
         dirs.has(path) ||
-        path === '/project/package.json' ||
-        [...virtualFs.keys()].some((key) => key.startsWith(`${path}/`)),
+        path === fixturePath('/project/package.json') ||
+        [...virtualFs.keys()].some((key) => key.startsWith(fixturePathPrefix(path))),
     ),
     mkdirSync: jest.fn((path: string) => void dirs.add(path)),
     rmSync: jest.fn((path: string) => {
       virtualFs.delete(path)
-      for (const key of [...virtualFs.keys()]) if (key.startsWith(`${path}/`)) virtualFs.delete(key)
+      for (const key of [...virtualFs.keys()]) if (key.startsWith(fixturePathPrefix(path))) virtualFs.delete(key)
     }),
     readFileSync: jest.fn((path: string) => {
       const found = virtualFs.get(path)
       if (found === undefined) throw new Error(`ENOENT: ${path}`)
       return found
     }),
-    writeFileSync: jest.fn((path: string, content: string) => void virtualFs.set(path, content)),
+    writeFileSync: jest.fn((path: string, content: string | Uint8Array) => void virtualFs.set(path, content)),
     readdirSync: jest.fn(() => []),
     // async half of the port: lockfile and installer services use these, not the *Sync variants
     readFile: jest.fn(async (path: string) => {
@@ -102,12 +104,14 @@ const createPorts = (locks: { local?: SkillLockFile; global?: SkillLockFile } = 
     }),
     writeFile: jest.fn(async (path: string, content: string) => void virtualFs.set(path, content)),
     appendFile: jest.fn(async (path: string, content: string) => {
-      virtualFs.set(path, (virtualFs.get(path) ?? '') + content)
+      const existing = virtualFs.get(path)
+      const base = typeof existing === 'string' ? existing : ''
+      virtualFs.set(path, base + content)
     }),
     mkdir: jest.fn(async (path: string) => void dirs.add(path)),
     rm: jest.fn(async (path: string) => {
       virtualFs.delete(path)
-      for (const key of [...virtualFs.keys()]) if (key.startsWith(`${path}/`)) virtualFs.delete(key)
+      for (const key of [...virtualFs.keys()]) if (key.startsWith(fixturePathPrefix(path))) virtualFs.delete(key)
     }),
     rename: jest.fn(async (from: string, to: string) => {
       virtualFs.set(to, virtualFs.get(from) ?? '')
@@ -116,7 +120,7 @@ const createPorts = (locks: { local?: SkillLockFile; global?: SkillLockFile } = 
     cp: jest.fn(async (from: string, to: string) => {
       virtualFs.set(to, virtualFs.get(from) ?? '')
       for (const [key, value] of [...virtualFs.entries()]) {
-        if (key.startsWith(`${from}/`)) virtualFs.set(key.replace(from, to), value)
+        if (key.startsWith(fixturePathPrefix(from))) virtualFs.set(key.replace(from, to), value)
       }
     }),
     symlink: jest.fn(async () => undefined),
@@ -132,7 +136,13 @@ const createPorts = (locks: { local?: SkillLockFile; global?: SkillLockFile } = 
     }
     const known = REGISTRY.skills.some((skill) => url.includes(skill.path))
     return known
-      ? { ok: true, status: 200, json: async () => REGISTRY, text: async () => SKILL_BODY }
+      ? {
+          ok: true,
+          status: 200,
+          json: async () => REGISTRY,
+          text: async () => SKILL_BODY,
+          bytes: async () => Buffer.from(SKILL_BODY),
+        }
       : { ok: false, status: 404, json: async () => REGISTRY, text: async () => '' }
   }
 
@@ -164,7 +174,9 @@ describe('updateSkills', () => {
 
     await updateSkills(ports, [SKILL])
 
-    expect(virtualFs.get(`${SKILL_CACHE}/SKILL.md`)).toBe(SKILL_BODY)
+    expect(Buffer.from(virtualFs.get(joinFixturePath(SKILL_CACHE, 'SKILL.md')) as Uint8Array)).toEqual(
+      Buffer.from(SKILL_BODY),
+    )
   })
 
   it('refreshes the cache even when no lockfile records the skill', async () => {
@@ -173,7 +185,9 @@ describe('updateSkills', () => {
     const results = await updateSkills(ports, [SKILL])
 
     expect(results).toEqual([])
-    expect(virtualFs.get(`${SKILL_CACHE}/SKILL.md`)).toBe(SKILL_BODY)
+    expect(Buffer.from(virtualFs.get(joinFixturePath(SKILL_CACHE, 'SKILL.md')) as Uint8Array)).toEqual(
+      Buffer.from(SKILL_BODY),
+    )
   })
 
   it('reinstalls for the agents recorded in the local lockfile', async () => {

@@ -665,6 +665,27 @@
       "contentHash": "8de88d993b2556a6b38c26fd79c863f06bf7746faf87c0c9fd1b9a198a49e1ac"
     },
     {
+      "name": "demo",
+      "description": "Record a demo video of a web app feature or flow on a real desktop (Docker, Xvfb, XFCE, real X cursor), producing an mp4 plus a click/hover/scroll/type telemetry file. Takes a flow description, an existing demo name or path, or init. Use when the user says \"record a demo of the checkout\", \"gravar um demo dessa feature\", \"make a screencast of this flow\", \"video for the changelog\", \"re-record the checkout demo\", \"refresh the demo video\", or \"demo init\". Do NOT use for general browser testing or automation that needs no video (use playwright-skill), page debugging or network inspection (use chrome-devtools), or static screenshots.",
+      "category": "web-automation",
+      "path": "(web-automation)/demo",
+      "files": [
+        "SKILL.md",
+        "assets/config.mjs",
+        "assets/docker/Dockerfile",
+        "assets/docker/package.json",
+        "assets/docker/record.sh",
+        "assets/docker/wallpaper.jpg",
+        "assets/lib.mjs",
+        "references/init.md",
+        "scripts/config",
+        "scripts/record"
+      ],
+      "author": "github.com/wcalderipe",
+      "version": "1.0.0",
+      "contentHash": "befea3ed2b19ef2eaa20f8a0f8e9390ad859c43335e857fce3cea227260731cd"
+    },
+    {
       "name": "docs-writer",
       "description": "Write, review, and edit documentation files with consistent structure, tone, and technical accuracy. Use when creating docs, reviewing markdown files, writing READMEs, updating `/docs` directories, or when user says \"write documentation\", \"review this doc\", \"improve this README\", \"create a guide\", or \"edit markdown\". Do NOT use for code comments, inline JSDoc, or API reference generation.",
       "category": "development",
@@ -1510,6 +1531,21 @@
       "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb"
     },
     {
+      "name": "skill-validator",
+      "description": "Estimates a skill's TrustScore (0-100) from security and quality checks, then reports what blocks the merge and how to fix it. Use when the user says validar skill, avaliar skill, auditar skill, nota de confianca, score this skill, qual a nota da minha skill, vai passar no CI, why was my skill blocked, or review this SKILL.md before the PR. Do NOT use for criar uma skill do zero (use skill-architect), revisar codigo de aplicacao, or explicar um TrustScore que o CI ja gerou.",
+      "category": "creation",
+      "path": "(creation)/skill-validator",
+      "files": [
+        "SKILL.md",
+        "references/scoring-rubric.md",
+        "scripts/score_skill.py",
+        "scripts/selftest.py"
+      ],
+      "author": "may-santos",
+      "version": "2.1.0",
+      "contentHash": "06bf2d854235274c29e2d1e3db7fcb63b6204a2d75468957d054eb463b87b12d"
+    },
+    {
       "name": "social-selling",
       "description": "When the user wants to sell through social media, optimize LinkedIn for sales, build DM sequences, or convert content engagement into pipeline. Also use when the user mentions 'social selling,' 'LinkedIn selling,' 'LinkedIn DMs,' 'social prospecting,' 'LinkedIn Sales Navigator,' 'DM sequences,' 'LinkedIn outreach,' 'social pipeline,' or 'LinkedIn optimization.' This skill covers social selling strategy from profile optimization through DM-to-deal conversion. Do NOT use for technical implementation, code review, or software architecture.",
       "category": "gtm",
@@ -1634,16 +1670,17 @@
     },
     {
       "name": "tlc-discover",
-      "description": "Interviews an unshaped idea into a verdict and a design document - decisions, flows, schema, contracts - that anyone can plan from without having been in the room. Use when the user says \"research this\", \"help me understand this problem\", \"should we build this\", \"discovery\", \"explore this problem\", or \"tlc-discover\". Do NOT use to cut a finished design into tasks, or to implement.",
+      "description": "Thinks through new or large projects: turns a vague idea into a design doc with a clear product problem and the technical solution. Use when exploring a new project, planning or designing a big project or system, or asked for a \"design doc\". Do NOT use for clear features or projects (use tlc-spec-lean or tlc-spec-driven).",
       "category": "development",
       "path": "(development)/tlc-discover",
       "files": [
         "SKILL.md",
-        "references/document-format.md"
+        "references/document-format.md",
+        "scripts/validate_design.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.9.0",
-      "contentHash": "518ab626fc8bac4ed1d0c5170b617d1adaec28a83634c1a462c7529d42170d3a"
+      "version": "0.10.0",
+      "contentHash": "e76c2dc3b32297bb54aaf511266f96273fecd94dbdc9f18d2fcc93be5c250748"
     },
     {
       "name": "tlc-generative-engine-optimization",
@@ -1667,43 +1704,71 @@
     },
     {
       "name": "tlc-implement",
-      "description": "Implement a work already planned: extracts a checklist, builds it, and proves every check with an independent verifier. Use when the user says \"extract a checklist\", \"build this ticket\", \"implement this spec\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to design the work.",
+      "description": "Implements work already planned - a plan.md from tlc-plan, or a small ticket - by freezing it into checks with proofs, building, and proving every check with a script and an independent Verifier before declaring done. Use when the user says \"implement this plan\", \"build this ticket\", \"implement this spec\", \"write the checks\", \"verify work\", or \"tlc-implement\". Do NOT use when nobody has decided what to build, or to plan a feature that needs one (that is tlc-plan).",
       "category": "development",
       "path": "(development)/tlc-implement",
       "files": [
         "SKILL.md",
-        "references/checklist-format.md",
-        "references/screens.md",
-        "references/test-policy.md",
-        "references/verify.md"
+        "references/build.md",
+        "references/checks.md",
+        "references/memory.md",
+        "references/verify-screens.md",
+        "references/verify.md",
+        "scripts/check_commit.py",
+        "scripts/check_proofs.py",
+        "scripts/fixtures/checks.md",
+        "scripts/fixtures/plan.md",
+        "scripts/fixtures/proofs.md",
+        "scripts/fixtures/verification.md",
+        "scripts/lean_config.py",
+        "scripts/lessons.py",
+        "scripts/selftest.py",
+        "scripts/validate_checks.py",
+        "scripts/validate_verification.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.1.0",
-      "contentHash": "b3bbd69d067b042072e9538ea5edc90db28b0873fdf4d86157ca4ae5363bfd9e"
+      "version": "1.2.0",
+      "contentHash": "28efe469462e37cbf1ff3c64a08068e507f16ab07251529fc2dc134a53b7d5f0"
     },
     {
       "name": "tlc-plan",
-      "description": "Turns decided work — a PRD, design doc, RFC, or thread — into tasks a builder can act on without guessing. Finds slices that each prove something, grounds them in the code, and writes intent, observable criteria with concrete values, the boundary, what the change disturbs, and only the decisions that are hard to reverse. Walks every surface the work exposes and sweeps the nine unwritten requirements, recording each landing as a criterion already in the source, existing behaviour, n/a, or Unresolved — never as a criterion the walk invented. Defaults to one task per source. Use when the user says \"write the task\", \"cut this PRD into tasks\", \"turn this design doc into work\", or \"tlc-plan\". Do NOT use for discovery itself or to implement — a one-line ticket is a decision; a blank wish is not.",
+      "description": "Turns a request, ticket, PRD, design or thread into one plan a human approves and a builder can act on without the conversation: asks every gray area until no product decision is left to the builder, then writes the problem, EARS criteria with concrete values, the path and the data it touches (drawn in mermaid), the interface, and only the decisions that are hard to reverse. Captures that come with the request bind. Use when the user says \"plan this\", \"plan feature\", \"specify feature\", \"write the plan\", \"cut this PRD into tasks\", or \"tlc-plan\". Do NOT use to implement (that is tlc-implement), for a standalone design document, or when nobody has decided what to build.",
       "category": "development",
       "path": "(development)/tlc-plan",
+      "files": [
+        "SKILL.md",
+        "references/plan.md",
+        "scripts/fixtures/plan.md",
+        "scripts/lean_config.py",
+        "scripts/lessons.py",
+        "scripts/selftest.py",
+        "scripts/validate_plan.py"
+      ],
+      "author": "Tech Leads Club - github.com/tech-leads-club",
+      "version": "1.1.1",
+      "contentHash": "7b3deced549d6cd3b812ed675760c69027166b6ce5e9b293b073f1570b747152"
+    },
+    {
+      "name": "tlc-prd",
+      "description": "Interviews an idea into a PRD file covering situation, problem, success, boundary, and journey states, and stops before any technical design. Use when the user says \"write the PRD\", \"create the PRD\", \"PRD\", \"product spec\", \"product requirements\", \"tlc-prd\", or \"what does the product need to decide\". Do NOT use for designing a solution, choosing technology, publishing the document, or cutting the PRD into tasks.",
+      "category": "development",
+      "path": "(development)/tlc-prd",
       "files": [
         "SKILL.md",
         "references/document-format.md"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "0.2.0",
-      "contentHash": "428b064742db100add4d42612ce61eaed040aad87e6718e494a09ad9ae03552b"
+      "version": "1.0.0",
+      "contentHash": "ce417e8df0cff1870fbfdd157959e6efbdc6b1b547c57ac3850134e8f70bba80"
     },
     {
       "name": "tlc-spec-driven",
-      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Writes testable requirements in EARS notation, atomic tasks, atomic Conventional Commits, and requirement traceability. Ships deterministic Python validation scripts so structural gates are enforced by code, not memory. Features an independent Verifier (author != verifier, evidence-or-zero), a discrimination sensor, a decision log (STATE.md), a test-coverage matrix, and a self-improving lessons layer. Stack-agnostic and tool-agnostic. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
+      "description": "Feature planning and implementation with 4 adaptive phases (Specify, Design, Tasks, Execute). Auto-sizes depth by complexity. Asks every product decision before the spec is approved, writes testable requirements in EARS notation, atomic tasks with a gate and a commit each, and one check per criterion with the test that proves it. Captures that come with the request bind, and each screen is judged against them. Ships deterministic Python scripts so the gates are enforced by code, not memory; the project's own tests run once at the end, and an independent Verifier (author != verifier) judges each check's test. Use when (1) planning features, (2) implementing with verification and atomic commits, (3) validating an implementation against a spec. Triggers on \"specify feature\", \"discuss feature\", \"design\", \"tasks\", \"implement\", \"validate\", \"verify work\", \"UAT\", \"record decision\", \"pause work\", \"resume work\". Do NOT use for pure architecture decomposition analysis or standalone technical design documents.",
       "category": "development",
       "path": "(development)/tlc-spec-driven",
       "files": [
         "SKILL.md",
-        "references/code-analysis.md",
         "references/coding-principles.md",
-        "references/context-limits.md",
         "references/design.md",
         "references/discuss.md",
         "references/implement.md",
@@ -1713,41 +1778,44 @@
         "references/sub-agents.md",
         "references/tasks.md",
         "references/validate.md",
+        "references/verify-screens.md",
         "scripts/check_commit.py",
+        "scripts/check_proofs.py",
+        "scripts/fixtures/checks.md",
+        "scripts/fixtures/plan.md",
+        "scripts/fixtures/proofs.md",
+        "scripts/fixtures/verification.md",
+        "scripts/lean_config.py",
         "scripts/lessons.py",
+        "scripts/selftest.py",
         "scripts/validate_spec.py",
-        "scripts/validate_state.py",
-        "scripts/validate_tasks.py"
+        "scripts/validate_tasks.py",
+        "scripts/validate_verification.py"
       ],
       "author": "Felipe Rodrigues - github.com/felipfr",
-      "version": "3.3.0",
-      "contentHash": "9f4c793556001f3210a2d9fe3b41bf24e82e581c522d8dd50f65addfee169a29"
+      "version": "4.1.0",
+      "contentHash": "e8c2380a57817ef2406da1977668a39ba7721bdcb5c430fb87f2f82d6b34ae18"
     },
     {
       "name": "tlc-spec-lean",
-      "description": "Spec-driven feature work that freezes obligations instead of the plan: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors, then proof-backed checks, then build, then an independent Verifier. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"write the checks\", \"build this plan\", or \"verify work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
+      "description": "Spec-driven feature work that freezes what must be true and frees how it is built: one human-reviewed plan with EARS criteria, path, entities, interface and one-way doors; then the build, one vertical slice at a time, each committed; then one review by a fresh sub-agent and one fix pass. Use when the user says \"tlc-spec-lean\", \"plan feature\", \"specify feature\", \"build this plan\", or \"review this work\". Do NOT use for standalone design documents unattached to a feature, architecture decomposition analysis, or work that already has a task list or checklist to execute.",
       "category": "development",
       "path": "(development)/tlc-spec-lean",
       "files": [
         "SKILL.md",
         "references/build.md",
-        "references/checks.md",
         "references/memory.md",
         "references/plan.md",
-        "references/verify.md",
+        "references/review.md",
         "scripts/check_commit.py",
-        "scripts/fixtures/checks.md",
         "scripts/fixtures/plan.md",
-        "scripts/fixtures/verification.md",
-        "scripts/lessons.py",
+        "scripts/lean_config.py",
         "scripts/selftest.py",
-        "scripts/validate_checks.py",
-        "scripts/validate_plan.py",
-        "scripts/validate_verification.py"
+        "scripts/validate_plan.py"
       ],
       "author": "Tech Leads Club - github.com/tech-leads-club",
-      "version": "1.1.0",
-      "contentHash": "28368cb86a9d441fce24426eb502a39a5e7f9ffe0ad5d682fead2ce76c5b085b"
+      "version": "3.2.0",
+      "contentHash": "788382a643dcb946c6062764e7a5af73995aaf2724357b1c478fa494b1723262"
     },
     {
       "name": "vercel-deploy",

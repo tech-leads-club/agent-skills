@@ -43,7 +43,7 @@ If any one is missing, skip it: an easily-reversed choice you will just reverse;
 
 ### `## Handoff` - pause snapshot (~500 tokens, overwritten each pause)
 
-Captures mid-task / in-flight state so work can resume without re-reading the full task history. It complements `tasks.md` and git evidence: on resume, the Handoff is a starting hypothesis that must be reconciled against the real branch, commits, and working tree (see Resume below).
+Written only when the user pauses or a session ends on purpose. A compaction gives no warning, so the live state of a feature is never here: it is the feature's own files - `spec.md` and `tasks.md` (`**Approved**:` lines, completion marks, `## Handoff` with `**Settled mid-build:**`, `**Dispatched:**` and `**Walked:**`), `proofs.md`, `verification.md`, `screens.md` - and git. On resume, this snapshot is a starting hypothesis reconciled against them (see Resume below).
 
 **Format:**
 
@@ -89,6 +89,7 @@ If the file does not yet exist, create it with both section headers and empty bo
 | Pause work / end of session | `## Handoff` | **Replace** - overwrite Handoff section only |
 | Resume work / start of session | `## Handoff` | **Read** - load snapshot, then reconcile with git before acting |
 | Resume work / start of session | `## Decisions` | **Read** - re-confirm active constraints before designing |
+| After a compaction | both, then the feature's files | **Read** - the same Resume procedure |
 
 ---
 
@@ -118,11 +119,13 @@ Both are silent data loss. The section-scoped write rule is the single correctne
 3. Do NOT modify anything above or before `## Handoff`.
 4. Commit or stash outstanding changes as appropriate.
 
-### Resume
+### Resume - a new session, or after a compaction
 
-1. Read `.specs/STATE.md` - both sections.
-2. Re-confirm active decisions from `## Decisions` - nothing superseded since last session?
-3. Read `## Handoff` - treat it as a **hypothesis** for feature, phase/task, next step, blockers, uncommitted files, branch - not as ground truth by itself.
+A compaction is a resume: the summary keeps the task and drops the rules.
+
+1. Re-read `SKILL.md`, then the reference for the phase the files show (table below).
+2. Read `.specs/STATE.md` - both sections - and re-confirm active decisions: nothing superseded since?
+3. Read the feature's files. The `STATE.md` `## Handoff`, when present, is a **hypothesis**, not ground truth.
 4. **Reconcile with git before editing anything:**
    - Current branch vs Handoff `Branch`
    - `git status --porcelain` (uncommitted / unexpected paths)
@@ -131,9 +134,23 @@ Both are silent data loss. The section-scoped write rule is the single correctne
 5. **Resolve conflicts with evidence, not narrative:**
    - A task with a green gate and an atomic commit already on the branch → do **not** redo it; mark it complete in `tasks.md` if the file still shows it open, then continue from the next incomplete task
    - Partial unverified work in the working tree → preserve it, re-run the relevant gate, then finish the status+commit cycle
-   - Stale or missing Handoff → rebuild next-step from git + `tasks.md`, then propose that to the user
+   - Stale or missing Handoff → rebuild next-step from git + the feature's files
    - Unexplained local changes you cannot map to the current task → STOP and ask; do not discard them
-6. Propose the reconciled next step to the user before writing any code.
+6. After a compaction in the middle of a run, continue when the files and git agree, and stop only on a conflict. In a new session, propose the reconciled next step to the user before writing any code.
+
+**Where the files put you** - the first row that holds:
+
+| The files show | Next |
+| --- | --- |
+| `spec.md` with no `**Approved**:` line | Specify: open questions still the user's - present the spec with them and stop |
+| no `tasks.md`, and the scope owes one | Design or Tasks |
+| `tasks.md` with no `**Approved**:` line | present the tasks and stop |
+| an open task | Execute it; one whose commit is on the branch is done - mark it |
+| every task done, no `**Walked:**` line (a feature with a screen) | the walk and the pictures (implement.md step 9) |
+| no `proofs.md`, or one at another commit than `HEAD` before any dispatch | `check_proofs.py` (step 10.1) |
+| `**Dispatched:**` names a sub-agent whose file is not on disk (`verification.md`, `screens.md`, a batch's commits) | wait for it; send it again only when it cannot return - a new session - and say so on the line |
+| `verification.md` with an open finding, or `screens.md` `**Round**: 1` that diverges | the fix pass, then round 2 |
+| `screens.md` `**Round**: 2` | the script and the gate; what still fails goes to the user - there is no third round |
 
 ---
 

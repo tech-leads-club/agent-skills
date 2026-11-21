@@ -12,8 +12,10 @@ import {
   SKILLS_SUBDIR,
 } from '../constants'
 import type { CorePorts } from '../ports'
-import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillMetadata, SkillsRegistry } from '../types'
+import type { CategoryInfo, DeprecatedEntry, SkillInfo, SkillLockEntry, SkillMetadata, SkillsRegistry } from '../types'
 import { sanitizeName } from '../utils'
+
+import { readSkillLock } from './lockfile.service'
 
 let cachedCdnRef: string | null = null
 
@@ -26,7 +28,6 @@ type CachedSkillMeta = {
   contentHash: string
   downloadedAt: number
 }
-
 
 function getRegistryCachePath(ports: CorePorts): string {
   return join(getCacheDir(ports), REGISTRY_CACHE_FILENAME)
@@ -98,7 +99,7 @@ async function getResolvedCdnRef(ports: CorePorts): Promise<string> {
  * Computes contentHash for an in-memory skill file set.
  * Must match packages/skills-catalog computeSkillHash (sorted path + bytes).
  */
-function computeSkillContentHash(files: ReadonlyMap<string, string | Buffer>): string {
+function computeSkillContentHash(files: ReadonlyMap<string, string | Uint8Array>): string {
   const hash = createHash('sha256')
   for (const file of [...files.keys()].sort()) {
     const content = files.get(file)
@@ -211,11 +212,7 @@ function pruneEmptyDirectories(ports: CorePorts, dir: string, root: string): voi
  * Keeps `.skill-meta.json`. Runs only after a successful download so a failed
  * refresh never deletes the previous cache.
  */
-function pruneOrphanedSkillCacheFiles(
-  ports: CorePorts,
-  skillCachePath: string,
-  keepFiles: readonly string[],
-): void {
+function pruneOrphanedSkillCacheFiles(ports: CorePorts, skillCachePath: string, keepFiles: readonly string[]): void {
   const keep = new Set<string>([...keepFiles, SKILL_META_FILE])
   const cachedFiles = collectCachedFiles(ports, skillCachePath, skillCachePath)
 
@@ -238,7 +235,7 @@ async function downloadSkillFile(
   skill: SkillMetadata,
   file: string,
   skillCachePath: string,
-): Promise<string | null> {
+): Promise<Uint8Array | null> {
   const filePath = join(skillCachePath, file)
 
   if (!isPathSafe(skillCachePath, filePath)) {
@@ -261,8 +258,9 @@ async function downloadSkillFile(
     throw new Error(`Failed to download ${file}: HTTP ${response.status}`)
   }
 
-  const content = await response.text()
-  ports.fs.writeFileSync(filePath, content, 'utf-8')
+  // why: text() replaces invalid UTF-8, so a JPEG no longer matches the registry content hash
+  const content = Buffer.from(await response.bytes())
+  ports.fs.writeFileSync(filePath, content)
   return content
 }
 
@@ -328,7 +326,7 @@ export async function downloadSkill(ports: CorePorts, skill: SkillMetadata): Pro
 
   try {
     const files = [...skill.files]
-    const downloadedContents = new Map<string, string>()
+    const downloadedContents = new Map<string, Uint8Array>()
 
     for (let index = 0; index < files.length; index += MAX_CONCURRENT_DOWNLOADS) {
       const batch = files.slice(index, index + MAX_CONCURRENT_DOWNLOADS)
@@ -467,9 +465,14 @@ export async function getDeprecatedMap(ports: CorePorts): Promise<Map<string, De
 }
 
 /**
- * Checks whether a cached skill differs from the current remote registry metadata.
+ * Checks whether an installed skill differs from the current remote registry metadata.
  *
- * @param ports - Core ports used for cache inspection and registry lookup.
+ * Installed copies are judged by the `contentHash` recorded in the project and
+ * global lockfiles, because the cache is shared: another project can refresh it
+ * while this project's copy stays stale. The cache is compared only when no
+ * lockfile records the skill.
+ *
+ * @param ports - Core ports used for cache inspection, lockfile reads, and registry lookup.
  * @param skillName - Canonical skill name to compare.
  * @returns `true` when the skill should be updated, otherwise `false`.
  *
@@ -483,6 +486,15 @@ export async function needsUpdate(ports: CorePorts, skillName: string): Promise<
 
   const metadata = await getSkillMetadata(ports, skillName)
   if (!metadata?.contentHash) return false
+
+  const installed: SkillLockEntry[] = []
+  for (const global of [false, true]) {
+    const entry = (await readSkillLock(ports, global)).skills[skillName]
+    if (entry?.agents?.length) installed.push(entry)
+  }
+  if (installed.length > 0) {
+    return installed.some((entry) => entry.contentHash !== metadata.contentHash)
+  }
 
   const cached = readCachedSkillMeta(ports, skillName)
   if (!cached?.contentHash) return true

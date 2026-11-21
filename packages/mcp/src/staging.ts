@@ -38,7 +38,7 @@ export type StagedFile = { path: string; written: boolean }
 export async function stageSkillFiles(
   skillName: string,
   contentHash: string,
-  files: ReadonlyMap<string, string>,
+  files: ReadonlyMap<string, string | Uint8Array>,
 ): Promise<Map<string, StagedFile>> {
   const skillDir = getSkillStagingDir(skillName, contentHash)
   const staged = new Map<string, StagedFile>()
@@ -58,16 +58,22 @@ export async function stageSkillFiles(
     // hazard: this is remotely-sourced code landing on the user's filesystem. Writing it
     // owner-only and without the execute bit means running it takes a deliberate act by the
     // caller (invoking an interpreter), never an accidental one.
-    await writeFile(destination, content, { encoding: 'utf8', mode: 0o600 })
+    // Bytes are written as-is so a JPEG survives staging. Strings stay UTF-8.
+    await writeFile(destination, toFileBytes(content), { mode: 0o600 })
     staged.set(filePath, { path: destination, written: true })
   }
 
   return staged
 }
 
-async function hasIdenticalContent(destination: string, content: string): Promise<boolean> {
+function toFileBytes(content: string | Uint8Array): Uint8Array {
+  return typeof content === 'string' ? Buffer.from(content) : content
+}
+
+async function hasIdenticalContent(destination: string, content: string | Uint8Array): Promise<boolean> {
   try {
-    return (await readFile(destination, 'utf8')) === content
+    const existing = await readFile(destination)
+    return existing.equals(Buffer.from(toFileBytes(content)))
   } catch {
     return false
   }
