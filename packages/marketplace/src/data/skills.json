@@ -1724,7 +1724,7 @@
         "referenceFiles": [
           "scoring-rubric.md"
         ],
-        "lastModified": "2026-10-29",
+        "lastModified": "2026-11-11",
         "version": "2.1.0",
         "scriptRuntimes": [
           "Python"
