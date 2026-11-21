@@ -1,10 +1,30 @@
-const SKILL_LINK_PATTERN = /\]\(\/skills\/([^/)#?\s]+)\/?(?:[#?][^)]*)?\)/g
+import { fromMarkdown } from 'mdast-util-from-markdown'
 
-/** Skill ids targeted by `[label](/skills/<id>/)` links that do not exist in the catalog. */
-export function findBrokenSkillLinks(markdown: string, skillIds: Set<string>): string[] {
+import { SITE_URL } from './seo/site'
+
+const SKILL_PATH_PATTERN = /^\/skills\/([^/?#]+)\/?(?:[?#].*)?$/
+
+type MdNode = { type: string; url?: string; children?: MdNode[] }
+
+// why: link destinations come from the parsed Markdown tree, the same one ReactMarkdown renders.
+// A regex over the source misses titled links, `<...>` destinations and reference definitions.
+function collectLinkUrls(node: MdNode, urls: string[]): string[] {
+  if ((node.type === 'link' || node.type === 'definition') && node.url) urls.push(node.url)
+  for (const child of node.children ?? []) collectLinkUrls(child, urls)
+  return urls
+}
+
+function skillIdFromUrl(url: string): string | null {
+  const path = url.startsWith(SITE_URL) ? url.slice(SITE_URL.length) : url
+  return SKILL_PATH_PATTERN.exec(path)?.[1] ?? null
+}
+
+/** Skill ids targeted by links to `/skills/<id>/` that do not exist in the catalog. */
+export function findBrokenSkillLinks(markdown: string, skillIds: ReadonlySet<string>): string[] {
   const broken = new Set<string>()
-  for (const match of markdown.matchAll(SKILL_LINK_PATTERN)) {
-    if (!skillIds.has(match[1])) broken.add(match[1])
+  for (const url of collectLinkUrls(fromMarkdown(markdown) as MdNode, [])) {
+    const id = skillIdFromUrl(url)
+    if (id && !skillIds.has(id)) broken.add(id)
   }
   return [...broken]
 }
