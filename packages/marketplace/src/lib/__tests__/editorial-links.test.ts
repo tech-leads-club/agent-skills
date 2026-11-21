@@ -15,6 +15,29 @@ describe('findBrokenSkillLinks', () => {
   it('ignores links to other sections', () => {
     expect(findBrokenSkillLinks('[flow](/tlc-ai-dev-flow/) [agents](/agents/)', ids)).toEqual([])
   })
+
+  it('checks links that carry a title', () => {
+    expect(findBrokenSkillLinks('[Gone](/skills/missing/ "Details")', ids)).toEqual(['missing'])
+  })
+
+  it('checks angle-bracket destinations', () => {
+    expect(findBrokenSkillLinks('[Gone](</skills/missing/>)', ids)).toEqual(['missing'])
+  })
+
+  it('checks reference-style link definitions', () => {
+    const md = 'See [the old skill][old] and [SEO][seo].\n\n[old]: /skills/missing/\n[seo]: /skills/seo/'
+    expect(findBrokenSkillLinks(md, ids)).toEqual(['missing'])
+  })
+
+  it('checks absolute links to this site', () => {
+    expect(findBrokenSkillLinks('[Gone](https://agent-skills.techleads.club/skills/missing/)', ids)).toEqual([
+      'missing',
+    ])
+  })
+
+  it('ignores skill paths that are not links', () => {
+    expect(findBrokenSkillLinks('Run it from `/skills/missing/` in code.', ids)).toEqual([])
+  })
 })
 
 describe('isInternalHref', () => {
