@@ -1,3 +1,13 @@
+## 0.17.23 (2026-11-21)
+
+### 🩹 Fixes
+
+- **skills-catalog:** drop stray divide-by-10 from domain-analysis cohesion score ([#206](https://github.com/tech-leads-club/agent-skills/pull/206))
+
+### ❤️ Thank You
+
+- William R. Fernandes @globsecure
+
 ## 0.17.22 (2026-11-21)
 
 ### 🚀 Features
