@@ -25,6 +25,19 @@
   overflow-x: auto;
 }
 
+/* Tailwind's preflight sets `list-style: none` on lists and github-markdown-css does not restore it */
+.markdown-body ul {
+  list-style: disc;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+.markdown-body ul ul {
+  list-style: circle;
+}
+
 @media (max-width: 767px) {
   .markdown-body {
     padding: 15px;

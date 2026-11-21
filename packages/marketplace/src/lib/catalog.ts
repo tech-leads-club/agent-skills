@@ -9,6 +9,8 @@ export function allSkills(): Skill[] {
   return data.skills
 }
 
+export const skillIds: ReadonlySet<string> = new Set(data.skills.map((skill) => skill.id))
+
 export function findSkill(id: string): Skill | undefined {
   return data.skills.find((skill) => skill.id === id)
 }
