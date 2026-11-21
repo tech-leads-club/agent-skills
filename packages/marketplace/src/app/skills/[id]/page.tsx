@@ -7,10 +7,13 @@ import remarkGfm from 'remark-gfm'
 import { Breadcrumbs } from '../../../components/Breadcrumbs'
 import { CategoryBadge } from '../../../components/CategoryBadge'
 import { CopyButton } from '../../../components/CopyButton'
+import { EditorialAnchor } from '../../../components/EditorialAnchor'
 import { JsonLd } from '../../../components/JsonLd'
 import { SafeMarkdownAnchor } from '../../../components/SafeMarkdownAnchor'
 import { ShareButton } from '../../../components/ShareButton'
+import { SkillAgentInstall } from '../../../components/SkillAgentInstall'
 import { SkillEntitySummary } from '../../../components/SkillEntitySummary'
+import { SkillFiles } from '../../../components/SkillFiles'
 import { SkillListItem } from '../../../components/SkillListItem'
 import {
   allSkills,
@@ -112,11 +115,37 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
+            {/* Site-only editorial goes first: it is the part of the page no SKILL.md mirror has */}
+            {skill.editorial && (
+              <article
+                aria-label={`About ${skill.name}`}
+                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm mb-6"
+              >
+                <div className="markdown-body">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: EditorialAnchor }}>
+                    {skill.editorial}
+                  </ReactMarkdown>
+                </div>
+              </article>
+            )}
+
             <SkillEntitySummary name={skill.name} description={skill.description} />
 
-            {/* Markdown content — demote body H1s so page chrome owns the sole H1 */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-              <div className="markdown-body">
+            <SkillAgentInstall skillId={skill.id} agents={agents} totalAgents={catalog.agents.length} />
+
+            <SkillFiles skillId={skill.id} files={skill.metadata.files ?? []} />
+
+            {/* Full agent-facing instructions. Collapsed when editorial exists so the page leads with
+                site-only content; open otherwise so the instructions stay the main read. */}
+            <details
+              open={!skill.editorial}
+              className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm"
+            >
+              <summary className="cursor-pointer select-none px-6 py-4 text-base font-bold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                Full SKILL.md instructions
+              </summary>
+              {/* Demote body H1s so page chrome owns the sole H1 */}
+              <div className="markdown-body border-t border-gray-100 dark:border-gray-800">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
@@ -125,7 +154,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   {demoteFirstMarkdownH1(skill.content)}
                 </ReactMarkdown>
               </div>
-            </div>
+            </details>
           </div>
 
           {/* Sidebar */}
@@ -163,36 +192,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   </span>
                 </div>
               </div>
-
-              {skill.metadata.hasReferences && skill.metadata.referenceFiles.length > 0 && (
-                <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5">
-                  <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-3">
-                    Reference Files
-                  </p>
-                  <ul className="space-y-1.5">
-                    {skill.metadata.referenceFiles.map((file) => (
-                      <li key={file} className="flex items-center gap-2">
-                        <svg
-                          className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        <code className="text-xs bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
-                          {file}
-                        </code>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               {allowedTools.length > 0 && (
                 <div className="border-t border-gray-100 dark:border-gray-800 mt-5 pt-5">

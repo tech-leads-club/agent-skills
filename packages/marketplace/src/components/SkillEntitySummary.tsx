@@ -1,4 +1,31 @@
+import Link from 'next/link'
+
+import { skillIds } from '../lib/catalog'
+import { splitSkillReferences } from '../lib/editorial-links'
 import { parseSkillDescription } from '../lib/seo/skill-description'
+import { routes } from '../lib/seo/urls'
+
+// why: "Do NOT use for X (use Y)" names the skill to reach for instead. Linking Y turns the
+// catalog's own convention into internal links between alternatives.
+function WithSkillLinks({ text }: { text: string }) {
+  return (
+    <>
+      {splitSkillReferences(text, skillIds).map((segment, index) =>
+        'skillId' in segment ? (
+          <Link
+            key={index}
+            href={routes.skill(segment.skillId)}
+            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          >
+            {segment.skillId}
+          </Link>
+        ) : (
+          <span key={index}>{segment.text}</span>
+        ),
+      )}
+    </>
+  )
+}
 
 /**
  * why: the skill body is long, agent-facing Markdown. AI answer engines and search snippets need
@@ -39,7 +66,9 @@ export function SkillEntitySummary({ name, description }: { name: string; descri
           </h3>
           <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600 dark:text-gray-300">
             {doNotUseFor.map((trigger) => (
-              <li key={trigger}>{trigger}</li>
+              <li key={trigger}>
+                <WithSkillLinks text={trigger} />
+              </li>
             ))}
           </ul>
         </div>

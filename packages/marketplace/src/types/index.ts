@@ -8,6 +8,8 @@ export interface SkillMetadata {
   scriptRuntimes?: string[]
   /** Frontmatter `allowed-tools`: agent tools the skill may use without a permission prompt. */
   allowedTools?: string[]
+  /** Every file shipped with the skill, relative to its folder (from the registry). */
+  files?: string[]
 }
 
 export interface Skill {
@@ -17,6 +19,11 @@ export interface Skill {
   category: string
   path: string
   content: string
+  /**
+   * Site-only Markdown from `content/skills/<id>.md`. It is never installed with the skill:
+   * it holds what the SKILL.md copies on other sites lack (walkthrough, comparisons, history).
+   */
+  editorial?: string
   metadata: SkillMetadata
 }
 

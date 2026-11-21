@@ -43,14 +43,8 @@ export function websiteSchema(): JsonLdNode {
     description: SITE_DESCRIPTION,
     inLanguage: 'en',
     publisher: { '@id': ORGANIZATION_ID },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${absoluteUrl(routes.skills())}?search={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
+    // why: no SearchAction here. Google retired the sitelinks search box, and its
+    // `?search={search_term_string}` template was being crawled as a literal URL.
   }
 }
 

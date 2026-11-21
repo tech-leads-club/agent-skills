@@ -6,6 +6,7 @@ import matter from 'gray-matter'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import { findBrokenSkillLinks } from '../src/lib/editorial-links'
 import { buildLlmsTxt } from '../src/lib/seo/llms-txt'
 import { extractDisplayName } from '../src/lib/skill-display-name'
 import type { AgentTarget, Category, MarketplaceData, Skill } from '../src/types'
@@ -19,6 +20,7 @@ const REGISTRY_FILE = path.join(WORKSPACE_ROOT, 'packages/skills-catalog/skills-
 const OUTPUT_FILE = path.join(__dirname, '../src/data/skills.json')
 const LLMS_TXT_FILE = path.join(__dirname, '../public/llms.txt')
 const DOWNLOADS_DIR = path.join(__dirname, '../public/downloads')
+const EDITORIAL_DIR = path.join(__dirname, '../content/skills')
 
 interface RegistrySkill {
   name: string
@@ -147,6 +149,31 @@ function inferScriptRuntimes(files: string[]): string[] {
   return [...new Set(runtimes)].sort()
 }
 
+/**
+ * why: the SKILL.md body is mirrored verbatim on GitHub and on many aggregator sites, so search
+ * engines treat our copy as a duplicate. Editorial files hold the site-only content; they live
+ * here, not in the skill folder, so the CLI never installs them and the content hash is untouched.
+ */
+function loadEditorial(skillIds: Set<string>): Map<string, string> {
+  const editorial = new Map<string, string>()
+  if (!fs.existsSync(EDITORIAL_DIR)) return editorial
+
+  for (const file of fs.readdirSync(EDITORIAL_DIR).filter((f) => f.endsWith('.md'))) {
+    const id = path.basename(file, '.md')
+    if (!skillIds.has(id)) {
+      throw new Error(`content/skills/${file} has no matching skill "${id}" in the registry`)
+    }
+    const markdown = fs.readFileSync(path.join(EDITORIAL_DIR, file), 'utf-8').trim()
+    const brokenLinks = findBrokenSkillLinks(markdown, skillIds)
+    if (brokenLinks.length > 0) {
+      throw new Error(`content/skills/${file} links to unknown skills: ${brokenLinks.join(', ')}`)
+    }
+    editorial.set(id, markdown)
+  }
+
+  return editorial
+}
+
 function generateMarketplaceData(): MarketplaceData {
   console.log('Loading skills registry...')
   const registry = loadRegistry()
@@ -160,6 +187,8 @@ function generateMarketplaceData(): MarketplaceData {
     description: meta.description,
     priority: meta.priority,
   }))
+
+  const editorial = loadEditorial(new Set(registry.skills.map((skill) => skill.name)))
 
   // Map registry skills to marketplace skills
   const skills: Skill[] = registry.skills.map((registrySkill) => {
@@ -180,6 +209,7 @@ function generateMarketplaceData(): MarketplaceData {
       category: registrySkill.category,
       path: `skills/${registrySkill.path}/SKILL.md`,
       content,
+      ...(editorial.has(registrySkill.name) ? { editorial: editorial.get(registrySkill.name) } : {}),
       metadata: {
         hasScripts,
         hasReferences,
@@ -188,6 +218,7 @@ function generateMarketplaceData(): MarketplaceData {
         version: registrySkill.version,
         scriptRuntimes: inferScriptRuntimes(registrySkill.files),
         allowedTools,
+        files: registrySkill.files,
       },
     }
   })
