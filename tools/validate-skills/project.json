@@ -1,0 +1,19 @@
+{
+  "name": "validate-skills",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/validate-skills/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "tools/validate-skills/jest.config.ts"
+      },
+      "env": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
+      }
+    }
+  }
+}

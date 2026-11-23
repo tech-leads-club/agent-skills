@@ -1,10 +1,18 @@
 name: 'Validate Skills'
 description: 'Validates skill structure, frontmatter, and description quality standards from CONTRIBUTING.md'
 
+inputs:
+  base:
+    description: 'Git ref to diff against. Changed skills get their full report, annotations, a job summary and the external URL review.'
+    required: false
+    default: ''
+
 runs:
   using: composite
   steps:
     - name: Validate All Skills
       shell: bash
+      env:
+        BASE_REF: ${{ inputs.base }}
       run: |
-        npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills
+        npx tsx tools/validate-skills/src/index.ts --batch packages/skills-catalog/skills ${BASE_REF:+--base "$BASE_REF"}

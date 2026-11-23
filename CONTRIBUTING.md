@@ -90,7 +90,7 @@ To reproduce what CI runs before opening anything:
 
 ```bash
 npx nx affected -t lint test build --base=origin/main
-npx tsx tools/validate-skills.ts --batch packages/skills-catalog/skills
+npx tsx tools/validate-skills/src/index.ts --batch packages/skills-catalog/skills --base origin/main
 ```
 
 ## ⭐ Creating a New Skill
