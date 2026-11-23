@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 ROW_RE = re.compile(
-    r"^\|\s*(?P<id>[CP]\d{3})\s*\|\s*(?P<cost>\d+)\s*\|\s*(?P<cls>[A-Z0-9_-]+)\s*\|",
+    r"^\|\s*(?P<id>[CP]\d{3,})\s*\|\s*(?P<cost>\d+)\s*\|\s*(?P<cls>[A-Z0-9_-]+)\s*\|",
     re.M,
 )
 REDUNDANT = {"REDUNDANT-CODE", "REDUNDANT-GENERAL"}
