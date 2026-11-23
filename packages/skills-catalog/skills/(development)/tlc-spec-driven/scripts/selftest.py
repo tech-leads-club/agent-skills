@@ -681,6 +681,9 @@ def run_tooling():
                 print(f"  BROKEN  validate_tasks.py: {desc} - expected exit={want_code} and {want_frag!r}, "
                       f"got exit={code}: {out.strip()[:300]}")
 
+    if shipped("slice_task"):
+        ok = run_slice_tooling() and ok
+
     # the lessons store has to survive a real round-trip on disk, not only its unit checks
     if not shipped("lessons"):
         return ok
@@ -732,6 +735,189 @@ def run_tooling():
             print(f"  BROKEN  lessons.py: surviving_mutant migration - exit={code}: {out.strip()}")
     finally:
         shutil.rmtree(root, ignore_errors=True)
+    return ok
+
+
+SLICE_TASKS = """# Billing Tasks
+
+## Execution Protocol (MANDATORY -- do not skip)
+
+Protocol of the feature.
+
+**Design**: `.specs/features/billing/design.md`
+
+## Test Coverage Matrix
+
+Coverage matrix.
+
+## Gate Check Commands
+
+Gate commands.
+
+## Task Breakdown
+
+### T1: Schema
+
+**Requirement**: BILL-01
+**Design sections**: Data Models
+
+Body of T1.
+
+---
+
+### T2: Service
+
+**Requirement**: BILL-02, BILL-05
+**Design sections**: `BillingService` (request scope); Retry policy
+
+Body of T2.
+
+---
+
+### T3: No design field
+
+**Requirement**: BILL-01
+
+### T4: Unknown requirement
+
+**Requirement**: BILL-99
+
+### T5: Unknown section
+
+**Requirement**: BILL-01
+**Design sections**: Section that does not exist
+
+### T6: Section and its subsection
+
+**Requirement**: BILL-01
+**Design sections**: Components; `BillingService`
+"""
+
+SLICE_SPEC = """# Billing Specification
+
+## User Stories
+
+### P1: Suspend on a failed charge ⭐ MVP
+
+**Acceptance Criteria**:
+
+1. WHEN a charge fails THEN the system SHALL suspend the subscription  <!-- BILL-01 -->
+2. IF the retry succeeds THEN the system SHALL reactivate it [BILL-02]
+3. WHEN the tenth attempt fails THEN the system SHALL notify [BILL-010]
+
+### P2: Dunning email
+
+**Acceptance Criteria**:
+
+1. WHEN a subscription is suspended THEN the system SHALL email the owner
+
+## Edge Cases
+
+- IF the provider times out THEN the system SHALL retry once
+
+## Requirement Traceability
+
+| Requirement ID | Story | Phase | Status |
+| --- | --- | --- | --- |
+| BILL-01 | P1: Suspend on a failed charge | Tasks | Pending |
+| BILL-05 | P2: Dunning email | Tasks | Pending |
+"""
+
+SLICE_DESIGN = """# Billing Design
+
+## Components
+
+### `BillingService` (request scope)
+
+Service detail.
+
+```python
+# a comment in code, not a heading
+```
+
+Service tail.
+
+## Data Models (if applicable)
+
+### Subscription
+
+Subscription table.
+
+## Retry policy
+
+Retry table.
+
+## Error Handling Strategy
+
+Errors.
+
+## Tech Decisions (only non-obvious ones)
+
+Decisions.
+"""
+
+# (description, tasks, files over the fixture, expected exit, fragments present, fragments absent)
+SLICE_CASES = [
+    ("cuts a task to its criteria and sections", ["T1"], {}, 0,
+     ["Protocol of the feature.", "Coverage matrix.", "Gate commands.", "Body of T1.",
+      "suspend the subscription  <!-- BILL-01 -->", "retry once", "### Subscription", "Errors.", "Decisions."],
+     ["reactivate it", "SHALL notify", "| BILL-01 |", "Service detail.", "Retry table.", "Body of T2."]),
+    ("takes the story of a requirement no criterion carries, and keeps fenced code", ["T2"], {}, 0,
+     ["reactivate it", "email the owner", "Service detail.", "Service tail.", "Retry table."],
+     ["suspend the subscription"]),
+    ("warns about a task with no design sections", ["T3"], {}, 0,
+     ["T3 has no `**Design sections**:` line"], []),
+    ("fails a requirement with no criterion or story", ["T4"], {}, 1, ["BILL-99"], []),
+    ("fails a design section that matches no heading", ["T5"], {}, 1, ["'Section that does not exist'"], []),
+    ("fails a task that is not in tasks.md", ["T9"], {}, 2, ["T9"], []),
+    ("follows the **Design**: pointer", ["T1"],
+     {"design.md": None, "docs/billing-design.md": SLICE_DESIGN,
+      "tasks.md": SLICE_TASKS.replace("`.specs/features/billing/design.md`", "[design](docs/billing-design.md)")},
+     0, ["### Subscription", "## billing-design.md"], []),
+    ("follows a **Design**: code span from the project root, dropping a line suffix", ["T1"],
+     {"design.md": None, "../../../notes/handoff.md": SLICE_DESIGN,
+      "tasks.md": SLICE_TASKS.replace("`.specs/features/billing/design.md`", "`notes/handoff.md:12-40`")},
+     0, ["### Subscription", "## handoff.md"], []),
+]
+
+
+def run_slice_tooling():
+    """slice_task.py replaces reading the three documents during Execute, so a criterion or a
+    section it drops without saying so becomes a wrong implementation: the failures matter as
+    much as the cut."""
+    def slice_root(files):
+        root = tempfile.mkdtemp(prefix="slice-")
+        base = {"tasks.md": SLICE_TASKS, "spec.md": SLICE_SPEC, "design.md": SLICE_DESIGN}
+        for rel, text in {**base, **files}.items():
+            if text is not None:
+                path = os.path.join(root, ".specs", "features", FEATURE, rel)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                write_artifact(path, text)
+        return root
+
+    ok = True
+    for desc, tasks, files, want_code, present, absent in SLICE_CASES:
+        root = slice_root(files)
+        code, out = run_script("slice_task.py", FEATURE, *tasks, "--root", root)
+        shutil.rmtree(root, ignore_errors=True)
+        wrong = [f"missing {f!r}" for f in present if f not in out] + [f"leaked {f!r}" for f in absent if f in out]
+        if code == want_code and not wrong:
+            print(f"  ok      slice_task.py: {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  slice_task.py: {desc} - expected exit={want_code}, got {code}; {'; '.join(wrong)}")
+            print("          " + out.strip()[:400].replace("\n", "\n          "))
+
+    root = slice_root({})
+    for desc, tasks, once in [("prints a shared section once for two tasks", ["T1", "T2"], "Decisions."),
+                              ("prints a subsection listed with its parent once", ["T6"], "Service detail.")]:
+        code, out = run_script("slice_task.py", FEATURE, *tasks, "--root", root)
+        if code == 0 and out.count(once) == 1:
+            print(f"  ok      slice_task.py: {desc}")
+        else:
+            ok = False
+            print(f"  BROKEN  slice_task.py: {desc} - exit {code}, {once!r} printed {out.count(once)} times")
+    shutil.rmtree(root, ignore_errors=True)
     return ok
 
 

@@ -21,8 +21,9 @@ This is where code gets written. Every task follows the same cycle: plan → imp
 ## Process
 
 **Batch worker context:** When this task is executed as part of a phase-batch sub-agent, the worker
-receives the task definitions for every phase in its batch, coding principles, the generated Test
-Coverage Matrix and Gate Check Commands from tasks.md, and relevant spec/design context. A batch is
+receives coding principles and the slice of its batch from `slice_task.py`: the task definitions for
+every phase in its batch, the generated Test Coverage Matrix and Gate Check Commands from tasks.md,
+and the acceptance criteria and design sections those tasks cite. A batch is
 one or more consecutive whole phases packed to ~7 tasks. The worker executes ALL tasks in its
 assigned batch in order - finishing every task in one phase before starting the next phase in the
 batch - and each task follows every step below (implement → gate → atomic commit) before moving to
@@ -61,6 +62,8 @@ If listing steps reveals >5 steps or complex dependencies, STOP and create a for
 ### 1. Pick Task
 
 From tasks.md (if exists) or from the execution plan above. User specifies ("implement T3") or suggest next available.
+
+With a tasks.md, read the task's slice instead of `spec.md`, `design.md` and the whole `tasks.md`: `python3 <skill-dir>/scripts/slice_task.py <feature> <Tn>` prints the task, the tasks.md preamble, the acceptance criteria of its requirements with the Edge Cases, and the design sections in its `**Design sections**:` line. A non-zero exit means the slice would be incomplete: fix the document it names first. Open a full document only when the slice is not enough.
 
 ### 2. Verify Dependencies
 
